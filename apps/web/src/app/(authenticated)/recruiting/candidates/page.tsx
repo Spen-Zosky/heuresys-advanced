@@ -163,7 +163,7 @@ export default function CandidatesPage() {
                       >
                         <option value="">{t("recruiting.fields.choosePosting")}</option>
                         {openPostings.map((p) => (
-                          <option key={p.postingId} value={p.postingId}>{p.code} · {p.title}</option>
+                          <option key={p.postingId} value={p.postingId}>{p.title} ({p.code})</option>
                         ))}
                       </select>
                       <Button

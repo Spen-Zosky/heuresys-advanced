@@ -22,6 +22,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type {
   ActivityClassification,
+  BlueprintFamily,
   EnterpriseSizeBand,
   OperatingModel,
   ModelProposalResponse,
@@ -224,7 +225,7 @@ function PassoIdentita({
             <option value="">—</option>
             {(fasce.data?.items ?? []).map((b) => (
               <option key={b.enterpriseSizeBandId} value={b.enterpriseSizeBandId}>
-                {b.code} — {b.name}
+                {b.name}
               </option>
             ))}
           </select>
@@ -242,7 +243,7 @@ function PassoIdentita({
             <option value="">—</option>
             {(modelli.data?.items ?? []).map((m) => (
               <option key={m.operatingModelId} value={m.operatingModelId}>
-                {m.code} — {m.name}
+                {m.name}
               </option>
             ))}
           </select>
@@ -345,7 +346,22 @@ function PassoModello({
   const { t } = useTranslation("blueprints");
   const qc = useQueryClient();
 
+  const enumLabel = useEnumLabel();
   const completa = Boolean(versione.identity.industryClassId && versione.identity.sizeBandId);
+
+  // C1: famiglie e fasce si leggono per nome; il codice resta solo dove manca il nome.
+  const famiglie = useQuery({
+    queryKey: ["blueprint-families", "list"],
+    queryFn: () => apiFetch<{ items: BlueprintFamily[]; total: number }>("/v1/blueprint-families?limit=200"),
+  });
+  const fasce = useQuery({
+    queryKey: ["enterprise-size-bands"],
+    queryFn: () => apiFetch<{ items: EnterpriseSizeBand[] }>("/v1/enterprise-size-bands?limit=50"),
+  });
+  const nomeFamiglia = (code: string) =>
+    famiglie.data?.items.find((f) => f.code === code)?.name ?? enumLabel("industryFamily", code);
+  const nomeFascia = (code: string) =>
+    fasce.data?.items.find((b) => b.code === code)?.name ?? enumLabel("sizeBand", code);
 
   const proposta = useQuery({
     queryKey: ["model-proposal", base],
@@ -386,13 +402,13 @@ function PassoModello({
         <div className="mt-2 space-y-2" data-testid="modello-proposto">
           <p className="text-sm text-foreground">
             <span className="font-medium">{disponibile.variantName}</span>{" "}
-            <span className="font-mono text-xs text-muted-foreground">
-              {`${disponibile.variantCode} v${disponibile.versionNumber}`}
+            <span className="text-xs text-muted-foreground">
+              {t("dossier.proposal.version", { n: disponibile.versionNumber })}
             </span>
           </p>
           <p className="text-sm text-muted-foreground">
             {t("dossier.proposal.processCount", { count: disponibile.processCount })} ·{" "}
-            {disponibile.matchedOn.industryFamilyCode} / {disponibile.matchedOn.sizeBandCode}
+            {nomeFamiglia(disponibile.matchedOn.industryFamilyCode)} / {nomeFascia(disponibile.matchedOn.sizeBandCode)}
           </p>
           {modificabile && versione.variantVersionId !== disponibile.variantVersionId ? (
             <Button
@@ -422,8 +438,8 @@ function PassoModello({
             </p>
             <ul className="mt-1 space-y-1">
               {assente.availableCombinations.map((c) => (
-                <li key={c.variantCode} className="font-mono text-xs text-muted-foreground">
-                  {c.industryFamilyCode} / {c.sizeBandCode} → {c.variantCode}
+                <li key={c.variantCode} className="text-xs text-muted-foreground">
+                  {nomeFamiglia(c.industryFamilyCode)} / {nomeFascia(c.sizeBandCode)}
                 </li>
               ))}
             </ul>

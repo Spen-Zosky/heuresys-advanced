@@ -107,7 +107,7 @@ export default function MeCareerTargetPage() {
                 <option value="">{t("careerTarget.selectPlaceholder")}</option>
                 {positions.rows.map((p) => (
                   <option key={p.positionId} value={p.positionId}>
-                    {p.code} — {p.title}
+                    {p.title} ({p.code})
                   </option>
                 ))}
               </select>

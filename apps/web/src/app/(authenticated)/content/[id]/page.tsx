@@ -411,7 +411,7 @@ export default function ContentEditPage() {
                   <option value="">{t("content.links.selectProcess")}</option>
                   {(processes.data?.items ?? []).map((p) => (
                     <option key={p.blueprintProcessId} value={p.blueprintProcessId}>
-                      {p.code} · {p.name}
+                      {p.name} ({p.code})
                     </option>
                   ))}
                 </select>

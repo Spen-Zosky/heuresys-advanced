@@ -180,7 +180,8 @@
       "processCount": "{{count}} processes",
       "unavailable": "No model for this combination",
       "availableTitle": "Combinations that exist today",
-      "noFallback": "No similar model is proposed: it would be a false answer."
+      "noFallback": "No similar model is proposed: it would be a false answer.",
+      "version": "version {{n}}"
     },
     "decisions": {
       "inclusion": "Decision",

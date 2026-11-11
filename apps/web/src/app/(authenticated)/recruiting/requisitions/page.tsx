@@ -111,7 +111,7 @@ export default function RequisitionsPage() {
               <select data-testid="requisition-position" className={SELECT_CLASS} {...register("positionId", { required: true })}>
                 <option value="">{t("recruiting.fields.choose")}</option>
                 {(positions.data?.items ?? []).map((p) => (
-                  <option key={p.positionId} value={p.positionId}>{p.code} · {p.title}</option>
+                  <option key={p.positionId} value={p.positionId}>{p.title} ({p.code})</option>
                 ))}
               </select>
             </label>

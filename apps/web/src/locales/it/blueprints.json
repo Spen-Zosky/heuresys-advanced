@@ -180,7 +180,8 @@
       "processCount": "{{count}} processi",
       "unavailable": "Nessun modello per questa combinazione",
       "availableTitle": "Combinazioni che esistono oggi",
-      "noFallback": "Non viene proposto un modello simile: sarebbe una risposta falsa."
+      "noFallback": "Non viene proposto un modello simile: sarebbe una risposta falsa.",
+      "version": "versione {{n}}"
     },
     "decisions": {
       "inclusion": "Decisione",

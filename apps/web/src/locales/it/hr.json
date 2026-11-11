@@ -944,7 +944,8 @@
       "applied": "Candidatura registrata: la trovi nella pipeline.",
       "applyError": "Candidatura rifiutata dal server.",
       "emptyTitle": "Nessun candidato",
-      "emptyDesc": "Registra il primo candidato."
+      "emptyDesc": "Registra il primo candidato.",
+      "write": "Scrivi"
     },
     "application": {
       "title": "Candidatura",

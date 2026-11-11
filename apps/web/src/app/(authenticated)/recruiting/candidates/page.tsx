@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
+import { Mail } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent, Badge, Button, Input } from "@heuresys/ui";
 import { PageHeader } from "@/components/intestazione-pagina";
 import type { Candidate, CandidateApplication } from "@heuresys/shared";
@@ -166,7 +167,14 @@ export default function CandidatesPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="font-medium" data-testid="candidate-row-name">{candidateName(c)}</p>
-                      <p className="text-xs text-muted-foreground">{c.email}{c.phone ? ` · ${c.phone}` : ""}</p>
+                      {/* C2: l'email non sta a video; resta il comando per scrivere */}
+                      <p className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <a href={`mailto:${c.email}`} aria-label={t("recruiting.fields.email")} title={t("recruiting.fields.email")} className="inline-flex items-center gap-1 text-primary hover:underline">
+                          <Mail className="h-3.5 w-3.5" aria-hidden />
+                          {t("recruiting.candidates.write")}
+                        </a>
+                        {c.phone ? <span data-grezzo>· {c.phone}</span> : null}
+                      </p>
                     </div>
                     <Badge data-testid="candidate-row-status">{t(`recruiting.candidateStatus.${c.status}`)}</Badge>
                   </div>

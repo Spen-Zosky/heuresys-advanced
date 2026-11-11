@@ -944,7 +944,8 @@
       "applied": "Application registered: find it in the pipeline.",
       "applyError": "Application rejected by the server.",
       "emptyTitle": "No candidates",
-      "emptyDesc": "Register the first candidate."
+      "emptyDesc": "Register the first candidate.",
+      "write": "Write"
     },
     "application": {
       "title": "Application",

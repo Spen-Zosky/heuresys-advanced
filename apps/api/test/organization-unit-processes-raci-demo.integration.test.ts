@@ -152,7 +152,7 @@ afterAll(async () => {
 });
 
 describe("RACI OU<->process PRODUCTION seed — live read-back via real API (S1002 #5/#11)", () => {
-  it("by-ou: the unit INFORMED on '02 KYC / AML' is served as INFORMED through the API", async () => {
+  it("by-ou: the unit INFORMED on '02 Adeguata verifica e antiriciclaggio' is served as INFORMED through the API", async () => {
     // [S1045] L'unita' non e' piu' scritta a mano. Era `DIV-RISK`, che la
     // ricostruzione dell'organigramma ha DISATTIVATO: il test cadeva su un reparto
     // chiuso, senza misurare niente sull'API. Si chiede al dato chi e' informato
@@ -166,7 +166,7 @@ describe("RACI OU<->process PRODUCTION seed — live read-back via real API (S10
     const aml = items.find((i) => i.blueprintProcessCode === "02");
     expect(aml).toBeTruthy();
     expect(aml!.role).toBe("INFORMED");
-    expect(aml!.blueprintProcessName).toContain("KYC");
+    expect(aml!.blueprintProcessName).toContain("antiriciclaggio");
   });
 
   it("by-ou: DIR-COMPL is OWNER of '11 Compliance & Regulatory Reporting'", async () => {

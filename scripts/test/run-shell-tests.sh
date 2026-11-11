@@ -156,17 +156,17 @@ section "close-propagate.sh — dry-run plan + resilience wiring"
 CP="scripts/close-propagate.sh"
 # F1: defaults — delta / auto-deploy / clone-db auto
 out="$(CLOSE_PROPAGATE_DRYRUN=1 bash "$CP" 2>&1)"
-if printf '%s' "$out" | grep -q 'mode=delta deploy=--auto-deploy clone-db=auto'; then
+if <<<"$out" grep -q 'mode=delta deploy=--auto-deploy clone-db=auto'; then
   ok "defaults: --delta --auto-deploy clone-db=auto"
 else fail "defaults plan ($out)"; fi
 # F2: explicit flags parsed correctly
 out="$(CLOSE_PROPAGATE_DRYRUN=1 bash "$CP" --full --no-deploy --no-clone-db 2>&1)"
-if printf '%s' "$out" | grep -q 'mode=full deploy=--no-deploy clone-db=skip'; then
+if <<<"$out" grep -q 'mode=full deploy=--no-deploy clone-db=skip'; then
   ok "flags: --full --no-deploy --no-clone-db"
 else fail "explicit flags plan ($out)"; fi
 # F3: --clone-db forces the conditional DB refresh (need_clone=1, regardless of the marker)
 out="$(CLOSE_PROPAGATE_DRYRUN=1 bash "$CP" --clone-db 2>&1)"
-if printf '%s' "$out" | grep -q 'clone-db=force need_clone=1'; then
+if <<<"$out" grep -q 'clone-db=force need_clone=1'; then
   ok "--clone-db forces the DB refresh (§12.3 override)"
 else fail "--clone-db force ($out)"; fi
 # F4: unknown flag rejected before any channel runs (exit 1)
@@ -216,11 +216,11 @@ if [ -f "$AC" ]; then
   # G1: host che non risponde => IGNOTO, e NON un verde. Esce 0 perche' un gemello
   #     spento non deve far fallire una chiusura sana, ma lo dichiara.
   out="$(CLONE_ARM_HOST=host-che-non-esiste-236 bash "$AC" --why test 2>&1)"; rc=$?
-  if [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'IGNOTO'; then
+  if [ "$rc" = 0 ] && <<<"$out" grep -q 'IGNOTO'; then
     ok "arma-clone: host irraggiungibile => IGNOTO dichiarato, exit 0 (non fa cadere la chiusura)"
   else fail "arma-clone: host irraggiungibile — atteso IGNOTO+exit 0, avuto rc=$rc"; fi
   # G2: e IGNOTO non deve poter passare per «armato»
-  if printf '%s' "$out" | grep -qi 'preso in carico'; then
+  if <<<"$out" grep -qi 'preso in carico'; then
     fail "arma-clone: un host morto NON puo' dire «preso in carico»"
   else ok "arma-clone: un host morto non si traveste da armato"; fi
   # G3: --dry-run non tocca niente E NON HA BISOGNO DELL'HOST.
@@ -232,7 +232,7 @@ if [ -f "$AC" ]; then
   # quindi su una macchina senza gemello `--dry-run` usciva IGNOTO invece di dichiarare
   # l'intenzione. Un dry-run che ha bisogno della rete non e' un dry-run.
   out="$(CLONE_ARM_HOST=host-morto-per-il-dry-run ARMA_CLONE_DRYRUN=1 bash "$AC" --why test 2>&1)"; rc=$?
-  if [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'DRY-RUN'; then
+  if [ "$rc" = 0 ] && <<<"$out" grep -q 'DRY-RUN'; then
     ok "arma-clone: --dry-run dichiara senza toccare l'host (regge anche in CI)"
   else fail "arma-clone: --dry-run rotto con host irraggiungibile (rc=$rc)"; fi
   # G4: flag sconosciuto rifiutato prima di toccare qualunque host
@@ -264,16 +264,16 @@ VC="scripts/verifica-cloni.sh"
 if [ -f "$VC" ]; then
   # H1: gemello spento => NON-VERIFICATO, exit 2 (non 0, non 1)
   out="$(CLONE_ARM_HOST=host-spento-test-236 bash "$VC" --solo clone 2>&1)"; rc=$?
-  if [ "$rc" = 2 ] && printf '%s' "$out" | grep -q 'NON-VERIFICATO'; then
+  if [ "$rc" = 2 ] && <<<"$out" grep -q 'NON-VERIFICATO'; then
     ok "verifica-cloni: gemello spento => NON-VERIFICATO, exit 2"
   else fail "verifica-cloni: gemello spento — atteso NON-VERIFICATO+exit 2, avuto rc=$rc"; fi
   # H2: e non deve poter dire FRESCO su un host che non ha guardato
-  if printf '%s' "$out" | grep -q 'FRESCO'; then
+  if <<<"$out" grep -q 'FRESCO'; then
     fail "verifica-cloni: un gemello spento NON puo' risultare FRESCO"
   else ok "verifica-cloni: un host spento non si traveste da fresco"; fi
   # H3: idem per l'ecosistema
   out="$(ECO_HOSTS=host-spento-test-236 bash "$VC" --solo ecosistema 2>&1)"; rc=$?
-  if [ "$rc" = 2 ] && printf '%s' "$out" | grep -q 'NON-VERIFICATO'; then
+  if [ "$rc" = 2 ] && <<<"$out" grep -q 'NON-VERIFICATO'; then
     ok "verifica-cloni: host dell'ecosistema spento => NON-VERIFICATO, exit 2"
   else fail "verifica-cloni: ecosistema con host spento — atteso NON-VERIFICATO+exit 2, avuto rc=$rc"; fi
   # H4: un --solo sconosciuto non deve girare mezzo controllo e poi dire va bene
@@ -321,7 +321,7 @@ if [ -f "$PU" ]; then
   printf 'roba\n[exited with code 0]\n' > "$tmpd/a.output"
   printf 'roba\n[killed]\n'             > "$tmpd/b.output"
   out="$(POSSO_USCIRE_PROCESSI=0 bash "$PU" --tasks "$tmpd" 2>/dev/null)"; rc=$?
-  if [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'USCITA SICURA'; then
+  if [ "$rc" = 0 ] && <<<"$out" grep -q 'USCITA SICURA'; then
     ok "posso-uscire: task tutti conclusi => USCITA SICURA, exit 0"
   else fail "posso-uscire: task conclusi — atteso USCITA SICURA+0, avuto rc=$rc"; fi
   # J2: IL CASO CHE CONTA (D-90, S1096) — un PROCESSO vivo della CLI, e /exit lo ucciderebbe.
@@ -329,27 +329,27 @@ if [ -f "$PU" ]; then
   #     CLI, quindi il numero si DICHIARA (POSSO_USCIRE_PROCESSI) e lo strumento lo dice.
   printf 'sto ancora lavorando\n' > "$tmpd/c.output"
   out="$(POSSO_USCIRE_PROCESSI=1 bash "$PU" --tasks "$tmpd" 2>/dev/null)"; rc=$?
-  if [ "$rc" = 1 ] && printf '%s' "$out" | grep -q 'ATTENDI'; then
+  if [ "$rc" = 1 ] && <<<"$out" grep -q 'ATTENDI'; then
     ok "posso-uscire: un processo vivo => ATTENDI, exit 1"
   else fail "posso-uscire: task vivo — atteso ATTENDI+1, avuto rc=$rc"; fi
   # J3: e non deve poter dire USCITA SICURA con un processo vivo
-  if printf '%s' "$out" | grep -q 'USCITA SICURA'; then
+  if <<<"$out" grep -q 'USCITA SICURA'; then
     fail "posso-uscire: un task vivo NON puo' dare USCITA SICURA"
   else ok "posso-uscire: con un task vivo non dice mai USCITA SICURA"; fi
   # J3-bis: IL REGISTRO NON E' L'INSIEME — un file senza riga finale ma ZERO processi vivi e'
   #         «concluso o perso», non «in volo»: e' esattamente il falso ATTENDI di D-90
   out="$(POSSO_USCIRE_PROCESSI=0 bash "$PU" --tasks "$tmpd" 2>/dev/null)"; rc=$?
-  if [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'conclusi o persi'; then
+  if [ "$rc" = 0 ] && <<<"$out" grep -q 'conclusi o persi'; then
     ok "posso-uscire: file senza fine ma zero processi => USCITA SICURA, e dice «conclusi o persi»"
   else fail "posso-uscire: file senza fine e zero processi — atteso USCITA SICURA+0 con la ragione, avuto rc=$rc"; fi
   # J4: directory assente => NON-VERIFICATO, exit 2 (mai un verde dal buio)
   out="$(bash "$PU" --tasks "$tmpd/non-esiste" 2>/dev/null)"; rc=$?
-  if [ "$rc" = 2 ] && printf '%s' "$out" | grep -q 'NON-VERIFICATO'; then
+  if [ "$rc" = 2 ] && <<<"$out" grep -q 'NON-VERIFICATO'; then
     ok "posso-uscire: directory dei task assente => NON-VERIFICATO, exit 2"
   else fail "posso-uscire: directory assente — atteso NON-VERIFICATO+2, avuto rc=$rc"; fi
   # J5: i lavori ARMATI non sono un motivo per aspettare — va detto, o il verdetto mente
   out="$(POSSO_USCIRE_PROCESSI=0 bash "$PU" --tasks "$tmpd" 2>/dev/null)"
-  if printf '%s' "$out" | grep -q 'NON sono un motivo per aspettare'; then
+  if <<<"$out" grep -q 'NON sono un motivo per aspettare'; then
     ok "posso-uscire: dichiara che deploy e clone armati proseguono comunque"
   else fail "posso-uscire: non dice che i lavori armati non richiedono attesa"; fi
   rm -rf "$tmpd"
@@ -507,44 +507,44 @@ if [ -f "$CG" ] && [ -f "$DW" ]; then
   dw() { DEPLOY_WATCH_DRYRUN=1 REPO_DIR="$W" bash "$W/scripts/deploy-watch.sh" 2>&1; }
 
   out="$(dw)"; rc=$?
-  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'nessun deploy armato'; } \
+  { [ "$rc" = 0 ] && <<<"$out" grep -q 'nessun deploy armato'; } \
     && ok "deploy-watch: niente armato => non fa nulla, esce 0" || fail "deploy-watch senza arma ($rc: $out)"
 
   git -C "$W" push -q origin HEAD:refs/heads/prod            # armato, ma LAST_GOOD assente
   out="$(dw)"; rc=$?
-  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'IGNOTO' && ! printf '%s' "$out" | grep -q 'partirebbe'; } \
+  { [ "$rc" = 0 ] && <<<"$out" grep -q 'IGNOTO' && ! <<<"$out" grep -q 'partirebbe'; } \
     && ok "deploy-watch: LAST_GOOD assente => IGNOTO, NON deploya (dottrina del dubbio)" || fail "deploy-watch IGNOTO ($rc: $out)"
 
   printf 'non-uno-sha\n' > "$W/pg_dump_snapshots/LAST_GOOD_SHA"
   out="$(dw)"; rc=$?
-  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'IGNOTO'; } \
+  { [ "$rc" = 0 ] && <<<"$out" grep -q 'IGNOTO'; } \
     && ok "deploy-watch: LAST_GOOD che non e' uno sha => IGNOTO (il guard non si accontenta dell'esistenza)" \
     || fail "deploy-watch LAST_GOOD malformato ($rc: $out)"
 
   printf '%s\n' "$SHA1" > "$W/pg_dump_snapshots/LAST_GOOD_SHA"
   out="$(dw)"; rc=$?
-  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'gia'; } \
+  { [ "$rc" = 0 ] && <<<"$out" grep -q 'gia'; } \
     && ok "deploy-watch: armato == in produzione => non fa nulla" || fail "deploy-watch idempotenza ($rc: $out)"
 
   # la punta avanza SENZA riarmare: e' il caso che protegge dal deploy non autorizzato
   echo y >> "$W/f"; git -C "$W" commit -qam c2; git -C "$W" push -q origin HEAD:refs/heads/main
   out="$(dw)"; rc=$?
-  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'non e. piu. quella autorizzata'; } \
+  { [ "$rc" = 0 ] && <<<"$out" grep -q 'non e. piu. quella autorizzata'; } \
     && ok "deploy-watch: main oltre prod => NON deploya (nessun deploy non autorizzato)" || fail "deploy-watch main>prod ($rc: $out)"
 
   # armato, arretrato, e la CI dice le tre cose
   git -C "$W" push -qf origin HEAD:refs/heads/prod
   out="$(CI_GATE_FIXTURE="$F/pending.json" dw)"; rc=$?
-  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'ancora in volo'; } \
+  { [ "$rc" = 0 ] && <<<"$out" grep -q 'ancora in volo'; } \
     && ok "deploy-watch: CI in volo => esce 0 zitto (non accende systemctl --failed)" || fail "deploy-watch PENDING ($rc: $out)"
   out="$(CI_GATE_FIXTURE="$F/red.json" dw)"; rc=$?
-  { [ "$rc" = 1 ] && printf '%s' "$out" | grep -q 'NON VERDE'; } \
+  { [ "$rc" = 1 ] && <<<"$out" grep -q 'NON VERDE'; } \
     && ok "deploy-watch: CI rossa => esce 1 (OnFailure registra)" || fail "deploy-watch RED ($rc: $out)"
   out="$(CI_GATE_FIXTURE="$F/red.json" dw)"; rc=$?
-  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'gia. segnalato'; } \
+  { [ "$rc" = 0 ] && <<<"$out" grep -q 'gia. segnalato'; } \
     && ok "deploy-watch: stessa CI rossa al tick dopo => zitto (un allarme ripetuto non e' un allarme)" || fail "deploy-watch RED ripetuto ($rc: $out)"
   out="$(CI_GATE_FIXTURE="$F/green.json" dw)"; rc=$?
-  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'partirebbe'; } \
+  { [ "$rc" = 0 ] && <<<"$out" grep -q 'partirebbe'; } \
     && ok "deploy-watch: armato + arretrato + verde => deploya" || fail "deploy-watch GREEN ($rc: $out)"
 
   # --- #212 GEMELLO: il deploy porta una FINESTRA, non un commit.
@@ -579,21 +579,21 @@ if [ -f "$CG" ] && [ -f "$DW" ]; then
 
   cp "$F/ti_pending.json" "$F/persha/$SHA_CODICE.json"     # ...ma il codice sotto e' in volo
   out="$(CI_GATE_FIXTURE="$F/persha" dw)"; rc=$?
-  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'DENTRO la finestra' && ! printf '%s' "$out" | grep -q 'partirebbe'; } \
+  { [ "$rc" = 0 ] && <<<"$out" grep -q 'DENTRO la finestra' && ! <<<"$out" grep -q 'partirebbe'; } \
     && ok "#212 gemello: sha armato verde ma codice in volo DENTRO la finestra => non deploya" \
     || fail "#212 gemello PENDING intermedio ($rc: $out)"
 
   cp "$F/ti_red.json" "$F/persha/$SHA_CODICE.json"         # ...oppure rosso
   rm -f "$W/.deploy-watch-state"
   out="$(CI_GATE_FIXTURE="$F/persha" dw)"; rc=$?
-  { [ "$rc" = 1 ] && printf '%s' "$out" | grep -q 'DENTRO la finestra'; } \
+  { [ "$rc" = 1 ] && <<<"$out" grep -q 'DENTRO la finestra'; } \
     && ok "#212 gemello: sha armato verde ma codice ROSSO nella finestra => esce 1, non deploya" \
     || fail "#212 gemello RED intermedio ($rc: $out)"
 
   cp "$F/ti_green.json" "$F/persha/$SHA_CODICE.json"       # tutta la finestra verde => si parte
   rm -f "$W/.deploy-watch-state"
   out="$(CI_GATE_FIXTURE="$F/persha" dw)"; rc=$?
-  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'partirebbe'; } \
+  { [ "$rc" = 0 ] && <<<"$out" grep -q 'partirebbe'; } \
     && ok "#212 gemello: finestra intera verde => deploya (il controllo non blocca il caso sano)" \
     || fail "#212 gemello GREEN finestra ($rc: $out)"
 
@@ -621,7 +621,7 @@ if [ -f "$CG" ] && [ -f "$DW" ]; then
   cp "$F/ti_red.json"   "$F/persha/$SHA_ROTTO.json"         # l'intermedio e' rosso...
   cp "$F/ti_green.json" "$F/persha/$SHA_FIX.json"           # ...e lo STESSO workflow e' verde sopra
   out="$(CI_GATE_FIXTURE="$F/persha" dw)"; rc=$?
-  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'partirebbe'; } \
+  { [ "$rc" = 0 ] && <<<"$out" grep -q 'partirebbe'; } \
     && ok "D-87: rosso intermedio SUPERATO dal verde dello stesso workflow a valle => deploya" \
     || fail "D-87 rosso superato ($rc: $out)"
 
@@ -634,7 +634,7 @@ if [ -f "$CG" ] && [ -f "$DW" ]; then
   rm -f "$W/.deploy-watch-state"
   cp "$F/ti_pending.json" "$F/persha/$SHA_ROTTO.json"
   out="$(CI_GATE_FIXTURE="$F/persha" dw)"; rc=$?
-  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'partirebbe'; } \
+  { [ "$rc" = 0 ] && <<<"$out" grep -q 'partirebbe'; } \
     && ok "D-87: in volo a monte SUPERATO dal verde dello stesso workflow a valle => deploya" \
     || fail "D-87 in volo superato ($rc: $out)"
   rm -rf "$F"
@@ -661,7 +661,7 @@ if [ -f "$VD" ] && [ -f "$VDR" ] && [ -f "$CP" ]; then
   cg() { REPO_DIR="$R" CI_GATE_FIXTURE="$F/$1.json" CI_GATE_WAIT=0 bash "$VD" --check-gate deadbeef 2>&1; }
 
   out="$(cg pending)"; rc=$?
-  { [ "$rc" = 10 ] && printf '%s' "$out" | grep -q 'non ho toccato niente'; } \
+  { [ "$rc" = 10 ] && <<<"$out" grep -q 'non ho toccato niente'; } \
     && ok "vm-deploy: CI in volo => 10 (rimanda) e lo DICHIARA, invece di dormire 900s" \
     || fail "vm-deploy PENDING ($rc: $out)"
 
@@ -680,21 +680,21 @@ if [ -f "$VD" ] && [ -f "$VDR" ] && [ -f "$CP" ]; then
 
   # D-79, una variabile piu' tardi: la manopola deve ARRIVARE al remoto, o non esiste.
   out="$(CI_GATE_NONBLOCKING=0 bash "$VDR" --print-gate-env)"
-  printf '%s' "$out" | grep -q 'CI_GATE_NONBLOCKING="0"' \
+  <<<"$out" grep -q 'CI_GATE_NONBLOCKING="0"' \
     && ok "vm-deploy-remote: inoltra CI_GATE_NONBLOCKING al gate REMOTO (era l'unica esclusa)" \
     || fail "vm-deploy-remote non inoltra la manopola ($out)"
   out="$(bash "$VDR" --print-gate-env)"
-  printf '%s' "$out" | grep -q 'CI_GATE_NONBLOCKING' \
+  <<<"$out" grep -q 'CI_GATE_NONBLOCKING' \
     && fail "vm-deploy-remote inoltra la manopola anche quando nessuno l'ha chiesta ($out)" \
     || ok "vm-deploy-remote: non inoltra nulla se il chiamante non ha chiesto niente"
 
   # La scelta si LEGGE dal piano di chiusura, non si presume.
   out="$(bash "$CP" --dry-run 2>&1)"
-  printf '%s' "$out" | grep -q 'ci-gate-nonblocking=1' \
+  <<<"$out" grep -q 'ci-gate-nonblocking=1' \
     && ok "close-propagate: la chiusura normale non aspetta la CI, e il piano lo dichiara" \
     || fail "close-propagate --dry-run non dichiara il gate ($out)"
   out="$(bash "$CP" --dry-run --deploy-now 2>&1)"
-  printf '%s' "$out" | grep -q 'ci-gate-nonblocking=0' \
+  <<<"$out" grep -q 'ci-gate-nonblocking=0' \
     && ok "close-propagate: --deploy-now chiede il sincrono, e il piano lo dichiara" \
     || fail "close-propagate --deploy-now non chiede il sincrono ($out)"
   rm -rf "$F"
@@ -726,14 +726,14 @@ if [ -f "$AD" ] && [ -f "$AC" ]; then
     || fail "arma-deploy primo armamento ($rc: $out)"
 
   out="$(arma)"; rc=$?
-  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'niente da armare'; } \
+  { [ "$rc" = 0 ] && <<<"$out" grep -q 'niente da armare'; } \
     && ok "arma-deploy: gia' armato => idempotente, esce 0 (due catene possono chiamarlo)" \
     || fail "arma-deploy idempotenza ($rc: $out)"
 
   # La punta avanza; il dry-run deve DIRE e non fare.
   echo y >> "$W/f"; git -C "$W" commit -qam c2
   out="$(arma --dry-run)"; rc=$?
-  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'DRY-RUN' \
+  { [ "$rc" = 0 ] && <<<"$out" grep -q 'DRY-RUN' \
     && [ "$(git -C "$B" rev-parse refs/heads/prod)" = "$SHA1" ]; } \
     && ok "arma-deploy: --dry-run dichiara e NON spinge (la ref resta dov'era)" \
     || fail "arma-deploy dry-run ($rc: $out)"
@@ -813,49 +813,49 @@ if [ -f "$PC" ]; then
   # 1. soli documenti
   echo testo > "$W/docs/kb/nota.md"; git -C "$W" add -A >/dev/null; git -C "$W" commit -qm docs
   out="$(prof "$BASE..HEAD")"
-  { printf '%s' "$out" | grep -q '^PROFILO=documenti$' \
-    && printf '%s' "$out" | grep -q '^PASSO_ARMA=salta$' \
-    && printf '%s' "$out" | grep -q '^PASSO_CLONEDB=salta$' \
-    && printf '%s' "$out" | grep -q '^PASSO_VERIFICA=salta$'; } \
+  { <<<"$out" grep -q '^PROFILO=documenti$' \
+    && <<<"$out" grep -q '^PASSO_ARMA=salta$' \
+    && <<<"$out" grep -q '^PASSO_CLONEDB=salta$' \
+    && <<<"$out" grep -q '^PASSO_VERIFICA=salta$'; } \
     && ok "profilo: soli documenti => niente arma, niente clone-db, niente verifica-deploy" \
     || fail "profilo documenti ($out)"
 
   # 4. LA PROPAGAZIONE NON SI SALTA MAI — decisione di Enzo, ed e' il caso che protegge
   #    il linux-pc (gemello di produzione, runner CI, macchina della verifica lunga).
-  printf '%s' "$out" | grep -q '^PASSO_PROPAGA=esegui$' \
+  <<<"$out" grep -q '^PASSO_PROPAGA=esegui$' \
     && ok "profilo: anche a soli documenti si PROPAGA (i cloni restano allineati sempre)" \
     || fail "profilo: la propagazione e' stata saltata — e' la decisione che non si tocca ($out)"
 
   # 5. atlante NON MISURABILE (nella sandbox lo strumento non c'e') => si esegue
-  printf '%s' "$out" | grep -q '^PASSO_ATLANTE=esegui$' \
+  <<<"$out" grep -q '^PASSO_ATLANTE=esegui$' \
     && ok "profilo: atlante non misurabile => si rigenera (si degrada verso il lavoro in piu')" \
     || fail "profilo: atlante saltato senza averlo potuto misurare ($out)"
 
   # 6. la forzatura, che i test usano per non dipendere dallo stato vero del repo
   out2="$( cd "$W" && ATLANTE_FORZA=salta bash scripts/profilo-chiusura.sh --eval --finestra "$BASE..HEAD" 2>/dev/null )"
-  printf '%s' "$out2" | grep -q '^PASSO_ATLANTE=salta$' \
+  <<<"$out2" grep -q '^PASSO_ATLANTE=salta$' \
     && ok "profilo: ATLANTE_FORZA scavalca la misura (seam dei test)" || fail "profilo ATLANTE_FORZA ($out2)"
 
   # 2. codice
   echo 'export const x = 1' > "$W/apps/api/src/x.ts"; git -C "$W" add -A >/dev/null; git -C "$W" commit -qm codice
   out="$(prof "$BASE..HEAD")"
-  { printf '%s' "$out" | grep -q '^PROFILO=codice$' \
-    && printf '%s' "$out" | grep -q '^PASSO_ARMA=esegui$' \
-    && printf '%s' "$out" | grep -q '^PASSO_VERIFICA=esegui$' \
-    && printf '%s' "$out" | grep -q '^PASSO_CLONEDB=salta$'; } \
+  { <<<"$out" grep -q '^PROFILO=codice$' \
+    && <<<"$out" grep -q '^PASSO_ARMA=esegui$' \
+    && <<<"$out" grep -q '^PASSO_VERIFICA=esegui$' \
+    && <<<"$out" grep -q '^PASSO_CLONEDB=salta$'; } \
     && ok "profilo: codice => arma e legge dalle macchine, ma NON rinfresca il clone del database" \
     || fail "profilo codice ($out)"
 
   # 3. codice+db
   echo 'select 1;' > "$W/db/migrations/000001_x.sql"; git -C "$W" add -A >/dev/null; git -C "$W" commit -qm db
   out="$(prof "$BASE..HEAD")"
-  { printf '%s' "$out" | grep -q '^PROFILO=codice+db$' \
-    && printf '%s' "$out" | grep -q '^PASSO_CLONEDB=esegui$'; } \
+  { <<<"$out" grep -q '^PROFILO=codice+db$' \
+    && <<<"$out" grep -q '^PASSO_CLONEDB=esegui$'; } \
     && ok "profilo: codice+db => in piu' rinfresca il clone del gemello" || fail "profilo codice+db ($out)"
 
   # finestra vuota: nessun commit da portare in produzione
   out="$(prof "HEAD..HEAD")"
-  printf '%s' "$out" | grep -q '^PROFILO=documenti$' \
+  <<<"$out" grep -q '^PROFILO=documenti$' \
     && ok "profilo: finestra vuota => documenti (non si arma il nulla)" || fail "profilo finestra vuota ($out)"
   rm -rf "$T"
 
@@ -897,7 +897,7 @@ if [ -f "$BD" ]; then
   # un lavoro mai tentato. Un verde che non ha eseguito niente e' peggio di un rosso.
   V="$(mktemp -d)"
   out="$(DERIVATI_REPO="$V" python "$BD" 2>&1)"; rc=$?
-  { [ "$rc" = 1 ] && printf '%s' "$out" | grep -q 'nessun generatore eseguito'; } \
+  { [ "$rc" = 1 ] && <<<"$out" grep -q 'nessun generatore eseguito'; } \
     && ok "build_derivati: nessun generatore eseguito => esce 1 (mai un verde a vuoto)" \
     || fail "build_derivati radice vuota ($rc: $out)"
   rm -rf "$V"
@@ -965,7 +965,7 @@ PY
     printf '{\n  "generato_da_commit": "%s"\n}\n' "$BASE_SHA" > "$A/docs/kb/atlas/derivati.json"
 
     out="$(DERIVATI_REPO="$A" python "$BD" --controlla 2>&1)"; rc=$?
-    { [ "$rc" = 1 ] && printf '%s' "$out" | grep -q 'SUPERATO'; } \
+    { [ "$rc" = 1 ] && <<<"$out" grep -q 'SUPERATO'; } \
       && ok "build_derivati: fonti cambiate dopo il commit registrato => SUPERATO (1)" \
       || fail "build_derivati con registro vecchio non ha visto il superamento ($rc: $out)"
 
@@ -973,7 +973,7 @@ PY
     printf '{\n  "generato_da_commit": "%s"\n}\n' "$(git -C "$A" rev-parse HEAD)" \
       > "$A/docs/kb/atlas/derivati.json"
     out="$(DERIVATI_REPO="$A" python "$BD" --controlla 2>&1)"; rc=$?
-    { [ "$rc" = 0 ] && ! printf '%s' "$out" | grep -q 'SUPERATO'; } \
+    { [ "$rc" = 0 ] && ! <<<"$out" grep -q 'SUPERATO'; } \
       && ok "build_derivati: registro allineato a HEAD => fresco (0), sullo stesso fixture" \
       || fail "build_derivati fixture allineato ($rc: $out)"
     rm -rf "$S"
@@ -1007,25 +1007,25 @@ if [ -f "$CR" ]; then
   # gruppo e non combaciava con la stringa vera. Il caso reale del 17 fu riconosciuto solo
   # grazie alle altre due firme — cioe' per fortuna.
   out="$(CI_LOG_FIXTURE="$F/solo429.log" bash "$CR" 2>&1)"; rc=$?
-  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q '^INFRASTRUTTURA' \
-    && printf '%s' "$out" | grep -q '429 (Too Many Requests)'; } \
+  { [ "$rc" = 0 ] && <<<"$out" grep -q '^INFRASTRUTTURA' \
+    && <<<"$out" grep -q '429 (Too Many Requests)'; } \
     && ok "ci-rosso-di-chi: il 429 da solo => INFRASTRUTTURA (la firma aggancia davvero)" \
     || fail "ci-rosso-di-chi 429 ($rc: $out)"
 
   # IL CASO CHE PROTEGGE: un rosso vero non si assolve.
   out="$(CI_LOG_FIXTURE="$F/progetto.log" bash "$CR" 2>&1)"; rc=$?
-  { [ "$rc" = 1 ] && printf '%s' "$out" | grep -q '^PROGETTO'; } \
+  { [ "$rc" = 1 ] && <<<"$out" grep -q '^PROGETTO'; } \
     && ok "ci-rosso-di-chi: un rosso dei test resta PROGETTO (1) — non si auto-assolve" \
     || fail "ci-rosso-di-chi progetto ($rc: $out)"
 
   # Un errore che non e' una firma nota NON diventa infrastruttura per somiglianza.
   out="$(CI_LOG_FIXTURE="$F/ignoto.log" bash "$CR" 2>&1)"; rc=$?
-  { [ "$rc" = 1 ] && printf '%s' "$out" | grep -q '^PROGETTO'; } \
+  { [ "$rc" = 1 ] && <<<"$out" grep -q '^PROGETTO'; } \
     && ok "ci-rosso-di-chi: un errore fuori dalle firme note resta PROGETTO (elenco stretto)" \
     || fail "ci-rosso-di-chi errore ignoto ($rc: $out)"
 
   out="$(CI_LOG_FIXTURE="$F/non-esiste.log" bash "$CR" 2>&1)"; rc=$?
-  { [ "$rc" = 2 ] && printf '%s' "$out" | grep -q '^NON-VERIFICATO'; } \
+  { [ "$rc" = 2 ] && <<<"$out" grep -q '^NON-VERIFICATO'; } \
     && ok "ci-rosso-di-chi: log illeggibile => NON-VERIFICATO (2), che non e' 'a posto'" \
     || fail "ci-rosso-di-chi fixture assente ($rc: $out)"
   rm -rf "$F"
@@ -1048,7 +1048,7 @@ if [ -f "$RC" ]; then
 {"ts":"2026-08-01T10:01:00+0200","session":"S900","run":"r1","step":"propaga","outcome":"eseguito","why":"x"}
 EOF
   out="$(HEURESYS_CLOSE_LOG="$D/serena.ndjson" python "$RC" --boot 2>&1)"
-  { printf '%s' "$out" | grep -q '^OK' && printf '%s' "$out" | grep -q 'tutti sereni'; } \
+  { <<<"$out" grep -q '^OK' && <<<"$out" grep -q 'tutti sereni'; } \
     && ok "rendiconto: chiusura senza guasti => OK" || fail "rendiconto serena ($out)"
 
   # Un passo fallito DEVE emergere: e' la prima cosa da sapere aprendo una sessione.
@@ -1058,15 +1058,15 @@ EOF
 {"ts":"2026-08-02T10:02:00+0200","session":"S901","run":"r2","step":"verifica-deploy","outcome":"fallito","why":"x"}
 EOF
   out="$(HEURESYS_CLOSE_LOG="$D/guasta.ndjson" python "$RC" --boot 2>&1)"
-  { printf '%s' "$out" | grep -q '^BAD' && printf '%s' "$out" | grep -q 'clone-db:ignoto' \
-    && printf '%s' "$out" | grep -q 'verifica-deploy:fallito'; } \
+  { <<<"$out" grep -q '^BAD' && <<<"$out" grep -q 'clone-db:ignoto' \
+    && <<<"$out" grep -q 'verifica-deploy:fallito'; } \
     && ok "rendiconto: passi ignoti/falliti emergono NOMINATI, non contati e basta" \
     || fail "rendiconto guasta ($out)"
 
   # Diario assente => UNK. Mai un verde dal buio: un «tutto bene» nato dal nulla e'
   # indistinguibile da uno nato da una misura, ed e' la peggiore delle risposte.
   out="$(HEURESYS_CLOSE_LOG="$D/non-esiste.ndjson" python "$RC" --boot 2>&1)"
-  { printf '%s' "$out" | grep -q '^UNK'; } \
+  { <<<"$out" grep -q '^UNK'; } \
     && ok "rendiconto: diario assente => UNK, mai OK (nessun verde dal buio)" \
     || fail "rendiconto diario assente ($out)"
 
@@ -1077,7 +1077,7 @@ EOF
 {"ts":"2026-08-03T11:00:00+0200","session":"S902","run":"o2","step":"arma","outcome":"eseguito","why":"a mano"}
 EOF
   out="$(HEURESYS_CLOSE_LOG="$D/orfane.ndjson" python "$RC" --boot 2>&1)"
-  { printf '%s' "$out" | grep -q '^UNK'; } \
+  { <<<"$out" grep -q '^UNK'; } \
     && ok "rendiconto: corse da un passo non sono chiusure (il conteggio resta vero)" \
     || fail "rendiconto orfane ($out)"
 
@@ -1105,7 +1105,7 @@ _MKD="$(mktemp -d)"; _MK="$_MKD/marker"; echo deadbeef > "$_MK"
 # E' la TERZA volta che la prova di I2 nasce falsa. Qui il blocco si estrae per ANCORA
 # semantica, e se l'ancora sparisce il test lo dichiara invece di misurare il vuoto.
 _EPI="$(sed -n '/IL MARCATORE NON SI CONSUMA/,$p' scripts/align-clones.sh)"
-if ! printf '%s' "$_EPI" | grep -q 'marcatore lasciato'; then
+if ! <<<"$_EPI" grep -q 'marcatore lasciato'; then
   fail "l'epilogo del marcatore non e' piu' estraibile dall'ancora — il test misurerebbe il vuoto"
 fi
 ( set +eu; DELTA=1; HAVE_MARKER=1; MARKER="$_MK"; SKIPPED=""; DEPLOY=0; DEPLOY_WHY=""
@@ -1173,13 +1173,13 @@ if [ -f "$CP" ]; then
   #     vuota => non armare), che vale identico su un clone shallow e su uno completo.
   printf 'deadbeef\n' > "$MK"
   p="$(plan "$MK" --delta --deploy)"
-  { printf '%s' "$p" | grep -q 'arm=arma' && printf '%s' "$p" | grep -q 'align-deploy-flag=--no-deploy'; } \
+  { <<<"$p" grep -q 'arm=arma' && <<<"$p" grep -q 'align-deploy-flag=--no-deploy'; } \
     && ok "close-propagate: arma, e ad align-clones passa --no-deploy (il deploy NON e' piu' in linea)" \
     || fail "arm=arma + align-deploy-flag=--no-deploy attesi ($p)"
 
   git rev-parse HEAD > "$MK"
   p="$(plan "$MK" --delta --auto-deploy)"
-  printf '%s' "$p" | grep -q 'arm=no' \
+  <<<"$p" grep -q 'arm=no' \
     && ok "close-propagate: finestra di sessione vuota => misura, e non arma" || fail "arm=no atteso su finestra vuota ($p)"
 
   # --- #212: la SECONDA corsa nella stessa sessione. La prima consuma il marcatore, e prima
@@ -1204,21 +1204,21 @@ if [ -f "$CP" ]; then
 
   # (a) niente di nuovo dopo la produzione: misura, e non arma
   p="$(cpplan --delta --auto-deploy)"
-  printf '%s' "$p" | grep -q "arm=no" && printf '%s' "$p" | grep -q "gia' su HEAD" \
+  <<<"$p" grep -q "arm=no" && <<<"$p" grep -q "gia' su HEAD" \
     && ok "#212: marcatore assente + origin/prod == HEAD => misura «niente da armare», non IGNOTO" \
     || fail "#212 (a): atteso arm=no + «gia' su HEAD» ($p)"
 
   # (b) commit di SOLI DOCUMENTI sopra la produzione: misura, e non arma
   echo piu > "$PW/docs/a.md"; git -C "$PW" commit -qam docs
   p="$(cpplan --delta --auto-deploy)"
-  { printf '%s' "$p" | grep -q "arm=no" && printf '%s' "$p" | grep -q "nessuno su path di deploy"; } \
+  { <<<"$p" grep -q "arm=no" && <<<"$p" grep -q "nessuno su path di deploy"; } \
     && ok "#212: marcatore assente + finestra di soli documenti => non arma, ma per MISURA" \
     || fail "#212 (b): atteso arm=no misurato ($p)"
 
   # (c) commit su path di deploy: DEVE armare — e' il caso che prima restava indietro in silenzio
   echo x > "$PW/scripts/nuovo.sh"; git -C "$PW" add -A >/dev/null; git -C "$PW" commit -qm codice
   p="$(cpplan --delta --auto-deploy)"
-  { printf '%s' "$p" | grep -q "arm=arma" && printf '%s' "$p" | grep -q "ri-derivato"; } \
+  { <<<"$p" grep -q "arm=arma" && <<<"$p" grep -q "ri-derivato"; } \
     && ok "#212: marcatore assente + finestra che tocca path di deploy => ARMA (era il difetto)" \
     || fail "#212 (c): atteso arm=arma ri-derivato ($p)"
 
@@ -1226,18 +1226,18 @@ if [ -f "$CP" ]; then
   #     avrebbe semplicemente spento la dottrina del dubbio invece di darle una misura.
   p="$( cd "$PW" && HEURESYS_MARKER="$P/assente" DEPLOY_ARM_REF=refchenonesiste \
         CLOSE_PROPAGATE_DRYRUN=1 bash scripts/close-propagate.sh --delta --auto-deploy 2>/dev/null | grep '^PLAN arm' )"
-  { printf '%s' "$p" | grep -q "arm=no" && printf '%s' "$p" | grep -q "IGNOTO"; } \
+  { <<<"$p" grep -q "arm=no" && <<<"$p" grep -q "IGNOTO"; } \
     && ok "#212: nessuna finestra misurabile => IGNOTO e non arma (il dubbio non e' stato spento)" \
     || fail "#212 (d): atteso IGNOTO ($p)"
   rm -rf "$P"
 
   # il veto S1030 deve continuare a valere: e' la ragione per cui l'armamento esiste
   p="$(HEURESYS_MARKER="$MK" HEURESYS_CLOSE_NODEPLOY=1 CLOSE_PROPAGATE_DRYRUN=1 bash "$CP" --delta --deploy 2>/dev/null | grep '^PLAN arm=')"
-  printf '%s' "$p" | grep -q 'arm=veto' \
+  <<<"$p" grep -q 'arm=veto' \
     && ok "close-propagate: HEURESYS_CLOSE_NODEPLOY=1 => veto, vince sul flag esplicito (S1030 preservato)" || fail "arm=veto atteso ($p)"
 
   p="$(plan "$MK" --delta --deploy-now)"
-  { printf '%s' "$p" | grep -q 'arm=deploy-now' && printf '%s' "$p" | grep -q 'align-deploy-flag=--deploy'; } \
+  { <<<"$p" grep -q 'arm=deploy-now' && <<<"$p" grep -q 'align-deploy-flag=--deploy'; } \
     && ok "close-propagate: --deploy-now conserva il deploy sincrono di prima di #165" || fail "deploy-now ($p)"
   rm -rf "$MKD"
 else
@@ -1473,12 +1473,12 @@ fi
 FAKE_M="$T/fake-marker"
 rm -f "$FAKE_M"
 out="$(HEURESYS_MARKER="$FAKE_M" CLOSE_PROPAGATE_DRYRUN=1 bash "$CP" 2>&1)"
-if printf '%s' "$out" | grep -q 'need_clone=0' && printf '%s' "$out" | grep -q 'clone-db-why: IGNOTO'; then
+if <<<"$out" grep -q 'need_clone=0' && <<<"$out" grep -q 'clone-db-why: IGNOTO'; then
   ok "clone-db: marcatore assente ⟹ need_clone=0 dichiarato IGNOTO (mai 'no change this session')"
 else fail "clone-db marcatore assente ($out)"; fi
 printf '%s\n' "$(git rev-parse HEAD)" > "$FAKE_M"
 out="$(HEURESYS_MARKER="$FAKE_M" CLOSE_PROPAGATE_DRYRUN=1 bash "$CP" 2>&1)"
-if printf '%s' "$out" | grep -q 'need_clone=0' && printf '%s' "$out" | grep -q 'clone-db-why: misurato'; then
+if <<<"$out" grep -q 'need_clone=0' && <<<"$out" grep -q 'clone-db-why: misurato'; then
   ok "clone-db: finestra valida senza migrazioni ⟹ 'misurato', non 'IGNOTO'"
 else fail "clone-db misurato-no ($out)"; fi
 # I8 — misurato-SÌ sulla fixture (stessa ragione di I5: la storia reale non è affidabile in CI).
@@ -1487,7 +1487,7 @@ else fail "clone-db misurato-no ($out)"; fi
 if [ -n "$FIXT_BASE" ]; then
   printf '%s\n' "$FIXT_CODE" > "$FAKE_M"   # finestra CODE..HEAD ⟹ contiene il commit di migrazione
   out="$( cd "$FIXT" && HEURESYS_MARKER="$FAKE_M" CLOSE_PROPAGATE_DRYRUN=1 bash "$ROOT/$CP" 2>&1 )"
-  if printf '%s' "$out" | grep -q 'need_clone=1'; then
+  if <<<"$out" grep -q 'need_clone=1'; then
     ok "clone-db: finestra che tocca db/migrations ⟹ need_clone=1"
   else fail "clone-db misurato-si ($out)"; fi
 else fail "fixture git non creata: impossibile provare il ramo clone-db misurato-SÌ"; fi
@@ -1507,7 +1507,7 @@ if [ -f "$CL" ]; then
     ok "close-log: una riga per passo, con sessione ed esito"
   else fail "close-log non ha scritto le righe attese ($(cat "$FAKE_L" 2>/dev/null))"; fi
   rep="$(HEURESYS_CLOSE_LOG="$FAKE_L" bash "$CL" report 2>&1 || true)"
-  if printf '%s' "$rep" | grep -q 'STEST' && printf '%s' "$rep" | grep -q 'saltato'; then
+  if <<<"$rep" grep -q 'STEST' && <<<"$rep" grep -q 'saltato'; then
     ok "close-log report: aggrega i passi per sessione"
   else fail "close-log report ($rep)"; fi
   # #148 — DUE CHIUSURE DEVONO RESTARE DISTINTE. Fino al 2026-08-12 il report
@@ -1518,7 +1518,7 @@ if [ -f "$CL" ]; then
   HEURESYS_CLOSE_LOG="$FAKE_R" HEURESYS_CLOSE_RUN=RUN-UNO bash "$CL" step registra eseguito 'a' >/dev/null 2>&1
   HEURESYS_CLOSE_LOG="$FAKE_R" HEURESYS_CLOSE_RUN=RUN-DUE bash "$CL" step registra eseguito 'b' >/dev/null 2>&1
   rep2="$(HEURESYS_CLOSE_LOG="$FAKE_R" bash "$CL" report 2>&1 || true)"
-  if printf '%s' "$rep2" | grep -q 'RUN-UNO' && printf '%s' "$rep2" | grep -q 'RUN-DUE'; then
+  if <<<"$rep2" grep -q 'RUN-UNO' && <<<"$rep2" grep -q 'RUN-DUE'; then
     ok "close-log: due corse di chiusura restano blocchi distinti (#148)"
   else fail "close-log: le due corse si sono fuse in un blocco solo ($rep2)"; fi
 
@@ -1527,7 +1527,7 @@ if [ -f "$CL" ]; then
   printf '{"ts":"2026-08-01T10:00:00+0200","session":"SVECCHIA","host":"x","head":"a","step":"propaga","outcome":"eseguito","why":"storica"}
 ' >> "$FAKE_R"
   rep3="$(HEURESYS_CLOSE_LOG="$FAKE_R" bash "$CL" report 2>&1 || true)"
-  if printf '%s' "$rep3" | grep -q 'SVECCHIA'; then
+  if <<<"$rep3" grep -q 'SVECCHIA'; then
     ok "close-log: le righe senza corsa degradano alla sessione invece di sparire"
   else fail "close-log: una riga storica e' sparita dal rendiconto ($rep3)"; fi
 
@@ -1599,8 +1599,8 @@ if [ -f "$CL" ]; then
     # La forma si verifica QUI, senza interprete: una batteria di shell che chiama `python`
     # smette di misurare il proprio bersaglio dove python non c'e' — e diventa rossa per la
     # ragione sbagliata (misurato su un clone usa-e-getta il 2026-08-16).
-    if printf '%s' "$JLINE" | grep -q '"ref":"compattazione"' \
-       && printf '%s' "$JLINE" | grep -qE '^\{.*"ts":"[0-9T:Z-]+".*"kind":"note".*"note":"[^"]+"\}$'; then
+    if <<<"$JLINE" grep -q '"ref":"compattazione"' \
+       && <<<"$JLINE" grep -qE '^\{.*"ts":"[0-9T:Z-]+".*"kind":"note".*"note":"[^"]+"\}$'; then
       ok "precompact: deposita una riga JSON valida di compattazione"
     else fail "precompact: riga assente o non JSON ($JLINE)"; fi
     # NEGATIVA/robustezza: fuori da un repo git non ha dove scrivere. Deve tacere e uscire 0 —
@@ -1656,7 +1656,7 @@ if [ -f "$CVD" ] && [ -f "$STUB" ]; then
   #    perche' quel drop stava sopra la pipe.
   vuota_traccia
   out="$(cvd FINTO_VM_KO=1)"; rc=$?
-  { [ "$rc" = 1 ] && ! ha_droppato && printf '%s' "$out" | grep -q 'non tocco niente'; } \
+  { [ "$rc" = 1 ] && ! ha_droppato && <<<"$out" grep -q 'non tocco niente'; } \
     && ok "clone-vm-db: VM muta => esce 1 e NON droppa niente" \
     || fail "clone-vm-db VM muta ($rc, droppato=$(ha_droppato && echo si || echo no): $out)"
 
@@ -1669,7 +1669,7 @@ if [ -f "$CVD" ] && [ -f "$STUB" ]; then
   # la frase e' cambiata («ZERO schemi applicativi» invece di «VUOTO») e l'asserzione
   # la segue. Cio' che si pretende e' invariato: esce 1, e non tocca niente.
   { [ "$rc" = 1 ] && ! ha_droppato && ! ha_scambiato \
-      && printf '%s' "$out" | grep -q 'ZERO schemi applicativi'; } \
+      && <<<"$out" grep -q 'ZERO schemi applicativi'; } \
     && ok "clone-vm-db: la sorgente dichiara zero schemi => esce 1 e non tocca niente" \
     || fail "clone-vm-db elenco vuoto ($rc: $out)"
 
@@ -1703,7 +1703,7 @@ if [ -f "$CVD" ] && [ -f "$STUB" ]; then
   #    dump tagliato al 70% dava exit 0 e una tabella a zero righe.)
   vuota_traccia
   out="$(cvd FINTO_SCHEMI_VM=sys FINTO_SCHEMI_LOC=sys FINTO_DUMP_RC=2)"; rc=$?
-  { [ "$rc" = 2 ] && printf '%s' "$out" | grep -q 'INCOMPLETO' && ! ha_scambiato; } \
+  { [ "$rc" = 2 ] && <<<"$out" grep -q 'INCOMPLETO' && ! ha_scambiato; } \
     && ok "clone-vm-db: dump interrotto => esce col SUO codice, e NON scambia (il clone vero resta)" \
     || fail "clone-vm-db dump interrotto ($rc, scambiato=$(ha_scambiato && echo si || echo no): $out)"
 
@@ -1711,8 +1711,8 @@ if [ -f "$CVD" ] && [ -f "$STUB" ]; then
   #    chiusura di S1074, e deve restare bloccante: e' il guardiano, non il difetto.
   vuota_traccia
   out="$(cvd FINTO_SCHEMI_VM=sys FINTO_SCHEMI_LOC=sys FINTO_CENS_VM='sys.tab=10' FINTO_CENS_LOC='sys.tab=11')"; rc=$?
-  { [ "$rc" = 1 ] && printf '%s' "$out" | grep -q 'NON corrisponde' && ! ha_scambiato \
-      && printf '%s' "$out" | grep -q 'resta quello di prima'; } \
+  { [ "$rc" = 1 ] && <<<"$out" grep -q 'NON corrisponde' && ! ha_scambiato \
+      && <<<"$out" grep -q 'resta quello di prima'; } \
     && ok "clone-vm-db: censimento divergente => FATAL, e il divergente NON prende il posto del buono" \
     || fail "clone-vm-db censimento DIFF ($rc, scambiato=$(ha_scambiato && echo si || echo no): $out)"
 
@@ -1721,9 +1721,9 @@ if [ -f "$CVD" ] && [ -f "$STUB" ]; then
   #    si presentava come successo perfetto (D-78).
   vuota_traccia
   out="$(cvd FINTO_SCHEMI_VM=sys FINTO_SCHEMI_LOC=sys FINTO_CONTE_KO=1)"; rc=$?
-  { [ "$rc" = 1 ] && printf '%s' "$out" | grep -q 'NON e. stato possibile' \
-      && printf '%s' "$out" | grep -q 'non e. stato verificato' \
-      && ! printf '%s' "$out" | grep -q 'NON corrisponde'; } \
+  { [ "$rc" = 1 ] && <<<"$out" grep -q 'NON e. stato possibile' \
+      && <<<"$out" grep -q 'non e. stato verificato' \
+      && ! <<<"$out" grep -q 'NON corrisponde'; } \
     && ok "clone-vm-db: conte non misurabili => «non verificato», NON «divergente»" \
     || fail "clone-vm-db non misurabile ($rc: $out)"
 
@@ -1731,7 +1731,7 @@ if [ -f "$CVD" ] && [ -f "$STUB" ]; then
   #    anche da uno script che fallisce SEMPRE.
   vuota_traccia
   out="$(cvd FINTO_SCHEMI_VM='sys staging' FINTO_SCHEMI_LOC='sys staging')"; rc=$?
-  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'done'; } \
+  { [ "$rc" = 0 ] && <<<"$out" grep -q 'done'; } \
     && ok "clone-vm-db: tutto sano => esce 0 (il controllo non blocca il caso buono)" \
     || fail "clone-vm-db caso sano ($rc: $out)"
 
@@ -1746,8 +1746,8 @@ if [ -f "$CVD" ] && [ -f "$STUB" ]; then
   out="$(cvd FINTO_SCHEMI_VM=sys FINTO_SCHEMI_LOC=sys FINTO_RENAME1_KO=1 \
              FINTO_CHI_COLLEGATO='api-gemello [idle]')"; rc=$?
   { [ "$rc" = 1 ] && ! ha_scambiato \
-      && printf '%s' "$out" | grep -q 'NIENTE E. PERDUTO' \
-      && printf '%s' "$out" | grep -q 'api-gemello'; } \
+      && <<<"$out" grep -q 'NIENTE E. PERDUTO' \
+      && <<<"$out" grep -q 'api-gemello'; } \
     && ok "clone-vm-db: primo rinomino fallito => niente scambio, e dice CHI era collegato" \
     || fail "clone-vm-db primo rinomino ($rc: $out)"
 
@@ -1759,8 +1759,8 @@ if [ -f "$CVD" ] && [ -f "$STUB" ]; then
   vuota_traccia
   out="$(cvd FINTO_SCHEMI_VM=sys FINTO_SCHEMI_LOC=sys FINTO_RENAME2_KO=1)"; rc=$?
   { [ "$rc" = 1 ] \
-      && printf '%s' "$out" | grep -q 'IL DATO NON E. PERDUTO' \
-      && printf '%s' "$out" | grep -q 'ALTER DATABASE "finto_db_old" RENAME TO "finto_db"'; } \
+      && <<<"$out" grep -q 'IL DATO NON E. PERDUTO' \
+      && <<<"$out" grep -q 'ALTER DATABASE "finto_db_old" RENAME TO "finto_db"'; } \
     && ok "clone-vm-db: secondo rinomino fallito => dice dov'e' il dato E il comando per rimediare" \
     || fail "clone-vm-db rinomino fallito ($rc: $out)"
   rm -rf "$T"
@@ -1896,7 +1896,7 @@ if [ -f "$RC" ]; then
     B="$T/origin.git"; git init -q --bare "$B"; git -C "$S" remote add origin "$B"; git -C "$S" push -q origin HEAD:refs/heads/main 2>/dev/null
     mkdir -p "$A3/scripts/lib"; cp scripts/deploy-watch.sh "$A3/scripts/"; cp scripts/lib/deploy-paths.sh "$A3/scripts/lib/" 2>/dev/null
     out="$(DEPLOY_WATCH_DRYRUN=1 REPO_DIR="$A3" bash "$A3/scripts/deploy-watch.sh" 2>&1)"; rc=$?
-    { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'nessun deploy armato' && [ -f "$S/.deploy-watch.lock" ]; } \
+    { [ "$rc" = 0 ] && <<<"$out" grep -q 'nessun deploy armato' && [ -f "$S/.deploy-watch.lock" ]; } \
       && ok "deploy-watch da una copia: legge git e tiene il lock nella sorgente" || fail "deploy-watch da copia ($rc: $out)"
   fi
   rm -rf "$T"

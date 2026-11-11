@@ -71,7 +71,17 @@ export function costruisci(fmt: Formati, enumi: Map<string, string>, rubrica: Ru
     if (CODICE.test(t)) return voce(t) ?? (italiano ? codiceInParole(t) : t);
     const frase = voce(t) ?? (italiano ? frasiComposte(t, voce) : undefined);
     if (frase) return frase;
-    if (!t.includes("@") && !/[0-9a-f]{8}-/i.test(t)) return s;
+    // Dentro una frase, una quantità con il punto decimale accanto alla sua unità («8.00 giorni»,
+    // «indice 71.4», «57.1 su 100», «12.5%») si scrive all'italiana. Solo accanto a un'unità:
+    // versioni, indirizzi e stringhe tecniche restano come sono.
+    const conQuantita = italiano
+      ? s.replace(
+          /(^|[\s(])(\d+)\.(\d+)(?=\s*(?:%|giorn|or[ae]\b|anni|mes[ei]|settiman|punt|su\s+100)|\))/g,
+          (_m, prima: string, intera: string, dec: string) => `${prima}${fmt.numero(Number(`${intera}.${dec}`), Math.min(2, dec.replace(/0+$/, "").length))}`,
+        )
+      : s;
+    if (!t.includes("@") && !/[0-9a-f]{8}-/i.test(t)) return conQuantita;
+    s = conQuantita;
     return s
       .replace(EMAIL, (m) => perEmail.get(m.toLowerCase()) ?? m)
       .replace(UUID, (m) => perId.get(m.toLowerCase()) ?? perId.get(m) ?? m);

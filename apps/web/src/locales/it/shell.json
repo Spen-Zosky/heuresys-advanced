@@ -58,13 +58,13 @@
       "category": "Per categoria",
       "group": "Per gruppo",
       "catalog": "Catalogo",
-      "gap": "Gap",
-      "skillGap": "Skill gap",
+      "gap": "Divari",
+      "skillGap": "Divari di competenza",
       "graph": "Grafo"
     },
     "comp": {
       "analytics": "Analisi",
-      "intelligence": "Compensation"
+      "intelligence": "Retribuzioni"
     },
     "kpi": {
       "analytics": "Analisi",
@@ -75,7 +75,7 @@
       "readiness": "Readiness successione"
     },
     "recruiting": {
-      "pipeline": "Pipeline",
+      "pipeline": "Fasi della selezione",
       "requisitions": "Richieste",
       "postings": "Annunci",
       "candidates": "Candidati"
@@ -98,14 +98,14 @@
   "roles": {
     "PLATFORM_ADMIN": "Amministratore piattaforma",
     "TENANT_ADMIN": "Amministratore tenant",
-    "BLUEPRINT_MANAGER": "Blueprint manager",
+    "BLUEPRINT_MANAGER": "Gestore dei modelli",
     "HRMS_MANAGER": "Responsabile HRMS",
-    "PROCESS_OWNER": "Process owner",
-    "MANAGER": "Manager",
+    "PROCESS_OWNER": "Responsabile di processo",
+    "MANAGER": "Responsabile",
     "USER": "Dipendente",
     "READ_ONLY": "Sola lettura",
-    "CEO": "CEO",
-    "TEAM_LEADER": "Team leader",
+    "CEO": "Amministratore delegato",
+    "TEAM_LEADER": "Capo squadra",
     "TEAM_MEMBER": "Membro del team",
     "ORG_DIRECTOR": "Direttore organizzativo",
     "WHISTLEBLOWING_CUSTODIAN": "Custode segnalazioni",
@@ -114,7 +114,7 @@
     "DPO": "Responsabile protezione dati",
     "SECURITY_ADMIN": "Amministratore sicurezza",
     "TAXONOMY_STEWARD": "Referente tassonomia",
-    "RECRUITER": "Recruiter",
+    "RECRUITER": "Selezionatore",
     "HIRING_MANAGER": "Responsabile assunzione",
     "IMPLEMENTATION_CONSULTANT": "Consulente di avviamento",
     "PEOPLE_MANAGER": "Responsabile del personale",

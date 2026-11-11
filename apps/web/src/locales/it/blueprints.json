@@ -10,7 +10,7 @@
     "columns": {
       "name": "Nome",
       "family": "Famiglia",
-      "industry": "Industry"
+      "industry": "Settore"
     }
   },
   "detail": {
@@ -37,7 +37,7 @@
       "optional": "Opzionale"
     },
     "activationColumns": {
-      "tenantId": "Tenant",
+      "tenantId": "Azienda",
       "status": "Stato",
       "activatedAt": "In vigore dal"
     },
@@ -69,19 +69,19 @@
     }
   },
   "brownfield": {
-    "title": "Brownfield adaptation",
+    "title": "Adattamento dei dati esistenti",
     "description": "Inventario, mapping e run di import dei dati legacy.",
     "tabs": {
-      "inventory": "Inventory",
-      "mapping": "Mapping",
-      "runs": "Runs"
+      "inventory": "Inventario",
+      "mapping": "Corrispondenze",
+      "runs": "Esecuzioni"
     },
     "inventoryEmpty": "Nessun export registrato",
-    "inventoryCaption": "Source exports",
+    "inventoryCaption": "Esportazioni di origine",
     "mappingEmpty": "Nessuna mapping registrata",
-    "mappingCaption": "Table mappings",
+    "mappingCaption": "Corrispondenze fra tabelle",
     "runsEmpty": "Nessun run",
-    "runsCaption": "Import runs",
+    "runsCaption": "Esecuzioni di importazione",
     "inventoryColumns": {
       "system": "Sistema",
       "capturedAt": "Catturato",
@@ -89,14 +89,14 @@
       "status": "Stato"
     },
     "mappingColumns": {
-      "sourceTable": "Source table",
-      "targetTable": "Target table",
+      "sourceTable": "Tabella di origine",
+      "targetTable": "Tabella di destinazione",
       "status": "Stato"
     },
     "runsColumns": {
-      "run": "Run",
-      "wave": "Wave",
-      "scope": "Scope",
+      "run": "Esecuzione",
+      "wave": "Ondata",
+      "scope": "Perimetro",
       "status": "Stato",
       "startedAt": "Inizio"
     }
@@ -108,9 +108,9 @@
     "error": "Impossibile caricare i run.",
     "emptyTitle": "Nessun run",
     "emptyDescription": "Nessun run di acquisizione registrato.",
-    "caption": "Pipeline runs",
+    "caption": "Esecuzioni della pipeline",
     "columns": {
-      "runId": "Run ID",
+      "runId": "Esecuzione",
       "code": "Codice",
       "status": "Stato",
       "startedAt": "Inizio",

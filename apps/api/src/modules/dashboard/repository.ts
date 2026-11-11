@@ -261,14 +261,15 @@ export async function getRecentActivity(
     `WITH events AS (
        SELECT 'USER_CREATED'::text AS kind,
               created_at AS occurred_at,
-              'User created: ' || user_display_name AS summary,
+              -- C1: il riepilogo si legge in italiano e la persona «Cognome, Nome» (R1).
+              'Nuova persona: ' || coalesce(nullif(concat_ws(', ', nullif(user_last_name, ''), nullif(user_first_name, '')), ''), user_display_name) AS summary,
               user_id AS resource_id,
               user_tenant_id AS tenant_id
          FROM sys.sys_users
        UNION ALL
        SELECT 'POSITION_CREATED'::text AS kind,
               created_at AS occurred_at,
-              'Position created: ' || position_title AS summary,
+              'Nuova posizione: ' || position_title AS summary,
               position_id AS resource_id,
               position_tenant_id AS tenant_id
          FROM sys.sys_positions

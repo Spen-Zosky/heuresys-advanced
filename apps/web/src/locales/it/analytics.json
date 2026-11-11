@@ -65,7 +65,7 @@
       "ouDesc": "OU con profili retributivi",
       "medianLabel": "Mediana banda"
     },
-    "range": "Min €{{min}} · Max €{{max}}",
+    "range": "Min {{min}} € · Max {{max}} €",
     "rangeEmpty": "Nessuna banda nell'ambito",
     "boxplotTitle": "Distribuzione bande retributive per unità (mid €)",
     "boxplotAria": "Distribuzione bande retributive per unità organizzativa",
@@ -199,7 +199,7 @@
     },
     "types": {
       "WEEKDAY": "Feriale",
-      "WEEKEND": "Weekend",
+      "WEEKEND": "Fine settimana",
       "NIGHT": "Notturno",
       "HOLIDAY": "Festivo",
       "EMERGENCY": "Emergenza",

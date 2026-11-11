@@ -33,7 +33,7 @@ test.describe("Serie-A panels (#30, #31)", () => {
     const attesaPiani = page.waitForResponse((r) => r.url().includes("/v1/learning-gaps/closure-plans"));
     const attesaEsiti = page.waitForResponse((r) => r.url().includes("/v1/learning-gaps/analysis-results"));
 
-    await page.goto("/gaps");
+    await page.goto("/gaps?scheda=piani"); // C5: i piani stanno nella loro scheda
     await expect(page.getByTestId("gaps-page")).toBeVisible();
     await expect(page.getByTestId("gap-closure")).toBeVisible({ timeout: 15_000 });
 

@@ -334,6 +334,14 @@
           "proposedBy": "proposto da {{who}} il {{when}}",
           "withdraw": "Ritira"
         }
+      },
+      "tabs": {
+        "work": "Lavoro e retribuzione",
+        "results": "Risultati e carriera",
+        "skills": "Competenze e formazione",
+        "attendance": "Presenze",
+        "history": "Storia",
+        "manage": "Gestione"
       }
     }
   },
@@ -741,7 +749,12 @@
       "exportEmpty": "Nessun export per questa versione.",
       "exportSize": "{{bytes}} byte",
       "exportNoContent": "senza contenuto",
-      "exportError": "Export non riuscito ({{code}})."
+      "exportError": "Export non riuscito ({{code}}).",
+      "tabs": {
+        "graph": "Grafo",
+        "elements": "Nodi e collegamenti",
+        "versions": "Versioni ed esportazioni"
+      }
     }
   },
   "content": {

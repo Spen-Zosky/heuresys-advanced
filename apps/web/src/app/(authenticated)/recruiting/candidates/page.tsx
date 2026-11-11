@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { Mail } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent, Badge, Button, Input } from "@heuresys/ui";
+import { SchedePagina } from "@/components/schede-pagina";
 import { PageHeader } from "@/components/intestazione-pagina";
 import type { Candidate, CandidateApplication } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
@@ -43,6 +44,12 @@ type FormValues = {
  * compare nella pipeline come carta in `APPLIED`. Lo stesso candidato sullo stesso annuncio
  * due volte e' rifiutato dal database (`APPLICATION_DUPLICATE`), e il messaggio arriva qui.
  */
+const GRUPPI_STATO = [
+  { id: "attivi", titolo: "recruiting.candidates.tabs.active", stati: ["ACTIVE"] },
+  { id: "assunti", titolo: "recruiting.candidates.tabs.hired", stati: ["HIRED"] },
+  { id: "altri", titolo: "recruiting.candidates.tabs.other", stati: ["WITHDRAWN", "BLACKLISTED", "ARCHIVED"] },
+] as const;
+
 export default function CandidatesPage() {
   const { t } = useTranslation("hr");
   const fmt = useFormat();
@@ -99,67 +106,17 @@ export default function CandidatesPage() {
   const applicationsOf = (candidateId: string) =>
     (applications.data?.items ?? []).filter((a) => a.candidateId === candidateId);
 
-  return (
-    <main data-testid="candidates-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
-      <PageHeader title={t("recruiting.candidates.title")} description={t("recruiting.candidates.description")} />
-
-      {canWrite && (
-      <Card>
-        <CardHeader><CardTitle>{t("recruiting.candidates.newTitle")}</CardTitle></CardHeader>
-        <CardContent>
-          <form className="grid gap-4 md:grid-cols-3" data-testid="candidate-form" onSubmit={handleSubmit((v) => create.mutate(v))}>
-            <label className="space-y-1 text-sm">
-              <span>{t("recruiting.fields.firstName")}</span>
-              <Input data-testid="candidate-first-name" {...register("firstName", { required: true })} />
-            </label>
-            <label className="space-y-1 text-sm">
-              <span>{t("recruiting.fields.lastName")}</span>
-              <Input data-testid="candidate-last-name" {...register("lastName", { required: true })} />
-            </label>
-            <label className="space-y-1 text-sm">
-              <span>{t("recruiting.fields.email")}</span>
-              <Input type="email" data-testid="candidate-email" {...register("email", { required: true })} />
-            </label>
-            <label className="space-y-1 text-sm">
-              <span>{t("recruiting.fields.phone")}</span>
-              <Input data-testid="candidate-phone" {...register("phone")} />
-            </label>
-            <label className="space-y-1 text-sm">
-              <span>{t("recruiting.fields.source")}</span>
-              <select data-testid="candidate-source" className={SELECT_CLASS} {...register("source")}>
-                {CANDIDATE_SOURCES.map((s) => (
-                  <option key={s} value={s}>{t(`recruiting.source.${s}`)}</option>
-                ))}
-              </select>
-            </label>
-            <label className="space-y-1 text-sm">
-              <span>{t("recruiting.fields.consentGivenOn")}</span>
-              <Input type="date" data-testid="candidate-consent" {...register("consentGivenOn")} />
-            </label>
-            <label className="space-y-1 text-sm">
-              <span>{t("recruiting.fields.retentionUntil")}</span>
-              <Input type="date" data-testid="candidate-retention" {...register("retentionUntil")} />
-            </label>
-            <div className="md:col-span-3">
-              <Button type="submit" data-testid="candidate-submit" disabled={create.isPending}>{t("recruiting.candidates.submit")}</Button>
-            </div>
-          </form>
-          {feedback && (
-            <p data-testid="candidate-feedback" role="status" className={`mt-3 text-sm ${feedback.kind === "ok" ? "text-success" : "text-danger"}`}>{feedback.msg}</p>
-          )}
-        </CardContent>
-      </Card>
-      )}
-
+  const elenco = (gruppo: typeof items) => (
+    <>
       {q.isLoading ? (
         <StatoCaricamento />
       ) : q.isError ? (
         <StatoErrore errore={q.error} titolo={t("recruiting.error")} testId="candidates-error" onRiprova={() => void q.refetch()} />
-      ) : items.length === 0 ? (
+      ) : gruppo.length === 0 ? (
         <StatoVuoto testId="candidates-empty" titolo={t("recruiting.candidates.emptyTitle")} motivo={t("recruiting.candidates.emptyDesc")} />
       ) : (
         <section className="grid gap-4 md:grid-cols-2" data-testid="candidates-list">
-          {items.map((c) => {
+          {gruppo.map((c) => {
             const sue = applicationsOf(c.candidateId);
             return (
               <Card key={c.candidateId} data-testid="candidate-row">
@@ -226,6 +183,74 @@ export default function CandidatesPage() {
           })}
         </section>
       )}
+    </>
+  );
+
+  return (
+    <main data-testid="candidates-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
+      <PageHeader title={t("recruiting.candidates.title")} description={t("recruiting.candidates.description")} />
+
+      {feedback && (
+        <p data-testid="candidate-feedback" role="status" className={`text-sm ${feedback.kind === "ok" ? "text-success" : "text-danger"}`}>{feedback.msg}</p>
+      )}
+
+      {/* C5: i candidati per stato, e il modulo per un candidato nuovo, in schede */}
+      <SchedePagina
+        schede={[
+          ...GRUPPI_STATO.map((g) => ({
+            id: g.id,
+            titolo: t(g.titolo),
+            conteggio: q.data ? items.filter((c) => (g.stati as readonly string[]).includes(c.status)).length : null,
+            contenuto: elenco(items.filter((c) => (g.stati as readonly string[]).includes(c.status))),
+          })),
+          { id: "nuovo", titolo: t("recruiting.candidates.newTitle"), nascosta: !canWrite, contenuto: (
+            <>
+        <Card>
+          <CardHeader><CardTitle>{t("recruiting.candidates.newTitle")}</CardTitle></CardHeader>
+          <CardContent>
+            <form className="grid gap-4 md:grid-cols-3" data-testid="candidate-form" onSubmit={handleSubmit((v) => create.mutate(v))}>
+              <label className="space-y-1 text-sm">
+                <span>{t("recruiting.fields.firstName")}</span>
+                <Input data-testid="candidate-first-name" {...register("firstName", { required: true })} />
+              </label>
+              <label className="space-y-1 text-sm">
+                <span>{t("recruiting.fields.lastName")}</span>
+                <Input data-testid="candidate-last-name" {...register("lastName", { required: true })} />
+              </label>
+              <label className="space-y-1 text-sm">
+                <span>{t("recruiting.fields.email")}</span>
+                <Input type="email" data-testid="candidate-email" {...register("email", { required: true })} />
+              </label>
+              <label className="space-y-1 text-sm">
+                <span>{t("recruiting.fields.phone")}</span>
+                <Input data-testid="candidate-phone" {...register("phone")} />
+              </label>
+              <label className="space-y-1 text-sm">
+                <span>{t("recruiting.fields.source")}</span>
+                <select data-testid="candidate-source" className={SELECT_CLASS} {...register("source")}>
+                  {CANDIDATE_SOURCES.map((s) => (
+                    <option key={s} value={s}>{t(`recruiting.source.${s}`)}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="space-y-1 text-sm">
+                <span>{t("recruiting.fields.consentGivenOn")}</span>
+                <Input type="date" data-testid="candidate-consent" {...register("consentGivenOn")} />
+              </label>
+              <label className="space-y-1 text-sm">
+                <span>{t("recruiting.fields.retentionUntil")}</span>
+                <Input type="date" data-testid="candidate-retention" {...register("retentionUntil")} />
+              </label>
+              <div className="md:col-span-3">
+                <Button type="submit" data-testid="candidate-submit" disabled={create.isPending}>{t("recruiting.candidates.submit")}</Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+            </>
+          ) },
+        ]}
+      />
     </main>
   );
 }

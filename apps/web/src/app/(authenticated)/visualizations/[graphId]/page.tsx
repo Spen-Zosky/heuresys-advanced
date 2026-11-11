@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Button, Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { SchedePagina } from "@/components/schede-pagina";
 import { PageHeader } from "@/components/intestazione-pagina";
 import { MermaidDiagram } from "../../_charts-client";
 import { apiFetch } from "@/lib/api/fetch";
@@ -221,178 +222,193 @@ export default function VisualizationDetailPage() {
         }
       />
 
-      {/* #36 (B5) — versioni ed export. Prima di questa sezione il grafo era
-          bloccato a v1 e gli export erano righe di registro senza documento. */}
-      <section className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <Card data-testid="visualization-versions-card">
-          <CardHeader>
-            <CardTitle>{t("visualizations.detail.versionsTitle")}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {versions.isLoading ? (
-              <StatoCaricamento />
-            ) : (
-              <>
-                <label htmlFor="viz-version" className="block text-sm text-muted-foreground">
-                  {t("visualizations.detail.versionSelectLabel")}
+      {/* C5: grafo, elementi e versioni stanno in tre schede invece di nove schermate */}
+      <SchedePagina
+        schede={[
+          { id: "grafo", titolo: t("visualizations.detail.tabs.graph"), nascosta: !mermaidSource, contenuto: (
+          <>
+          {mermaidSource ? (
+            <Card data-testid="visualization-renderer-card">
+              <CardHeader>
+                <CardTitle>{t("visualizations.detail.diagramTitle")}</CardTitle>
+              </CardHeader>
+              <CardContent className="overflow-x-auto" data-testid="visualization-renderer">
+                <MermaidDiagram
+                  source={mermaidSource}
+                  ariaLabel={t("visualizations.detail.diagramAria", { name: g.name })}
+                  className="min-w-full"
+                />
+              </CardContent>
+            </Card>
+          ) : null}
+          </>
+          ) },
+          { id: "elementi", titolo: t("visualizations.detail.tabs.elements"), conteggio: (nodes.data?.total ?? 0) + (edges.data?.total ?? 0), contenuto: (
+          <>
+          <section className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <Card data-testid="visualization-nodes-card">
+              <CardHeader>
+                <CardTitle>{t("visualizations.detail.nodesTitle", { count: nodes.data?.total ?? t("visualizations.detail.dash") })}</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                {nodes.isLoading ? (
+                  <StatoCaricamento />
+                ) : nodes.data && nodes.data.items.length === 0 ? (
+                  <StatoVuoto titolo={t("visualizations.detail.nodesEmpty")} testId="visualization-nodes-empty" />
+                ) : (
+                  <ul className="divide-y divide-border" data-testid="visualization-nodes-list">
+                    {nodes.data!.items.slice(0, 20).map((n) => (
+                      <li key={n.nodeId} className="px-4 py-2 text-sm text-foreground" data-testid="visualization-node-item">
+                        <span className="text-xs text-muted-foreground">{enumLabel("vizNodeSourceType", n.sourceEntityType)}</span>
+                        <span className="ml-2">{n.label}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card data-testid="visualization-edges-card">
+              <CardHeader>
+                <CardTitle>{t("visualizations.detail.edgesTitle", { count: edges.data?.total ?? t("visualizations.detail.dash") })}</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                {edges.isLoading ? (
+                  <StatoCaricamento />
+                ) : edges.data && edges.data.items.length === 0 ? (
+                  <StatoVuoto titolo={t("visualizations.detail.edgesEmpty")} testId="visualization-edges-empty" />
+                ) : (
+                  <ul className="divide-y divide-border" data-testid="visualization-edges-list">
+                    {edges.data!.items.slice(0, 20).map((e) => (
+                      <li key={e.edgeId} className="px-4 py-2 text-sm text-foreground" data-testid="visualization-edge-item">
+                        {/* C2: i nodi per nome, non per un pezzo d'identificativo */}
+                        {nodeMap.get(e.sourceNodeId)?.label ?? "—"}{t("visualizations.detail.edgeArrow")}{nodeMap.get(e.targetNodeId)?.label ?? "—"}
+                        <span className="ml-2 text-xs text-muted-foreground">{enumLabel("vizEdgeType", e.type)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </CardContent>
+            </Card>
+          </section>
+          </>
+          ) },
+          { id: "versioni", titolo: t("visualizations.detail.tabs.versions"), contenuto: (
+          <>
+          {/* #36 (B5) — versioni ed export. Prima di questa sezione il grafo era
+              bloccato a v1 e gli export erano righe di registro senza documento. */}
+          <section className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <Card data-testid="visualization-versions-card">
+              <CardHeader>
+                <CardTitle>{t("visualizations.detail.versionsTitle")}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {versions.isLoading ? (
+                  <StatoCaricamento />
+                ) : (
+                  <>
+                    <label htmlFor="viz-version" className="block text-sm text-muted-foreground">
+                      {t("visualizations.detail.versionSelectLabel")}
+                    </label>
+                    <select
+                      id="viz-version"
+                      data-testid="visualization-version-select"
+                      className={SELECT_CLASS}
+                      value={graphId}
+                      onChange={(e) => router.push(`/visualizations/${e.target.value}`)}
+                    >
+                      {(versions.data?.items ?? []).map((v) => (
+                        <option key={v.graphId} value={v.graphId}>
+                          {t("visualizations.detail.versionOption", { version: v.version, name: v.name })}
+                        </option>
+                      ))}
+                    </select>
+                    {canCreate ? (
+                      <Button
+                        data-testid="visualization-create-version"
+                        onClick={() => createVersion.mutate()}
+                        disabled={createVersion.isPending}
+                      >
+                        {createVersion.isPending
+                          ? t("visualizations.detail.versionCreating")
+                          : t("visualizations.detail.versionCreate")}
+                      </Button>
+                    ) : null}
+                    <p className="text-xs text-muted-foreground">{t("visualizations.detail.versionNote")}</p>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card data-testid="visualization-export-card">
+              <CardHeader>
+                <CardTitle>{t("visualizations.detail.exportTitle")}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <label htmlFor="viz-format" className="block text-sm text-muted-foreground">
+                  {t("visualizations.detail.exportFormatLabel")}
                 </label>
                 <select
-                  id="viz-version"
-                  data-testid="visualization-version-select"
+                  id="viz-format"
+                  data-testid="visualization-export-format"
                   className={SELECT_CLASS}
-                  value={graphId}
-                  onChange={(e) => router.push(`/visualizations/${e.target.value}`)}
+                  value={format}
+                  onChange={(e) => setFormat(e.target.value as ExportFormat)}
                 >
-                  {(versions.data?.items ?? []).map((v) => (
-                    <option key={v.graphId} value={v.graphId}>
-                      {t("visualizations.detail.versionOption", { version: v.version, name: v.name })}
-                    </option>
+                  {EXPORT_FORMATS.map((f) => (
+                    <option key={f} value={f}>{enumLabel("vizExportFormat", f)}</option>
                   ))}
                 </select>
                 {canCreate ? (
                   <Button
-                    data-testid="visualization-create-version"
-                    onClick={() => createVersion.mutate()}
-                    disabled={createVersion.isPending}
+                    data-testid="visualization-export-run"
+                    onClick={() => exportNow.mutate()}
+                    disabled={exportNow.isPending}
                   >
-                    {createVersion.isPending
-                      ? t("visualizations.detail.versionCreating")
-                      : t("visualizations.detail.versionCreate")}
+                    {exportNow.isPending
+                      ? t("visualizations.detail.exportRunning")
+                      : t("visualizations.detail.exportRun")}
                   </Button>
                 ) : null}
-                <p className="text-xs text-muted-foreground">{t("visualizations.detail.versionNote")}</p>
-              </>
-            )}
-          </CardContent>
-        </Card>
+                {exportError ? (
+                  <p className="text-sm text-danger" data-testid="visualization-export-error">
+                    {t("visualizations.detail.exportError", { code: exportError })}
+                  </p>
+                ) : null}
 
-        <Card data-testid="visualization-export-card">
-          <CardHeader>
-            <CardTitle>{t("visualizations.detail.exportTitle")}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <label htmlFor="viz-format" className="block text-sm text-muted-foreground">
-              {t("visualizations.detail.exportFormatLabel")}
-            </label>
-            <select
-              id="viz-format"
-              data-testid="visualization-export-format"
-              className={SELECT_CLASS}
-              value={format}
-              onChange={(e) => setFormat(e.target.value as ExportFormat)}
-            >
-              {EXPORT_FORMATS.map((f) => (
-                <option key={f} value={f}>{enumLabel("vizExportFormat", f)}</option>
-              ))}
-            </select>
-            {canCreate ? (
-              <Button
-                data-testid="visualization-export-run"
-                onClick={() => exportNow.mutate()}
-                disabled={exportNow.isPending}
-              >
-                {exportNow.isPending
-                  ? t("visualizations.detail.exportRunning")
-                  : t("visualizations.detail.exportRun")}
-              </Button>
-            ) : null}
-            {exportError ? (
-              <p className="text-sm text-danger" data-testid="visualization-export-error">
-                {t("visualizations.detail.exportError", { code: exportError })}
-              </p>
-            ) : null}
-
-            {graphExports.data && graphExports.data.items.length > 0 ? (
-              <ul className="divide-y divide-border" data-testid="visualization-export-list">
-                {graphExports.data.items.map((e) => (
-                  <li key={e.exportId} className="flex items-center justify-between gap-3 py-2 text-sm">
-                    <span>
-                      <span className="text-xs text-muted-foreground">{enumLabel("vizExportFormat", e.format)}</span>
-                      <span className="ml-2 text-muted-foreground">
-                        {e.byteSize === null
-                          ? t("visualizations.detail.exportNoContent")
-                          : fmt.dimensione(e.byteSize)}
-                      </span>
-                    </span>
-                    <Button
-                      variant="outline"
-                      data-testid="visualization-export-download"
-                      disabled={e.byteSize === null || downloadExisting.isPending}
-                      onClick={() => downloadExisting.mutate(e)}
-                    >
-                      {t("visualizations.detail.exportDownload")}
-                    </Button>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <StatoVuoto titolo={t("visualizations.detail.exportEmpty")} testId="visualization-export-empty" />
-            )}
-          </CardContent>
-        </Card>
-      </section>
-
-      {mermaidSource ? (
-        <Card data-testid="visualization-renderer-card">
-          <CardHeader>
-            <CardTitle>{t("visualizations.detail.diagramTitle")}</CardTitle>
-          </CardHeader>
-          <CardContent className="overflow-x-auto" data-testid="visualization-renderer">
-            <MermaidDiagram
-              source={mermaidSource}
-              ariaLabel={t("visualizations.detail.diagramAria", { name: g.name })}
-              className="min-w-full"
-            />
-          </CardContent>
-        </Card>
-      ) : null}
-
-      <section className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <Card data-testid="visualization-nodes-card">
-          <CardHeader>
-            <CardTitle>{t("visualizations.detail.nodesTitle", { count: nodes.data?.total ?? t("visualizations.detail.dash") })}</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            {nodes.isLoading ? (
-              <StatoCaricamento />
-            ) : nodes.data && nodes.data.items.length === 0 ? (
-              <StatoVuoto titolo={t("visualizations.detail.nodesEmpty")} testId="visualization-nodes-empty" />
-            ) : (
-              <ul className="divide-y divide-border" data-testid="visualization-nodes-list">
-                {nodes.data!.items.slice(0, 20).map((n) => (
-                  <li key={n.nodeId} className="px-4 py-2 text-sm text-foreground" data-testid="visualization-node-item">
-                    <span className="text-xs text-muted-foreground">{enumLabel("vizNodeSourceType", n.sourceEntityType)}</span>
-                    <span className="ml-2">{n.label}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card data-testid="visualization-edges-card">
-          <CardHeader>
-            <CardTitle>{t("visualizations.detail.edgesTitle", { count: edges.data?.total ?? t("visualizations.detail.dash") })}</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            {edges.isLoading ? (
-              <StatoCaricamento />
-            ) : edges.data && edges.data.items.length === 0 ? (
-              <StatoVuoto titolo={t("visualizations.detail.edgesEmpty")} testId="visualization-edges-empty" />
-            ) : (
-              <ul className="divide-y divide-border" data-testid="visualization-edges-list">
-                {edges.data!.items.slice(0, 20).map((e) => (
-                  <li key={e.edgeId} className="px-4 py-2 text-sm text-foreground" data-testid="visualization-edge-item">
-                    {/* C2: i nodi per nome, non per un pezzo d'identificativo */}
-                    {nodeMap.get(e.sourceNodeId)?.label ?? "—"}{t("visualizations.detail.edgeArrow")}{nodeMap.get(e.targetNodeId)?.label ?? "—"}
-                    <span className="ml-2 text-xs text-muted-foreground">{enumLabel("vizEdgeType", e.type)}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
-      </section>
+                {graphExports.data && graphExports.data.items.length > 0 ? (
+                  <ul className="divide-y divide-border" data-testid="visualization-export-list">
+                    {graphExports.data.items.map((e) => (
+                      <li key={e.exportId} className="flex items-center justify-between gap-3 py-2 text-sm">
+                        <span>
+                          <span className="text-xs text-muted-foreground">{enumLabel("vizExportFormat", e.format)}</span>
+                          <span className="ml-2 text-muted-foreground">
+                            {e.byteSize === null
+                              ? t("visualizations.detail.exportNoContent")
+                              : fmt.dimensione(e.byteSize)}
+                          </span>
+                        </span>
+                        <Button
+                          variant="outline"
+                          data-testid="visualization-export-download"
+                          disabled={e.byteSize === null || downloadExisting.isPending}
+                          onClick={() => downloadExisting.mutate(e)}
+                        >
+                          {t("visualizations.detail.exportDownload")}
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <StatoVuoto titolo={t("visualizations.detail.exportEmpty")} testId="visualization-export-empty" />
+                )}
+              </CardContent>
+            </Card>
+          </section>
+          </>
+          ) },
+        ]}
+      />
 
       <p className="text-xs text-muted-foreground">
         {t("visualizations.detail.note")}

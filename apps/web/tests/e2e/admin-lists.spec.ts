@@ -39,7 +39,8 @@ test.describe("MVP-2a admin lists — live data", () => {
     await firstLink.click();
     await page.waitForURL(/\/users\/[0-9a-f-]+$/);
     await expect(page.getByTestId("user-detail-page")).toBeVisible();
-    // C2: l'identificativo tecnico non è più a video; l'anagrafica resta
+    // C2: l'identificativo tecnico non è più a video; l'anagrafica resta, nella scheda Gestione (C5)
+    await page.getByTestId("scheda-gestione").click();
     await expect(page.getByTestId("user-fields")).toBeVisible();
     await expect(page.getByTestId("user-email-detail")).toBeVisible();
   });

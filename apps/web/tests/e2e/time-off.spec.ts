@@ -16,9 +16,12 @@ test.describe("time-off & leave admin page (#33 A/L8)", () => {
     await expect(page.getByTestId("time-off-title")).toBeVisible();
     // Live leave requests (69 seeded) + accrual rules (20) + transactions (20).
     await expect(page.getByTestId("time-off-request-row").first()).toBeVisible({ timeout: 20_000 });
+    await page.getByTestId("scheda-regole").click();
     await expect(page.getByTestId("time-off-rule-row").first()).toBeVisible({ timeout: 20_000 });
+    await page.getByTestId("scheda-movimenti").click();
     await expect(page.getByTestId("time-off-txn-row").first()).toBeVisible({ timeout: 20_000 });
     // Status filter narrows the request set without error.
+    await page.getByTestId("scheda-richieste").click();
     await page.getByTestId("time-off-status-filter").selectOption("APPROVED");
     await expect(page.getByTestId("time-off-page")).toBeVisible();
   });

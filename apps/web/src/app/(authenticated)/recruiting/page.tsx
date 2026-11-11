@@ -186,7 +186,8 @@ export default function RecruitingPipelinePage() {
           motivo={t("recruiting.pipeline.emptyDesc")}
         />
       ) : (
-        <div data-testid="pipeline-board" className="overflow-x-auto">
+        /* C5: la tavola scorre dentro il suo riquadro, la pagina resta corta */
+        <div data-testid="pipeline-board" className="max-h-[calc(100vh-16rem)] overflow-auto">
           <KanbanBoard key={`${impronta}#${annullati}`} columns={columns} onChange={onChange} />
         </div>
       )}

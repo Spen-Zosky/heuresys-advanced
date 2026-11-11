@@ -178,6 +178,7 @@
       "COMPLETED": "Completato",
       "ABANDONED": "Abbandonato"
     },
+    "employeeStatus": {"ACTIVE": "In servizio", "INACTIVE": "Non in servizio", "TERMINATED": "Cessato", "ON_LEAVE": "In aspettativa", "SUSPENDED": "Sospeso", "PROBATION": "In prova"},
     "timeOffStatus": {
       "PENDING": "In attesa",
       "APPROVED": "Approvata",

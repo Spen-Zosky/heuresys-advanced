@@ -371,6 +371,10 @@
       "target": "Target",
       "kind": "Kind",
       "score": "Score"
+    },
+    "tabs": {
+      "gaps": "Gaps",
+      "closure": "Remediation plans and analysis"
     }
   },
   "career": {
@@ -945,7 +949,12 @@
       "applyError": "Application rejected by the server.",
       "emptyTitle": "No candidates",
       "emptyDesc": "Register the first candidate.",
-      "write": "Write"
+      "write": "Write",
+      "tabs": {
+        "active": "Active",
+        "hired": "Hired",
+        "other": "Withdrawn, excluded and archived"
+      }
     },
     "application": {
       "title": "Application",

@@ -371,6 +371,10 @@
       "target": "Scadenza",
       "kind": "Tipo",
       "score": "Punteggio"
+    },
+    "tabs": {
+      "gaps": "Lacune",
+      "closure": "Piani di recupero e analisi"
     }
   },
   "career": {
@@ -945,7 +949,12 @@
       "applyError": "Candidatura rifiutata dal server.",
       "emptyTitle": "Nessun candidato",
       "emptyDesc": "Registra il primo candidato.",
-      "write": "Scrivi"
+      "write": "Scrivi",
+      "tabs": {
+        "active": "Attivi",
+        "hired": "Assunti",
+        "other": "Ritirati, esclusi e archiviati"
+      }
     },
     "application": {
       "title": "Candidatura",

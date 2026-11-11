@@ -178,6 +178,7 @@
       "COMPLETED": "Completed",
       "ABANDONED": "Abandoned"
     },
+    "employeeStatus": {"ACTIVE": "Active", "INACTIVE": "Inactive", "TERMINATED": "Terminated", "ON_LEAVE": "On leave", "SUSPENDED": "Suspended", "PROBATION": "Probation"},
     "timeOffStatus": {
       "PENDING": "Pending",
       "APPROVED": "Approved",

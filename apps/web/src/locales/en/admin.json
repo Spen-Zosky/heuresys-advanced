@@ -334,6 +334,14 @@
           "proposedBy": "proposed by {{who}} on {{when}}",
           "withdraw": "Withdraw"
         }
+      },
+      "tabs": {
+        "work": "Work and pay",
+        "results": "Results and career",
+        "skills": "Skills and learning",
+        "attendance": "Attendance",
+        "history": "History",
+        "manage": "Management"
       }
     }
   },
@@ -741,7 +749,12 @@
       "exportEmpty": "No export for this version yet.",
       "exportSize": "{{bytes}} bytes",
       "exportNoContent": "no content",
-      "exportError": "Export failed ({{code}})."
+      "exportError": "Export failed ({{code}}).",
+      "tabs": {
+        "graph": "Graph",
+        "elements": "Nodes and edges",
+        "versions": "Versions and exports"
+      }
     }
   },
   "content": {

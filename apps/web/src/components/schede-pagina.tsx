@@ -46,7 +46,7 @@ export function SchedePagina({ schede, chiave = "scheda" }: { schede: SchedaPagi
     <Tabs value={attiva} onValueChange={cambia} className="mt-2">
       <TabsList className="w-full justify-start overflow-x-auto" data-testid="schede-pagina">
         {visibili.map((s) => (
-          <TabsTrigger key={s.id} value={s.id} className="shrink-0">
+          <TabsTrigger key={s.id} value={s.id} className="shrink-0" data-testid={`scheda-${s.id}`}>
             {s.titolo}
             {typeof s.conteggio === "number" ? (
               <span className="ml-1.5 rounded-full bg-muted px-1.5 text-[11px] font-medium tabular-nums text-muted-foreground">

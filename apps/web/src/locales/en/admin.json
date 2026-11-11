@@ -102,8 +102,8 @@
     "delegated_other": "{{count}} steps decided by delegation"
   },
   "engagement": {
-    "title": "Engagement & Surveys",
-    "description": "Survey results and pulse trend.",
+    "title": "Climate and surveys",
+    "description": "Survey results and quick check-in trend.",
     "count": "{{count}} surveys",
     "columns": {
       "title": "Title",
@@ -120,12 +120,12 @@
       "archived": "Archived"
     },
     "pulse": {
-      "cardTitle": "Pulse trend",
+      "cardTitle": "Quick check-in trend",
       "mood": "Mood",
       "workload": "Workload",
       "satisfaction": "Satisfaction",
-      "totalChecks": "{{count}} total checks",
-      "empty": "No pulse data.",
+      "totalChecks": "{{count}} check-ins in all",
+      "empty": "No quick check-in data.",
       "axisWeek": "Week",
       "axisScore": "Average score",
       "tableTitle": "Show the data as a table",

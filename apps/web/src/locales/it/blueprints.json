@@ -102,11 +102,11 @@
   },
   "seedRuns": {
     "title": "Acquisizione dei dati di base — esecuzioni",
-    "description": "Run della pipeline di acquisizione seed.",
-    "count": "{{count}} run",
-    "error": "Impossibile caricare i run.",
-    "emptyTitle": "Nessun run",
-    "emptyDescription": "Nessun run di acquisizione registrato.",
+    "description": "Esecuzioni della procedura che acquisisce i dati di base.",
+    "count": "{{count}} esecuzioni",
+    "error": "Impossibile caricare le esecuzioni.",
+    "emptyTitle": "Nessuna esecuzione",
+    "emptyDescription": "Nessuna esecuzione di acquisizione registrata.",
     "caption": "Esecuzioni della pipeline",
     "columns": {
       "runId": "Esecuzione",

@@ -102,7 +102,7 @@
   },
   "seedRuns": {
     "title": "Seed acquisition — Runs",
-    "description": "Seed acquisition pipeline runs.",
+    "description": "Runs of the procedure that acquires the base data.",
     "count": "{{count}} runs",
     "error": "Unable to load the runs.",
     "emptyTitle": "No runs",

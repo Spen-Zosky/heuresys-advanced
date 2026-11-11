@@ -457,7 +457,11 @@
       "wellbeing": "Benessere",
       "exit": "Uscita",
       "onboarding": "Inserimento",
-      "custom": "Personalizzato"
+      "custom": "Personalizzato",
+      "pulse": "Rilevazione rapida",
+      "survey": "Sondaggio",
+      "feedback": "Riscontro",
+      "climate": "Clima"
     },
     "questionType": {
       "rating": "Valutazione",

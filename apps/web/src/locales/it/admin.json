@@ -1332,9 +1332,9 @@
     "description": "Quali righe di quest'azienda sono nate da una costruzione, e da quale versione di quale fascicolo. Non «quante»: quali.",
     "byTable": "Per tabella",
     "records": "Le righe",
-    "error": "Il registro non e' leggibile.",
+    "error": "Il registro non è leggibile.",
     "empty": "Nessuna riga.",
-    "nothingYet": "Il registro e' vuoto, e questo non e' un guasto: finche' nessuna costruzione e' stata applicata non c'e' niente da registrare.",
+    "nothingYet": "Il registro è vuoto, e questo non è un guasto: finché nessuna costruzione è stata applicata non c'è niente da registrare.",
     "allStatuses": "Tutti gli stati",
     "noJustification": "nessuna ragione registrata",
     "cols": {

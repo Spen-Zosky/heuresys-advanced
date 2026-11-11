@@ -215,11 +215,11 @@
     "depth": "{{count}} salto",
     "depth_other": "{{count}} salti",
     "pickTitle": "Scegli una competenza",
-    "pickDescription": "Cerca una competenza qui sopra e selezionala: il grafo mostrera' il suo vicinato.",
+    "pickDescription": "Cerca una competenza qui sopra e selezionala: il grafo mostrerà il suo vicinato.",
     "nodes": "Nodi",
     "explicitEdges": "Legami dichiarati",
     "groupEdges": "Legami di appartenenza",
-    "canvasEmpty": "Nessun legame per questa competenza a questa profondita'.",
+    "canvasEmpty": "Nessun legame per questa competenza a questa profondità.",
     "legendExplicit": "Legame dichiarato fra competenze",
     "legendGroup": "Appartenenza alla tassonomia"
   },

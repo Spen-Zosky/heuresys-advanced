@@ -715,7 +715,7 @@
       "title": "Cicli di valutazione",
       "hint": "Un ciclo apre la finestra in cui si valuta: senza, le autovalutazioni non hanno un periodo a cui riferirsi.",
       "emptyTitle": "Nessun ciclo aperto",
-      "emptyDescription": "Non risulta aperto alcun ciclo di valutazione. Le valutazioni qui sotto sono quelle gia' concluse.",
+      "emptyDescription": "Non risulta aperto alcun ciclo di valutazione. Le valutazioni qui sotto sono quelle già concluse.",
       "caption": "Elenco cicli di valutazione",
       "cols": {
         "code": "Codice",
@@ -758,8 +758,8 @@
   "projects": {
     "title": "Progetti",
     "description": "Il lavoro dell'organizzazione e chi lo porta avanti. Vedi i progetti a cui partecipi; con un mandato HR, tutti quelli del tenant.",
-    "error": "Non e' stato possibile caricare i progetti.",
-    "detailError": "Non e' stato possibile caricare il progetto.",
+    "error": "Non è stato possibile caricare i progetti.",
+    "detailError": "Non è stato possibile caricare il progetto.",
     "emptyTitle": "Nessun progetto",
     "emptyDesc": "Non partecipi ad alcun progetto in corso.",
     "count": "{{count}} progetti totali",
@@ -789,7 +789,7 @@
   "recruiting": {
     "title": "Selezione",
     "description": "Il ciclo di selezione: richieste di personale, annunci, candidati e candidature. Una richiesta copre un posto dell'organigramma.",
-    "error": "Non e' stato possibile caricare il recruiting.",
+    "error": "Non è stato possibile caricare il recruiting.",
     "summary": {
       "requisitions": "Richieste aperte",
       "postings": "Annunci pubblicati",
@@ -802,7 +802,7 @@
       "moved": "Candidatura spostata in {{stage}}",
       "moveError": "Spostamento rifiutato dal server.",
       "emptyTitle": "Nessuna candidatura",
-      "emptyDesc": "Registra un candidato e candidalo a un annuncio: comparira' qui come carta.",
+      "emptyDesc": "Registra un candidato e candidalo a un annuncio: comparirà qui come carta.",
       "readOnly": "Puoi consultare la tavola, ma spostare una candidatura spetta a chi gestisce i candidati."
     },
     "stage": {
@@ -827,7 +827,7 @@
       "REPLACEMENT": "Sostituzione",
       "GROWTH": "Crescita",
       "TEMPORARY": "Temporanea",
-      "INTERNAL_MOBILITY": "Mobilita' interna"
+      "INTERNAL_MOBILITY": "Mobilità interna"
     },
     "postingStatus": {
       "DRAFT": "Bozza",
@@ -869,8 +869,8 @@
       "NO_SHOW": "Assente"
     },
     "recommendation": {
-      "STRONG_YES": "Si', convinto",
-      "YES": "Si'",
+      "STRONG_YES": "Sì, convinto",
+      "YES": "Sì",
       "NEUTRAL": "Neutro",
       "NO": "No",
       "STRONG_NO": "No, convinto"
@@ -895,7 +895,7 @@
       "status": "Stato",
       "requisition": "Richiesta",
       "title": "Titolo",
-      "visibility": "Visibilita'",
+      "visibility": "Visibilità",
       "location": "Sede",
       "expiresOn": "Scadenza",
       "description": "Descrizione",
@@ -958,7 +958,7 @@
     },
     "application": {
       "title": "Candidatura",
-      "error": "Non e' stato possibile caricare la candidatura.",
+      "error": "Non è stato possibile caricare la candidatura.",
       "backToPipeline": "← Fasi della selezione",
       "stageTitle": "Stadio della candidatura",
       "moveTo": "Porta a",
@@ -972,7 +972,7 @@
       "noInterviews": "Nessun colloquio ancora.",
       "submitFeedback": "Valuta",
       "feedbackCreated": "Valutazione registrata.",
-      "feedbackError": "Valutazione rifiutata dal server (il colloquio si e' svolto?).",
+      "feedbackError": "Valutazione rifiutata dal server (il colloquio si è svolto?).",
       "offerTitle": "Offerta",
       "createOffer": "Prepara l'offerta",
       "offerCreated": "Offerta preparata.",

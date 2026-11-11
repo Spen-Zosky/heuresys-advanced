@@ -20,11 +20,11 @@
 -- 1. Enterprise size bands
 -- -----------------------------------------------------------------------------
 INSERT INTO sys.sys_enterprise_size_bands (enterprise_size_band_code, enterprise_size_band_name, enterprise_size_band_min_employees, enterprise_size_band_max_employees) VALUES
-  ('XS', 'Extra Small', 1,    9),
-  ('S',  'Small',       10,   49),
-  ('M',  'Medium',      50,   249),
-  ('L',  'Large',       250,  999),
-  ('XL', 'Extra Large', 1000, NULL)
+  ('XS', 'Molto piccola', 1,    9),
+  ('S',  'Piccola',      10,   49),
+  ('M',  'Media',        50,   249),
+  ('L',  'Grande',       250,  999),
+  ('XL', 'Molto grande', 1000, NULL)
 ON CONFLICT (enterprise_size_band_code) DO NOTHING;
 
 -- -----------------------------------------------------------------------------

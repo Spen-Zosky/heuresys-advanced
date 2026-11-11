@@ -669,6 +669,25 @@
       "BLUEPRINT_VARIANT": "Blueprint variant",
       "SUCCESSION_POOL": "Succession pool",
       "GENERIC": "Other"
+    },
+    "kpiUnit": {
+      "count": "count",
+      "hours": "hours",
+      "days": "days",
+      "months": "months",
+      "minutes": "minutes",
+      "percent": "%",
+      "percentage": "%",
+      "pct": "%",
+      "score": "score",
+      "ratio": "ratio",
+      "currency": "currency",
+      "EUR": "euro",
+      "fte": "full-time equivalents",
+      "FTE": "full-time equivalents",
+      "index": "index",
+      "rate": "rate",
+      "number": "number"
     }
   },
   "masked": "withheld for your profile",

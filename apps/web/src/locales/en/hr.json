@@ -108,6 +108,10 @@
       "forbidden": "You do not have permission for this operation.",
       "duplicate": "A KPI with this code already exists.",
       "readOnly": "You do not have permission to edit this KPI."
+    },
+    "tabs": {
+      "catalogue": "Indicators",
+      "metrology": "Measurement methods"
     }
   },
   "goals": {

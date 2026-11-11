@@ -12,6 +12,7 @@ import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
 import { useEnumLabel, type EnumLabelFn } from "@/lib/enum-labels";
 import { KpiMetrologyPanel } from "@/components/kpi-metrology-panel";
+import { SchedePagina } from "@/components/schede-pagina";
 import { KpiCreator, KpiEditor } from "./_components/kpi-forms";
 
 function buildColumns(
@@ -20,9 +21,10 @@ function buildColumns(
   onEdit: (id: string) => void,
 ): DataColumn<KpiDefinition>[] {
   return [
-    { header: t("shared.code"), cell: (k) => <span className="font-mono text-xs">{k.code}</span> },
     { header: t("shared.name"), cell: (k) => <span className="font-medium text-foreground">{k.name}</span> },
-    { header: t("kpis.cols.unit"), cell: (k) => <span className="text-xs text-muted-foreground">{k.unit ?? "—"}</span> },
+    // R2/C1: il codice non è la prima colonna né il dato da leggere; resta nel dettaglio della riga.
+    { header: t("shared.code"), secondaria: true, cell: (k) => <span className="font-mono text-xs" data-grezzo="">{k.code}</span> },
+    { header: t("kpis.cols.unit"), cell: (k) => <span className="text-xs text-muted-foreground">{k.unit ? enumLabel("kpiUnit", k.unit) : "—"}</span> },
     { header: t("kpis.cols.polarity"), cell: (k) => <span className="text-xs text-muted-foreground">{enumLabel("kpiPolarity", k.polarity)}</span> },
     {
       header: t("shared.scope"),
@@ -103,8 +105,11 @@ export default function KpisCataloguePage() {
       emptyDescription={t("kpis.emptyDescription")}
       caption={t("kpis.caption")}
     >
-      {/* #31 (S1018): metrology — assessment methods + weighting rules catalogs */}
-      <KpiMetrologyPanel />
+      {/* C5: catalogo e metrologia in due schede, invece di una pagina lunga. */}
+      <SchedePagina
+        schede={[
+          { id: "catalogo", titolo: t("kpis.tabs.catalogue"), contenuto: (
+      <div className="space-y-4">
       <div className="max-w-sm">
         <label htmlFor="kpis-search" className="mb-1 block text-sm font-medium text-foreground">
           {t("kpis.form.search")}
@@ -119,6 +124,12 @@ export default function KpisCataloguePage() {
       </div>
       {/* #43: il catalogo si LEGGEVA soltanto; qui si definisce e si corregge. */}
       <KpiCreator />
+      </div>
+          ) },
+          // #31 (S1018): metrology — assessment methods + weighting rules catalogs
+          { id: "metrologia", titolo: t("kpis.tabs.metrology"), contenuto: <KpiMetrologyPanel /> },
+        ]}
+      />
       {editingId && <KpiEditor kpiId={editingId} onClose={() => setEditingId(null)} />}
     </DataTablePanel>
   );

@@ -108,6 +108,10 @@
       "forbidden": "Non hai i permessi per questa operazione.",
       "duplicate": "Esiste già un indicatore con questo codice.",
       "readOnly": "Non hai i permessi per modificare questo indicatore."
+    },
+    "tabs": {
+      "catalogue": "Indicatori",
+      "metrology": "Metodi di misura"
     }
   },
   "goals": {

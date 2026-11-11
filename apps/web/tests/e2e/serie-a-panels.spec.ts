@@ -10,7 +10,7 @@ test.describe("Serie-A panels (#30, #31)", () => {
   test.use({ storageState: storageStateFor("tenantAdmin") });
 
   test("#31 KPI metrology panel shows the assessment-method + weighting-rule catalogs", async ({ page }) => {
-    await page.goto("/kpis");
+    await page.goto("/kpis?scheda=metrologia");
     await expect(page.getByTestId("kpis-page")).toBeVisible();
     await expect(page.getByTestId("kpi-metrology")).toBeVisible({ timeout: 15_000 });
     // The 5 methods + 3 rules are seeded global catalogs → at least one row each.

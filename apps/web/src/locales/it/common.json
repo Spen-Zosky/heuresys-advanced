@@ -669,6 +669,25 @@
       "BLUEPRINT_VARIANT": "Variante del modello",
       "SUCCESSION_POOL": "Bacino di successione",
       "GENERIC": "Altro"
+    },
+    "kpiUnit": {
+      "count": "numero",
+      "hours": "ore",
+      "days": "giorni",
+      "months": "mesi",
+      "minutes": "minuti",
+      "percent": "%",
+      "percentage": "%",
+      "pct": "%",
+      "score": "punteggio",
+      "ratio": "rapporto",
+      "currency": "valuta",
+      "EUR": "euro",
+      "fte": "persone a tempo pieno",
+      "FTE": "persone a tempo pieno",
+      "index": "indice",
+      "rate": "tasso",
+      "number": "numero"
     }
   },
   "masked": "nascosto per il tuo profilo",

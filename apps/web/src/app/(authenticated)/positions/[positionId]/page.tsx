@@ -13,6 +13,8 @@ import { FieldGrid } from "@/components/detail-panel";
 import { StatusBadge, StatusPill } from "@/components/status-pill";
 import { MaskedCell, isMasked } from "@/components/masked-cell";
 import { PositionEditor } from "./_components/position-editor";
+import { Riferimento } from "@/components/scheda-rapida";
+import { useLeggibile } from "@/lib/leggibile";
 
 interface PositionDetail {
   positionId: string;
@@ -37,6 +39,8 @@ interface PositionDetail {
 
 export default function PositionDetailPage() {
   const { t } = useTranslation("admin");
+  const leggi = useLeggibile();
+  const nome = (id: string) => leggi.persona(id) ?? leggi.testo(id);
   const params = useParams<{ positionId: string }>();
   const positionId = params.positionId;
   const position = useQuery({
@@ -103,12 +107,10 @@ export default function PositionDetailPage() {
           <FieldGrid
             testId="position-fields"
             fields={[
-              { label: t("positions.detail.fields.positionId"), value: p.positionId, mono: true },
-              { label: t("positions.detail.fields.tenantId"), value: p.tenantId, mono: true },
-              { label: t("positions.detail.fields.orgUnit"), value: p.organizationUnitId ?? t("positions.detail.dash"), mono: true },
-              { label: t("positions.detail.fields.jobRole"), value: p.jobRoleId ?? t("positions.detail.dash"), mono: true },
-              { label: t("positions.detail.fields.owner"), value: isMasked(p, "ownerUserId") ? <MaskedCell /> : (p.ownerUserId ?? t("positions.detail.dash")), mono: true },
-              { label: t("positions.detail.fields.reportsTo"), value: p.reportsToPositionId ?? t("positions.detail.dash"), mono: true },
+              // C2, C12: unità, proprietario e posizione superiore per nome, e ognuno apre la sua scheda
+              { label: t("positions.detail.fields.orgUnit"), value: p.organizationUnitId ? <Riferimento tipo="unita" id={p.organizationUnitId}>{nome(p.organizationUnitId)}</Riferimento> : t("positions.detail.dash") },
+              { label: t("positions.detail.fields.owner"), value: isMasked(p, "ownerUserId") ? <MaskedCell /> : p.ownerUserId ? <Riferimento tipo="persona" id={p.ownerUserId}>{nome(p.ownerUserId)}</Riferimento> : t("positions.detail.dash") },
+              { label: t("positions.detail.fields.reportsTo"), value: p.reportsToPositionId ? <Riferimento tipo="posizione" id={p.reportsToPositionId}>{nome(p.reportsToPositionId)}</Riferimento> : t("positions.detail.dash") },
               { label: t("positions.detail.fields.criticality"), value: <StatusBadge value={p.criticality} /> },
               { label: t("positions.detail.fields.economicWeight"), value: isMasked(p, "economicWeight") ? <MaskedCell /> : (p.economicWeight ?? t("positions.detail.dash")) },
               { label: t("positions.detail.fields.effectiveFrom"), value: p.effectiveFrom ?? t("positions.detail.dash") },

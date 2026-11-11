@@ -362,7 +362,6 @@ export default function UserDetailPage() {
           <FieldGrid
             testId="user-fields"
             fields={[
-              { label: t("users.detail.fields.userId"), value: p.userId, mono: true, testId: "field-userId" },
               { label: s("location"), value: org.location ?? "—" },
               { label: s("employeeStatus"), value: emp?.status ?? "—" },
             ]}

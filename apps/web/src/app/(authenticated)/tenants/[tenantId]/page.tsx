@@ -125,7 +125,6 @@ export default function TenantDetailPage() {
                 { label: t("tenants.detail.fields.industry"), value: tn.tenantIndustryCode ?? t("tenants.detail.dash") },
                 { label: t("tenants.detail.fields.sizeBand"), value: tn.tenantSizeBand ?? t("tenants.detail.dash") },
                 { label: t("tenants.detail.fields.status"), value: <EnumStatusBadge domain="tenantStatus" value={tn.tenantStatus} /> },
-                { label: t("tenants.detail.fields.tenantId"), value: tn.tenantId, mono: true },
                 { label: t("tenants.detail.fields.createdAt"), value: tn.createdAt, mono: true },
               ]}
             />

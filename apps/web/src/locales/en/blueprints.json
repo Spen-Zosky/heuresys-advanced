@@ -195,7 +195,10 @@
       "clear": "Back to the model",
       "saved": "Decision recorded.",
       "cleared": "The decision was removed: the model applies.",
-      "empty": "No model pinned yet: there is nothing to decide on."
+      "empty": "No model pinned yet: there is nothing to decide on.",
+      "preparedByAgent": "Prepared by the assistant: check and record it, or change it.",
+      "undoAgent": "Undo the assistant's last step",
+      "agentPending": "Decisions prepared by the assistant and not yet recorded: {{n}}"
     },
     "submit": {
       "action": "Submit for signature",

@@ -24,6 +24,26 @@ NODE_MAJOR="${NODE_MAJOR:-22}"
 
 log() { printf '\n\033[1m=== %s ===\033[0m\n' "$*"; }
 
+# Copia rilasciata (D1, docs/piani/PIANO_turni-advanced-datastore_20261110.md): la produzione gira dal
+# collegamento SERVIZIO_LINK. Tornare indietro e' rimettere il collegamento sulla copia precedente (o su
+# quella data come argomento, una cartella) e riavviare: niente checkout, niente build.
+SERVIZIO_LINK="${SERVIZIO_LINK:-$HOME/heuresys-servizio/advanced-produzione}"
+if [ -L "$SERVIZIO_LINK" ]; then
+  ATTUALE="$(readlink -f "$SERVIZIO_LINK")"
+  DEST="${1:-$(cat "$ATTUALE/.rilascio/precedente" 2>/dev/null || true)}"
+  [ -n "$DEST" ] && [ -d "$DEST" ] || { echo "ERROR: nessuna copia precedente registrata in $ATTUALE/.rilascio/precedente; passa la cartella" >&2; exit 1; }
+  log "rollback: $SERVIZIO_LINK $ATTUALE -> $DEST"
+  bash "$ATTUALE/scripts/rilascio-copia.sh" punta "$SERVIZIO_LINK" "$DEST"
+  sudo systemctl restart heuresys-advanced-api.service; sleep 4
+  sudo systemctl restart heuresys-advanced-web.service
+  systemctl is-enabled --quiet heuresys-agent-gateway.service 2>/dev/null && sudo systemctl restart heuresys-agent-gateway.service
+  if [ -f "$DEST/.rilascio/commit" ]; then cp "$DEST/.rilascio/commit" "$DEST/pg_dump_snapshots/LAST_GOOD_SHA"
+  else git -C "$DEST" rev-parse HEAD > "$DEST/pg_dump_snapshots/LAST_GOOD_SHA"; fi
+  curl -fsS --retry 45 --retry-delay 1 --retry-connrefused --retry-all-errors -m 8 "http://localhost:$API_PORT/readyz" >/dev/null \
+    && echo "  api /readyz OK" || { echo "  api /readyz FAILED" >&2; exit 1; }
+  exit 0
+fi
+
 SHA="${1:-}"
 if [ -z "$SHA" ]; then
   SHA="$(cat "$REPO_DIR/pg_dump_snapshots/LAST_GOOD_SHA" 2>/dev/null || true)"

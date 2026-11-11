@@ -15,7 +15,7 @@
  *       («come dice il modello»), non lascia una cella vuota che si legge
  *       «escluso».
  */
-import { use, useMemo, useState } from "react";
+import { use, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { PageHeader } from "@/components/intestazione-pagina";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -36,6 +36,16 @@ import { apiFetch } from "@/lib/api/fetch";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { StatusPill } from "@/components/status-pill";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { useVistaAgente, type VistaDichiarata } from "@/lib/agente/contesto";
+import {
+  BOZZA_VUOTA,
+  COMANDI_FASCICOLO,
+  eseguiSulFascicolo,
+  salvata,
+  vistaDelFascicolo,
+  type DecisionePreparata,
+  type StatoBozza,
+} from "@/lib/agente/bozza-oggetto";
 
 const INCLUSIONI = ["IN", "PARTIAL", "OUT"] as const;
 
@@ -467,6 +477,44 @@ function PassoProcessi({
     enabled: Boolean(versione.variantVersionId),
   });
 
+  // Blocco I5: l'assistente prepara qui le decisioni, una per comando, e ogni passo si annulla.
+  // Niente arriva al database finché la persona non registra la riga.
+  const [bozza, setBozza] = useState<StatoBozza>(BOZZA_VUOTA);
+  const bozzaRef = useRef(bozza);
+  useEffect(() => {
+    bozzaRef.current = bozza;
+  }, [bozza]);
+  const elenco = useMemo(
+    () =>
+      (processi.data?.items ?? []).map((p) => ({
+        processId: p.processId,
+        processCode: p.processCode,
+        processName: p.processName,
+        inclusion: p.inclusion,
+      })),
+    [processi.data],
+  );
+  const dichiarata = useMemo<VistaDichiarata | null>(
+    () =>
+      versione.variantVersionId && processi.data
+        ? {
+            vista: vistaDelFascicolo(elenco, bozza, modificabile),
+            comandi: COMANDI_FASCICOLO,
+            esegui: (nome, argomenti) => {
+              const r = eseguiSulFascicolo(bozzaRef.current, nome, argomenti, { processi: elenco, modificabile });
+              if (r.stato) {
+                bozzaRef.current = r.stato;
+                setBozza(r.stato);
+              }
+              return r.esito;
+            },
+          }
+        : null,
+    [versione.variantVersionId, processi.data, elenco, bozza, modificabile],
+  );
+  useVistaAgente(dichiarata);
+  const preparate = Object.keys(bozza.bozze).length;
+
   return (
     <section className="rounded-lg border border-border bg-card p-4" data-testid="passo-processi">
       <h2 className="text-sm font-semibold text-foreground">{t("dossier.steps.processes")}</h2>
@@ -476,17 +524,41 @@ function PassoProcessi({
       ) : processi.isLoading ? (
         <StatoCaricamento />
       ) : (
-        <ul className="mt-3 space-y-3">
-          {(processi.data?.items ?? []).map((p) => (
-            <RigaProcesso
-              key={p.processId}
-              base={base}
-              processo={p}
-              modificabile={modificabile}
-              onCambiato={() => qc.invalidateQueries({ queryKey: ["processi", base] })}
-            />
-          ))}
-        </ul>
+        <>
+          {preparate > 0 || bozza.passi.length > 0 ? (
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-md border border-dashed border-border p-2 text-sm" data-testid="bozza-agente">
+              <span className="text-muted-foreground">{t("dossier.decisions.agentPending", { n: preparate })}</span>
+              {bozza.passi.length > 0 ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  data-testid="bozza-agente-annulla"
+                  onClick={() => {
+                    const r = eseguiSulFascicolo(bozzaRef.current, "fascicolo.annulla", {}, { processi: elenco, modificabile });
+                    if (r.stato) setBozza(r.stato);
+                  }}
+                >
+                  {t("dossier.decisions.undoAgent")}
+                </Button>
+              ) : null}
+            </div>
+          ) : null}
+          <ul className="mt-3 space-y-3">
+            {(processi.data?.items ?? []).map((p) => (
+              <RigaProcesso
+                key={p.processId}
+                base={base}
+                processo={p}
+                modificabile={modificabile}
+                preparata={bozza.bozze[p.processId]}
+                // La bozza esce dopo la rilettura, così la riga riparte dai valori registrati.
+                onCambiato={() =>
+                  void qc.invalidateQueries({ queryKey: ["processi", base] }).then(() => setBozza((b) => salvata(b, p.processId)))
+                }
+              />
+            ))}
+          </ul>
+        </>
       )}
     </section>
   );
@@ -496,16 +568,27 @@ function RigaProcesso({
   base,
   processo,
   modificabile,
+  preparata,
   onCambiato,
 }: {
   base: string;
   processo: ProcessDecision;
   modificabile: boolean;
+  /** La decisione preparata dall'assistente e non ancora registrata (blocco I5). */
+  preparata?: DecisionePreparata | undefined;
   onCambiato: () => void;
 }) {
   const { t } = useTranslation("blueprints");
   const [inclusion, setInclusion] = useState(processo.inclusion ?? "IN");
   const [rationale, setRationale] = useState(processo.rationale ?? "");
+  // Quando l'assistente prepara o un annulla toglie, i campi della riga lo seguono (stato
+  // aggiustato durante il disegno, come vuole React, invece di un effetto).
+  const [seguita, setSeguita] = useState(preparata);
+  if (seguita !== preparata) {
+    setSeguita(preparata);
+    setInclusion(preparata?.inclusion ?? processo.inclusion ?? "IN");
+    setRationale(preparata?.rationale ?? processo.rationale ?? "");
+  }
 
   const salva = useMutation({
     mutationFn: () =>
@@ -541,6 +624,11 @@ function RigaProcesso({
         )}
       </div>
 
+      {preparata ? (
+        <p className="mt-1 text-xs text-muted-foreground" data-testid="processo-bozza-agente">
+          {t("dossier.decisions.preparedByAgent")}
+        </p>
+      ) : null}
       {modificabile ? (
         <div className="mt-2 flex flex-wrap items-end gap-2">
           <select

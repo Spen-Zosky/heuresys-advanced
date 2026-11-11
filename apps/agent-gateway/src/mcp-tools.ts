@@ -190,7 +190,7 @@ export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOpera
       // ricontrolla in comandi-vista.ts. L'esito torna dalla pagina: si riferisce quello, non altro.
       tool(
         "hrx_vista_comanda",
-        "Comanda la vista della pagina aperta dalla persona (cerca, filtra, ordina, azzera): cambia solo ciò che si vede, mai i dati. Usa solo i comandi elencati nel blocco <pagina>. Restituisce l'esito riferito dalla pagina (ok, parziale, rifiutata, non_confermata): racconta alla persona solo ciò che l'esito dice.",
+        "Comanda la pagina aperta dalla persona: i comandi «mostra» (cerca, filtra, ordina, azzera) cambiano solo ciò che si vede; i comandi «lavora» preparano sulla pagina un passo annullabile dell'oggetto che la persona costruisce, e lo registra lei. Nessuno cambia i dati. Usa solo i comandi elencati nel blocco <pagina>. Restituisce l'esito riferito dalla pagina (ok, parziale, rifiutata, non_confermata): racconta alla persona solo ciò che l'esito dice.",
         { nome: z.string(), argomenti: z.object({}).catchall(z.any()).optional() },
         async (a: { nome: string; argomenti?: Record<string, unknown> }) =>
           ok(vista ? await vista.comanda(a.nome, a.argomenti ?? {}) : { stato: "rifiutata", dettaglio: "Nessuna pagina collegata a questa conversazione." }),
@@ -222,6 +222,16 @@ export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOpera
       rdQ("hrx_predictions_list", "Predizioni dei modelli (rischio di uscita, prontezza, …)", "/predictions"),
       rdSotto("hrx_predictions_get", "Una predizione", "/predictions", ""),
       rdSotto("hrx_org_unit_processes_list", "I processi di un'unità organizzativa del tenant (id dell'unità)", "/organization-unit-processes/by-ou", ""),
+      // --- I3, piano dell'assistente nelle interfacce: le pagine del menu che l'assistente non leggeva ---
+      // (docs/kb/tools/check_letture_agente.py). Stessi permessi della persona, nessuna scrittura.
+      rdQ("hrx_capability_composition", "Composizione delle capacità del tenant (Dashboard Org Director)", "/capability/composition"),
+      rdQ("hrx_capability_essential_ranking", "Le capacità essenziali in ordine di peso", "/capability/composition/essential-ranking"),
+      rdQ("hrx_capability_vrio", "Analisi VRIO delle capacità (valore, rarità, inimitabilità, organizzazione)", "/capability/composition/vrio"),
+      rdQ("hrx_capability_maturity", "Maturità delle capacità per unità organizzativa", "/capability/maturity"),
+      rdQ("hrx_matching_my_positions", "Le posizioni più vicine al profilo della persona", "/matching/me/positions"),
+      rdQ("hrx_matching_my_job_roles", "I ruoli più vicini al profilo della persona", "/matching/me/job-roles"),
+      rdQ("hrx_matching_my_occupations", "Le professioni (ESCO) più vicine al profilo della persona", "/matching/me/occupations"),
+      rdQ("hrx_tenant_consolidations_list", "Le consolidazioni del tenant e il loro stato", "/tenant-consolidations"),
       // --- writes (gated by canUseTool) ---
       // user OR service principal:
       up("hrx_org_units_upsert", "/organization-units"), // organization_unit:{create,update}

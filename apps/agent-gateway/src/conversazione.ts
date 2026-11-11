@@ -100,7 +100,10 @@ export function fineDi(evento: unknown): { risultato?: string; esito: StatoAttiv
 
 /** Il titolo di una conversazione nuova: l'inizio della prima richiesta, su una riga. */
 export function titoloDa(prompt: string): string {
-  const riga = prompt.replace(/\s+/g, " ").trim();
+  // La finestra antepone il contesto («Contesto: Pagina …» su una riga, poi una riga vuota):
+  // il titolo è la domanda della persona, non il contesto.
+  const m = /^[^\n:]{1,40}: [^\n]*\n\n([\s\S]+)$/.exec(prompt);
+  const riga = (m?.[1] ?? prompt).replace(/\s+/g, " ").trim();
   return riga.length > 80 ? `${riga.slice(0, 79)}…` : riga || "Conversazione";
 }
 

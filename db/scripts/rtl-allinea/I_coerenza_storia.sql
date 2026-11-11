@@ -32,7 +32,7 @@ SELECT gen_random_uuid() id, ult.u, ult.t, ult.nv old_v, jsonb_build_object('par
 FROM ult JOIN sys.sys_organization_units o ON o.organization_unit_id=ult.u JOIN sys.sys_organization_units pa ON pa.organization_unit_id=o.organization_unit_parent_id
 WHERE ult.nv->>'parent_name' IS DISTINCT FROM pa.organization_unit_name;
 INSERT INTO sys.sys_organization_unit_history (organization_unit_history_id, organization_unit_history_unit_id, organization_unit_history_tenant_id, organization_unit_history_change_type, organization_unit_history_old_value, organization_unit_history_new_value, organization_unit_history_effective_at, organization_unit_history_actor_user_id, organization_unit_history_notes)
-SELECT id, u, t, 'MOVED', old_v, new_v, now(), (SELECT organization_unit_history_actor_user_id FROM sys.sys_organization_unit_history WHERE organization_unit_history_tenant_id=t AND organization_unit_history_actor_user_id IS NOT NULL GROUP BY 1 ORDER BY count(*) DESC LIMIT 1), 'Soppressione del livello di Area: la filiale riporta alla Divisione Retail Banking (decisione 2026-11-10)' FROM nuovo;
+SELECT id, u, t, 'MOVED', old_v, new_v, timestamptz '2026-08-04 23:59:59+02', (SELECT organization_unit_history_actor_user_id FROM sys.sys_organization_unit_history WHERE organization_unit_history_tenant_id=t AND organization_unit_history_actor_user_id IS NOT NULL GROUP BY 1 ORDER BY count(*) DESC LIMIT 1), 'Soppressione del livello di Area: la filiale riporta alla Divisione Retail Banking (decisione del 2026-11-10, registrata nel riordino del 2026-08-04)' FROM nuovo;
 INSERT INTO staging.rtl_allinea_org_undo (tabella, chiave, riga) SELECT 'ins:sys_organization_unit_history', id, '{}'::jsonb FROM nuovo ON CONFLICT DO NOTHING;
 -- nomi tradotti: la storia delle unita' porta gli stessi nomi di oggi (C6c)
 INSERT INTO staging.rtl_allinea_org_undo (tabella, chiave, riga)
@@ -42,5 +42,7 @@ UPDATE sys.sys_organization_unit_history SET
   organization_unit_history_old_value = replace(replace(organization_unit_history_old_value::text,'Risk & Compliance','Rischi e Compliance'),'Direzione Risk Management','Direzione Gestione dei Rischi')::jsonb,
   organization_unit_history_new_value = replace(replace(organization_unit_history_new_value::text,'Risk & Compliance','Rischi e Compliance'),'Direzione Risk Management','Direzione Gestione dei Rischi')::jsonb
  WHERE organization_unit_history_old_value::text ~ '(Risk & Compliance|Direzione Risk Management)' OR organization_unit_history_new_value::text ~ '(Risk & Compliance|Direzione Risk Management)';
+UPDATE sys.sys_organization_unit_history SET organization_unit_history_effective_at = timestamptz '2026-08-04 23:59:59+02', organization_unit_history_notes = replace(organization_unit_history_notes,'(decisione 2026-11-10)','(decisione del 2026-11-10, registrata nel riordino del 2026-08-04)')
+ WHERE organization_unit_history_notes LIKE 'Soppressione del livello di Area%' AND organization_unit_history_effective_at <> timestamptz '2026-08-04 23:59:59+02';
 COMMIT;
 SELECT 'I ok' esito, (SELECT count(*) FROM staging.rtl_allinea_org_undo WHERE tabella IN ('sys_succession_pools','sys_organization_unit_history','ins:sys_organization_unit_history')) nel_giornale;

@@ -349,7 +349,7 @@ export const LENTI: Lente[] = [
             azione: { etichetta: "Approvazioni", href: "/approvals" },
           },
   },
-  /* ---------------- accessi, processi, contenuti, segnalazioni, progetti, contatti ----------------
+  /* ---------------- accessi, processi, contenuti, progetti, contatti ----------------
      Lenti di chi governa il cliente o la piattaforma: contano su tutto il cliente ($2 NULL). */
   {
     chiave: "utenze-senza-ruolo",
@@ -429,24 +429,7 @@ export const LENTI: Lente[] = [
             azione: { etichetta: "Vedi i documenti", href: "/content" },
           },
   },
-  {
-    chiave: "segnalazioni-aperte",
-    aree: ["segnalazioni"],
-    sql: `SELECT count(*) FILTER (WHERE w.created_at < now() - interval '30 days')::int AS valore,
-                  count(*)::int AS prima
-             FROM sys.sys_whistleblowing_reports w
-            WHERE w.whistleblowing_report_status IN ('NEW','UNDER_REVIEW','MORE_INFO_REQUESTED') AND $2::uuid[] IS NULL
-              AND ($1::uuid[] IS NULL OR w.whistleblowing_report_tenant_id = ANY($1::uuid[]))`,
-    leggi: (vecchie, aperte) =>
-      !aperte
-        ? { tono: "positivo", titolo: "Nessuna segnalazione aperta", dettaglio: "Ogni segnalazione ricevuta ha avuto un esito.", azione: null }
-        : {
-            tono: vecchie ? "rischio" : "informazione",
-            titolo: `${n(aperte)} ${plurale(aperte, "segnalazione aperta", "segnalazioni aperte")}, ${n(vecchie)} da oltre 30 giorni`,
-            dettaglio: "La legge chiede un riscontro a chi segnala entro tre mesi: le più vecchie vanno chiuse per prime.",
-            azione: { etichetta: "Apri la console", href: "/whistleblowing-console" },
-          },
-  },
+  // Le segnalazioni restano fuori dal quadro: il loro isolamento è assoluto (#99 F4), solo la custodia le legge.
   {
     chiave: "progetti-oltre-la-scadenza",
     aree: ["progetti"],

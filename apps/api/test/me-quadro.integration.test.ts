@@ -52,7 +52,7 @@ describe("GET /v1/me/quadro", () => {
     // L'attore si costruisce con il solo ruolo USER: il perimetro è sé stesso per definizione
     // (resolveOrgReadScope), qualunque cosa dica l'organigramma della persona nei dati.
     const u = await pool.query<{ user_id: string; tenant_id: string }>(
-      `SELECT u.user_id, u.tenant_id FROM sys.sys_users u WHERE u.user_email = $1`,
+      `SELECT u.user_id, u.user_tenant_id AS tenant_id FROM sys.sys_users u WHERE u.user_email = $1`,
       ["tommaso.fiore@rtl-bank.org"],
     );
     const riga = u.rows[0]!;

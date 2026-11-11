@@ -37,6 +37,7 @@ import { useFormat } from "@/lib/format";
 import { IdentityEditor } from "./_components/identity-editor";
 import { RolesEditor } from "./_components/roles-editor";
 import { chiediConferma } from "@/lib/api/step-up";
+import { Leggibile } from "@/lib/leggibile";
 
 /* --- formattazione: mai una data ISO o un numero nudo davanti a una persona --- */
 // F-1 (piano interfacce, 2026-11-04): la forma comune di `@/lib/format`, nella lingua del portale.
@@ -73,7 +74,7 @@ function MiniTable({ head, rows, empty }: { head: string[]; rows: ReactNode[][];
             ))}
           </tr>
         </thead>
-        <tbody>
+        <tbody><Leggibile>
           {rows.map((r, i) => (
             <tr key={i} className="border-b last:border-0">
               {r.map((c, j) => (
@@ -81,7 +82,7 @@ function MiniTable({ head, rows, empty }: { head: string[]; rows: ReactNode[][];
               ))}
             </tr>
           ))}
-        </tbody>
+        </Leggibile></tbody>
       </table>
     </div>
   );

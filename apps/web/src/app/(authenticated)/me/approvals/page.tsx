@@ -11,6 +11,7 @@ import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pa
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { useFormat } from "@/lib/format";
+import { Leggibile } from "@/lib/leggibile";
 
 /** Le mie approvazioni (S1011 F5.3) — track-only view of the caller's own approval requests. */
 export default function MeApprovalsPage() {
@@ -69,7 +70,7 @@ export default function MeApprovalsPage() {
                     <th className="px-4 py-2">{t("approvals.colCreated")}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border">
+                <tbody className="divide-y divide-border"><Leggibile>
                   {items.map((a, i) => (
                     <tr key={`appr-${i}`} data-testid="me-approvals-row" className="transition-colors hover:bg-muted/60">
                       <td className="px-4 py-2 align-middle font-medium text-foreground">{a.title ?? "—"}</td>
@@ -88,7 +89,7 @@ export default function MeApprovalsPage() {
                       <td className="px-4 py-2 align-middle text-xs text-muted-foreground">{fmt.data(a.createdAt)}</td>
                     </tr>
                   ))}
-                </tbody>
+                </Leggibile></tbody>
               </table>
             </div>
           )}

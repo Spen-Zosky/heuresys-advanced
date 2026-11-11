@@ -14,6 +14,7 @@ import {
   CODE_PATTERN, KEY, POSTING_STATUSES, POSTING_VISIBILITIES,
   usePostings, useRequisitions,
 } from "@/lib/recruiting";
+import { Leggibile } from "@/lib/leggibile";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -165,7 +166,7 @@ export default function PostingsPage() {
                 <th className="px-4 py-2">{t("recruiting.fields.status")}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y divide-border"><Leggibile>
               {items.map((p) => (
                 <tr key={p.postingId} data-testid="posting-row">
                   <td className="px-4 py-2 font-medium" data-testid="posting-row-code">{p.code}</td>
@@ -191,7 +192,7 @@ export default function PostingsPage() {
                   </td>
                 </tr>
               ))}
-            </tbody>
+            </Leggibile></tbody>
           </table>
         </div>
       )}

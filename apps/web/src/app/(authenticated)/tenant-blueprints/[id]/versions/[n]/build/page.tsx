@@ -18,6 +18,7 @@ import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { StatusPill } from "@/components/status-pill";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { useFormat } from "@/lib/format";
+import { Leggibile } from "@/lib/leggibile";
 
 /**
  * #198 Tenant Builder P3, T7 — LA COSTRUZIONE: il piano prima, e la firma dopo.
@@ -227,7 +228,7 @@ export default function TenantBlueprintBuildPage({
                 </th>
               </tr>
             </thead>
-            <tbody>
+            <tbody><Leggibile>
               {righe.map((r) => (
                 <tr key={r.chiave} className="border-t border-border" data-testid={`build-row-${r.chiave}`}>
                   <td className="py-1 text-foreground">{r.etichetta}</td>
@@ -239,7 +240,7 @@ export default function TenantBlueprintBuildPage({
                   </td>
                 </tr>
               ))}
-            </tbody>
+            </Leggibile></tbody>
           </table>
           <p className="mt-2 text-xs text-muted-foreground">
             {t("dossier.build.alreadyThereMeans")}

@@ -41,6 +41,7 @@ import {
 import { useFormat } from "@/lib/format";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
+import { Leggibile } from "@/lib/leggibile";
 
 type RolePermissionItem = RolePermissionsResponse["items"][number];
 
@@ -304,7 +305,7 @@ export function SystemHealthLive() {
               <th className="px-3 py-2.5">{t("health.fleet.lastActivity")}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border">
+          <tbody className="divide-y divide-border"><Leggibile>
             {d.tenantFleet.map((tn) => {
               const st = tenantStatus(tn.status);
               return (
@@ -330,7 +331,7 @@ export function SystemHealthLive() {
                 </tr>
               );
             })}
-          </tbody>
+          </Leggibile></tbody>
         </table>
       </section>
 

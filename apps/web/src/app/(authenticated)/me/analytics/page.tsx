@@ -9,6 +9,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { EChartsCard } from "../../_charts-client";
 import { useFormat } from "@/lib/format";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
+import { Leggibile } from "@/lib/leggibile";
 
 /** Le mie analisi (S1011 F5.1) — own attendance trend + summary KPIs.
  *  #59 F/F5 (ADR-0031): + "Il mio sviluppo" — own computed scores with
@@ -142,7 +143,7 @@ export default function MeAnalyticsPage() {
                               <th className="py-1 font-medium">{t("analytics.development.factorContribution")}</th>
                             </tr>
                           </thead>
-                          <tbody>
+                          <tbody><Leggibile>
                             {dev.data.flightRisk.factors.map((f) => (
                               <tr key={f.feature} className="border-t border-border">
                                 <td className="py-1.5">
@@ -153,7 +154,7 @@ export default function MeAnalyticsPage() {
                                 <td className="py-1.5 tabular-nums">{fmt.numeroFisso(f.contribution, 1)}</td>
                               </tr>
                             ))}
-                          </tbody>
+                          </Leggibile></tbody>
                         </table>
                       </div>
                     </CardContent>

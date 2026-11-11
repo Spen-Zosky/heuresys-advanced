@@ -21,6 +21,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { useFormat } from "@/lib/format";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
+import { Leggibile } from "@/lib/leggibile";
 
 interface MeSkillEvidence {
   userSkillEvidenceId: string;
@@ -83,7 +84,7 @@ export default function MeSkillsPage() {
                 <th className="px-4 py-2">{t("skills.colSource")}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y divide-border"><Leggibile>
               {(possession.data?.items ?? []).map((s: MeSkillPossession) => (
                 <tr key={s.userSkillId} data-testid="me-skill-row" className="transition-colors hover:bg-muted/60">
                   <td className="px-4 py-2 align-middle font-medium text-foreground" title={s.skillCode}>
@@ -104,7 +105,7 @@ export default function MeSkillsPage() {
                   <td className="px-4 py-2 align-middle text-xs text-muted-foreground">{enumLabel("skillSource", s.source)}</td>
                 </tr>
               ))}
-            </tbody>
+            </Leggibile></tbody>
           </table>
         </div>
       )}
@@ -130,7 +131,7 @@ export default function MeSkillsPage() {
                   <th className="px-4 py-2">{t("skills.colDate")}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-y divide-border"><Leggibile>
                 {(evidence.data?.items ?? []).map((s) => (
                   <tr key={s.userSkillEvidenceId} data-testid="me-skill-evidence-row" className="transition-colors hover:bg-muted/60">
                     <td className="px-4 py-2 align-middle text-foreground" title={s.skillCode}>{s.skillName}</td>
@@ -142,7 +143,7 @@ export default function MeSkillsPage() {
                     <td className="px-4 py-2 align-middle text-xs text-muted-foreground">{fmt.data(s.assessedAt)}</td>
                   </tr>
                 ))}
-              </tbody>
+              </Leggibile></tbody>
             </table>
           )}
         </CardContent>

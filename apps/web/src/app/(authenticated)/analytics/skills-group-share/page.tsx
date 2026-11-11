@@ -11,6 +11,7 @@ import type { SkillsGroupShareAnalyticsResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { useFormat } from "@/lib/format";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
+import { Leggibile } from "@/lib/leggibile";
 
 export default function SkillsGroupShareAnalyticsPage() {
   const { t } = useTranslation("analytics");
@@ -130,7 +131,7 @@ export default function SkillsGroupShareAnalyticsPage() {
                     <th className="px-4 py-2 text-right font-medium">{t("skillsGroupShare.colShare")}</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody><Leggibile>
                   {d.groups.map((g) => (
                     <tr key={g.groupUri} className="border-b border-border/50 last:border-0">
                       <td className="px-4 py-2 font-mono text-xs text-foreground">{g.groupCode}</td>
@@ -140,7 +141,7 @@ export default function SkillsGroupShareAnalyticsPage() {
                       </td>
                     </tr>
                   ))}
-                </tbody>
+                </Leggibile></tbody>
               </table>
             </div>
           </div>

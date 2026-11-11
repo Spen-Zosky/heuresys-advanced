@@ -35,6 +35,7 @@ import { isApiError } from "@/lib/api/errors";
 import { useCurrentUser, useCurrentUserPermissions } from "@/lib/api/auth";
 import { useFormat } from "@/lib/format";
 import { codiceInParole } from "@/lib/enum-labels";
+import { Leggibile } from "@/lib/leggibile";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -209,7 +210,7 @@ export function RolesEditor({ userId }: { userId: string }) {
                   {canAssign && <th className="py-2 pr-4 font-medium">{t("common:table.actions")}</th>}
                 </tr>
               </thead>
-              <tbody>
+              <tbody><Leggibile>
                 {items.map((g) => (
                   <tr key={g.grantId} className="border-b last:border-0" data-testid={`user-role-${g.roleCode}`}>
                     <td className="py-2 pr-4 align-top" title={g.roleCode}>{t(`shell:roles.${g.roleCode}`, { defaultValue: codiceInParole(g.roleCode) })}</td>
@@ -262,7 +263,7 @@ export function RolesEditor({ userId }: { userId: string }) {
                     )}
                   </tr>
                 ))}
-              </tbody>
+              </Leggibile></tbody>
             </table>
           </div>
         )}

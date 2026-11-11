@@ -15,7 +15,7 @@
  * I rami (secondo e terzo livello) vengono da `lib/menu-albero.ts`; si aprono e si chiudono con
  * un clic, ricordano lo stato, e il ramo che contiene la pagina attiva è sempre aperto.
  */
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useSyncExternalStore, type ReactNode } from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -23,6 +23,22 @@ import type { Ramo, VoceMenu } from "@/lib/menu-albero";
 
 const CHIAVE_RAMI = "hrx-menu-rami";
 const CHIAVE_SCORRIMENTO = "hrx-menu-scorrimento";
+
+/* Lo stato dei rami vive nella memoria del browser; il server non la conosce e rende tutto
+   aperto. `useSyncExternalStore` con un'istantanea del server diversa da quella del client è il
+   modo che React prevede per non creare una discordanza d'idratazione (errore #418). */
+const ascoltatori = new Set<() => void>();
+function iscrivi(f: () => void) {
+  ascoltatori.add(f);
+  return () => ascoltatori.delete(f);
+}
+function memoriaRami(): string {
+  try {
+    return window.localStorage.getItem(CHIAVE_RAMI) || "{}";
+  } catch {
+    return "{}";
+  }
+}
 
 function leggiRami(): Record<string, boolean> {
   try {
@@ -62,19 +78,23 @@ function RamoMenu({
   const { t } = useTranslation();
   const id = `${idPadre}/${ramo.chiave}`;
   const dentro = contiene(ramo, attiva);
-  // la barra si rende solo nel browser, dopo l'accesso: la memoria si legge al primo render
-  const [aperto, setAperto] = useState(() => typeof window === "undefined" || leggiRami()[id] !== false);
-  const cambia = () => {
-    const nuovo = !aperto;
-    setAperto(nuovo);
+  const memoria = useSyncExternalStore(iscrivi, memoriaRami, () => "{}");
+  let aperto = true;
+  try {
+    aperto = (JSON.parse(memoria) as Record<string, boolean>)[id] !== false;
+  } catch {
+    /* memoria illeggibile: aperto */
+  }
+  const cambia = useCallback(() => {
     try {
       const s = leggiRami();
-      s[id] = nuovo;
+      s[id] = !aperto;
       window.localStorage.setItem(CHIAVE_RAMI, JSON.stringify(s));
     } catch {
       /* il browser può negare la memoria: si resta col comportamento predefinito */
     }
-  };
+    ascoltatori.forEach((f) => f());
+  }, [id, aperto]);
   const visibile = aperto || dentro;
   return (
     <li>
@@ -121,32 +141,40 @@ export function CorpoGruppo(props: { id: string; albero: Ramo; attiva: string | 
  * Tiene la posizione di scorrimento della barra: la salva mentre si scorre, la rimette dopo un
  * ricaricamento, e porta in vista la voce attiva se non si vede.
  */
-export function useScorrimentoMenu(attiva: string | null) {
+export function useScorrimentoMenu(attiva: string | null, pronto = true) {
+  // La barra esiste solo quando la sessione e il registro sono caricati: prima il layout mostra
+  // «Caricamento». Per questo l'ascolto dipende da `pronto`: con una dipendenza vuota l'effetto
+  // girava sul layout di attesa, non trovava la barra e non si agganciava più (C6, giro 11/11).
   useEffect(() => {
+    if (!pronto) return;
     const nav = document.querySelector<HTMLElement>("aside nav");
     if (!nav) return;
-    try {
-      const salvato = Number(window.sessionStorage.getItem(CHIAVE_SCORRIMENTO));
-      if (Number.isFinite(salvato) && salvato > 0 && nav.scrollTop === 0) nav.scrollTop = salvato;
-    } catch {
-      /* niente memoria: si parte dall'alto */
-    }
     const salva = () => {
       try {
         window.sessionStorage.setItem(CHIAVE_SCORRIMENTO, String(nav.scrollTop));
       } catch {
-        /* idem */
+        /* niente memoria: si parte dall'alto */
       }
     };
     nav.addEventListener("scroll", salva, { passive: true });
     return () => nav.removeEventListener("scroll", salva);
-  }, []);
+  }, [pronto]);
   useEffect(() => {
+    if (!pronto) return;
     const nav = document.querySelector<HTMLElement>("aside nav");
-    const voce = nav?.querySelector<HTMLElement>("[data-menu-attiva]");
-    if (!nav || !voce) return;
+    if (!nav) return;
+    // A ogni cambio di pagina si rimette la barra dove l'aveva lasciata la persona: se nel
+    // frattempo è stata ricreata, ripartirebbe dall'alto.
+    try {
+      const salvato = Number(window.sessionStorage.getItem(CHIAVE_SCORRIMENTO));
+      if (Number.isFinite(salvato) && salvato > 0 && Math.abs(nav.scrollTop - salvato) > 1) nav.scrollTop = salvato;
+    } catch {
+      /* idem */
+    }
+    const voce = nav.querySelector<HTMLElement>("[data-menu-attiva]");
+    if (!voce) return;
     const n = nav.getBoundingClientRect();
     const v = voce.getBoundingClientRect();
-    if (v.top < n.top || v.bottom > n.bottom) voce.scrollIntoView({ block: "center" });
-  }, [attiva]);
+    if (v.top < n.top || v.bottom > n.bottom) voce.scrollIntoView({ block: "nearest" });
+  }, [attiva, pronto]);
 }

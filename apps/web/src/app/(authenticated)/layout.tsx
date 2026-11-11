@@ -202,7 +202,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
   const ifaces = useMyInterfaces();
   const logout = useLogout();
   const updatePrefs = useUpdateMyPreferences();
-  useScorrimentoMenu(pathname);
+  useScorrimentoMenu(pathname, !!me.data && !!ifaces.data);
 
   if (me.isLoading || ifaces.isLoading) {
     return (

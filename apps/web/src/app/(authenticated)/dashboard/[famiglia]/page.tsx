@@ -40,6 +40,7 @@ import type {
 } from "@heuresys/shared";
 import { apiFetch } from "../../../../lib/api/fetch";
 import { EntityTable } from "../../../../components/data-table-panel";
+import { testoLeggibile } from "../../../../lib/i18n";
 
 /** Le viste con valori si disegnano per forma; le altre dicono perché non li hanno. */
 function Vista({ v, t }: { v: DashboardBlockData; t: (k: string) => string }) {
@@ -90,7 +91,7 @@ function Vista({ v, t }: { v: DashboardBlockData; t: (k: string) => string }) {
           ) : (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {v.content.counters.map((c) => (
-                <StatsCard key={c.key} label={c.label} value={c.value} />
+                <StatsCard key={c.key} label={testoLeggibile(c.label)} value={c.value} />
               ))}
             </div>
           )}
@@ -142,8 +143,8 @@ function Vista({ v, t }: { v: DashboardBlockData; t: (k: string) => string }) {
             rowKey={(r) => r.id}
             caption={v.name}
             columns={[
-              { header: t("dashboard.famiglie.colonnaVoce"), cell: (r) => r.label },
-              { header: t("dashboard.famiglie.colonnaDettaglio"), cell: (r) => r.detail ?? "—" },
+              { header: t("dashboard.famiglie.colonnaVoce"), cell: (r) => testoLeggibile(r.label) },
+              { header: t("dashboard.famiglie.colonnaDettaglio"), cell: (r) => (r.detail ? testoLeggibile(r.detail) : "—") },
               { header: t("dashboard.famiglie.colonnaValore"), align: "right", cell: (r) => (r.value === null ? "—" : r.value.toLocaleString(lingua)) },
             ]}
           />

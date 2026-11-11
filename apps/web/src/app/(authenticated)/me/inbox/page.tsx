@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { apiFetch } from "@/lib/api/fetch";
 import { useInboxStream } from "@/lib/use-inbox-stream";
+import { testoLeggibile } from "@/lib/i18n";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
@@ -105,7 +106,8 @@ export default function MeInboxPage() {
       icon: v.icon,
       tone: v.tone,
       title: n.subject,
-      description: n.body ?? undefined,
+      // C1: i testi già scritti dal servizio possono contenere un codice («priorità MODERATE_GAP»)
+      description: n.body ? testoLeggibile(n.body) : undefined,
       meta: `${formatRelativeTime(n.createdAt)} · ${enumLabel("notificationPriority", n.priority)} · ${enumLabel("notificationStatus", n.status)}`,
     };
   });

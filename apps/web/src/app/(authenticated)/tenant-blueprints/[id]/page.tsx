@@ -146,6 +146,7 @@ function PassoIdentita({
   modificabile: boolean;
   onSalvato: () => void;
 }) {
+  const enumLabel = useEnumLabel();
   const { t } = useTranslation("blueprints");
   const qc = useQueryClient();
   const [ricerca, setRicerca] = useState("");
@@ -225,7 +226,7 @@ function PassoIdentita({
             <option value="">—</option>
             {(fasce.data?.items ?? []).map((b) => (
               <option key={b.enterpriseSizeBandId} value={b.enterpriseSizeBandId}>
-                {b.name}
+                {enumLabel("sizeBand", b.code)}
               </option>
             ))}
           </select>
@@ -267,7 +268,7 @@ function PassoIdentita({
             <option value="">—</option>
             {["LOW", "MEDIUM", "HIGH", "EXTREME"].map((v) => (
               <option key={v} value={v}>
-                {v}
+                {enumLabel("supervisionIntensity", v)}
               </option>
             ))}
           </select>
@@ -349,19 +350,15 @@ function PassoModello({
   const enumLabel = useEnumLabel();
   const completa = Boolean(versione.identity.industryClassId && versione.identity.sizeBandId);
 
-  // C1: famiglie e fasce si leggono per nome; il codice resta solo dove manca il nome.
+  // C1: famiglie per nome, fasce in parole; il codice resta solo dove manca il nome.
   const famiglie = useQuery({
     queryKey: ["blueprint-families", "list"],
     queryFn: () => apiFetch<{ items: BlueprintFamily[]; total: number }>("/v1/blueprint-families?limit=200"),
   });
-  const fasce = useQuery({
-    queryKey: ["enterprise-size-bands"],
-    queryFn: () => apiFetch<{ items: EnterpriseSizeBand[] }>("/v1/enterprise-size-bands?limit=50"),
-  });
   const nomeFamiglia = (code: string) =>
     famiglie.data?.items.find((f) => f.code === code)?.name ?? enumLabel("industryFamily", code);
   const nomeFascia = (code: string) =>
-    fasce.data?.items.find((b) => b.code === code)?.name ?? enumLabel("sizeBand", code);
+    enumLabel("sizeBand", code);
 
   const proposta = useQuery({
     queryKey: ["model-proposal", base],
@@ -539,7 +536,7 @@ function RigaProcesso({
           </span>
         ) : (
           <StatusPill tone={processo.inclusion === "OUT" ? "warning" : "success"}>
-            {processo.inclusion}
+            {t(`dossier.decisions.${processo.inclusion.toLowerCase()}`)}
           </StatusPill>
         )}
       </div>

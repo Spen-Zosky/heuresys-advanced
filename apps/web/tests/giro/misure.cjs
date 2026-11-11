@@ -58,12 +58,14 @@ function misuraPagina() {
     "dashboard overview summary details detail settings search filter filters clear apply save cancel submit " +
     "edit delete add new view show hide more less next previous back home loading empty").split(" "));
   /* parole che coincidono con l'italiano o sono entrate nell'uso: non contano */
-  const AMMESSE = new Set("dashboard team manager skill budget performance feedback coaching mentor mentoring report " +
-    "online offline email badge ok no in a di da e o per con su tra fra il la le lo gli un una".split(" "));
+  /* (le parentesi contano: senza, `split` tagliava solo la seconda riga e l'insieme era fatto di lettere) */
+  const AMMESSE = new Set(("dashboard team manager skill budget performance feedback coaching mentor mentoring report " +
+    "online offline email badge ok no in a di da e o per con su tra fra il la le lo gli un una").split(" "));
   const CODICE = /\b[A-Z][A-Z0-9]*_[A-Z0-9_]*[A-Z0-9]\b|\b[a-z]+_[a-z_]+\b|\b(?:ACTIVE|INACTIVE|PENDING|DRAFT|STANDARD|MEDIUM|HIGH|LOW|CRITICAL|APPROVED|REJECTED|COMPLETED|CANCELLED|ARCHIVED|SUBMITTED|OPEN|CLOSED|IN_PROGRESS|TENANT|PLATFORM)\b/g;
   for (const { t } of testi) {
     for (const m of t.match(CODICE) || []) segna("C1-codice", `${m} — «${t}»`);
-    const parole = t.toLowerCase().match(/[a-z]+(?:'[a-z]+)?/g) || [];
+    /* le lettere accentate fanno parte della parola: «unità» non è «unit» */
+    const parole = t.toLowerCase().match(/[a-zà-ÿ]+(?:'[a-zà-ÿ]+)?/g) || [];
     const ing = parole.filter((p) => INGLESE.has(p) && !AMMESSE.has(p));
     /* due parole inglesi nello stesso nodo, o una sola se il nodo è una parola sola */
     if (ing.length >= 2 || (ing.length === 1 && parole.length === 1)) segna("C1-inglese", t);

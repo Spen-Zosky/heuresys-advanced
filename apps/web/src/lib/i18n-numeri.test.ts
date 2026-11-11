@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { i18n as i18next, numeroNellaFrase } from "./i18n";
+import { i18n as i18next, numeroNellaFrase, testoLeggibile } from "./i18n";
 
 describe("numeri nelle frasi tradotte (C4)", () => {
   it("un numero interpolato prende i separatori italiani", () => {
@@ -28,5 +28,14 @@ describe("codici nelle frasi tradotte (C1)", () => {
 describe("perimetro nelle frasi (C1)", () => {
   it("«Ambito {{kind}}» si legge", () => {
     expect(numeroNellaFrase("TENANT", "it", "kind")).toBe("intera azienda");
+  });
+});
+
+describe("testi composti dal servizio (C1)", () => {
+  it("i codici dentro un testo prendono la loro etichetta, il resto resta", () => {
+    const r = testoLeggibile("ACTIVE · settore Banche · dimensione media", "it");
+    expect(r).not.toMatch(/ACTIVE/);
+    expect(r).toContain("settore Banche · dimensione media");
+    expect(testoLeggibile("Filiale Monza", "it")).toBe("Filiale Monza");
   });
 });

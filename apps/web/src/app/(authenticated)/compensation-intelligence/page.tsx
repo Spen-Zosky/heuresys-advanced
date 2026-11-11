@@ -599,7 +599,7 @@ export default function CompensationIntelligencePage() {
     (dist.data?.items ?? []).map((i) => [i.status, i.count]),
   );
   const statusItems: KpiCardData[] = STATUSES.map((s) => ({
-    label: s.replace(/_/g, " "),
+    label: enumLabel("compensationGateStatus", s),
     value: (
       <span data-testid={`compensation-status-${s}`}>
         {distByStatus.get(s) ?? 0}
@@ -624,7 +624,7 @@ export default function CompensationIntelligencePage() {
         itemStyle: { borderColor: "transparent", borderWidth: 2 },
         label: { show: false },
         data: (dist.data?.items ?? []).map((i) => ({
-          name: i.status.replace(/_/g, " "),
+          name: enumLabel("compensationGateStatus", i.status),
           value: i.count,
           itemStyle: { color: STATUS_COLOR[i.status] ?? "#64748b" },
         })),

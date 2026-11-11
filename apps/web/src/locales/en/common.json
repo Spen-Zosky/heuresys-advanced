@@ -688,6 +688,27 @@
       "index": "index",
       "rate": "rate",
       "number": "number"
+    },
+    "sizeBand": {
+      "XS": "micro",
+      "S": "small",
+      "M": "medium",
+      "L": "large",
+      "XL": "very large"
+    },
+    "supervisionIntensity": {
+      "LOW": "low",
+      "MEDIUM": "medium",
+      "HIGH": "high",
+      "EXTREME": "very high"
+    },
+    "compensationGateStatus": {
+      "PASSED": "passed",
+      "WARNING": "with warning",
+      "BLOCKED": "blocked",
+      "ESCALATED": "escalated",
+      "OVERRIDDEN_WITH_REASON": "overridden with reason",
+      "PENDING": "pending"
     }
   },
   "masked": "withheld for your profile",

@@ -275,7 +275,7 @@ export default function AdminMfaPolicyPage() {
   const rows: Array<{ tenantId: string; label: string }> = tenants.data
     ? tenants.data.items.map((tn) => ({
         tenantId: tn.tenantId,
-        label: `${tn.tenantName} (${tn.tenantCode})`,
+        label: tn.tenantName,
       }))
     : (policies.data?.items ?? []).map((p) => ({ tenantId: p.tenantId, label: p.tenantId }));
 

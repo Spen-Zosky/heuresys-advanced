@@ -688,6 +688,27 @@
       "index": "indice",
       "rate": "tasso",
       "number": "numero"
+    },
+    "sizeBand": {
+      "XS": "micro",
+      "S": "piccola",
+      "M": "media",
+      "L": "grande",
+      "XL": "molto grande"
+    },
+    "supervisionIntensity": {
+      "LOW": "bassa",
+      "MEDIUM": "media",
+      "HIGH": "alta",
+      "EXTREME": "molto alta"
+    },
+    "compensationGateStatus": {
+      "PASSED": "superato",
+      "WARNING": "con avviso",
+      "BLOCKED": "bloccato",
+      "ESCALATED": "inoltrato a chi decide",
+      "OVERRIDDEN_WITH_REASON": "forzato con motivazione",
+      "PENDING": "in attesa"
     }
   },
   "masked": "nascosto per il tuo profilo",

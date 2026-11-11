@@ -32,6 +32,17 @@ export interface DataColumn<T> {
   align?: "left" | "right";
   headClassName?: string;
   cellClassName?: string;
+  /**
+   * C2, C3: un dato che serve a chi controlla, non a chi lavora (codice tecnico, email). Non va in
+   * tabella ma nella scheda della riga. Senza indicazione lo è ogni colonna la cui intestazione
+   * dice «Codice», «Code», «Email» o «Identificativo».
+   */
+  secondaria?: boolean;
+}
+
+const INTESTAZIONE_SECONDARIA = /^\s*(codice|code|cod\.|e-?mail|identificativo|id)\b/i;
+function eSecondaria<T>(c: DataColumn<T>): boolean {
+  return c.secondaria ?? (typeof c.header === "string" && INTESTAZIONE_SECONDARIA.test(c.header));
 }
 
 export interface EntityTableProps<T> {
@@ -158,6 +169,10 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
     : ultima && ultima.header === ""
       ? [...columns.slice(0, -1), colonnaOrigine, ultima]
       : [...columns, colonnaOrigine];
+  // In tabella le colonne del lavoro; nella scheda della riga tutte (C2, C3).
+  const primarie = colonne.filter((c) => !eSecondaria(c));
+  const inTabella = primarie.filter((c) => c.header !== "").length >= 2 ? primarie : colonne;
+  const titoloRiga = inTabella.find((c) => c.header !== "") ?? colonne[0];
   const from = total === 0 ? 0 : start + 1;
   const to = end;
   const goToPage = (i: number) =>
@@ -189,7 +204,7 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
       <DataTableWithCrossHair caption={caption} className="w-full border-collapse text-sm">
         <thead>
           <tr className="border-b border-border bg-muted text-left text-[11px] uppercase tracking-wider text-muted-foreground">
-            {colonne.map((c, i) => (
+            {inTabella.map((c, i) => (
               <th key={i} className={`px-4 py-2 ${c.align === "right" ? "text-right" : ""} ${c.headClassName ?? ""}`}>
                 <ConSpiegazione>{c.header}</ConSpiegazione>
               </th>
@@ -220,7 +235,7 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
                 }
               }}
             >
-              {colonne.map((c, i) => (
+              {inTabella.map((c, i) => (
                 <td key={i} className={`px-4 py-2 align-middle ${c.align === "right" ? "text-right tabular-nums" : ""} ${c.cellClassName ?? ""}`}>
                   {leggi.nodo(c.cell(row))}
                 </td>
@@ -232,11 +247,11 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
       <Dialog open={rigaAperta !== null} onOpenChange={(o) => { if (!o) setRigaAperta(null); }}>
         {rigaAperta !== null ? (
           <DialogContent className="max-h-[85vh] max-w-xl overflow-y-auto" data-testid="scheda-riga">
-            <DialogTitle className="text-lg font-bold leading-tight">{leggi.nodo(colonne[0]?.cell(rigaAperta))}</DialogTitle>
+            <DialogTitle className="text-lg font-bold leading-tight">{leggi.nodo(titoloRiga?.cell(rigaAperta))}</DialogTitle>
             <DialogDescription className="text-xs">{caption ?? t("dettaglio.riga")}</DialogDescription>
             <dl className="mt-3 divide-y divide-border">
-              {colonne.slice(1).map((c, i) =>
-                c.header === "" ? null : (
+              {colonne.map((c, i) =>
+                c.header === "" || c === titoloRiga ? null : (
                   <div key={i} className="grid grid-cols-[10rem_1fr] gap-3 py-1.5 text-sm">
                     <dt className="text-muted-foreground"><ConSpiegazione>{c.header}</ConSpiegazione></dt>
                     <dd className="min-w-0">{leggi.nodo(c.cell(rigaAperta))}</dd>

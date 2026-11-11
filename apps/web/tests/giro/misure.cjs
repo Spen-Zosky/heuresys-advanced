@@ -127,8 +127,11 @@ function misuraPagina() {
       const vuoto = dopo.getBoundingClientRect().top - header.getBoundingClientRect().bottom;
       if (vuoto > 32) segna("C7-spazio-dopo-intestazione", `${Math.round(vuoto)} px`);
     }
+    /* il quadro degli insight sta nell'intestazione per scelta (C15): non conta nell'altezza */
+    const quadro = header?.querySelector("[data-testid=quadro-insight]");
     const hRect = (header || h1).getBoundingClientRect();
-    if (hRect.height > 140) segna("C7-intestazione-alta", `${Math.round(hRect.height)} px`);
+    const alta = hRect.height - (quadro ? quadro.getBoundingClientRect().height : 0);
+    if (alta > 140) segna("C7-intestazione-alta", `${Math.round(alta)} px`);
   }
 
   /* C8 — grafici: legenda a scorrimento (frecce, «3/6»), grafico senza assi né legenda. */

@@ -47,6 +47,14 @@ export const SIGLE: Record<string, Voce> = {
 
 /** Concetti: chiave in minuscolo, confrontata con l'intestazione intera o con il suo inizio. */
 export const CONCETTI: Record<string, Voce> = {
+  coorte: { testo: "Il gruppo di persone che segue la stessa edizione di un'iniziativa formativa, con le stesse date." },
+  posti: { testo: "Quante persone l'edizione può accogliere; i posti liberi sono la differenza con gli iscritti." },
+  dimensione: { testo: "La fascia di grandezza dell'azienda cliente, misurata sul numero di persone." },
+  priorità: { testo: "Quanto presto va decisa la richiesta: alta vuol dire che il ritardo blocca qualcuno." },
+  grado: { testo: "Il gradino del livello nella scala della tassonomia: più alto vuol dire più padronanza." },
+  famiglia: { testo: "Il raggruppamento di categorie affini della tassonomia delle competenze." },
+  "unità superiore": { testo: "L'unità organizzativa che contiene questa, un gradino sopra nell'albero." },
+  "processo e attività": { testo: "Il processo di lavoro a cui appartiene la richiesta e il passo in cui è ferma." },
   criticità: { testo: "Quanto pesa la posizione per l'organizzazione se restasse scoperta: alta vuol dire che senza titolare un processo importante si ferma." },
   copertura: { testo: "Quota di posizioni con un titolare attivo sul totale delle posizioni attive." },
   scoperta: { testo: "Una posizione attiva senza un titolare assegnato." },

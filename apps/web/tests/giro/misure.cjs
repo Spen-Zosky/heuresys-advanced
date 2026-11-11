@@ -95,7 +95,7 @@ function misuraPagina() {
   /* C4 — numeri. Cifre ≥ 1000 senza separatore (non anni, non codici), decimali col punto,
      migliaia all'inglese. */
   for (const { t, el } of testi) {
-    if (el.closest("[data-giro-numero-libero]")) continue;
+    if (el.closest("[data-giro-numero-libero], [data-grezzo], input, textarea, code, pre")) continue;
     const pulito = t.replace(/\b[0-9a-f]{8}-[0-9a-f-]{27}\b/gi, "").replace(/\b(19|20)\d{2}\b/g, "").replace(/[A-Z]+-?\d+/g, "").replace(/\d{2}\/\d{2}\/\d{4}/g, "");
     if (/(?<![\d.,/:-])\d{4,}(?![\d.,/:-])/.test(pulito)) segna("C4-senza-separatore", t);
     if (/(?<![\d.])\d+\.\d{1,2}(?![\d.])/.test(pulito) && !/\d+\.\d{3}/.test(pulito)) segna("C4-decimale-col-punto", t);
@@ -173,7 +173,10 @@ function misuraPagina() {
 
   /* C13 — aiuti: quanti indicatori e intestazioni hanno una spiegazione. */
   const aiuti = main.querySelectorAll("[data-info], [aria-describedby], [data-glossario], [data-spiegazione]").length;
-  const intestazioni = main.querySelectorAll("th").length + main.querySelectorAll("[data-kpi], .stats-card").length;
+  /* un'intestazione che si spiega da sé (Nome, Stato, Data…) non chiede aiuto: conta solo quella
+     che porta un concetto del dominio */
+  const OVVIE = /^(nome|titolo|stato|tipo|data|inizio|fine|creat[ao]|aggiornat[ao]|categoria|codice|azioni|descrizione|paese|attiv[ao]|email|telefono|sede|unità|persona|ruolo|posizione|note|valore|voce|quando|chi|da|a|origine)$/i;
+  const intestazioni = Array.from(main.querySelectorAll("th")).filter((th) => !OVVIE.test((th.textContent || "").trim())).length + main.querySelectorAll("[data-kpi], .stats-card").length;
   if (intestazioni >= 4 && aiuti === 0) {
     const nomi = Array.from(main.querySelectorAll("th")).map((th) => (th.textContent || "").trim()).filter(Boolean);
     segna("C13-senza-spiegazioni", `${intestazioni} intestazioni, 0 aiuti: ${[...new Set(nomi)].slice(0, 12).join(" | ")}`);

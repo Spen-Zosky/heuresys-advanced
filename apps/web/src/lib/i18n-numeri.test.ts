@@ -39,3 +39,11 @@ describe("testi composti dal servizio (C1)", () => {
     expect(testoLeggibile("Filiale Monza", "it")).toBe("Filiale Monza");
   });
 });
+
+describe("codici minuscoli conosciuti (C1)", () => {
+  it("un motivo di variazione retributiva si scrive in parole, un codice ignoto resta", () => {
+    expect(testoLeggibile("salary_recalculation: ricalcolo", "it")).toBe("Ricalcolo della retribuzione: ricalcolo");
+    expect(testoLeggibile("verso CCNL_CRED_2024", "it")).toBe("verso CCNL Credito 2024");
+    expect(testoLeggibile("campo ignoto_qui", "it")).toBe("campo ignoto_qui");
+  });
+});

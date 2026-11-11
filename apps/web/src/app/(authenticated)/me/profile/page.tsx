@@ -263,8 +263,9 @@ export default function MeProfilePage() {
         title={t("profile.title")}
         description={t("profile.description")}
         badges={
-          <Badge variant="secondary" data-testid="me-profile-email" data-giro-email-ammessa>
-            {profile.data?.email ?? "…"}
+          <Badge variant="secondary" data-testid="me-profile-email">
+            {/* il proprio indirizzo nel proprio profilo è un dato, non un identificativo al posto del nome */}
+            <span data-giro-email-ammessa="">{profile.data?.email ?? "…"}</span>
           </Badge>
         }
       />

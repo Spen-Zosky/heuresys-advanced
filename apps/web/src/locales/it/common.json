@@ -709,6 +709,14 @@
       "ESCALATED": "inoltrato a chi decide",
       "OVERRIDDEN_WITH_REASON": "forzato con motivazione",
       "PENDING": "in attesa"
+    },
+    "compensationChangeReason": {
+      "salary_recalculation": "Ricalcolo della retribuzione",
+      "level_realignment": "Riallineamento di livello",
+      "executive_band_override": "Fascia dirigenziale fuori tabella"
+    },
+    "ccnlCode": {
+      "CCNL_CRED_2024": "CCNL Credito 2024"
     }
   },
   "masked": "nascosto per il tuo profilo",

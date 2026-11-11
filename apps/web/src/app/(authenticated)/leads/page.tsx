@@ -62,7 +62,8 @@ export default function LeadsPage() {
         cell: (r) => (
           <span className="flex flex-col leading-tight">
             <span className="font-medium text-foreground">{r.name}</span>
-            <span className="text-[11px] text-muted-foreground">{r.email}</span>
+            {/* il recapito di chi ha scritto è il dato che serve per rispondere */}
+            <span className="text-[11px] text-muted-foreground" data-giro-email-ammessa="">{r.email}</span>
           </span>
         ),
       },

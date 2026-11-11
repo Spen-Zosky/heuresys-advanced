@@ -709,6 +709,14 @@
       "ESCALATED": "escalated",
       "OVERRIDDEN_WITH_REASON": "overridden with reason",
       "PENDING": "pending"
+    },
+    "compensationChangeReason": {
+      "salary_recalculation": "Salary recalculation",
+      "level_realignment": "Level realignment",
+      "executive_band_override": "Executive band override"
+    },
+    "ccnlCode": {
+      "CCNL_CRED_2024": "Banking CCNL 2024"
     }
   },
   "masked": "withheld for your profile",

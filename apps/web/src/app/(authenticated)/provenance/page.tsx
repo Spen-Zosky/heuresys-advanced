@@ -31,10 +31,17 @@ function toneForStatus(s: ValidationStatus): "success" | "warning" | "danger" | 
   return "neutral";
 }
 
+/** C1: la tabella si legge per ciò che contiene (36 tabelle censite il 2026-11-11); una tabella
+ *  non censita mostra il suo nome tecnico, così la mancanza si vede. */
+function nomeTabella(t: TFunction, tabella: string): string {
+  const chiave = tabella.replace(/^sys\./, "");
+  return t(`provenance.tables.${chiave}`, { defaultValue: chiave });
+}
+
 function buildRecordColumns(t: TFunction, f: Formati): DataColumn<ProvenanceRecord>[] {
   return [
-    { header: t("provenance.cols.targetTable"), cell: (r) => <span className="font-mono text-xs">{r.targetTableName}</span> },
-    { header: t("provenance.cols.sourceTable"), cell: (r) => <span className="font-mono text-xs text-muted-foreground">{r.sourceTable}</span> },
+    { header: t("provenance.cols.targetTable"), cell: (r) => nomeTabella(t, r.targetTableName) },
+    { header: t("provenance.cols.sourceTable"), cell: (r) => <span className="font-mono text-xs text-muted-foreground" data-grezzo="">{r.sourceTable}</span> },
     { header: t("provenance.cols.confidence"), align: "right", cell: (r) => <span className="tabular-nums">{f.percento(r.mappingConfidence, "0-1", 1)}</span> },
     { header: t("provenance.cols.status"), cell: (r) => <StatusPill tone={toneForStatus(r.validationStatus)}>{t(`provenance.status.${r.validationStatus}`)}</StatusPill> },
     {
@@ -82,7 +89,7 @@ export default function ProvenancePage() {
   }, [summary.data, t, f]);
 
   const summaryColumns: DataColumn<ProvenanceSummaryResponse["byTable"][number]>[] = useMemo(() => [
-    { header: t("provenance.cols.targetTable"), cell: (r) => <span className="font-mono text-xs">{r.targetTable}</span> },
+    { header: t("provenance.cols.targetTable"), cell: (r) => nomeTabella(t, r.targetTable) },
     { header: t("provenance.cols.total"), align: "right", cell: (r) => <span className="tabular-nums">{f.numero(r.total)}</span> },
     { header: t("provenance.cols.avgConfidence"), align: "right", cell: (r) => <span className="tabular-nums">{r.avgConfidence != null ? `${f.percento(r.avgConfidence, "0-1", 1)}` : "—"}</span> },
     { header: t("provenance.status.VALID"), align: "right", cell: (r) => <span className="tabular-nums">{f.numero(r.valid)}</span> },

@@ -120,7 +120,8 @@ export function letturaDelGrafico(option: unknown, locale: string): { frase: str
     if (nodi.length === 0) return null;
     const collegamenti = Array.isArray(s0.links) ? s0.links.length : Array.isArray(s0.edges) ? s0.edges.length : null;
     const conValore = nodi.filter((n) => typeof n.value === "number").sort((a, b) => (b.value as number) - (a.value as number));
-    const primi = (conValore.length > 0 ? conValore : nodi).slice(0, 5).map((n) => String(n.name ?? "")).filter(Boolean);
+    // nomi diversi: cinque «Specialista» di fila non dicono niente di più di uno
+    const primi = [...new Set((conValore.length > 0 ? conValore : nodi).map((n) => String(n.name ?? "")).filter(Boolean))].slice(0, 5);
     return {
       frase: `${nf0.format(nodi.length)} elementi${collegamenti !== null ? ` e ${nf0.format(collegamenti)} collegamenti` : ""}${primi.length ? `; in testa: ${primi.join(", ")}` : ""}.`,
       tabella: {

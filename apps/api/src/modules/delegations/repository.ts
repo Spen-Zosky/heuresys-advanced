@@ -41,8 +41,8 @@ const SELEZIONE = `
   d.user_delegation_scope, d.user_delegation_groups, d.user_delegation_starts_on, d.user_delegation_ends_on,
   d.user_delegation_request_type, d.user_delegation_tenant_process_step_id, st.tenant_process_step_name AS step_name,
   d.user_delegation_status, d.user_delegation_reason, d.created_at, d.updated_at,
-  nullif(trim(coalesce(ud.user_first_name,'') || ' ' || coalesce(ud.user_last_name,'')), '') AS delegator_name,
-  nullif(trim(coalesce(ue.user_first_name,'') || ' ' || coalesce(ue.user_last_name,'')), '') AS delegate_name,
+  nullif(trim(both ', ' from coalesce(ud.user_last_name,'') || ', ' || coalesce(ud.user_first_name,'')), '') AS delegator_name,
+  nullif(trim(both ', ' from coalesce(ue.user_last_name,'') || ', ' || coalesce(ue.user_first_name,'')), '') AS delegate_name,
   (d.user_delegation_status = 'ACTIVE'
    AND d.user_delegation_starts_on <= current_date
    AND (d.user_delegation_ends_on IS NULL OR d.user_delegation_ends_on >= current_date)) AS is_in_force`;
@@ -236,7 +236,7 @@ export async function describePeople(
   if (userIds.length === 0) return [];
   const res = await q.query<{ user_id: string; name: string | null; position_title: string | null; unit_name: string | null }>(
     `SELECT u.user_id,
-            nullif(trim(coalesce(u.user_first_name,'') || ' ' || coalesce(u.user_last_name,'')), '') AS name,
+            nullif(trim(both ', ' from coalesce(u.user_last_name,'') || ', ' || coalesce(u.user_first_name,'')), '') AS name,
             pa.position_title, pa.unit_name
        FROM sys.sys_users u
        LEFT JOIN LATERAL (

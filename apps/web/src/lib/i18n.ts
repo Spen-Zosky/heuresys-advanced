@@ -99,7 +99,14 @@ function vocePerCodice(c: string, lng: string, chiave?: string): string {
 /** C1: un testo che arriva già composto dal servizio («ACTIVE · settore Banche», «HIRE · 01/10/2026»)
  *  si legge con le etichette al posto dei codici di lavoro che contiene. */
 export function testoLeggibile(v: string, lng: string = i18next.language): string {
-  return v.replace(/\b[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+\b|\b[A-Z]{4,}\b/g, (c) => vocePerCodice(c, lng));
+  const enums = (i18next.getResource(lng, "common", "enums") ?? {}) as Record<string, Record<string, string>>;
+  return v
+    .replace(/\b[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+\b|\b[A-Z]{4,}\b/g, (c) => vocePerCodice(c, lng))
+    // un codice minuscolo («salary_recalculation:») si scrive solo se un dominio lo conosce
+    .replace(/\b[a-z]+(?:_[a-z0-9]+)+\b/g, (c) => {
+      for (const dominio of Object.values(enums)) if (typeof dominio?.[c] === "string") return dominio[c];
+      return c;
+    });
 }
 
 function codiceNellaFrase(v: string, lng: string, chiave?: string): string {

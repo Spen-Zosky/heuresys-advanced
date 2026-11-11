@@ -84,6 +84,8 @@ function misuraPagina() {
   const SOLO_CODICE = /^(?:[A-Z]{2,}[A-Z0-9]*(?:[-_.][A-Z0-9]+)+|[A-Z]{2,5}-?\d{2,}|\d{1,4}(?:\.\d+)*)$/;
   for (const td of Array.from(main.querySelectorAll("td"))) {
     const t = (td.textContent || "").trim();
+    /* il nome proprio di un dato («ASP.NET», una tecnologia) è un nome, non un codice */
+    if (td.querySelector("[data-nome-proprio]")) continue;
     if (t && SOLO_CODICE.test(t) && !/^\d+([.,]\d+)?$/.test(t.replace(/\./g, ""))) segna("C3-codice-solo", t);
   }
   /* una prima colonna fatta di codici */
@@ -98,7 +100,8 @@ function misuraPagina() {
      migliaia all'inglese. */
   for (const { t, el } of testi) {
     if (el.closest("[data-giro-numero-libero], [data-grezzo], input, textarea, code, pre")) continue;
-    const pulito = t.replace(/\b[0-9a-f]{8}-[0-9a-f-]{27}\b/gi, "").replace(/\b(19|20)\d{2}\b/g, "").replace(/[A-Z]+-?\d+/g, "").replace(/\d{2}\/\d{2}\/\d{4}/g, "");
+    /* una versione («v3.0», «v1.0») è un nome, non un decimale */
+    const pulito = t.replace(/\bv\d+(?:\.\d+)+\b/gi, "").replace(/\b[0-9a-f]{8}-[0-9a-f-]{27}\b/gi, "").replace(/\b(19|20)\d{2}\b/g, "").replace(/[A-Z]+-?\d+/g, "").replace(/\d{2}\/\d{2}\/\d{4}/g, "");
     if (/(?<![\d.,/:-])\d{4,}(?![\d.,/:-])/.test(pulito)) segna("C4-senza-separatore", t);
     if (/(?<![\d.])\d+\.\d{1,2}(?![\d.])/.test(pulito) && !/\d+\.\d{3}/.test(pulito)) segna("C4-decimale-col-punto", t);
     if (/\d{1,3},\d{3}(?![\d])/.test(pulito)) segna("C4-migliaia-inglesi", t);

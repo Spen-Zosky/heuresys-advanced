@@ -339,7 +339,7 @@ export default function ConsolidationPage() {
           />
           <EntityTable<ConsolidationProposal> originPath={"/v1/tenant-consolidations"}
             isLoading={proposals.isLoading} isError={proposals.isError} error={proposals.error} errorMessage={t("consolidation.loadError")}
-            rows={righe} rowKey={(p) => p.proposalId} rowTestId="consolidation-proposal-row" columns={columns}
+            rows={righe} pageSize={10} rowKey={(p) => p.proposalId} rowTestId="consolidation-proposal-row" columns={columns}
             emptyTestId="consolidation-proposals-empty"
             emptyTitle={t("consolidation.proposalsEmptyTitle")} emptyDescription={t("consolidation.proposalsEmptyDescription")}
             caption={t("consolidation.caption")}

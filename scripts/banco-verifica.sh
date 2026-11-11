@@ -49,7 +49,7 @@ guardia_db() { # il banco non parla mai con un database che non sia il suo
 
 avvia_servizi() {
   carica; guardia_db
-  ( cd "$C/apps/api" && nohup node dist/server.js >"$B/api.log" 2>&1 & echo $! >"$B/api.pid" )
+  ( cd "$C/apps/api" && set -a && . "$C/.env" && set +a && JWT_PRIVATE_KEY="$(awk 'NF{printf "%s\\n",$0}' "$C/.secrets/jwt_private.pem")" JWT_PUBLIC_KEY="$(awk 'NF{printf "%s\\n",$0}' "$C/.secrets/jwt_public.pem")" nohup node dist/server.js >"$B/api.log" 2>&1 & echo $! >"$B/api.pid" )
   for _ in $(seq 60); do curl -fs "http://127.0.0.1:$PORT/readyz" >/dev/null && break; sleep 1; done
   ( cd "$C/apps/web" && nohup npx next start -H 127.0.0.1 -p "$WEBPORT" >"$B/web.log" 2>&1 & echo $! >"$B/web.pid" )
   for _ in $(seq 60); do curl -fs -o /dev/null "http://127.0.0.1:$WEBPORT/login" && break; sleep 1; done
@@ -86,7 +86,8 @@ su)
   [ -d "$B" ] && { echo "il banco '$nome' esiste gia': usa aggiorna o giu" >&2; exit 3; }
   [ -n "$dump" ] || dump="$(ls -1t "$DUMPS"/*/database.dump | head -1)"
   [ -f "$dump" ] || { echo "dump non trovato" >&2; exit 4; }
-  bash "$REPO/scripts/copia-prova.sh" apri "$nome" "banco di verifica delle interfacce" --rif "$rif"
+  # la copia puo' esistere gia' (aperta a mano sul ramo): allora si riusa
+  [ -d "$C/.git" ] || [ -f "$C/.git" ] || bash "$REPO/scripts/copia-prova.sh" apri "$nome" "banco di verifica delle interfacce" --rif "$rif"
   mkdir -p "$B/sock" "$C/.secrets"
   PGPORT="$(porta_libera 55400 55499)"; PORT="$(porta_libera 4100 4199)"; WEBPORT="$(porta_libera 4200 4299)"
   "$PGBIN/initdb" -D "$B/pg" -U "$(id -un)" --auth=trust -E UTF8 --locale=C.UTF-8 >"$B/initdb.log"
@@ -123,6 +124,8 @@ EOF
   costruisci
   avvia_servizi
   ;;
+avvia)
+  carica; ferma_servizi; avvia_servizi ;;
 aggiorna)
   carica; ferma_servizi
   git -C "$C" pull --ff-only -q

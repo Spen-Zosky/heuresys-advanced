@@ -1066,7 +1066,8 @@
     "conversationNotFound": "Conversazione non trovata.",
     "rejectReasonLabel": "Perché rifiuti?",
     "rejectConfirm": "Conferma il rifiuto",
-    "approvalExpires": "Scade"
+    "approvalExpires": "Scade",
+    "panelTitle": "Conversazione con l'agente"
   },
   "provenance": {
     "title": "Registro di provenienza",

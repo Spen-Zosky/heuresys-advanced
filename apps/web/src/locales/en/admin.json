@@ -1066,7 +1066,8 @@
     "conversationNotFound": "Conversation not found.",
     "rejectReasonLabel": "Why are you rejecting?",
     "rejectConfirm": "Confirm rejection",
-    "approvalExpires": "Expires"
+    "approvalExpires": "Expires",
+    "panelTitle": "Agent conversation"
   },
   "provenance": {
     "title": "Provenance ledger",

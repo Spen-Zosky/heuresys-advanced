@@ -28,7 +28,7 @@ Misura del 2026-11-10 sul dump di produzione delle 03:42, ripristinato in una co
 
 **R4.** Il ruolo funzionale lo decide Enzo per nome, con il motivo; al massimo uno per persona, un'eccezione si dichiara con il suo motivo. L'elenco vigente è in `db/scripts/modello-ruoli.sql`.
 
-**R5.** Un ruolo che ne contiene un altro lo sostituisce. Perché sia vero, 000485 aggiunge a `BRANCH_MANAGER` e `CEO` i permessi di `TEAM_LEADER`, a `CEO` quelli di `BRANCH_MANAGER`, a `TENANT_ADMIN` i 3 di `HRMS_MANAGER` (solo aggiunte, elencate in `staging.modello_ruoli_permessi_aggiunti`).
+**R5.** Un ruolo che ne contiene un altro lo sostituisce. Perché sia vero, 000485 aggiunge a `BRANCH_MANAGER` e `CEO` i permessi di `TEAM_LEADER`, a `CEO` quelli di `BRANCH_MANAGER` (solo aggiunte, elencate in `staging.modello_ruoli_permessi_aggiunti`). `TENANT_ADMIN` non assorbe i 3 permessi di `HRMS_MANAGER` (`agent_capability:activate`, `consolidation:decide`, `consolidation:run`): lo vietano l'allowlist deny-by-default D-57 e 000481, verificate da `rbac-tenant-admin-allowlist.test.ts` e `agent-capabilities.integration.test.ts`.
 
 **R6.** Ogni mandato regge su un atto approvato da un secondo titolare di mandato (ADR-0050 D4). Le concessioni dell'allineamento portano motivo e concedente (ADR-0055); gli atti di conferma si fanno dall'interfaccia, dopo l'allineamento.
 
@@ -38,13 +38,13 @@ Misura del 2026-11-10 sul dump di produzione delle 03:42, ripristinato in una co
 
 ## §3 — Le decisioni di Enzo del 2026-11-10
 
-- **D1.** Valentina Conti (HR Director) tiene solo `TENANT_ADMIN`; lascia `HRMS_MANAGER`, `ORG_DIRECTOR`, `HIRING_MANAGER`.
+- **D1.** Valentina Conti (HR Director) tiene `TENANT_ADMIN` e `HRMS_MANAGER`: il secondo porta le tre decisioni (agenti, consolidamento) che `TENANT_ADMIN` per D-57 non ha. Lascia `ORG_DIRECTOR` e `HIRING_MANAGER`.
 - **D2.** `PEOPLE_MANAGER` passa da Paolo Barbieri a Maria Colombo; Barbieri prende `BLUEPRINT_MANAGER`.
 - **D3.** Beatrice Russo tiene `RECRUITER` e `TAXONOMY_STEWARD` come eccezione dichiarata.
 - **D4.** `TEAM_MEMBER` non si concede più.
 - **D5.** Le utenze di collaudo perdono i ruoli a riposo.
 
-Il resto dell'elenco: Marco Bruno `DATA_STEWARD`; Laura Santoro `DPO`; Andrea Martino `WHISTLEBLOWING_CUSTODIAN`; Alice Costa `SECURITY_ADMIN`; Luca Bianchi `PROCESS_OWNER`; Enzo Spenuso `PLATFORM_ADMIN` (che contiene `SALES`, `PLATFORM_OPERATOR`, `IMPLEMENTATION_CONSULTANT`, `BLUEPRINT_MANAGER`, `MANAGER` e `CEO`, misurato). Restano senza titolare in RTL, coperti da `TENANT_ADMIN`: `HRMS_MANAGER`, `ORG_DIRECTOR`, `HIRING_MANAGER`, `READ_ONLY`.
+Il resto dell'elenco: Marco Bruno `DATA_STEWARD`; Laura Santoro `DPO`; Andrea Martino `WHISTLEBLOWING_CUSTODIAN`; Alice Costa `SECURITY_ADMIN`; Luca Bianchi `PROCESS_OWNER`; Enzo Spenuso `PLATFORM_ADMIN` (che contiene `SALES`, `PLATFORM_OPERATOR`, `IMPLEMENTATION_CONSULTANT`, `BLUEPRINT_MANAGER`, `MANAGER` e `CEO`, misurato). Restano senza titolare in RTL, coperti da `TENANT_ADMIN`: `ORG_DIRECTOR`, `HIRING_MANAGER`, `READ_ONLY`.
 
 ## §4 — Conseguenze
 

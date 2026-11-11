@@ -85,6 +85,7 @@ BEGIN
   CREATE TEMP TABLE _funzionali (email text, ruolo text, tenant_code text, motivo text) ON COMMIT DROP;
   INSERT INTO _funzionali VALUES
     ('valentina.conti@rtl-bank.org',   'TENANT_ADMIN',             'RTL_BANK', 'HR Director: vertice HR con il mandato del tenant (D1)'),
+    ('valentina.conti@rtl-bank.org',   'HRMS_MANAGER',             'RTL_BANK', 'HR Director: decide consolidamento e capacita degli agenti, che TENANT_ADMIN non ha (D1, D-57)'),
     ('maria.colombo@rtl-bank.org',     'PEOPLE_MANAGER',           'RTL_BANK', 'Resp. Amministrazione del Personale: gestione operativa delle persone (D2)'),
     ('marco.bruno@rtl-bank.org',       'DATA_STEWARD',             'RTL_BANK', 'Addetto Amministrazione del Personale: custode del dato del personale'),
     ('paolo.barbieri@rtl-bank.org',    'BLUEPRINT_MANAGER',        'RTL_BANK', 'Resp. Sviluppo, Formazione e Organizzazione: modello dell''organizzazione (D2)'),

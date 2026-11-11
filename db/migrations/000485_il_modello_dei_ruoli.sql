@@ -76,8 +76,9 @@ CREATE TABLE IF NOT EXISTS staging.modello_ruoli_permessi_aggiunti (
 WITH inclusioni(dst, src) AS (
   VALUES ('BRANCH_MANAGER', 'TEAM_LEADER'),
          ('CEO',            'TEAM_LEADER'),
-         ('CEO',            'BRANCH_MANAGER'),
-         ('TENANT_ADMIN',   'HRMS_MANAGER')
+         ('CEO',            'BRANCH_MANAGER')
+         -- TENANT_ADMIN NON assorbe HRMS_MANAGER: D-57 deny-by-default (allowlist) e 000481
+         -- (l'amministratore del tenant legge soltanto il catalogo degli agenti). Emendato 2026-11-10.
 ), mancanti AS (
   SELECT DISTINCT d.auth_role_id, rp.auth_permission_id, i.src
     FROM inclusioni i
@@ -99,6 +100,15 @@ SELECT a.auth_role_id, a.auth_permission_id, min(m.src)
   FROM aggiunti a JOIN mancanti m USING (auth_role_id, auth_permission_id)
  GROUP BY a.auth_role_id, a.auth_permission_id
 ON CONFLICT DO NOTHING;
+
+-- §1-bis ritiro di cio' che una versione precedente di §1 aveva dato a TENANT_ADMIN da HRMS_MANAGER
+UPDATE sys.sys_auth_role_permissions rp
+   SET revoked_at = now(), revoked_by_migration = '000485-no-tenant-admin-hrms'
+  FROM staging.modello_ruoli_permessi_aggiunti a
+  JOIN sys.sys_auth_roles d ON d.auth_role_id = a.auth_role_id AND d.auth_role_code = 'TENANT_ADMIN'
+ WHERE a.da_ruolo = 'HRMS_MANAGER'
+   AND rp.auth_role_id = a.auth_role_id AND rp.auth_permission_id = a.auth_permission_id
+   AND rp.revoked_at IS NULL;
 
 -- §2 il ruolo di comando che l'organigramma assegna --------------------------------------------
 CREATE OR REPLACE VIEW sys.v_ruoli_di_comando_attesi AS
@@ -170,7 +180,7 @@ DECLARE v_mancano int;
 BEGIN
   SELECT count(*) INTO v_mancano
     FROM (VALUES ('BRANCH_MANAGER','TEAM_LEADER'),('CEO','TEAM_LEADER'),
-                 ('CEO','BRANCH_MANAGER'),('TENANT_ADMIN','HRMS_MANAGER')) i(dst, src)
+                 ('CEO','BRANCH_MANAGER')) i(dst, src)
     JOIN sys.sys_auth_roles d ON d.auth_role_code = i.dst
     JOIN sys.sys_auth_roles s ON s.auth_role_code = i.src
     JOIN sys.sys_auth_role_permissions rp ON rp.auth_role_id = s.auth_role_id AND rp.revoked_at IS NULL

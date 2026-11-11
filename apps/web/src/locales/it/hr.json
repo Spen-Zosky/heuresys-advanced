@@ -396,7 +396,7 @@
     "pathsCols": {
       "code": "Codice",
       "name": "Nome",
-      "difficulty": "Difficoltà"
+      "kind": "Tipo di percorso"
     },
     "poolsCols": {
       "code": "Codice",

@@ -396,7 +396,7 @@
     "pathsCols": {
       "code": "Code",
       "name": "Name",
-      "difficulty": "Difficulty"
+      "kind": "Path type"
     },
     "poolsCols": {
       "code": "Code",

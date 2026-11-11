@@ -31,6 +31,7 @@ import {
 import { apiFetch } from "../../../../lib/api/fetch";
 import { isApiError } from "../../../../lib/api/errors";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { dispositivoLeggibile } from "@/lib/person-label";
 import { useFormat } from "@/lib/format";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
@@ -888,7 +889,7 @@ export default function MeSecurityPage() {
                           {isCurrent && <Badge variant="outline" className="border-success text-success" data-testid="me-security-session-current-badge">{t("security.sessions.thisDevice")}</Badge>}
                         </div>
                         <div className="font-mono text-xs text-muted-foreground">
-                          {(s.userAgent ?? t("security.sessions.unknownDevice")).slice(0, 60)} · {t("security.sessions.lastSeen", { date: fmt.dataOra(s.lastIssuedAt) })}
+                          <span title={s.userAgent ?? undefined}>{dispositivoLeggibile(s.userAgent) ?? t("security.sessions.unknownDevice")}</span> · {t("security.sessions.lastSeen", { date: fmt.dataOra(s.lastIssuedAt) })}
                         </div>
                       </div>
                       <Button

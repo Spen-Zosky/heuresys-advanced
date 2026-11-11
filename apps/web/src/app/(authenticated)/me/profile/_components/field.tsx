@@ -9,7 +9,10 @@ export function Field({ label, value, testId }: { label: string; value: ReactNod
   return (
     <div className="space-y-0.5">
       <dt className="text-xs uppercase tracking-wide text-muted-foreground">{label}</dt>
-      <dd className="text-sm font-medium text-foreground" data-testid={testId}>
+      {/* Un testo del profilo (CAP, matricola, IBAN, telefono) è un identificativo: la rete di
+          leggibilità non lo tocca, altrimenti «24122» diventerebbe «24.122». I numeri veri
+          arrivano già in forma dalla pagina. */}
+      <dd className="text-sm font-medium text-foreground" data-testid={testId} {...(typeof value === "string" ? { "data-grezzo": "" } : {})}>
         {empty ? <span className="text-muted-foreground">—</span> : value}
       </dd>
     </div>

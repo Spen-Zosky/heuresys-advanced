@@ -61,6 +61,8 @@ export function costruisci(fmt: Formati, enumi: Map<string, string>, rubrica: Ru
       // decimale lo farebbe diventare «1,23». Un decimale grezzo con tre cifre dopo il punto e
       // parte intera diversa da zero è raro; il migliaio formattato no.
       if (/^-?[1-9]\d{0,2}\.\d{3}$/.test(t)) return s;
+      // «00123» è un codice (matricola, CAP), non un numero
+      if (/^0\d/.test(t)) return s;
       const n = Number(t);
       if (Number.isInteger(n) && n >= 1900 && n <= 2100) return s; // un anno resta un anno
       const decimali = t.includes(".") ? Math.min(2, t.split(".")[1]!.length) : 0;

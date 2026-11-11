@@ -40,6 +40,10 @@ export interface DataColumn<T> {
   secondaria?: boolean;
 }
 
+/** Colonne di identificativi: la rete di leggibilità non le tocca («24122» resta un CAP). */
+const INTESTAZIONE_IDENTIFICATIVO = /\b(cap|matricola|telefono|cellulare|iban|pernr|partita iva|codice fiscale|numero di (badge|documento|pratica))\b/i;
+const grezza = <T,>(c: DataColumn<T>) => typeof c.header === "string" && INTESTAZIONE_IDENTIFICATIVO.test(c.header);
+
 const INTESTAZIONE_SECONDARIA = /^\s*(codice|code|cod\.|e-?mail|identificativo|id)\b/i;
 function eSecondaria<T>(c: DataColumn<T>): boolean {
   return c.secondaria ?? (typeof c.header === "string" && INTESTAZIONE_SECONDARIA.test(c.header));
@@ -236,8 +240,8 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
               }}
             >
               {inTabella.map((c, i) => (
-                <td key={i} className={`px-4 py-2 align-middle ${c.align === "right" ? "text-right tabular-nums" : ""} ${c.cellClassName ?? ""}`}>
-                  {leggi.nodo(c.cell(row))}
+                <td key={i} className={`px-4 py-2 align-middle ${c.align === "right" ? "text-right tabular-nums" : ""} ${c.cellClassName ?? ""}`} {...(grezza(c) ? { "data-grezzo": "" } : {})}>
+                  {grezza(c) ? c.cell(row) : leggi.nodo(c.cell(row))}
                 </td>
               ))}
             </tr>
@@ -254,7 +258,7 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
                 c.header === "" || c === titoloRiga ? null : (
                   <div key={i} className="grid grid-cols-[10rem_1fr] gap-3 py-1.5 text-sm">
                     <dt className="text-muted-foreground"><ConSpiegazione>{c.header}</ConSpiegazione></dt>
-                    <dd className="min-w-0">{leggi.nodo(c.cell(rigaAperta))}</dd>
+                    <dd className="min-w-0" {...(grezza(c) ? { "data-grezzo": "" } : {})}>{grezza(c) ? c.cell(rigaAperta) : leggi.nodo(c.cell(rigaAperta))}</dd>
                   </div>
                 ),
               )}

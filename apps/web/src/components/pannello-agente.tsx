@@ -24,6 +24,7 @@ import { useTranslation } from "react-i18next";
 import { AgentActivityList, AgentPanel, Button, type AgentActivityStatus } from "@heuresys/ui";
 import { AGENT_DEV_ENABLED, useAgentStream } from "@/lib/use-agent-stream";
 import { paginaIdonea } from "@/lib/agente/idoneita";
+import { titoloLeggibile } from "@/lib/agente/risposta";
 import { useContestoDichiarato, useVistaAttuale } from "@/lib/agente/contesto";
 
 export function PannelloAgente() {
@@ -113,7 +114,7 @@ function PannelloAgenteAcceso({ pathname }: { pathname: string }) {
         }}
         items={agent.conversations.map((c) => ({
           id: c.id,
-          title: c.title,
+          title: titoloLeggibile(c.title),
           status: c.lastActivityStatus,
           updatedText: t("agente.aggiornata", { quando: quando(c.updatedAt) }),
         }))}

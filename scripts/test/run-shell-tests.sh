@@ -1847,6 +1847,69 @@ if [ "$fn_rossi" = 0 ]; then
 else
   fail "$fn_rossi funzione/i usata/e e mai definita/e — una riga morta che restituisce exit 0"
 fi
+# ------------------- R. rilascio-copia.sh — la produzione da una copia rilasciata (D1, piano turni 20261110)
+# Cosa difende: la copia nasce dallo sha e non dall'albero di lavoro; i dati vivi fuori da git sono
+# COLLEGATI (la produzione legge gli stessi file di prima), i rigenerabili e i worktree NO; un percorso
+# che e' sia in git sia ignorato FERMA; il collegamento del servizio cambia in un colpo; la pulizia
+# tiene le ultime due copie e quella in servizio; deploy-watch dentro una copia legge git dalla sorgente.
+section "rilascio-copia.sh — copia rilasciata (D1)"
+RC=scripts/rilascio-copia.sh
+if [ -f "$RC" ]; then
+  T="$(mktemp -d)"; S="$T/repo"; R="$T/rilasci"; L="$T/servizio/advanced-produzione"
+  git init -q "$S"; git -C "$S" config user.email t@t; git -C "$S" config user.name t; git -C "$S" config commit.gpgsign false
+  mkdir -p "$S/apps/web" "$S/docs/kb" "$S/scripts"
+  printf '.env\n.secrets/\npg_dump_snapshots/\nnode_modules/\n.next/\n.claude/worktrees/\n_da_eliminare/\ndocs/kb/gen.json\n' > "$S/.gitignore"
+  echo traccia > "$S/apps/web/page.txt"; echo kb > "$S/docs/kb/README.md"; cp "$RC" "$S/scripts/"
+  git -C "$S" add -A >/dev/null; git -C "$S" commit -qm c1; SHA1="$(git -C "$S" rev-parse HEAD)"
+  echo nonincopia > "$S/apps/web/page.txt"                      # modifica non committata: non deve passare
+  echo V=1 > "$S/.env"; mkdir -p "$S/.secrets" "$S/pg_dump_snapshots" "$S/node_modules/x" "$S/apps/web/.next" "$S/.claude/worktrees/w" "$S/_da_eliminare/y"
+  echo s > "$S/.secrets/k"; echo "$SHA1" > "$S/pg_dump_snapshots/LAST_GOOD_SHA"; echo g > "$S/docs/kb/gen.json"
+  A1="$(RILASCIO_TS=20261110_000001 bash "$RC" prepara "$S" "$SHA1" "$R" 2>/dev/null)"; rc=$?
+  { [ "$rc" = 0 ] && [ "$A1" = "$R/20261110_000001/albero" ]; } && ok "prepara: copia creata nella cartella datata" || fail "prepara rc=$rc ($A1)"
+  [ "$(cat "$A1/apps/web/page.txt" 2>/dev/null)" = traccia ] && ok "prepara: il codice e' quello dello sha, non dell'albero di lavoro" || fail "prepara ha preso l'albero di lavoro"
+  { [ -L "$A1/.env" ] && [ -L "$A1/.secrets" ] && [ -L "$A1/pg_dump_snapshots" ] && [ -L "$A1/docs/kb/gen.json" ]; } \
+    && ok "prepara: .env, .secrets, pg_dump_snapshots e un ignorato dentro una cartella tracciata sono collegati" || fail "prepara: dati vivi non collegati"
+  { [ ! -e "$A1/node_modules" ] && [ ! -e "$A1/apps/web/.next" ] && [ ! -e "$A1/.claude/worktrees" ] && [ ! -e "$A1/_da_eliminare" ]; } \
+    && ok "prepara: node_modules, .next, worktree e _da_eliminare NON sono collegati" || fail "prepara: rigenerabili collegati"
+  { [ "$(bash "$RC" commit "$A1")" = "$SHA1" ] && [ "$(bash "$RC" sorgente "$A1")" = "$S" ]; } && ok "prepara: .rilascio dice sha e sorgente" || fail "prepara: .rilascio errato"
+  # un file forzato in git dentro una cartella ignorata: il file viene dalla copia, il vicino ignorato e' collegato
+  mkdir -p "$S/gen"; printf 'gen/\n' >> "$S/.gitignore"; echo t > "$S/gen/tracciato"; echo v > "$S/gen/vivo"
+  git -C "$S" add .gitignore >/dev/null; git -C "$S" add -f gen/tracciato >/dev/null; git -C "$S" commit -qm c2
+  AG="$(RILASCIO_TS=20261110_000002 bash "$RC" prepara "$S" HEAD "$R" 2>/dev/null)"; rc=$?
+  { [ "$rc" = 0 ] && [ -f "$AG/gen/tracciato" ] && [ ! -L "$AG/gen/tracciato" ] && [ -L "$AG/gen/vivo" ]; } \
+    && ok "prepara: in una cartella ignorata il file tracciato viene dallo sha, il vicino vivo e' collegato" || fail "prepara cartella mista rc=$rc"
+  rm -rf "$AG/.rilascio"   # una cartella datata senza .rilascio: la pulizia non deve toccarla
+  A2="$(RILASCIO_TS=20261110_000003 bash "$RC" prepara "$S" HEAD "$R" 2>/dev/null)"
+  A3="$(RILASCIO_TS=20261110_000004 bash "$RC" prepara "$S" HEAD "$R" 2>/dev/null)"
+  bash "$RC" punta "$L" "$A1" >/dev/null 2>&1 && [ "$(readlink -f "$L")" = "$(readlink -f "$A1")" ] && ok "punta: il collegamento va alla copia" || fail "punta"
+  mkdir -p "$T/finto"; bash "$RC" punta "$L" "$T/finto" >/dev/null 2>&1; rc=$?
+  { [ "$rc" = 1 ] && [ "$(readlink -f "$L")" = "$(readlink -f "$A1")" ]; } && ok "punta: una cartella qualunque e' rifiutata e il servizio non cambia" || fail "punta cartella finta rc=$rc"
+  bash "$RC" punta "$L" "$S" >/dev/null 2>&1 && ok "punta: la cartella del repo e' ammessa (ritorno dal primo passaggio)" || fail "punta repo"
+  bash "$RC" punta "$L" "$A1" >/dev/null 2>&1
+  bash "$RC" pulisci "$R" "$L" 2 >/dev/null 2>&1
+  { [ -d "$A3" ] && [ -d "$A2" ] && [ -d "$A1" ] && [ -d "$R/20261110_000002" ]; } \
+    && ok "pulisci: tiene le ultime due, quella in servizio e cio' che non e' una copia rilasciata" || fail "pulisci: $(ls "$R" | tr '\n' ' ')"
+  bash "$RC" punta "$L" "$A3" >/dev/null 2>&1; bash "$RC" pulisci "$R" "$L" 2 >/dev/null 2>&1
+  { [ ! -d "$A1" ] && [ -d "$A2" ] && [ -d "$A3" ] && [ -e "$S/.env" ]; } && ok "pulisci: la copia uscita dalla rotazione si toglie, i dati vivi restano" || fail "pulisci giro 2: $(ls "$R" | tr '\n' ' ')"
+  # deploy-watch eseguito DA una copia: git dalla sorgente
+  if [ -f scripts/deploy-watch.sh ]; then
+    B="$T/origin.git"; git init -q --bare "$B"; git -C "$S" remote add origin "$B"; git -C "$S" push -q origin HEAD:refs/heads/main 2>/dev/null
+    mkdir -p "$A3/scripts/lib"; cp scripts/deploy-watch.sh "$A3/scripts/"; cp scripts/lib/deploy-paths.sh "$A3/scripts/lib/" 2>/dev/null
+    out="$(DEPLOY_WATCH_DRYRUN=1 REPO_DIR="$A3" bash "$A3/scripts/deploy-watch.sh" 2>&1)"; rc=$?
+    { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'nessun deploy armato' && [ -f "$S/.deploy-watch.lock" ]; } \
+      && ok "deploy-watch da una copia: legge git e tiene il lock nella sorgente" || fail "deploy-watch da copia ($rc: $out)"
+  fi
+  rm -rf "$T"
+  # il modo copia di vm-deploy: il collegamento cambia solo subito prima del riavvio
+  if awk '/rilascio-copia.sh" punta "\$SERVIZIO_LINK" "\$REPO_DIR"/{p=NR} /^log "restart"/{r=NR} /pnpm --filter @heuresys\/web build/{b=NR} END{exit !(p && r && b && b<p && p<r)}' scripts/vm-deploy.sh; then
+    ok "vm-deploy: in modo copia il servizio passa alla copia dopo la build e prima del riavvio"
+  else fail "vm-deploy: ordine build/punta/riavvio in modo copia"; fi
+  if awk '/gate_ci "\$DEPLOY_SHA"/{g=NR} /rilascio-copia.sh" prepara/{p=NR} END{exit !(g && p && g<p)}' scripts/vm-deploy.sh; then
+    ok "vm-deploy: in modo copia il cancello CI viene prima della copia"
+  else fail "vm-deploy: cancello CI dopo la preparazione della copia"; fi
+  grep -q 'reset --hard' <(sed -n '/^if \[ "\$COPIA" = 1 \] && \[ -z/,/^fi$/p' scripts/vm-deploy.sh) \
+    && fail "vm-deploy: il modo copia fa reset --hard della cartella del repo" || ok "vm-deploy: il modo copia non tocca la cartella del repo"
+fi
 # ---------------------------------------------------------------- summary
 printf '\n%d ok, %d failed\n' "$PASS" "$FAIL"
 [ "$FAIL" = 0 ]

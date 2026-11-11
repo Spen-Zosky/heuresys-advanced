@@ -142,6 +142,9 @@ ROUTES: list[tuple[str, list[str]]] = [
     ("apps/api/src/modules/tenant-consolidation/", ["typecheck", "test-api", "anagrafe-agenti"]),
     ("apps/api/",        ["typecheck", "test-api"]),
     ("packages/shared/", ["typecheck", "test-api"]),
+    # I3 (piano dell'assistente nelle interfacce): ogni voce del menu ha una lettura dell'assistente
+    # o un'eccezione scritta. La guardano le pagine, la barra laterale e il controllo stesso.
+    ("apps/web/src/app/(authenticated)/", ["typecheck", "lint", "letture-agente"]),
     ("apps/web/",        ["typecheck", "lint"]),
     ("apps/showcase/",   ["typecheck", "lint"]),
     # ⚠ 2026-09-26 (#251) — il gateway dell'agente non instradava NIENTE, nemmeno il
@@ -149,7 +152,10 @@ ROUTES: list[tuple[str, list[str]]] = [
     # DECISIONE (`agent-perimetri.json`, `agent-operations.json`). Conseguenza misurata:
     # aggiungere 31 prove e riscrivere il gate lasciava il cancello locale verde, perche'
     # non aveva guardato. La copertura e' ora un caso del `selftest`, visto rosso prima.
-    ("apps/agent-gateway/", ["typecheck", "agent-gateway-test", "anagrafe-agenti"]),
+    ("apps/agent-gateway/", ["typecheck", "agent-gateway-test", "anagrafe-agenti", "letture-agente"]),
+    ("db/migrations/000484_la_barra_laterale_per_funzione.sql", ["letture-agente"]),
+    ("docs/kb/tools/check_letture_agente.py", ["letture-agente"]),
+    ("docs/kb/tools/letture_agente_eccezioni.json", ["letture-agente"]),
     # T5b (P22): l'anagrafe degli agenti e il suo controllo instradano il confronto col codice.
     ("docs/architecture/agenti/", ["anagrafe-agenti"]),
     ("docs/kb/tools/check_anagrafe_agenti.py", ["anagrafe-agenti"]),
@@ -305,6 +311,9 @@ SUITES: dict[str, tuple[str, str]] = {
     # Il datastore si confronta se sta accanto a questo repository, altrimenti si dice non verificato.
     "anagrafe-agenti":    ("L0", "python docs/kb/tools/check_anagrafe_agenti.py --selftest && "
                                  "python docs/kb/tools/check_anagrafe_agenti.py"),
+    # I3: le letture dell'assistente per ogni voce della barra laterale, o un'eccezione scritta.
+    "letture-agente":     ("L0", "python docs/kb/tools/check_letture_agente.py --selftest && "
+                                 "python docs/kb/tools/check_letture_agente.py"),
     # I test del gateway, che sono anche i guardiani della coerenza fra i perimetri decisi e
     # la mappa generata. L0 nel costo, L1 nella sostanza: girano senza database.
     "agent-gateway-test": ("L1", "pnpm --filter @heuresys/agent-gateway test"),

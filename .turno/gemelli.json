@@ -1,0 +1,27 @@
+{
+  "repo": "heuresys-advanced",
+  "macchine": ["vm", "debian"],
+  "git": { "rami": ["main"] },
+  "node": [ { "cartella": ".", "node": "22", "pnpm": "9.15.0" } ],
+  "database": [ { "nome": "heuresys_advanced", "porta_per": { "vm": 5432, "debian": 5432 } } ],
+  "solo_produzione": [
+    ".env",
+    ".secrets",
+    "pg_dump_snapshots",
+    "qa_artifacts/storia36",
+    ".data",
+    ".handoff",
+    ".zp",
+    ".deploy-watch-state",
+    ".deploy-watch.lock",
+    ".agents",
+    ".codex",
+    ".codex-review",
+    "_da_eliminare"
+  ],
+  "escludi_nomi": ["_da_eliminare"],
+  "riti": {
+    "dopo_presa": [ { "cmd": "bash scripts/turno/dopo-presa-debian.sh", "macchine": ["debian"] } ],
+    "prima_di_chiudere": [ "python3 scripts/turno/controlla-turno.py heuresys-advanced" ]
+  }
+}

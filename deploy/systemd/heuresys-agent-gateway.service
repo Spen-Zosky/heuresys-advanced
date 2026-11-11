@@ -1,0 +1,28 @@
+# Template — placeholders (@@...@@) are rendered by scripts/vm-deploy.sh. Do NOT install by hand.
+# Portata nei modelli il 2026-11-10 (D1 di docs/piani/PIANO_turni-advanced-datastore_20261110.md):
+# fino ad allora l'unita' era scritta a mano in /etc e girava dalla cartella del repo; ora segue la
+# copia rilasciata come api e web. Gli override locali (AGENT_GATEWAY_ALLOWED_USER_IDS, origine web)
+# restano nel drop-in /etc/systemd/system/heuresys-agent-gateway.service.d/, che vm-deploy non tocca.
+[Unit]
+Description=Heuresys Advanced — agent-gateway (giudice del consolidamento, abbonamento Claude, :8790)
+After=network-online.target heuresys-advanced-api.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=@@REPO_DIR@@/apps/agent-gateway
+Environment=PATH=%h/.local/bin:@@NODE_BIN@@:/usr/local/bin:/usr/bin:/bin
+Environment=HOME=%h
+Environment=NODE_ENV=production
+Environment=AGENT_GATEWAY_PORT=8790
+Environment=AGENT_GATEWAY_SUBSCRIPTION_AUTH=1
+Environment=HEURESYS_API=http://127.0.0.1:@@API_PORT@@
+UnsetEnvironment=ANTHROPIC_API_KEY
+EnvironmentFile=-/etc/heuresys/agent-gateway-consolidation.conf
+ExecStart=@@REPO_DIR@@/apps/agent-gateway/node_modules/.bin/tsx src/server.ts
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

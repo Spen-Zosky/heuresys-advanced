@@ -455,7 +455,7 @@
       "code": "Codice",
       "name": "Nome",
       "type": "Tipo",
-      "parent": "Unità superiore",
+      "parent": "Parent",
       "active": "Attiva"
     },
     "dash": "—",

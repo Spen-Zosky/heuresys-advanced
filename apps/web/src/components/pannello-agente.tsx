@@ -17,23 +17,32 @@
  * Dal piano dei principi agentici T6c (ADR-0056 D4): accanto al pannello la colonna delle
  * conversazioni salvate (`AgentActivityList`), da cui la persona ne riprende una; il rifiuto di
  * una proposta chiede il motivo, che il gateway registra (senza motivo l'API risponde 422).
+ *
+ * Dal blocco I2 del piano dell'assistente nelle interfacce (logiche L1, L2, L9, riprese da
+ * mod-platform): un simbolo fisso in un angolo (`AgentLauncher`, con il puntino quando c'è un
+ * lavoro in corso) apre una finestra sopra la pagina (`AgentWindow`, @heuresys/ui 1.4.0) con le
+ * attività a sinistra, la conversazione al centro e a destra ciò che l'attività ha toccato
+ * (`lib/agente/lato-finestra.ts`). Il componente resta montato su ogni pagina a flag acceso,
+ * così cambiare pagina o chiudere la finestra non interrompe lo stream; il simbolo si mostra
+ * sulle pagine idonee e, altrove, solo mentre la finestra è aperta o un lavoro è in corso.
  */
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { AgentActivityList, AgentPanel, Button, type AgentActivityStatus } from "@heuresys/ui";
+import { AgentActivityList, AgentLauncher, AgentPanel, AgentWindow, type AgentActivityStatus } from "@heuresys/ui";
 import { AGENT_DEV_ENABLED, useAgentStream } from "@/lib/use-agent-stream";
 import { paginaIdonea } from "@/lib/agente/idoneita";
 import { titoloLeggibile } from "@/lib/agente/risposta";
 import { useContestoDichiarato, useVistaAttuale } from "@/lib/agente/contesto";
+import { latoDellaFinestra, latoVuoto, type LatoDellaFinestra } from "@/lib/agente/lato-finestra";
 
 export function PannelloAgente() {
   const pathname = usePathname() ?? "";
-  if (!AGENT_DEV_ENABLED || paginaIdonea(pathname) === null) return null;
-  return <PannelloAgenteAcceso pathname={pathname} />;
+  if (!AGENT_DEV_ENABLED) return null;
+  return <PannelloAgenteAcceso pathname={pathname} idonea={paginaIdonea(pathname) !== null} />;
 }
 
-function PannelloAgenteAcceso({ pathname }: { pathname: string }) {
+function PannelloAgenteAcceso({ pathname, idonea }: { pathname: string; idonea: boolean }) {
   const { t, i18n } = useTranslation("common");
   const dichiarato = useContestoDichiarato();
   const vistaAttuale = useVistaAttuale();
@@ -55,6 +64,8 @@ function PannelloAgenteAcceso({ pathname }: { pathname: string }) {
     },
   });
   const [aperto, setAperto] = useState(false);
+  const [attivitaCompresse, setAttivitaCompresse] = useState(false);
+  const chiudi = useCallback(() => setAperto(false), []);
   const [prompt, setPrompt] = useState("");
   const { refreshConversations } = agent;
 
@@ -86,42 +97,61 @@ function PannelloAgenteAcceso({ pathname }: { pathname: string }) {
         : t("agente.approvalDescRead", { persone: agent.approval.personeDistinte })
       : t("agente.approvalDesc");
 
-  if (!aperto) {
-    return (
-      <div className="flex justify-end px-6 pt-4">
-        <Button variant="outline" size="sm" data-testid="agente-apri" onClick={() => setAperto(true)}>
-          {t("agente.apri")}
-        </Button>
-      </div>
-    );
-  }
+  const strumentoInAttesa = agent.approval === null ? null : typeof agent.approval.tool === "string" ? agent.approval.tool : t("agente.approvalTitle");
+  const lato = latoDellaFinestra(agent.lines, strumentoInAttesa);
+  const occupato = agent.running || agent.approval !== null;
+
+  // Il simbolo si mostra sulle pagine idonee; su un'altra pagina resta solo se la finestra è
+  // aperta o c'è un lavoro in corso, così cambiare pagina non spegne niente (L1).
+  const mostraSimbolo = idonea || aperto || occupato;
 
   return (
-    <section aria-label={t("agente.title")} className="space-y-2 px-6 pt-4">
-      <div className="flex justify-end">
-        <Button variant="ghost" size="sm" data-testid="agente-chiudi" onClick={() => setAperto(false)}>
-          {t("agente.chiudi")}
-        </Button>
-      </div>
-      <AgentActivityList
-        testIdPrefix="agente-attivita"
+    <>
+      {mostraSimbolo && (
+        <AgentLauncher
+          testIdPrefix="agente"
+          label={t("agente.title")}
+          busyLabel={t("agente.inCorso")}
+          open={aperto}
+          busy={occupato}
+          onToggle={() => setAperto((a) => !a)}
+        />
+      )}
+      <AgentWindow
+        testIdPrefix="agente"
+        open={aperto}
+        onClose={chiudi}
         labels={{
-          title: t("agente.attivitaTitolo"),
-          empty: t("agente.attivitaVuota"),
-          resume: t("agente.riprendi"),
-          newConversation: t("agente.nuovaConversazione"),
-          statusLabels: stati,
+          title: t("agente.title"),
+          close: t("agente.chiudi"),
+          toggleAside: t("agente.comprimiAttivita"),
+          sideTitle: t("agente.latoTitolo"),
         }}
-        items={agent.conversations.map((c) => ({
-          id: c.id,
-          title: titoloLeggibile(c.title),
-          status: c.lastActivityStatus,
-          updatedText: t("agente.aggiornata", { quando: quando(c.updatedAt) }),
-        }))}
-        selectedId={agent.conversationId}
-        onSelect={(id) => void agent.resume(id)}
-        onNew={agent.startNew}
-      />
+        asideCollapsed={attivitaCompresse}
+        onToggleAside={() => setAttivitaCompresse((c) => !c)}
+        aside={
+          <AgentActivityList
+            testIdPrefix="agente-attivita"
+            labels={{
+              title: t("agente.attivitaTitolo"),
+              empty: t("agente.attivitaVuota"),
+              resume: t("agente.riprendi"),
+              newConversation: t("agente.nuovaConversazione"),
+              statusLabels: stati,
+            }}
+            items={agent.conversations.map((c) => ({
+              id: c.id,
+              title: titoloLeggibile(c.title),
+              status: c.lastActivityStatus,
+              updatedText: t("agente.aggiornata", { quando: quando(c.updatedAt) }),
+            }))}
+            selectedId={agent.conversationId}
+            onSelect={(id) => void agent.resume(id)}
+            onNew={agent.startNew}
+          />
+        }
+        side={<LatoFinestra lato={lato} />}
+      >
       <AgentPanel
         testIdPrefix="agente"
         context={contesto}
@@ -175,6 +205,44 @@ function PannelloAgenteAcceso({ pathname }: { pathname: string }) {
         onApproval={(decision, reason) => void agent.resolveApproval(decision, reason)}
         notice={agent.notice === null || testoAvviso === null ? null : { kind: agent.notice.kind, text: testoAvviso }}
       />
-    </section>
+      </AgentWindow>
+    </>
+  );
+}
+
+function LatoFinestra({ lato }: { lato: LatoDellaFinestra }) {
+  const { t } = useTranslation("common");
+  if (latoVuoto(lato)) return <p className="text-xs text-muted-foreground" data-testid="agente-lato-vuoto">{t("agente.latoVuoto")}</p>;
+  return (
+    <div className="space-y-3 text-xs" data-testid="agente-lato">
+      {lato.proposta !== null && (
+        <section>
+          <h3 className="mb-1 font-semibold">{t("agente.latoProposta")}</h3>
+          <p data-testid="agente-lato-proposta">{lato.proposta}</p>
+        </section>
+      )}
+      {lato.comandi.length > 0 && (
+        <section>
+          <h3 className="mb-1 font-semibold">{t("agente.latoPagina")}</h3>
+          <ul className="space-y-1" data-testid="agente-lato-comandi">
+            {lato.comandi.map((c, i) => (
+              <li key={i}>
+                <span className="font-medium">{c.nome}</span> ({c.esito}){c.dettaglio ? `: ${c.dettaglio}` : ""}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+      {lato.letture.length > 0 && (
+        <section>
+          <h3 className="mb-1 font-semibold">{t("agente.latoLetture")}</h3>
+          <ul className="space-y-1" data-testid="agente-lato-letture">
+            {lato.letture.map((l) => (
+              <li key={l}>{l}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </div>
   );
 }

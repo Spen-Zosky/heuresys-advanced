@@ -964,7 +964,14 @@
     "statoFATTA": "Fatta",
     "statoFALLITA": "Non riuscita",
     "statoINTERROTTA": "Interrotta",
-    "aggiornata": "Aggiornata il {{quando}}"
+    "aggiornata": "Aggiornata il {{quando}}",
+    "inCorso": "lavoro in corso",
+    "comprimiAttivita": "Mostra o nascondi le attività",
+    "latoTitolo": "Ciò che ha toccato",
+    "latoPagina": "Sulla pagina",
+    "latoLetture": "Ha letto",
+    "latoProposta": "Aspetta la tua decisione",
+    "latoVuoto": "Ancora niente: qui compare ciò che l'assistente fa sulla pagina, legge o ti propone."
   },
   "dettaglio": {
     "riga": "Dettaglio della riga"

@@ -163,7 +163,7 @@ giro)
   carica; shift 2
   [ -f "$B/persone.json" ] || bash "$0" persone "$nome"
   out="$B/giro-$(date +%Y%m%d-%H%M)"
-  ( cd "$C/apps/web" && GIRO_GETTONE="bash $REPO/scripts/banco-verifica.sh gettone $nome {email}" GIRO_BASE="http://127.0.0.1:$WEBPORT" GIRO_PERSONE="$B/persone.json" GIRO_OUT="$out" node tests/giro/giro.mjs "$@" )
+  ( cd "$C/apps/web" && GIRO_GETTONE="[\"bash\",\"$REPO/scripts/banco-verifica.sh\",\"gettone\",\"$nome\",\"{email}\"]" GIRO_BASE="http://127.0.0.1:$WEBPORT" GIRO_PERSONE="$B/persone.json" GIRO_OUT="$out" node tests/giro/giro.mjs "$@" )
   echo "esito: $out" ;;
 stato)
   carica; echo "copia $C ($(git -C "$C" log --oneline -1))"; cat "$B/banco.env"

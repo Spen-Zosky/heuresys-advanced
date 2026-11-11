@@ -10,7 +10,7 @@
  *
  * `persone.json` è un elenco di { chiave, email, ruoli, cookie } dove `cookie` è il valore del
  * cookie di accesso firmato con la chiave del banco (`scripts/banco-verifica.sh persone`).
- * Con `GIRO_GETTONE` (un comando con `{email}`, lo passa `banco-verifica.sh giro`) il cookie si
+ * Con `GIRO_GETTONE` (vettore JSON di argomenti con `{email}`, lo passa `banco-verifica.sh giro`) il cookie si
  * rifirma prima di ogni persona: la conferma del secondo fattore vale 15 minuti, e un cookie
  * firmato all'inizio del giro (o il giorno prima) farebbe rispondere 403 a ogni dato riservato
  * delle persone visitate dopo, accusando la pagina di un difetto che non ha.
@@ -24,7 +24,7 @@
  * Esito in GIRO_OUT: `giro-esito.json`, `rapporto.md` (per classe e per pagina), `provini.html`
  * (tutte le schermate) e le schermate in `schermate/<persona>/`.
  */
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
@@ -71,6 +71,14 @@ async function risolvi(page, rotta) {
   return hrefs.find((h) => h && re.test(h.split("?")[0])) ?? null;
 }
 
+/** GIRO_GETTONE è un vettore JSON di argomenti: nessuna shell, l'email resta un argomento. */
+function gettone(email) {
+  const argv = JSON.parse(process.env.GIRO_GETTONE ?? "[]").map((a) => String(a).replace("{email}", email));
+  const [cmd, ...args] = argv;
+  if (!cmd) throw new Error("GIRO_GETTONE vuoto");
+  return execFileSync(cmd, args, { encoding: "utf8" }).trim();
+}
+
 const persone = JSON.parse(fs.readFileSync(PERSONE, "utf8")).filter((p) => !SOLO_PERSONE || SOLO_PERSONE.includes(p.chiave));
 const tutte = rotte().filter((r) => !SOLO || SOLO.includes(r));
 fs.mkdirSync(OUT, { recursive: true });
@@ -83,7 +91,7 @@ for (const p of persone) {
   fs.mkdirSync(dir, { recursive: true });
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, locale: "it-IT" });
   const cookie = process.env.GIRO_GETTONE
-    ? execSync(process.env.GIRO_GETTONE.replace("{email}", p.email), { encoding: "utf8" }).trim()
+    ? gettone(p.email)
     : p.cookie;
   await ctx.addCookies([{ name: "hrx_access", value: cookie, domain: host, path: "/", httpOnly: true, sameSite: "Lax" }]);
   const page = await ctx.newPage();

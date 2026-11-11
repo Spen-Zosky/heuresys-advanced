@@ -213,7 +213,18 @@ export type DashboardBlockRow = z.infer<typeof DashboardBlockRowSchema>;
 export const DashboardBlockContentSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("counters"), counters: z.array(DashboardBlockCounterSchema) }),
   z.object({ kind: z.literal("series"), points: z.array(DashboardBlockPointSchema) }),
-  z.object({ kind: z.literal("list"), rows: z.array(DashboardBlockRowSchema) }),
+  z.object({
+    kind: z.literal("list"),
+    rows: z.array(DashboardBlockRowSchema),
+    /**
+     * Le intestazioni delle tre colonne nel linguaggio della vista («Unità», «Responsabile»,
+     * «Unità dipendenti»): «Voce, Dettaglio, Valore» non dicono che cosa si guarda (R2).
+     * Assente, la pagina usa le intestazioni generiche.
+     */
+    columns: z
+      .object({ label: z.string(), detail: z.string().optional(), value: z.string().optional() })
+      .optional(),
+  }),
 ]);
 export type DashboardBlockContent = z.infer<typeof DashboardBlockContentSchema>;
 

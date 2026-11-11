@@ -332,6 +332,7 @@
       "POSITION_INTELLIGENCE_MAP": "Position intelligence map",
       "ENTERPRISE_BLUEPRINT_MAP": "Enterprise blueprint map"
     },
+    "vizExportFormat": {"SVG": "Vector image (SVG)", "MERMAID": "Mermaid diagram", "GENERIC_JSON": "JSON data", "REACT_FLOW_JSON": "JSON data for graph editors"},
     "vizEdgeType": {
       "REPORTS_TO": "Reports to",
       "REQUIRES_SKILL": "Requires skill",

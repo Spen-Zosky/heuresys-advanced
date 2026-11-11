@@ -161,7 +161,6 @@ export default function RequisitionsPage() {
           <table className="w-full text-sm" data-testid="requisitions-table">
             <thead className="bg-muted/40 text-left text-xs uppercase text-muted-foreground">
               <tr>
-                <th className="px-4 py-2">{t("recruiting.fields.code")}</th>
                 <th className="px-4 py-2">{t("recruiting.fields.position")}</th>
                 <th className="px-4 py-2">{t("recruiting.fields.headcount")}</th>
                 <th className="px-4 py-2">{t("recruiting.fields.reason")}</th>
@@ -171,8 +170,11 @@ export default function RequisitionsPage() {
             <tbody className="divide-y divide-border"><Leggibile>
               {items.map((r) => (
                 <tr key={r.requisitionId} data-testid="requisition-row">
-                  <td className="px-4 py-2 font-medium" data-testid="requisition-row-code">{r.code}</td>
-                  <td className="px-4 py-2"><NomeOppure nome={r.positionTitle} id={r.positionId} /></td>
+                  {/* C3: la posizione è ciò che si legge; il codice della richiesta resta accanto */}
+                  <td className="px-4 py-2">
+                    <div className="font-medium"><NomeOppure nome={r.positionTitle} id={r.positionId} /></div>
+                    <div className="text-xs text-muted-foreground" data-testid="requisition-row-code" data-grezzo>{r.code}</div>
+                  </td>
                   <td className="px-4 py-2">{r.headcount}</td>
                   <td className="px-4 py-2">{r.reason ? t(`recruiting.reason.${r.reason}`) : "—"}</td>
                   <td className="px-4 py-2">

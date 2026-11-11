@@ -282,7 +282,7 @@ export default function VisualizationDetailPage() {
               onChange={(e) => setFormat(e.target.value as ExportFormat)}
             >
               {EXPORT_FORMATS.map((f) => (
-                <option key={f} value={f}>{f}</option>
+                <option key={f} value={f}>{enumLabel("vizExportFormat", f)}</option>
               ))}
             </select>
             {canCreate ? (

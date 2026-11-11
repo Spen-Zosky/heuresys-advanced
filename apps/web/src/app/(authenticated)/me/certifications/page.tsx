@@ -78,7 +78,7 @@ function buildColumns(t: CertI18n, fmt: Formati): DataColumn<MeCertification>[] 
     { header: t("certifications.colIssued"), cell: (c) => <span className="text-xs text-muted-foreground">{fmt.data(c.issuedDate)}</span> },
     { header: t("certifications.colExpires"), cell: (c) => <span className="text-xs text-muted-foreground">{fmt.data(c.expiresDate)}</span> },
     {
-      header: t("certifications.colCredential"),
+      header: t("certifications.colCredential"), secondaria: true,
       cell: (c) => <span className="font-mono text-xs text-muted-foreground">{c.credentialId ?? "—"}</span>,
     },
   ];

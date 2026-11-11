@@ -40,6 +40,7 @@ export default function PostingsPage() {
   const qc = useQueryClient();
   const q = usePostings();
   const requisitions = useRequisitions();
+  const posizioneDellaRichiesta = new Map((requisitions.data?.items ?? []).map((r) => [r.requisitionId, r.positionTitle ?? r.code] as const));
   const [feedback, setFeedback] = useState<{ kind: "ok" | "err"; msg: string } | null>(null);
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
@@ -159,7 +160,6 @@ export default function PostingsPage() {
           <table className="w-full text-sm" data-testid="postings-table">
             <thead className="bg-muted/40 text-left text-xs uppercase text-muted-foreground">
               <tr>
-                <th className="px-4 py-2">{t("recruiting.fields.code")}</th>
                 <th className="px-4 py-2">{t("recruiting.fields.title")}</th>
                 <th className="px-4 py-2">{t("recruiting.fields.requisition")}</th>
                 <th className="px-4 py-2">{t("recruiting.fields.visibility")}</th>
@@ -169,9 +169,12 @@ export default function PostingsPage() {
             <tbody className="divide-y divide-border"><Leggibile>
               {items.map((p) => (
                 <tr key={p.postingId} data-testid="posting-row">
-                  <td className="px-4 py-2 font-medium" data-testid="posting-row-code">{p.code}</td>
-                  <td className="px-4 py-2">{p.title}</td>
-                  <td className="px-4 py-2">{p.requisitionCode ?? "—"}</td>
+                  {/* C3: il titolo è ciò che si legge; il codice resta accanto, in piccolo */}
+                  <td className="px-4 py-2">
+                    <div className="font-medium">{p.title}</div>
+                    <div className="text-xs text-muted-foreground" data-testid="posting-row-code" data-grezzo>{p.code}</div>
+                  </td>
+                  <td className="px-4 py-2">{posizioneDellaRichiesta.get(p.requisitionId) ?? p.requisitionCode ?? "—"}</td>
                   <td className="px-4 py-2"><Badge variant="outline" data-testid="posting-row-visibility">{t(`recruiting.visibility.${p.visibility}`)}</Badge></td>
                   <td className="px-4 py-2">
                     <div className="flex items-center gap-2">

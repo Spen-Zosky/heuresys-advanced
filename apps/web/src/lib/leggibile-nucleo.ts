@@ -82,8 +82,17 @@ export function costruisci(fmt: Formati, enumi: Map<string, string>, rubrica: Ru
           (_m, prima: string, intera: string, dec: string) => `${prima}${fmt.numero(Number(`${intera}.${dec}`), Math.min(2, dec.replace(/0+$/, "").length))}`,
         )
       : s;
-    if (!t.includes("@") && !/[0-9a-f]{8}-/i.test(t)) return conQuantita;
-    s = conQuantita;
+    // Un importo accanto alla sua valuta: «4,069 EUR» (migliaia all'inglese) e «37467.00 EUR»
+    // (decimale col punto) si scrivono «4.069 EUR» e «37.467 EUR».
+    const conImporti = italiano
+      ? conQuantita
+          .replace(/(^|[\s(])(\d{1,3}(?:,\d{3})+)(\.\d+)?(?=\s*(?:EUR|€|USD|GBP|CHF)\b)/g, (_m, prima: string, intera: string, dec?: string) =>
+            `${prima}${fmt.numero(Number(intera.replace(/,/g, "") + (dec ?? "")), dec ? 2 : 0)}`)
+          .replace(/(^|[\s(])(\d{4,})\.(\d{1,2})(?=\s*(?:EUR|€|USD|GBP|CHF)\b)/g, (_m, prima: string, intera: string, dec: string) =>
+            `${prima}${fmt.numero(Number(`${intera}.${dec}`), /^0+$/.test(dec) ? 0 : 2)}`)
+      : conQuantita;
+    if (!t.includes("@") && !/[0-9a-f]{8}-/i.test(t)) return conImporti;
+    s = conImporti;
     return s
       .replace(EMAIL, (m) => perEmail.get(m.toLowerCase()) ?? m)
       .replace(UUID, (m) => perId.get(m.toLowerCase()) ?? perId.get(m) ?? m);

@@ -113,7 +113,7 @@ export default function MeAnalyticsPage() {
                       </div>
                       <p className="mt-1 text-xs text-muted-foreground">
                         {dev.data.capability.coverage != null &&
-                          `${fmt.percento(dev.data.capability.coverage, "0-1", 0)} ${t("analytics.development.capabilityCoverage")} · `}
+                          `${fmt.percento(dev.data.capability.coverage, "0-100", 0)} ${t("analytics.development.capabilityCoverage")} · `}
                         {t("analytics.development.computedAt")}{" "}
                         {fmt.data(dev.data.capability.computedAt)}
                       </p>

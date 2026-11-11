@@ -45,6 +45,19 @@ const INTESTAZIONE_IDENTIFICATIVO = /\b(cap|matricola|telefono|cellulare|iban|pe
 const grezza = <T,>(c: DataColumn<T>) => typeof c.header === "string" && INTESTAZIONE_IDENTIFICATIVO.test(c.header);
 
 const INTESTAZIONE_SECONDARIA = /^\s*(codice|code|cod\.|e-?mail|identificativo|id)\b/i;
+/** Una cella è vuota quando non porta niente: assente, stringa vuota, il trattino, o un elemento
+ *  che contiene soltanto uno di questi. */
+export function cellaVuota(n: unknown, profondita = 0): boolean {
+  if (n === null || n === undefined || n === false || n === "") return true;
+  if (typeof n === "string") return /^\s*(—|–|-|n\/d)?\s*$/i.test(n);
+  if (Array.isArray(n)) return n.every((x) => cellaVuota(x, profondita + 1));
+  if (profondita < 3 && typeof n === "object" && "props" in (n as object)) {
+    const p = (n as { props?: { children?: unknown } }).props;
+    if (p && "children" in p && typeof (n as { type?: unknown }).type === "string") return cellaVuota(p.children, profondita + 1);
+  }
+  return false;
+}
+
 function eSecondaria<T>(c: DataColumn<T>): boolean {
   return c.secondaria ?? (typeof c.header === "string" && INTESTAZIONE_SECONDARIA.test(c.header));
 }
@@ -174,7 +187,11 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
       ? [...columns.slice(0, -1), colonnaOrigine, ultima]
       : [...columns, colonnaOrigine];
   // In tabella le colonne del lavoro; nella scheda della riga tutte (C2, C3).
-  const primarie = colonne.filter((c) => !eSecondaria(c));
+  // C9: una colonna vuota in tutte le righe in vista non dice niente; esce dalla tabella e resta
+  // nella scheda della riga.
+  const vuotaOvunque = (c: DataColumn<T>) =>
+    visibleRows.length > 0 && c.header !== "" && visibleRows.every((r) => cellaVuota(c.cell(r)));
+  const primarie = colonne.filter((c) => !eSecondaria(c) && !vuotaOvunque(c));
   const inTabella = primarie.filter((c) => c.header !== "").length >= 2 ? primarie : colonne;
   const titoloRiga = inTabella.find((c) => c.header !== "") ?? colonne[0];
   const from = total === 0 ? 0 : start + 1;

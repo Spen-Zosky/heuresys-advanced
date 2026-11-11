@@ -35,12 +35,15 @@ export async function leggiQuadro(
   const mandatoHR = scope.kind === "all" || actor.roles.some((r) => HR_MANDATED_ROLES.has(r));
   const soloSe = scope.kind === "self";
 
-  const scelte = LENTI.filter(
+  const perArea = LENTI.filter(
     (l) =>
       l.aree.some((a) => aree.includes(a)) &&
       (!l.soloMandatoHR || mandatoHR) &&
       (soloSe ? l.personale === true : true),
   );
+  // Chi vede solo sé stesso, su una pagina che non ha lenti personali (la selezione,
+  // l'organigramma), riceve comunque le proprie: una pagina non apre mai muta (C15).
+  const scelte = perArea.length > 0 || !soloSe ? perArea : LENTI.filter((l) => l.personale === true);
 
   const nonCalcolate: string[] = [];
   const esiti: Array<Insight | null> = await Promise.all(

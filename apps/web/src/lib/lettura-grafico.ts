@@ -57,8 +57,12 @@ export function letturaDelGrafico(option: unknown, locale: string): { frase: str
   });
   if (frasi.length === 0) return null;
   const testo = frasi.join(" ");
+  const colonne = ["Voce", ...serie.map((s, i) => (typeof s.name === "string" && s.name ? s.name : serie.length === 1 ? "Valore" : `Serie ${i + 1}`))];
+  const tutte = [...righe.values()];
+  // C9: una serie senza nessun valore è una colonna di soli trattini; non si mostra
+  const tenute = colonne.map((_c, j) => j === 0 || tutte.some((r) => r[j] !== "—"));
   return {
     frase: testo.charAt(0).toUpperCase() + testo.slice(1),
-    tabella: { titolo: "Vedi i numeri del grafico", colonne: ["Voce", ...serie.map((s, i) => (typeof s.name === "string" && s.name ? s.name : serie.length === 1 ? "Valore" : `Serie ${i + 1}`))], righe: [...righe.values()] },
+    tabella: { titolo: "Vedi i numeri del grafico", colonne: colonne.filter((_c, j) => tenute[j]), righe: tutte.map((r) => r.filter((_v, j) => tenute[j])) },
   };
 }

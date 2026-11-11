@@ -19,6 +19,8 @@ describe("rete di leggibilità (C1, C2, C4)", () => {
     expect(l.testo("0.850")).toBe("0,85");
     expect(l.testo("Richiesta di ferie — 8.00 giorni dal 15/08/2026")).toBe("Richiesta di ferie — 8 giorni dal 15/08/2026");
     expect(l.testo("in coda (indice 71.4), a 57.1 su 100")).toBe("in coda (indice 71,4), a 57,1 su 100");
+    expect(l.testo("Adeguamento retributivo — 4,069 EUR")).toBe("Adeguamento retributivo — 4.069 EUR");
+    expect(l.testo("Salary set to 37467.00 EUR (hire)")).toContain("37.467 EUR");
     expect(l.testo("Mozilla/5.0 (X11; Linux x86_64)")).toBe("Mozilla/5.0 (X11; Linux x86_64)");
   });
   it("codici e frasi inglesi in italiano", () => {

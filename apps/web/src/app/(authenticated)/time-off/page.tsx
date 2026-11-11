@@ -111,7 +111,7 @@ export default function TimeOffPage() {
             onChange={(e) => setStatus(e.target.value)}
           >
             <option value="">{t("timeOff.allStatuses")}</option>
-            {REQUEST_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+            {REQUEST_STATUSES.map((s) => <option key={s} value={s}>{enumLabel("timeOffStatus", s)}</option>)}
           </select>
         </div>
         <EntityTable<TimeOffRequest>

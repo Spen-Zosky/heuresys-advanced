@@ -57,8 +57,12 @@ function buildColumns(
       cell: (r) => (
         <span className="flex flex-col leading-tight">
           <span className="font-medium text-foreground">{r.skillGroupName}</span>
-          <span className="text-[10px] text-muted-foreground">
-            {t("vrio.cols.skillCount", { count: r.skillCount })}
+          <span className="max-w-sm text-[10px] text-muted-foreground">
+            {/* il gruppo ESCO da solo può ingannare (la sicurezza informatica sta fra i servizi
+                della difesa): si dice quali competenze dell'azienda lo compongono davvero */}
+            {r.skillExamples.length > 0
+              ? t("vrio.cols.skillExamples", { count: r.skillCount, esempi: r.skillExamples.join(", ") })
+              : t("vrio.cols.skillCount", { count: r.skillCount })}
           </span>
         </span>
       ),

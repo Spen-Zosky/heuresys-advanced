@@ -613,6 +613,7 @@
     "cols": {
       "capability": "Capacità",
       "skillCount": "{{count}} competenze",
+      "skillExamples": "{{count}} competenze, tra cui {{esempi}}",
       "value": "Valore",
       "rarity": "Rarità",
       "inimitability": "Inimitabilità",

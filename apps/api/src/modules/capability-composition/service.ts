@@ -365,6 +365,7 @@ export function computeVrio(inputs: repo.VrioInputs): VrioCapabilityItem[] {
       skillGroupId: g.skillGroupId,
       skillGroupName: g.skillGroupName,
       skillCount: g.skillCount,
+      skillExamples: g.skillExamples,
       value: round4(value),
       rarity: round4(rarity),
       inimitability: round4(inimitability),

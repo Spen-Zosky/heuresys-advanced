@@ -66,6 +66,8 @@ export const VrioCapabilityItemSchema = z.object({
   skillGroupId: z.uuid(),
   skillGroupName: z.string(),
   skillCount: z.number().int().min(0), // skills of this group that are in play (held or required)
+  // le tre competenze del gruppo più presenti: dicono che cosa il gruppo è davvero in azienda
+  skillExamples: z.array(z.string()).default([]),
 
   // ---- dimensions: PERCENTILE within this org's capability set, each [0,1] ----
   value: z.number().min(0).max(1),

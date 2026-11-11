@@ -194,7 +194,10 @@
       "clear": "Torna al modello",
       "saved": "Decisione registrata.",
       "cleared": "La decisione è stata tolta: vale il modello.",
-      "empty": "Ancora nessun modello ancorato: non c'è niente su cui decidere."
+      "empty": "Ancora nessun modello ancorato: non c'è niente su cui decidere.",
+      "preparedByAgent": "Preparata dall'assistente: controlla e registra, oppure cambiala.",
+      "undoAgent": "Annulla l'ultimo passo dell'assistente",
+      "agentPending": "Decisioni preparate dall'assistente e non ancora registrate: {{n}}"
     },
     "submit": {
       "action": "Sottoponi alla firma",

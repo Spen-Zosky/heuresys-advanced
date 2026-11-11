@@ -81,6 +81,15 @@ export const READ_TOOL_NAMES = [
   "hrx_predictions_list",
   "hrx_predictions_get",
   "hrx_org_unit_processes_list",
+  // I3 (piano dell'assistente nelle interfacce): le pagine del menu che l'assistente non leggeva.
+  "hrx_capability_composition",
+  "hrx_capability_essential_ranking",
+  "hrx_capability_vrio",
+  "hrx_capability_maturity",
+  "hrx_matching_my_positions",
+  "hrx_matching_my_job_roles",
+  "hrx_matching_my_occupations",
+  "hrx_tenant_consolidations_list",
 ] as const;
 
 /** Write tools (allowlisted, but still routed through the HITL approval round-trip). */

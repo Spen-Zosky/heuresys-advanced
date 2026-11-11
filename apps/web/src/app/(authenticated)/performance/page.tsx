@@ -97,14 +97,14 @@ export default function PerformancePage() {
 
   const colonneCicli = useMemo<DataColumn<ReviewCycle>[]>(
     () => [
-      { header: t("performance.cycles.cols.code"), cell: (c) => <span className="text-xs font-medium">{c.code}</span> },
-      { header: t("performance.cycles.cols.name"), cell: (c) => <span className="text-xs">{c.name}</span> },
+      // Repertorio interfacce (B5): il nome del ciclo apre la riga, il codice non va a video (R2, R4).
+      { header: t("performance.cycles.cols.name"), cell: (c) => <span className="text-xs font-medium">{c.name}</span> },
       { header: t("performance.cycles.cols.type"), cell: (c) => <span className="text-xs">{enumLabel("perfReviewType", c.type)}</span> },
       {
         header: t("performance.cycles.cols.period"),
         cell: (c) => <span className="text-xs text-muted-foreground">{periodo(c.periodStart, c.periodEnd, fmt)}</span>,
       },
-      { header: t("performance.cycles.cols.status"), cell: (c) => <EnumStatusBadge domain="status" value={c.status} /> },
+      { header: t("performance.cycles.cols.status"), cell: (c) => <EnumStatusBadge domain="perfCycleStatus" value={c.status} /> },
     ],
     [t, enumLabel, fmt],
   );
@@ -115,7 +115,7 @@ export default function PerformancePage() {
         header: t("performance.reviews.cols.subject"),
         cell: (r) => (
           <span className="text-xs text-foreground">
-            {r.subjectEmail ?? (r.subjectUserId ? t("performance.reviews.subjectUnnamed") : "—")}
+            {r.subjectName ?? r.subjectEmail ?? (r.subjectUserId ? t("performance.reviews.subjectUnnamed") : "—")}
           </span>
         ),
       },
@@ -124,10 +124,6 @@ export default function PerformancePage() {
         cell: (r) => <span className="text-xs text-muted-foreground">{periodo(r.periodStart, r.periodEnd, fmt)}</span>,
       },
       { header: t("performance.reviews.cols.type"), cell: (r) => <span className="text-xs">{enumLabel("perfReviewType", r.type)}</span> },
-      {
-        header: t("performance.reviews.cols.status"),
-        cell: (r) => (r.status ? <EnumStatusBadge domain="status" value={r.status} /> : <span className="text-xs">—</span>),
-      },
       {
         header: t("performance.reviews.cols.overall"),
         cell: (r) => voto(r, "overallRating", r.overallRating),
@@ -155,6 +151,11 @@ export default function PerformancePage() {
             <span className="text-xs text-muted-foreground">{t("performance.reviews.notShared")}</span>
           ),
       },
+      // R3: lo stato chiude la riga.
+      {
+        header: t("performance.reviews.cols.status"),
+        cell: (r) => (r.status ? <EnumStatusBadge domain="perfReviewStatus" value={r.status} /> : <span className="text-xs">—</span>),
+      },
     ],
     [t, fmt, enumLabel],
   );
@@ -174,7 +175,7 @@ export default function PerformancePage() {
           </span>
         ),
       },
-      { header: t("performance.calib.cols.status"), cell: (s) => <EnumStatusBadge domain="status" value={s.status} /> },
+      { header: t("performance.calib.cols.status"), cell: (s) => <EnumStatusBadge domain="calibrationStatus" value={s.status} /> },
     ],
     [t, fmt],
   );

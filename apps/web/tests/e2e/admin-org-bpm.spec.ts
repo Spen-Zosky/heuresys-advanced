@@ -36,6 +36,10 @@ test.describe("MVP-2a admin org + bpm — live data", () => {
     await expect(page.getByTestId("processes-page")).toBeVisible();
     await expect(page.getByTestId("processes-count")).toContainText(/\d+\s+processi/);
     await expect(page.getByTestId("processes-row").first()).toBeVisible();
+    // Repertorio interfacce (B3): niente colonna del codice, il tipo in parole (R2, R4, R7).
+    const heads = (await page.locator("main table thead th").allTextContents()).map((h) => h.trim().toLowerCase());
+    expect(heads).toEqual(["n.", "processo", "tipo"]);
+    await expect(page.locator("main table tbody").getByText(/^(Essenziale|Facoltativo)$/).first()).toBeVisible();
   });
 
   test("/learning/training-initiatives lists scheduled sessions", async ({ page }) => {

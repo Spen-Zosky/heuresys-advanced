@@ -102,8 +102,8 @@
     "delegated_other": "{{count}} steps decided by delegation"
   },
   "engagement": {
-    "title": "Engagement & Surveys",
-    "description": "Survey results and pulse trend.",
+    "title": "Climate and surveys",
+    "description": "Survey results and quick check-in trend.",
     "count": "{{count}} surveys",
     "columns": {
       "title": "Title",
@@ -120,12 +120,12 @@
       "archived": "Archived"
     },
     "pulse": {
-      "cardTitle": "Pulse trend",
+      "cardTitle": "Quick check-in trend",
       "mood": "Mood",
       "workload": "Workload",
       "satisfaction": "Satisfaction",
-      "totalChecks": "{{count}} total checks",
-      "empty": "No pulse data.",
+      "totalChecks": "{{count}} check-ins in all",
+      "empty": "No quick check-in data.",
       "axisWeek": "Week",
       "axisScore": "Average score",
       "tableTitle": "Show the data as a table",
@@ -889,7 +889,9 @@
         "elements": "Nodes and edges",
         "versions": "Versions and exports"
       }
-    }
+    },
+    "activeOn": "Active",
+    "activeOff": "Inactive"
   },
   "content": {
     "title": "Content",
@@ -1359,7 +1361,7 @@
       "transactions": "Transactions"
     },
     "cols": {
-      "employee": "Employee",
+      "employee": "Person",
       "leaveType": "Leave type",
       "period": "Period",
       "days": "Days",
@@ -1368,11 +1370,17 @@
       "method": "Method",
       "amount": "Amount",
       "ccnl": "CCNL",
-      "active": "Active",
+      "active": "Status",
       "txnType": "Type",
       "description": "Description",
       "reference": "Reference",
       "date": "Date"
+    },
+    "referenceType": {
+      "TIME_OFF_REQUEST": "Time-off request",
+      "SYSTEM": "System",
+      "MANUAL": "Manual entry",
+      "ACCRUAL": "Automatic accrual"
     }
   },
   "talentReview": {

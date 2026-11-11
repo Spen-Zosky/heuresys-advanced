@@ -102,8 +102,8 @@
     "delegated_other": "{{count}} passi decisi per delega"
   },
   "engagement": {
-    "title": "Engagement & Sondaggi",
-    "description": "Risultati dei sondaggi e andamento pulse.",
+    "title": "Clima e sondaggi",
+    "description": "Risultati dei sondaggi e andamento delle rilevazioni rapide.",
     "count": "{{count}} sondaggi",
     "columns": {
       "title": "Titolo",
@@ -120,12 +120,12 @@
       "archived": "Archiviato"
     },
     "pulse": {
-      "cardTitle": "Andamento Pulse",
+      "cardTitle": "Andamento delle rilevazioni rapide",
       "mood": "Umore",
       "workload": "Carico",
       "satisfaction": "Soddisfazione",
-      "totalChecks": "{{count}} check totali",
-      "empty": "Nessun dato pulse.",
+      "totalChecks": "{{count}} rilevazioni in tutto",
+      "empty": "Nessuna rilevazione rapida.",
       "axisWeek": "Settimana",
       "axisScore": "Punteggio medio",
       "tableTitle": "Mostra i dati in tabella",
@@ -889,7 +889,9 @@
         "elements": "Nodi e collegamenti",
         "versions": "Versioni ed esportazioni"
       }
-    }
+    },
+    "activeOn": "Attiva",
+    "activeOff": "Non attiva"
   },
   "content": {
     "title": "Contenuti",
@@ -1359,7 +1361,7 @@
       "transactions": "Transazioni"
     },
     "cols": {
-      "employee": "Dipendente",
+      "employee": "Persona",
       "leaveType": "Tipo assenza",
       "period": "Periodo",
       "days": "Giorni",
@@ -1368,11 +1370,17 @@
       "method": "Metodo",
       "amount": "Quantità",
       "ccnl": "CCNL",
-      "active": "Attiva",
+      "active": "Stato",
       "txnType": "Tipo",
       "description": "Descrizione",
       "reference": "Riferimento",
       "date": "Data"
+    },
+    "referenceType": {
+      "TIME_OFF_REQUEST": "Richiesta di assenza",
+      "SYSTEM": "Sistema",
+      "MANUAL": "Inserimento a mano",
+      "ACCRUAL": "Maturazione automatica"
     }
   },
   "talentReview": {

@@ -235,7 +235,7 @@
     "core": "Core",
     "optional": "Optional",
     "cols": {
-      "ordinal": "#",
+      "ordinal": "No.",
       "code": "Code",
       "name": "Process",
       "kind": "Kind",
@@ -257,8 +257,8 @@
         "role": "RACI role"
       },
       "roles": {
-        "OWNER": "Owner · A",
-        "CONTRIBUTOR": "Contributor · R",
+        "OWNER": "Accountable · A",
+        "CONTRIBUTOR": "Responsible · R",
         "CONSULTED": "Consulted · C",
         "INFORMED": "Informed · I"
       }
@@ -645,7 +645,8 @@
     "methodIdle": "Status says whether the unit is healthy in absolute terms, standing says where to look first relative to the others. A dimension without data leaves the calculation and lowers coverage, not the score.",
     "cols": {
       "unit": "Org-unit",
-      "headcount": "{{count}} people",
+      "headcount_one": "{{count}} person",
+      "headcount_other": "{{count}} people",
       "index": "Index",
       "status": "Status",
       "standing": "Standing",

@@ -11,6 +11,8 @@ export type DbConnector = Pool | PoolClient;
 
 const COLS = `review_id, review_tenant_id, review_subject_user_id,
   (SELECT u.user_email FROM sys.sys_users u WHERE u.user_id = review_subject_user_id) AS subject_email,
+  (SELECT COALESCE(NULLIF(concat_ws(', ', NULLIF(trim(u.user_last_name), ''), NULLIF(trim(u.user_first_name), '')), ''), u.user_display_name)
+     FROM sys.sys_users u WHERE u.user_id = review_subject_user_id) AS subject_name,
   review_reviewer_user_id, review_cycle_id,
   review_period_start, review_period_end, review_type, review_status,
   review_self_assessment_status,
@@ -42,6 +44,7 @@ function toReview(r: Record<string, unknown>): PerformanceReview {
     tenantId: r.review_tenant_id as string,
     subjectUserId: (r.review_subject_user_id as string | null) ?? null,
     subjectEmail: (r.subject_email as string | null) ?? null,
+    subjectName: (r.subject_name as string | null) ?? null,
     reviewerUserId: (r.review_reviewer_user_id as string | null) ?? null,
     reviewCycleId: (r.review_cycle_id as string | null) ?? null,
     periodStart: dateN(r.review_period_start),

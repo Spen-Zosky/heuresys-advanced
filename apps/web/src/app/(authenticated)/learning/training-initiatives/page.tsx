@@ -16,14 +16,14 @@ function buildColumns(t: TFunction, fmt: Formati): DataColumn<TrainingInitiative
       cell: (ti) => (
         <div className="flex flex-col">
           <span className="text-sm font-medium text-foreground">{ti.cohortName ?? t("training.cohortNd")}</span>
-          <span className="font-mono text-[11px] text-muted-foreground">{ti.code}</span>
         </div>
       ),
     },
-    { header: t("training.cols.status"), cell: (ti) => <EnumStatusBadge domain="trainingInitiativeStatus" value={ti.status} /> },
     { header: t("training.cols.start"), cell: (ti) => <span className="text-xs text-muted-foreground">{fmt.data(ti.startDate)}</span> },
     { header: t("training.cols.end"), cell: (ti) => <span className="text-xs text-muted-foreground">{fmt.data(ti.endDate)}</span> },
     { header: t("training.cols.seats"), cell: (ti) => <span className="text-xs text-muted-foreground">{ti.capacity ?? "—"}</span> },
+    // Repertorio interfacce (B5), R3: lo stato chiude la riga; il codice dell'iniziativa non va a video (R4).
+    { header: t("training.cols.status"), cell: (ti) => <EnumStatusBadge domain="trainingInitiativeStatus" value={ti.status} /> },
   ];
 }
 

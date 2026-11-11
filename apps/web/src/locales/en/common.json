@@ -202,7 +202,10 @@
       "ACCRUAL": "Accrual",
       "USAGE": "Usage",
       "ADJUSTMENT": "Adjustment",
-      "CARRYOVER": "Carryover"
+      "CARRYOVER": "Carryover",
+      "EXPIRY": "Expiry",
+      "RESET": "Reset",
+      "TRANSFER": "Transfer"
     },
     "severity": {
       "LOW": "Low",
@@ -306,7 +309,12 @@
     },
     "perfReviewStatus": {
       "IN_PROGRESS": "In progress",
-      "COMPLETED": "Completed"
+      "COMPLETED": "Completed",
+      "DRAFT": "Draft",
+      "SUBMITTED": "Submitted",
+      "CALIBRATED": "Calibrated",
+      "FINALIZED": "Finalized",
+      "CANCELLED": "Cancelled"
     },
     "flightRiskBand": {
       "LOW": "Low",
@@ -449,7 +457,11 @@
       "wellbeing": "Wellbeing",
       "exit": "Exit",
       "onboarding": "Onboarding",
-      "custom": "Custom"
+      "custom": "Custom",
+      "pulse": "Pulse",
+      "survey": "Survey",
+      "feedback": "Feedback",
+      "climate": "Climate"
     },
     "questionType": {
       "rating": "Rating",
@@ -530,7 +542,8 @@
       "SABBATICAL": "Sabbatical",
       "UNPAID": "Unpaid",
       "OTHER": "Other",
-      "PAID_LEAVE": "Paid leave"
+      "PAID_LEAVE": "Paid leave",
+      "UNPAID_LEAVE": "Unpaid leave of absence"
     },
     "whistleblowingStatus": {
       "NEW": "New",
@@ -724,6 +737,34 @@
     },
     "ccnlCode": {
       "CCNL_CRED_2024": "Banking CCNL 2024"
+    },
+    "perfCycleStatus": {
+      "DRAFT": "Draft",
+      "SELF_ASSESSMENT": "Self-assessment",
+      "MANAGER_REVIEW": "Manager review",
+      "CALIBRATION": "Calibration",
+      "FINALIZED": "Finalized",
+      "SHARED": "Shared",
+      "CANCELLED": "Cancelled"
+    },
+    "calibrationStatus": {
+      "SCHEDULED": "Scheduled",
+      "IN_PROGRESS": "In progress",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    },
+    "careerPathDifficulty": {
+      "EASY": "Easy",
+      "MEDIUM": "Medium",
+      "HARD": "Hard",
+      "STRETCH": "Stretch"
+    },
+    "readinessLevel": {
+      "READY_NOW": "Ready now",
+      "READY_6_MONTHS": "Ready in 6 months",
+      "READY_1_YEAR": "Ready in a year",
+      "READY_2_YEARS": "Ready in two years",
+      "NOT_READY": "Not ready yet"
     }
   },
   "masked": "withheld for your profile",

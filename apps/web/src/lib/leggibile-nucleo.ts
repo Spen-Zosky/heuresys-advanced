@@ -48,7 +48,9 @@ export function costruisci(fmt: Formati, enumi: Map<string, string>, rubrica: Ru
   }
 
   const voce = (k: string): string | undefined => {
-    const e = enumi.get(k) ?? enumi.get(k.toUpperCase());
+    // Un codice si cerca anche scritto in minuscolo («pulse» → PULSE), ma una parola con la
+    // maiuscola iniziale è testo scritto apposta: «Tenant» non è il valore enumerato TENANT.
+    const e = enumi.get(k) ?? (k === k.toLowerCase() ? enumi.get(k.toUpperCase()) : undefined);
     if (e) return e;
     return italiano ? FRASI_IT[chiaveFrase(k)] : undefined;
   };

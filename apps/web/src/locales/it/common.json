@@ -202,7 +202,10 @@
       "ACCRUAL": "Maturazione",
       "USAGE": "Utilizzo",
       "ADJUSTMENT": "Rettifica",
-      "CARRYOVER": "Riporto"
+      "CARRYOVER": "Riporto",
+      "EXPIRY": "Scadenza",
+      "RESET": "Azzeramento",
+      "TRANSFER": "Trasferimento"
     },
     "severity": {
       "LOW": "Bassa",
@@ -306,7 +309,12 @@
     },
     "perfReviewStatus": {
       "IN_PROGRESS": "In corso",
-      "COMPLETED": "Completata"
+      "COMPLETED": "Completata",
+      "DRAFT": "Bozza",
+      "SUBMITTED": "Inviata",
+      "CALIBRATED": "Calibrata",
+      "FINALIZED": "Chiusa",
+      "CANCELLED": "Annullata"
     },
     "flightRiskBand": {
       "LOW": "Basso",
@@ -449,7 +457,11 @@
       "wellbeing": "Benessere",
       "exit": "Uscita",
       "onboarding": "Inserimento",
-      "custom": "Personalizzato"
+      "custom": "Personalizzato",
+      "pulse": "Rilevazione rapida",
+      "survey": "Sondaggio",
+      "feedback": "Riscontro",
+      "climate": "Clima"
     },
     "questionType": {
       "rating": "Valutazione",
@@ -530,7 +542,8 @@
       "SABBATICAL": "Aspettativa",
       "UNPAID": "Non retribuito",
       "OTHER": "Altro",
-      "PAID_LEAVE": "Permesso retribuito"
+      "PAID_LEAVE": "Permesso retribuito",
+      "UNPAID_LEAVE": "Aspettativa non retribuita"
     },
     "whistleblowingStatus": {
       "NEW": "Nuova",
@@ -724,6 +737,34 @@
     },
     "ccnlCode": {
       "CCNL_CRED_2024": "CCNL Credito 2024"
+    },
+    "perfCycleStatus": {
+      "DRAFT": "Bozza",
+      "SELF_ASSESSMENT": "Autovalutazione",
+      "MANAGER_REVIEW": "Valutazione del responsabile",
+      "CALIBRATION": "Calibrazione",
+      "FINALIZED": "Chiuso",
+      "SHARED": "Comunicato",
+      "CANCELLED": "Annullato"
+    },
+    "calibrationStatus": {
+      "SCHEDULED": "In programma",
+      "IN_PROGRESS": "In corso",
+      "COMPLETED": "Conclusa",
+      "CANCELLED": "Annullata"
+    },
+    "careerPathDifficulty": {
+      "EASY": "Facile",
+      "MEDIUM": "Media",
+      "HARD": "Impegnativa",
+      "STRETCH": "Molto sfidante"
+    },
+    "readinessLevel": {
+      "READY_NOW": "Pronto ora",
+      "READY_6_MONTHS": "Pronto entro 6 mesi",
+      "READY_1_YEAR": "Pronto entro un anno",
+      "READY_2_YEARS": "Pronto entro due anni",
+      "NOT_READY": "Non ancora pronto"
     }
   },
   "masked": "nascosto per il tuo profilo",

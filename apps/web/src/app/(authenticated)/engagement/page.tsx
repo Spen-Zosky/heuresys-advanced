@@ -60,11 +60,12 @@ export default function EngagementPage() {
           </Link>
         ),
       },
-      { header: t("engagement.columns.status"), cell: (s) => <Badge variant={statusVariant(s.status)}>{t(`engagement.status.${s.status}`, s.status)}</Badge> },
       { header: t("engagement.columns.type"), cell: (s) => <span className="text-muted-foreground">{enumLabel("surveyCategory", s.type)}</span> },
       { header: t("engagement.columns.responses"), cell: (s) => <span className="text-muted-foreground">{s.responseCount}</span> },
       { header: t("engagement.columns.questions"), cell: (s) => <span className="text-muted-foreground">{s.questionCount}</span> },
       { header: t("engagement.columns.invitations"), cell: (s) => <span className="text-muted-foreground">{s.totalInvitations}</span> },
+      // Repertorio interfacce, R3: lo stato chiude la riga.
+      { header: t("engagement.columns.status"), cell: (s) => <Badge variant={statusVariant(s.status)}>{t(`engagement.status.${s.status}`, s.status)}</Badge> },
     ],
     [t, enumLabel],
   );

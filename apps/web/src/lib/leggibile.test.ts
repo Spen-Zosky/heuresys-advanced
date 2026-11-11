@@ -7,7 +7,7 @@ const rubrica = {
   posizioni: [{ id: "08dfa814-de0a-4d93-b1c9-87b9badf1fff", codice: "POS-1", titolo: "Cassiere", unita: "Filiale Monza", titolare: null, unitaId: null, titolareId: null, riportaAId: null, criticita: null, attiva: true }],
   unita: [],
 };
-const l = costruisci(formati("it"), new Map([["APPROVED", "Approvata"]]), rubrica, true);
+const l = costruisci(formati("it"), new Map([["APPROVED", "Approvata"], ["TENANT", "intera azienda"]]), rubrica, true);
 
 describe("rete di leggibilità (C1, C2, C4)", () => {
   it("numeri in forma italiana, anni intatti", () => {
@@ -40,6 +40,11 @@ describe("rete di leggibilità (C1, C2, C4)", () => {
   it("il testo italiano resta com'è", () => {
     expect(l.testo("Filiale Monza")).toBe("Filiale Monza");
     expect(l.testo("Non comunicata — eccezione")).toBe("Non comunicata — eccezione");
+  });
+  it("una parola con la maiuscola iniziale non è un codice", () => {
+    expect(l.testo("Tenant")).toBe("Tenant");
+    expect(l.testo("tenant")).toBe("intera azienda");
+    expect(l.testo("TENANT")).toBe("intera azienda");
   });
   it("attraversa gli elementi", () => {
     const n = l.nodo(["883217", 12693]) as string[];

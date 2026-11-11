@@ -889,7 +889,9 @@
         "elements": "Nodi e collegamenti",
         "versions": "Versioni ed esportazioni"
       }
-    }
+    },
+    "activeOn": "Attiva",
+    "activeOff": "Non attiva"
   },
   "content": {
     "title": "Contenuti",

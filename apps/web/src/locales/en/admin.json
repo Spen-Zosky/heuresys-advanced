@@ -889,7 +889,9 @@
         "elements": "Nodes and edges",
         "versions": "Versions and exports"
       }
-    }
+    },
+    "activeOn": "Active",
+    "activeOff": "Inactive"
   },
   "content": {
     "title": "Content",

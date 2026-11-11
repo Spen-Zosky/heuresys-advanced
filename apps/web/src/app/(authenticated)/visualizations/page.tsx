@@ -10,7 +10,7 @@ import type { VizGraph, VizGraphTypeDistributionItem } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
-import { StatusBadge } from "@/components/status-pill";
+import { StatusPill } from "@/components/status-pill";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { EChartsCard } from "../_charts-client";
 import { useFormat } from "@/lib/format";
@@ -71,7 +71,6 @@ export default function VisualizationsPage() {
 
   const columns = useMemo<DataColumn<VizGraph>[]>(
     () => [
-      { header: t("visualizations.columns.code"), cell: (g) => <span className="font-mono text-xs">{g.code}</span> },
       {
         header: t("visualizations.columns.name"),
         cell: (g) => (
@@ -84,8 +83,8 @@ export default function VisualizationsPage() {
           </Link>
         ),
       },
-      { header: t("visualizations.columns.type"), cell: (g) => <span className="text-xs uppercase text-muted-foreground">{enumLabel("vizGraphType", g.type)}</span> },
-      { header: t("visualizations.columns.status"), cell: (g) => <StatusBadge value={g.isActive ? "ACTIVE" : "INACTIVE"} /> },
+      { header: t("visualizations.columns.type"), cell: (g) => <span className="text-xs text-muted-foreground">{enumLabel("vizGraphType", g.type)}</span> },
+      { header: t("visualizations.columns.status"), cell: (g) => <StatusPill tone={g.isActive ? "success" : "neutral"}>{g.isActive ? t("visualizations.activeOn") : t("visualizations.activeOff")}</StatusPill> },
     ],
     [t, enumLabel],
   );

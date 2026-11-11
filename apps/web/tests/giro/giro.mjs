@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* global process, console, URL */
 /**
  * apps/web/tests/giro/giro.mjs — il giro di tutte le pagine con tutti i ruoli
  * (docs/piani/PIANO_interfaccia-sistematica_20261111.md, §3).

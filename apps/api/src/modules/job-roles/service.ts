@@ -33,7 +33,9 @@ import * as repo from "./repository.js";
 
 export const jobRolesService = {
   async list(actor: ActorContext, query: JobRoleListQuery) {
-    return repo.listJobRoles(pool, query, await perimetroDiCatalogo(pool, actor, "job_roles"));
+    // I21: la piattaforma che chiede il catalogo di un cliente lo riceve nel perimetro di quel cliente
+    const chi = isPlatform(actor) && query.tenantId ? { ...actor, roles: ["USER" as const], tenantId: query.tenantId } : actor;
+    return repo.listJobRoles(pool, query, await perimetroDiCatalogo(pool, chi, "job_roles"));
   },
 
   async getById(actor: ActorContext, id: string): Promise<JobRole> {

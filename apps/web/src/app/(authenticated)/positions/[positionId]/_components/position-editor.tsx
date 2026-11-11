@@ -69,9 +69,10 @@ export function PositionEditor({ positionId }: { positionId: string }) {
     enabled: canUpdate,
   });
   const jobRoles = useQuery({
-    queryKey: ["job-roles", "picker"],
-    queryFn: () => apiFetch<{ items: JobRole[] }>(`/v1/job-roles?limit=${LIST_LIMIT}`),
-    enabled: canUpdate,
+    // I21: il catalogo dei ruoli come lo vede il cliente della posizione, non quello di tutte le industrie
+    queryKey: ["job-roles", "picker", position.data?.tenantId ?? null],
+    queryFn: () => apiFetch<{ items: JobRole[] }>(`/v1/job-roles?limit=${LIST_LIMIT}&tenantId=${position.data!.tenantId}`),
+    enabled: canUpdate && !!position.data,
   });
   const positions = useQuery({
     queryKey: ["positions", "picker"],
@@ -183,7 +184,7 @@ export function PositionEditor({ positionId }: { positionId: string }) {
               </label>
               <select id="pos-org" data-testid="position-edit-orgunit" className={SELECT_CLASS} {...register("organizationUnitId")}>
                 <option value="">{t("positions.detail.edit.none")}</option>
-                {(orgUnits.data?.items ?? []).map((o) => (
+                {(orgUnits.data?.items ?? []).filter((o) => o.tenantId === position.data?.tenantId).map((o) => (
                   <option key={o.organizationUnitId} value={o.organizationUnitId}>
                     {o.name}
                   </option>
@@ -212,7 +213,7 @@ export function PositionEditor({ positionId }: { positionId: string }) {
               <select id="pos-reports" data-testid="position-edit-reportsto" className={SELECT_CLASS} {...register("reportsToPositionId")}>
                 <option value="">{t("positions.detail.edit.none")}</option>
                 {(positions.data?.items ?? [])
-                  .filter((x) => x.positionId !== positionId)
+                  .filter((x) => x.positionId !== positionId && x.tenantId === position.data?.tenantId)
                   .map((x) => (
                     <option key={x.positionId} value={x.positionId}>
                       {x.title}
@@ -230,7 +231,7 @@ export function PositionEditor({ positionId }: { positionId: string }) {
                 <option value="">{t("positions.detail.edit.none")}</option>
                 {/* #198 T7 — il titolare di una posizione non si assegna a un
                     segnaposto senza vederlo: sarebbe un dato falso sull'organigramma. */}
-                {(users.data?.items ?? []).map((u) => (
+                {(users.data?.items ?? []).filter((u) => u.tenantId === position.data?.tenantId).map((u) => (
                   <option key={u.userId} value={u.userId}>
                     {etichettaPersona(u, enumLabel)}
                   </option>

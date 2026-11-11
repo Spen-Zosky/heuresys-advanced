@@ -661,6 +661,43 @@ END $fn$;
 -- ACTIVE); per il vertice senza manager il fallback legittimo è il service
 -- account enzo.spenuso@heuresys.com. («alla data» arriverà con la history di C6.)
 -- ----------------------------------------------------------------------------
+
+-- ----------------------------------------------------------------------------
+-- VALORI «ALLA DATA» (2026-11-11). L'allineamento di RTL alla corsa (db/scripts/rtl-allinea) ha cambiato in place livello, stipendio e
+-- riporti di oggi e ha tenuto il valore di prima nei suoi giornali (staging.rtl_allinea_*_undo). La storia chiusa va confrontata con
+-- il valore valido ALLA DATA della riga, non con quello di oggi: un check che giudica il 2023 col livello del 2026 non misura niente.
+-- Senza i giornali (database nuovo, CI) le funzioni restituiscono il valore corrente: nessun cambio di esito.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_data_allineamento() RETURNS date LANGUAGE plpgsql STABLE AS $f$
+DECLARE d date;
+BEGIN
+  IF to_regclass('staging.rtl_allinea_livelli_undo') IS NULL THEN RETURN NULL; END IF;
+  EXECUTE 'SELECT min(salvato_il)::date FROM staging.rtl_allinea_livelli_undo' INTO d;
+  RETURN d;
+END $f$;
+CREATE OR REPLACE FUNCTION staging.storia36_livello_at(p_user uuid, p_data date, p_corrente text) RETURNS text LANGUAGE plpgsql STABLE AS $f$
+DECLARE v text; da date := staging.storia36_data_allineamento();
+BEGIN
+  IF da IS NULL OR p_data >= da THEN RETURN p_corrente; END IF;
+  EXECUTE 'SELECT contratto_livello_prima FROM staging.rtl_allinea_livelli_undo WHERE user_id = $1' INTO v USING p_user;
+  RETURN COALESCE(v, p_corrente);
+END $f$;
+CREATE OR REPLACE FUNCTION staging.storia36_ral_corrente_at(p_user uuid, p_data date, p_corrente numeric) RETURNS numeric LANGUAGE plpgsql STABLE AS $f$
+DECLARE v numeric; da date := staging.storia36_data_allineamento();
+BEGIN
+  IF da IS NULL OR p_data >= da THEN RETURN p_corrente; END IF;
+  EXECUTE 'SELECT contratto_salario_prima FROM staging.rtl_allinea_livelli_undo WHERE user_id = $1' INTO v USING p_user;
+  RETURN COALESCE(v, p_corrente);
+END $f$;
+CREATE OR REPLACE FUNCTION staging.storia36_riporto_at(p_posto uuid, p_data date) RETURNS uuid LANGUAGE plpgsql STABLE AS $f$
+DECLARE v uuid; cur uuid; da date := staging.storia36_data_allineamento();
+BEGIN
+  SELECT position_reports_to_position_id INTO cur FROM sys.sys_positions WHERE position_id = p_posto;
+  IF da IS NULL OR p_data >= da OR to_regclass('staging.rtl_allinea_org_undo') IS NULL THEN RETURN cur; END IF;
+  EXECUTE $q$SELECT (riga->>'position_reports_to_position_id')::uuid FROM staging.rtl_allinea_org_undo WHERE tabella='sys_positions' AND chiave=$1 ORDER BY salvato_il LIMIT 1$q$ INTO v USING p_posto;
+  RETURN COALESCE(v, cur);
+END $f$;
+
 CREATE OR REPLACE FUNCTION staging.storia36_check_c2c()
 RETURNS void LANGUAGE plpgsql AS $fn$
 DECLARE
@@ -676,7 +713,7 @@ BEGIN
     FROM sys.sys_user_position_assignments a1
     JOIN sys.sys_positions p1 ON p1.position_id = a1.user_position_assignment_position_id
     JOIN sys.sys_user_position_assignments a2
-         ON a2.user_position_assignment_position_id = p1.position_reports_to_position_id
+         ON a2.user_position_assignment_position_id = staging.storia36_riporto_at(p1.position_id, r.review_period_end)
         AND a2.user_position_assignment_kind = 'PRIMARY'
         AND a2.user_position_assignment_status = 'ACTIVE'
     WHERE a1.user_position_assignment_user_id = r.review_subject_user_id
@@ -961,11 +998,11 @@ BEGIN
     -- pieno non si applica alla prima busta parziale
     AND date_trunc('month', e.user_employment_hire_date) <> date_trunc('month', p.user_pay_slip_period_start)
     AND c.user_contract_ccnl_level IS NOT NULL
-    AND c.user_contract_ccnl_level <> 'Dirigente'
+    AND staging.storia36_livello_at(u.user_id, p.user_pay_slip_period_start, c.user_contract_ccnl_level) <> 'Dirigente'
     -- dicembre = 13a mensilita' (gross doppio): si confronta la mensilita' base
     AND (p.user_pay_slip_gross_pay
          / CASE WHEN extract(month FROM p.user_pay_slip_period_start) = 12 THEN 2 ELSE 1 END) * 13
-        < staging.storia36_floor_at(c.user_contract_ccnl_level, p.user_pay_slip_period_start) - 1;
+        < staging.storia36_floor_at(staging.storia36_livello_at(u.user_id, p.user_pay_slip_period_start, c.user_contract_ccnl_level), p.user_pay_slip_period_start) - 1;
   IF v_cnt > 0 THEN
     RAISE EXCEPTION 'C3c: % buste sotto il floor CCNL alla data (es. %)', v_cnt, v_sample;
   END IF;
@@ -1019,15 +1056,15 @@ BEGIN
   JOIN sys.sys_user_contracts c ON c.user_contract_user_id = u.user_id
   WHERE v.variable_pay_calculation_payload->>'storia36' = 'C3'
     AND abs(v.variable_pay_calculation_amount_eur - round(LEAST(
-          staging.storia36_ral_at(c.user_contract_gross_annual_salary, c.user_contract_ccnl_level,
+          staging.storia36_ral_at(staging.storia36_ral_corrente_at(u.user_id, make_date(extract(year FROM v.variable_pay_calculation_period_start)::int, 12, 1), c.user_contract_gross_annual_salary), staging.storia36_livello_at(u.user_id, make_date(extract(year FROM v.variable_pay_calculation_period_start)::int, 12, 1), c.user_contract_ccnl_level),
             make_date(extract(year FROM v.variable_pay_calculation_period_start)::int, 12, 1))
-          * CASE WHEN c.user_contract_ccnl_level = 'Dirigente' THEN 0.15
-                 WHEN c.user_contract_ccnl_level LIKE 'QD%' OR c.user_contract_ccnl_level = 'Quadro' THEN 0.12
-                 WHEN c.user_contract_ccnl_level = '3A4L' THEN 0.08
-                 WHEN c.user_contract_ccnl_level = '3A3L' THEN 0.07
+          * CASE WHEN staging.storia36_livello_at(u.user_id, make_date(extract(year FROM v.variable_pay_calculation_period_start)::int, 12, 1), c.user_contract_ccnl_level) = 'Dirigente' THEN 0.15
+                 WHEN staging.storia36_livello_at(u.user_id, make_date(extract(year FROM v.variable_pay_calculation_period_start)::int, 12, 1), c.user_contract_ccnl_level) LIKE 'QD%' OR staging.storia36_livello_at(u.user_id, make_date(extract(year FROM v.variable_pay_calculation_period_start)::int, 12, 1), c.user_contract_ccnl_level) = 'Quadro' THEN 0.12
+                 WHEN staging.storia36_livello_at(u.user_id, make_date(extract(year FROM v.variable_pay_calculation_period_start)::int, 12, 1), c.user_contract_ccnl_level) = '3A4L' THEN 0.08
+                 WHEN staging.storia36_livello_at(u.user_id, make_date(extract(year FROM v.variable_pay_calculation_period_start)::int, 12, 1), c.user_contract_ccnl_level) = '3A3L' THEN 0.07
                  ELSE 0.05 END
           * LEAST(0.5 + ((v.variable_pay_calculation_payload->>'attainment')::numeric - 0.8) * 2.5, 1.5),
-          staging.storia36_ral_at(c.user_contract_gross_annual_salary, c.user_contract_ccnl_level,
+          staging.storia36_ral_at(staging.storia36_ral_corrente_at(u.user_id, make_date(extract(year FROM v.variable_pay_calculation_period_start)::int, 12, 1), c.user_contract_gross_annual_salary), staging.storia36_livello_at(u.user_id, make_date(extract(year FROM v.variable_pay_calculation_period_start)::int, 12, 1), c.user_contract_ccnl_level),
             make_date(extract(year FROM v.variable_pay_calculation_period_start)::int, 12, 1)) * 0.30), 2)) > 1;
   IF v_cnt > 0 THEN
     BEGIN
@@ -1099,8 +1136,8 @@ BEGIN
         -- il VAP deve stare SOPRA la mensilita' base del mese (non basta
         -- gross >= amount: sarebbe vacuo quando base > amount)
         AND p.user_pay_slip_gross_pay >=
-            round(staging.storia36_ral_at(c2.user_contract_gross_annual_salary,
-                                          c2.user_contract_ccnl_level,
+            round(staging.storia36_ral_at(staging.storia36_ral_corrente_at(p.user_pay_slip_user_id, p.user_pay_slip_period_start, c2.user_contract_gross_annual_salary),
+                                          staging.storia36_livello_at(p.user_pay_slip_user_id, p.user_pay_slip_period_start, c2.user_contract_ccnl_level),
                                           p.user_pay_slip_period_start) / 13.0, 2)
             + v.variable_pay_calculation_amount_eur - 1);
   IF v_cnt > 0 THEN

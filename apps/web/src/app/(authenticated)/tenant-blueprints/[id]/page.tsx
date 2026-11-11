@@ -17,6 +17,7 @@
  */
 import { use, useMemo, useState } from "react";
 import Link from "next/link";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type {
@@ -73,19 +74,15 @@ export default function TenantBlueprintDetailPage({
 
   return (
     <div className="space-y-6" data-testid="tenant-blueprint-detail">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <Link
-            href="/tenant-blueprints"
-            className="text-sm text-muted-foreground underline-offset-2 hover:underline"
-          >
+      <PageHeader
+        breadcrumbs={
+          <Link href="/tenant-blueprints" className="underline-offset-2 hover:underline">
             {t("dossier.back")}
           </Link>
-          <h1 className="mt-1 text-xl font-semibold text-foreground" data-testid="tenant-blueprint-name">
-            {fascicolo.data.name}
-          </h1>
-          <p className="font-mono text-xs text-muted-foreground">{fascicolo.data.code}</p>
-        </div>
+        }
+        title={fascicolo.data.name}
+        data-testid="tenant-blueprint-name"
+        actions={
         <div className="flex items-center gap-3">
           <span className="text-sm text-muted-foreground">
             {t("dossier.version")} {versione.number}
@@ -113,7 +110,8 @@ export default function TenantBlueprintDetailPage({
             {t("dossier.build.title")}
           </Link>
         </div>
-      </header>
+        }
+      />
 
       <PassoIdentita
         base={base}

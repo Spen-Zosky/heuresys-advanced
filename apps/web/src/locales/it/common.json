@@ -643,6 +643,19 @@
       "MEDIUM": "Media",
       "HIGH": "Alta",
       "EXTREME": "Estrema"
+    },
+    "vizNodeSourceType": {
+      "POSITION": "Posizione",
+      "USER": "Persona",
+      "SKILL": "Competenza",
+      "KPI": "Indicatore",
+      "PROCESS": "Processo",
+      "UNIT": "Unità organizzativa",
+      "LEARNING_MODULE": "Modulo formativo",
+      "CAREER_PATH": "Percorso di carriera",
+      "BLUEPRINT_VARIANT": "Variante del modello",
+      "SUCCESSION_POOL": "Bacino di successione",
+      "GENERIC": "Altro"
     }
   },
   "masked": "nascosto per il tuo profilo",

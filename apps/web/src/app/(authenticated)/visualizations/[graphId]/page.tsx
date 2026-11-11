@@ -361,7 +361,7 @@ export default function VisualizationDetailPage() {
               <ul className="divide-y divide-border" data-testid="visualization-nodes-list">
                 {nodes.data!.items.slice(0, 20).map((n) => (
                   <li key={n.nodeId} className="px-4 py-2 text-sm text-foreground" data-testid="visualization-node-item">
-                    <span className="font-mono text-xs text-muted-foreground">{n.sourceEntityType}</span>
+                    <span className="text-xs text-muted-foreground">{enumLabel("vizNodeSourceType", n.sourceEntityType)}</span>
                     <span className="ml-2">{n.label}</span>
                   </li>
                 ))}
@@ -382,9 +382,10 @@ export default function VisualizationDetailPage() {
             ) : (
               <ul className="divide-y divide-border" data-testid="visualization-edges-list">
                 {edges.data!.items.slice(0, 20).map((e) => (
-                  <li key={e.edgeId} className="px-4 py-2 font-mono text-xs text-foreground" data-testid="visualization-edge-item">
-                    {e.sourceNodeId.slice(0, 6)}{t("visualizations.detail.edgeArrow")}{e.targetNodeId.slice(0, 6)}
-                    <span className="ml-2 uppercase text-muted-foreground">{enumLabel("vizEdgeType", e.type)}</span>
+                  <li key={e.edgeId} className="px-4 py-2 text-sm text-foreground" data-testid="visualization-edge-item">
+                    {/* C2: i nodi per nome, non per un pezzo d'identificativo */}
+                    {nodeMap.get(e.sourceNodeId)?.label ?? "—"}{t("visualizations.detail.edgeArrow")}{nodeMap.get(e.targetNodeId)?.label ?? "—"}
+                    <span className="ml-2 text-xs text-muted-foreground">{enumLabel("vizEdgeType", e.type)}</span>
                   </li>
                 ))}
               </ul>

@@ -643,6 +643,19 @@
       "MEDIUM": "Medium",
       "HIGH": "High",
       "EXTREME": "Extreme"
+    },
+    "vizNodeSourceType": {
+      "POSITION": "Position",
+      "USER": "Person",
+      "SKILL": "Skill",
+      "KPI": "KPI",
+      "PROCESS": "Process",
+      "UNIT": "Organization unit",
+      "LEARNING_MODULE": "Learning module",
+      "CAREER_PATH": "Career path",
+      "BLUEPRINT_VARIANT": "Blueprint variant",
+      "SUCCESSION_POOL": "Succession pool",
+      "GENERIC": "Other"
     }
   },
   "masked": "withheld for your profile",

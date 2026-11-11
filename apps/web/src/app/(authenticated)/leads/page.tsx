@@ -2,7 +2,8 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, PageHeader } from "@heuresys/ui";
+import { Badge } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import type { LeadListResponse, LeadResponse, LeadStatus } from "@heuresys/shared";
 import { LeadStatusEnum } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
@@ -61,7 +62,8 @@ export default function LeadsPage() {
         cell: (r) => (
           <span className="flex flex-col leading-tight">
             <span className="font-medium text-foreground">{r.name}</span>
-            <span className="text-[11px] text-muted-foreground">{r.email}</span>
+            {/* il recapito di chi ha scritto è il dato che serve per rispondere */}
+            <span className="text-[11px] text-muted-foreground" data-giro-email-ammessa="">{r.email}</span>
           </span>
         ),
       },
@@ -124,7 +126,7 @@ export default function LeadsPage() {
   const data = leads.data;
 
   return (
-    <main data-testid="leads-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="leads-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="leads-title"
         title={t("leads.title")}

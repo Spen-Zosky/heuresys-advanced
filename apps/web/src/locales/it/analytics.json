@@ -65,7 +65,7 @@
       "ouDesc": "OU con profili retributivi",
       "medianLabel": "Mediana banda"
     },
-    "range": "Min €{{min}} · Max €{{max}}",
+    "range": "Min {{min}} € · Max {{max}} €",
     "rangeEmpty": "Nessuna banda nell'ambito",
     "boxplotTitle": "Distribuzione bande retributive per unità (mid €)",
     "boxplotAria": "Distribuzione bande retributive per unità organizzativa",
@@ -114,7 +114,7 @@
   },
   "skillsGroupShare": {
     "title": "Quote competenze per gruppo ESCO",
-    "description": "Distribuzione del catalogo competenze ESCO tra i suoi gruppi (cluster). Il catalogo è globale di piattaforma.",
+    "description": "Come si distribuiscono fra i gruppi ESCO le competenze che le persone dell'azienda possiedono. Chi gestisce la piattaforma vede il catalogo intero.",
     "stats": {
       "groupedLabel": "Competenze raggruppate",
       "groupedDesc": "Competenze con un gruppo ESCO assegnato",
@@ -132,7 +132,8 @@
     "colGroup": "Gruppo",
     "colCount": "Competenze",
     "colShare": "Quota",
-    "emptyDesc": "Il catalogo competenze non ha ancora gruppi ESCO popolati."
+    "emptyDesc": "Il catalogo competenze non ha ancora gruppi ESCO popolati.",
+    "colCode": "Codice ESCO"
   },
   "orgNetwork": {
     "title": "Rete organizzativa",
@@ -199,7 +200,7 @@
     },
     "types": {
       "WEEKDAY": "Feriale",
-      "WEEKEND": "Weekend",
+      "WEEKEND": "Fine settimana",
       "NIGHT": "Notturno",
       "HOLIDAY": "Festivo",
       "EMERGENCY": "Emergenza",
@@ -215,11 +216,11 @@
     "depth": "{{count}} salto",
     "depth_other": "{{count}} salti",
     "pickTitle": "Scegli una competenza",
-    "pickDescription": "Cerca una competenza qui sopra e selezionala: il grafo mostrera' il suo vicinato.",
+    "pickDescription": "Cerca una competenza qui sopra e selezionala: il grafo mostrerà il suo vicinato.",
     "nodes": "Nodi",
     "explicitEdges": "Legami dichiarati",
     "groupEdges": "Legami di appartenenza",
-    "canvasEmpty": "Nessun legame per questa competenza a questa profondita'.",
+    "canvasEmpty": "Nessun legame per questa competenza a questa profondità.",
     "legendExplicit": "Legame dichiarato fra competenze",
     "legendGroup": "Appartenenza alla tassonomia"
   },

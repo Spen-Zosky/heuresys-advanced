@@ -16,7 +16,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import {
   WHISTLEBLOWING_STATUSES,
   type WhistleblowingListItem,
@@ -140,7 +141,7 @@ export default function WhistleblowingConsolePage() {
     || registro.data.perspectives.some((p) => p.interfaces.some((i) => i.code === "whistleblowing-console"));
   if (!puoEntrare) {
     return (
-      <main data-testid="wb-console-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+      <main data-testid="wb-console-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
         <PageHeader
           data-testid="whistleblowing-console-title"
           title={t("whistleblowingConsole.title")}
@@ -158,7 +159,7 @@ export default function WhistleblowingConsolePage() {
   }
 
   return (
-    <main data-testid="wb-console-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="wb-console-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="whistleblowing-console-title"
         title={t("whistleblowingConsole.title")}

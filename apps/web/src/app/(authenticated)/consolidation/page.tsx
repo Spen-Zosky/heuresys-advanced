@@ -3,7 +3,8 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import {
   ALLOWED_DECISIONS,
   CONSOLIDATION_CERTAIN_THRESHOLD,
@@ -198,7 +199,7 @@ export default function ConsolidationPage() {
   const ultimo = corrente?.lastRun ?? null;
 
   return (
-    <main data-testid="consolidation-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="consolidation-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="consolidation-title"
         title={t("consolidation.title")}
@@ -338,7 +339,7 @@ export default function ConsolidationPage() {
           />
           <EntityTable<ConsolidationProposal> originPath={"/v1/tenant-consolidations"}
             isLoading={proposals.isLoading} isError={proposals.isError} error={proposals.error} errorMessage={t("consolidation.loadError")}
-            rows={righe} pageSize={100} rowKey={(p) => p.proposalId} rowTestId="consolidation-proposal-row" columns={columns}
+            rows={righe} pageSize={10} rowKey={(p) => p.proposalId} rowTestId="consolidation-proposal-row" columns={columns}
             emptyTestId="consolidation-proposals-empty"
             emptyTitle={t("consolidation.proposalsEmptyTitle")} emptyDescription={t("consolidation.proposalsEmptyDescription")}
             caption={t("consolidation.caption")}

@@ -29,6 +29,7 @@
  * dev subscription out_of_credits / PROD credential required). Submitting a prompt
  * when the gateway is unreachable surfaces a real error in the stream, by design.
  */
+import { PageHeader } from "@/components/intestazione-pagina";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AgentPanel, Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
@@ -46,7 +47,9 @@ const GATEWAY_URL = (process.env.NEXT_PUBLIC_AGENT_GATEWAY_URL ?? "http://localh
 function DisabledNotice() {
   const { t } = useTranslation("admin");
   return (
-    <div className="mx-auto max-w-3xl px-6 py-10">
+    // C7: anche spenta, la pagina ha il suo titolo
+    <main className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+      <PageHeader title={t("agentDev.title")} description={t("agentDev.description")} />
       <Card data-testid="agentdev-disabled">
         <CardHeader>
           <CardTitle>{t("agentDev.disabledTitle")}</CardTitle>
@@ -55,7 +58,7 @@ function DisabledNotice() {
           <p className="text-sm text-muted-foreground">{t("agentDev.disabledDesc")}</p>
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
 }
 
@@ -88,12 +91,14 @@ export default function AgentDevConsolePage() {
   if (!AGENT_DEV_ENABLED) return <DisabledNotice />;
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-8">
+    <div className="mx-auto max-w-4xl px-6 pb-8">
+      {/* C7: la pagina ha il suo titolo, come le altre; il pannello porta il nome della conversazione */}
+      <PageHeader title={t("agentDev.title")} description={t("agentDev.description")} />
       <AgentPanel
         testIdPrefix="agentdev"
         labels={{
-          title: t("agentDev.title"),
-          description: t("agentDev.description"),
+          title: t("agentDev.panelTitle"),
+          description: "",
           gatewayLabel: t("agentDev.gatewayLabel"),
           promptLabel: t("agentDev.promptLabel"),
           promptPlaceholder: t("agentDev.promptPlaceholder"),

@@ -15,7 +15,7 @@ import { SkillAliasesPanel, SkillEdgesPanel } from "./_components/skill-relation
 function buildColumns(t: TFunction, onEdit: (id: string) => void): DataColumn<Skill>[] {
   return [
     { header: t("shared.code"), cell: (s) => <span className="font-mono text-xs">{s.code}</span> },
-    { header: t("shared.name"), cell: (s) => <span className="font-medium text-foreground">{s.name}</span> },
+    { header: t("shared.name"), cell: (s) => <span className="font-medium text-foreground" data-nome-proprio="">{s.name}</span> },
     {
       header: t("shared.scope"),
       cell: (s) => (

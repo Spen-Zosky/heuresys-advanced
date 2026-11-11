@@ -16,7 +16,7 @@
  */
 
 import { useTranslation } from "react-i18next";
-import { PageHeader } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { JobFamiliesPanel } from "./_components/job-families-panel";
 import { JobRolesPanel } from "./_components/job-roles-panel";
 
@@ -24,7 +24,7 @@ export default function JobCatalogPage() {
   const { t } = useTranslation("admin");
 
   return (
-    <main data-testid="job-catalog-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="job-catalog-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="job-catalog-title"
         title={t("jobCatalog.title")}

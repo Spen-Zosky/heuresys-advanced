@@ -3,9 +3,10 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import {
-  Badge, Card, CardContent, CardHeader, CardTitle, KPIStrip, PageHeader, type KpiCardData,
-} from "@heuresys/ui";
+import { Badge, Card, CardContent, CardHeader, CardTitle, type KpiCardData } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
+import { KPIStrip } from "@/components/indicatori-leggibili";
+import { SchedePagina } from "@/components/schede-pagina";
 import type {
   NineBoxRow, TalentBand, FitScore, ReadinessScore, SuccessionScore,
   CriticalPosition, CriticalCoverage,
@@ -141,7 +142,7 @@ export default function TalentReviewPage() {
   ], [nineBox.total, fit.total, readiness.total, succession.total, criticalPositions.total, t, f]);
 
   return (
-    <main data-testid="talent-review-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="talent-review-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="talent-review-title"
         title={t("talentReview.title")}
@@ -219,90 +220,96 @@ export default function TalentReviewPage() {
         </CardContent>
       </Card>
 
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-foreground">{t("talentReview.sections.fit")}</h2>
-        <EntityTable<FitScore>
-          isLoading={fit.query.isLoading}
-          isError={fit.query.isError}
-          error={fit.query.error}
-          errorMessage={t("talentReview.error")}
-          rows={fit.rows}
-          server={fit.server}
-          rowKey={(r) => r.fitScoreId}
-          rowTestId="talent-fit-row"
-          columns={fitColumns}
-          emptyTitle={t("talentReview.empty")}
-          caption={t("talentReview.sections.fit")}
-        />
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-foreground">{t("talentReview.sections.readiness")}</h2>
-        <EntityTable<ReadinessScore>
-          isLoading={readiness.query.isLoading}
-          isError={readiness.query.isError}
-          error={readiness.query.error}
-          errorMessage={t("talentReview.error")}
-          rows={readiness.rows}
-          server={readiness.server}
-          rowKey={(r) => r.readinessScoreId}
-          rowTestId="talent-readiness-row"
-          columns={readinessColumns}
-          emptyTitle={t("talentReview.empty")}
-          caption={t("talentReview.sections.readiness")}
-        />
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-foreground">{t("talentReview.sections.succession")}</h2>
-        <EntityTable<SuccessionScore>
-          isLoading={succession.query.isLoading}
-          isError={succession.query.isError}
-          error={succession.query.error}
-          errorMessage={t("talentReview.error")}
-          rows={succession.rows}
-          server={succession.server}
-          rowKey={(r) => r.successionScoreId}
-          rowTestId="talent-succession-row"
-          columns={successionColumns}
-          emptyTitle={t("talentReview.empty")}
-          caption={t("talentReview.sections.succession")}
-        />
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-foreground">{t("talentReview.sections.criticalPositions")}</h2>
-        <EntityTable<CriticalPosition>
-          isLoading={criticalPositions.query.isLoading}
-          isError={criticalPositions.query.isError}
-          error={criticalPositions.query.error}
-          errorMessage={t("talentReview.error")}
-          rows={criticalPositions.rows}
-          server={criticalPositions.server}
-          rowKey={(r) => r.criticalPositionId}
-          rowTestId="talent-critical-position-row"
-          columns={criticalPositionColumns}
-          emptyTitle={t("talentReview.empty")}
-          caption={t("talentReview.sections.criticalPositions")}
-        />
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-foreground">{t("talentReview.sections.criticalCoverage")}</h2>
-        <EntityTable<CriticalCoverage>
-          isLoading={coverage.query.isLoading}
-          isError={coverage.query.isError}
-          error={coverage.query.error}
-          errorMessage={t("talentReview.error")}
-          rows={coverage.rows}
-          server={coverage.server}
-          rowKey={(r) => r.criticalRoleCoverageStatusId}
-          rowTestId="talent-critical-coverage-row"
-          columns={coverageColumns}
-          emptyTitle={t("talentReview.empty")}
-          caption={t("talentReview.sections.criticalCoverage")}
-        />
-      </section>
+      {/* C5: le sezioni lunghe stanno in schede orizzontali */}
+      <SchedePagina
+        schede={[
+          { id: "fit", titolo: t("talentReview.sections.fit"), contenuto: (
+            <div className="space-y-3">
+            <EntityTable<FitScore>
+              isLoading={fit.query.isLoading}
+              isError={fit.query.isError}
+              error={fit.query.error}
+              errorMessage={t("talentReview.error")}
+              rows={fit.rows}
+              server={fit.server}
+              rowKey={(r) => r.fitScoreId}
+              rowTestId="talent-fit-row"
+              columns={fitColumns}
+              emptyTitle={t("talentReview.empty")}
+              caption={t("talentReview.sections.fit")}
+            />
+            </div>
+          ) },
+          { id: "prontezza", titolo: t("talentReview.sections.readiness"), contenuto: (
+            <div className="space-y-3">
+            <EntityTable<ReadinessScore>
+              isLoading={readiness.query.isLoading}
+              isError={readiness.query.isError}
+              error={readiness.query.error}
+              errorMessage={t("talentReview.error")}
+              rows={readiness.rows}
+              server={readiness.server}
+              rowKey={(r) => r.readinessScoreId}
+              rowTestId="talent-readiness-row"
+              columns={readinessColumns}
+              emptyTitle={t("talentReview.empty")}
+              caption={t("talentReview.sections.readiness")}
+            />
+            </div>
+          ) },
+          { id: "successione", titolo: t("talentReview.sections.succession"), contenuto: (
+            <div className="space-y-3">
+            <EntityTable<SuccessionScore>
+              isLoading={succession.query.isLoading}
+              isError={succession.query.isError}
+              error={succession.query.error}
+              errorMessage={t("talentReview.error")}
+              rows={succession.rows}
+              server={succession.server}
+              rowKey={(r) => r.successionScoreId}
+              rowTestId="talent-succession-row"
+              columns={successionColumns}
+              emptyTitle={t("talentReview.empty")}
+              caption={t("talentReview.sections.succession")}
+            />
+            </div>
+          ) },
+          { id: "critiche", titolo: t("talentReview.sections.criticalPositions"), contenuto: (
+            <div className="space-y-3">
+            <EntityTable<CriticalPosition>
+              isLoading={criticalPositions.query.isLoading}
+              isError={criticalPositions.query.isError}
+              error={criticalPositions.query.error}
+              errorMessage={t("talentReview.error")}
+              rows={criticalPositions.rows}
+              server={criticalPositions.server}
+              rowKey={(r) => r.criticalPositionId}
+              rowTestId="talent-critical-position-row"
+              columns={criticalPositionColumns}
+              emptyTitle={t("talentReview.empty")}
+              caption={t("talentReview.sections.criticalPositions")}
+            />
+            </div>
+          ) },
+          { id: "copertura", titolo: t("talentReview.sections.criticalCoverage"), contenuto: (
+            <div className="space-y-3">
+            <EntityTable<CriticalCoverage>
+              isLoading={coverage.query.isLoading}
+              isError={coverage.query.isError}
+              error={coverage.query.error}
+              errorMessage={t("talentReview.error")}
+              rows={coverage.rows}
+              server={coverage.server}
+              rowKey={(r) => r.criticalRoleCoverageStatusId}
+              rowTestId="talent-critical-coverage-row"
+              columns={coverageColumns}
+              emptyTitle={t("talentReview.empty")}
+              caption={t("talentReview.sections.criticalCoverage")}
+            />
+            </div>
+          ) },
+        ]}
+      />
     </main>
   );
 }

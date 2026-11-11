@@ -118,3 +118,11 @@ body {
    language switcher (its onToggleLanguage is wired in the authenticated layout and
    persists the choice to sys_user_preferences). The old G-03 rule that hid it as a
    dead duplicate is removed — the sidebar LanguageSwitcher was retired. */
+
+/* C13: intestazioni spiegate dal glossario (ReteDiPagina) */
+[data-spiegazione="auto"] {
+  cursor: help;
+  text-decoration: underline dotted;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+  text-underline-offset: 3px;
+}

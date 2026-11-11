@@ -8,16 +8,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslation } from "react-i18next";
 import { QRCodeSVG } from "qrcode.react";
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Input,
-  PageHeader,
-} from "@heuresys/ui";
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import {
   type EnrollMfaResponse,
   type ListMfaFactorsResponse,
@@ -39,6 +31,7 @@ import {
 import { apiFetch } from "../../../../lib/api/fetch";
 import { isApiError } from "../../../../lib/api/errors";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { dispositivoLeggibile } from "@/lib/person-label";
 import { useFormat } from "@/lib/format";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
@@ -426,7 +419,7 @@ export default function MeSecurityPage() {
   return (
     <main
       data-testid="me-security-page"
-      className="mx-auto max-w-3xl space-y-6 px-6 py-8"
+      className="mx-auto max-w-3xl space-y-6 px-6 pb-8"
     >
       <PageHeader
         data-testid="me-security-title"
@@ -896,7 +889,7 @@ export default function MeSecurityPage() {
                           {isCurrent && <Badge variant="outline" className="border-success text-success" data-testid="me-security-session-current-badge">{t("security.sessions.thisDevice")}</Badge>}
                         </div>
                         <div className="font-mono text-xs text-muted-foreground">
-                          {(s.userAgent ?? t("security.sessions.unknownDevice")).slice(0, 60)} · {t("security.sessions.lastSeen", { date: fmt.dataOra(s.lastIssuedAt) })}
+                          <span title={s.userAgent ?? undefined}>{dispositivoLeggibile(s.userAgent) ?? t("security.sessions.unknownDevice")}</span> · {t("security.sessions.lastSeen", { date: fmt.dataOra(s.lastIssuedAt) })}
                         </div>
                       </div>
                       <Button

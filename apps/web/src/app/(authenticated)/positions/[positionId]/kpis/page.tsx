@@ -4,7 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable } from "@/components/data-table-panel";
 import { NomeOppure } from "@/components/senza-nome";
@@ -31,7 +32,7 @@ export default function PositionKpisPage() {
   const items = kpis.data?.items ?? [];
 
   return (
-    <main data-testid="position-kpis-page" className="mx-auto max-w-5xl space-y-6 px-6 py-8">
+    <main data-testid="position-kpis-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="position-kpis-title"
         title={t("positions.kpis.title")}

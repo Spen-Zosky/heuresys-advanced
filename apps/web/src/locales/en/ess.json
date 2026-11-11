@@ -289,7 +289,9 @@
     "errorMessage": "Unable to load the KPIs.",
     "emptyTitle": "No KPI assigned",
     "emptyDesc": "You have no KPIs assigned.",
-    "caption": "Active targets"
+    "caption": "Active targets",
+    "notMeasured": "Not measured yet",
+    "targetIs": "target {{value}}"
   },
   "learning": {
     "title": "My learning",

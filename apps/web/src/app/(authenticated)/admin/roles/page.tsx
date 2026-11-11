@@ -3,7 +3,8 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, Card, CardContent, PageHeader } from "@heuresys/ui";
+import { Badge, Card, CardContent } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
 import { Check } from "lucide-react";
 import { apiFetch } from "../../../../lib/api/fetch";
@@ -46,7 +47,7 @@ export default function AdminRolesPage() {
     : rp.isError ? t("common:stato.nonDisponibile") : t("common:loading");
 
   return (
-    <main data-testid="admin-roles-page" className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+    <main data-testid="admin-roles-page" className="max-w-7xl mx-auto px-6 pb-8 space-y-6">
       <PageHeader
         title={t("roles.title")}
         description={t("roles.description")}

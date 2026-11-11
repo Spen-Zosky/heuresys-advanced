@@ -64,7 +64,9 @@ export function OverviewTab({ data }: { data: MeProfileFull }) {
       <ProfileSection title={t("profile.full.contacts.title")} testId="section-contacts">
         <Field label={t("profile.full.contacts.phoneMobile")} value={data.contacts.phoneMobile} />
         <Field label={t("profile.full.contacts.phoneHome")} value={data.contacts.phoneHome} />
-        <Field label={t("profile.full.contacts.personalEmail")} value={data.contacts.personalEmail} />
+        <div className="contents" data-giro-email-ammessa="">
+          <Field label={t("profile.full.contacts.personalEmail")} value={data.contacts.personalEmail} />
+        </div>
       </ProfileSection>
 
       <ProfileSection title={t("profile.full.family.title")} testId="section-family">

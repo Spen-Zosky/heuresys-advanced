@@ -2,7 +2,8 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, PageHeader } from "@heuresys/ui";
+import { Badge } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import type {
   OrgHealthScorecard, OrgHealthUnit, OrgHealthStatus, OrgHealthStanding, OrgHealthDimension,
 } from "@heuresys/shared";
@@ -119,7 +120,7 @@ export default function OrgHealthPage() {
   const data = scorecard.data;
 
   return (
-    <main data-testid="org-health-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="org-health-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="org-health-title"
         title={t("orgHealth.title")}

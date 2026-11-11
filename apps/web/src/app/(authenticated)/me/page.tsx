@@ -2,7 +2,7 @@
 
 import { Suspense } from "react";
 import { useTranslation } from "react-i18next";
-import { PageHeader } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { StatoCaricamento } from "@/components/stato-pagina";
 import { ProfileTabs, type ProfileTabDef } from "../../../components/profile-tabs";
 import { MeSummaryTab } from "./_components/summary-tab";
@@ -27,7 +27,7 @@ export default function MeLandingPage() {
     },
   ];
   return (
-    <main data-testid="me-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
+    <main data-testid="me-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       <PageHeader title={t("landing.title")} description={t("landing.description")} />
       <Suspense fallback={<StatoCaricamento />}>
         <ProfileTabs tabs={tabs} ariaLabel={t("landing.tabs.aria")} />

@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
-import { Badge, Button, Input, PageHeader } from "@heuresys/ui";
+import { Badge, Button, Input } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import type { LearningPath } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
@@ -85,7 +86,7 @@ export default function MeLearningCataloguePage() {
   ];
 
   return (
-    <main data-testid="learning-catalogue-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="learning-catalogue-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <Link
         href="/me/learning"
         className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"

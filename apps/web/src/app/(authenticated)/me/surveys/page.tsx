@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, Button, Card, CardContent, PageHeader } from "@heuresys/ui";
+import { Badge, Button, Card, CardContent } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { ClipboardList } from "lucide-react";
 import type { MeSurveysResponse } from "@heuresys/shared";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
@@ -19,7 +20,7 @@ export default function MeSurveysPage() {
   const items = surveys.data?.items ?? [];
 
   return (
-    <main data-testid="me-surveys-page" className="mx-auto max-w-4xl space-y-6 px-6 py-8">
+    <main data-testid="me-surveys-page" className="mx-auto max-w-4xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="me-surveys-title"
         title={t("surveys.title")}

@@ -23,6 +23,7 @@ test.describe("approvals lifecycle (live)", () => {
     await expect(page.getByTestId("approvals-page")).toBeVisible();
 
     // Create a request with federica as the sole approver.
+    await page.getByTestId("approval-create-toggle").click();
     await page.getByTestId("approval-create-title").fill(title);
     // V-2: la persona si cerca sul server per nome o email, poi si sceglie dai risultati.
     await page.getByTestId("approval-create-approvers-input").fill(PERSONAS.tenantAdmin.email);

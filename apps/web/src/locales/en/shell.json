@@ -13,7 +13,34 @@
       "me": "My space",
       "me_profile": "My profile",
       "me_growth": "My growth",
-      "me_results": "My results"
+      "me_results": "My results",
+      "me_area": "My area"
+    },
+    "rami": {
+      "dash_aree": "By area",
+      "dash_ruoli": "By responsibility",
+      "dash_governo": "Governance and platform",
+      "org_struttura": "Structure",
+      "org_diagnosi": "Diagnosis",
+      "persone_anagrafica": "People and hiring",
+      "persone_tempo": "Working time",
+      "persone_retribuzioni": "Compensation",
+      "talento_risultati": "Results",
+      "talento_sviluppo": "Development",
+      "comp_mappa": "Skills map",
+      "comp_formazione": "Learning",
+      "conf_accessi": "Access",
+      "conf_registri": "Registers",
+      "cfg_modello": "Organisation model",
+      "cfg_dati": "Base data",
+      "cfg_sito": "Public site",
+      "me_lavoro": "My work",
+      "me_profilo": "My profile",
+      "me_crescita": "My growth",
+      "me_risultati": "My results",
+      "comp": "Skills",
+      "formazione": "Learning",
+      "carriera": "Career"
     }
   },
   "tabs": {

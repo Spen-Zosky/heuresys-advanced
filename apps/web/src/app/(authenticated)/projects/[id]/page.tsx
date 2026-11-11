@@ -3,9 +3,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useParams } from "next/navigation";
-import {
-  PageHeader, Card, CardHeader, CardTitle, CardContent, Badge,
-} from "@heuresys/ui";
+import { Card, CardHeader, CardTitle, CardContent, Badge } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { Crown } from "lucide-react";
 import type { ProjectDetail } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
@@ -41,14 +40,14 @@ export default function ProjectDetailPage() {
 
   if (q.isLoading) {
     return (
-      <main className="mx-auto max-w-4xl px-6 py-8">
+      <main className="mx-auto max-w-4xl px-6 pb-8">
         <StatoCaricamento testId="project-detail-loading" />
       </main>
     );
   }
   if (q.isError || !q.data) {
     return (
-      <main className="mx-auto max-w-4xl px-6 py-8">
+      <main className="mx-auto max-w-4xl px-6 pb-8">
         <StatoErrore
           errore={q.error}
           titolo={t("projects.detailError")}
@@ -63,7 +62,7 @@ export default function ProjectDetailPage() {
   const correnti = p.members.filter((m) => m.isCurrent);
 
   return (
-    <main data-testid="project-detail-page" className="mx-auto max-w-4xl space-y-8 px-6 py-8">
+    <main data-testid="project-detail-page" className="mx-auto max-w-4xl space-y-8 px-6 pb-8">
       <PageHeader title={p.name} description={p.code} />
 
       <Card>

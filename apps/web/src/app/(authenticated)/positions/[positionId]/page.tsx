@@ -4,7 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
 import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
@@ -12,6 +13,8 @@ import { FieldGrid } from "@/components/detail-panel";
 import { StatusBadge, StatusPill } from "@/components/status-pill";
 import { MaskedCell, isMasked } from "@/components/masked-cell";
 import { PositionEditor } from "./_components/position-editor";
+import { Riferimento } from "@/components/scheda-rapida";
+import { useLeggibile } from "@/lib/leggibile";
 
 interface PositionDetail {
   positionId: string;
@@ -36,6 +39,8 @@ interface PositionDetail {
 
 export default function PositionDetailPage() {
   const { t } = useTranslation("admin");
+  const leggi = useLeggibile();
+  const nome = (id: string) => leggi.persona(id) ?? leggi.testo(id);
   const params = useParams<{ positionId: string }>();
   const positionId = params.positionId;
   const position = useQuery({
@@ -46,7 +51,7 @@ export default function PositionDetailPage() {
 
   if (position.isLoading) {
     return (
-      <main className="mx-auto max-w-5xl px-6 py-8">
+      <main className="mx-auto max-w-5xl px-6 pb-8">
         <StatoCaricamento />
       </main>
     );
@@ -54,7 +59,7 @@ export default function PositionDetailPage() {
   if (position.isError) {
     const code = isApiError(position.error) ? position.error.status : 0;
     return (
-      <main className="mx-auto max-w-5xl px-6 py-8" data-testid="position-error">
+      <main className="mx-auto max-w-5xl px-6 pb-8" data-testid="position-error">
         <Link href="/positions" className="text-sm underline">{t("positions.detail.back")}</Link>
         <div className="mt-4">
           <StatoErrore
@@ -69,7 +74,7 @@ export default function PositionDetailPage() {
   }
   const p = position.data!;
   return (
-    <main data-testid="position-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 py-8">
+    <main data-testid="position-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="position-title"
         title={p.title}
@@ -102,12 +107,10 @@ export default function PositionDetailPage() {
           <FieldGrid
             testId="position-fields"
             fields={[
-              { label: t("positions.detail.fields.positionId"), value: p.positionId, mono: true },
-              { label: t("positions.detail.fields.tenantId"), value: p.tenantId, mono: true },
-              { label: t("positions.detail.fields.orgUnit"), value: p.organizationUnitId ?? t("positions.detail.dash"), mono: true },
-              { label: t("positions.detail.fields.jobRole"), value: p.jobRoleId ?? t("positions.detail.dash"), mono: true },
-              { label: t("positions.detail.fields.owner"), value: isMasked(p, "ownerUserId") ? <MaskedCell /> : (p.ownerUserId ?? t("positions.detail.dash")), mono: true },
-              { label: t("positions.detail.fields.reportsTo"), value: p.reportsToPositionId ?? t("positions.detail.dash"), mono: true },
+              // C2, C12: unità, proprietario e posizione superiore per nome, e ognuno apre la sua scheda
+              { label: t("positions.detail.fields.orgUnit"), value: p.organizationUnitId ? <Riferimento tipo="unita" id={p.organizationUnitId}>{nome(p.organizationUnitId)}</Riferimento> : t("positions.detail.dash") },
+              { label: t("positions.detail.fields.owner"), value: isMasked(p, "ownerUserId") ? <MaskedCell /> : p.ownerUserId ? <Riferimento tipo="persona" id={p.ownerUserId}>{nome(p.ownerUserId)}</Riferimento> : t("positions.detail.dash") },
+              { label: t("positions.detail.fields.reportsTo"), value: p.reportsToPositionId ? <Riferimento tipo="posizione" id={p.reportsToPositionId}>{nome(p.reportsToPositionId)}</Riferimento> : t("positions.detail.dash") },
               { label: t("positions.detail.fields.criticality"), value: <StatusBadge value={p.criticality} /> },
               { label: t("positions.detail.fields.economicWeight"), value: isMasked(p, "economicWeight") ? <MaskedCell /> : (p.economicWeight ?? t("positions.detail.dash")) },
               { label: t("positions.detail.fields.effectiveFrom"), value: p.effectiveFrom ?? t("positions.detail.dash") },

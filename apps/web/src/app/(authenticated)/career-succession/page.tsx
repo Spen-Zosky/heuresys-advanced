@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { PageHeader } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { StatoCaricamento, StatoVuoto } from "@/components/stato-pagina";
 import type { SuccessionPool, SuccessorCandidate } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
@@ -126,7 +126,7 @@ export default function CareerSuccessionPage() {
   };
 
   return (
-    <main data-testid="career-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="career-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader data-testid="career-title" title={t("career.title")} description={t("career.description")} />
 
       <nav className="flex gap-1 border-b border-border" data-testid="career-tabs">

@@ -9,6 +9,7 @@
  * da una che funziona, finché qualcuno non ricarica la pagina. Qui si ricarica.
  */
 
+import { cifra } from "./cifra";
 import { test, expect } from "@playwright/test";
 import { storageStateFor, PERSONAS, API_BASE, passwordFor, totpFor } from "./fixtures";
 
@@ -43,7 +44,7 @@ test.describe("#4 W4 — gestione delle richieste di contatto", () => {
 
     await page.goto("/leads", { waitUntil: "domcontentloaded", timeout: 60_000 });
     await expect(page.getByTestId("leads-title")).toBeVisible({ timeout: 45_000 });
-    await expect(page.getByTestId("leads-count")).toContainText(String(api.total));
+    await expect(page.getByTestId("leads-count")).toContainText(cifra(api.total));
     await expect(page.getByTestId("lead-row")).toHaveCount(api.total);
   });
 

@@ -44,6 +44,7 @@ test.describe("MVP-2a visualizations — live data", () => {
 
       await expect(page.getByTestId("visualization-detail-page")).toBeVisible({ timeout: 15_000 });
       await expect(page.getByTestId("visualization-version")).toContainText(/versione\s+\d+/);
+      await page.getByTestId("scheda-versioni").click();
 
       const select = page.getByTestId("visualization-version-select");
       await expect(select).toBeVisible();
@@ -56,6 +57,7 @@ test.describe("MVP-2a visualizations — live data", () => {
     test("generating an export downloads a real document", async ({ page }) => {
       await page.goto("/visualizations");
       await page.getByTestId("visualization-link").first().click();
+      await page.getByTestId("scheda-versioni").click({ timeout: 15_000 });
       await expect(page.getByTestId("visualization-export-card")).toBeVisible({ timeout: 15_000 });
 
       await page.getByTestId("visualization-export-format").selectOption("SVG");

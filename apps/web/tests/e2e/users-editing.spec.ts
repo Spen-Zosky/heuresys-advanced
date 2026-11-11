@@ -76,7 +76,7 @@ test.describe("scheda persona — anagrafica e ruoli si modificano dall'interfac
     const nuovoFuso = originale.timezone === "Europe/Madrid" ? "Europe/Lisbon" : "Europe/Madrid";
 
     try {
-      await gotoAuthenticated(page, `/users/${userId}`);
+      await gotoAuthenticated(page, `/users/${userId}?scheda=gestione`);
       await expect(page.getByTestId("user-detail-page")).toBeVisible({ timeout: 45_000 });
 
       // il pannello esiste ed è in scrittura (TENANT_ADMIN ha user:update)
@@ -132,7 +132,7 @@ test.describe("scheda persona — anagrafica e ruoli si modificano dall'interfac
     expect(daAssegnare, "la persona ha già tutti i ruoli candidati: scegline un altro").toBeTruthy();
     const ruolo = daAssegnare!;
 
-    await gotoAuthenticated(page, `/users/${userId}`);
+    await gotoAuthenticated(page, `/users/${userId}?scheda=gestione`);
     await expect(page.getByTestId("user-roles-editor")).toBeVisible({ timeout: 45_000 });
     await expect(page.getByTestId("user-roles-grant")).toBeVisible();
 

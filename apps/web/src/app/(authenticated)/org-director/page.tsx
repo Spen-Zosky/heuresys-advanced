@@ -3,7 +3,9 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { Badge, Button, CapabilityRadar, PageHeader } from "@heuresys/ui";
+import { Badge, Button, CapabilityRadar } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
+import { SchedePagina } from "@/components/schede-pagina";
 import type {
   CapabilityMaturityScore,
   EssentialCapabilityItem,
@@ -132,13 +134,18 @@ export default function OrgDirectorPage() {
   ], [t]);
 
   return (
-    <main data-testid="org-director-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="org-director-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="org-director-title"
         title={t("orgDirector.title")}
         description={t("orgDirector.description")}
         badges={composition.data ? <Badge variant="secondary" data-testid="org-director-count">{t("orgDirector.count", { count: rows.length })}</Badge> : undefined}
       />
+      {/* C5: unità (con il loro profilo) e capacità essenziali in due schede. */}
+      <SchedePagina
+        schede={[
+          { id: "unita", titolo: t("orgDirector.tabs.units"), contenuto: (
+      <div className="space-y-6">
       <EntityTable<OrgRow> originPath={"/v1/capability/composition"}
         isLoading={isLoading} isError={isError} errorMessage={t("orgDirector.errorMessage")}
         rows={rows} rowKey={(r) => r.ouId} rowTestId="org-director-row" columns={columns}
@@ -165,8 +172,10 @@ export default function OrgDirectorPage() {
           </div>
         )}
       </section>
-
-      {/* #55 F1 — Essential Capability Ranker (declared formula, drillable components) */}
+      </div>
+          ) },
+          { id: "essenziali", titolo: t("orgDirector.tabs.essential"), contenuto: (
+      // #55 F1 — Essential Capability Ranker (declared formula, drillable components)
       <section data-testid="org-director-essential" className="space-y-3">
         <PageHeader
           data-testid="org-director-essential-title"
@@ -196,6 +205,9 @@ export default function OrgDirectorPage() {
           caption={t("orgDirector.essential.caption")}
         />
       </section>
+          ) },
+        ]}
+      />
     </main>
   );
 }

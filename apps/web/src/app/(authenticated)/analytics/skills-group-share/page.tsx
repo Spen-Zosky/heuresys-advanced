@@ -2,13 +2,16 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, PageHeader, StatsCard, echartsPresets } from "@heuresys/ui";
+import { Badge, echartsPresets } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
+import { StatsCard } from "@/components/indicatori-leggibili";
 import { Boxes, Layers, PieChart } from "lucide-react";
 import { EChartsCard } from "../../_charts-client";
 import type { SkillsGroupShareAnalyticsResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { useFormat } from "@/lib/format";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
+import { EntityTable } from "@/components/data-table-panel";
 
 export default function SkillsGroupShareAnalyticsPage() {
   const { t } = useTranslation("analytics");
@@ -20,14 +23,14 @@ export default function SkillsGroupShareAnalyticsPage() {
 
   if (q.isLoading) {
     return (
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="mx-auto max-w-7xl px-6 pb-8">
         <StatoCaricamento testId="analytics-skills-group-share-loading" />
       </main>
     );
   }
   if (q.isError) {
     return (
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="mx-auto max-w-7xl px-6 pb-8">
         <StatoErrore errore={q.error} titolo={t("error")} testId="analytics-skills-group-share-error" onRiprova={() => void q.refetch()} />
       </main>
     );
@@ -39,7 +42,7 @@ export default function SkillsGroupShareAnalyticsPage() {
   // Bar: the top-N ESCO groups by skill count, with the remaining groups folded
   // into a single "other" bar so the chart reconciles to the grouped total.
   const barX = [
-    ...d.groups.map((g) => g.groupCode),
+    ...d.groups.map((g) => g.groupName ?? g.groupCode),
     ...(d.otherGroupsCount > 0 ? [t("skillsGroupShare.otherLabel", { count: d.otherGroupsCount })] : []),
   ];
   const barValues = [
@@ -52,7 +55,7 @@ export default function SkillsGroupShareAnalyticsPage() {
   });
 
   return (
-    <main data-testid="analytics-skills-group-share-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
+    <main data-testid="analytics-skills-group-share-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       <PageHeader
         data-testid="analytics-skills-group-share-title"
         title={t("skillsGroupShare.title")}
@@ -120,26 +123,19 @@ export default function SkillsGroupShareAnalyticsPage() {
               data-testid="analytics-skills-group-share-table"
               className="overflow-hidden rounded-card border border-border bg-card"
             >
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
-                    <th className="px-4 py-2 font-medium">{t("skillsGroupShare.colGroup")}</th>
-                    <th className="px-4 py-2 text-right font-medium">{t("skillsGroupShare.colCount")}</th>
-                    <th className="px-4 py-2 text-right font-medium">{t("skillsGroupShare.colShare")}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {d.groups.map((g) => (
-                    <tr key={g.groupUri} className="border-b border-border/50 last:border-0">
-                      <td className="px-4 py-2 font-mono text-xs text-foreground">{g.groupCode}</td>
-                      <td className="px-4 py-2 text-right tabular-nums text-foreground">{g.skillCount}</td>
-                      <td className="px-4 py-2 text-right tabular-nums text-muted-foreground">
-                        {fmt.numeroFisso(g.sharePct, 2)}%
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              {/* C12: ogni gruppo si apre nella sua scheda; il codice ESCO resta nel dettaglio */}
+              <EntityTable<SkillsGroupShareAnalyticsResponse["groups"][number]>
+                isLoading={false}
+                isError={false}
+                rows={d.groups}
+                rowKey={(g) => g.groupUri}
+                columns={[
+                  { header: t("skillsGroupShare.colGroup"), cell: (g) => <span className="text-foreground">{g.groupName ?? g.groupCode}</span> },
+                  { header: t("skillsGroupShare.colCode"), secondaria: true, cell: (g) => <span className="font-mono text-xs" data-grezzo="">{g.groupCode}</span> },
+                  { header: t("skillsGroupShare.colCount"), align: "right", cell: (g) => fmt.numero(g.skillCount) },
+                  { header: t("skillsGroupShare.colShare"), align: "right", cell: (g) => `${fmt.numeroFisso(g.sharePct, 2)}%` },
+                ]}
+              />
             </div>
           </div>
         </section>

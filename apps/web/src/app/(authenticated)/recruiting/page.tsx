@@ -4,10 +4,8 @@ import { useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
-import {
-  PageHeader, Card, CardContent, KanbanBoard,
-  type KanbanColumn,
-} from "@heuresys/ui";
+import { Card, CardContent, KanbanBoard, type KanbanColumn } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import type { ApplicationStage, CandidateApplication } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { useCan } from "@/lib/api/auth";
@@ -131,7 +129,7 @@ export default function RecruitingPipelinePage() {
   const publishedPostings = (postings.data?.items ?? []).filter((p) => p.status === "PUBLISHED").length;
 
   return (
-    <main data-testid="recruiting-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
+    <main data-testid="recruiting-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       <PageHeader title={t("recruiting.title")} description={t("recruiting.description")} />
 
       <section className="grid gap-4 sm:grid-cols-3" data-testid="recruiting-summary">
@@ -188,7 +186,8 @@ export default function RecruitingPipelinePage() {
           motivo={t("recruiting.pipeline.emptyDesc")}
         />
       ) : (
-        <div data-testid="pipeline-board" className="overflow-x-auto">
+        /* C5: la tavola scorre dentro il suo riquadro, la pagina resta corta */
+        <div data-testid="pipeline-board" className="max-h-[calc(100vh-16rem)] overflow-auto">
           <KanbanBoard key={`${impronta}#${annullati}`} columns={columns} onChange={onChange} />
         </div>
       )}

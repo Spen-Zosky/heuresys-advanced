@@ -14,6 +14,7 @@
  * admin roles by migration 000057.
  */
 
+import { cifra } from "./cifra";
 import { test, expect } from "@playwright/test";
 import { storageStateFor, gotoAuthenticated } from "./fixtures";
 
@@ -38,7 +39,7 @@ test.describe("BI analytics — KPI (live data)", () => {
 
     // 4. The headline stat is fed by the live API — assert the rendered number
     //    matches what the endpoint returned (proves no mock/placeholder).
-    await expect(page.getByTestId("kpi-total-targets")).toContainText(String(api.totalTargets));
+    await expect(page.getByTestId("kpi-total-targets")).toContainText(cifra(api.totalTargets));
 
     // 5. The KPI achievement gauge/chart renders (RadialGauge/LinearGauge or
     //    EChartsCard, depending on the page composition).

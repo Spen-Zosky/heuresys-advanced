@@ -2,7 +2,9 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, PageHeader, StatsCard } from "@heuresys/ui";
+import { Badge } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
+import { StatsCard } from "@/components/indicatori-leggibili";
 import { Activity, Clock, TrendingUp } from "lucide-react";
 import { EChartsCard } from "../../_charts-client";
 import type {
@@ -96,14 +98,14 @@ export default function AttendanceAnalyticsPage() {
 
   if (q.isLoading) {
     return (
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="mx-auto max-w-7xl px-6 pb-8">
         <StatoCaricamento testId="analytics-attendance-loading" />
       </main>
     );
   }
   if (q.isError) {
     return (
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="mx-auto max-w-7xl px-6 pb-8">
         <StatoErrore errore={q.error} titolo={t("error")} testId="analytics-attendance-error" onRiprova={() => void q.refetch()} />
       </main>
     );
@@ -113,7 +115,7 @@ export default function AttendanceAnalyticsPage() {
   const hasData = d.monthly.length > 0;
 
   return (
-    <main data-testid="analytics-attendance-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
+    <main data-testid="analytics-attendance-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       <PageHeader
         data-testid="analytics-attendance-title"
         title={t("attendance.title")}

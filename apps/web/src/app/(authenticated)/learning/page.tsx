@@ -12,11 +12,13 @@ import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
 import { LearningModuleCreator, LearningModuleEditor } from "./_components/learning-forms";
 import { LearningPathsPanel } from "./_components/learning-paths";
+import { SchedePagina } from "@/components/schede-pagina";
 
 function buildColumns(t: TFunction, onEdit: (id: string) => void): DataColumn<LearningModule>[] {
   return [
-    { header: t("shared.code"), cell: (m) => <span className="font-mono text-xs">{m.code}</span> },
     { header: t("shared.name"), cell: (m) => <span className="font-medium text-foreground">{m.title}</span> },
+    // R2/C1: il codice resta nel dettaglio della riga, non in testa alla tabella.
+    { header: t("shared.code"), secondaria: true, cell: (m) => <span className="font-mono text-xs" data-grezzo="">{m.code}</span> },
     {
       header: t("learning.cols.duration"),
       cell: (m) => <span className="text-xs text-muted-foreground">{m.durationMinutes ?? "—"}</span>,
@@ -97,6 +99,11 @@ export default function LearningCataloguePage() {
       emptyDescription={t("learning.emptyDescription")}
       caption={t("learning.caption")}
     >
+      {/* C5: moduli e percorsi in due schede, invece di una pagina lunga. */}
+      <SchedePagina
+        schede={[
+          { id: "moduli", titolo: t("learning.tabs.modules"), contenuto: (
+      <div className="space-y-4">
       <div className="max-w-sm">
         <label htmlFor="learning-search" className="mb-1 block text-sm font-medium text-foreground">
           {t("learning.form.search")}
@@ -111,10 +118,13 @@ export default function LearningCataloguePage() {
       </div>
       {/* #43: il catalogo si LEGGEVA soltanto; qui si inserisce e si corregge. */}
       <LearningModuleCreator />
+      </div>
+          ) },
+          // I percorsi compongono i moduli in una sequenza che porta a un risultato (#43).
+          { id: "percorsi", titolo: t("learning.tabs.paths"), contenuto: <LearningPathsPanel /> },
+        ]}
+      />
       {editingId && <LearningModuleEditor moduleId={editingId} onClose={() => setEditingId(null)} />}
-      {/* I percorsi compongono i moduli in una sequenza che porta a un
-          risultato: stanno sotto il catalogo che li alimenta (#43). */}
-      <LearningPathsPanel />
     </DataTablePanel>
   );
 }

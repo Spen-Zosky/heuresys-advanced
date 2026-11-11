@@ -19,7 +19,7 @@
 import { pool } from "../../db/client.js";
 import type { ActorContext } from "../../lib/actor.js";
 import { isPlatform } from "../../lib/actor.js";
-import { perimetroDiCatalogo } from "../../lib/scope/profilo.js";
+import { perimetroDelCliente, perimetroDiCatalogo } from "../../lib/scope/profilo.js";
 
 export type { ActorContext };
 import { NotFoundError, ConflictError } from "../../errors/index.js";
@@ -33,7 +33,13 @@ import * as repo from "./repository.js";
 
 export const jobRolesService = {
   async list(actor: ActorContext, query: JobRoleListQuery) {
-    return repo.listJobRoles(pool, query, await perimetroDiCatalogo(pool, actor, "job_roles"));
+    // I21: la piattaforma che chiede il catalogo di un cliente lo riceve nel perimetro di quel cliente
+    // (chi vede il catalogo intero può restringerlo a quello di un cliente; gli altri hanno già il loro)
+    const proprio = await perimetroDiCatalogo(pool, actor, "job_roles");
+    const perimetro = proprio.tipo === "tutto" && query.tenantId
+      ? await perimetroDelCliente(pool, query.tenantId, "job_roles")
+      : proprio;
+    return repo.listJobRoles(pool, query, perimetro);
   },
 
   async getById(actor: ActorContext, id: string): Promise<JobRole> {

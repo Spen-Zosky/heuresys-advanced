@@ -2,7 +2,9 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, PageHeader, StatsCard, echartsPresets } from "@heuresys/ui";
+import { Badge, echartsPresets } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
+import { StatsCard } from "@/components/indicatori-leggibili";
 import { GraduationCap, Layers, Users } from "lucide-react";
 import { EChartsCard } from "../../_charts-client";
 import type { SkillsByCategoryAnalyticsResponse } from "@heuresys/shared";
@@ -67,14 +69,14 @@ export default function SkillsByCategoryAnalyticsPage() {
 
   if (q.isLoading) {
     return (
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="mx-auto max-w-7xl px-6 pb-8">
         <StatoCaricamento testId="analytics-skills-by-category-loading" />
       </main>
     );
   }
   if (q.isError) {
     return (
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="mx-auto max-w-7xl px-6 pb-8">
         <StatoErrore errore={q.error} titolo={t("error")} testId="analytics-skills-by-category-error" onRiprova={() => void q.refetch()} />
       </main>
     );
@@ -95,7 +97,7 @@ export default function SkillsByCategoryAnalyticsPage() {
   });
 
   return (
-    <main data-testid="analytics-skills-by-category-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
+    <main data-testid="analytics-skills-by-category-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       <PageHeader
         data-testid="analytics-skills-by-category-title"
         title={t("skillsByCategory.title")}

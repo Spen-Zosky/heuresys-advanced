@@ -6,7 +6,7 @@
     "columns": {
       "title": "Titolo",
       "status": "Stato",
-      "policy": "Quorum",
+      "policy": "Regola di approvazione",
       "priority": "Priorità",
       "steps": "Passi",
       "created": "Creata",
@@ -29,7 +29,7 @@
       "ANY_OF": "Almeno uno"
     },
     "priority": {
-      "INFO": "Info",
+      "INFO": "Informativa",
       "MEDIUM": "Media",
       "HIGH": "Alta",
       "CRITICAL": "Critica"
@@ -38,7 +38,7 @@
     "create": {
       "cardTitle": "Nuova richiesta di approvazione",
       "titleLabel": "Titolo",
-      "policyLabel": "Quorum",
+      "policyLabel": "Regola di approvazione",
       "priorityLabel": "Priorità",
       "approversLabel": "Approvatori",
       "approversHint": "Cerca le persone per nome o email e aggiungile una alla volta.",
@@ -76,7 +76,7 @@
         "description": "Strumento di sviluppo: chiedi all'agente qualcosa su questa richiesta di approvazione. Tool e input di eventuali scritture sono già oscurati dal gateway.",
         "contextLabel": "Contesto",
         "context": "Richiesta di approvazione «{{title}}» ({{id}})",
-        "promptLabel": "Prompt",
+        "promptLabel": "Istruzione",
         "promptPlaceholder": "Es. Riassumi lo stato di questa richiesta di approvazione.",
         "run": "Esegui",
         "running": "In esecuzione…",
@@ -87,7 +87,7 @@
         "approvalDesc": "L'agente vuole eseguire una scrittura. Tool e input sono già oscurati dal gateway.",
         "approvalDescRead": "L'assistente ha già consultato dati di {{persone}} persone diverse in questa richiesta, più di quante ne conti il reparto più grande dell'azienda. Vuoi che continui a leggere? Non è un divieto: se confermi, procede.",
         "approvalDescReadUnknown": "L'assistente sta per leggere altri dati, ma quante persone abbia consultato finora non risulta misurato. Vuoi che continui?",
-        "approvalTool": "Tool",
+        "approvalTool": "Strumento",
         "approvalInput": "Input (oscurato)",
         "allow": "Consenti",
         "deny": "Nega",
@@ -334,6 +334,14 @@
           "proposedBy": "proposto da {{who}} il {{when}}",
           "withdraw": "Ritira"
         }
+      },
+      "tabs": {
+        "work": "Lavoro e retribuzione",
+        "results": "Risultati e carriera",
+        "skills": "Competenze e formazione",
+        "attendance": "Presenze",
+        "history": "Storia",
+        "manage": "Gestione"
       }
     }
   },
@@ -358,20 +366,20 @@
       "notFound": "Tenant non trovato.",
       "loadError": "Errore di caricamento.",
       "tabs": {
-        "overview": "Overview",
-        "typing": "Enterprise Typing",
+        "overview": "Panoramica",
+        "typing": "Tipologia d'impresa",
         "users": "Utenti"
       },
       "overviewTitle": "Anagrafica",
       "typingTitle": "Profili Enterprise Typing",
       "usersTitle": "Utenti",
       "fields": {
-        "legalName": "Legal name",
-        "country": "Country",
-        "industry": "Industry",
-        "sizeBand": "Size band",
+        "legalName": "Ragione sociale",
+        "country": "Paese",
+        "industry": "Settore",
+        "sizeBand": "Classe dimensionale",
         "status": "Stato",
-        "tenantId": "Tenant ID",
+        "tenantId": "Identificativo dell'azienda",
         "createdAt": "Creato"
       },
       "dash": "—",
@@ -406,7 +414,7 @@
   "enterpriseTyping": {
     "title": "Tipizzazione dell'azienda",
     "description": "Il profilo che descrive l'azienda: classe di attività, dimensione, modello operativo, intensità regolatoria.",
-    "back": "← Tenant",
+    "back": "← Aziende",
     "cardTitleNew": "Nuovo profilo",
     "cardTitleSaved": "Profilo salvato",
     "classLabel": "Classe di attività",
@@ -512,13 +520,13 @@
       "loadError": "Errore di caricamento.",
       "activeOn": "Attiva",
       "activeOff": "Inattiva",
-      "cardTitle": "Position Intelligence Profile",
+      "cardTitle": "Profilo della posizione",
       "fields": {
-        "positionId": "Position ID",
-        "tenantId": "Tenant ID",
-        "orgUnit": "Org Unit",
-        "jobRole": "Job Role",
-        "owner": "Owner",
+        "positionId": "Identificativo della posizione",
+        "tenantId": "Identificativo dell'azienda",
+        "orgUnit": "Unità organizzativa",
+        "jobRole": "Ruolo professionale",
+        "owner": "Proprietario della posizione",
         "reportsTo": "Riferisce a",
         "criticality": "Criticità",
         "economicWeight": "Peso economico",
@@ -589,7 +597,7 @@
           "required": "Richiesta",
           "module": "Modulo",
           "delivery": "Erogazione",
-          "target": "Target"
+          "target": "Livello atteso"
         }
       },
       "gaps": {
@@ -597,7 +605,7 @@
         "caption": "Gap formativi aperti per la posizione",
         "empty": "Nessun gap formativo associato a questa posizione.",
         "columns": {
-          "user": "User",
+          "user": "Persona",
           "skill": "Skill",
           "severity": "Severità",
           "detected": "Rilevato"
@@ -655,9 +663,9 @@
     "counters": {
       "users": "Utenti",
       "positions": "Posizioni",
-      "organizationUnits": "Org Units",
-      "learningPaths": "Learning Paths",
-      "learningGaps": "Learning Gaps",
+      "organizationUnits": "Unità organizzative",
+      "learningPaths": "Percorsi formativi",
+      "learningGaps": "Lacune formative",
       "tenants": "Tenant",
       "blueprints": "Blueprint",
       "recommendations": "Reward proposte"
@@ -671,7 +679,7 @@
     "activityEmptyDesc": "Le azioni recenti del tuo ambito appariranno qui.",
     "activitySubtitle": "Ambito {{kind}}",
     "famiglie": {
-      "badge": "dashboard",
+      "badge": "cruscotto",
       "vistePlurale": "{{count}} viste",
       "visteConTrattenute": "{{count}} viste, di cui {{masked}} con valori trattenuti",
       "colonnaVoce": "Voce",
@@ -714,7 +722,7 @@
     "chartAria": "Distribuzione grafici per tipo",
     "noData": "Nessun dato.",
     "detail": {
-      "back": "← Visualizations",
+      "back": "← Visualizzazioni",
       "notFound": "Grafico non trovato.",
       "loadError": "Errore.",
       "diagramTitle": "Diagramma",
@@ -729,7 +737,7 @@
       "versionBadge": "versione {{version}}",
       "versionsTitle": "Versioni",
       "versionSelectLabel": "Versione da consultare",
-      "versionOption": "v{{version}} — {{name}}",
+      "versionOption": "versione {{version}} — {{name}}",
       "versionCreate": "Crea una nuova versione",
       "versionCreating": "Creazione in corso…",
       "versionNote": "Una nuova versione è una copia indipendente: nodi, collegamenti e posizioni vengono duplicati, e la versione da cui parti resta consultabile com'è.",
@@ -741,7 +749,12 @@
       "exportEmpty": "Nessun export per questa versione.",
       "exportSize": "{{bytes}} byte",
       "exportNoContent": "senza contenuto",
-      "exportError": "Export non riuscito ({{code}})."
+      "exportError": "Export non riuscito ({{code}}).",
+      "tabs": {
+        "graph": "Grafo",
+        "elements": "Nodi e collegamenti",
+        "versions": "Versioni ed esportazioni"
+      }
     }
   },
   "content": {
@@ -761,7 +774,7 @@
     },
     "kind": {
       "article": "Articolo",
-      "policy": "Policy",
+      "policy": "Regolamento",
       "announcement": "Annuncio",
       "handbook": "Manuale",
       "process_doc": "Doc di processo"
@@ -819,7 +832,7 @@
       "attachSuccess": "Blueprint collegato.",
       "roles": {
         "documentation": "Documentazione",
-        "policy": "Policy",
+        "policy": "Regolamento",
         "procedure": "Procedura",
         "reference": "Riferimento"
       }
@@ -837,7 +850,7 @@
       "successMsg": "Categoria creata.",
       "empty": "Nessuna categoria.",
       "colName": "Nome",
-      "colSlug": "Slug",
+      "colSlug": "Indirizzo breve",
       "colActions": "Azioni",
       "delete": "Elimina"
     },
@@ -889,6 +902,10 @@
       "uploadError": "Caricamento non riuscito",
       "deleteError": "Eliminazione non riuscita",
       "copyMarkdown": "Copia markdown"
+    },
+    "tabs": {
+      "documents": "Documenti",
+      "categories": "Categorie"
     }
   },
   "insights": {
@@ -913,7 +930,7 @@
       "tenure": "Anzianità",
       "attendance": "Presenze / straordinari",
       "kpi": "Performance KPI",
-      "engagement": "Engagement",
+      "engagement": "Coinvolgimento",
       "comp": "Posizionamento retributivo",
       "promotion": "Recenza promozione"
     },
@@ -969,7 +986,7 @@
     "caption": "Gap di competenze (gap più ampio in cima)",
     "colSubject": "Persona",
     "colPosition": "Ruolo attuale",
-    "colValue": "Gap",
+    "colValue": "Divario",
     "colSegment": "Segmento",
     "segment": {
       "ALIGNED": "Allineato",
@@ -1007,7 +1024,7 @@
     "rolesHint": "Ambito: tutti i ruoli oppure una selezione (almeno uno).",
     "empty": "Nessun tenant disponibile.",
     "accessDeniedTitle": "Accesso negato",
-    "accessDeniedDesc": "Servono i permessi mfa_policy per leggere le policy.",
+    "accessDeniedDesc": "Servono i permessi sulla verifica in due passaggi per leggerne le regole.",
     "exemptions": {
       "title": "Esenzioni dal secondo fattore",
       "description": "Chi può entrare senza il secondo fattore, perché, chi l'ha deciso e fino a quando. Un'esenzione scaduta non apre più niente; chi porta un mandato non può averne.",
@@ -1021,6 +1038,10 @@
       "author": "decisa da {{name}}",
       "noAuthor": "senza autore (di prima della regola)",
       "disable": "Spegni"
+    },
+    "tabs": {
+      "rules": "Regole per azienda",
+      "exemptions": "Esenzioni"
     }
   },
   "agentDev": {
@@ -1028,17 +1049,17 @@
     "description": "Strumento di sviluppo: invia un prompt all'agent gateway e osserva lo stream live (messaggi, tool-call e richieste di approvazione write).",
     "disabledTitle": "Console agente disabilitata",
     "disabledDesc": "Questa console di sviluppo è disattivata. Abilitala impostando il flag d'ambiente per la console agente.",
-    "promptLabel": "Prompt",
+    "promptLabel": "Istruzione",
     "promptPlaceholder": "Es. Elenca le organization unit del mio tenant e dimmi quante sono.",
     "run": "Esegui",
     "running": "In esecuzione…",
     "stop": "Interrompi",
     "streamTitle": "Stream eventi",
     "streamEmpty": "Nessun evento ancora. Invia un prompt per avviare l'agente.",
-    "gatewayLabel": "Gateway",
+    "gatewayLabel": "Punto di accesso",
     "approvalTitle": "Approvazione richiesta",
     "approvalDesc": "L'agente vuole eseguire una scrittura. Tool e input sono già oscurati dal gateway.",
-    "approvalTool": "Tool",
+    "approvalTool": "Strumento",
     "approvalDescRead": "L'assistente ha già consultato dati di {{persone}} persone diverse in questa richiesta, più di quante ne conti il reparto più grande dell'azienda. Vuoi che continui a leggere? Non è un divieto: se confermi, procede.",
     "approvalDescReadUnknown": "L'assistente sta per leggere altri dati, ma quante persone abbia consultato finora non risulta misurato. Vuoi che continui?",
     "approvalInput": "Input (oscurato)",
@@ -1053,7 +1074,8 @@
     "conversationNotFound": "Conversazione non trovata.",
     "rejectReasonLabel": "Perché rifiuti?",
     "rejectConfirm": "Conferma il rifiuto",
-    "approvalExpires": "Scade"
+    "approvalExpires": "Scade",
+    "panelTitle": "Conversazione con l'agente"
   },
   "provenance": {
     "title": "Registro di provenienza",
@@ -1087,6 +1109,103 @@
       "STALE": "Superate",
       "CONFLICTED": "In conflitto",
       "REJECTED": "Respinte"
+    },
+    "tables": {
+      "sys_skills": "Competenze",
+      "sys_skill_taxonomy_edges": "Legami fra competenze",
+      "sys_esco_occupation_mappings": "Corrispondenze con le occupazioni ESCO",
+      "sys_attendance": "Presenze",
+      "sys_learning_modules": "Moduli formativi",
+      "sys_learning_paths": "Percorsi formativi",
+      "sys_activity_classifications": "Classificazioni delle attività",
+      "sys_goal_updates": "Aggiornamenti degli obiettivi",
+      "sys_goals": "Obiettivi",
+      "sys_goal_check_ins": "Verifiche degli obiettivi",
+      "sys_goal_milestones": "Tappe degli obiettivi",
+      "sys_goal_comments": "Commenti agli obiettivi",
+      "sys_time_off_balances": "Saldi delle assenze",
+      "sys_continuous_feedback": "Riscontri continui",
+      "sys_performance_review_competency_ratings": "Valutazioni delle competenze nelle revisioni",
+      "sys_feedback_360_responses": "Risposte ai riscontri a 360 gradi",
+      "sys_overtime": "Straordinari",
+      "sys_job_roles": "Ruoli professionali",
+      "sys_users": "Persone",
+      "sys_performance_reviews": "Revisioni delle prestazioni",
+      "sys_goal_alignments": "Allineamenti degli obiettivi",
+      "sys_time_off_requests": "Richieste di assenza",
+      "sys_skill_aliases": "Sinonimi delle competenze",
+      "sys_skill_families": "Famiglie di competenze",
+      "sys_compensation_bands": "Fasce retributive",
+      "sys_calibration_discussions": "Discussioni di calibrazione",
+      "sys_goal_templates": "Modelli di obiettivo",
+      "sys_calibration_sessions": "Sessioni di calibrazione",
+      "sys_skill_categories": "Categorie di competenze",
+      "sys_job_families": "Famiglie professionali",
+      "sys_okr_check_ins": "Verifiche degli OKR",
+      "sys_leave_balance_transactions": "Movimenti dei saldi di assenza",
+      "sys_leave_accrual_rules": "Regole di maturazione delle assenze",
+      "sys_calibration_participants": "Partecipanti alla calibrazione",
+      "sys_okr_key_results": "Risultati chiave degli OKR",
+      "sys_okrs": "OKR",
+      "esco_skills": "Competenze ESCO",
+      "skill_adjacencies": "Vicinanze fra competenze",
+      "esco_skill_relations": "Relazioni fra competenze ESCO",
+      "employee_attendance": "Presenze",
+      "occupation_industry_classifications": "Professioni per settore",
+      "semantic_entity_index": "Indice semantico",
+      "industry_classifications": "Classificazioni dei settori",
+      "course_enrollments": "Iscrizioni ai corsi",
+      "esco_occupations": "Professioni ESCO",
+      "module_completions": "Moduli completati",
+      "learning_recommendations": "Suggerimenti di formazione",
+      "competency_review_ratings": "Giudizi sulle competenze",
+      "course_modules": "Moduli dei corsi",
+      "employee_time_off_balances": "Saldi di ferie e permessi",
+      "learning_ratings": "Giudizi sui corsi",
+      "feedback_360": "Riscontri a 360 gradi",
+      "employee_overtime": "Straordinari",
+      "skill_gap_analyses": "Analisi dei divari di competenza",
+      "skill_demand_metrics": "Domanda di competenze",
+      "skill_supply_metrics": "Disponibilità di competenze",
+      "job_templates": "Modelli di mansione",
+      "courses": "Corsi",
+      "skill_pair_usage": "Coppie di competenze usate insieme",
+      "employee_time_off_requests": "Richieste di ferie e permessi",
+      "ccnl_job_title_mapping": "Corrispondenze fra mansioni e CCNL",
+      "market_salary_data": "Retribuzioni di mercato",
+      "skill_development_paths": "Percorsi di sviluppo delle competenze",
+      "competencies": "Competenze",
+      "ontology_feedback": "Riscontri sull'ontologia",
+      "ontology_quality_metrics": "Misure di qualità dell'ontologia",
+      "skill_clusters": "Raggruppamenti di competenze",
+      "learning_bookmarks": "Corsi salvati",
+      "ccnl_levels": "Livelli del CCNL",
+      "skill_gap_snapshots": "Fotografie dei divari di competenza",
+      "onet_skills": "Competenze O*NET",
+      "market_benchmarks": "Riferimenti di mercato",
+      "skill_extraction_jobs": "Estrazioni di competenze",
+      "ontology_skill_relations": "Relazioni fra competenze dell'ontologia",
+      "unknown_skills": "Competenze non riconosciute",
+      "onet_occupations": "Professioni O*NET",
+      "ontology_skill_dimensions": "Dimensioni delle competenze",
+      "sindacati": "Sindacati",
+      "course_enrollments_semantic": "Iscrizioni ai corsi (indice semantico)",
+      "key_results": "Risultati chiave",
+      "onet_knowledge": "Conoscenze O*NET",
+      "industry_occupation_mapping": "Professioni tipiche dei settori",
+      "onet_abilities": "Abilità O*NET",
+      "onet_work_activities": "Attività lavorative O*NET",
+      "esco_isco_groups": "Gruppi professionali ISCO",
+      "learning_content_providers": "Fornitori di formazione",
+      "ccnl_executive_bands": "Fasce dirigenziali del CCNL",
+      "esco_skill_groups": "Gruppi di competenze ESCO",
+      "learning_path_enrollments": "Iscrizioni ai percorsi",
+      "okr_checkins": "Verifiche degli OKR",
+      "ccnl_contracts": "Contratti collettivi",
+      "semantic_search_log": "Ricerche semantiche",
+      "competency_frameworks": "Modelli di competenza",
+      "rating_scales": "Scale di valutazione",
+      "ontology_embedding_jobs": "Indicizzazioni dell'ontologia"
     }
   },
   "timeOff": {
@@ -1130,7 +1249,7 @@
     "nineBox": {
       "title": "Griglia 9-box",
       "axisPotential": "Potenziale",
-      "axisPerformance": "Performance",
+      "axisPerformance": "Prestazione",
       "band": {
         "LOW": "Basso",
         "MEDIUM": "Medio",
@@ -1207,7 +1326,8 @@
       "recipient": "Sistema destinatario",
       "status": "Stato",
       "handedOff": "Consegnato"
-    }
+    },
+    "rewardGates": "Cancelli di premio"
   },
   "whistleblowingConsole": {
     "title": "Segnalazioni whistleblowing",
@@ -1318,9 +1438,9 @@
     "description": "Quali righe di quest'azienda sono nate da una costruzione, e da quale versione di quale fascicolo. Non «quante»: quali.",
     "byTable": "Per tabella",
     "records": "Le righe",
-    "error": "Il registro non e' leggibile.",
+    "error": "Il registro non è leggibile.",
     "empty": "Nessuna riga.",
-    "nothingYet": "Il registro e' vuoto, e questo non e' un guasto: finche' nessuna costruzione e' stata applicata non c'e' niente da registrare.",
+    "nothingYet": "Il registro è vuoto, e questo non è un guasto: finché nessuna costruzione è stata applicata non c'è niente da registrare.",
     "allStatuses": "Tutti gli stati",
     "noJustification": "nessuna ragione registrata",
     "cols": {

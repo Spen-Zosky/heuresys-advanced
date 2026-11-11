@@ -11,6 +11,7 @@
  * do anywhere" while the data clearly ranks one unit last.
  */
 
+import { cifra } from "./cifra";
 import { test, expect } from "@playwright/test";
 import { storageStateFor, PERSONAS, API_BASE, passwordFor, totpFor } from "./fixtures";
 
@@ -62,9 +63,9 @@ test.describe("#57 F3 — organizational health", () => {
     // riporta il totale VERO — che e' il modo in cui un lettore sa che ce ne sono altre.
     const PER_PAGINA = 25;
     await expect(page.getByTestId("org-health-row")).toHaveCount(Math.min(api.total, PER_PAGINA));
-    await expect(page.getByTestId("org-health-count")).toContainText(String(api.total));
+    await expect(page.getByTestId("org-health-count")).toContainText(cifra(api.total));
     for (const [status, count] of Object.entries(api.summary)) {
-      await expect(page.getByTestId(`org-health-summary-${status}`)).toContainText(String(count));
+      await expect(page.getByTestId(`org-health-summary-${status}`)).toContainText(cifra(count));
     }
     // weakest first — the unit a director should look at opens the table
     await expect(page.getByTestId("org-health-row").first()).toContainText(api.units[0].orgUnitName);

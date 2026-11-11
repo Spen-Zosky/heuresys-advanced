@@ -3,7 +3,9 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, PageHeader, StatsCard } from "@heuresys/ui";
+import { Badge } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
+import { StatsCard } from "@/components/indicatori-leggibili";
 import { Building2, Coins, Scale } from "lucide-react";
 import { EChartsCard } from "../../_charts-client";
 import { MaskedCell } from "@/components/masked-cell";
@@ -103,14 +105,14 @@ export default function CompensationAnalyticsPage() {
 
   if (q.isLoading) {
     return (
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="mx-auto max-w-7xl px-6 pb-8">
         <StatoCaricamento testId="analytics-compensation-loading" />
       </main>
     );
   }
   if (q.isError) {
     return (
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="mx-auto max-w-7xl px-6 pb-8">
         <StatoErrore errore={q.error} titolo={t("error")} testId="analytics-compensation-error" onRiprova={() => void q.refetch()} />
       </main>
     );
@@ -135,7 +137,7 @@ export default function CompensationAnalyticsPage() {
       : t("compensation.rangeEmpty");
 
   return (
-    <main data-testid="analytics-compensation-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
+    <main data-testid="analytics-compensation-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       <PageHeader
         data-testid="analytics-compensation-title"
         title={t("compensation.title")}

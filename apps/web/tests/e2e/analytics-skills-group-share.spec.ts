@@ -12,6 +12,7 @@
  * is granted to the admin roles by migration 000057; the catalogue is global.
  */
 
+import { cifra } from "./cifra";
 import { test, expect, type APIRequestContext } from "@playwright/test";
 import { storageStateFor } from "./fixtures";
 
@@ -71,11 +72,11 @@ test.describe("BI T3.8 /analytics/skills-group-share — live data (ESCO group s
     await expect(chart).toBeVisible({ timeout: 15_000 });
     await expect(chart.locator("canvas").first()).toBeVisible({ timeout: 15_000 });
 
-    // 6. Share table renders the top group's real code + skill count (the largest group).
+    // 6. Share table renders the top group's name (C1: il codice ESCO sta nel dettaglio della riga) + skill count.
     const table = page.getByTestId("analytics-skills-group-share-table");
     await expect(table).toBeVisible({ timeout: 15_000 });
-    const top = api.groups[0]!;
-    await expect(table).toContainText(top.groupCode);
-    await expect(table).toContainText(String(top.skillCount));
+    const top = api.groups[0]! as typeof api.groups[number] & { groupName?: string | null };
+    await expect(table).toContainText(top.groupName ?? top.groupCode);
+    await expect(table).toContainText(cifra(top.skillCount));
   });
 });

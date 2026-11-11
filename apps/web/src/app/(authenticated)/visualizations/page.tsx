@@ -4,7 +4,8 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
-import { Badge, PageHeader } from "@heuresys/ui";
+import { Badge } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import type { VizGraph, VizGraphTypeDistributionItem } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
@@ -27,7 +28,7 @@ interface RecentExport {
 
 /** Donut option: type distribution. The series name is passed in already
  *  translated (i18n is a render-time hook), never resolved at module scope. */
-function typeChartOption(items: TypeDistItem[], labels: { series: string }) {
+function typeChartOption(items: TypeDistItem[], labels: { series: string; tipo: (code: string) => string }) {
   return {
     tooltip: { trigger: "item" as const, formatter: "{b}: {c} ({d}%)" },
     legend: { type: "scroll" as const, bottom: 0, textStyle: { color: "hsl(var(--muted-foreground))", fontSize: 11 } },
@@ -39,7 +40,7 @@ function typeChartOption(items: TypeDistItem[], labels: { series: string }) {
         avoidLabelOverlap: true,
         itemStyle: { borderColor: "transparent", borderWidth: 2 },
         label: { show: false },
-        data: items.map((i) => ({ name: i.type.replace(/_/g, " "), value: i.count })),
+        data: items.map((i) => ({ name: labels.tipo(i.type), value: i.count })),
       },
     ],
   };
@@ -90,7 +91,7 @@ export default function VisualizationsPage() {
   );
 
   return (
-    <main data-testid="visualizations-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="visualizations-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="visualizations-title"
         title={t("visualizations.title")}
@@ -128,7 +129,7 @@ export default function VisualizationsPage() {
         >
           <h2 className="mb-2 text-sm font-medium text-foreground">{t("visualizations.distributionTitle")}</h2>
           {summary.data && summary.data.total > 0 ? (
-            <EChartsCard option={typeChartOption(summary.data.items, { series: t("visualizations.chartSeries") })} height={260} ariaLabel={t("visualizations.chartAria")} />
+            <EChartsCard option={typeChartOption(summary.data.items, { series: t("visualizations.chartSeries"), tipo: (c) => enumLabel("vizGraphType", c) })} height={260} ariaLabel={t("visualizations.chartAria")} />
           ) : summary.isLoading ? (
             <StatoCaricamento />
           ) : (

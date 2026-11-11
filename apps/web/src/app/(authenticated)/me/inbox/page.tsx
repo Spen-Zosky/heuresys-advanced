@@ -2,19 +2,8 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import {
-  AuditFeed,
-  type AuditEvent,
-  type AuditTone,
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  PageHeader,
-  formatRelativeTime,
-} from "@heuresys/ui";
+import { AuditFeed, type AuditEvent, type AuditTone, Badge, Button, Card, CardContent, CardHeader, CardTitle, formatRelativeTime } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import {
   AlertTriangle,
   Bell,
@@ -24,6 +13,7 @@ import {
 } from "lucide-react";
 import { apiFetch } from "@/lib/api/fetch";
 import { useInboxStream } from "@/lib/use-inbox-stream";
+import { testoLeggibile } from "@/lib/i18n";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
@@ -116,13 +106,14 @@ export default function MeInboxPage() {
       icon: v.icon,
       tone: v.tone,
       title: n.subject,
-      description: n.body ?? undefined,
+      // C1: i testi già scritti dal servizio possono contenere un codice («priorità MODERATE_GAP»)
+      description: n.body ? testoLeggibile(n.body) : undefined,
       meta: `${formatRelativeTime(n.createdAt)} · ${enumLabel("notificationPriority", n.priority)} · ${enumLabel("notificationStatus", n.status)}`,
     };
   });
 
   return (
-    <main data-testid="me-inbox-page" className="mx-auto max-w-5xl space-y-6 px-6 py-8">
+    <main data-testid="me-inbox-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="me-inbox-title"
         title={t("inbox.title")}

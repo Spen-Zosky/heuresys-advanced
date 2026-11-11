@@ -11,6 +11,7 @@
  */
 import { use } from "react";
 import Link from "next/link";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { BlueprintDiffResponse } from "@heuresys/shared";
@@ -47,15 +48,14 @@ export default function TenantBlueprintDiffPage({
 
   return (
     <div className="space-y-6" data-testid="tenant-blueprint-diff">
-      <header>
-        <Link
-          href={`/tenant-blueprints/${id}`}
-          className="text-sm text-muted-foreground underline-offset-2 hover:underline"
-        >
-          {t("dossier.back")}
-        </Link>
-        <h1 className="mt-1 text-xl font-semibold text-foreground">{t("dossier.diff.title")}</h1>
-      </header>
+      <PageHeader
+        breadcrumbs={
+          <Link href={`/tenant-blueprints/${id}`} className="underline-offset-2 hover:underline">
+            {t("dossier.back")}
+          </Link>
+        }
+        title={t("dossier.diff.title")}
+      />
 
       <section className="rounded-lg border border-border bg-card p-4" data-testid="diff-modello">
         <h2 className="text-sm font-semibold text-foreground">{t("dossier.diff.model")}</h2>

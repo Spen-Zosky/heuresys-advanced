@@ -34,26 +34,8 @@
  *   - docs/13_best_practices_for_modern_saas_ui.md
  */
 
-import {
-  AlertBanner,
-  AuditFeed,
-  DashboardFooter,
-  DashboardHeader,
-  DashboardShell,
-  DashboardSidebar,
-  DBSupervisorSidebar,
-  ErrorRateBreakdown,
-  HeuresysLogoBadge,
-  HeuresysWordmark,
-  IncidentTimeline,
-  KPIStrip,
-  LogStream,
-  PageActions,
-  RBACMatrix,
-  SQLSlowQueryTable,
-  TenantFleetTable,
-  TimeRangeSelector,
-} from "@heuresys/ui";
+import { AlertBanner, AuditFeed, DashboardFooter, DashboardHeader, DashboardShell, DashboardSidebar, DBSupervisorSidebar, ErrorRateBreakdown, HeuresysLogoBadge, HeuresysWordmark, IncidentTimeline, LogStream, PageActions, RBACMatrix, SQLSlowQueryTable, TenantFleetTable, TimeRangeSelector } from "@heuresys/ui";
+import { KPIStrip } from "@/components/indicatori-leggibili";
 import {
   Activity, Layers, ScrollText, ShieldCheck, Users, Lock, Database, Settings, AlertCircle, Code2,
 } from "lucide-react";

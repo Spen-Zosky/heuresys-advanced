@@ -19,6 +19,7 @@ test.describe("talent review 9-box page (#29 A/L3)", () => {
     await expect(page.getByTestId("talent-nine-box")).toBeVisible({ timeout: 20_000 });
     await expect(page.getByTestId("talent-nine-box-cell").first()).toBeVisible();
     // A supporting live panel (readiness by horizon).
+    await page.getByTestId("scheda-prontezza").click();
     await expect(page.getByTestId("talent-readiness-row").first()).toBeVisible({ timeout: 20_000 });
   });
 });

@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { apiFetch } from "@/lib/api/fetch";
 import { EChartsCard } from "../../_charts-client";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
@@ -72,7 +73,7 @@ export default function OrgChartPage() {
   };
 
   return (
-    <main data-testid="org-chart-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="org-chart-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="org-chart-title"
         title={t("orgChart.title")}

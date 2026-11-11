@@ -3,7 +3,8 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { Badge, Button, PageHeader } from "@heuresys/ui";
+import { Badge, Button } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import type { OrgUnitProcessForProcess, OrgUnitProcessesForProcessResponse, OrgUnitProcessRole } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
@@ -89,7 +90,7 @@ export default function ProcessOwnerPage() {
   const raciColumns = useMemo(() => buildRaciColumns(t), [t]);
 
   return (
-    <main data-testid="process-owner-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="process-owner-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="process-owner-title"
         title={t("processOwner.title")}

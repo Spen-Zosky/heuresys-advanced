@@ -3,15 +3,9 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  PageHeader,
-} from "@heuresys/ui";
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
+import { SchedePagina } from "@/components/schede-pagina";
 import type { MfaPolicy, ListMfaPoliciesResponse, ListMfaExemptionsResponse, MfaExemption } from "@heuresys/shared";
 import { useFormat } from "@/lib/format";
 import { apiFetch } from "../../../../lib/api/fetch";
@@ -282,14 +276,14 @@ export default function AdminMfaPolicyPage() {
   const rows: Array<{ tenantId: string; label: string }> = tenants.data
     ? tenants.data.items.map((tn) => ({
         tenantId: tn.tenantId,
-        label: `${tn.tenantName} (${tn.tenantCode})`,
+        label: tn.tenantName,
       }))
     : (policies.data?.items ?? []).map((p) => ({ tenantId: p.tenantId, label: p.tenantId }));
 
   const enabledCount = (policies.data?.items ?? []).filter((p) => p.enabled).length;
 
   return (
-    <main data-testid="admin-mfa-policy-page" className="mx-auto max-w-4xl space-y-6 px-6 py-8">
+    <main data-testid="admin-mfa-policy-page" className="mx-auto max-w-4xl space-y-6 px-6 pb-8">
       <PageHeader
         title={t("mfaPolicy.title")}
         description={t("mfaPolicy.description")}
@@ -300,6 +294,10 @@ export default function AdminMfaPolicyPage() {
         }
       />
 
+      {/* C5: regole per azienda ed esenzioni in due schede */}
+      <SchedePagina
+        schede={[
+          { id: "regole", titolo: t("mfaPolicy.tabs.rules"), contenuto: (
       <Card>
         <CardHeader>
           <CardTitle>{t("mfaPolicy.cardTitle")}</CardTitle>
@@ -337,8 +335,10 @@ export default function AdminMfaPolicyPage() {
           )}
         </CardContent>
       </Card>
-
-      <ExemptionsCard canManage={canManage} />
+          ) },
+          { id: "esenzioni", titolo: t("mfaPolicy.tabs.exemptions"), contenuto: <ExemptionsCard canManage={canManage} /> },
+        ]}
+      />
     </main>
   );
 }

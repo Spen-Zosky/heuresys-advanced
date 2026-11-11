@@ -13,7 +13,34 @@
       "me": "Il mio spazio",
       "me_profile": "Il mio profilo",
       "me_growth": "La mia crescita",
-      "me_results": "I miei risultati"
+      "me_results": "I miei risultati",
+      "me_area": "La mia area"
+    },
+    "rami": {
+      "dash_aree": "Per area",
+      "dash_ruoli": "Per responsabilità",
+      "dash_governo": "Governo e piattaforma",
+      "org_struttura": "Struttura",
+      "org_diagnosi": "Diagnosi",
+      "persone_anagrafica": "Persone e selezione",
+      "persone_tempo": "Tempo di lavoro",
+      "persone_retribuzioni": "Retribuzioni",
+      "talento_risultati": "Risultati",
+      "talento_sviluppo": "Sviluppo",
+      "comp_mappa": "Mappa delle competenze",
+      "comp_formazione": "Formazione",
+      "conf_accessi": "Accessi",
+      "conf_registri": "Registri",
+      "cfg_modello": "Modello organizzativo",
+      "cfg_dati": "Dati di base",
+      "cfg_sito": "Sito pubblico",
+      "me_lavoro": "Il mio lavoro",
+      "me_profilo": "Il mio profilo",
+      "me_crescita": "La mia crescita",
+      "me_risultati": "I miei risultati",
+      "comp": "Competenze",
+      "formazione": "Formazione",
+      "carriera": "Carriera"
     }
   },
   "tabs": {
@@ -31,13 +58,13 @@
       "category": "Per categoria",
       "group": "Per gruppo",
       "catalog": "Catalogo",
-      "gap": "Gap",
-      "skillGap": "Skill gap",
+      "gap": "Divari",
+      "skillGap": "Divari di competenza",
       "graph": "Grafo"
     },
     "comp": {
       "analytics": "Analisi",
-      "intelligence": "Compensation"
+      "intelligence": "Retribuzioni"
     },
     "kpi": {
       "analytics": "Analisi",
@@ -48,7 +75,7 @@
       "readiness": "Readiness successione"
     },
     "recruiting": {
-      "pipeline": "Pipeline",
+      "pipeline": "Fasi della selezione",
       "requisitions": "Richieste",
       "postings": "Annunci",
       "candidates": "Candidati"
@@ -71,9 +98,9 @@
   "roles": {
     "PLATFORM_ADMIN": "Amministratore piattaforma",
     "TENANT_ADMIN": "Amministratore tenant",
-    "BLUEPRINT_MANAGER": "Blueprint manager",
+    "BLUEPRINT_MANAGER": "Gestore dei modelli",
     "HRMS_MANAGER": "Responsabile HRMS",
-    "PROCESS_OWNER": "Process owner",
+    "PROCESS_OWNER": "Responsabile di processo",
     "MANAGER": "Manager",
     "USER": "Dipendente",
     "READ_ONLY": "Sola lettura",
@@ -87,7 +114,7 @@
     "DPO": "Responsabile protezione dati",
     "SECURITY_ADMIN": "Amministratore sicurezza",
     "TAXONOMY_STEWARD": "Referente tassonomia",
-    "RECRUITER": "Recruiter",
+    "RECRUITER": "Selezionatore",
     "HIRING_MANAGER": "Responsabile assunzione",
     "IMPLEMENTATION_CONSULTANT": "Consulente di avviamento",
     "PEOPLE_MANAGER": "Responsabile del personale",

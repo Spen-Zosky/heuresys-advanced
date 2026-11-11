@@ -2,11 +2,14 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { PageHeader, Card, CardHeader, CardTitle, CardContent, Badge } from "@heuresys/ui";
+import { Card, CardHeader, CardTitle, CardContent, Badge } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { Users, Crown } from "lucide-react";
 import type { MyTeamsResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
+import { Riferimento } from "@/components/scheda-rapida";
+import { useRubrica } from "@/lib/leggibile";
 
 /**
  * "Il mio team" (WS-4 R1b) — the caller's own teams (lead + member), each with its members.
@@ -20,9 +23,15 @@ export default function MeTeamPage() {
     staleTime: 60_000,
     retry: 0,
   });
+  // Ogni persona si mostra «Cognome, Nome» con la sua posizione e apre la sua scheda (C2, C12):
+  // l'email non serve a lavorare con il proprio team.
+  const rubrica = useRubrica();
+  const persone = new Map((rubrica.data?.persone ?? []).map((p) => [p.id, p]));
+  const membri = (lista: MyTeamsResponse["teams"][number]["members"]) =>
+    [...lista].sort((a, b) => (persone.get(a.userId)?.etichetta ?? a.fullName ?? "").localeCompare(persone.get(b.userId)?.etichetta ?? b.fullName ?? "", "it"));
 
   return (
-    <main data-testid="me-team-page" className="mx-auto max-w-5xl space-y-8 px-6 py-8">
+    <main data-testid="me-team-page" className="mx-auto max-w-5xl space-y-8 px-6 pb-8">
       <PageHeader
         title={t("team.title")}
         description={t("team.description")}
@@ -41,7 +50,6 @@ export default function MeTeamPage() {
               <CardHeader>
                 <div className="flex flex-wrap items-center gap-3">
                   <CardTitle data-testid="me-team-name">{team.name}</CardTitle>
-                  <Badge variant="secondary" className="font-mono text-xs">{team.code}</Badge>
                   <span className="ml-auto inline-flex items-center gap-1 text-sm text-muted-foreground">
                     <Users className="h-4 w-4" />
                     {team.memberCount}
@@ -50,7 +58,7 @@ export default function MeTeamPage() {
               </CardHeader>
               <CardContent>
                 <ul className="divide-y divide-border">
-                  {team.members.map((m) => (
+                  {membri(team.members).map((m) => (
                     <li
                       key={m.userId}
                       data-testid="me-team-member-row"
@@ -61,9 +69,11 @@ export default function MeTeamPage() {
                       ) : (
                         <Users className="h-4 w-4 text-muted-foreground" />
                       )}
-                      <span className="font-medium text-foreground">{m.fullName ?? m.email ?? m.userId}</span>
-                      {m.email && m.fullName ? (
-                        <span className="text-xs text-muted-foreground">{m.email}</span>
+                      <Riferimento tipo="persona" id={m.userId}>
+                        {persone.get(m.userId)?.etichetta ?? m.fullName ?? t("team.member")}
+                      </Riferimento>
+                      {persone.get(m.userId)?.posizione ? (
+                        <span className="text-xs text-muted-foreground">{persone.get(m.userId)?.posizione}</span>
                       ) : null}
                       <Badge
                         variant={m.role === "LEAD" ? "default" : "secondary"}

@@ -540,7 +540,7 @@ const platformJob: Fornitore = async (q) => {
             -- import_run_wave e' smallint, non testo: senza il cast il coalesce non compila
             -- (misurato, non previsto: la prova live e' uscita 500 proprio su questa riga).
             coalesce(ir.import_run_classification_scope, 'ondata ' || ir.import_run_wave::text, 'corsa') AS label,
-            ir.import_run_status || ' · ' || to_char(ir.import_run_started_at, 'YYYY-MM-DD HH24:MI') AS detail
+            ir.import_run_status || ' · ' || to_char(ir.import_run_started_at, 'DD/MM/YYYY HH24:MI') AS detail
        FROM reference_sync.import_runs ir
       ORDER BY ir.import_run_started_at DESC NULLS LAST LIMIT 15`,
   );
@@ -557,19 +557,22 @@ const tenantConfigurazione: Fornitore = async (q, p) => {
   const r = await q.query<{
     id: string; codice: string; nome: string; stato: string; industry: string; taglia: string;
   }>(
-    `SELECT tenant_id::text AS id, tenant_code AS codice, tenant_name AS nome,
-            tenant_status AS stato, coalesce(tenant_industry_code, '—') AS industry,
-            coalesce(tenant_size_band, '—') AS taglia
-       FROM sys.sys_tenancies
-      WHERE ($1::uuid IS NULL OR tenant_id = $1::uuid)
-      ORDER BY tenant_code`,
+    `SELECT t.tenant_id::text AS id, t.tenant_code AS codice, t.tenant_name AS nome,
+            t.tenant_status AS stato, coalesce(ic.industry_name, t.tenant_industry_code, '—') AS industry,
+            coalesce(t.tenant_size_band, '—') AS taglia
+       FROM sys.sys_tenancies t
+       LEFT JOIN sys.sys_industry_codes ic ON ic.industry_code = t.tenant_industry_code
+      WHERE ($1::uuid IS NULL OR t.tenant_id = $1::uuid)
+      ORDER BY t.tenant_name`,
     [p.tenantId],
   );
+  // C1: a video il nome e il settore per nome, la fascia in parole; lo stato lo traduce la pagina.
+  const FASCIA: Record<string, string> = { XS: "micro", S: "piccola", M: "media", L: "grande", XL: "molto grande" };
   return elenco(
     r.rows.map((x) => ({
       id: s(x.id),
-      label: `${s(x.nome)} (${s(x.codice)})`,
-      detail: `${s(x.stato)} · settore ${s(x.industry)} · dimensione ${s(x.taglia)}`,
+      label: s(x.nome),
+      detail: `${s(x.stato)} · settore ${s(x.industry)} · dimensione ${FASCIA[s(x.taglia)] ?? s(x.taglia)}`,
       value: null,
     })),
   );
@@ -579,7 +582,7 @@ const tenantBlueprintAdottati: Fornitore = async (q, p) => {
   const r = await q.query<{ id: string; label: string; detail: string }>(
     `SELECT tb.tenant_blueprint_id::text AS id,
             tb.tenant_blueprint_name AS label,
-            tb.tenant_blueprint_status || ' · ' || tb.tenant_blueprint_code AS detail
+            tb.tenant_blueprint_status AS detail
        FROM sys.sys_tenant_blueprints tb
       WHERE ($1::uuid IS NULL OR tb.tenant_blueprint_tenant_id = $1::uuid)
       ORDER BY tb.tenant_blueprint_name LIMIT 30`,
@@ -633,7 +636,7 @@ const selfAttivita: Fornitore = async (q, p) => {
     `SELECT e.user_timeline_event_id::text AS id,
             e.user_timeline_event_summary AS label,
             e.user_timeline_event_type || ' · ' ||
-            to_char(e.user_timeline_event_occurred_at, 'YYYY-MM-DD') AS detail
+            to_char(e.user_timeline_event_occurred_at, 'DD/MM/YYYY') AS detail
        FROM sys.sys_user_timeline_events e
       WHERE e.user_timeline_event_user_id = $1::uuid
       ORDER BY e.user_timeline_event_occurred_at DESC NULLS LAST LIMIT 15`,

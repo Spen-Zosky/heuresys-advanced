@@ -334,6 +334,14 @@
           "proposedBy": "proposed by {{who}} on {{when}}",
           "withdraw": "Withdraw"
         }
+      },
+      "tabs": {
+        "work": "Work and pay",
+        "results": "Results and career",
+        "skills": "Skills and learning",
+        "attendance": "Attendance",
+        "history": "History",
+        "manage": "Management"
       }
     }
   },
@@ -741,7 +749,12 @@
       "exportEmpty": "No export for this version yet.",
       "exportSize": "{{bytes}} bytes",
       "exportNoContent": "no content",
-      "exportError": "Export failed ({{code}})."
+      "exportError": "Export failed ({{code}}).",
+      "tabs": {
+        "graph": "Graph",
+        "elements": "Nodes and edges",
+        "versions": "Versions and exports"
+      }
     }
   },
   "content": {
@@ -889,6 +902,10 @@
       "uploadError": "Upload failed",
       "deleteError": "Delete failed",
       "copyMarkdown": "Copy markdown"
+    },
+    "tabs": {
+      "documents": "Documents",
+      "categories": "Categories"
     }
   },
   "insights": {
@@ -1021,6 +1038,10 @@
       "author": "decided by {{name}}",
       "noAuthor": "no author (predates the rule)",
       "disable": "Disable"
+    },
+    "tabs": {
+      "rules": "Rules by company",
+      "exemptions": "Exemptions"
     }
   },
   "agentDev": {
@@ -1053,7 +1074,8 @@
     "conversationNotFound": "Conversation not found.",
     "rejectReasonLabel": "Why are you rejecting?",
     "rejectConfirm": "Confirm rejection",
-    "approvalExpires": "Expires"
+    "approvalExpires": "Expires",
+    "panelTitle": "Agent conversation"
   },
   "provenance": {
     "title": "Provenance ledger",
@@ -1087,6 +1109,103 @@
       "STALE": "Stale",
       "CONFLICTED": "Conflicted",
       "REJECTED": "Rejected"
+    },
+    "tables": {
+      "sys_skills": "Skills",
+      "sys_skill_taxonomy_edges": "Skill links",
+      "sys_esco_occupation_mappings": "ESCO occupation mappings",
+      "sys_attendance": "Attendance",
+      "sys_learning_modules": "Learning modules",
+      "sys_learning_paths": "Learning paths",
+      "sys_activity_classifications": "Activity classifications",
+      "sys_goal_updates": "Goal updates",
+      "sys_goals": "Goals",
+      "sys_goal_check_ins": "Goal check-ins",
+      "sys_goal_milestones": "Goal milestones",
+      "sys_goal_comments": "Goal comments",
+      "sys_time_off_balances": "Time-off balances",
+      "sys_continuous_feedback": "Continuous feedback",
+      "sys_performance_review_competency_ratings": "Review competency ratings",
+      "sys_feedback_360_responses": "360 feedback responses",
+      "sys_overtime": "Overtime",
+      "sys_job_roles": "Job roles",
+      "sys_users": "People",
+      "sys_performance_reviews": "Performance reviews",
+      "sys_goal_alignments": "Goal alignments",
+      "sys_time_off_requests": "Time-off requests",
+      "sys_skill_aliases": "Skill aliases",
+      "sys_skill_families": "Skill families",
+      "sys_compensation_bands": "Compensation bands",
+      "sys_calibration_discussions": "Calibration discussions",
+      "sys_goal_templates": "Goal templates",
+      "sys_calibration_sessions": "Calibration sessions",
+      "sys_skill_categories": "Skill categories",
+      "sys_job_families": "Job families",
+      "sys_okr_check_ins": "OKR check-ins",
+      "sys_leave_balance_transactions": "Leave balance transactions",
+      "sys_leave_accrual_rules": "Leave accrual rules",
+      "sys_calibration_participants": "Calibration participants",
+      "sys_okr_key_results": "OKR key results",
+      "sys_okrs": "OKRs",
+      "esco_skills": "Esco skills",
+      "skill_adjacencies": "Skill adjacencies",
+      "esco_skill_relations": "Esco skill relations",
+      "employee_attendance": "Employee attendance",
+      "occupation_industry_classifications": "Occupation industry classifications",
+      "semantic_entity_index": "Semantic entity index",
+      "industry_classifications": "Industry classifications",
+      "course_enrollments": "Course enrollments",
+      "esco_occupations": "Esco occupations",
+      "module_completions": "Module completions",
+      "learning_recommendations": "Learning recommendations",
+      "competency_review_ratings": "Competency review ratings",
+      "course_modules": "Course modules",
+      "employee_time_off_balances": "Employee time off balances",
+      "learning_ratings": "Learning ratings",
+      "feedback_360": "Feedback 360",
+      "employee_overtime": "Employee overtime",
+      "skill_gap_analyses": "Skill gap analyses",
+      "skill_demand_metrics": "Skill demand metrics",
+      "skill_supply_metrics": "Skill supply metrics",
+      "job_templates": "Job templates",
+      "courses": "Courses",
+      "skill_pair_usage": "Skill pair usage",
+      "employee_time_off_requests": "Employee time off requests",
+      "ccnl_job_title_mapping": "Ccnl job title mapping",
+      "market_salary_data": "Market salary data",
+      "skill_development_paths": "Skill development paths",
+      "competencies": "Competencies",
+      "ontology_feedback": "Ontology feedback",
+      "ontology_quality_metrics": "Ontology quality metrics",
+      "skill_clusters": "Skill clusters",
+      "learning_bookmarks": "Learning bookmarks",
+      "ccnl_levels": "Ccnl levels",
+      "skill_gap_snapshots": "Skill gap snapshots",
+      "onet_skills": "Onet skills",
+      "market_benchmarks": "Market benchmarks",
+      "skill_extraction_jobs": "Skill extraction jobs",
+      "ontology_skill_relations": "Ontology skill relations",
+      "unknown_skills": "Unknown skills",
+      "onet_occupations": "Onet occupations",
+      "ontology_skill_dimensions": "Ontology skill dimensions",
+      "sindacati": "Sindacati",
+      "course_enrollments_semantic": "Course enrollments semantic",
+      "key_results": "Key results",
+      "onet_knowledge": "Onet knowledge",
+      "industry_occupation_mapping": "Industry occupation mapping",
+      "onet_abilities": "Onet abilities",
+      "onet_work_activities": "Onet work activities",
+      "esco_isco_groups": "Esco isco groups",
+      "learning_content_providers": "Learning content providers",
+      "ccnl_executive_bands": "Ccnl executive bands",
+      "esco_skill_groups": "Esco skill groups",
+      "learning_path_enrollments": "Learning path enrollments",
+      "okr_checkins": "Okr checkins",
+      "ccnl_contracts": "Ccnl contracts",
+      "semantic_search_log": "Semantic search log",
+      "competency_frameworks": "Competency frameworks",
+      "rating_scales": "Rating scales",
+      "ontology_embedding_jobs": "Ontology embedding jobs"
     }
   },
   "timeOff": {
@@ -1207,7 +1326,8 @@
       "recipient": "Recipient system",
       "status": "Status",
       "handedOff": "Handed off"
-    }
+    },
+    "rewardGates": "Reward gates"
   },
   "whistleblowingConsole": {
     "title": "Whistleblowing reports",

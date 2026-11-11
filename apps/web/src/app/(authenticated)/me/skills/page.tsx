@@ -10,9 +10,11 @@
  * tested but no UI consumed it — the page still showed only the trail.
  */
 
+import { EntityTable } from "@/components/data-table-panel";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { Badge, Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { Inbox } from "lucide-react";
 import type { MeSkillPossession, MeSkillPossessionResponse } from "@heuresys/shared";
 import { EnumStatusPill } from "@/components/enum-badge";
@@ -46,7 +48,7 @@ export default function MeSkillsPage() {
   });
 
   return (
-    <main data-testid="me-skills-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="me-skills-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="me-skills-title"
         title={t("skills.title")}
@@ -71,40 +73,37 @@ export default function MeSkillsPage() {
           motivo={t("skills.emptyDesc")}
         />
       ) : (
-        <div className="overflow-hidden rounded-card border border-border bg-card shadow-card">
-          <table className="w-full border-collapse text-sm" data-testid="me-skills-table">
-            <thead>
-              <tr className="border-b border-border bg-muted text-left text-[11px] uppercase tracking-wider text-muted-foreground">
-                <th className="px-4 py-2">{t("skills.colSkill")}</th>
-                <th className="px-4 py-2">{t("skills.colLevel")}</th>
-                <th className="px-4 py-2">{t("skills.colYears")}</th>
-                <th className="px-4 py-2">{t("skills.colVerified")}</th>
-                <th className="px-4 py-2">{t("skills.colSource")}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {(possession.data?.items ?? []).map((s: MeSkillPossession) => (
-                <tr key={s.userSkillId} data-testid="me-skill-row" className="transition-colors hover:bg-muted/60">
-                  <td className="px-4 py-2 align-middle font-medium text-foreground" title={s.skillCode}>
+        /* C12: ogni competenza apre la sua scheda; il codice ESCO resta fuori dalla vista */
+        <div data-testid="me-skills-table">
+          <EntityTable<MeSkillPossession>
+            isLoading={false}
+            isError={false}
+            rows={possession.data?.items ?? []}
+            rowKey={(s) => s.userSkillId}
+            rowTestId="me-skill-row"
+            originPath="/v1/me/skills"
+            caption={t("skills.colSkill")}
+            columns={[
+              {
+                header: t("skills.colSkill"),
+                cell: (s) => (
+                  <span className="font-medium text-foreground">
                     {s.skillName}
                     {s.isPrimary && <span className="ml-2 text-[10px] uppercase text-muted-foreground">{t("skills.primaryTag")}</span>}
-                  </td>
-                  <td className="px-4 py-2 align-middle">
-                    <EnumStatusPill domain="proficiency" value={s.proficiency} tone="info" />
-                  </td>
-                  <td className="px-4 py-2 align-middle text-xs text-muted-foreground tabular-nums">
-                    {s.yearsExperience !== null ? t("skills.years", { count: s.yearsExperience }) : "—"}
-                  </td>
-                  <td className="px-4 py-2 align-middle text-xs">
-                    {s.isVerified
-                      ? <span className="text-success">{t("skills.verifiedYes")}</span>
-                      : <span className="text-muted-foreground">{t("skills.verifiedNo")}</span>}
-                  </td>
-                  <td className="px-4 py-2 align-middle text-xs text-muted-foreground">{enumLabel("skillSource", s.source)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </span>
+                ),
+              },
+              { header: t("skills.colLevel"), cell: (s) => <EnumStatusPill domain="proficiency" value={s.proficiency} tone="info" /> },
+              { header: t("skills.colYears"), cell: (s) => <span className="text-xs text-muted-foreground tabular-nums">{s.yearsExperience !== null ? t("skills.years", { count: s.yearsExperience }) : "—"}</span> },
+              { header: t("skills.colSource"), cell: (s) => <span className="text-xs text-muted-foreground">{enumLabel("skillSource", s.source)}</span> },
+              {
+                header: t("skills.colVerified"),
+                cell: (s) => s.isVerified
+                  ? <span className="text-xs text-success">{t("skills.verifiedYes")}</span>
+                  : <span className="text-xs text-muted-foreground">{t("skills.verifiedNo")}</span>,
+              },
+            ]}
+          />
         </div>
       )}
 
@@ -119,30 +118,23 @@ export default function MeSkillsPage() {
           ) : (evidence.data?.items.length ?? 0) === 0 ? (
             <StatoVuoto titolo={t("skills.evidenceEmpty")} testId="me-skill-evidence-empty" />
           ) : (
-            <table className="w-full border-collapse text-sm" data-testid="me-skill-evidence-table">
-              <thead>
-                <tr className="border-b border-border bg-muted text-left text-[11px] uppercase tracking-wider text-muted-foreground">
-                  <th className="px-4 py-2">{t("skills.colSkill")}</th>
-                  <th className="px-4 py-2">{t("skills.colLevel")}</th>
-                  <th className="px-4 py-2">{t("skills.colSource")}</th>
-                  <th className="px-4 py-2">{t("skills.colScore")}</th>
-                  <th className="px-4 py-2">{t("skills.colDate")}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {(evidence.data?.items ?? []).map((s) => (
-                  <tr key={s.userSkillEvidenceId} data-testid="me-skill-evidence-row" className="transition-colors hover:bg-muted/60">
-                    <td className="px-4 py-2 align-middle text-foreground" title={s.skillCode}>{s.skillName}</td>
-                    <td className="px-4 py-2 align-middle">
-                      <EnumStatusPill domain="proficiency" value={s.declaredProficiency} tone="info" />
-                    </td>
-                    <td className="px-4 py-2 align-middle text-xs text-muted-foreground">{enumLabel("skillEvidenceSource", s.source)}</td>
-                    <td className="px-4 py-2 align-middle text-xs text-muted-foreground">{s.score ?? "—"}</td>
-                    <td className="px-4 py-2 align-middle text-xs text-muted-foreground">{fmt.data(s.assessedAt)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div data-testid="me-skill-evidence-table">
+              <EntityTable<(NonNullable<typeof evidence.data>)["items"][number]>
+                isLoading={false}
+                isError={false}
+                rows={evidence.data?.items ?? []}
+                rowKey={(s) => s.userSkillEvidenceId}
+                rowTestId="me-skill-evidence-row"
+                caption={t("skills.evidenceTitle")}
+                columns={[
+                  { header: t("skills.colSkill"), cell: (s) => <span className="text-foreground">{s.skillName}</span> },
+                  { header: t("skills.colLevel"), cell: (s) => <EnumStatusPill domain="proficiency" value={s.declaredProficiency} tone="info" /> },
+                  { header: t("skills.colSource"), cell: (s) => <span className="text-xs text-muted-foreground">{enumLabel("skillEvidenceSource", s.source)}</span> },
+                  { header: t("skills.colScore"), cell: (s) => <span className="text-xs text-muted-foreground">{s.score ?? "—"}</span> },
+                  { header: t("skills.colDate"), cell: (s) => <span className="text-xs text-muted-foreground">{fmt.data(s.assessedAt)}</span> },
+                ]}
+              />
+            </div>
           )}
         </CardContent>
       </Card>

@@ -4,7 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import type {
   LearningGap,
   PositionLearningRequirement,
@@ -59,7 +60,7 @@ export default function PositionLearningPage() {
   const gapItems = gaps.rows;
 
   return (
-    <main data-testid="position-learning-page" className="mx-auto max-w-5xl space-y-6 px-6 py-8">
+    <main data-testid="position-learning-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="position-learning-title"
         title={t("positions.learning.title")}

@@ -25,7 +25,9 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { KPIStrip, PageHeader, type KpiCardData } from "@heuresys/ui";
+import { type KpiCardData } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
+import { KPIStrip } from "@/components/indicatori-leggibili";
 import type {
   CalibrationSession,
   PerformanceReview,

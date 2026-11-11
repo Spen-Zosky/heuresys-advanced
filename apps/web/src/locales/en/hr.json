@@ -108,6 +108,10 @@
       "forbidden": "You do not have permission for this operation.",
       "duplicate": "A KPI with this code already exists.",
       "readOnly": "You do not have permission to edit this KPI."
+    },
+    "tabs": {
+      "catalogue": "Indicators",
+      "metrology": "Measurement methods"
     }
   },
   "goals": {
@@ -214,6 +218,10 @@
         "demand": "Positions · critical",
         "holders": "Holders"
       }
+    },
+    "tabs": {
+      "units": "Organisational units",
+      "essential": "Essential capabilities"
     }
   },
   "processOwner": {
@@ -371,6 +379,10 @@
       "target": "Target",
       "kind": "Kind",
       "score": "Score"
+    },
+    "tabs": {
+      "gaps": "Gaps",
+      "closure": "Remediation plans and analysis"
     }
   },
   "career": {
@@ -505,6 +517,10 @@
       "moveUp": "Up",
       "searchModule": "Search a module",
       "searchModulePlaceholder": "at least 2 characters…"
+    },
+    "tabs": {
+      "modules": "Modules",
+      "paths": "Paths"
     }
   },
   "training": {
@@ -597,6 +613,7 @@
     "cols": {
       "capability": "Capability",
       "skillCount": "{{count}} skills",
+      "skillExamples": "{{count}} skills, including {{esempi}}",
       "value": "Value",
       "rarity": "Rarity",
       "inimitability": "Inimitability",
@@ -944,7 +961,13 @@
       "applied": "Application registered: find it in the pipeline.",
       "applyError": "Application rejected by the server.",
       "emptyTitle": "No candidates",
-      "emptyDesc": "Register the first candidate."
+      "emptyDesc": "Register the first candidate.",
+      "write": "Write",
+      "tabs": {
+        "active": "Active",
+        "hired": "Hired",
+        "other": "Withdrawn, excluded and archived"
+      }
     },
     "application": {
       "title": "Application",

@@ -443,6 +443,8 @@ export interface VrioGroupRow {
   skillGroupId: string;
   skillGroupName: string;
   skillCount: number;
+  /** le competenze del gruppo più presenti in azienda: il nome del gruppo ESCO da solo inganna */
+  skillExamples: string[];
   // demand / value
   positionsRequiring: number;
   criticalPositions: number;
@@ -489,7 +491,7 @@ export async function loadVrioInputs(tenantId: string | null, q: Queryable = poo
   const headcount = Number(headcountRes.rows[0]?.headcount ?? 0);
 
   const res = await q.query<{
-    skill_group_id: string; skill_group_name: string; skill_count: string;
+    skill_group_id: string; skill_group_name: string; skill_count: string; esempi: string[] | null;
     positions_requiring: string; critical_positions: string; total_requirements: string;
     avg_econ: string | null; crit_share: string | null;
     holders: string; avg_held_rank: string | null; verified_share: string | null; evidence_share: string | null;
@@ -546,21 +548,23 @@ export async function loadVrioInputs(tenantId: string | null, q: Queryable = poo
         GROUP BY s.skill_group_id
      ),
      in_play AS (
-       SELECT skill_group_id, count(DISTINCT skill_id) AS skill_count FROM (
-         SELECT s.skill_group_id, s.skill_id
+       SELECT skill_group_id, count(DISTINCT skill_id) AS skill_count,
+              (array_agg(skill_name ORDER BY presenze DESC, skill_name))[1:3] AS esempi
+         FROM (SELECT skill_group_id, skill_id, skill_name, count(*) AS presenze FROM (
+         SELECT s.skill_group_id, s.skill_id, s.skill_name
            FROM sys.sys_position_skill_requirements r
            JOIN sys.sys_positions p ON p.position_id = r.position_id AND p.position_is_active
            JOIN sys.sys_skills s    ON s.skill_id = r.skill_id AND s.skill_group_id IS NOT NULL
           WHERE true ${posTenant}
-         UNION
-         SELECT s.skill_group_id, s.skill_id
+         UNION ALL
+         SELECT s.skill_group_id, s.skill_id, s.skill_name
            FROM sys.sys_user_skills us
            JOIN sys.sys_skills s ON s.skill_id = us.user_skill_skill_id AND s.skill_group_id IS NOT NULL
           WHERE true ${usrTenant}
-       ) z GROUP BY skill_group_id
+       ) z GROUP BY skill_group_id, skill_id, skill_name) zz GROUP BY skill_group_id
      )
      SELECT g.skill_group_id, g.skill_group_name,
-            ip.skill_count::text,
+            ip.skill_count::text, ip.esempi,
             COALESCE(d.positions_requiring, 0)::text  AS positions_requiring,
             COALESCE(d.critical_positions, 0)::text   AS critical_positions,
             COALESCE(d.total_requirements, 0)::text   AS total_requirements,
@@ -584,6 +588,7 @@ export async function loadVrioInputs(tenantId: string | null, q: Queryable = poo
       skillGroupId: r.skill_group_id,
       skillGroupName: r.skill_group_name,
       skillCount: Number(r.skill_count),
+      skillExamples: r.esempi ?? [],
       positionsRequiring: Number(r.positions_requiring),
       criticalPositions: Number(r.critical_positions),
       totalRequirements: Number(r.total_requirements),

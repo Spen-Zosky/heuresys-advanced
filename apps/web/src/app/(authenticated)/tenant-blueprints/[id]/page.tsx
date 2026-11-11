@@ -17,10 +17,12 @@
  */
 import { use, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type {
   ActivityClassification,
+  BlueprintFamily,
   EnterpriseSizeBand,
   OperatingModel,
   ModelProposalResponse,
@@ -83,19 +85,15 @@ export default function TenantBlueprintDetailPage({
 
   return (
     <div className="space-y-6" data-testid="tenant-blueprint-detail">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <Link
-            href="/tenant-blueprints"
-            className="text-sm text-muted-foreground underline-offset-2 hover:underline"
-          >
+      <PageHeader
+        breadcrumbs={
+          <Link href="/tenant-blueprints" className="underline-offset-2 hover:underline">
             {t("dossier.back")}
           </Link>
-          <h1 className="mt-1 text-xl font-semibold text-foreground" data-testid="tenant-blueprint-name">
-            {fascicolo.data.name}
-          </h1>
-          <p className="font-mono text-xs text-muted-foreground">{fascicolo.data.code}</p>
-        </div>
+        }
+        title={fascicolo.data.name}
+        data-testid="tenant-blueprint-name"
+        actions={
         <div className="flex items-center gap-3">
           <span className="text-sm text-muted-foreground">
             {t("dossier.version")} {versione.number}
@@ -123,7 +121,8 @@ export default function TenantBlueprintDetailPage({
             {t("dossier.build.title")}
           </Link>
         </div>
-      </header>
+        }
+      />
 
       <PassoIdentita
         base={base}
@@ -157,6 +156,7 @@ function PassoIdentita({
   modificabile: boolean;
   onSalvato: () => void;
 }) {
+  const enumLabel = useEnumLabel();
   const { t } = useTranslation("blueprints");
   const qc = useQueryClient();
   const [ricerca, setRicerca] = useState("");
@@ -236,7 +236,7 @@ function PassoIdentita({
             <option value="">—</option>
             {(fasce.data?.items ?? []).map((b) => (
               <option key={b.enterpriseSizeBandId} value={b.enterpriseSizeBandId}>
-                {b.code} — {b.name}
+                {enumLabel("sizeBand", b.code)}
               </option>
             ))}
           </select>
@@ -254,7 +254,7 @@ function PassoIdentita({
             <option value="">—</option>
             {(modelli.data?.items ?? []).map((m) => (
               <option key={m.operatingModelId} value={m.operatingModelId}>
-                {m.code} — {m.name}
+                {m.name}
               </option>
             ))}
           </select>
@@ -278,7 +278,7 @@ function PassoIdentita({
             <option value="">—</option>
             {["LOW", "MEDIUM", "HIGH", "EXTREME"].map((v) => (
               <option key={v} value={v}>
-                {v}
+                {enumLabel("supervisionIntensity", v)}
               </option>
             ))}
           </select>
@@ -357,7 +357,18 @@ function PassoModello({
   const { t } = useTranslation("blueprints");
   const qc = useQueryClient();
 
+  const enumLabel = useEnumLabel();
   const completa = Boolean(versione.identity.industryClassId && versione.identity.sizeBandId);
+
+  // C1: famiglie per nome, fasce in parole; il codice resta solo dove manca il nome.
+  const famiglie = useQuery({
+    queryKey: ["blueprint-families", "list"],
+    queryFn: () => apiFetch<{ items: BlueprintFamily[]; total: number }>("/v1/blueprint-families?limit=200"),
+  });
+  const nomeFamiglia = (code: string) =>
+    famiglie.data?.items.find((f) => f.code === code)?.name ?? enumLabel("industryFamily", code);
+  const nomeFascia = (code: string) =>
+    enumLabel("sizeBand", code);
 
   const proposta = useQuery({
     queryKey: ["model-proposal", base],
@@ -398,13 +409,13 @@ function PassoModello({
         <div className="mt-2 space-y-2" data-testid="modello-proposto">
           <p className="text-sm text-foreground">
             <span className="font-medium">{disponibile.variantName}</span>{" "}
-            <span className="font-mono text-xs text-muted-foreground">
-              {`${disponibile.variantCode} v${disponibile.versionNumber}`}
+            <span className="text-xs text-muted-foreground">
+              {t("dossier.proposal.version", { n: disponibile.versionNumber })}
             </span>
           </p>
           <p className="text-sm text-muted-foreground">
             {t("dossier.proposal.processCount", { count: disponibile.processCount })} ·{" "}
-            {disponibile.matchedOn.industryFamilyCode} / {disponibile.matchedOn.sizeBandCode}
+            {nomeFamiglia(disponibile.matchedOn.industryFamilyCode)} / {nomeFascia(disponibile.matchedOn.sizeBandCode)}
           </p>
           {modificabile && versione.variantVersionId !== disponibile.variantVersionId ? (
             <Button
@@ -434,8 +445,8 @@ function PassoModello({
             </p>
             <ul className="mt-1 space-y-1">
               {assente.availableCombinations.map((c) => (
-                <li key={c.variantCode} className="font-mono text-xs text-muted-foreground">
-                  {c.industryFamilyCode} / {c.sizeBandCode} → {c.variantCode}
+                <li key={c.variantCode} className="text-xs text-muted-foreground">
+                  {nomeFamiglia(c.industryFamilyCode)} / {nomeFascia(c.sizeBandCode)}
                 </li>
               ))}
             </ul>
@@ -608,7 +619,7 @@ function RigaProcesso({
           </span>
         ) : (
           <StatusPill tone={processo.inclusion === "OUT" ? "warning" : "success"}>
-            {processo.inclusion}
+            {t(`dossier.decisions.${processo.inclusion.toLowerCase()}`)}
           </StatusPill>
         )}
       </div>

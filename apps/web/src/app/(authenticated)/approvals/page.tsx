@@ -4,7 +4,8 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader } from "@heuresys/ui";
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import type {
   ApprovalListResponse,
   ApprovalRequest,
@@ -141,7 +142,7 @@ export default function ApprovalsPage() {
   );
 
   return (
-    <main data-testid="approvals-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="approvals-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="approvals-title"
         title={t("approvals.title")}
@@ -154,8 +155,16 @@ export default function ApprovalsPage() {
       />
 
       {/* Create approval request */}
+      {/* C5: il modulo di creazione si apre a richiesta, così l'elenco resta in vista */}
       {canCreate && (
-      <Card>
+      <details data-testid="approval-create-panel" className="group">
+      <summary
+        data-testid="approval-create-toggle"
+        className="inline-flex cursor-pointer list-none items-center rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-foreground shadow-card hover:bg-muted"
+      >
+        {t("approvals.create.cardTitle")}
+      </summary>
+      <Card className="mt-3">
         <CardHeader>
           <CardTitle>{t("approvals.create.cardTitle")}</CardTitle>
         </CardHeader>
@@ -233,6 +242,7 @@ export default function ApprovalsPage() {
           </form>
         </CardContent>
       </Card>
+      </details>
       )}
 
       {/* Filter */}

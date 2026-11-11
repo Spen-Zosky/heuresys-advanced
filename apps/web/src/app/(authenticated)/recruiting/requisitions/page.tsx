@@ -1,12 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import {
-  PageHeader, Card, CardHeader, CardTitle, CardContent, Badge, Button, Input,
-} from "@heuresys/ui";
+import { Card, CardHeader, CardTitle, CardContent, Badge, Button, Input } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import type { JobRequisition, JobRequisitionStatus } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
@@ -16,6 +16,7 @@ import {
   useActivePositions, useRequisitions,
 } from "@/lib/recruiting";
 import { NomeOppure } from "@/components/senza-nome";
+import { Leggibile } from "@/lib/leggibile";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -84,7 +85,7 @@ export default function RequisitionsPage() {
   const items = q.data?.items ?? [];
 
   return (
-    <main data-testid="requisitions-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
+    <main data-testid="requisitions-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       <PageHeader title={t("recruiting.requisitions.title")} description={t("recruiting.requisitions.description")} />
 
       {canWrite && (
@@ -110,7 +111,7 @@ export default function RequisitionsPage() {
               <select data-testid="requisition-position" className={SELECT_CLASS} {...register("positionId", { required: true })}>
                 <option value="">{t("recruiting.fields.choose")}</option>
                 {(positions.data?.items ?? []).map((p) => (
-                  <option key={p.positionId} value={p.positionId}>{p.code} · {p.title}</option>
+                  <option key={p.positionId} value={p.positionId}>{p.title} ({p.code})</option>
                 ))}
               </select>
             </label>
@@ -161,18 +162,23 @@ export default function RequisitionsPage() {
           <table className="w-full text-sm" data-testid="requisitions-table">
             <thead className="bg-muted/40 text-left text-xs uppercase text-muted-foreground">
               <tr>
-                <th className="px-4 py-2">{t("recruiting.fields.code")}</th>
                 <th className="px-4 py-2">{t("recruiting.fields.position")}</th>
                 <th className="px-4 py-2">{t("recruiting.fields.headcount")}</th>
                 <th className="px-4 py-2">{t("recruiting.fields.reason")}</th>
                 <th className="px-4 py-2">{t("recruiting.fields.status")}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y divide-border"><Leggibile>
               {items.map((r) => (
                 <tr key={r.requisitionId} data-testid="requisition-row">
-                  <td className="px-4 py-2 font-medium" data-testid="requisition-row-code">{r.code}</td>
-                  <td className="px-4 py-2"><NomeOppure nome={r.positionTitle} id={r.positionId} /></td>
+                  {/* C3: la posizione è ciò che si legge; il codice della richiesta resta accanto */}
+                  <td className="px-4 py-2">
+                    <div className="font-medium">
+                      {/* C12: la posizione apre la sua pagina */}
+                      {r.positionId ? <Link href={`/positions/${r.positionId}`} className="hover:underline"><NomeOppure nome={r.positionTitle} id={r.positionId} /></Link> : <NomeOppure nome={r.positionTitle} id={r.positionId} />}
+                    </div>
+                    <div className="text-xs text-muted-foreground" data-testid="requisition-row-code" data-grezzo>{r.code}</div>
+                  </td>
                   <td className="px-4 py-2">{r.headcount}</td>
                   <td className="px-4 py-2">{r.reason ? t(`recruiting.reason.${r.reason}`) : "—"}</td>
                   <td className="px-4 py-2">
@@ -194,7 +200,7 @@ export default function RequisitionsPage() {
                   </td>
                 </tr>
               ))}
-            </tbody>
+            </Leggibile></tbody>
           </table>
         </div>
       )}

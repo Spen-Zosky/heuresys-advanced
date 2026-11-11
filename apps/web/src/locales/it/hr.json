@@ -2,11 +2,11 @@
   "shared": {
     "code": "Codice",
     "name": "Nome",
-    "scope": "Scope",
-    "global": "global",
-    "tenant": "tenant",
+    "scope": "Perimetro",
+    "global": "globale",
+    "tenant": "azienda",
     "status": "Stato",
-    "user": "User",
+    "user": "Persona",
     "loading": "Caricamento…"
   },
   "skills": {
@@ -108,6 +108,10 @@
       "forbidden": "Non hai i permessi per questa operazione.",
       "duplicate": "Esiste già un indicatore con questo codice.",
       "readOnly": "Non hai i permessi per modificare questo indicatore."
+    },
+    "tabs": {
+      "catalogue": "Indicatori",
+      "metrology": "Metodi di misura"
     }
   },
   "goals": {
@@ -125,15 +129,15 @@
       "due": "Scadenza"
     },
     "timeline": {
-      "open": "Timeline",
+      "open": "Cronologia",
       "title": "Timeline attività",
       "empty": "Nessun evento registrato.",
       "comments": "Commenti",
       "commentsEmpty": "Nessun commento.",
       "private": "Privato",
       "update": "Aggiornamento",
-      "checkIn": "Check-in",
-      "milestone": "Milestone",
+      "checkIn": "Verifica",
+      "milestone": "Traguardo",
       "progress": "Avanzamento",
       "confidence": "Confidenza",
       "target": "Scadenza",
@@ -159,7 +163,7 @@
       "title": "Check-in OKR",
       "empty": "Nessun check-in registrato.",
       "scopeAggregate": "Aggregato OKR",
-      "scopeKeyResult": "Key result",
+      "scopeKeyResult": "Risultato chiave",
       "progress": "Avanzamento",
       "overall": "Complessivo",
       "error": "Errore di caricamento."
@@ -175,7 +179,7 @@
     "caption": "Capability e maturità per unità",
     "cols": {
       "unit": "Unità",
-      "capability": "Capability",
+      "capability": "Capacità",
       "coverage": "Copertura",
       "positions": "Posizioni",
       "maturity": "Maturità",
@@ -188,10 +192,10 @@
       "subtitle": "Dimensioni di maturità dell'unità selezionata (motore Maturity), normalizzate 0-100.",
       "hint": "Seleziona un'unità per vedere il radar delle sue dimensioni di maturità.",
       "axes": {
-        "composite": "Composite",
+        "composite": "Complessivo",
         "skill": "Copertura skill",
         "kpi": "Raggiungimento KPI",
-        "readiness": "Readiness",
+        "readiness": "Prontezza",
         "gapFree": "Assenza gap"
       }
     },
@@ -204,27 +208,31 @@
       "emptyDescription": "Il ranking si popola quando le posizioni dichiarano skill richieste.",
       "caption": "Capability essenziali (priorità d'investimento)",
       "cols": {
-        "skill": "Skill",
+        "skill": "Competenza",
         "priority": "Priorità invest.",
         "essentiality": "Essenzialità",
-        "econ": "Econ",
+        "econ": "Peso economico",
         "crit": "Criticità",
         "scarcity": "Scarsità",
         "maturity": "Maturità",
         "demand": "Posizioni · critiche",
         "holders": "Titolari"
       }
+    },
+    "tabs": {
+      "units": "Unità organizzative",
+      "essential": "Capacità essenziali"
     }
   },
   "processOwner": {
-    "title": "Process owner",
+    "title": "Responsabile di processo",
     "description": "Catalogo dei processi del blueprint (navigazione del grafo, non runtime BPM).",
     "count": "{{count}} processi",
     "errorMessage": "Impossibile caricare i processi",
     "emptyTitle": "Nessun processo",
     "emptyDescription": "Non ci sono processi nel blueprint.",
     "caption": "Catalogo processi",
-    "core": "Core",
+    "core": "Essenziale",
     "optional": "Opzionale",
     "cols": {
       "ordinal": "#",
@@ -249,10 +257,10 @@
         "role": "Ruolo RACI"
       },
       "roles": {
-        "OWNER": "Owner · A",
-        "CONTRIBUTOR": "Contributor · R",
-        "CONSULTED": "Consulted · C",
-        "INFORMED": "Informed · I"
+        "OWNER": "Responsabile · A",
+        "CONTRIBUTOR": "Esecutore · R",
+        "CONSULTED": "Consultato · C",
+        "INFORMED": "Informato · I"
       }
     }
   },
@@ -338,7 +346,7 @@
     }
   },
   "gaps": {
-    "title": "Gap analysis",
+    "title": "Analisi dei divari",
     "description": "Gap di competenza per severità, sull'intero tenant.",
     "count": "{{count}} gap registrati",
     "error": "Impossibile caricare i gap.",
@@ -354,9 +362,9 @@
     "skillUnresolvedHint": "La lacuna cita una competenza che non è più nel catalogo, oppure non è visibile a questo tenant.",
     "caption": "Elenco gap",
     "cols": {
-      "user": "User",
+      "user": "Persona",
       "position": "Posizione",
-      "skill": "Skill",
+      "skill": "Competenza",
       "severity": "Severità",
       "required": "Richiesto",
       "current": "Attuale"
@@ -371,14 +379,18 @@
       "target": "Scadenza",
       "kind": "Tipo",
       "score": "Punteggio"
+    },
+    "tabs": {
+      "gaps": "Lacune",
+      "closure": "Piani di recupero e analisi"
     }
   },
   "career": {
-    "title": "Career & Succession",
+    "title": "Carriere e successione",
     "description": "Percorsi di carriera, pool di successione e candidati.",
     "tabs": {
-      "paths": "Career paths",
-      "pools": "Succession pools",
+      "paths": "Percorsi di carriera",
+      "pools": "Bacini di successione",
       "candidates": "Candidati"
     },
     "pathsCols": {
@@ -392,40 +404,40 @@
       "status": "Stato"
     },
     "candidatesCols": {
-      "user": "User",
-      "pool": "Pool",
-      "readiness": "Readiness",
+      "user": "Persona",
+      "pool": "Bacino",
+      "readiness": "Prontezza",
       "status": "Stato"
     },
     "pipelineTitle": "Pipeline readiness",
     "pipelineAria": "Distribuzione candidati per livello di readiness",
     "pipelineEmpty": "Nessun candidato da rappresentare.",
-    "pathsEmpty": "Nessun career path definito",
-    "pathsCaption": "Career paths",
+    "pathsEmpty": "Nessun percorso di carriera definito",
+    "pathsCaption": "Percorsi di carriera",
     "poolsEmpty": "Nessuna pool registrata",
-    "poolsCaption": "Succession pools",
+    "poolsCaption": "Bacini di successione",
     "candidatesEmpty": "Nessun candidato registrato",
     "candidatesCaption": "Candidati alla succession"
   },
   "compensation": {
-    "title": "Compensation intelligence",
+    "title": "Retribuzioni",
     "description": "Reward gate per stato di valutazione, sull'intero tenant.",
     "count": "{{count}} reward gate registrati",
     "distributionTitle": "Distribuzione stati",
     "distributionAria": "Distribuzione reward gate per stato di valutazione",
     "distributionEmpty": "Nessun dato di distribuzione.",
-    "seriesName": "Reward gate",
+    "seriesName": "Cancello di premio",
     "error": "Accesso negato o errore.",
     "emptyTitle": "Nessun reward gate",
     "emptyDescription": "Non ci sono reward gate registrati.",
-    "caption": "Reward gate",
+    "caption": "Cancello di premio",
     "blockingYes": "Sì",
     "blockingNo": "No",
     "cols": {
-      "user": "User",
-      "gate": "Gate",
+      "user": "Persona",
+      "gate": "Cancello",
       "period": "Periodo",
-      "blocking": "Blocking",
+      "blocking": "Bloccante",
       "status": "Stato"
     },
     "bands": {
@@ -505,6 +517,10 @@
       "moveUp": "Su",
       "searchModule": "Cerca un modulo",
       "searchModulePlaceholder": "almeno 2 caratteri…"
+    },
+    "tabs": {
+      "modules": "Moduli",
+      "paths": "Percorsi"
     }
   },
   "training": {
@@ -595,8 +611,9 @@
     "caption": "Scorecard VRIO per capability",
     "method": "Le quattro colonne sono percentili calcolati sull'insieme delle capability di questo tenant, con sotto la misura grezza. Si usano i percentili perché le scale grezze non sono calibrate: sui dati reali rarità, imitabilità e organizzazione stanno quasi tutte sopra 0,50, e una soglia assoluta le darebbe presenti ovunque facendo collassare il verdetto sul solo valore. Il verdetto è la classificazione di Barney, mai una media delle quattro dimensioni.",
     "cols": {
-      "capability": "Capability",
+      "capability": "Capacità",
       "skillCount": "{{count}} competenze",
+      "skillExamples": "{{count}} competenze, tra cui {{esempi}}",
       "value": "Valore",
       "rarity": "Rarità",
       "inimitability": "Inimitabilità",
@@ -639,7 +656,7 @@
       "execution": "Esecuzione",
       "retention": "Ritenzione",
       "stability": "Presenza",
-      "performance": "Performance",
+      "performance": "Prestazione",
       "maturity": "Maturità"
     },
     "statuses": {
@@ -655,7 +672,7 @@
       "LAGGING": "In coda",
       "UNRANKED": "Non in classifica"
     },
-    "sample": "n={{count}}"
+    "sample": "campione di {{count}}"
   },
   "advisor": {
     "title": "Consigli operativi",
@@ -711,7 +728,7 @@
       "title": "Cicli di valutazione",
       "hint": "Un ciclo apre la finestra in cui si valuta: senza, le autovalutazioni non hanno un periodo a cui riferirsi.",
       "emptyTitle": "Nessun ciclo aperto",
-      "emptyDescription": "Non risulta aperto alcun ciclo di valutazione. Le valutazioni qui sotto sono quelle gia' concluse.",
+      "emptyDescription": "Non risulta aperto alcun ciclo di valutazione. Le valutazioni qui sotto sono quelle già concluse.",
       "caption": "Elenco cicli di valutazione",
       "cols": {
         "code": "Codice",
@@ -754,8 +771,8 @@
   "projects": {
     "title": "Progetti",
     "description": "Il lavoro dell'organizzazione e chi lo porta avanti. Vedi i progetti a cui partecipi; con un mandato HR, tutti quelli del tenant.",
-    "error": "Non e' stato possibile caricare i progetti.",
-    "detailError": "Non e' stato possibile caricare il progetto.",
+    "error": "Non è stato possibile caricare i progetti.",
+    "detailError": "Non è stato possibile caricare il progetto.",
     "emptyTitle": "Nessun progetto",
     "emptyDesc": "Non partecipi ad alcun progetto in corso.",
     "count": "{{count}} progetti totali",
@@ -783,9 +800,9 @@
     }
   },
   "recruiting": {
-    "title": "Recruiting",
+    "title": "Selezione",
     "description": "Il ciclo di selezione: richieste di personale, annunci, candidati e candidature. Una richiesta copre un posto dell'organigramma.",
-    "error": "Non e' stato possibile caricare il recruiting.",
+    "error": "Non è stato possibile caricare il recruiting.",
     "summary": {
       "requisitions": "Richieste aperte",
       "postings": "Annunci pubblicati",
@@ -798,12 +815,12 @@
       "moved": "Candidatura spostata in {{stage}}",
       "moveError": "Spostamento rifiutato dal server.",
       "emptyTitle": "Nessuna candidatura",
-      "emptyDesc": "Registra un candidato e candidalo a un annuncio: comparira' qui come carta.",
+      "emptyDesc": "Registra un candidato e candidalo a un annuncio: comparirà qui come carta.",
       "readOnly": "Puoi consultare la tavola, ma spostare una candidatura spetta a chi gestisce i candidati."
     },
     "stage": {
       "APPLIED": "Candidato",
-      "SCREENING": "Screening",
+      "SCREENING": "Prima valutazione",
       "INTERVIEWING": "Colloqui",
       "OFFER": "Offerta",
       "HIRED": "Assunto",
@@ -823,7 +840,7 @@
       "REPLACEMENT": "Sostituzione",
       "GROWTH": "Crescita",
       "TEMPORARY": "Temporanea",
-      "INTERNAL_MOBILITY": "Mobilita' interna"
+      "INTERNAL_MOBILITY": "Mobilità interna"
     },
     "postingStatus": {
       "DRAFT": "Bozza",
@@ -852,10 +869,10 @@
       "ARCHIVED": "Archiviato"
     },
     "interviewKind": {
-      "SCREENING": "Screening",
+      "SCREENING": "Prima valutazione",
       "TECHNICAL": "Tecnico",
       "BEHAVIORAL": "Comportamentale",
-      "PANEL": "Panel",
+      "PANEL": "Commissione",
       "FINAL": "Finale"
     },
     "interviewStatus": {
@@ -865,8 +882,8 @@
       "NO_SHOW": "Assente"
     },
     "recommendation": {
-      "STRONG_YES": "Si', convinto",
-      "YES": "Si'",
+      "STRONG_YES": "Sì, convinto",
+      "YES": "Sì",
       "NEUTRAL": "Neutro",
       "NO": "No",
       "STRONG_NO": "No, convinto"
@@ -891,7 +908,7 @@
       "status": "Stato",
       "requisition": "Richiesta",
       "title": "Titolo",
-      "visibility": "Visibilita'",
+      "visibility": "Visibilità",
       "location": "Sede",
       "expiresOn": "Scadenza",
       "description": "Descrizione",
@@ -944,12 +961,18 @@
       "applied": "Candidatura registrata: la trovi nella pipeline.",
       "applyError": "Candidatura rifiutata dal server.",
       "emptyTitle": "Nessun candidato",
-      "emptyDesc": "Registra il primo candidato."
+      "emptyDesc": "Registra il primo candidato.",
+      "write": "Scrivi",
+      "tabs": {
+        "active": "Attivi",
+        "hired": "Assunti",
+        "other": "Ritirati, esclusi e archiviati"
+      }
     },
     "application": {
       "title": "Candidatura",
-      "error": "Non e' stato possibile caricare la candidatura.",
-      "backToPipeline": "← Pipeline",
+      "error": "Non è stato possibile caricare la candidatura.",
+      "backToPipeline": "← Fasi della selezione",
       "stageTitle": "Stadio della candidatura",
       "moveTo": "Porta a",
       "rejectHint": "Obbligatorio per respingere",
@@ -962,7 +985,7 @@
       "noInterviews": "Nessun colloquio ancora.",
       "submitFeedback": "Valuta",
       "feedbackCreated": "Valutazione registrata.",
-      "feedbackError": "Valutazione rifiutata dal server (il colloquio si e' svolto?).",
+      "feedbackError": "Valutazione rifiutata dal server (il colloquio si è svolto?).",
       "offerTitle": "Offerta",
       "createOffer": "Prepara l'offerta",
       "offerCreated": "Offerta preparata.",

@@ -135,6 +135,9 @@ for (const p of persone) {
         };
         bloccata = await page.waitForFunction(FINITO, null, { timeout: 15_000 }).then(() => false, () => true);
       }
+      // C15: il quadro degli insight arriva con una sua chiamata; si aspetta fino a 10 secondi prima
+      // di dichiararlo assente, altrimenti l'esito dipende dal tempo di caricamento e non dalla pagina
+      await page.getByTestId("quadro-insight").first().waitFor({ state: "attached", timeout: 10_000 }).catch(() => {});
       e.misura = await page.evaluate(misuraPagina);
       if (bloccata) (e.misura.esito ??= {})["C14-caricamento"] = { n: 1, esempi: ["resta su 'Caricamento…' oltre 15 secondi"] };
       const file = `${rotta.replace(/[^a-z0-9]+/gi, "_").replace(/^_|_$/g, "") || "radice"}.png`;

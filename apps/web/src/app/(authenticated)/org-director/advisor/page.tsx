@@ -111,6 +111,7 @@ export default function AdvisorPage() {
         error={advisor.error}
         errorMessage={t("advisor.errorMessage")}
         rows={data?.items ?? []}
+        pageSize={10}
         rowKey={(r) => `${r.ruleId}-${r.subjectId}`}
         rowTestId="advisor-row"
         columns={columns}

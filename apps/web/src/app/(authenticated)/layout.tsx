@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode } from "react";
+import { useSyncExternalStore, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -195,6 +195,8 @@ const NAV_TESTID: Record<string, string> = {
 };
 
 
+const nienteDaAscoltare = () => () => {};
+
 export default function AuthenticatedLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { t, i18n } = useTranslation();
@@ -203,9 +205,14 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
   const ifaces = useMyInterfaces();
   const logout = useLogout();
   const updatePrefs = useUpdateMyPreferences();
-  useScorrimentoMenu(pathname, !!me.data && !!ifaces.data);
+  // C14, React #418 su quasi ogni pagina (giro 11/11): identità, menu e permessi partono dalla
+  // copia della scheda (sessionStorage, V-12), che il server non vede. Il server disegnava
+  // «Caricamento», il primo disegno del client la pagina intera: HTML diverso, idratazione
+  // rifiutata. Finché l'idratazione non è finita si disegna ciò che ha disegnato il server.
+  const idratato = useSyncExternalStore(nienteDaAscoltare, () => true, () => false);
+  useScorrimentoMenu(pathname, idratato && !!me.data && !!ifaces.data);
 
-  if (me.isLoading || ifaces.isLoading) {
+  if (!idratato || me.isLoading || ifaces.isLoading) {
     return (
       <main className="min-h-screen flex items-center justify-center">
         <span data-testid="app-loading" className="text-sm text-muted-foreground">{t("loading")}</span>

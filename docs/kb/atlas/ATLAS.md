@@ -1,18 +1,18 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `72b38db9` (2026-11-11T02:58:28+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `d9ed5d0e` (2026-11-12T02:06:24+00:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
 | Layer | Valore |
 |---|---|
-| Moduli API | 118 |
-| Route API | 708 |
+| Moduli API | 120 |
+| Route API | 710 |
 | Pagine web | 132 |
-| Schemi shared | 131 |
-| Tabelle DB | 401 (vuote: 69) |
+| Schemi shared | 133 |
+| Tabelle DB | 411 (vuote: 70) |
 | Viste / matview | 88 / 0 |
-| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 334 |
+| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 336 |
 
 ## Moduli API
 
@@ -24,7 +24,7 @@
 | agent-capabilities | /v1/agent-capabilities | 7 | 0 | 5 | 1 |
 | agent-conversations | /v1/agent-conversations | 10 | 0 | 4 | 1 |
 | agent-tokens | /v1/auth/agent-tokens | 1 | 0 | 2 | 0 |
-| analytics | /v1/analytics | 10 | 1 | 13 | 5 |
+| analytics | /v1/analytics | 10 | 1 | 15 | 5 |
 | approvals | /v1/approvals | 5 | 3 | 6 | 5 |
 | assessment-methods | /v1/assessment-methods | 1 | 1 | 1 | 1 |
 | assessment-results | /v1/assessment-results | 3 | 2 | 2 | 2 |
@@ -46,7 +46,7 @@
 | compensation | /v1/compensation | 14 | 2 | 15 | 5 |
 | content | /v1/content | 20 | 5 | 5 | 5 |
 | content-blueprint-links | /v1/content-blueprint-links | 5 | 4 | 4 | 1 |
-| dashboard | /v1/dashboard | 4 | 1 | 25 | 4 |
+| dashboard | /v1/dashboard | 4 | 1 | 26 | 4 |
 | data-classification | /v1/data-classification | 1 | 1 | 1 | 1 |
 | delegations | /v1/delegations | 4 | 2 | 12 | 2 |
 | engagement | /v1/engagement | 4 | 1 | 5 | 2 |
@@ -73,7 +73,7 @@
 | learning-path-steps | /v1/learning-path-steps | 5 | 4 | 3 | 1 |
 | learning-paths | /v1/learning-paths | 5 | 4 | 2 | 1 |
 | mandate-acts | /v1/mandate-acts | 6 | 1 | 5 | 0 |
-| me | /v1/me | 73 | 32 | 64 | 46 |
+| me | /v1/me | 75 | 32 | 64 | 48 |
 | mentorship | /v1/mentorship | 17 | 4 | 4 | 3 |
 | mfa-policy | /v1/mfa-policy | 4 | 2 | 4 | 1 |
 | notifications | /v1/notifications | 2 | 2 | 2 | 0 |
@@ -90,16 +90,18 @@
 | platform-tenant-assignments | /v1/platform-tenant-assignments | 3 | 1 | 3 | 1 |
 | position-career-paths | /v1/position-career-paths | 4 | 3 | 3 | 1 |
 | position-succession-relevance | /v1/position-succession-relevance | 4 | 3 | 2 | 1 |
-| positions | /v1/positions | 16 | 4 | 12 | 4 |
+| positions | /v1/positions | 16 | 4 | 16 | 4 |
 | predictions | /v1/predictions | 4 | 1 | 2 | 3 |
 | process-kpi-templates | /v1/process-kpi-templates | 4 | 3 | 3 | 1 |
 | projects | /v1/projects | 7 | 3 | 3 | 1 |
 | provenance | /v1/provenance | 2 | 1 | 1 | 1 |
 | public-job-postings | /v1/public | 2 | 0 | 2 | 1 |
 | public-stats | /v1/public | 1 | 0 | 11 | 1 |
+| quadro | — | 0 | 0 | 23 | 1 |
 | reference-sync | /v1/reference-sync | 4 | 2 | 3 | 2 |
 | research | — | 0 | 0 | 20 | 1 |
 | review-cycles | /v1/review-cycles | 4 | 2 | 1 | 2 |
+| rubrica | — | 0 | 0 | 4 | 1 |
 | seed-acquisition-runs | /v1/seed-acquisition-runs | 6 | 3 | 1 | 1 |
 | seed-approval-decisions | /v1/seed-approval-decisions | 3 | 2 | 2 | 1 |
 | seed-candidate-records | /v1/seed-candidate-records | 5 | 2 | 3 | 1 |
@@ -207,6 +209,7 @@
 - `sys.sys_blueprint_content_training`
 - `sys.sys_blueprint_content_unit_processes`
 - `sys.sys_conflitti_ibridi`
+- `sys.sys_content_blueprint_links`
 - `sys.sys_content_media`
 - `sys.sys_generated_record_origins`
 - `sys.sys_mandate_act_audit`
@@ -226,7 +229,7 @@
 - permissions: **250**
 - role_permission_mappings: **1317**
 - ui_interfaces_active: **78**
-- skills: **14031**
+- skills: **14032**
 
 ## Anomalie shared exports
 

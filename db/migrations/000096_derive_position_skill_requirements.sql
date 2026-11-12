@@ -79,6 +79,13 @@ qualified AS (
                    AND pr.skill_id = h.skill_id AND pr.rn = 1
   WHERE pe.peer_n >= 1 AND h.holders_n >= 2
     AND (h.holders_n::numeric / NULLIF(pe.peer_n, 0)) >= 0.34
+    -- RTL Bank (allineamento 2026-11-11, blocco H, ADR-0035): le competenze che una banca non ha
+    -- (alimentare, materiali avanzati, sosta) sono ritirate; la derivazione non le riporta.
+    AND NOT (h.tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+             AND EXISTS (SELECT 1 FROM sys.sys_skills sk
+                          WHERE sk.skill_id = h.skill_id
+                            AND (sk.skill_name IN ('materiali avanzati', 'regolamentazione della sosta')
+                                 OR sk.skill_name ~* 'produzione alimentare')))
 ),
 derived AS (  -- fan role+tenant requirements out to each position of that role+tenant
   SELECT p.position_id, q.tenant_id, q.skill_id, q.prof_ord, q.prevalence, q.holders_n, q.peer_n

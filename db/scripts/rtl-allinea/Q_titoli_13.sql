@@ -1,24 +1,18 @@
 -- Decisioni 1 e 4 (mandato RTL 2026-11-11, estensione del coordinatore): titolo e mansione delle 13 persone senza posto della corsa, secondo la corsa.
--- Rinaldi M. resta Analista Bilancio e Segnalazioni (decisione 1). Mansioni nuove di tenant dove il catalogo non ha l'equivalente. Idempotente.
--- Giornale: staging.rtl_allinea_org_undo (posto prima, contratto prima, mansioni inserite come 'ins:sys_job_roles').
+-- Rinaldi M. resta Analista Bilancio e Segnalazioni (decisione 1). Mansioni: quelle del catalogo (il profilo della banca, 000398, e' dichiarato e non ammette mansioni nuove). Idempotente.
+-- Giornale: staging.rtl_allinea_org_undo (posto prima, contratto prima).
 \set ON_ERROR_STOP on
 BEGIN;
 CREATE TABLE IF NOT EXISTS staging.rtl_allinea_org_undo (
   salvato_il timestamptz NOT NULL DEFAULT now(), tabella text NOT NULL, chiave uuid NOT NULL, riga jsonb NOT NULL, PRIMARY KEY (tabella, chiave));
-INSERT INTO sys.sys_job_roles (job_role_id, job_role_family_id, job_role_code, job_role_name, job_role_description, job_role_seniority_level, job_role_tenant_id)
-SELECT gen_random_uuid(), (SELECT job_family_id FROM sys.sys_job_families WHERE job_family_code=v.fam), v.cod, v.nome, v.descr, 'ENTRY', '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
-FROM (VALUES ('RTL-ROLE-ADDETTO-CHIUSURA-CONTI','Addetto Chiusura Conti','OPS','Chiusura dei conti e dei rapporti: verifiche, estinzioni e restituzione dei saldi.'),
-             ('RTL-ROLE-ADDETTO-CUSTOMER-CARE','Addetto Assistenza Clienti e Qualità','RETAIL','Assistenza ai clienti, gestione della qualità del servizio e dei reclami di primo livello.')) v(cod,nome,fam,descr)
-WHERE NOT EXISTS (SELECT 1 FROM sys.sys_job_roles r WHERE r.job_role_code=v.cod AND r.job_role_tenant_id='86ba7a65-217f-48ba-8ce5-5c09b40a66b0');
-INSERT INTO staging.rtl_allinea_org_undo (tabella, chiave, riga) SELECT 'ins:sys_job_roles', job_role_id, '{}'::jsonb FROM sys.sys_job_roles WHERE job_role_code IN ('RTL-ROLE-ADDETTO-CHIUSURA-CONTI','RTL-ROLE-ADDETTO-CUSTOMER-CARE') AND job_role_tenant_id='86ba7a65-217f-48ba-8ce5-5c09b40a66b0' ON CONFLICT DO NOTHING;
 CREATE TEMP TABLE t13(persona text, titolo text, codice_ruolo text) ON COMMIT DROP;
 INSERT INTO t13 VALUES
- ('Mancini, Giorgio','Addetto Chiusura Conti','RTL-ROLE-ADDETTO-CHIUSURA-CONTI'),('Villa, Paolo','Addetto Chiusura Conti','RTL-ROLE-ADDETTO-CHIUSURA-CONTI'),
+ ('Mancini, Giorgio','Addetto Chiusura Conti','RTL-ROLE-SPECIALISTA-BACK-OFFICE'),('Villa, Paolo','Addetto Chiusura Conti','RTL-ROLE-SPECIALISTA-BACK-OFFICE'),
  ('Fiore, Gabriele','Consulente di Filiale','RTL-ROLE-CONSULENTE-CLIENTELA'),('Greco, Filippo','Consulente di Filiale','RTL-ROLE-CONSULENTE-CLIENTELA'),
  ('Monti, Michele','Operatore di Sportello e Cassa','RTL-ROLE-CASSIERE'),('Testa, Nicola','Operatore di Sportello e Cassa','RTL-ROLE-CASSIERE'),
  ('Fontana, Gabriele','Analista Crediti','RTL-ROLE-ANALISTA-CREDITI'),('Ricci, Giorgio','Analista Crediti','RTL-ROLE-ANALISTA-CREDITI'),
  ('Sanna, Pietro','Specialista Sviluppo Vendite','RTL-ROLE-SPECIALISTA-SVILUPPO-COMM'),('Santoro, Noemi','Specialista Sviluppo Vendite','RTL-ROLE-SPECIALISTA-SVILUPPO-COMM'),
- ('Fontana, Diego','Auditor','RTL-AUDIT'),('Greco, Andrea','Addetto Customer Care e Qualità','RTL-ROLE-ADDETTO-CUSTOMER-CARE');
+ ('Fontana, Diego','Auditor','RTL-AUDIT'),('Greco, Andrea','Addetto Customer Care e Qualità','RTL-ROLE-SPECIALISTA-SUPPORTO-RETE');
 CREATE TEMP TABLE chi ON COMMIT DROP AS
 SELECT u.user_id, a.user_position_assignment_position_id pos, t.titolo, r.job_role_id
 FROM t13 t JOIN sys.sys_users u ON u.user_tenant_id='86ba7a65-217f-48ba-8ce5-5c09b40a66b0' AND u.user_last_name||', '||u.user_first_name=t.persona

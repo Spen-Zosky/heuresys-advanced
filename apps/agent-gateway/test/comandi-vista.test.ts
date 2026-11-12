@@ -63,6 +63,17 @@ describe("catalogo chiuso", () => {
     expect((await p.comanda("fascicolo.decidi", { processo: "HR-01", inclusione: "IN", motivazione: "  " })).stato).toBe("rifiutata");
   });
 
+  it("il blocco dice i nomi esatti degli argomenti di ogni comando, ricavati dallo schema", () => {
+    const testo = contestoPagina({
+      percorso: "/x",
+      comandi: ["fascicolo.decidi", "fascicolo.annulla", "tabella.filtra", "tabella.ordina", "tabella.azzera"],
+    });
+    expect(testo).toContain('Argomenti: { "processo": string, "inclusione": "IN" | "PARTIAL" | "OUT", "motivazione": string }');
+    expect(testo).toContain('"colonna": string, "valore": string | number | boolean');
+    expect(testo).toContain('"verso": "crescente" | "decrescente"');
+    expect(testo).toMatch(/fascicolo\.annulla .*Argomenti: \{\}/u);
+  });
+
   it("lo strumento ha la classe A nel catalogo delle azioni", () => {
     expect(CLASSI_STRUMENTI.hrx_vista_comanda).toBe("A");
   });

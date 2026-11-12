@@ -121,12 +121,39 @@ export function leggiPagina(dati: unknown): PaginaDichiarata | null {
 }
 
 /**
+ * La forma degli argomenti di un comando, ricavata dallo schema che il gateway fa valere: nomi
+ * esatti dei campi, tipo o valori ammessi. Senza, il modello indovina i nomi (prova dal vivo del
+ * 2026-11-12: cinque nomi sbagliati prima di «inclusione»). Si ricava, non si scrive a mano, così
+ * non può divergere dalla validazione.
+ */
+export function firmaArgomenti(v: VoceComando): string {
+  const js = z.toJSONSchema(v.argomenti, { unrepresentable: "any" }) as {
+    properties?: Record<string, { type?: string | string[]; enum?: unknown[]; anyOf?: Array<{ type?: string }> }>;
+    required?: string[];
+  };
+  const campi = Object.entries(js.properties ?? {}).map(([nome, d]) => {
+    const tipo = d.enum
+      ? d.enum.map((x) => JSON.stringify(x)).join(" | ")
+      : d.anyOf
+        ? d.anyOf.map((x) => x.type ?? "valore").join(" | ")
+        : Array.isArray(d.type)
+          ? d.type.join(" | ")
+          : (d.type ?? "valore");
+    return `"${nome}"${js.required?.includes(nome) ? "" : "?"}: ${tipo}`;
+  });
+  return `{ ${campi.join(", ")} }`.replace("{  }", "{}");
+}
+
+/**
  * Il blocco che accompagna il mandato: dove si trova la persona, che cosa vede, che cosa la pagina
  * accetta. È un dato marcato, e lo dice.
  */
 export function contestoPagina(p: PaginaDichiarata): string {
   const comandi = p.comandi
-    .map((n) => `- ${n} (${CATALOGO_VISTA[n]?.modo === "lavora" ? "prepara, la persona registra" : "cambia ciò che si vede"}): ${CATALOGO_VISTA[n]?.descrizione ?? ""}`)
+    .map((n) => {
+      const v = CATALOGO_VISTA[n];
+      return `- ${n} (${v?.modo === "lavora" ? "prepara, la persona registra" : "cambia ciò che si vede"}): ${v?.descrizione ?? ""} Argomenti: ${v ? firmaArgomenti(v) : "{}"}`;
+    })
     .join("\n");
   return [
     "<pagina>",

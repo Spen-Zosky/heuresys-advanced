@@ -1,0 +1,110 @@
+codice|titolo|unita_cod|unita|madre|livello|organico|riporta
+R001|Direttore Generale|U01|Direzione Generale|-|DIR|1|-
+R002|Responsabile Pianificazione Strategica|U01|Direzione Generale|-|QD4|1|R001
+R003|Addetto Segreteria Societaria e Rapporti con il CdA|U01|Direzione Generale|-|QD3|1|R001
+R004|Analista di Business Development|U01|Direzione Generale|-|3A L3|1|R001
+R005|Addetto Segreteria Generale|U01|Direzione Generale|-|Area unificata|1|R001
+R006|Responsabile Compliance|U02|Direzione Compliance|Direzione Generale|DIR|1|R001
+R007|Compliance Officer Senior|U02|Direzione Compliance|Direzione Generale|QD3|1|R006
+R008|Compliance Officer|U02|Direzione Compliance|Direzione Generale|3A L3|1|R006
+R009|Addetto Compliance (Analista Normativo)|U02|Direzione Compliance|Direzione Generale|3A L2|1|R006
+R010|Responsabile Risk Management (Chief Risk Officer)|U03|Direzione Risk Management|Direzione Generale|DIR|1|R001
+R011|Risk Manager Senior|U03|Direzione Risk Management|Direzione Generale|QD3|1|R010
+R012|Analista Rischio di Mercato|U03|Direzione Risk Management|Direzione Generale|3A L3|1|R010
+R013|Addetto Risk Management|U03|Direzione Risk Management|Direzione Generale|3A L2|1|R010
+R014|Responsabile Rischio Operativo e Antiriciclaggio|U04|Direzione Rischio Operativo e Antiriciclaggio|Direzione Generale|DIR|1|R001
+R015|Responsabile Antiriciclaggio Operativo (AML Officer)|U04|Direzione Rischio Operativo e Antiriciclaggio|Direzione Generale|QD3|1|R014
+R016|Analista Rischio Operativo|U04|Direzione Rischio Operativo e Antiriciclaggio|Direzione Generale|3A L3|1|R014
+R017|Addetto Antiriciclaggio|U04|Direzione Rischio Operativo e Antiriciclaggio|Direzione Generale|3A L1|1|R014
+R018|Responsabile Internal Audit (Chief Audit Executive)|U05|Direzione Internal Audit|Direzione Generale|DIR|1|R001
+R019|Auditor Senior|U05|Direzione Internal Audit|Direzione Generale|QD2|1|R018
+R020|Auditor|U05|Direzione Internal Audit|Direzione Generale|3A L3|1|R018
+R021|Capo Divisione Commerciale|U06|Divisione Commerciale|Direzione Generale|DIR|1|R001
+R022|Responsabile Coordinamento Rete e Sviluppo Commerciale|U06|Divisione Commerciale|Direzione Generale|QD4|1|R021
+R023|Addetto Customer Care e Qualità|U06|Divisione Commerciale|Direzione Generale|3A L1|1|R021
+R033|Responsabile Direzione Marketing e Studi|U10|Direzione Marketing e Studi|Divisione Commerciale|QD4|1|R021
+R034|Analista di Mercato Senior|U10|Direzione Marketing e Studi|Divisione Commerciale|QD3|1|R033
+R035|Analista di Mercato e CRM|U10|Direzione Marketing e Studi|Divisione Commerciale|3A L2|2|R033
+R036|Addetto Marketing e Studi|U10|Direzione Marketing e Studi|Divisione Commerciale|Area unificata|1|R033
+R037|Direttore Vendite e Canali|U11|Direzione Vendite e Canali|Divisione Commerciale|DIR|1|R021
+R038|Responsabile Strategia Commerciale|U11|Direzione Vendite e Canali|Divisione Commerciale|QD3|1|R037
+R039|Specialista Sviluppo Vendite|U11|Direzione Vendite e Canali|Divisione Commerciale|3A L3|2|R037
+R040|Analista Performance Canali|U11|Direzione Vendite e Canali|Divisione Commerciale|3A L2|1|R037
+R041|Direttore Rete Commerciale|U12|Direzione Rete Commerciale|Divisione Commerciale|DIR|1|R021
+R042|Responsabile Gestione Cassa e Pagamenti|U12|Direzione Rete Commerciale|Divisione Commerciale|QD3|1|R041
+R043|Responsabile Crediti e Finanziamenti Retail|U12|Direzione Rete Commerciale|Divisione Commerciale|QD3|1|R041
+R044|Specialista Customer Care e Gestione Reclami|U12|Direzione Rete Commerciale|Divisione Commerciale|3A L3|1|R041
+R045|Direttore di Filiale|U13|Direzione Filiale 1|Divisione Commerciale|QD3|1|R021
+R048|Responsabile Ufficio Sportello e Cassa|U16|Ufficio Sportello e Cassa|Direzione Filiale 1|QD2|1|R045
+R049|Operatore di Sportello e Cassa|U16|Ufficio Sportello e Cassa|Direzione Filiale 1|3A L1|3|R048
+R050|Responsabile Ufficio Consulenza Clienti e Fidi|U17|Ufficio Consulenza Clienti e Fidi|Direzione Filiale 1|QD3|1|R045
+R051|Consulente di Filiale|U17|Ufficio Consulenza Clienti e Fidi|Direzione Filiale 1|3A L2|3|R050
+R046|Direttore di Filiale|U14|Direzione Filiale 2|Divisione Commerciale|QD3|1|R021
+R052|Responsabile Ufficio Sportello e Cassa|U18|Ufficio Sportello e Cassa|Direzione Filiale 2|QD2|1|R046
+R053|Operatore di Sportello e Cassa|U18|Ufficio Sportello e Cassa|Direzione Filiale 2|3A L1|3|R052
+R054|Responsabile Ufficio Consulenza Clienti e Fidi|U19|Ufficio Consulenza Clienti e Fidi|Direzione Filiale 2|QD3|1|R046
+R055|Consulente di Filiale|U19|Ufficio Consulenza Clienti e Fidi|Direzione Filiale 2|3A L2|3|R054
+R047|Direttore di Filiale|U15|Direzione Filiale 3|Divisione Commerciale|QD3|1|R021
+R056|Responsabile Ufficio Sportello e Cassa|U20|Ufficio Sportello e Cassa|Direzione Filiale 3|QD2|1|R047
+R057|Operatore di Sportello e Cassa|U20|Ufficio Sportello e Cassa|Direzione Filiale 3|3A L1|3|R056
+R058|Responsabile Ufficio Consulenza Clienti e Fidi|U21|Ufficio Consulenza Clienti e Fidi|Direzione Filiale 3|QD3|1|R047
+R059|Gestore Clientela / Consulente Commerciale|U21|Ufficio Consulenza Clienti e Fidi|Direzione Filiale 3|3A L3|1|R058
+R060|Addetto Pianificazione Contatti Clienti|U21|Ufficio Consulenza Clienti e Fidi|Direzione Filiale 3|Area unificata|1|R058
+R061|Addetto Reclami e Customer Satisfaction|U21|Ufficio Consulenza Clienti e Fidi|Direzione Filiale 3|3A L1|1|R058
+R024|Capo Divisione Crediti e Finanza|U07|Divisione Crediti e Finanza|Direzione Generale|DIR|1|R001
+R025|Responsabile Crediti|U07|Divisione Crediti e Finanza|Direzione Generale|QD3|1|R024
+R026|Responsabile Finanza e Risk|U07|Divisione Crediti e Finanza|Direzione Generale|QD3|1|R024
+R062|Direttore Crediti|U22|Direzione Crediti|Divisione Crediti e Finanza|DIR|1|R024
+R063|Responsabile Istruttoria Fidi|U22|Direzione Crediti|Divisione Crediti e Finanza|QD3|1|R062
+R064|Analista Crediti Senior|U22|Direzione Crediti|Divisione Crediti e Finanza|QD2|2|R062
+R065|Analista Crediti|U22|Direzione Crediti|Divisione Crediti e Finanza|3A L3|3|R062
+R066|Gestore Crediti Problematici (NPL)|U22|Direzione Crediti|Divisione Crediti e Finanza|3A L4|2|R062
+R067|Addetto Segreteria Fidi|U22|Direzione Crediti|Divisione Crediti e Finanza|Area unificata|1|R062
+R068|Direttore Finanza e Tesoreria|U23|Direzione Finanza e Tesoreria|Divisione Crediti e Finanza|DIR|1|R024
+R069|Responsabile Tesoreria|U23|Direzione Finanza e Tesoreria|Divisione Crediti e Finanza|QD3|1|R068
+R070|Dealer / Trader|U23|Direzione Finanza e Tesoreria|Divisione Crediti e Finanza|QD2|3|R068
+R071|Addetto Middle Office Finanza|U23|Direzione Finanza e Tesoreria|Divisione Crediti e Finanza|3A L2|3|R068
+R072|Addetto Back Office Titoli|U23|Direzione Finanza e Tesoreria|Divisione Crediti e Finanza|3A L1|3|R068
+R073|Analista Rischi Finanziari|U23|Direzione Finanza e Tesoreria|Divisione Crediti e Finanza|3A L4|1|R068
+R027|Capo Divisione Operations e IT|U08|Divisione Operations e IT|Direzione Generale|DIR|1|R001
+R028|Responsabile Back Office Operativo|U08|Divisione Operations e IT|Direzione Generale|QD3|1|R027
+R029|Responsabile Sistemi di Pagamento|U08|Divisione Operations e IT|Direzione Generale|QD3|1|R027
+R074|Direttore Centro Operativo|U24|Direzione Centro Operativo|Divisione Operations e IT|DIR|1|R027
+R075|Specialista IT Core Banking|U24|Direzione Centro Operativo|Divisione Operations e IT|QD1|1|R074
+R076|Analista Canali e Performance|U24|Direzione Centro Operativo|Divisione Operations e IT|3A L4|1|R074
+R077|Responsabile Ufficio Gestione Conti e Back Office|U25|Ufficio Gestione Conti e Back Office|Direzione Centro Operativo|QD3|1|R074
+R078|Addetto Apertura Conti|U25|Ufficio Gestione Conti e Back Office|Direzione Centro Operativo|Area unificata|3|R077
+R079|Addetto Mantenimento Conti|U25|Ufficio Gestione Conti e Back Office|Direzione Centro Operativo|Area unificata|3|R077
+R080|Addetto Chiusura Conti|U25|Ufficio Gestione Conti e Back Office|Direzione Centro Operativo|Area unificata|2|R077
+R081|Responsabile Ufficio Pagamenti e Regolamento|U26|Ufficio Pagamenti e Regolamento|Direzione Centro Operativo|QD3|1|R074
+R082|Specialista Pagamenti SEPA e Regolamento Interbancario|U26|Ufficio Pagamenti e Regolamento|Direzione Centro Operativo|3A L3|4|R081
+R083|Addetto Back Office Incassi e Pagamenti|U26|Ufficio Pagamenti e Regolamento|Direzione Centro Operativo|Area unificata|3|R081
+R084|Direttore Sistemi Informativi (CIO)|U27|Direzione IT|Divisione Operations e IT|DIR|1|R027
+R085|Responsabile Sviluppo Applicativi Core Banking|U27|Direzione IT|Divisione Operations e IT|QD2|1|R084
+R086|Responsabile Infrastrutture e Sicurezza IT|U27|Direzione IT|Divisione Operations e IT|QD1|1|R084
+R087|Analista Programmatore Core Banking|U27|Direzione IT|Divisione Operations e IT|3A L3|6|R084
+R088|Addetto Sistemi e Reti|U27|Direzione IT|Divisione Operations e IT|3A L1|3|R084
+R089|Addetto Assistenza Utenti (Service Desk)|U27|Direzione IT|Divisione Operations e IT|Area unificata|2|R084
+R030|Capo Divisione Risorse e Supporto|U09|Divisione Risorse e Supporto|Direzione Generale|DIR|1|R001
+R031|Responsabile Risorse Umane|U09|Divisione Risorse e Supporto|Direzione Generale|QD3|1|R030
+R032|Responsabile Acquisti e Sicurezza|U09|Divisione Risorse e Supporto|Direzione Generale|QD3|1|R030
+R090|Direttore Risorse Umane|U28|Direzione Risorse Umane|Divisione Risorse e Supporto|DIR|1|R030
+R091|Responsabile Reclutamento e Selezione|U28|Direzione Risorse Umane|Divisione Risorse e Supporto|QD2|1|R090
+R092|Responsabile Formazione e Sviluppo|U28|Direzione Risorse Umane|Divisione Risorse e Supporto|QD2|1|R090
+R093|Responsabile Compensation & Benefits|U28|Direzione Risorse Umane|Divisione Risorse e Supporto|QD2|1|R090
+R094|Addetto Amministrazione del Personale|U28|Direzione Risorse Umane|Divisione Risorse e Supporto|3A L2|2|R090
+R095|Addetto Recruiting|U28|Direzione Risorse Umane|Divisione Risorse e Supporto|3A L1|1|R090
+R096|Addetto Compensation|U28|Direzione Risorse Umane|Divisione Risorse e Supporto|3A L1|1|R090
+R097|Direttore Pianificazione e Controllo di Gestione|U29|Direzione Pianificazione e Controllo di Gestione|Divisione Risorse e Supporto|DIR|1|R030
+R098|Responsabile Controllo di Gestione|U29|Direzione Pianificazione e Controllo di Gestione|Divisione Risorse e Supporto|QD2|1|R097
+R099|Analista di Pianificazione e Controllo (Controller)|U29|Direzione Pianificazione e Controllo di Gestione|Divisione Risorse e Supporto|3A L2|3|R097
+R100|Addetto Reporting Direzionale|U29|Direzione Pianificazione e Controllo di Gestione|Divisione Risorse e Supporto|3A L1|1|R097
+R101|Direttore Amministrazione e Approvvigionamenti|U30|Direzione Amministrazione e Approvvigionamenti|Divisione Risorse e Supporto|DIR|1|R030
+R102|Responsabile Payroll|U30|Direzione Amministrazione e Approvvigionamenti|Divisione Risorse e Supporto|QD2|1|R101
+R103|Responsabile Acquisti e Approvvigionamenti|U30|Direzione Amministrazione e Approvvigionamenti|Divisione Risorse e Supporto|QD2|1|R101
+R104|Addetto Payroll|U30|Direzione Amministrazione e Approvvigionamenti|Divisione Risorse e Supporto|3A L1|3|R101
+R105|Addetto Acquisti e Contabilità Fornitori|U30|Direzione Amministrazione e Approvvigionamenti|Divisione Risorse e Supporto|3A L1|3|R101
+R106|Addetto Amministrazione Generale|U30|Direzione Amministrazione e Approvvigionamenti|Divisione Risorse e Supporto|Area unificata|2|R101
+R107|Direttore Sicurezza|U31|Direzione Sicurezza|Divisione Risorse e Supporto|DIR|1|R030
+R108|Responsabile Sicurezza Fisica e Antirapina|U31|Direzione Sicurezza|Divisione Risorse e Supporto|QD2|1|R107
+R109|Addetto Sicurezza e Antirapina|U31|Direzione Sicurezza|Divisione Risorse e Supporto|Area unificata|2|R107

@@ -72,7 +72,7 @@ const GRUPPI: Record<string, string> = {
 export class LottoNonValido extends Error {}
 
 /** Lo stesso criterio di `persone-distinte.ts`: un identificativo di persona finisce in `UserId`. */
-function portaChiaviDiPersona(v: unknown): boolean {
+export function portaChiaviDiPersona(v: unknown): boolean {
   if (Array.isArray(v)) return v.some(portaChiaviDiPersona);
   if (v && typeof v === "object") {
     return Object.entries(v as Record<string, unknown>).some(

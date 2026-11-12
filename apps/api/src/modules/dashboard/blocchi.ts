@@ -187,7 +187,8 @@ const processProcessiAttivi: Fornitore = async (q, p) => {
   const r = await q.query<{ id: string; label: string; detail: string; value: string }>(
     `SELECT bp.blueprint_process_id::text AS id,
             bp.blueprint_process_name AS label,
-            bp.blueprint_process_code AS detail,
+            -- Repertorio interfacce, R4: niente codice a video; il dettaglio dice se il processo è essenziale.
+            CASE WHEN bp.blueprint_process_is_optional THEN 'Facoltativo' ELSE 'Essenziale' END AS detail,
             count(oup.organization_unit_process_id) AS value
        FROM sys.sys_blueprint_process_registry bp
        LEFT JOIN sys.sys_organization_unit_processes oup
@@ -211,7 +212,7 @@ const processAttivitaRecenti: Fornitore = async (q, p) => {
     `SELECT e.user_timeline_event_id::text AS id,
             e.user_timeline_event_summary AS label,
             e.user_timeline_event_type AS detail,
-            to_char(e.user_timeline_event_occurred_at, 'YYYY-MM-DD') AS occorso
+            to_char(e.user_timeline_event_occurred_at, 'DD/MM/YYYY') AS occorso
        FROM sys.sys_user_timeline_events e
       WHERE ($1::uuid IS NULL OR e.user_timeline_event_tenant_id = $1::uuid)
       ORDER BY e.user_timeline_event_occurred_at DESC NULLS LAST LIMIT 15`,
@@ -295,7 +296,8 @@ const orgCatenaDiRiporto: Fornitore = async (q, p) => {
     `${CTE_UNITA}
      SELECT u.organization_unit_id::text AS id,
             u.organization_unit_name AS label,
-            coalesce(m.user_display_name, '(nessun responsabile)') AS detail,
+            -- R1: la persona si scrive «Cognome, Nome».
+            coalesce(nullif(concat_ws(', ', nullif(m.user_last_name, ''), nullif(m.user_first_name, '')), ''), m.user_display_name, '(nessun responsabile)') AS detail,
             (SELECT count(*) FROM sys.sys_organization_units f
               WHERE f.organization_unit_parent_id = u.organization_unit_id) AS value
        FROM sys.sys_organization_units u
@@ -613,7 +615,7 @@ const tenantUtenti: Fornitore = async (q, p) => {
 const selfProfilo: Fornitore = async (q, p) => {
   const r = await q.query<{ id: string; label: string; detail: string }>(
     `SELECT u.user_id::text AS id,
-            coalesce(u.user_display_name, u.user_email) AS label,
+            coalesce(nullif(concat_ws(', ', nullif(u.user_last_name, ''), nullif(u.user_first_name, '')), ''), u.user_display_name, u.user_email) AS label,
             coalesce(pos.position_title, '(nessuna posizione attiva)') || ' · ' ||
             coalesce(ou.organization_unit_name, '—') AS detail
        FROM sys.sys_users u
@@ -664,23 +666,30 @@ const selfFormazione: Fornitore = async (q, p) => {
  * La mappa. Chiave: `<famiglia>/<vista>`, gli stessi codici che stanno nel database.
  * ------------------------------------------------------------------ */
 
+type Colonne = { label: string; detail?: string; value?: string };
+/** Un elenco con le sue intestazioni (R2): la pagina non deve indovinare che cosa misura. */
+const conColonne = (f: Fornitore, columns: Colonne): Fornitore => async (q, p) => {
+  const c = await f(q, p);
+  return c.kind === "list" ? { ...c, columns } : c;
+};
+
 export const FORNITORI: Readonly<Record<string, Fornitore>> = Object.freeze({
   "company/headcount": companyHeadcount,
   "company/andamento-organico": companyAndamentoOrganico,
-  "company/copertura-competenze": companyCoperturaCompetenze,
+  "company/copertura-competenze": conColonne(companyCoperturaCompetenze, { label: "Competenza", detail: "Livello", value: "Persone" }),
   "company/andamento-valutazioni": companyAndamentoValutazioni,
 
-  "process/processi-attivi": processProcessiAttivi,
-  "process/attivita-recenti": processAttivitaRecenti,
+  "process/processi-attivi": conColonne(processProcessiAttivi, { label: "Processo", detail: "Tipo", value: "Unità" }),
+  "process/attivita-recenti": conColonne(processAttivitaRecenti, { label: "Attività", detail: "Tipo e data" }),
   "process/approvazioni-in-coda": processApprovazioniInCoda,
 
-  "org/struttura-unita": orgStrutturaUnita,
-  "org/posizioni-scoperte": orgPosizioniScoperte,
-  "org/catena-di-riporto": orgCatenaDiRiporto,
+  "org/struttura-unita": conColonne(orgStrutturaUnita, { label: "Unità", detail: "Tipo", value: "Posizioni attive" }),
+  "org/posizioni-scoperte": conColonne(orgPosizioniScoperte, { label: "Posizione scoperta", detail: "Unità" }),
+  "org/catena-di-riporto": conColonne(orgCatenaDiRiporto, { label: "Unità", detail: "Responsabile", value: "Unità dipendenti" }),
 
-  "branch/organico-filiale": branchOrganico,
-  "branch/attivita-filiale": branchAttivita,
-  "branch/competenze-filiale": branchCompetenze,
+  "branch/organico-filiale": conColonne(branchOrganico, { label: "Filiale", value: "Persone" }),
+  "branch/attivita-filiale": conColonne(branchAttivita, { label: "Attività", detail: "Tipo" }),
+  "branch/competenze-filiale": conColonne(branchCompetenze, { label: "Competenza", value: "Persone" }),
 
   "hr/organico": hrOrganico,
   "hr/retribuzioni": hrRetribuzioni,
@@ -690,14 +699,14 @@ export const FORNITORI: Readonly<Record<string, Fornitore>> = Object.freeze({
 
   "platform/salute-sistema": platformSaluteSistema,
   "platform/credenziali-e-accessi": platformCredenziali,
-  "platform/job-e-corse": platformJob,
+  "platform/job-e-corse": conColonne(platformJob, { label: "Corsa", detail: "Stato e inizio" }),
 
-  "tenant/configurazione-tenant": tenantConfigurazione,
-  "tenant/blueprint-adottati": tenantBlueprintAdottati,
+  "tenant/configurazione-tenant": conColonne(tenantConfigurazione, { label: "Tenant", detail: "Stato, settore e dimensione" }),
+  "tenant/blueprint-adottati": conColonne(tenantBlueprintAdottati, { label: "Modello di impianto", detail: "Stato" }),
   "tenant/utenti-del-tenant": tenantUtenti,
 
-  "self/il-mio-profilo": selfProfilo,
-  "self/le-mie-attivita": selfAttivita,
+  "self/il-mio-profilo": conColonne(selfProfilo, { label: "Persona", detail: "Posizione e unità" }),
+  "self/le-mie-attivita": conColonne(selfAttivita, { label: "Attività", detail: "Data" }),
   "self/la-mia-formazione": selfFormazione,
 });
 

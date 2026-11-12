@@ -143,9 +143,10 @@ function Vista({ v, t }: { v: DashboardBlockData; t: (k: string) => string }) {
             rowKey={(r) => r.id}
             caption={v.name}
             columns={[
-              { header: t("dashboard.famiglie.colonnaVoce"), cell: (r) => testoLeggibile(r.label) },
-              { header: t("dashboard.famiglie.colonnaDettaglio"), cell: (r) => (r.detail ? testoLeggibile(r.detail) : "—") },
-              { header: t("dashboard.famiglie.colonnaValore"), align: "right", cell: (r) => (r.value === null ? "—" : r.value.toLocaleString(lingua)) },
+              // R2: le intestazioni le dà la vista; le generiche restano solo come ripiego.
+              { header: v.content.columns?.label ?? t("dashboard.famiglie.colonnaVoce"), cell: (r) => testoLeggibile(r.label) },
+              { header: v.content.columns?.detail ?? t("dashboard.famiglie.colonnaDettaglio"), cell: (r) => (r.detail ? testoLeggibile(r.detail) : "—") },
+              { header: v.content.columns?.value ?? t("dashboard.famiglie.colonnaValore"), align: "right", cell: (r) => (r.value === null ? "—" : r.value.toLocaleString(lingua)) },
             ]}
           />
         )}

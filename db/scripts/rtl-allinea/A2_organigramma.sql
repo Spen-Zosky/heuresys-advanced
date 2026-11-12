@@ -31,52 +31,72 @@ DO $$ DECLARE n int; BEGIN
   SELECT count(*) INTO n FROM (SELECT resp_sport p FROM fil UNION ALL SELECT resp_cons FROM fil) x WHERE p NOT IN (SELECT persona FROM pers);
   IF n > 0 THEN RAISE EXCEPTION 'A/org: % responsabili senza posto attivo', n; END IF; END $$;
 
--- giornale: unita' e posti che si toccano
-INSERT INTO staging.rtl_allinea_org_undo (tabella, chiave, riga)
-SELECT 'sys_organization_units', o.organization_unit_id, to_jsonb(o) FROM sys.sys_organization_units o
- WHERE o.organization_unit_id IN (SELECT id FROM un WHERE c IN (SELECT unita FROM fil) OR c IN ('AREA-MI','AREA-BSBG'))
-ON CONFLICT DO NOTHING;
-INSERT INTO staging.rtl_allinea_org_undo (tabella, chiave, riga)
-SELECT 'sys_positions', p.position_id, to_jsonb(p) FROM sys.sys_positions p
+-- giornale: istantanea di unita' e posti che si possono toccare; a fine script si scrivono SOLO le righe cambiate davvero (stato prima)
+CREATE TEMP TABLE snap_u ON COMMIT DROP AS
+SELECT o.* FROM sys.sys_organization_units o
+ WHERE o.organization_unit_id IN (SELECT id FROM un WHERE c IN (SELECT unita FROM fil) OR c IN ('AREA-MI','AREA-BSBG'));
+CREATE TEMP TABLE snap_p ON COMMIT DROP AS
+SELECT p.* FROM sys.sys_positions p
  WHERE p.position_organization_unit_id IN (SELECT id FROM un WHERE c IN (SELECT unita FROM fil) OR c IN ('AREA-MI','AREA-BSBG'))
     OR p.position_id IN (SELECT posto FROM pers WHERE persona IN ('Pellegrini, Marta','Orlando, Ignazio'))
-ON CONFLICT DO NOTHING;
+    OR p.position_id IN (SELECT posto FROM pers WHERE persona IN (SELECT resp_sport FROM fil UNION SELECT resp_cons FROM fil))
+    OR p.position_id IN (SELECT id FROM po WHERE c LIKE 'POS-CMD-FIL-%');
 
 -- 1) le 10 filiali dipendono dalla Divisione Retail; i direttori riportano al Retail Director
 UPDATE sys.sys_organization_units f SET organization_unit_parent_id=(SELECT id FROM un WHERE c='DIV-RETAIL')
- WHERE f.organization_unit_id IN (SELECT id FROM un WHERE c IN (SELECT unita FROM fil));
+ WHERE f.organization_unit_id IN (SELECT id FROM un WHERE c IN (SELECT unita FROM fil))
+   AND f.organization_unit_parent_id IS DISTINCT FROM (SELECT id FROM un WHERE c='DIV-RETAIL');
 UPDATE sys.sys_positions p SET position_reports_to_position_id=(SELECT id FROM po WHERE c='POS-00000436')
- WHERE p.position_id IN (SELECT id FROM po WHERE c LIKE 'POS-CMD-FIL-%');
+ WHERE p.position_id IN (SELECT id FROM po WHERE c LIKE 'POS-CMD-FIL-%')
+   AND p.position_reports_to_position_id IS DISTINCT FROM (SELECT id FROM po WHERE c='POS-00000436');
 
 -- 2) Pellegrini M.: Responsabile Gestione Cassa e Pagamenti della rete (Direzione Governo e Supporto Rete)
 UPDATE sys.sys_positions p SET position_title='Responsabile Gestione Cassa e Pagamenti', position_organization_unit_id=(SELECT id FROM un WHERE c='DIR-RETE'),
        position_reports_to_position_id=(SELECT id FROM po WHERE c='POS-CMD-DIR-RETE')
- WHERE p.position_id=(SELECT posto FROM pers WHERE persona='Pellegrini, Marta');
--- Orlando I.: Specialista Customer Care e Gestione Reclami (il vice direttore non e' un ruolo della corsa)
-UPDATE sys.sys_positions p SET position_title='Specialista Customer Care e Gestione Reclami', position_organization_unit_id=(SELECT id FROM un WHERE c='DIR-RETE'),
+ WHERE p.position_id=(SELECT posto FROM pers WHERE persona='Pellegrini, Marta')
+   AND (p.position_title, p.position_organization_unit_id, p.position_reports_to_position_id) IS DISTINCT FROM
+       ('Responsabile Gestione Cassa e Pagamenti', (SELECT id FROM un WHERE c='DIR-RETE'), (SELECT id FROM po WHERE c='POS-CMD-DIR-RETE'));
+-- Orlando I.: Specialista Assistenza Clienti e Gestione Reclami (il vice direttore non e' un ruolo della corsa; titolo gia' in italiano, J2 non deve piu' rinominarlo)
+UPDATE sys.sys_positions p SET position_title='Specialista Assistenza Clienti e Gestione Reclami', position_organization_unit_id=(SELECT id FROM un WHERE c='DIR-RETE'),
        position_reports_to_position_id=(SELECT id FROM po WHERE c='POS-CMD-DIR-RETE')
- WHERE p.position_id=(SELECT posto FROM pers WHERE persona='Orlando, Ignazio');
+ WHERE p.position_id=(SELECT posto FROM pers WHERE persona='Orlando, Ignazio')
+   AND (p.position_title, p.position_organization_unit_id, p.position_reports_to_position_id) IS DISTINCT FROM
+       ('Specialista Assistenza Clienti e Gestione Reclami', (SELECT id FROM un WHERE c='DIR-RETE'), (SELECT id FROM po WHERE c='POS-CMD-DIR-RETE'));
 
 -- 3) responsabili di filiale
 UPDATE sys.sys_positions p SET position_title='Responsabile Ufficio Sportello e Cassa', position_organization_unit_id=(SELECT id FROM un WHERE c=f.unita),
        position_reports_to_position_id=(SELECT id FROM po WHERE c='POS-CMD-'||f.unita)
- FROM fil f JOIN pers s ON s.persona=f.resp_sport WHERE p.position_id=s.posto;
+ FROM fil f JOIN pers s ON s.persona=f.resp_sport WHERE p.position_id=s.posto
+   AND (p.position_title, p.position_organization_unit_id, p.position_reports_to_position_id) IS DISTINCT FROM
+       ('Responsabile Ufficio Sportello e Cassa', (SELECT id FROM un WHERE c=f.unita), (SELECT id FROM po WHERE c='POS-CMD-'||f.unita));
 UPDATE sys.sys_positions p SET position_title='Responsabile Ufficio Consulenza Clienti e Fidi', position_organization_unit_id=(SELECT id FROM un WHERE c=f.unita),
        position_reports_to_position_id=(SELECT id FROM po WHERE c='POS-CMD-'||f.unita)
- FROM fil f JOIN pers s ON s.persona=f.resp_cons WHERE p.position_id=s.posto;
--- cassieri e consulenti della filiale riportano ai rispettivi responsabili
+ FROM fil f JOIN pers s ON s.persona=f.resp_cons WHERE p.position_id=s.posto
+   AND (p.position_title, p.position_organization_unit_id, p.position_reports_to_position_id) IS DISTINCT FROM
+       ('Responsabile Ufficio Consulenza Clienti e Fidi', (SELECT id FROM un WHERE c=f.unita), (SELECT id FROM po WHERE c='POS-CMD-'||f.unita));
+-- cassieri e consulenti ATTIVI della filiale riportano ai rispettivi responsabili (i posti spenti non cambiano; il titolo inglese «Bank Teller» diventa «Cassiere» solo in J: si riconoscono entrambi, cosi' A non dipende dall'ordine)
 UPDATE sys.sys_positions p SET position_reports_to_position_id=s.posto
  FROM fil f JOIN pers s ON s.persona=f.resp_sport
- WHERE p.position_organization_unit_id=(SELECT id FROM un WHERE c=f.unita) AND p.position_title='Cassiere' AND p.position_id<>s.posto;
+ WHERE p.position_organization_unit_id=(SELECT id FROM un WHERE c=f.unita) AND p.position_title IN ('Cassiere','Bank Teller','Bank teller') AND p.position_id<>s.posto AND p.position_is_active
+   AND p.position_reports_to_position_id IS DISTINCT FROM s.posto;
 UPDATE sys.sys_positions p SET position_reports_to_position_id=s.posto
  FROM fil f JOIN pers s ON s.persona=f.resp_cons
- WHERE p.position_organization_unit_id=(SELECT id FROM un WHERE c=f.unita) AND p.position_title IN ('Consulente Clientela','Gestore Piccole Imprese') AND p.position_id<>s.posto;
+ WHERE p.position_organization_unit_id=(SELECT id FROM un WHERE c=f.unita) AND p.position_title IN ('Consulente Clientela','Gestore Piccole Imprese') AND p.position_id<>s.posto AND p.position_is_active
+   AND p.position_reports_to_position_id IS DISTINCT FROM s.posto;
 
 -- 4) le Aree escono dall'organigramma (ritirate, non cancellate)
 UPDATE sys.sys_organization_units a SET organization_unit_is_active=false, organization_unit_effective_to=COALESCE(a.organization_unit_effective_to, current_date)
  WHERE a.organization_unit_id IN (SELECT id FROM un WHERE c IN ('AREA-MI','AREA-BSBG')) AND a.organization_unit_is_active;
 UPDATE sys.sys_positions p SET position_is_active=false, position_effective_to=COALESCE(p.position_effective_to, current_date)
  WHERE p.position_organization_unit_id IN (SELECT id FROM un WHERE c IN ('AREA-MI','AREA-BSBG')) AND p.position_is_active;
+
+-- giornale: solo le righe cambiate davvero, con lo stato di prima
+INSERT INTO staging.rtl_allinea_org_undo (tabella, chiave, riga)
+SELECT 'sys_organization_units', s.organization_unit_id, to_jsonb(s) FROM snap_u s JOIN sys.sys_organization_units n USING (organization_unit_id)
+ WHERE to_jsonb(n) - 'updated_at' - 'updated_by' IS DISTINCT FROM to_jsonb(s) - 'updated_at' - 'updated_by' ON CONFLICT DO NOTHING;
+INSERT INTO staging.rtl_allinea_org_undo (tabella, chiave, riga)
+SELECT 'sys_positions', s.position_id, to_jsonb(s) FROM snap_p s JOIN sys.sys_positions n USING (position_id)
+ WHERE to_jsonb(n) - 'updated_at' - 'updated_by' IS DISTINCT FROM to_jsonb(s) - 'updated_at' - 'updated_by' ON CONFLICT DO NOTHING;
 
 -- post-condizioni
 DO $$ DECLARE a int; b int; c int; BEGIN

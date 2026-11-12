@@ -114,7 +114,13 @@ function PannelloAgenteAcceso({ pathname, idonea }: { pathname: string; idonea: 
           busyLabel={t("agente.inCorso")}
           open={aperto}
           busy={occupato}
-          onToggle={() => setAperto((a) => !a)}
+          onToggle={() => {
+            // Sul telefono la colonna delle attività copre la conversazione: si apre compressa,
+            // così il campo della domanda è subito raggiungibile (prova dal vivo del 2026-11-12).
+            if (!aperto && typeof window !== "undefined" && window.matchMedia("(max-width: 639px)").matches)
+              setAttivitaCompresse(true);
+            setAperto((a) => !a);
+          }}
         />
       )}
       <AgentWindow

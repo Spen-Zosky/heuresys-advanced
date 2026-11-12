@@ -22,7 +22,8 @@ def q(v):
 
 
 def main(path):
-    c = json.load(open(path, encoding="utf-8"))["passi"]
+    with open(path, encoding="utf-8") as f:
+        c = json.load(f)["passi"]
     form = c["formazione"]["esito"]["moduli"]
     obi = {o["id"]: o for o in c["obiettivi"]["esito"]["obiettivi"]}
     pesi = c["derivati"]["esito"]["pesiObiettivi"]

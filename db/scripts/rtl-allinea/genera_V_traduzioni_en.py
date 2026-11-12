@@ -24,7 +24,8 @@ MANUALI = {
  "Tempestività di presentazione del piano strategico HR annuale al vertice": "Timeliness of presenting the annual HR strategic plan to the top management",
 }
 def q(v): return "'" + str(v).replace("'", "''") + "'"
-c = json.load(open(sys.argv[1], encoding="utf-8"))["passi"]
+with open(sys.argv[1], encoding="utf-8") as f:
+    c = json.load(f)["passi"]
 t = {k: v["en"] for k, v in c["traduzioni"]["esito"]["testi"].items()}
 t.update(MANUALI)
 met = c["metriche"]["esito"]["metriche"]; obi = {o["id"]: o for o in c["obiettivi"]["esito"]["obiettivi"]}; pesi = c["derivati"]["esito"]["pesiObiettivi"]

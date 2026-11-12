@@ -43,8 +43,8 @@ importers:
   .:
     dependencies:
       '@heuresys/ui':
-        specifier: ^1.3.0
-        version: 1.3.0(@standard-schema/spec@1.1.0)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(@types/three@0.184.1)(ajv@8.20.0)(immer@11.1.8)(prop-types@15.8.1)(react-dom@19.2.8(react@19.2.8))(react-is@16.13.1)(react@19.2.8)(redux@5.0.1)
+        specifier: ^1.4.0
+        version: 1.4.0(@standard-schema/spec@1.1.0)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(@types/three@0.184.1)(ajv@8.20.0)(immer@11.1.8)(prop-types@15.8.1)(react-dom@19.2.8(react@19.2.8))(react-is@16.13.1)(react@19.2.8)(redux@5.0.1)
     devDependencies:
       '@eslint/eslintrc':
         specifier: ^3.3.7
@@ -214,8 +214,8 @@ importers:
   apps/showcase:
     dependencies:
       '@heuresys/ui':
-        specifier: ^1.3.0
-        version: 1.3.0(@standard-schema/spec@1.1.0)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(@types/three@0.184.1)(ajv@8.20.0)(immer@11.1.8)(prop-types@15.8.1)(react-dom@19.2.8(react@19.2.8))(react-is@16.13.1)(react@19.2.8)(redux@5.0.1)
+        specifier: ^1.4.0
+        version: 1.4.0(@standard-schema/spec@1.1.0)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(@types/three@0.184.1)(ajv@8.20.0)(immer@11.1.8)(prop-types@15.8.1)(react-dom@19.2.8(react@19.2.8))(react-is@16.13.1)(react@19.2.8)(redux@5.0.1)
       lucide-react:
         specifier: ^1.61.0
         version: 1.65.0(@types/react@19.2.18)(react@19.2.8)
@@ -260,8 +260,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/shared
       '@heuresys/ui':
-        specifier: ^1.3.0
-        version: 1.3.0(@standard-schema/spec@1.1.0)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(@types/three@0.184.1)(ajv@8.20.0)(immer@11.1.8)(prop-types@15.8.1)(react-dom@19.2.8(react@19.2.8))(react-is@16.13.1)(react@19.2.8)(redux@5.0.1)
+        specifier: ^1.4.0
+        version: 1.4.0(@standard-schema/spec@1.1.0)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(@types/three@0.184.1)(ajv@8.20.0)(immer@11.1.8)(prop-types@15.8.1)(react-dom@19.2.8(react@19.2.8))(react-is@16.13.1)(react@19.2.8)(redux@5.0.1)
       '@hookform/resolvers':
         specifier: 5.9.1
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv@8.20.0)(react-hook-form@7.91.0(@types/react@19.2.18)(react@19.2.8))(zod@4.6.7)
@@ -850,8 +850,8 @@ packages:
   '@floating-ui/utils@0.2.11':
     resolution: {integrity: sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg==}
 
-  '@heuresys/ui@1.3.0':
-    resolution: {integrity: sha512-YZeB7PT8AGSNKldFAQxZ6O9OYqSoWukePO8GX7ByHbJBYWwCm+IN3le+fqseYyTrz2oAQsiRiVKqSUCuShrSvg==}
+  '@heuresys/ui@1.4.0':
+    resolution: {integrity: sha512-TUxoCjWDPUCrQRbCrgXOkt8NJG29LlSDc5+wDnR5LxoKb/O6MdMkbDt3Zx6DshVvk38fxlNL3o8QS6ec1t5VQw==}
     engines: {node: '>=20.0.0', pnpm: '>=9.0.0'}
     peerDependencies:
       '@types/react': 19.2.18
@@ -6034,10 +6034,6 @@ packages:
     resolution: {integrity: sha512-Al01C2JIBnO2CXCAPbpAl6sUiOZHeThGtHYNTa51JRw9PyWOCdr+9Ong05R4qg/Sk3+H645E8ov1h2c58ityNw==}
     engines: {node: '>=20.0.0'}
 
-  tinyexec@1.2.4:
-    resolution: {integrity: sha512-SHf/r48b7vOrjve9PxJo3MN5v5yuyjHvdUcrQffT3WXMUfnGmHDVbC4k3sHJaJTgZCwpUplIaAo5ANtMyp3YHg==}
-    engines: {node: '>=18'}
-
   tinyexec@1.3.1:
     resolution: {integrity: sha512-GCvB3aoys96IuDFBMcTB46JOR6mdMtAToqwiW8JlWhsoh1mhHi/xn9ss/Dg7N555GiJyEt2qzoG/NHCwM6h1EA==}
     engines: {node: '>=18'}
@@ -6569,7 +6565,7 @@ snapshots:
   '@antfu/install-pkg@1.1.0':
     dependencies:
       package-manager-detector: 1.6.0
-      tinyexec: 1.2.4
+      tinyexec: 1.3.1
 
   '@anthropic-ai/claude-agent-sdk-darwin-arm64@0.3.314':
     optional: true
@@ -7047,7 +7043,7 @@ snapshots:
 
   '@floating-ui/utils@0.2.11': {}
 
-  '@heuresys/ui@1.3.0(@standard-schema/spec@1.1.0)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(@types/three@0.184.1)(ajv@8.20.0)(immer@11.1.8)(prop-types@15.8.1)(react-dom@19.2.8(react@19.2.8))(react-is@16.13.1)(react@19.2.8)(redux@5.0.1)':
+  '@heuresys/ui@1.4.0(@standard-schema/spec@1.1.0)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(@types/three@0.184.1)(ajv@8.20.0)(immer@11.1.8)(prop-types@15.8.1)(react-dom@19.2.8(react@19.2.8))(react-is@16.13.1)(react@19.2.8)(redux@5.0.1)':
     dependencies:
       '@dnd-kit/core': 6.3.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@dnd-kit/sortable': 10.0.0(@dnd-kit/core@6.3.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
@@ -8707,7 +8703,7 @@ snapshots:
 
   '@types/estree-jsx@1.0.5':
     dependencies:
-      '@types/estree': 1.0.9
+      '@types/estree': 1.0.10
 
   '@types/estree@1.0.10': {}
 
@@ -10630,7 +10626,7 @@ snapshots:
 
   hast-util-to-jsx-runtime@2.3.6:
     dependencies:
-      '@types/estree': 1.0.9
+      '@types/estree': 1.0.10
       '@types/hast': 3.0.4
       '@types/unist': 3.0.3
       comma-separated-tokens: 2.0.3
@@ -12883,8 +12879,6 @@ snapshots:
   tiny-invariant@1.3.3: {}
 
   tinybench@6.2.3: {}
-
-  tinyexec@1.2.4: {}
 
   tinyexec@1.3.1: {}
 

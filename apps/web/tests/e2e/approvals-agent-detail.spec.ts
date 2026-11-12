@@ -60,9 +60,11 @@ test.describe("#159 F3 — /approvals/[id] consuma AgentPanel con un contesto ve
     const id = page.url().split("/approvals/")[1];
     if (!id) throw new Error("id non estraibile dall'URL dopo la navigazione al dettaglio");
 
-    // Dal piano interfacce L10 (A-8) il pannello lo monta il layout su ogni pagina idonea, chiuso:
-    // si apre col pulsante. Il contesto resta quello che QUESTA pagina dichiara.
-    await page.getByTestId("agente-apri").click();
+    // Dal piano interfacce L10 (A-8) il pannello lo monta il layout su ogni pagina idonea, chiuso;
+    // dal blocco I2 dell'assistente si apre dal simbolo fisso, in una finestra sopra la pagina.
+    // Il contesto resta quello che QUESTA pagina dichiara.
+    await page.getByTestId("agente-launcher").click();
+    await expect(page.getByTestId("agente-window")).toBeVisible();
     await expect(page.getByTestId("agente-page")).toBeVisible();
     // ADR-0056 D4: accanto al pannello, le conversazioni salvate della persona.
     await expect(page.getByTestId("agente-attivita-list")).toBeVisible();

@@ -1005,7 +1005,14 @@
     "statoFATTA": "Done",
     "statoFALLITA": "Failed",
     "statoINTERROTTA": "Stopped",
-    "aggiornata": "Updated {{quando}}"
+    "aggiornata": "Updated {{quando}}",
+    "inCorso": "work in progress",
+    "comprimiAttivita": "Show or hide activities",
+    "latoTitolo": "What it touched",
+    "latoPagina": "On the page",
+    "latoLetture": "Read",
+    "latoProposta": "Waiting for your decision",
+    "latoVuoto": "Nothing yet: what the assistant does on the page, reads or proposes appears here."
   },
   "dettaglio": {
     "riga": "Row detail"

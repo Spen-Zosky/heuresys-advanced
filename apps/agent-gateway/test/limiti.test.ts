@@ -115,3 +115,11 @@ describe("strumenti integrati: l'assistente non ha gli strumenti di sviluppo", (
     }
   });
 });
+
+describe("connettori dell'abbonamento: l'assistente non li vede", () => {
+  it("accetta solo gli MCP passati dal gateway e spegne i connettori claude.ai", async () => {
+    const { ISOLAMENTO_MCP } = await import("../src/sdk-agent.js");
+    expect(ISOLAMENTO_MCP.strictMcpConfig).toBe(true);
+    expect(ISOLAMENTO_MCP.env.ENABLE_CLAUDEAI_MCP_SERVERS).toBe("false");
+  });
+});

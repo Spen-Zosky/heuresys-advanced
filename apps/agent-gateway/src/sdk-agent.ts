@@ -17,6 +17,13 @@ import { buildHeuresysMcp } from "./mcp-tools.js";
 
 /** Gli unici strumenti integrati di Claude Code che l'assistente conserva. */
 export const STRUMENTI_INTEGRATI = ["ToolSearch", "Skill"] as const;
+
+/**
+ * I connettori `claude.ai` dell'abbonamento (Gmail, Drive, Calendar, Microsoft 365: 102 strumenti
+ * misurati il 2026-11-11 nell'evento di avvio) non sono dell'assistente di pagina. `strictMcpConfig`
+ * tiene solo gli MCP passati in `mcpServers`; la variabile spegne la via dei connettori dell'account.
+ */
+export const ISOLAMENTO_MCP = { strictMcpConfig: true, env: { ENABLE_CLAUDEAI_MCP_SERVERS: "false" } } as const;
 import { AtlasOperationResolver } from "./atlas-resolver.js";
 import { makeCanUseTool, type ApproveFn, type GatePrincipal } from "./write-gate.js";
 import { FileAuditSink, registraChiusuraConversazione, type AuditSink } from "./audit-sink.js";
@@ -147,6 +154,8 @@ export async function* runHrAgent(
       // `Skill`; gli strumenti MCP heuresys arrivano da `mcpServers` e passano da `canUseTool`.
       tools: [...STRUMENTI_INTEGRATI],
       mcpServers: { heuresys },
+      strictMcpConfig: ISOLAMENTO_MCP.strictMcpConfig,
+      env: { ...process.env, ...ISOLAMENTO_MCP.env },
       permissionMode: "default", // unlisted tools (the heuresys MCP set) → canUseTool
       canUseTool,
       // ADR-0056 T3: il modello per nome, mai il default della CLI; e un numero di giri finito.

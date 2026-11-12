@@ -457,8 +457,12 @@ const server = createServer(async (req, res) => {
 
         res.writeHead(200, {
           "content-type": "text/event-stream",
-          "cache-control": "no-cache",
+          // no-transform: senza, la compressione di Next sul rewrite /agent-gateway accumula lo
+          // stream e i page_command arrivano alla pagina a fine giro, dopo che l'attesa dell'esito
+          // è scaduta (prova dal vivo del 2026-11-12: 73 s invece di subito). Come apps/api /me.
+          "cache-control": "no-cache, no-transform",
           connection: "keep-alive",
+          "x-accel-buffering": "no",
         });
         // T6b: chiudere la finestra NON ferma il giro. Da quel momento non si scrive più verso la
         // finestra; il giro prosegue fino a un limite e lascia tutto nel registro.

@@ -1,7 +1,7 @@
 -- Custodia storia36 (voce 7), correzioni nei dati dei rossi non legati alla storia chiusa. Idempotente. Giornale: staging.rtl_allinea_org_undo.
 --  C5f(iii) i posti critici sono segnalati nella vista di rilevanza della successione
 --  C5b      i posti critici senza successori ricevono fino a 2 pari livello della stessa direzione (o di una direzione vicina)
---  C4h(ii)  chi dirige altri posti ha l'aggiornamento preposti (D.Lgs 81/08 art. 37) valido
+--  C4h(ii)  (ora in T) chi dirige altri posti ha l'aggiornamento preposti (D.Lgs 81/08 art. 37) valido
 --  C5c(iv)  gli obiettivi di carriera puntano a un posto piu' in alto, di altro mestiere e occupato (lungo la catena dei riporti)
 --  C13d     le selezioni aperte su posti chiusi passano su un posto vacante gemello, nuovo e coerente (stessa unita', stesso titolo e mansione)
 \set ON_ERROR_STOP on
@@ -49,16 +49,7 @@ INSERT INTO sys.sys_successor_readiness (successor_readiness_id, successor_readi
 SELECT rid, cid, '86ba7a65-217f-48ba-8ce5-5c09b40a66b0', CASE WHEN rn=1 THEN 60 ELSE 40 END, liv, '{"anno": 2026, "metodo": "comitato nomine — valutazione annuale", "allinea": "N"}'::jsonb, now() FROM nuovi;
 INSERT INTO staging.rtl_allinea_org_undo (tabella, chiave, riga) SELECT 'ins:sys_successor_candidates', cid, '{}'::jsonb FROM nuovi ON CONFLICT DO NOTHING;
 INSERT INTO staging.rtl_allinea_org_undo (tabella, chiave, riga) SELECT 'ins:sys_successor_readiness', rid, '{}'::jsonb FROM nuovi ON CONFLICT DO NOTHING;
--- C4h(ii)
-CREATE TEMP TABLE prep ON COMMIT DROP AS
-SELECT gen_random_uuid() id, u.user_id uid FROM sys.sys_users u
-JOIN sys.sys_user_position_assignments a ON a.user_position_assignment_user_id=u.user_id AND a.user_position_assignment_kind='PRIMARY' AND a.user_position_assignment_status='ACTIVE'
-WHERE u.user_tenant_id='86ba7a65-217f-48ba-8ce5-5c09b40a66b0' AND u.user_status='ACTIVE'
-  AND EXISTS (SELECT 1 FROM sys.sys_positions p WHERE p.position_reports_to_position_id=a.user_position_assignment_position_id)
-  AND NOT EXISTS (SELECT 1 FROM sys.sys_user_certifications c WHERE c.user_certification_user_id=u.user_id AND c.user_certification_name ILIKE '%preposti%' AND c.user_certification_expires_date >= current_date + 365);
-INSERT INTO sys.sys_user_certifications (user_certification_id, user_certification_user_id, user_certification_tenant_id, user_certification_name, user_certification_issuer, user_certification_issued_date, user_certification_expires_date, user_certification_metadata)
-SELECT id, uid, '86ba7a65-217f-48ba-8ce5-5c09b40a66b0', 'Aggiornamento preposti (D.Lgs 81/08 art. 37)', 'INAIL', current_date, current_date + 1826, '{"status": "active", "validity_months": "60", "allinea": "N"}'::jsonb FROM prep;
-INSERT INTO staging.rtl_allinea_org_undo (tabella, chiave, riga) SELECT 'ins:sys_user_certifications', id, '{}'::jsonb FROM prep ON CONFLICT DO NOTHING;
+-- C4h(ii): spostato in T (dopo l'ultimo cambio dei riporti: chi diventa capo in T riceve l'aggiornamento preposti nella stessa corsa)
 -- C5c(iv): obiettivi di carriera lungo la catena dei riporti
 CREATE TEMP TABLE bad ON COMMIT DROP AS
 WITH RECURSIVE disc AS (
@@ -93,7 +84,10 @@ SELECT rq.requisition_id rid, gen_random_uuid() npos, rq.requisition_position_id
 WHERE rq.requisition_metadata->>'storia36'='C13' AND rq.requisition_status='OPEN' AND NOT EXISTS (SELECT 1 FROM sys.sys_positions p WHERE p.position_id=rq.requisition_position_id AND p.position_is_active);
 INSERT INTO sys.sys_positions (position_id, position_tenant_id, position_code, position_title, position_organization_unit_id, position_job_role_id, position_reports_to_position_id, position_esco_occupation_uri, position_criticality, position_economic_weight, position_is_active, position_effective_from, position_metadata)
 SELECT c.npos, p.position_tenant_id, p.position_code||'-V'||substr(c.npos::text,1,4), p.position_title, p.position_organization_unit_id, p.position_job_role_id,
-  p.position_reports_to_position_id,
+  -- come i posti attivi gemelli della stessa unita' e dello stesso titolo (li ha gia' sistemati A); altrimenti come il posto chiuso
+  COALESCE((SELECT x.position_reports_to_position_id FROM sys.sys_positions x
+             WHERE x.position_is_active AND x.position_organization_unit_id=p.position_organization_unit_id AND x.position_title=p.position_title
+               AND x.position_id<>p.position_id AND x.position_reports_to_position_id IS NOT NULL ORDER BY x.position_code LIMIT 1), p.position_reports_to_position_id),
   p.position_esco_occupation_uri, COALESCE(p.position_criticality,'LOW'), p.position_economic_weight, true, current_date, jsonb_build_object('allinea','N','gemello_di',p.position_id)
 FROM chiusi c JOIN sys.sys_positions p ON p.position_id=c.vecchio;
 INSERT INTO staging.rtl_allinea_org_undo (tabella, chiave, riga) SELECT 'sys_job_requisitions', q.requisition_id, to_jsonb(q) FROM sys.sys_job_requisitions q WHERE q.requisition_id IN (SELECT rid FROM chiusi) ON CONFLICT DO NOTHING;

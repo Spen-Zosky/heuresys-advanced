@@ -125,7 +125,9 @@ JOIN sys.sys_users u ON u.user_tenant_id='86ba7a65-217f-48ba-8ce5-5c09b40a66b0' 
 JOIN sys.sys_user_position_assignments a ON a.user_position_assignment_user_id=u.user_id AND a.user_position_assignment_status='ACTIVE' AND a.user_position_assignment_kind='PRIMARY';
 INSERT INTO staging.rtl_allinea_org_undo (tabella, chiave, riga)
 SELECT 'sys_positions', p.position_id, to_jsonb(p) FROM sys.sys_positions p JOIN pp ON pp.posto=p.position_id ON CONFLICT DO NOTHING;
-UPDATE sys.sys_positions p SET position_criticality=pp.criticita FROM pp WHERE pp.posto=p.position_id AND p.position_criticality IS DISTINCT FROM pp.criticita;
+UPDATE sys.sys_positions p SET position_criticality=pp.criticita FROM pp WHERE pp.posto=p.position_id AND p.position_criticality IS DISTINCT FROM pp.criticita
+   -- i posti gia' nel registro dei critici restano CRITICAL (lo impone I, C5f): D non li abbassa, altrimenti I li rialzerebbe a ogni corsa
+   AND NOT EXISTS (SELECT 1 FROM sys.sys_critical_positions c WHERE c.critical_position_position_id=p.position_id);
 WITH ins AS (
   INSERT INTO sys.sys_critical_positions (critical_position_tenant_id, critical_position_position_id, critical_position_rationale)
   SELECT '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'::uuid, p.posto, 'Criticita'' CRITICAL del posto della corsa p20261010010521tjb' FROM pp p

@@ -17,13 +17,19 @@ DO $$ DECLARE n int; BEGIN
   SELECT count(*) INTO n FROM tit WHERE persona NOT IN (SELECT persona FROM pers);
   IF n>0 THEN RAISE EXCEPTION 'A/titoli: % persone senza posto attivo', n; END IF; END $$;
 CREATE TEMP TABLE it(persona text) ON COMMIT DROP;
-INSERT INTO it VALUES ('Greco, Sara'),('Mariani, Luca'),('Zanetti, Chiara'),('Rinaldi, Stefano'),('Gatti, Pietro');
-INSERT INTO staging.rtl_allinea_org_undo (tabella, chiave, riga)
-SELECT 'sys_positions', p.position_id, to_jsonb(p) FROM sys.sys_positions p
- WHERE p.position_id IN (SELECT posto FROM pers WHERE persona IN (SELECT persona FROM tit UNION SELECT persona FROM it))
-ON CONFLICT DO NOTHING;
+-- Mariani L. e Zanetti C. riportano al responsabile Sviluppo Applicativi Core Banking (T, scostamento richiesto dal coordinatore):
+-- non stanno qui, altrimenti ogni corsa di A3 li riporterebbe al posto sbagliato e T dovrebbe rimetterli.
+INSERT INTO it VALUES ('Greco, Sara'),('Rinaldi, Stefano'),('Gatti, Pietro');
+-- giornale: istantanea prima; a fine script si scrivono solo le righe cambiate davvero
+CREATE TEMP TABLE snap_p ON COMMIT DROP AS
+SELECT p.* FROM sys.sys_positions p
+ WHERE p.position_id IN (SELECT posto FROM pers WHERE persona IN (SELECT persona FROM tit UNION SELECT persona FROM it));
 UPDATE sys.sys_positions p SET position_title=t.titolo FROM tit t JOIN pers s ON s.persona=t.persona WHERE p.position_id=s.posto AND p.position_title<>t.titolo;
 UPDATE sys.sys_positions p SET position_reports_to_position_id=(SELECT position_id FROM sys.sys_positions WHERE position_code='POS-00000431')
- FROM it JOIN pers s ON s.persona=it.persona WHERE p.position_id=s.posto;
+ FROM it JOIN pers s ON s.persona=it.persona WHERE p.position_id=s.posto
+   AND p.position_reports_to_position_id IS DISTINCT FROM (SELECT position_id FROM sys.sys_positions WHERE position_code='POS-00000431');
+INSERT INTO staging.rtl_allinea_org_undo (tabella, chiave, riga)
+SELECT 'sys_positions', s.position_id, to_jsonb(s) FROM snap_p s JOIN sys.sys_positions n USING (position_id)
+ WHERE to_jsonb(n) - 'updated_at' - 'updated_by' IS DISTINCT FROM to_jsonb(s) - 'updated_at' - 'updated_by' ON CONFLICT DO NOTHING;
 COMMIT;
 SELECT 'A/titoli ok' esito, (SELECT count(*) FROM staging.rtl_allinea_org_undo) nel_giornale;

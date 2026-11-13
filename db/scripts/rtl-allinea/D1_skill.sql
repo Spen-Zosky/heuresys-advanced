@@ -1266,6 +1266,8 @@ WITH ins AS (
   FROM pp p JOIN staging.rtl_corsa_skill c ON c.posto = p.codice
   JOIN sys.sys_skills s ON s.skill_esco_uri = c.esco_uri AND (s.skill_tenant_id IS NULL OR s.skill_tenant_id='86ba7a65-217f-48ba-8ce5-5c09b40a66b0')
   WHERE NOT EXISTS (SELECT 1 FROM sys.sys_position_skill_requirements r WHERE r.position_id=p.posto AND r.skill_id=s.skill_id)
+    -- competenze che una banca non ha: ritirate dal blocco H, D non le riporta (altrimenti H le toglierebbe a ogni corsa)
+    AND NOT (s.skill_name IN ('materiali avanzati','regolamentazione della sosta') OR s.skill_name ~* 'produzione alimentare')
   RETURNING position_skill_requirement_id)
 INSERT INTO staging.rtl_allinea_skill_undo (tabella, chiave) SELECT 'sys_position_skill_requirements', position_skill_requirement_id FROM ins ON CONFLICT DO NOTHING;
 COMMIT;

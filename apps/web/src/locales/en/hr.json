@@ -360,18 +360,16 @@
         "FORMA_TENANT": "Your form: only the link, nothing changes in your data",
         "NOME_PROTOTIPO": "Prototype name: name and code take the prototype's form too"
       },
-      "confirm": "Confirm and apply",
-      "confirming": "Applying to the data…",
+      "confirm": "Confirm the decision",
+      "confirming": "Recording…",
       "close": "Close",
-      "sameHint": "You can reconfirm the same choice: the data realign and only what differs is touched.",
-      "result": {
-        "title": "Applied to the data",
-        "nothing": "Everything was already aligned: no data changed.",
-        "changed": "Data changed: {{count}}",
-        "created": "Items created: {{count}}",
-        "reverted": "Earlier effects withdrawn: {{count}}",
-        "skipped": "Not done"
-      }
+      "sameHint": "You can reconfirm the same choice. The decision is recorded: the data change only when you press “Apply changes”."
+    },
+    "applyChanges": "Apply changes ({{count}})",
+    "applying": "Applying to the data…",
+    "applyResult": {
+      "title": "Changes applied: {{count}} decisions applied to the data",
+      "detail": "Values changed {{changed}}, items created {{created}}, earlier effects withdrawn {{reverted}}."
     }
   },
   "gaps": {

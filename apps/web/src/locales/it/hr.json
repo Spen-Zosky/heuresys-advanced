@@ -360,18 +360,16 @@
         "FORMA_TENANT": "Forma tua: solo il collegamento, niente cambia nei tuoi dati",
         "NOME_PROTOTIPO": "Nome del prototipo: anche nome e codice prendono la forma del prototipo"
       },
-      "confirm": "Conferma e applica",
-      "confirming": "Applico ai dati…",
+      "confirm": "Conferma la decisione",
+      "confirming": "Registro…",
       "close": "Chiudi",
-      "sameHint": "Puoi riconfermare anche la stessa scelta: i dati si riallineano e si tocca solo ciò che differisce.",
-      "result": {
-        "title": "Applicata ai dati",
-        "nothing": "Tutto era già allineato: nessun dato è cambiato.",
-        "changed": "Dati cambiati: {{count}}",
-        "created": "Voci create: {{count}}",
-        "reverted": "Effetti precedenti ritirati: {{count}}",
-        "skipped": "Non fatto"
-      }
+      "sameHint": "Puoi riconfermare anche la stessa scelta. La decisione viene registrata: i dati cambiano solo quando premi «Esegui modifiche»."
+    },
+    "applyChanges": "Esegui modifiche ({{count}})",
+    "applying": "Applico ai dati…",
+    "applyResult": {
+      "title": "Modifiche eseguite: {{count}} decisioni applicate ai dati",
+      "detail": "Valori cambiati {{changed}}, voci create {{created}}, effetti precedenti ritirati {{reverted}}."
     }
   },
   "gaps": {

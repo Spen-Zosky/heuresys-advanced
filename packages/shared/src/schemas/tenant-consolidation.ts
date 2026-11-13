@@ -219,19 +219,23 @@ export const ConsolidationProposalSchema = z.object({
 });
 export type ConsolidationProposal = z.infer<typeof ConsolidationProposalSchema>;
 
-/** Che cosa ha fatto l'applicazione di una decisione ai dati del tenant (AC-8). */
-export const ApplicationReportSchema = z.object({
-  changed: z.array(z.object({
-    table: z.string(), recordId: z.string(), column: z.string(), from: z.string().nullable(), to: z.string().nullable(),
-  })),
-  created: z.array(z.object({ table: z.string(), recordId: z.string(), code: z.string(), name: z.string() })),
+/** «Esegui modifiche»: l'esito dell'applicazione di tutte le decisioni registrate ai dati del tenant. */
+export const ApplyChangesResultSchema = z.object({
+  /** Decisioni eseguite in questo ciclo. */
+  applied: z.number().int(),
+  /** Valori cambiati nei dati. */
+  changed: z.number().int(),
+  /** Voci create (adozioni). */
+  created: z.number().int(),
+  /** Effetti di decisioni sostituite rimessi com'erano. */
   reverted: z.number().int(),
+  /** Ciò che non si è potuto fare, con la ragione in italiano. */
   skipped: z.array(z.string()),
 });
-export type ApplicationReport = z.infer<typeof ApplicationReportSchema>;
+export type ApplyChangesResult = z.infer<typeof ApplyChangesResultSchema>;
 
-export const DecisionResultSchema = ConsolidationProposalSchema.extend({ application: ApplicationReportSchema });
-export type DecisionResult = z.infer<typeof DecisionResultSchema>;
+export const PendingChangesSchema = z.object({ pending: z.number().int() });
+export type PendingChanges = z.infer<typeof PendingChangesSchema>;
 
 export const StartConsolidationBodySchema = z.object({
   /** Se manca, la versione del prototipo attiva per il tenant (`sys_blueprint_activations`). */

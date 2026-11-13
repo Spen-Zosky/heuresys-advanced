@@ -60,6 +60,7 @@ describe.skipIf(!collaudo)("l'applicazione delle decisioni (AC-8)", () => {
         WHERE tenant_consolidation_tenant_id = $1 AND tenant_consolidation_status IN ('GIRI','IN_CONFERMA') LIMIT 1`, [direttore.tenantId]);
     sessioneId = s.rows[0]!.id;
     variantVersionId = s.rows[0]!.v;
+    await svc.applyChanges(direttore, sessioneId); // le decisioni già prese in precedenza si eseguono una volta, qui
 
     // Una competenza del tenant e due del prototipo: una per l'abbinamento, una assente dal tenant (lacuna).
     const t = await pool.query<{ skill_id: string; skill_name: string; skill_code: string }>(
@@ -77,32 +78,42 @@ describe.skipIf(!collaudo)("l'applicazione delle decisioni (AC-8)", () => {
 
   afterAll(async () => { await closePool(); });
 
-  it("nome del prototipo: cambia nome e codice; la stessa riconferma non cambia niente; la forma del tenant rimette tutto com'era", async () => {
+  it("decidere registra soltanto; «Esegui modifiche» applica in un ciclo; la riesecuzione non trova niente", async () => {
     const id = await creaProposta("CORRISPONDENZA", [protoCode], [tenantSkillId]);
+    await svc.decide(direttore, id, { decision: "CONFERMATA", form: "NOME_PROTOTIPO" });
+    expect(await competenza(tenantSkillId)).toEqual({ skill_name: nomePrima, skill_code: codicePrima }); // niente è cambiato
+    expect((await svc.pendingChanges(direttore, sessioneId)).pending).toBe(1);
 
-    const a = await svc.decide(direttore, id, { decision: "CONFERMATA", form: "NOME_PROTOTIPO" });
-    expect(a.application.changed.map((c) => c.column).sort()).toEqual(["skill_code", "skill_name"]);
+    const a = await svc.applyChanges(direttore, sessioneId);
+    expect(a).toMatchObject({ applied: 1, changed: 2, created: 0 });
     expect(await competenza(tenantSkillId)).toEqual({ skill_name: protoName, skill_code: protoCode });
 
-    const b = await svc.decide(direttore, id, { decision: "CONFERMATA", form: "NOME_PROTOTIPO" });
-    expect(b.application.changed).toEqual([]);
-    expect(b.application.reverted).toBe(0); // niente da ritirare: lo stato voluto è già quello
-    expect(await competenza(tenantSkillId)).toEqual({ skill_name: protoName, skill_code: protoCode });
+    const b = await svc.applyChanges(direttore, sessioneId);
+    expect(b).toMatchObject({ applied: 0, changed: 0 });
+    expect((await svc.pendingChanges(direttore, sessioneId)).pending).toBe(0);
 
-    const c = await svc.decide(direttore, id, { decision: "CONFERMATA", form: "FORMA_TENANT" });
-    expect(c.application.changed).toEqual([]);
+    // La stessa scelta riconfermata: la decisione nuova si esegue, ma i dati sono già come devono essere.
+    await svc.decide(direttore, id, { decision: "CONFERMATA", form: "NOME_PROTOTIPO" });
+    const c = await svc.applyChanges(direttore, sessioneId);
+    expect(c).toMatchObject({ applied: 1, changed: 0, reverted: 0 });
+
+    // Cambio idea: la forma del tenant rimette nome e codice com'erano.
+    await svc.decide(direttore, id, { decision: "CONFERMATA", form: "FORMA_TENANT" });
+    const d = await svc.applyChanges(direttore, sessioneId);
+    expect(d).toMatchObject({ applied: 1, changed: 0, reverted: 2 });
     expect(await competenza(tenantSkillId)).toEqual({ skill_name: nomePrima, skill_code: codicePrima });
-
     const l = await pool.query(`SELECT tenant_consolidation_link_adr48_state s FROM sys.sys_tenant_consolidation_links WHERE tenant_consolidation_link_proposal_id = $1`, [id]);
     expect(l.rows).toEqual([{ s: "CONSERVATA" }]);
   });
 
-  it("un valore cambiato da altri dopo la decisione non viene rimesso com'era", async () => {
+  it("un valore cambiato da altri dopo l'esecuzione non viene rimesso com'era", async () => {
     const id = await creaProposta("CORRISPONDENZA", [protoCode], [tenantSkillId]);
     await svc.decide(direttore, id, { decision: "CONFERMATA", form: "NOME_PROTOTIPO" });
+    await svc.applyChanges(direttore, sessioneId);
     await pool.query(`UPDATE sys.sys_skills SET skill_name = skill_name || ' (rivisto)' WHERE skill_id = $1`, [tenantSkillId]);
-    const r = await svc.decide(direttore, id, { decision: "CONFERMATA", form: "FORMA_TENANT" });
-    expect(r.application.skipped.join(" ")).toMatch(/skill_name/);
+    await svc.decide(direttore, id, { decision: "CONFERMATA", form: "FORMA_TENANT" });
+    const r = await svc.applyChanges(direttore, sessioneId);
+    expect(r.skipped.join(" ")).toMatch(/skill_name/);
     expect((await competenza(tenantSkillId)).skill_name).toBe(`${protoName} (rivisto)`);
     expect((await competenza(tenantSkillId)).skill_code).toBe(codicePrima);
     await pool.query(`UPDATE sys.sys_skills SET skill_name = $2 WHERE skill_id = $1`, [tenantSkillId, nomePrima]);
@@ -113,11 +124,12 @@ describe.skipIf(!collaudo)("l'applicazione delle decisioni (AC-8)", () => {
     const conta = async () => (await pool.query<{ n: number }>(
       `SELECT count(*)::int n FROM sys.sys_skills WHERE skill_tenant_id = $1 AND skill_code = $2`, [direttore.tenantId, lacunaCode])).rows[0]!.n;
     expect(await conta()).toBe(0);
-    const a = await svc.decide(direttore, id, { decision: "ADOTTATA" });
-    expect(a.application.created.length).toBe(1);
+    await svc.decide(direttore, id, { decision: "ADOTTATA" });
+    expect(await conta()).toBe(0); // registrata, non eseguita
+    expect(await svc.applyChanges(direttore, sessioneId)).toMatchObject({ applied: 1, created: 1 });
     expect(await conta()).toBe(1);
-    const b = await svc.decide(direttore, id, { decision: "ADOTTATA" });
-    expect(b.application.created).toEqual([]);
+    await svc.decide(direttore, id, { decision: "ADOTTATA" });
+    expect(await svc.applyChanges(direttore, sessioneId)).toMatchObject({ applied: 1, created: 0 });
     expect(await conta()).toBe(1);
   });
 
@@ -125,7 +137,9 @@ describe.skipIf(!collaudo)("l'applicazione delle decisioni (AC-8)", () => {
     const prima = await pool.query<{ n: number }>(`SELECT (SELECT count(*) FROM sys.sys_users)::int + (SELECT count(*) FROM sys.sys_user_auth_roles)::int n`);
     const id = await creaProposta("CORRISPONDENZA", [protoCode], [tenantSkillId]);
     await svc.decide(direttore, id, { decision: "CONFERMATA", form: "NOME_PROTOTIPO" });
+    await svc.applyChanges(direttore, sessioneId);
     await svc.decide(direttore, id, { decision: "RIFIUTATA" });
+    await svc.applyChanges(direttore, sessioneId);
     const dopo = await pool.query<{ n: number }>(`SELECT (SELECT count(*) FROM sys.sys_users)::int + (SELECT count(*) FROM sys.sys_user_auth_roles)::int n`);
     expect(dopo.rows[0]!.n).toBe(prima.rows[0]!.n);
   });

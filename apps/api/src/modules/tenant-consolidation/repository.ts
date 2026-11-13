@@ -546,3 +546,44 @@ export async function pendingInGroup(q: DbConnector, consolidationId: string, gr
   );
   return rows[0]?.n ?? 0;
 }
+
+/**
+ * Le decisioni valide della sessione che non sono ancora state eseguite sui dati: senza riga di
+ * collegamento, oppure con un collegamento che porta una decisione più vecchia. Nell'ordine dei gruppi.
+ */
+export async function decisioniDaApplicare(
+  q: DbConnector,
+  tenantId: string,
+  consolidationId: string,
+): Promise<Array<{
+  proposalId: string; group: ConsolidationGroup; tenantKeys: string[]; prototypeKeys: string[];
+  decisionId: string; decision: Decision; form: LinkForm | null; adr48State: "EREDITATA" | "CONSERVATA" | "PROPRIA" | null;
+}>> {
+  const { rows } = await q.query(
+    `SELECT p.tenant_consolidation_proposal_id AS proposal_id, p.tenant_consolidation_proposal_group AS grp,
+            p.tenant_consolidation_proposal_tenant_keys AS tenant_keys, p.tenant_consolidation_proposal_prototype_keys AS prototype_keys,
+            d.tenant_consolidation_decision_id AS decision_id, d.tenant_consolidation_decision_value AS decision,
+            d.tenant_consolidation_decision_form AS form, d.tenant_consolidation_decision_adr48_state AS adr48
+       FROM sys.sys_tenant_consolidation_proposals p
+       JOIN sys.sys_tenant_consolidations c ON c.tenant_consolidation_id = p.tenant_consolidation_proposal_consolidation_id
+       JOIN LATERAL (
+         SELECT x.* FROM sys.sys_tenant_consolidation_decisions x
+          WHERE x.tenant_consolidation_decision_proposal_id = p.tenant_consolidation_proposal_id
+            AND NOT EXISTS (SELECT 1 FROM sys.sys_tenant_consolidation_decisions s
+                             WHERE s.tenant_consolidation_decision_supersedes_id = x.tenant_consolidation_decision_id)
+          ORDER BY x.tenant_consolidation_decision_decided_at DESC LIMIT 1) d ON true
+       LEFT JOIN sys.sys_tenant_consolidation_links l ON l.tenant_consolidation_link_proposal_id = p.tenant_consolidation_proposal_id
+      WHERE c.tenant_consolidation_id = $2 AND c.tenant_consolidation_tenant_id = $1
+        AND p.tenant_consolidation_proposal_superseded_at IS NULL
+        AND l.tenant_consolidation_link_decision_id IS DISTINCT FROM d.tenant_consolidation_decision_id
+      ORDER BY array_position(ARRAY['ORGANIZATION','POSITIONS_ROLES','SKILLS','PROCESSES','INDICATORS_GOALS'],
+                              p.tenant_consolidation_proposal_group::text),
+               d.tenant_consolidation_decision_decided_at`,
+    [tenantId, consolidationId],
+  );
+  return rows.map((r) => ({
+    proposalId: r.proposal_id, group: r.grp as ConsolidationGroup, tenantKeys: r.tenant_keys, prototypeKeys: r.prototype_keys,
+    decisionId: r.decision_id, decision: r.decision as Decision, form: r.form as LinkForm | null,
+    adr48State: r.adr48 as "EREDITATA" | "CONSERVATA" | "PROPRIA" | null,
+  }));
+}

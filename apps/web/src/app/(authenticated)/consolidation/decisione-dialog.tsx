@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@heuresys/ui";
 import {
   ALLOWED_DECISIONS,
-  type ApplicationReport,
   type ConsolidationProposal,
   type Decision,
   type LinkForm,
@@ -22,11 +21,10 @@ export function raccomandata(p: ConsolidationProposal): Decision {
 }
 
 export function DecisioneDialog({
-  proposta, occupato, rapporto, errore, onConferma, onChiudi,
+  proposta, occupato, errore, onConferma, onChiudi,
 }: {
   proposta: ConsolidationProposal;
   occupato: boolean;
-  rapporto: ApplicationReport | null;
   errore: string | null;
   onConferma: (decisione: Decision, forma: LinkForm | undefined) => void;
   onChiudi: () => void;
@@ -62,8 +60,7 @@ export function DecisioneDialog({
           </p>
         </section>
 
-        {rapporto === null ? (
-          <>
+        <>
             <fieldset className="space-y-2" disabled={occupato}>
               <legend className="text-sm font-medium">{t("consolidation.modal.choose")}</legend>
               <div className="flex flex-wrap gap-2">
@@ -100,32 +97,7 @@ export function DecisioneDialog({
                 {occupato ? t("consolidation.modal.confirming") : t("consolidation.modal.confirm")}
               </Button>
             </DialogFooter>
-          </>
-        ) : (
-          <>
-            <section className="space-y-1 text-sm" data-testid="consolidation-application-report">
-              <h3 className="font-medium">{t("consolidation.modal.result.title")}</h3>
-              {rapporto.changed.length + rapporto.created.length + rapporto.reverted === 0 ? (
-                <p>{t("consolidation.modal.result.nothing")}</p>
-              ) : (
-                <ul className="list-disc pl-5">
-                  {rapporto.changed.length > 0 ? <li>{t("consolidation.modal.result.changed", { count: rapporto.changed.length })}</li> : null}
-                  {rapporto.created.length > 0 ? <li>{t("consolidation.modal.result.created", { count: rapporto.created.length })}</li> : null}
-                  {rapporto.reverted > 0 ? <li>{t("consolidation.modal.result.reverted", { count: rapporto.reverted })}</li> : null}
-                </ul>
-              )}
-              {rapporto.skipped.length > 0 ? (
-                <div>
-                  <p className="font-medium">{t("consolidation.modal.result.skipped")}</p>
-                  <ul className="list-disc pl-5 text-muted-foreground">{rapporto.skipped.map((s) => <li key={s}>{s}</li>)}</ul>
-                </div>
-              ) : null}
-            </section>
-            <DialogFooter>
-              <Button type="button" onClick={onChiudi} data-testid="consolidation-decision-close">{t("consolidation.modal.close")}</Button>
-            </DialogFooter>
-          </>
-        )}
+        </>
       </DialogContent>
     </Dialog>
   );

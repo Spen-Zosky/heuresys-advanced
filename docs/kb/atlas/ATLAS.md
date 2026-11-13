@@ -1,18 +1,18 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `d9ed5d0e` (2026-11-12T02:06:24+00:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `a41c6e99` (2026-11-13T14:37:19+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
 | Layer | Valore |
 |---|---|
 | Moduli API | 120 |
-| Route API | 710 |
+| Route API | 712 |
 | Pagine web | 132 |
 | Schemi shared | 133 |
 | Tabelle DB | 411 (vuote: 70) |
 | Viste / matview | 88 / 0 |
-| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 336 |
+| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 340 |
 
 ## Moduli API
 
@@ -119,7 +119,7 @@
 | talent-review | /v1/talent-review | 6 | 1 | 8 | 2 |
 | teams | /v1/teams | 6 | 3 | 3 | 2 |
 | tenant-blueprints | /v1/tenant-blueprints | 20 | 2 | 15 | 1 |
-| tenant-consolidation | /v1/consolidation-vocabulary, /v1/tenant-consolidations | 12 | 3 | 28 | 1 |
+| tenant-consolidation | /v1/consolidation-vocabulary, /v1/tenant-consolidations | 14 | 3 | 30 | 2 |
 | tenant-import-runs | /v1/tenant-import-runs | 5 | 2 | 15 | 1 |
 | tenant-materialization | /v1/tenant-materialization | 2 | 1 | 18 | 1 |
 | tenants | /v1/tenants | 7 | 4 | 3 | 1 |

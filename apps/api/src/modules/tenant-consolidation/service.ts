@@ -38,6 +38,7 @@ import {
 import * as repo from "./repository.js";
 import { consolidaGruppo, nuovoStato, type Giudice } from "./engine.js";
 import { giudiceDaAmbiente } from "./giudice.js";
+import { applicaDecisione, type RapportoApplicazione } from "./applicazione.js";
 import { vociDelPrototipo, vociDelTenant } from "./sorgenti.js";
 
 /** La soglia degli abbinamenti certi, la stessa che la pagina usa (`@heuresys/shared`). */
@@ -223,7 +224,9 @@ export const tenantConsolidationService = {
     return leggibili ? tutti.filter((p) => leggibili.includes(p.group)) : tutti;
   },
 
-  async decide(actor: ActorContext, proposalId: string, body: DecideProposalBody): Promise<ConsolidationProposal> {
+  async decide(
+    actor: ActorContext, proposalId: string, body: DecideProposalBody,
+  ): Promise<ConsolidationProposal & { application: RapportoApplicazione }> {
     const tenantId = tenantDi(actor);
     const m = await mandatoDi(actor);
     const decisa = await withTransaction(async (client) => {
@@ -254,22 +257,31 @@ export const tenantConsolidationService = {
         );
       }
       const form: LinkForm | null = body.decision === "CONFERMATA" ? body.form ?? "NORMALIZZATA" : null;
-      await repo.insertDecision(client, tenantId, {
+      const statoAdr = statoAdr48(body.decision, form);
+      const decisionId = await repo.insertDecision(client, tenantId, {
         proposalId,
         decision: body.decision,
         form,
-        adr48State: statoAdr48(body.decision, form),
+        adr48State: statoAdr,
         reason: body.reason ?? null,
         userId: actor.userId,
         delegationId: m.gruppi.get(p.group) ?? null,
         supersedesId: p.decisionId,
       });
+      // L'applicazione ai dati sta nella stessa transazione della decisione: o entrambe o niente.
+      const s = await repo.getConsolidation(client, tenantId, p.consolidationId);
+      const application = await applicaDecisione(
+        client, tenantId, s!.variantVersionId,
+        { proposalId, group: p.group, tenantKeys: p.tenantKeys, prototypeKeys: p.prototypeKeys },
+        { decisionId, decision: body.decision, form, adr48State: statoAdr },
+      );
       const [dopo] = await repo.getProposals(client, tenantId, [proposalId]);
       const { decisionId: _d, status: _s, ...proposta } = dopo!;
-      return proposta;
+      return { ...proposta, application };
     });
-    const [conNome] = await conNomi(tenantId, await sessione(tenantId, decisa.consolidationId), [decisa]);
-    return conNome!;
+    const { application, ...soloProposta } = decisa;
+    const [conNome] = await conNomi(tenantId, await sessione(tenantId, decisa.consolidationId), [soloProposta]);
+    return { ...conNome!, application };
   },
 
   /**
@@ -292,7 +304,7 @@ export const tenantConsolidationService = {
           skipped.push(p.proposalId);
           continue;
         }
-        await repo.insertDecision(client, tenantId, {
+        const decisionId = await repo.insertDecision(client, tenantId, {
           proposalId: p.proposalId,
           decision: "CONFERMATA",
           form: "NORMALIZZATA",
@@ -302,6 +314,12 @@ export const tenantConsolidationService = {
           delegationId: m.gruppi.get(p.group) ?? null,
           supersedesId: null,
         });
+        const sess = await repo.getConsolidation(client, tenantId, p.consolidationId);
+        await applicaDecisione(
+          client, tenantId, sess!.variantVersionId,
+          { proposalId: p.proposalId, group: p.group, tenantKeys: p.tenantKeys, prototypeKeys: p.prototypeKeys },
+          { decisionId, decision: "CONFERMATA", form: "NORMALIZZATA", adr48State: "EREDITATA" },
+        );
         confirmed++;
       }
       return { confirmed, skipped };

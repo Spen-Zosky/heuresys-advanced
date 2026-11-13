@@ -343,6 +343,35 @@
       "CONSOLIDATION_GROUP_PENDING": "Ci sono ancora proposte da decidere in questo gruppo.",
       "CONSOLIDATION_RUN_FAILED": "errore durante il giro.",
       "PERMISSION_DENIED": "Non hai il mandato per questa decisione."
+    },
+    "decideNow": "Decidi",
+    "modal": {
+      "title": "Decisione sulla proposta",
+      "recommendation": "Raccomandazione dell'agente",
+      "recommends": "L'agente raccomanda: {{decision}}",
+      "because": "Perché: {{reason}}",
+      "confidence": "Fiducia {{value}} su 100",
+      "current": "Decisione attuale: {{decision}}",
+      "noneYet": "Nessuna decisione presa finora",
+      "choose": "La tua scelta",
+      "form": "In che forma",
+      "forms": {
+        "NORMALIZZATA": "Normalizzata: restano nome e codice tuoi, dal prototipo arrivano i campi che mancano",
+        "FORMA_TENANT": "Forma tua: solo il collegamento, niente cambia nei tuoi dati",
+        "NOME_PROTOTIPO": "Nome del prototipo: anche nome e codice prendono la forma del prototipo"
+      },
+      "confirm": "Conferma e applica",
+      "confirming": "Applico ai dati…",
+      "close": "Chiudi",
+      "sameHint": "Puoi riconfermare anche la stessa scelta: i dati si riallineano e si tocca solo ciò che differisce.",
+      "result": {
+        "title": "Applicata ai dati",
+        "nothing": "Tutto era già allineato: nessun dato è cambiato.",
+        "changed": "Dati cambiati: {{count}}",
+        "created": "Voci create: {{count}}",
+        "reverted": "Effetti precedenti ritirati: {{count}}",
+        "skipped": "Non fatto"
+      }
     }
   },
   "gaps": {

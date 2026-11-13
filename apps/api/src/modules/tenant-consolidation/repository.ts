@@ -255,17 +255,19 @@ export async function insertDecision(
     delegationId: string | null;
     supersedesId: string | null;
   },
-): Promise<void> {
-  await q.query(
+): Promise<string> {
+  const { rows } = await q.query<{ id: string }>(
     `INSERT INTO sys.sys_tenant_consolidation_decisions
        (tenant_consolidation_decision_proposal_id, tenant_consolidation_decision_tenant_id,
         tenant_consolidation_decision_value, tenant_consolidation_decision_form,
         tenant_consolidation_decision_adr48_state, tenant_consolidation_decision_reason,
         tenant_consolidation_decision_decided_by, tenant_consolidation_decision_delegation_id,
         tenant_consolidation_decision_supersedes_id)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+     RETURNING tenant_consolidation_decision_id::text AS id`,
     [v.proposalId, tenantId, v.decision, v.form, v.adr48State, v.reason, v.userId, v.delegationId, v.supersedesId],
   );
+  return rows[0]!.id;
 }
 
 /** L'avanzamento di ogni gruppo della sessione (R-8), contato dal registro e non stimato. */

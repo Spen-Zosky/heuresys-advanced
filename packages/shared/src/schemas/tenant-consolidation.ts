@@ -219,6 +219,20 @@ export const ConsolidationProposalSchema = z.object({
 });
 export type ConsolidationProposal = z.infer<typeof ConsolidationProposalSchema>;
 
+/** Che cosa ha fatto l'applicazione di una decisione ai dati del tenant (AC-8). */
+export const ApplicationReportSchema = z.object({
+  changed: z.array(z.object({
+    table: z.string(), recordId: z.string(), column: z.string(), from: z.string().nullable(), to: z.string().nullable(),
+  })),
+  created: z.array(z.object({ table: z.string(), recordId: z.string(), code: z.string(), name: z.string() })),
+  reverted: z.number().int(),
+  skipped: z.array(z.string()),
+});
+export type ApplicationReport = z.infer<typeof ApplicationReportSchema>;
+
+export const DecisionResultSchema = ConsolidationProposalSchema.extend({ application: ApplicationReportSchema });
+export type DecisionResult = z.infer<typeof DecisionResultSchema>;
+
 export const StartConsolidationBodySchema = z.object({
   /** Se manca, la versione del prototipo attiva per il tenant (`sys_blueprint_activations`). */
   variantVersionId: z.uuid().optional(),

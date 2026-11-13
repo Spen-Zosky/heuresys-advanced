@@ -22,12 +22,12 @@ import {
   ConfirmCertainResponseSchema,
   ConsolidationAccessSchema,
   ConsolidationGroupSchema,
+  DecisionResultSchema,
   ConsolidationIdParamSchema,
   ConsolidationListResponseSchema,
   ConsolidationProgressResponseSchema,
   ConsolidationProposalListQuerySchema,
   ConsolidationProposalListResponseSchema,
-  ConsolidationProposalSchema,
   ConsolidationRunStartedSchema,
   DecideProposalBodySchema,
   StartConsolidationBodySchema,
@@ -120,7 +120,7 @@ export const tenantConsolidationRoutes: FastifyPluginAsyncZod = async (app) => {
   app.post("/proposals/:proposalId/decision", {
     config: conf,
     preHandler: [app.verifyCsrf, DECIDE],
-    schema: { params: PROPOSTA, body: DecideProposalBodySchema, response: { 200: ConsolidationProposalSchema } },
+    schema: { params: PROPOSTA, body: DecideProposalBodySchema, response: { 200: DecisionResultSchema } },
   }, async (req) => svc.decide(actor(req), req.params.proposalId, req.body));
 
   app.post("/proposals/confirm-certain", {

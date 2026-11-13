@@ -231,7 +231,9 @@ if [ -d "$REPO_DIR/node_modules" ] && [ "$CUR_ABI" != "$PREV_ABI" ]; then
   rm -rf "$REPO_DIR/node_modules" "$REPO_DIR"/apps/*/node_modules "$REPO_DIR"/packages/*/node_modules
 fi
 log "deps: pnpm install --frozen-lockfile"
-if ! pnpm install --frozen-lockfile; then
+# CI=true: senza terminale pnpm chiede «modules directories will be removed… Proceed?» e non installa (8-9/11/2026: 89 rollout
+# falliti con @heuresys/ui vecchia). Con CI=true la conferma non c'e' e un'installazione che non riesce ferma il deploy qui sotto.
+if ! CI=true pnpm install --frozen-lockfile; then
   echo "ERROR: 'pnpm install --frozen-lockfile' failed — pnpm-lock.yaml is out of sync with package.json." >&2
   echo "       Regenerate + commit the lockfile on the PC (run 'pnpm install', commit pnpm-lock.yaml, push), then redeploy." >&2
   exit 1

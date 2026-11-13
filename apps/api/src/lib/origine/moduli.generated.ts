@@ -1228,6 +1228,7 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_skills",
       "sys_tenancies",
       "sys_tenant_consolidation_decisions",
+      "sys_tenant_consolidation_links",
       "sys_tenant_consolidation_proposals",
       "sys_tenant_consolidation_rounds",
       "sys_tenant_consolidation_working_items",

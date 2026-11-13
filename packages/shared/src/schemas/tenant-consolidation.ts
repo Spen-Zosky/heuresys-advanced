@@ -219,6 +219,24 @@ export const ConsolidationProposalSchema = z.object({
 });
 export type ConsolidationProposal = z.infer<typeof ConsolidationProposalSchema>;
 
+/** «Esegui modifiche»: l'esito dell'applicazione di tutte le decisioni registrate ai dati del tenant. */
+export const ApplyChangesResultSchema = z.object({
+  /** Decisioni eseguite in questo ciclo. */
+  applied: z.number().int(),
+  /** Valori cambiati nei dati. */
+  changed: z.number().int(),
+  /** Voci create (adozioni). */
+  created: z.number().int(),
+  /** Effetti di decisioni sostituite rimessi com'erano. */
+  reverted: z.number().int(),
+  /** Ciò che non si è potuto fare, con la ragione in italiano. */
+  skipped: z.array(z.string()),
+});
+export type ApplyChangesResult = z.infer<typeof ApplyChangesResultSchema>;
+
+export const PendingChangesSchema = z.object({ pending: z.number().int() });
+export type PendingChanges = z.infer<typeof PendingChangesSchema>;
+
 export const StartConsolidationBodySchema = z.object({
   /** Se manca, la versione del prototipo attiva per il tenant (`sys_blueprint_activations`). */
   variantVersionId: z.uuid().optional(),

@@ -6,15 +6,17 @@ import type { TFunction } from "i18next";
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
 import { PageHeader } from "@/components/intestazione-pagina";
 import {
-  ALLOWED_DECISIONS,
   CONSOLIDATION_CERTAIN_THRESHOLD,
   CONSOLIDATION_GROUP_VALUES,
+  type ApplyChangesResult,
+  type PendingChanges,
   type ConsolidationAccess,
   type ConsolidationGroup,
   type ConsolidationItemRef,
   type ConsolidationProposal,
   type Decision,
   type GroupProgress,
+  type LinkForm,
   type ProposalOutcome,
   type TenantConsolidation,
 } from "@heuresys/shared";
@@ -24,6 +26,7 @@ import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill, type StatusTone } from "@/components/status-pill";
 import { useFormat } from "@/lib/format";
 import { StatoErrore, StatoVuoto } from "@/components/stato-pagina";
+import { DecisioneDialog } from "./decisione-dialog";
 
 // AC-10 — La pagina del Direttore HR per il consolidamento del tenant col prototipo
 // (`.programmi/consolidamento/agente/`). L'agente propone, una persona decide: qui si avviano
@@ -56,7 +59,7 @@ function erroreDi(t: TFunction, e: unknown): string {
 function buildColumns(
   t: TFunction,
   canDecide: boolean,
-  onDecide: (p: ConsolidationProposal, d: Decision) => void,
+  onDecide: (p: ConsolidationProposal) => void,
   busy: boolean,
 ): DataColumn<ConsolidationProposal>[] {
   return [
@@ -84,20 +87,17 @@ function buildColumns(
       header: t("consolidation.cols.decision"), align: "right",
       cell: (p) => (
         <div className="flex flex-wrap items-center justify-end gap-2">
-          {p.decision ? (
+          {canDecide ? (
+            <Button
+              type="button" size="sm" variant="outline" disabled={busy}
+              data-testid="consolidation-decide-open"
+              onClick={() => onDecide(p)}
+            >
+              {p.decision ? t(`consolidation.decisions.${p.decision}`) : t("consolidation.decideNow")}
+            </Button>
+          ) : p.decision ? (
             <StatusPill tone={decisionTone(p.decision)}>{t(`consolidation.decisions.${p.decision}`)}</StatusPill>
           ) : null}
-          {canDecide
-            ? ALLOWED_DECISIONS[p.outcome].filter((d) => d !== p.decision).map((d) => (
-              <Button
-                key={d} type="button" size="sm" variant="outline" disabled={busy}
-                data-testid={`consolidation-decide-${d}`}
-                onClick={() => onDecide(p, d)}
-              >
-                {t(`consolidation.actions.${d}`)}
-              </Button>
-            ))
-            : null}
         </div>
       ),
     },
@@ -177,22 +177,37 @@ export default function ConsolidationPage() {
     mutationFn: (g: ConsolidationGroup) => apiFetch(`${BASE}/${idCorrente}/groups/${g}/close`, { method: "POST", body: {} }),
     onSuccess: () => { setScelto(null); rinfresca(); }, onError: fallita,
   });
+  const [inDecisione, setInDecisione] = useState<ConsolidationProposal | null>(null);
+  const [esito, setEsito] = useState<ApplyChangesResult | null>(null);
   const decide = useMutation({
-    mutationFn: (v: { p: ConsolidationProposal; d: Decision }) =>
-      apiFetch(`${BASE}/proposals/${v.p.proposalId}/decision`, { method: "POST", body: { decision: v.d } }),
-    onSuccess: rinfresca, onError: fallita,
+    mutationFn: (v: { p: ConsolidationProposal; d: Decision; form: LinkForm | undefined }) =>
+      apiFetch(`${BASE}/proposals/${v.p.proposalId}/decision`, {
+        method: "POST", body: { decision: v.d, ...(v.form ? { form: v.form } : {}) },
+      }),
+    // Decidere registra soltanto: la finestra si chiude e la decisione aspetta «Esegui modifiche».
+    onSuccess: () => { setInDecisione(null); rinfresca(); }, onError: fallita,
+  });
+  const chiudiDecisione = () => { setInDecisione(null); setErrore(null); };
+  const pendenti = useQuery({
+    queryKey: ["tenant-consolidations", idCorrente, "pending-changes"],
+    queryFn: () => apiFetch<PendingChanges>(`${BASE}/${idCorrente}/pending-changes`),
+    enabled: idCorrente !== null,
+  });
+  const applica = useMutation({
+    mutationFn: () => apiFetch<ApplyChangesResult>(`${BASE}/${idCorrente}/apply-changes`, { method: "POST", body: {} }),
+    onSuccess: (r) => { setEsito(r); rinfresca(); }, onError: fallita,
   });
   const confirm = useMutation({
     mutationFn: (ids: string[]) => apiFetch(`${BASE}/proposals/confirm-certain`, { method: "POST", body: { proposalIds: ids } }),
     onSuccess: rinfresca, onError: fallita,
   });
 
-  const occupato = start.isPending || run.isPending || close.isPending || decide.isPending || confirm.isPending;
+  const occupato = start.isPending || run.isPending || close.isPending || decide.isPending || confirm.isPending || applica.isPending;
   const canRun = access.data?.canRun ?? false;
   const canDecide = corrente !== null && gruppo !== null && (access.data?.groups.includes(gruppo) ?? false);
   const columns = useMemo(
-    () => buildColumns(t, canDecide, (p, d) => decide.mutate({ p, d }), occupato),
-    [t, canDecide, decide, occupato],
+    () => buildColumns(t, canDecide, (p) => { setErrore(null); setInDecisione(p); }, occupato),
+    [t, canDecide, occupato],
   );
   const avanzamento = progress.data?.groups ?? [];
   const delGruppo = avanzamento.find((g) => g.group === gruppo) ?? null;
@@ -256,6 +271,15 @@ export default function ConsolidationPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {esito ? (
+              <div role="status" data-testid="consolidation-apply-result" className="rounded-card border bg-card px-4 py-3 text-sm space-y-1">
+                <p className="font-medium">{t("consolidation.applyResult.title", { count: esito.applied })}</p>
+                <p>{t("consolidation.applyResult.detail", { changed: esito.changed, created: esito.created, reverted: esito.reverted })}</p>
+                {esito.skipped.length > 0 ? (
+                  <ul className="list-disc pl-5 text-muted-foreground">{esito.skipped.map((x) => <li key={x}>{x}</li>)}</ul>
+                ) : null}
+              </div>
+            ) : null}
             <ol data-testid="consolidation-groups" className="grid gap-2 sm:grid-cols-5">
               {CONSOLIDATION_GROUP_VALUES.map((g) => {
                 const p = avanzamento.find((x) => x.group === g);
@@ -305,6 +329,15 @@ export default function ConsolidationPage() {
                   {t("consolidation.run", { group: t(`consolidation.groups.${corrente.openGroup}`) })}
                 </Button>
               ) : null}
+              {access.data?.decidesAs ? (
+                <Button
+                  type="button" data-testid="consolidation-apply-changes"
+                  disabled={occupato || (pendenti.data?.pending ?? 0) === 0}
+                  onClick={() => { setEsito(null); applica.mutate(); }}
+                >
+                  {applica.isPending ? t("consolidation.applying") : t("consolidation.applyChanges", { count: pendenti.data?.pending ?? 0 })}
+                </Button>
+              ) : null}
               {canDecide && certe.length > 0 ? (
                 <Button
                   type="button" variant="secondary" data-testid="consolidation-confirm-certain" disabled={occupato}
@@ -345,6 +378,16 @@ export default function ConsolidationPage() {
             caption={t("consolidation.caption")}
           />
         </section>
+      ) : null}
+      {inDecisione ? (
+        <DecisioneDialog
+          key={inDecisione.proposalId}
+          proposta={inDecisione}
+          occupato={decide.isPending}
+          errore={errore}
+          onConferma={(d, form) => decide.mutate({ p: inDecisione, d, form })}
+          onChiudi={chiudiDecisione}
+        />
       ) : null}
     </main>
   );

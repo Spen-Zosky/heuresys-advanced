@@ -343,6 +343,33 @@
       "CONSOLIDATION_GROUP_PENDING": "Some proposals in this group still need a decision.",
       "CONSOLIDATION_RUN_FAILED": "error during the run.",
       "PERMISSION_DENIED": "You have no mandate for this decision."
+    },
+    "decideNow": "Decide",
+    "modal": {
+      "title": "Decision on the proposal",
+      "recommendation": "The agent's recommendation",
+      "recommends": "The agent recommends: {{decision}}",
+      "because": "Why: {{reason}}",
+      "confidence": "Confidence {{value}} out of 100",
+      "current": "Current decision: {{decision}}",
+      "noneYet": "No decision taken so far",
+      "choose": "Your choice",
+      "form": "In which form",
+      "forms": {
+        "NORMALIZZATA": "Normalized: your name and code stay, the prototype fills in what is missing",
+        "FORMA_TENANT": "Your form: only the link, nothing changes in your data",
+        "NOME_PROTOTIPO": "Prototype name: name and code take the prototype's form too"
+      },
+      "confirm": "Confirm the decision",
+      "confirming": "Recording…",
+      "close": "Close",
+      "sameHint": "You can reconfirm the same choice. The decision is recorded: the data change only when you press “Apply changes”."
+    },
+    "applyChanges": "Apply changes ({{count}})",
+    "applying": "Applying to the data…",
+    "applyResult": {
+      "title": "Changes applied: {{count}} decisions applied to the data",
+      "detail": "Values changed {{changed}}, items created {{created}}, earlier effects withdrawn {{reverted}}."
     }
   },
   "gaps": {

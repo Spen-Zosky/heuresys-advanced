@@ -12,8 +12,7 @@ Wants=network-online.target
 Type=simple
 User=ubuntu
 WorkingDirectory=@@REPO_DIR@@/apps/agent-gateway
-Environment=PATH=%h/.local/bin:@@NODE_BIN@@:/usr/local/bin:/usr/bin:/bin
-Environment=HOME=%h
+Environment=PATH=@@NODE_BIN@@:/usr/local/bin:/usr/bin:/bin
 Environment=NODE_ENV=production
 Environment=AGENT_GATEWAY_PORT=8790
 Environment=AGENT_GATEWAY_SUBSCRIPTION_AUTH=1

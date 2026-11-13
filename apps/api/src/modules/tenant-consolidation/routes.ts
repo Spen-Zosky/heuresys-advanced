@@ -22,12 +22,14 @@ import {
   ConfirmCertainResponseSchema,
   ConsolidationAccessSchema,
   ConsolidationGroupSchema,
+  ApplyChangesResultSchema,
+  PendingChangesSchema,
+  ConsolidationProposalSchema,
   ConsolidationIdParamSchema,
   ConsolidationListResponseSchema,
   ConsolidationProgressResponseSchema,
   ConsolidationProposalListQuerySchema,
   ConsolidationProposalListResponseSchema,
-  ConsolidationProposalSchema,
   ConsolidationRunStartedSchema,
   DecideProposalBodySchema,
   StartConsolidationBodySchema,
@@ -122,6 +124,18 @@ export const tenantConsolidationRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [app.verifyCsrf, DECIDE],
     schema: { params: PROPOSTA, body: DecideProposalBodySchema, response: { 200: ConsolidationProposalSchema } },
   }, async (req) => svc.decide(actor(req), req.params.proposalId, req.body));
+
+  app.get("/:id/pending-changes", {
+    config: conf,
+    preHandler: [LEGGE],
+    schema: { params: ConsolidationIdParamSchema, response: { 200: PendingChangesSchema } },
+  }, async (req) => svc.pendingChanges(actor(req), req.params.id));
+
+  app.post("/:id/apply-changes", {
+    config: conf,
+    preHandler: [app.verifyCsrf, DECIDE],
+    schema: { params: ConsolidationIdParamSchema, response: { 200: ApplyChangesResultSchema } },
+  }, async (req) => svc.applyChanges(actor(req), req.params.id));
 
   app.post("/proposals/confirm-certain", {
     config: conf,

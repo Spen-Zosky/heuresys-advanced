@@ -25,6 +25,7 @@ import {
   CONSOLIDATION_CERTAIN_THRESHOLD,
   CONSOLIDATION_GROUP_VALUES,
   nextConsolidationGroup,
+  type ApplyChangesResult,
   type ConsolidationAccess,
   type ConsolidationGroup,
   type ConsolidationProposal,
@@ -38,6 +39,7 @@ import {
 import * as repo from "./repository.js";
 import { consolidaGruppo, nuovoStato, type Giudice } from "./engine.js";
 import { giudiceDaAmbiente } from "./giudice.js";
+import { applicaDecisione } from "./applicazione.js";
 import { vociDelPrototipo, vociDelTenant } from "./sorgenti.js";
 
 /** La soglia degli abbinamenti certi, la stessa che la pagina usa (`@heuresys/shared`). */
@@ -264,6 +266,7 @@ export const tenantConsolidationService = {
         delegationId: m.gruppi.get(p.group) ?? null,
         supersedesId: p.decisionId,
       });
+      // Decidere registra soltanto: i dati cambiano quando la persona preme «Esegui modifiche» (applyChanges).
       const [dopo] = await repo.getProposals(client, tenantId, [proposalId]);
       const { decisionId: _d, status: _s, ...proposta } = dopo!;
       return proposta;
@@ -305,6 +308,44 @@ export const tenantConsolidationService = {
         confirmed++;
       }
       return { confirmed, skipped };
+    });
+  },
+
+  /** Quante decisioni aspettano di essere applicate ai dati (registrate, non ancora eseguite). */
+  async pendingChanges(actor: ActorContext, id: string): Promise<{ pending: number }> {
+    const tenantId = tenantDi(actor);
+    const m = await mandatoDi(actor);
+    await sessione(tenantId, id);
+    const righe = await repo.decisioniDaApplicare(pool, tenantId, id);
+    return { pending: righe.filter((r) => m.gruppi.has(r.group)).length };
+  },
+
+  /**
+   * «Esegui modifiche»: applica ai dati, in un ciclo solo e in una sola transazione, tutte le
+   * decisioni registrate e non ancora eseguite (o cambiate dopo l'ultima esecuzione), gruppo per
+   * gruppo nell'ordine della sessione. Idempotente: una seconda esecuzione trova niente da fare.
+   */
+  async applyChanges(actor: ActorContext, id: string): Promise<ApplyChangesResult> {
+    const tenantId = tenantDi(actor);
+    const m = await mandatoDi(actor);
+    return withTransaction(async (client) => {
+      const s = await repo.getConsolidation(client, tenantId, id, true);
+      if (!s) throw new NotFoundError("Sessione di consolidamento non trovata", "CONSOLIDATION_NOT_FOUND");
+      const da = (await repo.decisioniDaApplicare(client, tenantId, id)).filter((r) => m.gruppi.has(r.group));
+      const esito: ApplyChangesResult = { applied: 0, changed: 0, created: 0, reverted: 0, skipped: [] };
+      for (const r of da) {
+        const rap = await applicaDecisione(
+          client, tenantId, s.variantVersionId,
+          { proposalId: r.proposalId, group: r.group, tenantKeys: r.tenantKeys, prototypeKeys: r.prototypeKeys },
+          { decisionId: r.decisionId, decision: r.decision, form: r.form, adr48State: r.adr48State },
+        );
+        esito.applied++;
+        esito.changed += rap.changed.length;
+        esito.created += rap.created.length;
+        esito.reverted += rap.reverted;
+        esito.skipped.push(...rap.skipped);
+      }
+      return esito;
     });
   },
 

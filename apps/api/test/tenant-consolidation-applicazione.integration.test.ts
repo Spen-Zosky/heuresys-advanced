@@ -16,16 +16,16 @@ let direttore: ActorContext;
 let sessioneId = "";
 let variantVersionId = "";
 
-async function creaProposta(outcome: string, pk: string[], tk: string[]): Promise<string> {
+async function creaProposta(outcome: string, pk: string[], tk: string[], gruppo = "SKILLS"): Promise<string> {
   const r = await pool.query<{ id: string }>(
     `INSERT INTO sys.sys_tenant_consolidation_proposals
        (tenant_consolidation_proposal_consolidation_id, tenant_consolidation_proposal_group,
         tenant_consolidation_proposal_prototype_keys, tenant_consolidation_proposal_tenant_keys,
         tenant_consolidation_proposal_outcome, tenant_consolidation_proposal_method,
         tenant_consolidation_proposal_confidence, tenant_consolidation_proposal_reason, tenant_consolidation_proposal_round)
-     VALUES ($1, 'SKILLS', $2::text[], $3::text[], $4, 'SEMANTICA', 80, 'prova AC-8', 9)
+     VALUES ($1, $5, $2::text[], $3::text[], $4, 'SEMANTICA', 80, 'prova AC-8', 9)
      RETURNING tenant_consolidation_proposal_id AS id`,
-    [sessioneId, pk, tk, outcome],
+    [sessioneId, pk, tk, outcome, gruppo],
   );
   return r.rows[0]!.id;
 }
@@ -131,6 +131,24 @@ describe.skipIf(!collaudo)("l'applicazione delle decisioni (AC-8)", () => {
     await svc.decide(direttore, id, { decision: "ADOTTATA" });
     expect(await svc.applyChanges(direttore, sessioneId)).toMatchObject({ applied: 1, created: 0 });
     expect(await conta()).toBe(1);
+  });
+
+  it("un'unità adottata non si crea da sola: senza responsabile spezzerebbe la guardia della 000247", async () => {
+    const u = await pool.query<{ code: string }>(
+      `SELECT blueprint_content_unit_code code FROM sys.sys_blueprint_content_units un
+        WHERE blueprint_content_unit_version_id = $1
+          AND NOT EXISTS (SELECT 1 FROM sys.sys_organization_units x WHERE x.organization_unit_tenant_id = $2 AND x.organization_unit_code = un.blueprint_content_unit_code)
+        ORDER BY 1 LIMIT 1`, [variantVersionId, direttore.tenantId]);
+    expect(u.rows.length, "il modello ha almeno un'unità assente dal tenant").toBe(1);
+    const conta = async () => (await pool.query<{ n: number }>(
+      `SELECT count(*)::int n FROM sys.sys_organization_units WHERE organization_unit_tenant_id = $1`, [direttore.tenantId])).rows[0]!.n;
+    const prima = await conta();
+    const id = await creaProposta("LACUNA", [u.rows[0]!.code], [], "ORGANIZATION");
+    await svc.decide(direttore, id, { decision: "ADOTTATA" });
+    const r = await svc.applyChanges(direttore, sessioneId);
+    expect(r.created).toBe(0);
+    expect(r.skipped.join(" ")).toMatch(/responsabile/);
+    expect(await conta()).toBe(prima);
   });
 
   it("non tocca persone né utenze", async () => {

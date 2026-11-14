@@ -112,17 +112,20 @@ UPDATE sys.sys_organization_units AS ou
 DO $$
 DECLARE
   n_con_capo int; n_senza int; n_distinti int; n_condiviso int;
-  n_assegn int; n_nulli int; n_ceo int;
+  n_assegn int; n_nulli int; n_ceo int; v_tenant uuid;
 BEGIN
+  -- Le attese sono quelle dell'organigramma di RTL Bank: si contano solo le sue unita. Un altro
+  -- tenant (o un'unita adottata dal consolidamento) non deve poter rompere la catena a ogni deploy.
+  SELECT user_tenant_id INTO v_tenant FROM sys.sys_users WHERE user_email = 'federica.marchetti@rtl-bank.org';
   SELECT count(*) INTO n_con_capo FROM sys.sys_organization_units
-   WHERE organization_unit_manager_user_id IS NOT NULL;
+   WHERE organization_unit_tenant_id = v_tenant AND organization_unit_manager_user_id IS NOT NULL;
   IF n_con_capo <> 43 THEN
     RAISE EXCEPTION 'Unita con responsabile: attese 43 su 45, trovate %', n_con_capo;
   END IF;
 
   -- le due senza capo sono, e devono essere, quelle in attesa di scioglimento
   SELECT count(*) INTO n_senza FROM sys.sys_organization_units
-   WHERE organization_unit_manager_user_id IS NULL
+   WHERE organization_unit_tenant_id = v_tenant AND organization_unit_manager_user_id IS NULL
      AND organization_unit_code NOT IN ('DIV-RISK', 'DIR-CORP');
   IF n_senza <> 0 THEN
     RAISE EXCEPTION 'Unita senza responsabile diverse dalle 2 attese: %', n_senza;
@@ -130,7 +133,7 @@ BEGIN
 
   -- nessuna nomina e finita a NULL per un'email sbagliata
   SELECT count(*) INTO n_nulli FROM sys.sys_organization_units
-   WHERE organization_unit_manager_user_id IS NULL
+   WHERE organization_unit_tenant_id = v_tenant AND organization_unit_manager_user_id IS NULL
      AND organization_unit_code IN (
        'DG','DIR-RISKM','DIR-LEGAL','DIV-CFO','DIR-COORD','DIR-RETE','DIR-CREDITI',
        'DIR-MONIT','UFF-CRED-PMI','UFF-CRED-RETAIL','DIR-BACKOFF','DIR-PAY',
@@ -143,20 +146,22 @@ BEGIN
 
   -- un responsabile, una sola unita: l'unica eccezione e la CEO su societa e DG
   SELECT count(DISTINCT organization_unit_manager_user_id) INTO n_distinti
-    FROM sys.sys_organization_units WHERE organization_unit_manager_user_id IS NOT NULL;
+    FROM sys.sys_organization_units WHERE organization_unit_tenant_id = v_tenant AND organization_unit_manager_user_id IS NOT NULL;
   IF n_distinti <> 42 THEN
     RAISE EXCEPTION 'Responsabili distinti: attesi 42 (43 unita meno la CEO che ne regge 2), trovati %', n_distinti;
   END IF;
 
   SELECT count(*) INTO n_condiviso
-    FROM sys.v_organization_unit_integrity WHERE responsabile_condiviso;
+    FROM sys.v_organization_unit_integrity i
+    JOIN sys.sys_organization_units ou ON ou.organization_unit_id = i.unita_id
+   WHERE i.responsabile_condiviso AND ou.organization_unit_tenant_id = v_tenant;
   IF n_condiviso <> 2 THEN
     RAISE EXCEPTION 'Responsabili condivisi: attesi 2 (societa e Direzione Generale, entrambe della CEO), trovati %', n_condiviso;
   END IF;
 
   -- e le due unita condivise sono proprio quelle, non altre
   SELECT count(*) INTO n_ceo FROM sys.sys_organization_units
-   WHERE organization_unit_code IN ('RTL','DG')
+   WHERE organization_unit_tenant_id = v_tenant AND organization_unit_code IN ('RTL','DG')
      AND organization_unit_manager_user_id =
          (SELECT user_id FROM sys.sys_users WHERE user_email='federica.marchetti@rtl-bank.org');
   IF n_ceo <> 2 THEN

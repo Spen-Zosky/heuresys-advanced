@@ -32,7 +32,10 @@ interface Bersaglio {
 const BERSAGLI: Record<ConsolidationGroup, Bersaglio> = {
   ORGANIZATION: {
     table: "sys_organization_units", id: "organization_unit_id", tenant: "organization_unit_tenant_id",
-    name: "organization_unit_name", code: "organization_unit_code", description: null, creabile: true,
+    name: "organization_unit_name", code: "organization_unit_code", description: null,
+    // Un'unità senza padre e senza responsabile è un difetto dell'organigramma (la guardia della 000247 la rifiuta):
+    // si registra come adottata e si materializza scegliendo il responsabile, non da sola.
+    creabile: false,
   },
   POSITIONS_ROLES: {
     table: "sys_positions", id: "position_id", tenant: "position_tenant_id",
@@ -201,7 +204,9 @@ export async function applicaDecisione(
     }
   } else if (d.decision === "ADOTTATA") {
     if (!b.creabile) {
-      rapporto.skipped.push("Una posizione adottata si crea scegliendo unità e ruolo del catalogo: l'ho registrata come adottata, da materializzare.");
+      rapporto.skipped.push(p.group === "ORGANIZATION"
+        ? "Un'unità adottata si crea scegliendo il padre e il responsabile: l'ho registrata come adottata, da materializzare."
+        : "Una posizione adottata si crea scegliendo unità e ruolo del catalogo: l'ho registrata come adottata, da materializzare.");
     } else {
       for (const v of proto) {
         if (v.key.startsWith("GOAL:")) { rapporto.skipped.push(`Il modello di obiettivo ${v.code ?? v.key} non ha ancora una tabella del tenant: registrato come adottato.`); continue; }

@@ -75,3 +75,19 @@ Richiesta di Enzo, misurata dal thread degli organigrammi sul catalogo di heures
 | I1.7 pesi degli obiettivi per ruolo; responsabili di processo | goals, process registry | da misurare |
 
 Quando la colonna di I1.2 è unita, si avvisa il thread «Rifare gli organigrammi di advanced come il banco» (la aggiunge a `/v1/me/organigramma` e alle viste).
+
+## Esito del ciclo W, cascata e sede/organico (2026-11-14)
+
+| id | stato | come |
+|---|---|---|
+| W1 | fatta | Le decisioni restano nel registro della sessione (la bozza): nessuna tabella nuova, l'oggetto di lavoro è l'insieme delle decisioni non ancora applicate. «Apporta modifiche (N)» è l'anteprima: la stessa transazione dell'approvazione, annullata. Prova: `consolidation-bozza.integration.test.ts` (dati vivi identici dopo decisione e anteprima). PR 257. |
+| W2 | fatta, con una differenza | Pulsante rosso del solo Direttore HR, conferma esplicita, un'unica transazione con il giornale di ritorno. Il backup automatico per ogni approvazione non c'è: lo sostituiscono la transazione unica, il giornale `staging.tenant_consolidation_undo` e il backup verificato quotidiano del database. |
+| W3 | fatta | Una sola sessione aperta per tenant (l'avvio chiude la precedente); niente approvazione con un giro in corso (`CONSOLIDATION_RUN_BUSY`); dentro la transazione si contano tutte le viste sentinella `sys.v_*` prima e dopo, e se una cresce l'approvazione si annulla e lo dice (`CONSOLIDATION_APPROVAL_BREAKS_INVARIANTS`); le sentinelle di dati ricalcolabili (embedding) non fermano e si riportano come «da ricalcolare»; «Scarta modifiche». Obsolescenza: la bozza non tiene copie dei dati, l'approvazione rilegge e rivalida i dati vivi nel momento in cui scrive. |
+| W4 | fatta | `GET /v1/tenant-consolidations/pending-approval`, letto dall'intestazione solo se la persona può aprire /consolidation; segnale arancione intermittente, fermo con l'animazione ridotta, con testo e collegamento. L'accensione e lo spegnimento sono provati nel test d'integrazione; l'E2E è in sola lettura (`consolidation-bozza.spec.ts`), perché decidere in produzione scriverebbe nella bozza di RTL. |
+| W5 | fatta | `blueprint_run_final_results` (000490): chi, quando, quante decisioni, valori cambiati, voci create, ritiri. |
+| W6 | sostituita | La 000247 è marcata `-- @migrate: once` (PR 255): non si riesegue a ogni rilascio. |
+| Cascata | fatta | `cascata.ts` ricava prerequisiti e conseguenze dal contenuto del modello; la finestra li mostra; «Aggiorna cascata (N)» registra la scelta sulle voci ancora da decidere, dentro la delega. |
+| Sede e organico (I1.2) | fatta | Colonne vere su `sys_organization_units` (000490, PR 255); la conferma di un'unità le porta dal modello dove il tenant non le ha. |
+| S3, indicatori dei 30 processi | fatta | La sentinella `v_processi_senza_kpi` guarda solo il modello in uso (000491, PR 255): una corsa accolta e non attiva non la accende più. |
+
+I1.1 e I1.3-I1.7 restano fuori da questo ciclo, come dichiarato: sono il prossimo ciclo, da proporre a Enzo.

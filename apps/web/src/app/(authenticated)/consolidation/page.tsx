@@ -3,13 +3,17 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import {
+  Badge, Button, Card, CardContent, CardHeader, CardTitle,
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from "@heuresys/ui";
 import { PageHeader } from "@/components/intestazione-pagina";
 import {
   CONSOLIDATION_CERTAIN_THRESHOLD,
   CONSOLIDATION_GROUP_VALUES,
   nextConsolidationGroup,
   type ApplyChangesResult,
+  type ApprovalPreview,
   type PendingChanges,
   type ConsolidationAccess,
   type ConsolidationGroup,
@@ -183,11 +187,11 @@ export default function ConsolidationPage() {
   const [inDecisione, setInDecisione] = useState<ConsolidationProposal | null>(null);
   const [esito, setEsito] = useState<ApplyChangesResult | null>(null);
   const decide = useMutation({
-    mutationFn: (v: { p: ConsolidationProposal; d: Decision; form: LinkForm | undefined }) =>
+    mutationFn: (v: { p: ConsolidationProposal; d: Decision; form: LinkForm | undefined; cascade: boolean }) =>
       apiFetch(`${BASE}/proposals/${v.p.proposalId}/decision`, {
-        method: "POST", body: { decision: v.d, ...(v.form ? { form: v.form } : {}) },
+        method: "POST", body: { decision: v.d, ...(v.form ? { form: v.form } : {}), ...(v.cascade ? { cascade: true } : {}) },
       }),
-    // Decidere registra soltanto: la finestra si chiude e la decisione aspetta «Esegui modifiche».
+    // Decidere registra soltanto nella bozza: i dati vivi cambiano solo con l'approvazione definitiva.
     onSuccess: () => { setInDecisione(null); rinfresca(); }, onError: fallita,
   });
   const chiudiDecisione = () => { setInDecisione(null); setErrore(null); };
@@ -196,17 +200,31 @@ export default function ConsolidationPage() {
     queryFn: () => apiFetch<PendingChanges>(`${BASE}/${idCorrente}/pending-changes`),
     enabled: idCorrente !== null,
   });
+  // «Apporta modifiche (N)»: l'anteprima nella bozza, provata e annullata. Niente cambia nei dati vivi.
+  const [anteprima, setAnteprima] = useState<ApprovalPreview | null>(null);
+  const prova = useMutation({
+    mutationFn: () => apiFetch<ApprovalPreview>(`${BASE}/${idCorrente}/preview-changes`, { method: "POST", body: {} }),
+    onSuccess: (r) => { setEsito(null); setAnteprima(r); }, onError: fallita,
+  });
+  // Il pulsante rosso: solo qui le modifiche della bozza entrano nei dati vivi.
+  const [conferma, setConferma] = useState<"approva" | "scarta" | null>(null);
   const applica = useMutation({
     mutationFn: () => apiFetch<ApplyChangesResult>(`${BASE}/${idCorrente}/apply-changes`, { method: "POST", body: {} }),
-    onSuccess: (r) => { setEsito(r); rinfresca(); }, onError: fallita,
+    onSuccess: (r) => { setConferma(null); setAnteprima(null); setEsito(r); rinfresca(); }, onError: fallita,
+  });
+  const scarta = useMutation({
+    mutationFn: () => apiFetch<{ discarded: number }>(`${BASE}/${idCorrente}/discard-changes`, { method: "POST", body: {} }),
+    onSuccess: () => { setConferma(null); setAnteprima(null); rinfresca(); }, onError: fallita,
   });
   const confirm = useMutation({
     mutationFn: (ids: string[]) => apiFetch(`${BASE}/proposals/confirm-certain`, { method: "POST", body: { proposalIds: ids } }),
     onSuccess: rinfresca, onError: fallita,
   });
 
-  const occupato = start.isPending || run.isPending || close.isPending || decide.isPending || confirm.isPending || applica.isPending;
+  const occupato = start.isPending || run.isPending || close.isPending || decide.isPending || confirm.isPending || applica.isPending || prova.isPending || scarta.isPending;
   const canRun = access.data?.canRun ?? false;
+  const isDirector = access.data?.decidesAs === "DIRETTORE";
+  const nBozza = pendenti.data?.pending ?? 0;
   const canDecide = corrente !== null && gruppo !== null && (access.data?.groups.includes(gruppo) ?? false);
   const columns = useMemo(
     () => buildColumns(t, canDecide, (p) => { setErrore(null); setInDecisione(p); }, occupato),
@@ -225,7 +243,6 @@ export default function ConsolidationPage() {
     if (gruppo !== aperto) return { chiave: "nextOther", vars: { group: nomeAperto } };
     if (righe.length === 0) return { chiave: "nextRun", vars: { group: nomeAperto } };
     if (delGruppo && delGruppo.pending > 0) return { chiave: "nextDecide", vars: { count: delGruppo.pending } };
-    if ((pendenti.data?.pending ?? 0) > 0) return { chiave: "nextApply", vars: { count: pendenti.data?.pending ?? 0 } };
     const prossimo = nextConsolidationGroup(aperto);
     return prossimo
       ? { chiave: "nextClose", vars: { next: t(`consolidation.groups.${prossimo}`) } }
@@ -311,6 +328,24 @@ export default function ConsolidationPage() {
                 ) : null}
               </div>
             ) : null}
+            {anteprima ? (
+              <div role="status" data-testid="consolidation-preview" className="rounded-card border border-primary/40 bg-card px-4 py-3 text-sm space-y-1">
+                <p className="font-medium">{t("consolidation.approval.previewTitle", { count: anteprima.result.applied })}</p>
+                <p>{t("consolidation.applyResult.detail", { changed: anteprima.result.changed, created: anteprima.result.created, reverted: anteprima.result.reverted })}</p>
+                {anteprima.result.skipped.length > 0 ? (
+                  <ul className="list-disc pl-5 text-muted-foreground">{anteprima.result.skipped.map((x) => <li key={x}>{x}</li>)}</ul>
+                ) : null}
+                {anteprima.violations.length > 0 ? (
+                  <p role="alert" data-testid="consolidation-preview-violations" className="text-destructive">
+                    {t("consolidation.approval.violations", { views: anteprima.violations.map((v) => v.view).join(", ") })}
+                  </p>
+                ) : <p className="text-muted-foreground">{t("consolidation.approval.noViolations")}</p>}
+                {anteprima.toRecompute.length > 0 ? (
+                  <p className="text-muted-foreground">{t("consolidation.approval.toRecompute", { views: anteprima.toRecompute.map((v) => v.view).join(", ") })}</p>
+                ) : null}
+                <p className="text-xs text-muted-foreground">{t("consolidation.approval.previewHint")}</p>
+              </div>
+            ) : null}
             <ol data-testid="consolidation-groups" className="grid gap-2 sm:grid-cols-5">
               {CONSOLIDATION_GROUP_VALUES.map((g) => {
                 const p = avanzamento.find((x) => x.group === g);
@@ -368,13 +403,13 @@ export default function ConsolidationPage() {
                   {t("consolidation.run", { group: t(`consolidation.groups.${corrente.openGroup}`) })}
                 </Button>
               ) : null}
-              {access.data?.decidesAs ? (
+              {isDirector ? (
                 <Button
-                  type="button" data-testid="consolidation-apply-changes"
-                  disabled={occupato || (pendenti.data?.pending ?? 0) === 0}
-                  onClick={() => { setEsito(null); applica.mutate(); }}
+                  type="button" variant="outline" data-testid="consolidation-apply-changes"
+                  disabled={occupato || nBozza === 0}
+                  onClick={() => prova.mutate()}
                 >
-                  {applica.isPending ? t("consolidation.applying") : t("consolidation.applyChanges", { count: pendenti.data?.pending ?? 0 })}
+                  {prova.isPending ? t("consolidation.applying") : t("consolidation.applyChanges", { count: nBozza })}
                 </Button>
               ) : null}
               {canDecide && certe.length > 0 ? (
@@ -395,6 +430,25 @@ export default function ConsolidationPage() {
                 </Button>
               ) : null}
             </div>
+            {isDirector && nBozza > 0 ? (
+              <div className="flex flex-wrap items-center gap-2 border-t pt-4" data-testid="consolidation-approval">
+                <Button
+                  type="button" variant="destructive" data-testid="consolidation-approve"
+                  disabled={occupato || inCorso !== null}
+                  onClick={() => { setErrore(null); setConferma("approva"); }}
+                >
+                  {t("consolidation.approval.approve", { count: nBozza })}
+                </Button>
+                <Button
+                  type="button" variant="outline" data-testid="consolidation-discard"
+                  disabled={occupato}
+                  onClick={() => { setErrore(null); setConferma("scarta"); }}
+                >
+                  {t("consolidation.approval.discard")}
+                </Button>
+                <p className="text-xs text-muted-foreground">{t("consolidation.approval.hint")}</p>
+              </div>
+            ) : null}
           </CardContent>
         </Card>
       ) : null}
@@ -419,13 +473,33 @@ export default function ConsolidationPage() {
           />
         </section>
       ) : null}
+      {conferma ? (
+        <Dialog open onOpenChange={(o) => { if (!o) setConferma(null); }}>
+          <DialogContent data-testid="consolidation-approval-dialog">
+            <DialogHeader>
+              <DialogTitle>{t(`consolidation.approval.${conferma}Title`)}</DialogTitle>
+              <DialogDescription>{t(`consolidation.approval.${conferma}Body`, { count: nBozza })}</DialogDescription>
+            </DialogHeader>
+            {errore ? <p role="alert" className="text-sm text-destructive">{errore}</p> : null}
+            <DialogFooter>
+              <Button type="button" variant="outline" disabled={occupato} onClick={() => setConferma(null)}>{t("consolidation.modal.close")}</Button>
+              <Button
+                type="button" variant="destructive" data-testid="consolidation-approval-confirm" disabled={occupato}
+                onClick={() => (conferma === "approva" ? applica.mutate() : scarta.mutate())}
+              >
+                {t(`consolidation.approval.${conferma}Confirm`)}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      ) : null}
       {inDecisione ? (
         <DecisioneDialog
           key={inDecisione.proposalId}
           proposta={inDecisione}
           occupato={decide.isPending}
           errore={errore}
-          onConferma={(d, form) => decide.mutate({ p: inDecisione, d, form })}
+          onConferma={(d, form, cascade) => decide.mutate({ p: inDecisione, d, form, cascade })}
           onChiudi={chiudiDecisione}
         />
       ) : null}

@@ -199,6 +199,35 @@ export async function applicaDecisione(
           voluti.push({ recordId: t, column: b.description, value: v.description });
         }
       }
+      // La cascata di un'unità (000490): sede, organico previsto e ragione dell'organico vengono dal modello
+      // dove il tenant non li ha ancora; un valore che il tenant ha già è suo e non si tocca.
+      if (p.group === "ORGANIZATION") {
+        const { rows: m } = await db.query<{ site: string | null; kind: string | null; hc: string | null; note: string | null }>(
+          `SELECT u.blueprint_content_unit_site_code AS site, s.blueprint_content_site_kind AS kind,
+                  u.blueprint_content_unit_planned_headcount::text AS hc, u.blueprint_content_unit_headcount_note AS note
+             FROM sys.sys_blueprint_content_units u
+             LEFT JOIN sys.sys_blueprint_content_sites s
+               ON s.blueprint_content_site_version_id = u.blueprint_content_unit_version_id
+              AND s.blueprint_content_site_code = u.blueprint_content_unit_site_code
+            WHERE u.blueprint_content_unit_version_id = $1 AND u.blueprint_content_unit_code = $2`,
+          [variantVersionId, v.key],
+        );
+        const { rows: ora } = await db.query<{ site: string | null; kind: string | null; hc: string | null; note: string | null }>(
+          `SELECT organization_unit_site_code AS site, organization_unit_site_kind AS kind,
+                  organization_unit_planned_headcount::text AS hc, organization_unit_headcount_note AS note
+             FROM sys.sys_organization_units WHERE organization_unit_id = $1 AND organization_unit_tenant_id = $2`,
+          [t, tenantId],
+        );
+        const mm = m[0];
+        const oo = ora[0];
+        if (mm && oo) {
+          const campi: Array<[keyof typeof mm, string]> = [
+            ["site", "organization_unit_site_code"], ["kind", "organization_unit_site_kind"],
+            ["hc", "organization_unit_planned_headcount"], ["note", "organization_unit_headcount_note"],
+          ];
+          for (const [k, col] of campi) if (mm[k] !== null && oo[k] === null) voluti.push({ recordId: t, column: col, value: mm[k] });
+        }
+      }
     } else {
       rapporto.skipped.push("L'abbinamento è fra più voci: ho registrato il collegamento senza cambiare i dati.");
     }
@@ -211,15 +240,37 @@ export async function applicaDecisione(
       for (const v of proto) {
         if (v.key.startsWith("GOAL:")) { rapporto.skipped.push(`Il modello di obiettivo ${v.code ?? v.key} non ha ancora una tabella del tenant: registrato come adottato.`); continue; }
         if (!v.code) continue;
+        let escoDaScrivere: string | null = null;
         const { rows: esiste } = await db.query<{ id: string }>(
           `SELECT ${q(b.id)}::text AS id FROM sys.${q(b.table)} WHERE ${q(b.tenant)} = $1 AND ${q(b.code)} = $2`,
           [tenantId, v.code],
         );
         if (esiste.length > 0) continue; // già nel tenant: la riadozione non duplica
+        if (p.group === "SKILLS") {
+          // Una competenza del modello porta il suo URI ESCO: se il catalogo l'ha già, il tenant la usa da lì
+          // (l'URI è unico); senza URI e senza una posizione che la richieda sarebbe residuo (v_skill_isolate_residue).
+          const { rows: e } = await db.query<{ uri: string | null; id: string | null }>(
+            `SELECT b.blueprint_content_skill_esco_uri AS uri, s.skill_id::text AS id
+               FROM sys.sys_blueprint_content_skills b
+               LEFT JOIN sys.sys_skills s ON s.skill_esco_uri = b.blueprint_content_skill_esco_uri
+              WHERE b.blueprint_content_skill_version_id = $1 AND b.blueprint_content_skill_code = $2`,
+            [variantVersionId, v.code],
+          );
+          const uri = e[0]?.uri ?? null;
+          if (!uri) {
+            rapporto.skipped.push(`La competenza ${v.code} non ha un URI ESCO e nessuna posizione la richiede: creata da sola resterebbe isolata. L'ho registrata come adottata.`);
+            continue;
+          }
+          if (e[0]?.id) {
+            rapporto.skipped.push(`La competenza ${v.code} è già nel catalogo (ESCO): il tenant la usa da lì, senza una copia.`);
+            continue;
+          }
+          escoDaScrivere = uri;
+        }
         await db.query(`SAVEPOINT cons_crea`);
         try {
-          const cols = [b.tenant, b.code, b.name, ...(b.description ? [b.description] : [])];
-          const vals: unknown[] = [tenantId, v.code, v.name, ...(b.description ? [v.description ?? null] : [])];
+          const cols = [b.tenant, b.code, b.name, ...(b.description ? [b.description] : []), ...(escoDaScrivere ? ["skill_esco_uri"] : [])];
+          const vals: unknown[] = [tenantId, v.code, v.name, ...(b.description ? [v.description ?? null] : []), ...(escoDaScrivere ? [escoDaScrivere] : [])];
           const { rows } = await db.query<{ id: string }>(
             `INSERT INTO sys.${q(b.table)} (${cols.map(q).join(", ")})
              VALUES (${cols.map((_, i) => `$${i + 1}`).join(", ")}) RETURNING ${q(b.id)}::text AS id`,

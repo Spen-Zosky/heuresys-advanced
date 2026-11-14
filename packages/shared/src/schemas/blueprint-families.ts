@@ -12,6 +12,9 @@ export const BlueprintFamilySchema = z.object({
   metadata: z.record(z.string(), z.unknown()),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
+  /** Settore: la classe d'attività primaria della famiglia (codice e nome), se c'è. */
+  industryCode: z.string().nullable(),
+  industryName: z.string().nullable(),
 });
 export type BlueprintFamily = z.infer<typeof BlueprintFamilySchema>;
 

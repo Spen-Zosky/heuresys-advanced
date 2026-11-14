@@ -49,6 +49,8 @@ interface FamilyResponse {
   metadata: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
+  industryCode: string | null;
+  industryName: string | null;
 }
 interface ErrorEnvelope {
   error: { code: string; message: string; requestId?: string };
@@ -125,6 +127,35 @@ describe("/v1/blueprint-families/* integration", () => {
     const g = got.json() as FamilyResponse;
     expect(g.blueprintFamilyId).toBe(c.blueprintFamilyId);
     expect(g.code).toBe(code);
+    // Una famiglia appena creata non ha classi d'attività: il settore è vuoto, non inventato.
+    expect(c.industryCode).toBeNull();
+    expect(g.industryName).toBeNull();
+  });
+
+  it("LIST: una famiglia con classe d'attività primaria porta codice e nome del settore", async () => {
+    const r = await suite.app.inject({
+      method: "GET",
+      url: "/v1/blueprint-families?limit=200",
+      headers: { cookie: ch(platformS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const items = (r.json() as { items: FamilyResponse[] }).items;
+    const atteso = await pool.query<{ id: string; code: string; name: string }>(
+      `SELECT m.blueprint_family_activity_class_family_id AS id,
+              c.activity_classification_code AS code, c.activity_classification_name AS name
+         FROM sys.sys_blueprint_family_activity_classes m
+         JOIN sys.sys_activity_classifications c
+           ON c.activity_classification_id = m.blueprint_family_activity_class_classification_id
+        WHERE m.blueprint_family_activity_class_kind = 'PRIMARY'
+        ORDER BY 1, 2`,
+    );
+    const primo = new Map<string, { code: string; name: string }>();
+    for (const a of atteso.rows) if (!primo.has(a.id)) primo.set(a.id, a);
+    for (const f of items) {
+      const p = primo.get(f.blueprintFamilyId);
+      expect(f.industryCode).toBe(p?.code ?? null);
+      expect(f.industryName).toBe(p?.name ?? null);
+    }
   });
 
   it("GET /:id with a random uuid → 404 NOT_FOUND", async () => {

@@ -59,3 +59,19 @@ Cambia la base del consolidamento, quindi viene prima della cascata e della sede
 | W6 | La 000247 conta solo il tenant per cui è scritta (RTL), così un altro tenant non rompe la catena | catena verde su copia con un'unità senza responsabile in un altro tenant |
 
 Poi, su questa base: la cascata della decisione e la sede/organico delle unità (sezioni sopra).
+
+## Indagine I1 (prossimo ciclo): dove tenere nei dati operativi ciò che il modello porta e advanced no
+
+Richiesta di Enzo, misurata dal thread degli organigrammi sul catalogo di heuresys_advanced (2026-11-14 05:18 UTC). Per ogni voce: tabella e colonna di destinazione, indici, chiavi esterne, gruppo del consolidamento e posto nella cascata; esito scritto qui prima di qualunque migrazione.
+
+| voce | nel modello | in advanced oggi |
+|---|---|---|
+| I1.1 unità: genere (AREA, DIREZIONE…), centrale o filiale, processi per unità con il ruolo nel processo | `blueprint_content_unit_type`, `_site_code`, `sys_blueprint_content_unit_processes` | `organization_unit_type`; da verificare se `sys_organization_unit_processes` porta il ruolo |
+| I1.2 unità: sede, organico previsto, ragione dell'organico | `_site_code`, `_planned_headcount`, `_headcount_note` | assenti: colonne vere su `sys_organization_units` (servono alle viste dell'organigramma) |
+| I1.3 posizioni: livello CCNL e grado aziendale con il motivo; criticità con il motivo | inquadramento.assegnazioni, criticita[].motivo | `sys_positions` senza livello né CCNL; criticità senza motivo |
+| I1.4 preposti di succursale, con il minimo per sede | da misurare | da misurare |
+| I1.5 obblighi normativi per posizione con la formazione richiesta | `sys_blueprint_content_obligation_positions`, `_training_positions` | manca il legame operativo posizione-obbligo |
+| I1.6 schemi di incentivo per posizione; commesse con unità e posizioni | `_incentive_links`, `_engagement_links` | da misurare |
+| I1.7 pesi degli obiettivi per ruolo; responsabili di processo | goals, process registry | da misurare |
+
+Quando la colonna di I1.2 è unita, si avvisa il thread «Rifare gli organigrammi di advanced come il banco» (la aggiunge a `/v1/me/organigramma` e alle viste).

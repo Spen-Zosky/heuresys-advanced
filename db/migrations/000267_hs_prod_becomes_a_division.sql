@@ -1,3 +1,7 @@
+-- GUARDIA ALLINEAMENTO-RTL (ADR-0035): questo file racconta un passaggio storico di RTL che l'allineamento alla corsa (db/scripts/rtl-allinea) ha superato.
+-- Dove il giornale dell'allineamento esiste il corpo si salta; altrove si applica come sempre.
+SELECT (to_regclass('staging.rtl_allinea_org_undo') IS NULL) AS esegui_storica \gset
+\if :esegui_storica
 -- ═══════════════════════════════════════════════════════════════════════════════
 -- 000267_hs_prod_becomes_a_division.sql
 --
@@ -67,3 +71,4 @@ COMMIT;
 -- ROLLBACK — dallo snapshot pre-migrazione: il tipo e il nome precedenti non
 -- sono conservati altrove.
 -- ═══════════════════════════════════════════════════════════════════════════════
+\endif

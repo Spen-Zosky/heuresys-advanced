@@ -12,14 +12,16 @@ Wants=network-online.target
 Type=simple
 User=ubuntu
 WorkingDirectory=@@REPO_DIR@@/apps/agent-gateway
-Environment=PATH=%h/.local/bin:@@NODE_BIN@@:/usr/local/bin:/usr/bin:/bin
-Environment=HOME=%h
+Environment=PATH=@@NODE_BIN@@:/usr/local/bin:/usr/bin:/bin
 Environment=NODE_ENV=production
 Environment=AGENT_GATEWAY_PORT=8790
 Environment=AGENT_GATEWAY_SUBSCRIPTION_AUTH=1
 Environment=HEURESYS_API=http://127.0.0.1:@@API_PORT@@
 UnsetEnvironment=ANTHROPIC_API_KEY
 EnvironmentFile=-/etc/heuresys/agent-gateway-consolidation.conf
+# Token di lunga durata dell'abbonamento (CLAUDE_CODE_OAUTH_TOKEN), unico per tutti gli agenti della macchina:
+# lo crea e lo rinnova ~/.claude/tools/token-agenti.sh (regola di Enzo del 2026-11-13). Se manca vale il login della CLI.
+EnvironmentFile=-%h/.config/claude-agenti/token.env
 ExecStart=@@REPO_DIR@@/apps/agent-gateway/node_modules/.bin/tsx src/server.ts
 Restart=on-failure
 RestartSec=10

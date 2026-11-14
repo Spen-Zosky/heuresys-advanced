@@ -55,10 +55,10 @@ function buildRuleColumns(t: TFunction, enumLabel: EnumLabelFn): DataColumn<Leav
 
 function buildTxnColumns(t: TFunction, enumLabel: EnumLabelFn, f: Formati): DataColumn<LeaveBalanceTransaction>[] {
   return [
-    { header: t("timeOff.cols.txnType"), cell: (r) => <span className="font-mono text-xs">{enumLabel("timeOffTxnType", r.type)}</span> },
+    { header: t("timeOff.cols.txnType"), cell: (r) => <span className="text-xs">{enumLabel("timeOffTxnType", r.type)}</span> },
     { header: t("timeOff.cols.days"), align: "right", cell: (r) => <span className="tabular-nums">{r.daysAmount}</span> },
     { header: t("timeOff.cols.description"), cell: (r) => <span className="text-xs text-muted-foreground">{r.description ?? "—"}</span> },
-    { header: t("timeOff.cols.reference"), cell: (r) => <span className="text-xs">{r.referenceType ?? "—"}</span> },
+    { header: t("timeOff.cols.reference"), cell: (r) => <span className="text-xs">{r.referenceType ? t(`timeOff.referenceType.${r.referenceType}`, { defaultValue: r.referenceType }) : "—"}</span> },
     { header: t("timeOff.cols.date"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.createdAt)}</span> },
   ];
 }

@@ -32,12 +32,11 @@ function buildColumns(t: TFunction): DataColumn<VariantRow>[] {
           <Link href={`/blueprints/${v.blueprintVariantId}`} data-testid="blueprint-link" className="font-medium text-foreground underline-offset-2 hover:underline">
             {v.name ? v.name : na}
           </Link>
-          {v.code ? <span className="font-mono text-xs text-muted-foreground">{v.code}</span> : null}
         </div>
       ),
     },
     { header: t("list.columns.family"), cell: (v) => <span className="text-foreground">{v.famName ?? na}</span> },
-    { header: t("list.columns.industry"), cell: (v) => <span className="text-muted-foreground">{v.industry ?? na}</span> },
+    { header: t("list.columns.industry"), cell: (v) => <span className="text-xs text-muted-foreground">{v.industry ?? na}</span> },
   ];
 }
 

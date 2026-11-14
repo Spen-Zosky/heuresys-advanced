@@ -10,7 +10,7 @@
 WITH tr(code, it) AS (VALUES
   ('00', 'Strategia e governance aziendale'),
   ('01', 'Acquisizione e onboarding clienti'),
-  ('02', 'KYC / AML'),
+  ('02', 'Adeguata verifica e antiriciclaggio'),
   ('03', 'Apertura e gestione conti'),
   ('04', 'Pagamenti e bonifici'),
   ('05', 'Erogazione del credito'),

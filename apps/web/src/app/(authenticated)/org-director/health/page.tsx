@@ -82,14 +82,6 @@ function buildColumns(t: ReturnType<typeof useTranslation>["t"], fmt: Formati): 
       ),
     },
     {
-      header: t("orgHealth.cols.status"),
-      cell: (r) => (
-        <span data-testid={`org-health-status-${r.status}`}>
-          <StatusPill tone={STATUS_TONE[r.status]}>{t(`orgHealth.statuses.${r.status}`)}</StatusPill>
-        </span>
-      ),
-    },
-    {
       header: t("orgHealth.cols.standing"),
       cell: (r) => (
         <span data-testid={`org-health-standing-${r.standing}`}>
@@ -104,6 +96,15 @@ function buildColumns(t: ReturnType<typeof useTranslation>["t"], fmt: Formati): 
       ),
     },
     ...dimensionColumns,
+    // Repertorio interfacce, R3: lo stato chiude la riga.
+    {
+      header: t("orgHealth.cols.status"),
+      cell: (r) => (
+        <span data-testid={`org-health-status-${r.status}`}>
+          <StatusPill tone={STATUS_TONE[r.status]}>{t(`orgHealth.statuses.${r.status}`)}</StatusPill>
+        </span>
+      ),
+    },
   ];
 }
 

@@ -70,7 +70,7 @@ git -C "$REPO_DIR" log --oneline -1
 
 cd "$REPO_DIR"
 log "deps: pnpm install --frozen-lockfile (lockfile of the rolled-back sha)"
-pnpm install --frozen-lockfile
+CI=true pnpm install --frozen-lockfile
 
 log "build: clean shared → api → web (same pipeline as vm-deploy step 3)"
 rm -rf "$REPO_DIR/packages/shared/dist" "$REPO_DIR/packages/shared/tsconfig.tsbuildinfo"

@@ -53,20 +53,19 @@
   },
   "processes": {
     "title": "Catalogo dei processi",
-    "description": "Catalogo processi blueprint-anchored.",
+    "description": "I processi del modello di impianto del tenant, nell'ordine della catena del valore.",
     "count": "{{count}} processi",
     "error": "Impossibile caricare i processi.",
     "emptyTitle": "Nessun processo",
     "emptyDescription": "Non ci sono processi.",
-    "caption": "Catalogo processi (blueprint-anchored)",
-    "yes": "sì",
-    "no": "no",
+    "caption": "Processi in ordine di catena del valore",
     "columns": {
-      "ordinal": "#",
-      "code": "Codice",
-      "name": "Nome",
-      "optional": "Opzionale"
-    }
+      "ordinal": "N.",
+      "name": "Processo",
+      "optional": "Tipo"
+    },
+    "optionalYes": "Facoltativo",
+    "optionalNo": "Essenziale"
   },
   "brownfield": {
     "title": "Adattamento dei dati esistenti",
@@ -103,11 +102,11 @@
   },
   "seedRuns": {
     "title": "Acquisizione dei dati di base — esecuzioni",
-    "description": "Run della pipeline di acquisizione seed.",
-    "count": "{{count}} run",
-    "error": "Impossibile caricare i run.",
-    "emptyTitle": "Nessun run",
-    "emptyDescription": "Nessun run di acquisizione registrato.",
+    "description": "Esecuzioni della procedura che acquisisce i dati di base.",
+    "count": "{{count}} esecuzioni",
+    "error": "Impossibile caricare le esecuzioni.",
+    "emptyTitle": "Nessuna esecuzione",
+    "emptyDescription": "Nessuna esecuzione di acquisizione registrata.",
     "caption": "Esecuzioni della pipeline",
     "columns": {
       "runId": "Esecuzione",

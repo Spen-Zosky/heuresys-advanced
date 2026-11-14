@@ -101,6 +101,9 @@ export interface EntityTableProps<T> {
   originPath?: string;
 }
 
+/** Le intestazioni dello stato: la colonna che chiude la riga (R3). */
+const INTESTAZIONE_STATO = /^(stato|status|attiv[ao]|stato del dato)$/i;
+
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
 
 export function EntityTable<T>(props: EntityTableProps<T>) {
@@ -179,13 +182,15 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
       return typeof v === "string" ? <OrigineDellaRiga valore={v} /> : null;
     },
   };
-  // Prima della colonna delle azioni (intestazione vuota), se c'è.
-  const ultima = columns[columns.length - 1];
+  // Prima della colonna delle azioni (intestazione vuota) e prima dello stato, che chiude la
+  // riga (repertorio interfacce, R3): l'origine è un dato come gli altri, lo stato resta in coda.
+  let coda = columns.length;
+  if (coda > 0 && columns[coda - 1]!.header === "") coda--;
+  const penultima = columns[coda - 1];
+  if (penultima && typeof penultima.header === "string" && INTESTAZIONE_STATO.test(penultima.header.trim())) coda--;
   const colonne: DataColumn<T>[] = !conOrigine
     ? columns
-    : ultima && ultima.header === ""
-      ? [...columns.slice(0, -1), colonnaOrigine, ultima]
-      : [...columns, colonnaOrigine];
+    : [...columns.slice(0, coda), colonnaOrigine, ...columns.slice(coda)];
   // In tabella le colonne del lavoro; nella scheda della riga tutte (C2, C3).
   // C9: una colonna vuota in tutte le righe in vista non dice niente; esce dalla tabella e resta
   // nella scheda della riga.

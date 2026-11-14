@@ -202,7 +202,10 @@
       "ACCRUAL": "Accrual",
       "USAGE": "Usage",
       "ADJUSTMENT": "Adjustment",
-      "CARRYOVER": "Carryover"
+      "CARRYOVER": "Carryover",
+      "EXPIRY": "Expiry",
+      "RESET": "Reset",
+      "TRANSFER": "Transfer"
     },
     "severity": {
       "LOW": "Low",
@@ -306,7 +309,12 @@
     },
     "perfReviewStatus": {
       "IN_PROGRESS": "In progress",
-      "COMPLETED": "Completed"
+      "COMPLETED": "Completed",
+      "DRAFT": "Draft",
+      "SUBMITTED": "Submitted",
+      "CALIBRATED": "Calibrated",
+      "FINALIZED": "Finalized",
+      "CANCELLED": "Cancelled"
     },
     "flightRiskBand": {
       "LOW": "Low",
@@ -449,7 +457,11 @@
       "wellbeing": "Wellbeing",
       "exit": "Exit",
       "onboarding": "Onboarding",
-      "custom": "Custom"
+      "custom": "Custom",
+      "pulse": "Pulse",
+      "survey": "Survey",
+      "feedback": "Feedback",
+      "climate": "Climate"
     },
     "questionType": {
       "rating": "Rating",
@@ -530,7 +542,8 @@
       "SABBATICAL": "Sabbatical",
       "UNPAID": "Unpaid",
       "OTHER": "Other",
-      "PAID_LEAVE": "Paid leave"
+      "PAID_LEAVE": "Paid leave",
+      "UNPAID_LEAVE": "Unpaid leave of absence"
     },
     "whistleblowingStatus": {
       "NEW": "New",
@@ -724,6 +737,34 @@
     },
     "ccnlCode": {
       "CCNL_CRED_2024": "Banking CCNL 2024"
+    },
+    "perfCycleStatus": {
+      "DRAFT": "Draft",
+      "SELF_ASSESSMENT": "Self-assessment",
+      "MANAGER_REVIEW": "Manager review",
+      "CALIBRATION": "Calibration",
+      "FINALIZED": "Finalized",
+      "SHARED": "Shared",
+      "CANCELLED": "Cancelled"
+    },
+    "calibrationStatus": {
+      "SCHEDULED": "Scheduled",
+      "IN_PROGRESS": "In progress",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    },
+    "careerPathDifficulty": {
+      "EASY": "Easy",
+      "MEDIUM": "Medium",
+      "HARD": "Hard",
+      "STRETCH": "Stretch"
+    },
+    "readinessLevel": {
+      "READY_NOW": "Ready now",
+      "READY_6_MONTHS": "Ready in 6 months",
+      "READY_1_YEAR": "Ready in a year",
+      "READY_2_YEARS": "Ready in two years",
+      "NOT_READY": "Not ready yet"
     }
   },
   "masked": "withheld for your profile",
@@ -964,9 +1005,66 @@
     "statoFATTA": "Done",
     "statoFALLITA": "Failed",
     "statoINTERROTTA": "Stopped",
-    "aggiornata": "Updated {{quando}}"
+    "aggiornata": "Updated {{quando}}",
+    "inCorso": "work in progress",
+    "comprimiAttivita": "Show or hide activities",
+    "latoTitolo": "What it touched",
+    "latoPagina": "On the page",
+    "latoLetture": "Read",
+    "latoProposta": "Waiting for your decision",
+    "latoVuoto": "Nothing yet: what the assistant does on the page, reads or proposes appears here."
   },
   "dettaglio": {
     "riga": "Row detail"
+  },
+  "organigramma": {
+    "aggiorna": "Refresh",
+    "aggiornando": "Refreshing…",
+    "calcolato": "Computed from live data on {{quando}}",
+    "viste": {
+      "blocchi": "Boxes",
+      "nodi": "Nodes"
+    },
+    "legenda": "Click a box to open the unit with its sub-units, people and positions. Filled box = top; dashed = branch. The head of the unit is in bold.",
+    "legendaNodi": "One node per unit: its size says how many people work there, including the units below. Click the name to open the card, click the dot to expand or collapse the branch; scroll to zoom.",
+    "completo": "Full organisation chart",
+    "completoNota": "Overview without names; below, head office and branches with their people.",
+    "centrale": "Head office",
+    "filiali": "Branches",
+    "riepilogo": "{{unita}} units, {{persone}} people",
+    "riepilogoFiliali": "{{sedi}} branches, {{unita}} units, {{persone}} people",
+    "persone_one": "{{count}} person",
+    "persone_other": "{{count}} people",
+    "conSotto_one": "{{count}} person including units below",
+    "conSotto_other": "{{count}} people including units below",
+    "altri_one": "and one more person",
+    "altri_other": "and {{count}} more people",
+    "esportaSvg": "Export SVG",
+    "riduci": "Zoom out",
+    "ingrandisci": "Zoom in",
+    "vuoto": "No active units for this client.",
+    "errore": "Unable to compute the organisation chart.",
+    "aria": "Organisation chart of {{cliente}}",
+    "ariaNodi": "Unit tree of {{cliente}}",
+    "avvisi": {
+      "unitaSenzaResponsabile_one": "{{count}} unit without a head",
+      "unitaSenzaResponsabile_other": "{{count}} units without a head",
+      "riportiFuoriCliente_one": "{{count}} position reports to an inactive position",
+      "riportiFuoriCliente_other": "{{count}} positions report to an inactive position"
+    },
+    "scheda": {
+      "indietro": "‹ Back",
+      "chiudiCascata": "Close all",
+      "chiudi": "Close",
+      "tipo": "Type",
+      "persone": "People",
+      "struttura": "Structure below ({{count}} units)",
+      "addetti": "People",
+      "addettiConSotto": "{{diretti}} in the unit, {{totali}} including units below"
+    },
+    "consolidamento": {
+      "titolo": "The client's org chart today",
+      "spiegazione": "The organisation as it is now, with the people in each unit: the starting point of the consolidation proposals."
+    }
   }
 }

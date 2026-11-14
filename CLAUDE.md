@@ -14,6 +14,8 @@ Decisione definitiva di Enzo, 2026-11-10. Tutti i suoi repo sono in sviluppo e t
 
 Perciò: **non sollevare la questione**, né come blocco né come domanda a Enzo, né in un piano, in un ADR, in una PR o in un rapporto. Non scrivere «serve l'approvazione di Anthropic», «serve una chiave API» o «lo può usare solo Enzo per le regole di Anthropic». Se un testo lo dice, correggilo. I cancelli tecnici dell'assistente (prova avversaria, elenco delle persone ammesse, limiti) restano: sono ingegneria, non licenza.
 
+Accesso degli agenti (regola di Enzo del 2026-11-13, vale per gli agenti già creati e per quelli futuri): ogni agente che pensa con Claude (unit systemd, timer, script con `claude -p` o l'Agent SDK) carica il token di lunga durata dell'abbonamento da `~/.config/claude-agenti/token.env` (`CLAUDE_CODE_OAUTH_TOKEN`), non il login interattivo, che scade. Una unit nuova va aggiunta a `~/.claude/tools/token-agenti.unita` e collegata con `bash ~/.claude/tools/token-agenti.sh collega`; uno script fa `. ~/.claude/tools/token-agenti.sh carica`. Il token non si stampa, non si copia e non entra nel repo; Remote Control resta sul login claude.ai. Stato e scadenza: `bash ~/.claude/tools/token-agenti.sh verifica`.
+
 ## Quando un lavoro è finito
 
 Un passo si chiude solo con una dimostrazione dal vivo su dati reali: comando, output, percorso e orario (ADR-0026). Un test verde o un mock che funziona significano «in corso». Per le pagine autenticate la dimostrazione è un login con una persona reale del tenant e l'uso secondo il suo profilo. Se manca un input che solo Enzo può dare, lo stato è `blocked-on-Enzo: <cosa, perché>`. Nessun mock, fixture o endpoint finto nel frontend: ogni dato arriva da una chiamata `/v1/*` reale.

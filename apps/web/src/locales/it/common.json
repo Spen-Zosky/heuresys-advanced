@@ -202,7 +202,10 @@
       "ACCRUAL": "Maturazione",
       "USAGE": "Utilizzo",
       "ADJUSTMENT": "Rettifica",
-      "CARRYOVER": "Riporto"
+      "CARRYOVER": "Riporto",
+      "EXPIRY": "Scadenza",
+      "RESET": "Azzeramento",
+      "TRANSFER": "Trasferimento"
     },
     "severity": {
       "LOW": "Bassa",
@@ -306,7 +309,12 @@
     },
     "perfReviewStatus": {
       "IN_PROGRESS": "In corso",
-      "COMPLETED": "Completata"
+      "COMPLETED": "Completata",
+      "DRAFT": "Bozza",
+      "SUBMITTED": "Inviata",
+      "CALIBRATED": "Calibrata",
+      "FINALIZED": "Chiusa",
+      "CANCELLED": "Annullata"
     },
     "flightRiskBand": {
       "LOW": "Basso",
@@ -449,7 +457,11 @@
       "wellbeing": "Benessere",
       "exit": "Uscita",
       "onboarding": "Inserimento",
-      "custom": "Personalizzato"
+      "custom": "Personalizzato",
+      "pulse": "Rilevazione rapida",
+      "survey": "Sondaggio",
+      "feedback": "Riscontro",
+      "climate": "Clima"
     },
     "questionType": {
       "rating": "Valutazione",
@@ -530,7 +542,8 @@
       "SABBATICAL": "Aspettativa",
       "UNPAID": "Non retribuito",
       "OTHER": "Altro",
-      "PAID_LEAVE": "Permesso retribuito"
+      "PAID_LEAVE": "Permesso retribuito",
+      "UNPAID_LEAVE": "Aspettativa non retribuita"
     },
     "whistleblowingStatus": {
       "NEW": "Nuova",
@@ -724,6 +737,34 @@
     },
     "ccnlCode": {
       "CCNL_CRED_2024": "CCNL Credito 2024"
+    },
+    "perfCycleStatus": {
+      "DRAFT": "Bozza",
+      "SELF_ASSESSMENT": "Autovalutazione",
+      "MANAGER_REVIEW": "Valutazione del responsabile",
+      "CALIBRATION": "Calibrazione",
+      "FINALIZED": "Chiuso",
+      "SHARED": "Comunicato",
+      "CANCELLED": "Annullato"
+    },
+    "calibrationStatus": {
+      "SCHEDULED": "In programma",
+      "IN_PROGRESS": "In corso",
+      "COMPLETED": "Conclusa",
+      "CANCELLED": "Annullata"
+    },
+    "careerPathDifficulty": {
+      "EASY": "Facile",
+      "MEDIUM": "Media",
+      "HARD": "Impegnativa",
+      "STRETCH": "Molto sfidante"
+    },
+    "readinessLevel": {
+      "READY_NOW": "Pronto ora",
+      "READY_6_MONTHS": "Pronto entro 6 mesi",
+      "READY_1_YEAR": "Pronto entro un anno",
+      "READY_2_YEARS": "Pronto entro due anni",
+      "NOT_READY": "Non ancora pronto"
     }
   },
   "masked": "nascosto per il tuo profilo",
@@ -964,9 +1005,66 @@
     "statoFATTA": "Fatta",
     "statoFALLITA": "Non riuscita",
     "statoINTERROTTA": "Interrotta",
-    "aggiornata": "Aggiornata il {{quando}}"
+    "aggiornata": "Aggiornata il {{quando}}",
+    "inCorso": "lavoro in corso",
+    "comprimiAttivita": "Mostra o nascondi le attività",
+    "latoTitolo": "Ciò che ha toccato",
+    "latoPagina": "Sulla pagina",
+    "latoLetture": "Ha letto",
+    "latoProposta": "Aspetta la tua decisione",
+    "latoVuoto": "Ancora niente: qui compare ciò che l'assistente fa sulla pagina, legge o ti propone."
   },
   "dettaglio": {
     "riga": "Dettaglio della riga"
+  },
+  "organigramma": {
+    "aggiorna": "Aggiorna",
+    "aggiornando": "Aggiornamento…",
+    "calcolato": "Calcolato dai dati vivi il {{quando}}",
+    "viste": {
+      "blocchi": "Blocchi",
+      "nodi": "Nodi"
+    },
+    "legenda": "Clic su un riquadro per aprire l'unità con le sue figlie, le persone e le posizioni. Riquadro pieno = vertice; tratteggiato = filiale. In grassetto il responsabile.",
+    "legendaNodi": "Un nodo per unità: la grandezza dice quante persone ci lavorano, comprese quelle delle unità sotto. Clic sul nome per aprire la scheda, clic sul pallino per aprire o chiudere il ramo; rotella per lo zoom.",
+    "completo": "Organigramma completo",
+    "completoNota": "Panoramica senza i nomi; sotto, la sede centrale e le filiali con le persone.",
+    "centrale": "Sede centrale",
+    "filiali": "Filiali",
+    "riepilogo": "{{unita}} unità, {{persone}} persone",
+    "riepilogoFiliali": "{{sedi}} filiali, {{unita}} unità, {{persone}} persone",
+    "persone_one": "{{count}} persona",
+    "persone_other": "{{count}} persone",
+    "conSotto_one": "{{count}} persona con le unità sotto",
+    "conSotto_other": "{{count}} persone con le unità sotto",
+    "altri_one": "e un'altra persona",
+    "altri_other": "e altre {{count}} persone",
+    "esportaSvg": "Esporta SVG",
+    "riduci": "Riduci",
+    "ingrandisci": "Ingrandisci",
+    "vuoto": "Nessuna unità attiva per questo cliente.",
+    "errore": "Impossibile calcolare l'organigramma.",
+    "aria": "Organigramma a blocchi di {{cliente}}",
+    "ariaNodi": "Albero delle unità di {{cliente}}",
+    "avvisi": {
+      "unitaSenzaResponsabile_one": "{{count}} unità senza responsabile",
+      "unitaSenzaResponsabile_other": "{{count}} unità senza responsabile",
+      "riportiFuoriCliente_one": "{{count}} posizione riporta a una posizione non attiva",
+      "riportiFuoriCliente_other": "{{count}} posizioni riportano a una posizione non attiva"
+    },
+    "scheda": {
+      "indietro": "‹ Indietro",
+      "chiudiCascata": "Chiudi cascata",
+      "chiudi": "Chiudi",
+      "tipo": "Tipo",
+      "persone": "Persone",
+      "struttura": "Struttura sotto di sé ({{count}} unità)",
+      "addetti": "Persone",
+      "addettiConSotto": "{{diretti}} nell'unità, {{totali}} con le unità sotto"
+    },
+    "consolidamento": {
+      "titolo": "Organigramma del cliente oggi",
+      "spiegazione": "L'organizzazione com'è adesso, con le persone di ogni unità: il punto di partenza delle proposte del consolidamento."
+    }
   }
 }

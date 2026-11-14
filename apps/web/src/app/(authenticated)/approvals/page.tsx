@@ -109,20 +109,6 @@ export default function ApprovalsPage() {
             <span className="text-xs text-muted-foreground">{t("approvals.noProcess")}</span>
           ),
       },
-      {
-        header: t("approvals.columns.status"),
-        cell: (r) => (
-          <span className="flex flex-col items-start gap-1">
-            <Badge variant={statusVariant(r.status)}>{t(`approvals.status.${r.status}`)}</Badge>
-            {/* V-3 (ADR-0051): se un passo l'ha deciso un delegato, la riga lo dice. */}
-            {r.delegatedStepCount > 0 && (
-              <span className="text-xs text-muted-foreground" data-testid="approval-row-delegated">
-                {t("approvals.delegated", { count: r.delegatedStepCount })}
-              </span>
-            )}
-          </span>
-        ),
-      },
       { header: t("approvals.columns.policy"), cell: (r) => <span className="text-muted-foreground">{t(`approvals.policy.${r.decisionPolicy}`)}</span> },
       { header: t("approvals.columns.priority"), cell: (r) => <span className="text-muted-foreground">{t(`approvals.priority.${r.priority}`)}</span> },
       {
@@ -135,6 +121,21 @@ export default function ApprovalsPage() {
           <time dateTime={r.createdAt} className="text-xs text-muted-foreground">
             {fmt.data(r.createdAt)}
           </time>
+        ),
+      },
+      // Repertorio interfacce, R3: lo stato chiude la riga.
+      {
+        header: t("approvals.columns.status"),
+        cell: (r) => (
+          <span className="flex flex-col items-start gap-1">
+            <Badge variant={statusVariant(r.status)}>{t(`approvals.status.${r.status}`)}</Badge>
+            {/* V-3 (ADR-0051): se un passo l'ha deciso un delegato, la riga lo dice. */}
+            {r.delegatedStepCount > 0 && (
+              <span className="text-xs text-muted-foreground" data-testid="approval-row-delegated">
+                {t("approvals.delegated", { count: r.delegatedStepCount })}
+              </span>
+            )}
+          </span>
         ),
       },
     ],

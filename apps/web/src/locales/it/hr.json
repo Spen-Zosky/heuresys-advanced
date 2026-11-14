@@ -233,9 +233,9 @@
     "emptyDescription": "Non ci sono processi nel blueprint.",
     "caption": "Catalogo processi",
     "core": "Essenziale",
-    "optional": "Opzionale",
+    "optional": "Facoltativo",
     "cols": {
-      "ordinal": "#",
+      "ordinal": "N.",
       "code": "Codice",
       "name": "Processo",
       "kind": "Tipo",
@@ -262,6 +262,73 @@
         "CONSULTED": "Consultato · C",
         "INFORMED": "Informato · I"
       }
+    }
+  },
+  "consolidationRuns": {
+    "title": "Corse del modello",
+    "count": "{{count}} corse nel registro",
+    "pick": "Corsa con cui lavorare",
+    "option": "{{model}} · caricata il {{date}} · {{status}}",
+    "empty": "Il registro delle corse è vuoto: nessuna corsa del datastore è stata ancora caricata come modello.",
+    "never": "Con il modello «{{model}}», caricato in advanced il {{date}}, non è ancora mai stato fatto un consolidamento.",
+    "neverHint": "Il primo giro di ogni gruppo resterà nel registro come misura di partenza, con il tempo che l'agente impiega a trovare le differenze.",
+    "range": "dal {{from}} al {{to}}",
+    "fields": {
+      "description": "Azienda descritta",
+      "executed": "Corsa eseguita nel datastore",
+      "loaded": "Modello caricato in advanced",
+      "status": "Stato"
+    },
+    "results": {
+      "caption": "Risultati del primo consolidamento con questo modello",
+      "group": "Gruppo",
+      "items": "Voci (azienda / modello)",
+      "itemsValue": "{{tenant}} / {{prototype}}",
+      "proposals": "Proposte",
+      "certain": "Certe",
+      "gaps": "Lacune",
+      "customizations": "Personalizzazioni",
+      "time": "Tempo dell'agente"
+    },
+    "startFirst": "Avvia il primo consolidamento con questa corsa",
+    "startAgain": "Avvia un nuovo consolidamento con questa corsa",
+    "confirmReplace": "C'è un consolidamento aperto: verrà chiuso e se ne aprirà uno nuovo con questa corsa. Le decisioni già prese restano nel registro. Procedere?",
+    "makeDefinitive": "Rendi definitiva",
+    "confirmDefinitive": "La corsa diventa il modello in uso della tua azienda: il modello attuale viene sostituito. Procedere?",
+    "deliveries": "Corse consegnate dal datastore e non ancora caricate",
+    "delivery": "{{description}} · corsa del {{executed}} · consegnata il {{delivered}}",
+    "receive": "Carica come modello",
+    "receiving": "Caricamento…",
+    "inUse": "In uso",
+    "caption": "Registro delle corse: la più recente in alto",
+    "cols": {
+      "model": "Modello",
+      "executed": "Corsa eseguita",
+      "loaded": "Caricato",
+      "consolidations": "Consolidamenti",
+      "agentTime": "Tempo dell'agente",
+      "code": "Codice della corsa",
+      "status": "Stato"
+    },
+    "statuses": {
+      "CARICATA": "Mai consolidata",
+      "IN_CONSOLIDAMENTO": "In consolidamento",
+      "DEFINITIVA": "Definitiva",
+      "SUPERATA": "Superata"
+    },
+    "errors": {
+      "BLUEPRINT_RUN_NOT_FOUND": "Corsa non trovata nel registro.",
+      "BLUEPRINT_RUN_DELIVERY_NOT_FOUND": "La consegna non è più nella cartella del datastore.",
+      "BLUEPRINT_RUN_DELIVERIES_UNAVAILABLE": "Questo server non vede le consegne del datastore.",
+      "BLUEPRINT_RUN_DELIVERY_REJECTED": "La consegna non si è potuta caricare: il manifesto o l'impronta non reggono.",
+      "BLUEPRINT_RUN_HASH_MISMATCH": "La corsa è già nel registro con un contenuto diverso.",
+      "BLUEPRINT_RUN_LOAD_FAILED": "Il caricamento del modello non è riuscito.",
+      "BLUEPRINT_RUN_VERSION_MISSING": "Il modello di questa corsa non c'è più.",
+      "BLUEPRINT_RUN_NOT_ACTIVATABLE": "Il modello di questa corsa non porta ancora ruoli e cruscotti: renderlo il modello in uso svuoterebbe quelli della tua azienda.",
+      "BLUEPRINT_RUN_VERSION_RETIRED": "Il modello di questa corsa è stato ritirato.",
+      "CONSOLIDATION_ALREADY_OPEN": "C'è già un consolidamento aperto.",
+      "CONSOLIDATION_VERSION_INVALID": "Il modello di questa corsa non c'è più.",
+      "PERMISSION_DENIED": "Non hai il mandato per questa operazione."
     }
   },
   "consolidation": {
@@ -343,7 +410,43 @@
       "CONSOLIDATION_GROUP_PENDING": "Ci sono ancora proposte da decidere in questo gruppo.",
       "CONSOLIDATION_RUN_FAILED": "errore durante il giro.",
       "PERMISSION_DENIED": "Non hai il mandato per questa decisione."
-    }
+    },
+    "decideNow": "Decidi",
+    "modal": {
+      "title": "Decisione sulla proposta",
+      "recommendation": "Raccomandazione dell'agente",
+      "recommends": "L'agente raccomanda: {{decision}}",
+      "because": "Perché: {{reason}}",
+      "confidence": "Fiducia {{value}} su 100",
+      "current": "Decisione attuale: {{decision}}",
+      "noneYet": "Nessuna decisione presa finora",
+      "choose": "La tua scelta",
+      "form": "In che forma",
+      "forms": {
+        "NORMALIZZATA": "Normalizzata: restano nome e codice tuoi, dal prototipo arrivano i campi che mancano",
+        "FORMA_TENANT": "Forma tua: solo il collegamento, niente cambia nei tuoi dati",
+        "NOME_PROTOTIPO": "Nome del prototipo: anche nome e codice prendono la forma del prototipo"
+      },
+      "confirm": "Conferma la decisione",
+      "confirming": "Registro…",
+      "close": "Chiudi",
+      "sameHint": "Puoi riconfermare anche la stessa scelta. La decisione viene registrata: i dati cambiano solo quando premi «Esegui modifiche»."
+    },
+    "applyChanges": "Esegui modifiche ({{count}})",
+    "applying": "Applico ai dati…",
+    "applyResult": {
+      "title": "Modifiche eseguite: {{count}} decisioni applicate ai dati",
+      "detail": "Valori cambiati {{changed}}, voci create {{created}}, effetti precedenti ritirati {{reverted}}."
+    },
+    "nextTitle": "Cosa fare adesso",
+    "nextRunning": "Il giro su {{group}} è in corso. Non devi fare niente: la pagina si aggiorna da sola quando ha finito.",
+    "nextRun": "Per questo gruppo non ci sono ancora proposte. Premi «Avvia i giri su {{group}}»: l'agente confronta i dati della tua azienda con il prototipo e prepara le proposte.",
+    "nextDecide": "Restano {{count}} proposte da decidere nella tabella qui sotto. Apri ogni riga e scegli, oppure usa «Conferma gli abbinamenti certi» per quelle sicure. Finché ne resta una, il gruppo non si può chiudere.",
+    "nextApply": "Hai deciso tutte le proposte, ma le decisioni non sono ancora nei dati. Passo successivo: premi «Esegui modifiche ({{count}})». Solo allora cambiano i dati della tua azienda.",
+    "nextClose": "Tutto è deciso e applicato. Passo successivo: premi «Chiudi il gruppo e passa al successivo». Si apre il gruppo {{next}}.",
+    "nextCloseLast": "Tutto è deciso e applicato. Passo successivo: premi «Chiudi il gruppo e passa al successivo»: è l'ultimo gruppo, la sessione passa in conferma.",
+    "nextOther": "Il gruppo aperto è {{group}}. Puoi consultare questo gruppo, ma i passi da fare sono nel gruppo aperto: selezionalo nella fila qui sopra.",
+    "stepsHint": "In ordine: 1. decidi le proposte · 2. «Esegui modifiche» · 3. «Chiudi il gruppo e passa al successivo». «Avvia i giri» serve solo per far preparare le proposte all'agente."
   },
   "gaps": {
     "title": "Analisi dei divari",
@@ -645,7 +748,8 @@
     "methodIdle": "Lo stato dice se l'unità è sana in assoluto, la posizione dice dove guardare per prima rispetto alle altre. Una dimensione senza dati esce dal calcolo e abbassa la copertura, non il punteggio.",
     "cols": {
       "unit": "Unità organizzativa",
-      "headcount": "{{count}} persone",
+      "headcount_one": "{{count}} persona",
+      "headcount_other": "{{count}} persone",
       "index": "Indice",
       "status": "Stato",
       "standing": "Posizione",

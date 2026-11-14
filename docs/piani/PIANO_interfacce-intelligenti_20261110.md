@@ -37,12 +37,31 @@ Ogni blocco è una PR in bozza, provata su un banco usa-e-getta della VM con una
 | B0 | Repertorio, controllo a cricchetto, questo piano | `docs/kb/xtras/INTERFACCE_INTELLIGENTI.md`, `.claude/rules/interfacce-intelligenti.md`, spec e registro | unito con la PR #215 (23adfa40) |
 | B1 | Utenti, primo esempio | `/users` (API `GET /v1/users` con ruolo, unità, sede, tenant, ordine per cognome, filtro tenant per la piattaforma; pagina con Cognome, Nome, Ruolo, Sede, Stato; «158 persone»; paginazione del server) | CI verde su 9496524; banco provato il 10/11 alle 14:09-14:21 Roma (§3.1); sì di Enzo al repertorio alle 14:36 Roma; unito con la PR #215 (23adfa40), nel rilascio unico con #213 e #216 |
 | B2 | Organizzazione | `/positions` (titolare, unità, sede; criticità leggibile; numero coerente), `/organization`, `/organization/org-chart`, `/job-catalog`, `/admin/roles` (nomi dei ruoli al posto dei codici) | scritto nella PR #220, da provare dal vivo dopo il rilascio: `/positions` con Posizione, Titolare, Unità, Sede, Criticità in parole, Stato e «N posizioni attive»; `/organization` per nome con Nome, Tipo, Unità superiore, Stato e senza codice; `/job-catalog` per nome senza codice e con il totale del server («200 di N» se la tabella ne mostra meno); `/admin/roles` con il permesso in parole («Utenti · leggere») e il codice solo al passaggio del mouse; `/organization/org-chart` è un grafico senza tabella, si guarda solo dal vivo |
-| B3 | Processi e approvazioni | `/processes`, `/process-owner`, `/approvals`, `/me/approvals`, `/dashboard/process` | da fare |
-| B4 | Persone e presenze | `/time-off`, `/me/time-off`, `/engagement`, `/content`, `/me/documents`, `/me/certifications` | da fare |
-| B5 | Talento e competenze | `/skills`, `/skill-taxonomy`, `/learning`, `/learning/training-initiatives`, `/me/learning`, `/me/learning/catalogue`, `/career-succession`, `/performance`, `/talent-review`, `/me/positions`, `/me/kpis` | da fare |
-| B6 | Analisi e cruscotti | `/dashboard/*`, `/org-director/*`, `/analytics/*`, `/insights` | da fare |
-| B7 | Configurazione e piattaforma | `/tenants`, `/blueprints`, `/tenant-blueprints`, `/visualizations`, `/seed-acquisition/runs`, `/provenance`, `/generated-origins`, `/consolidation`, `/admin/mfa-policy` | da fare |
-| B8 | Caselle di scelta e selettori di persone in tutto il prodotto | `person-picker`, filtri di stato, selettori di ruolo: R1, R4, R6 | da fare |
+| B3 | Processi e approvazioni | `/processes`, `/process-owner`, `/approvals`, `/me/approvals`, `/dashboard/process` | provato dal vivo il 2026-11-11 (§3.3), PR #231: `/approvals` e `/me/approvals` con lo stato in coda; `/processes` e `/process-owner` senza colonne del codice, tipo «Essenziale»/«Facoltativo» con lo stesso termine nelle due pagine, ruoli RACI in italiano; `/dashboard/process` è generata dal server, si guarda dal vivo |
+| B4 | Persone e presenze | `/time-off`, `/me/time-off`, `/engagement`, `/content`, `/me/documents`, `/me/certifications` | provato dal vivo il 2026-11-11 (§3.3), PR #231: `/time-off` persona «Cognome, Nome», tipi di movimento e riferimento in parole, «Stato» per le regole; `/engagement` e `/content` stato in coda; `/me/*` senza rilievi del cricchetto |
+| B5 | Talento e competenze | `/skills`, `/skill-taxonomy`, `/learning`, `/learning/training-initiatives`, `/me/learning`, `/me/learning/catalogue`, `/career-succession`, `/performance`, `/talent-review`, `/me/positions`, `/me/kpis` | provato dal vivo il 2026-11-11 (§3.3), PR #231: `/performance` stati in parole e in coda, persona valutata per nome; `/learning/training-initiatives` stato in coda; `/career-succession` senza codici, difficoltà e prontezza in parole |
+| B6 | Analisi e cruscotti | `/dashboard/*`, `/org-director/*`, `/analytics/*`, `/insights` | provato dal vivo il 2026-11-11 (§3.3), PR #231: `/org-director/health` stato in coda; le pagine `/dashboard/*` sono generate dal server, si guardano dal vivo |
+| B7 | Configurazione e piattaforma | `/tenants`, `/blueprints`, `/tenant-blueprints`, `/visualizations`, `/seed-acquisition/runs`, `/provenance`, `/generated-origins`, `/consolidation`, `/admin/mfa-policy` | provato dal vivo il 2026-11-11 (§3.3), PR #231: `/tenants`, `/blueprints`, `/visualizations` senza codici e con stato in parole; `/provenance` e `/seed-acquisition/runs` stato in coda (la corsa tiene il suo codice come nome) |
+| B8 | Caselle di scelta e selettori di persone in tutto il prodotto | `person-picker`, filtri di stato, selettori di ruolo: R1, R4, R6 | provato dal vivo il 2026-11-11 (§3.3), PR #231: `etichettaPersona` scrive «Cognome, Nome» in tutte le caselle di scelta di persone, con prova unitaria |
+
+### 3.3 Dimostrazione dei blocchi B3-B8, 2026-11-11 18:14-19:29 Roma
+
+Banco della #227 (`scripts/banco-verifica.sh su b3b8`) su una copia del database dalla copia di fase più recente, in un cluster privato. Produzione, `heuresys_advanced` e `heuresys_ci` non sono stati toccati. Accesso come Valentina Conti (hrManager) e come amministratore di piattaforma.
+
+- Primo giro su f18ad7b8, alle 18:14-18:16: 29 verdi e 1 rosso. Il rosso era /time-off, dove la colonna Origine, aggiunta da EntityTable, veniva dopo lo Stato. In più, a vista: il titolo di /tenants diventava «intera azienda», e c'erano «1 persone», «16 run» e «Engagement & Sondaggi».
+- Correzioni (74231c32, caeefeb4, 0bf9ecb3):
+  - in EntityTable la colonna Origine ora entra prima dello Stato;
+  - la rete di leggibilità non cerca più fra i codici le parole con la maiuscola iniziale (prova unitaria rossa prima e verde dopo);
+  - testi corretti: «1 persona», «esecuzioni», «Clima e sondaggi», «Rilevazione rapida»;
+  - il cricchetto R5 legge il totale solo dall'h1 e dalla riga `*-count`, perché le schede di sintesi davano falsi rossi su sette pagine.
+- Controllo a vista su caeefeb4, alle 18:51-18:52:
+  - /time-off ha le colonne «… | Origine | Stato»;
+  - /tenants ha il titolo «Tenant»;
+  - «intera azienda» non compare in nessuna delle 22 pagine guardate;
+  - /seed-acquisition/runs dice «16 esecuzioni»;
+  - /engagement ha il titolo «Clima e sondaggi».
+- Giro finale su 0bf9ecb3, alle 19:27-19:29: `interfacce-intelligenti.spec.ts` e `admin-org-bpm.spec.ts` 30/30 verdi, 0 rilievi. Il registro dei debiti è tutto vuoto.
+- Restano dati in inglese o di collaudo (titoli dei sondaggi, sessioni di calibrazione, percorsi di carriera, varianti di impianto, residui E2E in /content). Sono stati passati al thread dell'agente bancario.
 
 ### 3.2 Dimostrazione del blocco B2, 2026-11-11 01:15-01:17 Roma
 

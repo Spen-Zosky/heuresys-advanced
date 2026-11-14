@@ -102,8 +102,8 @@
     "delegated_other": "{{count}} steps decided by delegation"
   },
   "engagement": {
-    "title": "Engagement & Surveys",
-    "description": "Survey results and pulse trend.",
+    "title": "Climate and surveys",
+    "description": "Survey results and quick check-in trend.",
     "count": "{{count}} surveys",
     "columns": {
       "title": "Title",
@@ -120,12 +120,12 @@
       "archived": "Archived"
     },
     "pulse": {
-      "cardTitle": "Pulse trend",
+      "cardTitle": "Quick check-in trend",
       "mood": "Mood",
       "workload": "Workload",
       "satisfaction": "Satisfaction",
-      "totalChecks": "{{count}} total checks",
-      "empty": "No pulse data.",
+      "totalChecks": "{{count}} check-ins in all",
+      "empty": "No quick check-in data.",
       "axisWeek": "Week",
       "axisScore": "Average score",
       "tableTitle": "Show the data as a table",
@@ -488,15 +488,7 @@
   "orgChart": {
     "title": "Org chart",
     "back": "← Organization",
-    "count": "{{count}} org charts available",
-    "cardTitle": "Org chart ({{label}})",
-    "nodeCount": "{{count}} positions",
-    "dash": "—",
-    "emptyPrefix": "No org chart available for this tenant.",
-    "noNodes": "The graph has no nodes.",
-    "error": "Could not load the org chart.",
-    "graphAria": "Interactive org chart of positions",
-    "note": "Interactive force graph (zoom/pan). Nodes are the tenant's active positions; edges are the reports-to relationships."
+    "description": "The client's units with the people who work in them, computed from today's data: as boxes like a classic org chart, or as a tree of nodes."
   },
   "positions": {
     "title": "Positions",
@@ -888,8 +880,18 @@
         "graph": "Graph",
         "elements": "Nodes and edges",
         "versions": "Versions and exports"
+      },
+      "rigenera": {
+        "spiegazione": "This saved org chart holds only positions and reporting lines, frozen on the day it was written. «Refresh from live data» realigns it to today's active positions.",
+        "vivo": "Live org chart with people →",
+        "azione": "Refresh from live data",
+        "inCorso": "Refreshing…",
+        "esito": "Done: {{nodi}} positions, {{archi}} reporting lines ({{nodiAggiunti}} added, {{nodiTolti}} removed).",
+        "errore": "Refresh failed."
       }
-    }
+    },
+    "activeOn": "Active",
+    "activeOff": "Inactive"
   },
   "content": {
     "title": "Content",
@@ -1359,7 +1361,7 @@
       "transactions": "Transactions"
     },
     "cols": {
-      "employee": "Employee",
+      "employee": "Person",
       "leaveType": "Leave type",
       "period": "Period",
       "days": "Days",
@@ -1368,11 +1370,17 @@
       "method": "Method",
       "amount": "Amount",
       "ccnl": "CCNL",
-      "active": "Active",
+      "active": "Status",
       "txnType": "Type",
       "description": "Description",
       "reference": "Reference",
       "date": "Date"
+    },
+    "referenceType": {
+      "TIME_OFF_REQUEST": "Time-off request",
+      "SYSTEM": "System",
+      "MANUAL": "Manual entry",
+      "ACCRUAL": "Automatic accrual"
     }
   },
   "talentReview": {

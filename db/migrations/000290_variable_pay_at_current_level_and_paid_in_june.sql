@@ -1,3 +1,7 @@
+-- GUARDIA ALLINEAMENTO-RTL (ADR-0035): questo file racconta un passaggio storico di RTL che l'allineamento alla corsa (db/scripts/rtl-allinea) ha superato.
+-- Dove il giornale dell'allineamento esiste il corpo si salta; altrove si applica come sempre.
+SELECT (to_regclass('staging.rtl_allinea_org_undo') IS NULL) AS esegui_storica \gset
+\if :esegui_storica
 -- ═══════════════════════════════════════════════════════════════════════════════
 -- 000290_variable_pay_at_current_level_and_paid_in_june.sql
 --
@@ -146,3 +150,4 @@ BEGIN
 END $fn$;
 
 COMMIT;
+\endif

@@ -23,7 +23,8 @@ interface Contenuto {
   kind: "counters" | "series" | "list";
   counters?: { key: string; label: string; value: number }[];
   points?: { bucket: string; value: number }[];
-  rows?: { id: string; label: string }[];
+  rows?: { id: string; label: string; detail?: string | null }[];
+  columns?: { label: string; detail?: string; value?: string };
 }
 interface Vista {
   code: string;
@@ -89,6 +90,17 @@ describe("#142 F3b — i dati dentro le viste", () => {
         if (v.content.kind === "counters") expect(Array.isArray(v.content.counters)).toBe(true);
         if (v.content.kind === "series") expect(Array.isArray(v.content.points)).toBe(true);
         if (v.content.kind === "list") expect(Array.isArray(v.content.rows)).toBe(true);
+      }
+    });
+
+    it("ogni elenco porta le intestazioni della vista e scrive le persone «Cognome, Nome» (R1, R2)", async () => {
+      const d = (await dati(MANDATO_HR, "org")).json() as Dati;
+      const elenchi = d.blocks.filter((v) => v.content?.kind === "list");
+      expect(elenchi.length).toBeGreaterThan(0);
+      for (const v of elenchi) expect(v.content?.columns?.label, `vista senza intestazioni: ${v.code}`).toBeTruthy();
+      const catena = elenchi.find((v) => v.code.endsWith("catena-di-riporto"));
+      for (const r of catena?.content?.rows ?? []) {
+        if (r.detail && r.detail !== "(nessun responsabile)") expect(r.detail, "responsabile non in forma «Cognome, Nome»").toContain(", ");
       }
     });
 

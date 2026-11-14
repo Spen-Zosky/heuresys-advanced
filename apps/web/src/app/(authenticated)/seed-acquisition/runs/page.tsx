@@ -19,7 +19,6 @@ function buildColumns(t: TFunction): DataColumn<SeedAcquisitionRun>[] {
       // F-3 (L6): l'identificativo della corsa non è più una colonna a sé; resta nel suggerimento del codice.
       cell: (r) => <span className="font-mono text-xs text-muted-foreground" title={r.seedAcquisitionRunId}>{r.code}</span>,
     },
-    { header: t("seedRuns.columns.status"), cell: (r) => <EnumStatusBadge domain="seedRunStatus" value={r.status} /> },
     {
       header: t("seedRuns.columns.startedAt"),
       cell: (r) => <span className="text-xs text-muted-foreground">{r.startedAt.slice(0, 19)}</span>,
@@ -28,6 +27,8 @@ function buildColumns(t: TFunction): DataColumn<SeedAcquisitionRun>[] {
       header: t("seedRuns.columns.finishedAt"),
       cell: (r) => <span className="text-xs text-muted-foreground">{r.finishedAt?.slice(0, 19) ?? none}</span>,
     },
+    // Repertorio interfacce, R3: lo stato chiude la riga.
+    { header: t("seedRuns.columns.status"), cell: (r) => <EnumStatusBadge domain="seedRunStatus" value={r.status} /> },
   ];
 }
 

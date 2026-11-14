@@ -27,6 +27,8 @@ import type { EnumLabelFn } from "./enum-labels";
 /** Il minimo che serve: qualunque risposta API che porti nome e tipo va bene. */
 export type PersonaConTipo = {
   displayName: string;
+  firstName?: string | null;
+  lastName?: string | null;
   type?: string | null;
 };
 
@@ -46,8 +48,10 @@ export function nonEUnaPersona(u: PersonaConTipo): boolean {
  * tutte le righe non distingue nessuna riga.
  */
 export function etichettaPersona(u: PersonaConTipo, enumLabel: EnumLabelFn): string {
-  if (!nonEUnaPersona(u)) return u.displayName;
-  return `${u.displayName} (${enumLabel("userType", u.type)})`;
+  // R1 (blocco B8): anche nelle caselle di scelta la persona si scrive «Cognome, Nome».
+  const nome = cognomeNome(u) || u.displayName;
+  if (!nonEUnaPersona(u)) return nome;
+  return `${nome} (${enumLabel("userType", u.type)})`;
 }
 
 /**

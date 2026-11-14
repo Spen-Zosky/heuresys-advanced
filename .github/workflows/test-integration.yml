@@ -56,7 +56,9 @@ jobs:
     # home-network flakiness that looked like the cause at first (ruled out: the same
     # suite ran clean end-to-end in 20m24s directly on the twin, network notwithstanding).
     # 35min gives the current ~21-23min job a real margin instead of living at the edge.
-    timeout-minutes: 35
+    # 2026-11-13: la suite e' cresciuta a 325 file e sul PC di CI la corsa supera i 35 min (1630 prove verdi, poi
+    # annullata dal tetto, due volte di fila su #242 e prima su main). Tetto a 55 min, stesso criterio del 35 di a72f3049.
+    timeout-minutes: 55
     env:
       # POSTGRES_* (except the DB name) + JWT_PRIVATE_KEY/JWT_PUBLIC_KEY +
       # COOKIE_SECRET + MFA_ENCRYPTION_KEY come from runner EnvironmentFile.

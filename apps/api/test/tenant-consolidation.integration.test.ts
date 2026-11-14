@@ -13,7 +13,7 @@ import { loadRolePermissionCache } from "../src/modules/auth/cache-loader.js";
 import type { ActorContext } from "../src/lib/actor.js";
 import type { RoleCode } from "../src/config/constants.js";
 import { eseguiGiri, tenantConsolidationService as svc } from "../src/modules/tenant-consolidation/service.js";
-import { activeVariantVersion } from "../src/modules/tenant-consolidation/repository.js";
+import { activeVariantVersion, setStatus } from "../src/modules/tenant-consolidation/repository.js";
 import type { Giudice } from "../src/modules/tenant-consolidation/engine.js";
 
 let direttore: ActorContext;
@@ -242,5 +242,22 @@ describe("la versione del prototipo, quando la sessione non la indica", () => {
     expect(await activeVariantVersion(pool, direttore.tenantId!)).toBe(attesa.rows[0]?.id ?? null);
     // Un tenant inesistente non ha versione: la sessione non si apre su un prototipo indovinato.
     expect(await activeVariantVersion(pool, "00000000-0000-0000-0000-000000000000")).toBeNull();
+  });
+});
+
+describe("il passaggio di stato della sessione (chiudi il gruppo)", () => {
+  it("setStatus avanza al gruppo successivo e, chiudendo, valorizza la data di chiusura", async () => {
+    const letta = async () =>
+      (await pool.query<{ st: string; og: string | null; chiusa: Date | null }>(
+        `SELECT tenant_consolidation_status AS st, tenant_consolidation_open_group AS og, tenant_consolidation_closed_at AS chiusa
+           FROM sys.sys_tenant_consolidations WHERE tenant_consolidation_id = $1`,
+        [sessioneId],
+      )).rows[0]!;
+    await setStatus(pool, sessioneId, "GIRI", "POSITIONS_ROLES");
+    expect(await letta()).toMatchObject({ st: "GIRI", og: "POSITIONS_ROLES", chiusa: null });
+    await setStatus(pool, sessioneId, "CHIUSA", null);
+    const c = await letta();
+    expect(c).toMatchObject({ st: "CHIUSA", og: null });
+    expect(c.chiusa).not.toBeNull();
   });
 });

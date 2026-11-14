@@ -130,8 +130,8 @@ export async function setStatus(
 ): Promise<void> {
   await q.query(
     `UPDATE sys.sys_tenant_consolidations
-        SET tenant_consolidation_status = $2, tenant_consolidation_open_group = $3,
-            tenant_consolidation_closed_at = CASE WHEN $2 = 'CHIUSA' THEN now() ELSE tenant_consolidation_closed_at END
+        SET tenant_consolidation_status = $2::varchar, tenant_consolidation_open_group = $3,
+            tenant_consolidation_closed_at = CASE WHEN $2::varchar = 'CHIUSA' THEN now() ELSE tenant_consolidation_closed_at END
       WHERE tenant_consolidation_id = $1`,
     [id, status, openGroup],
   );

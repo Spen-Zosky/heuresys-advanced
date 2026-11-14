@@ -324,6 +324,7 @@
       "BLUEPRINT_RUN_HASH_MISMATCH": "La corsa è già nel registro con un contenuto diverso.",
       "BLUEPRINT_RUN_LOAD_FAILED": "Il caricamento del modello non è riuscito.",
       "BLUEPRINT_RUN_VERSION_MISSING": "Il modello di questa corsa non c'è più.",
+      "BLUEPRINT_RUN_NOT_ACTIVATABLE": "Il modello di questa corsa non porta ancora ruoli e cruscotti: renderlo il modello in uso svuoterebbe quelli della tua azienda.",
       "BLUEPRINT_RUN_VERSION_RETIRED": "Il modello di questa corsa è stato ritirato.",
       "CONSOLIDATION_ALREADY_OPEN": "C'è già un consolidamento aperto.",
       "CONSOLIDATION_VERSION_INVALID": "Il modello di questa corsa non c'è più.",

@@ -208,6 +208,16 @@ describe("registro delle corse del modello", () => {
     const runA = (await svc.runs(direttore)).find((r) => r.code === "p20261010010521tst")!;
 
     expect(await codiceDi(svc.makeDefinitive(estraneo, runA.runId))).toBe("PERMISSION_DENIED");
+    // un modello senza ruoli né cruscotti svuoterebbe il profilo del tenant: si rifiuta
+    expect(await codiceDi(svc.makeDefinitive(direttore, runA.runId))).toBe("BLUEPRINT_RUN_NOT_ACTIVATABLE");
+    for (const v of [versioneA, versioneB]) {
+      await pool.query(
+        `INSERT INTO sys.sys_blueprint_content_job_roles (blueprint_content_job_role_version_id, blueprint_content_job_role_code, blueprint_content_job_role_name)
+         VALUES ($1, 'PROVA_RUOLO', 'Ruolo di prova')`, [v]);
+      await pool.query(
+        `INSERT INTO sys.sys_blueprint_content_dashboards (blueprint_content_dashboard_version_id, blueprint_content_dashboard_code, blueprint_content_dashboard_name)
+         VALUES ($1, 'self', 'Cruscotto di prova')`, [v]);
+    }
 
     const a = await svc.makeDefinitive(direttore, runA.runId);
     expect(a).toMatchObject({ status: "DEFINITIVA", inUse: true });
@@ -228,6 +238,11 @@ describe("registro delle corse del modello", () => {
       [t],
     );
     expect(att.rows.map((x) => x.v)).toEqual([versioneB]);
+    // le porte di ricompensa seguono il tenant sulla variante nuova (la 000400 le pretende)
+    const porte = await pool.query<{ n: number }>(
+      `SELECT count(*)::int AS n FROM sys.v_reward_gate_completeness`,
+    );
+    expect(porte.rows[0]!.n).toBe(0);
     // il registro parte dalla corsa caricata più di recente
     expect(tutte[0]!.modelLoadedAt >= tutte[tutte.length - 1]!.modelLoadedAt).toBe(true);
   });

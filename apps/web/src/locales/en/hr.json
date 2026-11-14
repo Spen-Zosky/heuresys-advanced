@@ -324,6 +324,7 @@
       "BLUEPRINT_RUN_HASH_MISMATCH": "The run is already in the register with different content.",
       "BLUEPRINT_RUN_LOAD_FAILED": "Loading the model failed.",
       "BLUEPRINT_RUN_VERSION_MISSING": "This run's model no longer exists.",
+      "BLUEPRINT_RUN_NOT_ACTIVATABLE": "This run's model does not carry roles and dashboards yet: making it the model in use would empty your company's.",
       "BLUEPRINT_RUN_VERSION_RETIRED": "This run's model has been retired.",
       "CONSOLIDATION_ALREADY_OPEN": "A consolidation is already open.",
       "CONSOLIDATION_VERSION_INVALID": "This run's model no longer exists.",

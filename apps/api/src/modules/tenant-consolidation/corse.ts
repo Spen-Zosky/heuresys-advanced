@@ -238,7 +238,8 @@ export async function registraCorsa(
         blueprint_run_description, blueprint_run_executed_from, blueprint_run_executed_to,
         blueprint_run_variant_version_id, blueprint_run_model_label, blueprint_run_model_loaded_at, created_by)
      SELECT $1, $2, $3, $4, $5, $6, $7, vv.blueprint_variant_version_id,
-            left(format('%s — versione %s', coalesce(v.blueprint_variant_name, v.blueprint_variant_code),
+            -- il nome della variante del datastore è la descrizione intera: basta la parte prima dei due punti
+            left(format('%s — versione %s', coalesce(nullif(trim(split_part(v.blueprint_variant_name, ':', 1)), ''), v.blueprint_variant_code),
                         vv.blueprint_variant_version_number), 250),
             vv.created_at, $9
        FROM sys.sys_blueprint_variant_versions vv
@@ -396,6 +397,21 @@ export async function rendiDefinitiva(tenantId: string, runId: string, userId: s
       throw new ConflictError("La versione di modello di questa corsa non c'è più", "BLUEPRINT_RUN_VERSION_MISSING");
     }
     if (r.vstato === "RETIRED") throw new ConflictError("La versione di modello è ritirata", "BLUEPRINT_RUN_VERSION_RETIRED");
+    // Il profilo del tenant (lib/scope/profilo.ts) legge ruoli e cruscotti dalla versione attiva: una
+    // versione che non li porta svuoterebbe il catalogo dei ruoli e i cruscotti del tenant. Il pacchetto
+    // 0.3 del datastore oggi non li porta (richiesta M2-M6 del programma di consolidamento): si rifiuta.
+    const pieno = await c.query<{ ruoli: number; cruscotti: number }>(
+      `SELECT (SELECT count(*)::int FROM sys.sys_blueprint_content_job_roles WHERE blueprint_content_job_role_version_id = $1) AS ruoli,
+              (SELECT count(*)::int FROM sys.sys_blueprint_content_dashboards WHERE blueprint_content_dashboard_version_id = $1) AS cruscotti`,
+      [r.ver],
+    );
+    const vuoto = pieno.rows[0]!;
+    if (vuoto.ruoli === 0 || vuoto.cruscotti === 0) {
+      throw new ConflictError(
+        `Il modello di questa corsa non porta ancora ${vuoto.ruoli === 0 ? "i ruoli" : ""}${vuoto.ruoli === 0 && vuoto.cruscotti === 0 ? " né " : ""}${vuoto.cruscotti === 0 ? "i cruscotti" : ""}: renderlo il modello in uso svuoterebbe quelli del tenant`,
+        "BLUEPRINT_RUN_NOT_ACTIVATABLE",
+      );
+    }
     if (r.vstato !== "PUBLISHED") {
       await c.query(
         `UPDATE sys.sys_blueprint_variant_versions
@@ -421,6 +437,23 @@ export async function rendiDefinitiva(tenantId: string, runId: string, userId: s
         [a.id, r.ver, userId],
       );
     } else {
+      // Le porte di ricompensa sono della variante, e la 000400 pretende che ogni tenant attivo ne abbia:
+      // se la variante nuova non ne ha, porta con sé quelle della variante che il tenant lascia.
+      if (a) {
+        await c.query(
+          `INSERT INTO sys.sys_reward_gate_catalog
+             (reward_gate_catalog_blueprint_variant_id, reward_gate_catalog_code, reward_gate_catalog_name,
+              reward_gate_catalog_description, reward_gate_catalog_is_blocking, reward_gate_catalog_metadata)
+           SELECT $2, g.reward_gate_catalog_code, g.reward_gate_catalog_name, g.reward_gate_catalog_description,
+                  g.reward_gate_catalog_is_blocking,
+                  g.reward_gate_catalog_metadata || jsonb_build_object('portata_da', $3::text)
+             FROM sys.sys_reward_gate_catalog g
+            WHERE g.reward_gate_catalog_blueprint_variant_id = $1
+              AND NOT EXISTS (SELECT 1 FROM sys.sys_reward_gate_catalog n WHERE n.reward_gate_catalog_blueprint_variant_id = $2)
+           ON CONFLICT DO NOTHING`,
+          [a.variante, r.variante, a.variante],
+        );
+      }
       if (a) {
         await c.query(
           `UPDATE sys.sys_blueprint_activations

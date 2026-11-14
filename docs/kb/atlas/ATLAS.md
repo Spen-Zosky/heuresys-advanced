@@ -1,6 +1,6 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `a9a932f8` (2026-11-14T17:55:04+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `0be4a4e4` (2026-11-14T18:22:04+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
@@ -10,7 +10,7 @@
 | Route API | 718 |
 | Pagine web | 132 |
 | Schemi shared | 134 |
-| Tabelle DB | 414 (vuote: 77) |
+| Tabelle DB | 414 (vuote: 44) |
 | Viste / matview | 88 / 0 |
 | Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 364 |
 
@@ -31,7 +31,7 @@
 | assessments | /v1/assessments | 4 | 3 | 2 | 2 |
 | auth | /v1/auth, /v1/auth/mfa | 34 | 3 | 16 | 7 |
 | blueprint-activations | /v1/blueprint-activations | 5 | 3 | 4 | 1 |
-| blueprint-families | /v1/blueprint-families | 5 | 4 | 2 | 1 |
+| blueprint-families | /v1/blueprint-families | 5 | 4 | 4 | 1 |
 | blueprint-overrides | /v1/blueprint-overrides | 4 | 3 | 3 | 1 |
 | blueprint-processes | /v1/blueprint-processes | 5 | 4 | 3 | 1 |
 | blueprint-variants | /v1/blueprint-variants | 5 | 4 | 3 | 1 |
@@ -169,47 +169,14 @@
 - `sys.sys_blueprint_content_agents`
 - `sys.sys_blueprint_content_capabilities`
 - `sys.sys_blueprint_content_capability_links`
-- `sys.sys_blueprint_content_career_paths`
-- `sys.sys_blueprint_content_career_steps`
-- `sys.sys_blueprint_content_ccnl_conditions`
-- `sys.sys_blueprint_content_ccnl_institutes`
-- `sys.sys_blueprint_content_ccnl_levels`
-- `sys.sys_blueprint_content_ccnl`
-- `sys.sys_blueprint_content_context`
 - `sys.sys_blueprint_content_decision_rights`
 - `sys.sys_blueprint_content_decisions`
-- `sys.sys_blueprint_content_derivations`
 - `sys.sys_blueprint_content_design_principles`
-- `sys.sys_blueprint_content_engagement_links`
-- `sys.sys_blueprint_content_engagements`
-- `sys.sys_blueprint_content_evidence_gaps`
-- `sys.sys_blueprint_content_evidence_links`
-- `sys.sys_blueprint_content_evidence`
-- `sys.sys_blueprint_content_gaps`
-- `sys.sys_blueprint_content_goals`
-- `sys.sys_blueprint_content_incentive_links`
-- `sys.sys_blueprint_content_incentives`
 - `sys.sys_blueprint_content_job_role_links`
 - `sys.sys_blueprint_content_legal_entities`
-- `sys.sys_blueprint_content_obligation_positions`
-- `sys.sys_blueprint_content_obligations`
-- `sys.sys_blueprint_content_packages`
-- `sys.sys_blueprint_content_perimeters`
-- `sys.sys_blueprint_content_position_occupations`
-- `sys.sys_blueprint_content_position_processes`
-- `sys.sys_blueprint_content_position_responsibilities`
-- `sys.sys_blueprint_content_position_skill_requirements`
-- `sys.sys_blueprint_content_process_sites`
-- `sys.sys_blueprint_content_process_steps`
-- `sys.sys_blueprint_content_receipts`
-- `sys.sys_blueprint_content_sites`
 - `sys.sys_blueprint_content_strategies`
 - `sys.sys_blueprint_content_strategy_items`
-- `sys.sys_blueprint_content_training_positions`
 - `sys.sys_blueprint_content_training_skills`
-- `sys.sys_blueprint_content_training`
-- `sys.sys_blueprint_content_unit_processes`
-- `sys.sys_blueprint_runs`
 - `sys.sys_conflitti_ibridi`
 - `sys.sys_content_blueprint_links`
 - `sys.sys_content_media`

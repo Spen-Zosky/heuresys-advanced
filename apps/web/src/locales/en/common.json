@@ -765,6 +765,13 @@
       "READY_1_YEAR": "Ready in a year",
       "READY_2_YEARS": "Ready in two years",
       "NOT_READY": "Not ready yet"
+    },
+    "siteKind": {
+      "SEDE_CENTRALE": "Head office",
+      "FILIALE": "Branch",
+      "STABILIMENTO": "Plant",
+      "MAGAZZINO": "Warehouse",
+      "UFFICIO": "Office"
     }
   },
   "masked": "withheld for your profile",
@@ -1060,11 +1067,16 @@
       "persone": "People",
       "struttura": "Structure below ({{count}} units)",
       "addetti": "People",
-      "addettiConSotto": "{{diretti}} in the unit, {{totali}} including units below"
+      "addettiConSotto": "{{diretti}} in the unit, {{totali}} including units below",
+      "sede": "Site",
+      "organicoPrevisto": "Planned headcount",
+      "ragioneOrganico": "Why this headcount"
     },
     "consolidamento": {
       "titolo": "The client's org chart today",
       "spiegazione": "The organisation as it is now, with the people in each unit: the starting point of the consolidation proposals."
-    }
+    },
+    "previste_one": "{{count}} planned",
+    "previste_other": "{{count}} planned"
   }
 }

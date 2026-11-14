@@ -34,6 +34,8 @@ export async function leggiOrganigramma(tenantId: string, cliente: string): Prom
     `SELECT ou.organization_unit_id AS id, ou.organization_unit_code AS codice,
             coalesce(ou.organization_unit_name, ou.organization_unit_code, '—') AS nome,
             ou.organization_unit_type AS tipo, ou.organization_unit_relation AS relazione,
+            ou.organization_unit_site_code AS "sedeCodice", ou.organization_unit_site_kind AS "sedeTipo",
+            ou.organization_unit_planned_headcount AS "organicoPrevisto", ou.organization_unit_headcount_note AS "ragioneOrganico",
             ou.organization_unit_parent_id AS "padreId",
             ou.organization_unit_manager_user_id AS "responsabileId",
             CASE WHEN u.user_id IS NULL THEN NULL ELSE ${ETICHETTA} END AS responsabile

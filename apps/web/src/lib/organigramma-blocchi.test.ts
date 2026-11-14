@@ -78,6 +78,22 @@ describe("gruppi (sede centrale e filiali, come il banco)", () => {
     expect(fil.unita.find((x) => x.id === "F2a")!.padreId).toBe("F2");
   });
 
+  it("con la sede del modello: un organigramma per sede, le unità senza sede stanno in quella del padre", () => {
+    const s = (x: UnitaBlocco, sede: string | null) => ({ ...x, sede });
+    const g = gruppi([
+      s(u("R", null, 1), "SEDE_CENTRALE"), s(u("A", "R", 2), null),
+      s(u("CO", "R", 3), "CENTRO_OPERATIVO"), s(u("CO1", "CO", 4), null),
+      s(u("F1", "A", 2, true), "FILIALE_1"),
+    ], "Filiali");
+    expect(g.map((x) => x.chiave)).toEqual(["centrale", "sede-CENTRO_OPERATIVO", "filiali"]);
+    expect(g[0]!.unita.map((x) => x.id).sort()).toEqual(["A", "R"]);
+    expect(g[1]!.sede).toBe("CENTRO_OPERATIVO");
+    expect(g[1]!.unita.map((x) => x.id).sort()).toEqual(["CO", "CO1"]);
+    expect(g[1]!.addetti).toBe(7);
+    // Senza sede su nessuna unità resta il comportamento di prima: centrale e filiali.
+    expect(gruppi([u("R", null), u("F", "R", 1, true)], "Filiali").map((x) => x.chiave)).toEqual(["centrale", "filiali"]);
+  });
+
   it("filiali con padri diversi: vertice «Filiali»", () => {
     const g = gruppi([u("R", null), u("A", "R"), u("B", "R"), u("F1", "A", 1, true), u("F2", "B", 1, true)], "Filiali");
     expect(g[1]!.vertice!.id).toBe("__filiali");

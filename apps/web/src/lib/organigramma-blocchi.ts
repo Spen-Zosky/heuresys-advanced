@@ -25,6 +25,10 @@ export interface UnitaBlocco {
   persone: PersonaBlocco[];
   /** Persone dell'unità e di quelle sotto di lei. */
   addettiTotali: number;
+  /** Codice della sede dal modello (SEDE_CENTRALE, FILIALE_1…), quando il consolidamento l'ha portato. */
+  sede?: string | null;
+  /** Organico previsto dal modello, quando c'è. */
+  organicoPrevisto?: number | null;
 }
 export interface NodoDisposto {
   u: UnitaBlocco;
@@ -165,7 +169,10 @@ export function disponi(unita: UnitaBlocco[], opzioni: { conPersone: boolean }):
 }
 
 export interface Gruppo {
-  chiave: "centrale" | "filiali";
+  /** «centrale», «filiali» oppure «sede-<codice>» per un'altra sede (per esempio un centro operativo). */
+  chiave: string;
+  /** Per una sede che non è né la centrale né una filiale: il suo codice, da mostrare come titolo. */
+  sede?: string;
   unita: UnitaBlocco[];
   /** Per le filiali: il vertice da cui dipendono (copia, senza padre). */
   vertice: UnitaBlocco | null;
@@ -192,10 +199,30 @@ export function gruppi(unita: UnitaBlocco[], nomeVerticeFiliali: string): Gruppo
 
   const centrale = unita.filter((u) => !inFiliale.has(u.id));
   const out: Gruppo[] = [];
-  if (centrale.length) {
+  // Come `organigrammiPerSede` del banco: quando il consolidamento ha portato la sede delle unità,
+  // ogni sede che non è una filiale ha il suo organigramma. Un'unità senza sede sta in quella del
+  // padre; la radice senza sede sta nella centrale.
+  const sedeDi = new Map<string, string>();
+  const risali = (u: UnitaBlocco, n = 0): string => {
+    const nota = sedeDi.get(u.id);
+    if (nota) return nota;
+    const padre = u.padreId ? perId.get(u.padreId) : undefined;
+    const s = u.sede ?? (padre && n < 50 ? risali(padre, n + 1) : "SEDE_CENTRALE");
+    sedeDi.set(u.id, s);
+    return s;
+  };
+  const perSede = new Map<string, UnitaBlocco[]>();
+  for (const u of centrale) {
+    const s = centrale.some((x) => x.sede) ? risali(u) : "SEDE_CENTRALE";
+    if (!perSede.has(s)) perSede.set(s, []);
+    perSede.get(s)!.push(u);
+  }
+  const ordine = [...perSede.keys()].sort((a, b) => Number(b === "SEDE_CENTRALE") - Number(a === "SEDE_CENTRALE") || a.localeCompare(b));
+  for (const s of ordine) {
+    const sub = perSede.get(s)!;
     out.push({
-      chiave: "centrale", unita: centrale, vertice: null, sedi: 1,
-      addetti: centrale.reduce((s, u) => s + u.persone.length, 0),
+      chiave: s === "SEDE_CENTRALE" ? "centrale" : `sede-${s}`, ...(s === "SEDE_CENTRALE" ? {} : { sede: s }),
+      unita: sub, vertice: null, sedi: 1, addetti: sub.reduce((t, u) => t + u.persone.length, 0),
     });
   }
   if (radiciFiliali.length) {

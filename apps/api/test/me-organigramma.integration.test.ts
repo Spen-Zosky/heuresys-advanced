@@ -78,6 +78,23 @@ describe("GET /v1/me/organigramma", () => {
     expect(radici.reduce((s, u) => s + u.addettiTotali, 0)).toBe(atteso.persone);
   });
 
+  it("sede e organico previsto delle unità sono quelli delle colonne del modello (000490)", async () => {
+    const r = await t.app.inject({ method: "GET", url: "/v1/me/organigramma", headers: { cookie } });
+    const b = r.json() as OrganigrammaResponse;
+    const { rows } = await pool.query<{ id: string; sede: string | null; tipo: string | null; previsto: number | null; ragione: string | null }>(
+      `SELECT organization_unit_id AS id, organization_unit_site_code AS sede, organization_unit_site_kind AS tipo,
+              organization_unit_planned_headcount AS previsto, organization_unit_headcount_note AS ragione
+         FROM sys.sys_organization_units WHERE organization_unit_tenant_id = $1 AND organization_unit_is_active`,
+      [b.tenantId],
+    );
+    const per = new Map(rows.map((x) => [x.id, x]));
+    for (const u of b.unita) {
+      const a = per.get(u.id)!;
+      expect([u.sedeCodice, u.sedeTipo, u.organicoPrevisto, u.ragioneOrganico]).toEqual([a.sede, a.tipo, a.previsto, a.ragione]);
+      if (a.tipo === "FILIALE") expect(u.filiale).toBe(true);
+    }
+  });
+
   it("un cliente fuori dal perimetro risponde 404", async () => {
     const r = await t.app.inject({ method: "GET", url: `/v1/me/organigramma?tenantId=${randomUUID()}`, headers: { cookie } });
     expect(r.statusCode).toBe(404);
@@ -107,6 +124,7 @@ describe("comporre (funzione pura)", () => {
 
   it("un ciclo nei padri non manda in loop e ogni unità resta nel disegno", () => {
     const r = comporre("t", "Cliente", [u("A", "B"), u("B", "A")], [], []);
+    expect(r.unita.every((x) => x.sedeCodice === null && x.organicoPrevisto === null)).toBe(true);
     expect(r.unita).toHaveLength(2);
     expect(r.unita.every((x) => x.livello >= 1)).toBe(true);
   });

@@ -14,35 +14,21 @@
  * Un clic su un'unità apre la scheda a cascata (`scheda-rapida.tsx`).
  */
 import { useMemo } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { RefreshCw } from "lucide-react";
 import { Button } from "@heuresys/ui";
-import type { OrganigrammaResponse } from "@heuresys/shared";
-import { apiFetch } from "@/lib/api/fetch";
 import { useFormat } from "@/lib/format";
-import { gruppi, type UnitaBlocco } from "@/lib/organigramma-blocchi";
+import { codiceInParole } from "@/lib/enum-labels";
+import { gruppi, type Gruppo } from "@/lib/organigramma-blocchi";
+import { useOrganigramma, aBlocchi } from "./dati";
 import { useScheda } from "@/components/scheda-rapida";
 import { SchedePagina } from "@/components/schede-pagina";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { OrganigrammaBlocchi } from "./blocchi";
 import { OrganigrammaNodi } from "./nodi";
 
-export function useOrganigramma(tenantId?: string | null) {
-  return useQuery({
-    queryKey: ["me", "organigramma", tenantId ?? null],
-    queryFn: ({ signal }) =>
-      apiFetch<OrganigrammaResponse>(`/v1/me/organigramma${tenantId ? `?tenantId=${encodeURIComponent(tenantId)}` : ""}`, { signal }),
-    staleTime: 60_000,
-  });
-}
-
-export function aBlocchi(r: OrganigrammaResponse | undefined): UnitaBlocco[] {
-  return (r?.unita ?? []).map((u) => ({
-    id: u.id, nome: u.nome, padreId: u.padreId, filiale: u.filiale, addettiTotali: u.addettiTotali,
-    persone: u.persone.map((p) => ({ etichetta: p.etichetta, responsabile: p.responsabile })),
-  }));
-}
+export { useOrganigramma, aBlocchi };
 
 export function VistaOrganigramma({
   tenantId, evidenzia, testId = "organigramma",
@@ -79,6 +65,9 @@ export function VistaOrganigramma({
     d.avvisi.riportiFuoriCliente ? t("organigramma.avvisi.riportiFuoriCliente", { count: d.avvisi.riportiFuoriCliente }) : null,
   ].filter(Boolean);
   const nome = d.cliente.replace(/[^\p{L}\p{N}]+/gu, "_");
+  // Una sede che non è né la centrale né una filiale (per esempio un centro operativo) si chiama
+  // con il suo codice del modello, scritto in parole.
+  const titolo = (g: Gruppo) => (g.sede ? codiceInParole(g.sede) : t(`organigramma.${g.chiave}`));
 
   const vistaBlocchi = (
     <div className="space-y-6" data-testid={`${testId}-blocchi`}>
@@ -91,14 +80,14 @@ export function VistaOrganigramma({
       {gr.map((g) => (
         <section key={g.chiave} className="space-y-1" data-testid={`${testId}-gruppo-${g.chiave}`}>
           <h3 className="text-sm font-semibold">
-            {t(`organigramma.${g.chiave}`)}{" "}
+            {titolo(g)}{" "}
             <span className="font-normal text-muted-foreground">
               — {g.chiave === "filiali"
                 ? t("organigramma.riepilogoFiliali", { sedi: g.sedi, unita: g.unita.length - 1, persone: g.addetti })
                 : t("organigramma.riepilogo", { unita: g.unita.length, persone: g.addetti })}
             </span>
           </h3>
-          <OrganigrammaBlocchi unita={g.unita} {...(apri ? { onApri: apri } : {})} {...(evidenzia ? { evidenzia } : {})} nomeFile={`organigramma_${nome}_${g.chiave}`} ariaLabel={t(`organigramma.${g.chiave}`)} />
+          <OrganigrammaBlocchi unita={g.unita} {...(apri ? { onApri: apri } : {})} {...(evidenzia ? { evidenzia } : {})} nomeFile={`organigramma_${nome}_${g.chiave}`} ariaLabel={titolo(g)} />
         </section>
       ))}
     </div>

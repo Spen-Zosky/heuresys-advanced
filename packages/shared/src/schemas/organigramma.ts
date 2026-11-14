@@ -46,6 +46,16 @@ export const OrganigrammaUnitaSchema = z.object({
   scoperte: z.number().int(),
   /** Persone dell'unità e di tutte quelle sotto di lei. */
   addettiTotali: z.number().int(),
+  /**
+   * Sede e organico dal modello (migrazione 000490): vuoti finché il consolidamento non li porta.
+   * `sedeCodice` è il codice della sede del modello (SEDE_CENTRALE, FILIALE_1…), non un
+   * riferimento a `sys_branches`; `sedeTipo` uno di SEDE_CENTRALE, FILIALE, STABILIMENTO,
+   * MAGAZZINO, UFFICIO.
+   */
+  sedeCodice: z.string().nullable(),
+  sedeTipo: z.string().nullable(),
+  organicoPrevisto: z.number().int().nullable(),
+  ragioneOrganico: z.string().nullable(),
 });
 export type OrganigrammaUnita = z.infer<typeof OrganigrammaUnitaSchema>;
 

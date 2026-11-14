@@ -14,7 +14,7 @@ Fuori da questo ciclo: il ritorno al datastore (AC-14); la consegna automatica d
 | R1 | Migrazione 000489: `sys.sys_blueprint_runs` (registro delle corse per tenant) + avvio della sessione legato alla corsa | Claude | catena verde su copia, riapplicata senza differenze | fatta: catena verde due volte su copia (000062 e 000429 emendate) |
 | R2 | API: `GET /v1/consolidation/runs` (registro, più recente prima), `GET /v1/consolidation/runs/available` (consegne del datastore, con «già nel registro»), `POST /v1/consolidation/runs/receive` (accoglie una consegna come nuova versione di modello e la registra), `POST /v1/consolidation/runs/:id/definitive`; `POST /v1/consolidation` accetta `runId`; il primo giro di ogni gruppo scrive i risultati iniziali e il tempo dell'agente nel registro | Claude | prove d'integrazione verdi | fatta: 17/17 prove sul consolidamento verdi su copia |
 | R3 | Pagina /consolidation: scelta della corsa (predefinita la più recente del registro), storico del registro, avviso «modello mai consolidato» con descrizione e data di caricamento, tempo dell'agente | Claude | login reale di una persona HRMS_MANAGER di RTL | scritta, prova dal vivo dopo il rilascio |
-| R4 | In produzione, dopo backup verificato: ricevere la consegna, pubblicare la versione, attivarla per RTL (l'attivazione vecchia passa a RETIRED), registrarla come corsa più recente | Claude | attivazione ACTIVE di RTL sulla nuova versione, riga nel registro | da fare |
+| R4 | In produzione, dopo backup verificato: accogliere la consegna e registrarla come corsa più recente (attivazione rimandata, vedi S2) | Claude | attivazione ACTIVE di RTL sulla nuova versione, riga nel registro | da fare |
 | R5 | Annullare il giro del 01/11 (2 unità con il giornale di ritorno, sessione con proposte, decisioni, collegamenti) ed eliminare la versione vecchia | Enzo dà il sì nel thread, Claude esegue | conteggi a zero, backup prima | giro annullato 03:52 UTC (sì di Enzo 03:44:55); eliminazione della versione vecchia: aspetta Enzo |
 | R6 | PR, CI verde, unione, rilascio, verifica dal vivo | Claude | `scripts/verifica-deploy.sh` DEPLOYATO e R3 ripetuta in produzione | da fare |
 
@@ -27,3 +27,12 @@ R2. La ricezione dall'API riusa il caricatore verificato `db/scripts/pacchetto/a
 R4. Strumenti: `bash ~/.claude/tools/backup-verificato.sh heuresys_advanced`, poi `accogli-pacchetto.mjs ricevi heuresys_advanced <cartella> <uscita> --produzione`, poi pubblicazione e attivazione con SQL in una transazione con guardia (RTL ha una sola attivazione ACTIVE e punta a d5ef21db). Ritorno: riattivare d5ef21db (finché non è eliminata).
 
 R5. Distruttiva, dati non creati da questa sessione: si esegue solo con il sì scritto di Enzo, dopo backup verificato, con l'elenco esatto.
+
+## Registro delle scoperte (fuori da questo ciclo, da proporre a Enzo una volta)
+
+- S1 (03:51 UTC). Le unità create da un'adozione del consolidamento senza responsabile fanno fallire `000247_organization_unit_managers.sql` a ogni deploy. Tolte AREA-01/02 con R5; il difetto di fondo resta nel modulo tenant-consolidation (thread della pagina avvisato).
+- S2 (04:10 UTC). Il pacchetto 0.3 della corsa tjb non porta ruoli né cruscotti (richiesta M2-M6 del programma di consolidamento): attivarlo per RTL svuoterebbe il profilo (`lib/scope/profilo.ts`) e la 000400 fallirebbe per le porte di ricompensa. Quindi R4 si ridimensiona: la corsa entra nel registro come voce di partenza e il consolidamento si fa contro di lei; l'attivazione aspetta un pacchetto completo. «Rendi definitiva» rifiuta un modello senza ruoli o cruscotti e porta con sé le porte di ricompensa.
+- S3 (04:08 UTC). Ogni versione accolta con `ricevi` accende la sentinella `sys.v_processi_senza_kpi` (30 processi della corsa tjb senza modelli di indicatore): `ricevi` per disegno (C3) non scrive indicatori di piattaforma. La vista non è creata da nessun file del repo.
+- S4. Il modello vecchio (FIN_BANKING v1) non si cancella e per ora non si ritira: è ancora il modello in uso di RTL (S2), e cancellarlo toglierebbe 96 assegnazioni processo-unità, 73 modelli di indicatore e 7 porte di RTL.
+
+Configurazione di macchina (non nel repo): drop-in `/etc/systemd/system/heuresys-advanced-api.service.d/consegne-datastore.conf` con `DATASTORE_CONSEGNE_DIR`.

@@ -346,3 +346,75 @@ export async function deleteGraph(q: DbConnector, id: string): Promise<boolean> 
   const res = await q.query(`DELETE FROM sys.sys_visualization_graphs WHERE graph_id = $1`, [id]);
   return (res.rowCount ?? 0) === 1;
 }
+
+/**
+ * Riallinea un grafo ORG_CHART alle posizioni attive del suo cliente (piano organigrammi a
+ * blocchi, 2026-11-14, V2). Il grafo di RTL era stato scritto una volta da
+ * `db/seeds/org_chart_rtl_demo.sql` e mai più: mostrava posizioni scomparse e riporti vecchi.
+ *
+ * Solo nodi POSITION e archi REPORTS_TO, mai persone (sentinella 000355: un grafo salvato non
+ * contiene nodi USER). I nodi delle posizioni ancora attive restano (con l'etichetta di oggi),
+ * così le loro disposizioni e i loro stili non si perdono; quelli delle posizioni non più attive
+ * si tolgono; quelli delle posizioni nuove si aggiungono; gli archi REPORTS_TO si ricostruiscono.
+ * Da chiamare dentro una transazione.
+ */
+export async function riallineaOrgChart(
+  q: DbConnector, graphId: string, tenantId: string,
+): Promise<{ nodiAggiunti: number; nodiTolti: number; nodi: number; archi: number }> {
+  const tolti = await q.query(
+    `DELETE FROM sys.sys_visualization_nodes n
+      WHERE n.node_graph_id = $1 AND n.node_source_entity_type = 'POSITION'
+        AND NOT EXISTS (SELECT 1 FROM sys.sys_positions p
+                         WHERE p.position_id = n.node_source_entity_id
+                           AND p.position_tenant_id = $2 AND p.position_is_active)`,
+    [graphId, tenantId],
+  );
+  await q.query(
+    `UPDATE sys.sys_visualization_nodes n
+        SET node_label = coalesce(p.position_title, p.position_code), updated_at = now()
+       FROM sys.sys_positions p
+      WHERE n.node_graph_id = $1 AND n.node_source_entity_type = 'POSITION'
+        AND p.position_id = n.node_source_entity_id
+        AND n.node_label IS DISTINCT FROM coalesce(p.position_title, p.position_code)`,
+    [graphId],
+  );
+  const aggiunti = await q.query(
+    `INSERT INTO sys.sys_visualization_nodes
+            (node_graph_id, node_source_entity_type, node_source_entity_id, node_label, node_type)
+     SELECT $1, 'POSITION', p.position_id, coalesce(p.position_title, p.position_code), NULL
+       FROM sys.sys_positions p
+      WHERE p.position_tenant_id = $2 AND p.position_is_active
+        AND NOT EXISTS (SELECT 1 FROM sys.sys_visualization_nodes n
+                         WHERE n.node_graph_id = $1 AND n.node_source_entity_type = 'POSITION'
+                           AND n.node_source_entity_id = p.position_id)`,
+    [graphId, tenantId],
+  );
+  await q.query(
+    `DELETE FROM sys.sys_visualization_edges WHERE edge_graph_id = $1 AND edge_type = 'REPORTS_TO'`,
+    [graphId],
+  );
+  await q.query(
+    `INSERT INTO sys.sys_visualization_edges (edge_graph_id, edge_source_node_id, edge_target_node_id, edge_type)
+     SELECT $1, figlio.node_id, padre.node_id, 'REPORTS_TO'
+       FROM sys.sys_positions p
+       JOIN sys.sys_visualization_nodes figlio
+         ON figlio.node_graph_id = $1 AND figlio.node_source_entity_type = 'POSITION'
+        AND figlio.node_source_entity_id = p.position_id
+       JOIN sys.sys_visualization_nodes padre
+         ON padre.node_graph_id = $1 AND padre.node_source_entity_type = 'POSITION'
+        AND padre.node_source_entity_id = p.position_reports_to_position_id
+      WHERE p.position_tenant_id = $2 AND p.position_is_active`,
+    [graphId, tenantId],
+  );
+  const conti = await q.query<{ nodi: number; archi: number }>(
+    `SELECT (SELECT count(*)::int FROM sys.sys_visualization_nodes WHERE node_graph_id = $1) AS nodi,
+            (SELECT count(*)::int FROM sys.sys_visualization_edges WHERE edge_graph_id = $1) AS archi`,
+    [graphId],
+  );
+  return {
+    nodiAggiunti: aggiunti.rowCount ?? 0,
+    nodiTolti: tolti.rowCount ?? 0,
+    nodi: conti.rows[0]?.nodi ?? 0,
+    archi: conti.rows[0]?.archi ?? 0,
+  };
+}

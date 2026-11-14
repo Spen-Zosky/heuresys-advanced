@@ -290,6 +290,83 @@ describe("/v1/visualization-graphs/* integration", () => {
     });
   });
 
+  // Piano organigrammi a blocchi (2026-11-14, V2): un organigramma salvato si riallinea ai dati
+  // vivi. Il grafo di prova nasce con un nodo POSITION vecchio (una posizione non attiva) e senza
+  // archi: dopo «rigenera» deve avere un nodo per ogni posizione attiva del cliente, un arco per
+  // ogni riporto fra posizioni attive, e il nodo vecchio non più.
+  describe("POST /:id/rigenera — riallinea un organigramma ai dati vivi", () => {
+    async function post(url: string, payload: unknown, s: S = tenantS) {
+      return suite.app.inject({
+        method: "POST", url,
+        headers: { cookie: ch(s.cookies), "x-csrf-token": s.csrfToken, "content-type": "application/json" },
+        payload: payload as Record<string, unknown>,
+      });
+    }
+
+    it("un nodo per posizione attiva, un arco per riporto, niente nodi vecchi né persone", async () => {
+      const g = await post("/v1/visualization-graphs", { code: `${SUITE_PREFIX}_RIG`, type: "ORG_CHART", name: "Da rigenerare" });
+      const gr = g.json() as { graphId: string; tenantId: string };
+      createdGraphIds.push(gr.graphId);
+      const vecchia = await pool.query<{ position_id: string }>(
+        `SELECT position_id FROM sys.sys_positions WHERE position_tenant_id = $1 AND NOT position_is_active LIMIT 1`,
+        [gr.tenantId],
+      );
+      if (vecchia.rows[0]) {
+        await pool.query(
+          `INSERT INTO sys.sys_visualization_nodes (node_graph_id, node_source_entity_type, node_source_entity_id, node_label)
+           VALUES ($1, 'POSITION', $2, 'Posizione di ieri')`,
+          [gr.graphId, vecchia.rows[0].position_id],
+        );
+      }
+
+      const r = await post(`/v1/visualization-graphs/${gr.graphId}/rigenera`, {});
+      expect(r.statusCode).toBe(200);
+      const b = r.json() as { nodi: number; archi: number; nodiTolti: number };
+
+      const atteso = await pool.query<{ posizioni: number; riporti: number }>(
+        `SELECT count(*)::int AS posizioni,
+                count(*) FILTER (WHERE EXISTS (SELECT 1 FROM sys.sys_positions c
+                                                WHERE c.position_id = p.position_reports_to_position_id
+                                                  AND c.position_tenant_id = p.position_tenant_id AND c.position_is_active))::int AS riporti
+           FROM sys.sys_positions p WHERE p.position_tenant_id = $1 AND p.position_is_active`,
+        [gr.tenantId],
+      );
+      expect(b.nodi).toBe(atteso.rows[0]!.posizioni);
+      expect(b.archi).toBe(atteso.rows[0]!.riporti);
+      expect(b.nodiTolti).toBe(vecchia.rows[0] ? 1 : 0);
+
+      const render = await suite.app.inject({
+        method: "GET", url: `/v1/visualization-graphs/${gr.graphId}/render`, headers: { cookie: ch(tenantS.cookies) },
+      });
+      const nodi = (render.json() as { nodes: Array<{ label: string; sourceEntityType: string }> }).nodes;
+      expect(nodi.map((n) => n.label)).not.toContain("Posizione di ieri");
+      expect(nodi.every((n) => n.sourceEntityType === "POSITION")).toBe(true);
+
+      // Una seconda pressione non cambia niente: è idempotente.
+      const r2 = await post(`/v1/visualization-graphs/${gr.graphId}/rigenera`, {});
+      const b2 = r2.json() as { nodi: number; archi: number; nodiAggiunti: number; nodiTolti: number };
+      expect([b2.nodi, b2.archi, b2.nodiAggiunti, b2.nodiTolti]).toEqual([b.nodi, b.archi, 0, 0]);
+    });
+
+    it("un grafo che non è un organigramma → 409 VIZ_GRAPH_NOT_ORG_CHART", async () => {
+      const g = await post("/v1/visualization-graphs", { code: `${SUITE_PREFIX}_RIG_SK`, type: "PROCESS_FLOW", name: "Non organigramma" });
+      expect(g.statusCode).toBe(201);
+      const id = (g.json() as { graphId: string }).graphId;
+      createdGraphIds.push(id);
+      const r = await post(`/v1/visualization-graphs/${id}/rigenera`, {});
+      expect(r.statusCode).toBe(409);
+      expect((r.json() as { error: { code: string } }).error.code).toBe("VIZ_GRAPH_NOT_ORG_CHART");
+    });
+
+    it("chi non ha visualization:create → 403", async () => {
+      const g = await post("/v1/visualization-graphs", { code: `${SUITE_PREFIX}_RIG_M`, type: "ORG_CHART", name: "Manager" });
+      const id = (g.json() as { graphId: string }).graphId;
+      createdGraphIds.push(id);
+      const r = await post(`/v1/visualization-graphs/${id}/rigenera`, {}, managerS);
+      expect(r.statusCode).toBe(403);
+    });
+  });
+
   it("POST without x-csrf-token header → 403 (CSRF)", async () => {
     const r = await suite.app.inject({
       method: "POST", url: "/v1/visualization-graphs",

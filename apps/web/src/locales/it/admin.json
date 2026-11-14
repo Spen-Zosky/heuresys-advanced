@@ -488,15 +488,7 @@
   "orgChart": {
     "title": "Organigramma",
     "back": "← Organizzazione",
-    "count": "{{count}} organigrammi disponibili",
-    "cardTitle": "Organigramma ({{label}})",
-    "nodeCount": "{{count}} posizioni",
-    "dash": "—",
-    "emptyPrefix": "Nessun organigramma disponibile per questo tenant.",
-    "noNodes": "Il grafo non ha nodi.",
-    "error": "Impossibile caricare l'organigramma.",
-    "graphAria": "Organigramma interattivo delle posizioni",
-    "note": "Grafo a forza interattivo (zoom/pan). I nodi sono le posizioni attive del tenant; gli archi le relazioni reports-to."
+    "description": "Le unità del cliente con le persone che ci lavorano, calcolate dai dati di oggi: a blocchi come un organigramma classico, oppure ad albero di nodi."
   },
   "positions": {
     "title": "Posizioni",
@@ -888,6 +880,14 @@
         "graph": "Grafo",
         "elements": "Nodi e collegamenti",
         "versions": "Versioni ed esportazioni"
+      },
+      "rigenera": {
+        "spiegazione": "Questo organigramma salvato contiene solo posizioni e riporti, fermi al giorno in cui è stato scritto. «Aggiorna dai dati vivi» lo riallinea alle posizioni attive di oggi.",
+        "vivo": "Organigramma vivo con le persone →",
+        "azione": "Aggiorna dai dati vivi",
+        "inCorso": "Aggiornamento…",
+        "esito": "Fatto: {{nodi}} posizioni, {{archi}} riporti ({{nodiAggiunti}} aggiunte, {{nodiTolti}} tolte).",
+        "errore": "Aggiornamento non riuscito."
       }
     },
     "activeOn": "Attiva",

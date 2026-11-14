@@ -13,6 +13,8 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { QuadroQuerySchema, QuadroResponseSchema, RubricaResponseSchema } from "@heuresys/shared";
 import { areeDa, leggiQuadro } from "../quadro/service.js";
 import { leggiRubrica } from "../rubrica/repository.js";
+import { organigrammaDi } from "../organigramma/service.js";
+import { OrganigrammaQuerySchema, OrganigrammaResponseSchema } from "@heuresys/shared";
 import type { FastifyRequest } from "fastify";
 import {
   MeProfileSchema, MeProfileFullSchema, MeContractsResponseSchema, MePaySlipsResponseSchema,
@@ -485,6 +487,13 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [requirePermission("user_profile:read:self")],
     schema: { response: { 200: RubricaResponseSchema } },
   }, async (req) => leggiRubrica(actorFromRequest(req)));
+
+  // Piano organigrammi a blocchi (2026-11-14): l'organigramma vivo di un cliente, con le persone
+  // per unità. Gli stessi nomi della rubrica, raccolti per albero: stesso pavimento di permesso.
+  app.get("/organigramma", {
+    preHandler: [requirePermission("user_profile:read:self")],
+    schema: { querystring: OrganigrammaQuerySchema, response: { 200: OrganigrammaResponseSchema } },
+  }, async (req) => organigrammaDi(actorFromRequest(req), req.query));
 
   // Classe C15: il quadro degli insight di una pagina, sul perimetro di chi guarda (ADR-0027).
   // Conteggi, mai nomi né importi individuali; le lenti sensibili solo per i mandati HR.

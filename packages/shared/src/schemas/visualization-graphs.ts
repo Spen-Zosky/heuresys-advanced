@@ -123,3 +123,14 @@ export const VizGraphVersionListResponseSchema = z.object({
   total: z.number().int().min(0),
 });
 export type VizGraphVersionListResponse = z.infer<typeof VizGraphVersionListResponseSchema>;
+
+// Piano organigrammi a blocchi (2026-11-14, V2): POST /:id/rigenera riallinea un grafo
+// ORG_CHART alle posizioni attive del cliente. Solo posizioni e riporti, mai persone.
+export const VizGraphRigeneraResponseSchema = z.object({
+  graph: VizGraphSchema,
+  nodiAggiunti: z.number().int().min(0),
+  nodiTolti: z.number().int().min(0),
+  nodi: z.number().int().min(0),
+  archi: z.number().int().min(0),
+});
+export type VizGraphRigeneraResponse = z.infer<typeof VizGraphRigeneraResponseSchema>;

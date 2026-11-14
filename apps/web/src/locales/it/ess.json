@@ -728,13 +728,9 @@
   },
   "orgChart": {
     "title": "Organigramma",
-    "description": "La tua posizione nell'organizzazione.",
+    "description": "La tua unità nell'organizzazione, con le persone e le unità intorno a te.",
     "personalView": "Vista personale",
-    "nodeCount": "{{count}} posizioni",
-    "empty": "Nessun organigramma disponibile.",
-    "error": "Impossibile caricare l'organigramma.",
-    "noNodes": "Organigramma vuoto.",
-    "graphAria": "Grafico organigramma"
+    "tuaUnita": "La tua unità è evidenziata."
   },
   "approvals": {
     "title": "Le mie approvazioni",

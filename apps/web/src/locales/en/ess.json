@@ -728,13 +728,9 @@
   },
   "orgChart": {
     "title": "Org chart",
-    "description": "Your position in the organization.",
+    "description": "Your unit in the organisation, with the people and units around you.",
     "personalView": "Personal view",
-    "nodeCount": "{{count}} positions",
-    "empty": "No org chart available.",
-    "error": "Could not load the org chart.",
-    "noNodes": "Empty org chart.",
-    "graphAria": "Org chart graph"
+    "tuaUnita": "Your unit is highlighted."
   },
   "approvals": {
     "title": "My approvals",

@@ -125,6 +125,21 @@ export default function VisualizationDetailPage() {
     },
   });
 
+  // Piano organigrammi a blocchi (2026-11-14, V2): un organigramma salvato si riallinea alle
+  // posizioni attive di oggi, invece di restare com'era il giorno in cui fu scritto.
+  const rigenera = useMutation({
+    mutationFn: () =>
+      apiFetch<{ nodi: number; archi: number; nodiAggiunti: number; nodiTolti: number }>(
+        `/v1/visualization-graphs/${graphId}/rigenera`,
+        { method: "POST", body: {} },
+      ),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["visualization-nodes", graphId] });
+      void queryClient.invalidateQueries({ queryKey: ["visualization-edges", graphId] });
+      void queryClient.invalidateQueries({ queryKey: ["visualization-graphs", graphId] });
+    },
+  });
+
   // Genera l'export E lo scarica: due passi che per chi guarda sono un gesto solo.
   const exportNow = useMutation({
     mutationFn: async () => {
@@ -221,6 +236,29 @@ export default function VisualizationDetailPage() {
           </>
         }
       />
+
+      {g.type === "ORG_CHART" ? (
+        <Card data-testid="visualization-rigenera">
+          <CardContent className="flex flex-wrap items-center gap-3 pt-6 text-sm">
+            <p className="min-w-0 flex-1 text-muted-foreground">
+              {t("visualizations.detail.rigenera.spiegazione")}{" "}
+              <Link href="/organization/org-chart" className="text-primary hover:underline">{t("visualizations.detail.rigenera.vivo")}</Link>
+            </p>
+            {rigenera.data ? (
+              <span className="text-xs" data-testid="visualization-rigenera-esito">
+                {t("visualizations.detail.rigenera.esito", rigenera.data)}
+              </span>
+            ) : rigenera.isError ? (
+              <span className="text-xs text-destructive">{t("visualizations.detail.rigenera.errore")}</span>
+            ) : null}
+            {canCreate ? (
+              <Button type="button" size="sm" variant="outline" onClick={() => rigenera.mutate()} disabled={rigenera.isPending} data-testid="visualization-rigenera-btn">
+                {rigenera.isPending ? t("visualizations.detail.rigenera.inCorso") : t("visualizations.detail.rigenera.azione")}
+              </Button>
+            ) : null}
+          </CardContent>
+        </Card>
+      ) : null}
 
       {/* C5: grafo, elementi e versioni stanno in tre schede invece di nove schermate */}
       <SchedePagina

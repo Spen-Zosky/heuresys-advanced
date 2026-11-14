@@ -122,18 +122,21 @@ describe.skipIf(!collaudo)("l'applicazione delle decisioni (AC-8)", () => {
     await pool.query(`UPDATE sys.sys_skills SET skill_name = $2 WHERE skill_id = $1`, [tenantSkillId, nomePrima]);
   });
 
-  it("lacuna adottata: la voce si crea una volta sola, anche riadottando", async () => {
+  it("lacuna adottata: la competenza non si duplica né resta isolata, anche riadottando", async () => {
+    // Senza URI ESCO non si crea (sarebbe residuo per v_skill_isolate_residue); con l'URI già nel
+    // catalogo il tenant la usa da lì. In entrambi i casi il tenant non riceve una copia.
     const id = await creaProposta("LACUNA", [lacunaCode], []);
     const conta = async () => (await pool.query<{ n: number }>(
       `SELECT count(*)::int n FROM sys.sys_skills WHERE skill_tenant_id = $1 AND skill_code = $2`, [direttore.tenantId, lacunaCode])).rows[0]!.n;
     expect(await conta()).toBe(0);
     await svc.decide(direttore, id, { decision: "ADOTTATA" });
     expect(await conta()).toBe(0); // registrata, non eseguita
-    expect(await svc.applyChanges(direttore, sessioneId)).toMatchObject({ applied: 1, created: 1 });
-    expect(await conta()).toBe(1);
+    const r = await svc.applyChanges(direttore, sessioneId);
+    expect(r).toMatchObject({ applied: 1, created: 0 });
+    expect(r.skipped.join(" ")).toMatch(/ESCO/);
     await svc.decide(direttore, id, { decision: "ADOTTATA" });
     expect(await svc.applyChanges(direttore, sessioneId)).toMatchObject({ applied: 1, created: 0 });
-    expect(await conta()).toBe(1);
+    expect(await conta()).toBe(0);
   });
 
   it("un'unità adottata non si crea da sola: senza responsabile spezzerebbe la guardia della 000247", async () => {

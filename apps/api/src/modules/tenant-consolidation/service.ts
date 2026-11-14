@@ -26,6 +26,9 @@ import {
   CONSOLIDATION_GROUP_VALUES,
   nextConsolidationGroup,
   type ApplyChangesResult,
+  type ApprovalPreview,
+  type CascadeResponse,
+  type PendingApproval,
   type AvailableDeliveryList,
   type BlueprintRun,
   type ReceiveDeliveryBody,
@@ -44,6 +47,8 @@ import { consolidaGruppo, nuovoStato, type Giudice } from "./engine.js";
 import { giudiceDaAmbiente } from "./giudice.js";
 import { applicaDecisione } from "./applicazione.js";
 import { vociDelPrototipo, vociDelTenant } from "./sorgenti.js";
+import { accese, contaSentinelle } from "./approvazione.js";
+import { CAMPI_IN_CASCATA, cascataDi, sceltaInCascata } from "./cascata.js";
 import {
   accogliConsegna,
   consegneDisponibili,
@@ -173,6 +178,75 @@ export async function eseguiGiri(
   } catch (e) {
     const codice = e instanceof InternalError ? e.code : "CONSOLIDATION_RUN_FAILED";
     await repo.releaseRun(pool, id, { group, ok: false, error: codice, ms: Date.now() - inizio }).catch(() => undefined);
+  }
+}
+
+/** L'approvazione definitiva, l'anteprima e lo scarto sono del Direttore HR: un delegato decide, non riversa. */
+async function soloDirettore(actor: ActorContext): Promise<void> {
+  const m = await mandatoDi(actor);
+  if (!m.direttore) {
+    throw new ForbiddenError("Solo il Direttore HR approva definitivamente le modifiche", "PERMISSION_DENIED");
+  }
+}
+
+/**
+ * Riversa nei dati vivi tutte le decisioni della bozza, in una transazione: misura le sentinelle prima
+ * e dopo, e se `conferma` è falso (anteprima) o qualche sentinella si accende, annulla tutto.
+ */
+async function riversa(
+  tenantId: string,
+  id: string,
+  userId: string | null,
+  conferma: boolean,
+): Promise<ApprovalPreview> {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const s = await repo.getConsolidation(client, tenantId, id, true);
+    if (!s) throw new NotFoundError("Sessione di consolidamento non trovata", "CONSOLIDATION_NOT_FOUND");
+    if (s.runningGroup) {
+      throw new ConflictError("L'agente sta lavorando su questa sessione: si approva quando ha finito", "CONSOLIDATION_RUN_BUSY");
+    }
+    const prima = await contaSentinelle(client);
+    const da = await repo.decisioniDaApplicare(client, tenantId, id);
+    const result: ApplyChangesResult = { applied: 0, changed: 0, created: 0, reverted: 0, skipped: [] };
+    for (const r of da) {
+      const rap = await applicaDecisione(
+        client, tenantId, s.variantVersionId,
+        { proposalId: r.proposalId, group: r.group, tenantKeys: r.tenantKeys, prototypeKeys: r.prototypeKeys },
+        { decisionId: r.decisionId, decision: r.decision, form: r.form, adr48State: r.adr48State },
+      );
+      result.applied++;
+      result.changed += rap.changed.length;
+      result.created += rap.created.length;
+      result.reverted += rap.reverted;
+      result.skipped.push(...rap.skipped);
+    }
+    const dopo = await contaSentinelle(client);
+    const violations = accese(prima, dopo);
+    const toRecompute = accese(prima, dopo, true);
+    if (conferma && violations.length === 0) {
+      if (s.runId && result.applied > 0) {
+        await client.query(
+          `UPDATE sys.sys_blueprint_runs
+              SET blueprint_run_final_results = jsonb_build_object(
+                    'approvedAt', now(), 'approvedBy', $2::text, 'consolidationId', $3::text,
+                    'applied', $4::int, 'changed', $5::int, 'created', $6::int, 'reverted', $7::int,
+                    'previous', CASE WHEN blueprint_run_final_results = '{}'::jsonb THEN NULL ELSE blueprint_run_final_results END)
+            WHERE blueprint_run_id = $1`,
+          [s.runId, userId, id, result.applied, result.changed, result.created, result.reverted],
+        );
+      }
+      await client.query("COMMIT");
+    } else {
+      await client.query("ROLLBACK");
+    }
+    return { result, violations, toRecompute };
+  } catch (e) {
+    await client.query("ROLLBACK").catch(() => undefined);
+    throw e;
+  } finally {
+    client.release();
   }
 }
 
@@ -326,7 +400,27 @@ export const tenantConsolidationService = {
         delegationId: m.gruppi.get(p.group) ?? null,
         supersedesId: p.decisionId,
       });
-      // Decidere registra soltanto: i dati cambiano quando la persona preme «Esegui modifiche» (applyChanges).
+      // «Aggiorna cascata»: la stessa scelta sulle proposte legate a questa nel modello e ancora senza decisione.
+      if (body.cascade) {
+        const s = await repo.getConsolidation(client, tenantId, p.consolidationId);
+        for (const c of s ? await cascataDi(client, s.variantVersionId, p) : []) {
+          if (c.decision !== null || !m.gruppi.has(c.group)) continue;
+          const scelta = sceltaInCascata(body.decision, c.outcome);
+          if (!scelta) continue;
+          const formaC: LinkForm | null = scelta === "CONFERMATA" ? "NORMALIZZATA" : null;
+          await repo.insertDecision(client, tenantId, {
+            proposalId: c.proposalId,
+            decision: scelta,
+            form: formaC,
+            adr48State: statoAdr48(scelta, formaC),
+            reason: `In cascata dalla decisione sulla proposta ${proposalId}`,
+            userId: actor.userId,
+            delegationId: m.gruppi.get(c.group) ?? null,
+            supersedesId: null,
+          });
+        }
+      }
+      // Decidere registra soltanto, nella bozza: i dati cambiano con «Approva definitivamente le modifiche».
       const [dopo] = await repo.getProposals(client, tenantId, [proposalId]);
       const { decisionId: _d, status: _s, ...proposta } = dopo!;
       return proposta;
@@ -387,26 +481,81 @@ export const tenantConsolidationService = {
    */
   async applyChanges(actor: ActorContext, id: string): Promise<ApplyChangesResult> {
     const tenantId = tenantDi(actor);
-    const m = await mandatoDi(actor);
+    await soloDirettore(actor);
+    const { result, violations } = await riversa(tenantId, id, actor.userId, true);
+    if (violations.length > 0) {
+      throw new ConflictError(
+        `L'approvazione accenderebbe ${violations.length} controlli del database (${violations.map((v) => v.view).join(", ")}): niente è stato scritto`,
+        "CONSOLIDATION_APPROVAL_BREAKS_INVARIANTS",
+      );
+    }
+    return result;
+  },
+
+  /** L'anteprima dell'approvazione: la stessa transazione, annullata alla fine. */
+  async previewChanges(actor: ActorContext, id: string): Promise<ApprovalPreview> {
+    const tenantId = tenantDi(actor);
+    await soloDirettore(actor);
+    return riversa(tenantId, id, actor.userId, false);
+  },
+
+  /** «Scarta modifiche»: toglie dalla bozza le decisioni non ancora approvate; restano quelle già riversate. */
+  async discardChanges(actor: ActorContext, id: string): Promise<{ discarded: number }> {
+    const tenantId = tenantDi(actor);
+    await soloDirettore(actor);
     return withTransaction(async (client) => {
       const s = await repo.getConsolidation(client, tenantId, id, true);
       if (!s) throw new NotFoundError("Sessione di consolidamento non trovata", "CONSOLIDATION_NOT_FOUND");
-      const da = (await repo.decisioniDaApplicare(client, tenantId, id)).filter((r) => m.gruppi.has(r.group));
-      const esito: ApplyChangesResult = { applied: 0, changed: 0, created: 0, reverted: 0, skipped: [] };
-      for (const r of da) {
-        const rap = await applicaDecisione(
-          client, tenantId, s.variantVersionId,
-          { proposalId: r.proposalId, group: r.group, tenantKeys: r.tenantKeys, prototypeKeys: r.prototypeKeys },
-          { decisionId: r.decisionId, decision: r.decision, form: r.form, adr48State: r.adr48State },
-        );
-        esito.applied++;
-        esito.changed += rap.changed.length;
-        esito.created += rap.created.length;
-        esito.reverted += rap.reverted;
-        esito.skipped.push(...rap.skipped);
-      }
-      return esito;
+      const r = await client.query(
+        `DELETE FROM sys.sys_tenant_consolidation_decisions d
+          USING sys.sys_tenant_consolidation_proposals p
+          WHERE p.tenant_consolidation_proposal_id = d.tenant_consolidation_decision_proposal_id
+            AND p.tenant_consolidation_proposal_consolidation_id = $1
+            AND d.tenant_consolidation_decision_tenant_id = $2
+            AND NOT EXISTS (SELECT 1 FROM sys.sys_tenant_consolidation_links l
+                             WHERE l.tenant_consolidation_link_decision_id = d.tenant_consolidation_decision_id)
+            AND NOT EXISTS (SELECT 1 FROM sys.sys_tenant_consolidation_decisions x
+                              JOIN sys.sys_tenant_consolidation_links l2
+                                ON l2.tenant_consolidation_link_decision_id = x.tenant_consolidation_decision_id
+                             WHERE x.tenant_consolidation_decision_supersedes_id = d.tenant_consolidation_decision_id)`,
+        [id, tenantId],
+      );
+      return { discarded: r.rowCount ?? 0 };
     });
+  },
+
+  /** Le modifiche nella bozza e non ancora approvate, per l'avviso nell'intestazione. */
+  async pendingApproval(actor: ActorContext): Promise<PendingApproval> {
+    const tenantId = tenantDi(actor);
+    await gruppiLeggibili(actor);
+    const aperta = (await repo.listConsolidations(pool, tenantId)).find((s) => s.status === "GIRI" || s.status === "IN_CONFERMA");
+    if (!aperta) return { pending: 0, consolidationId: null, since: null };
+    const da = await repo.decisioniDaApplicare(pool, tenantId, aperta.consolidationId);
+    const { rows } = await pool.query<{ t: Date | null }>(
+      `SELECT min(d.tenant_consolidation_decision_decided_at) AS t
+         FROM sys.sys_tenant_consolidation_decisions d WHERE d.tenant_consolidation_decision_id = ANY($1::uuid[])`,
+      [da.map((x) => x.decisionId)],
+    );
+    return { pending: da.length, consolidationId: aperta.consolidationId, since: rows[0]?.t ? rows[0].t.toISOString() : null };
+  },
+
+  /** La cascata di una proposta, con i nomi delle voci, prima di decidere. */
+  async cascade(actor: ActorContext, proposalId: string): Promise<CascadeResponse> {
+    const tenantId = tenantDi(actor);
+    await gruppiLeggibili(actor);
+    const [p] = await repo.getProposals(pool, tenantId, [proposalId]);
+    if (!p) throw new NotFoundError("Proposta non trovata", "CONSOLIDATION_PROPOSAL_NOT_FOUND");
+    const s = await sessione(tenantId, p.consolidationId);
+    const voci = await cascataDi(pool, s.variantVersionId, p);
+    const gruppi = [...new Set(voci.map((v) => v.group))];
+    const nomi = new Map<string, string>();
+    await Promise.all(gruppi.map(async (g) => {
+      for (const v of await vociDelPrototipo(pool, s.variantVersionId, g)) nomi.set(`${g}#${v.key}`, v.name);
+    }));
+    return {
+      items: voci.map((v) => ({ ...v, prototypeItems: v.prototypeKeys.map((key) => ({ key, name: nomi.get(`${v.group}#${key}`) ?? null })) })),
+      fields: CAMPI_IN_CASCATA[p.group] ?? [],
+    };
   },
 
   /**

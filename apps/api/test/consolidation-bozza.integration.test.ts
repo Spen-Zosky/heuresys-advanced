@@ -74,7 +74,9 @@ beforeAll(async () => {
     [direttore.tenantId, direttore.userId]);
   lettore = { userId: l.rows[0]!.user_id, tenantId: direttore.tenantId, roles: await ruoliDi(l.rows[0]!.user_id) };
 
-  // un modello che porta un'unità con sede e organico e almeno una posizione in quell'unità
+  // Un modello con un'unità che ha almeno una posizione: prima quelli che portano già sede e organico
+  // (la corsa del datastore in produzione); il database della CI non ha le corse accolte da script,
+  // e lì sede e organico si scrivono sull'unità del modello (l'isolamento del file li annulla).
   const m = await pool.query<{ ver: string; unit: string; pos: string }>(
     `SELECT u.blueprint_content_unit_version_id AS ver, u.blueprint_content_unit_code AS unit,
             min(p.blueprint_content_position_code) AS pos
@@ -82,10 +84,16 @@ beforeAll(async () => {
        JOIN sys.sys_blueprint_content_positions p
          ON p.blueprint_content_position_version_id = u.blueprint_content_unit_version_id
         AND p.blueprint_content_position_unit_code = u.blueprint_content_unit_code
-      WHERE u.blueprint_content_unit_site_code IS NOT NULL AND u.blueprint_content_unit_planned_headcount IS NOT NULL
-      GROUP BY 1, 2 ORDER BY 1, 2 LIMIT 1`);
-  if (!m.rows[0]) throw new Error("nessun modello con unità, sede e posizioni: la corsa del datastore non è caricata?");
+      GROUP BY 1, 2
+      ORDER BY bool_or(u.blueprint_content_unit_site_code IS NOT NULL AND u.blueprint_content_unit_planned_headcount IS NOT NULL) DESC, 1, 2
+      LIMIT 1`);
+  if (!m.rows[0]) throw new Error("nessun modello con un'unità e le sue posizioni nel database");
   ({ ver: versione, unit: unitaModello, pos: posizioneModello } = m.rows[0]);
+  await pool.query(
+    `UPDATE sys.sys_blueprint_content_units
+        SET blueprint_content_unit_site_code = coalesce(blueprint_content_unit_site_code, 'SEDE-PROVA'),
+            blueprint_content_unit_planned_headcount = coalesce(blueprint_content_unit_planned_headcount, 7)
+      WHERE blueprint_content_unit_version_id = $1 AND blueprint_content_unit_code = $2`, [versione, unitaModello]);
   const u = await pool.query<{ id: string }>(
     `SELECT organization_unit_id AS id FROM sys.sys_organization_units
       WHERE organization_unit_tenant_id = $1 AND organization_unit_is_active ORDER BY organization_unit_code LIMIT 1`,

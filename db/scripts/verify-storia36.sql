@@ -20,6 +20,33 @@
 -- ============================================================================
 
 \set ON_ERROR_STOP on
+
+-- PROPRIETARIO DELLE FUNZIONI staging.storia36_*: devono essere di chi possiede lo schema staging (oggi `heuresys`, il ruolo con cui
+-- gira la custodia). Una corsa a mano come `postgres` crea le funzioni NUOVE di proprieta' di `postgres` e la custodia successiva
+-- cade su «must be owner of function» (13/11/2026: storia36_data_allineamento, _livello_at, _ral_corrente_at, _riporto_at).
+--   · come superuser: riassegna da solo le funzioni al proprietario dello schema (idempotente, nessun effetto se gia' a posto);
+--   · come ruolo normale: se una funzione e' di un altro, si ferma SUBITO con il comando esatto invece del messaggio criptico.
+DO $prop$
+DECLARE
+  r record;
+  v_ref name := (SELECT pg_get_userbyid(nspowner) FROM pg_namespace WHERE nspname = 'staging');
+  v_su boolean := (SELECT rolsuper FROM pg_roles WHERE rolname = current_user);
+BEGIN
+  FOR r IN SELECT p.oid::regprocedure::text AS f, pg_get_userbyid(p.proowner) AS o
+             FROM pg_proc p
+            WHERE p.pronamespace = 'staging'::regnamespace AND p.proname LIKE 'storia36%'
+              AND pg_get_userbyid(p.proowner) <> v_ref
+  LOOP
+    IF v_su THEN
+      EXECUTE format('ALTER FUNCTION %s OWNER TO %I', r.f, v_ref);
+      RAISE NOTICE 'storia36: % era di %, ora e'' di %', r.f, r.o, v_ref;
+    ELSIF NOT pg_has_role(current_user, r.o, 'MEMBER') THEN
+      RAISE EXCEPTION 'storia36: la funzione % e'' di %, non di % (proprietario dello schema staging), e la verifica gira come %, che non puo'' cambiarla. Serve un superuser: o rilancia questa stessa verifica da superuser (riassegna da sola le funzioni), o esegui ALTER FUNCTION % OWNER TO %;',
+        r.f, r.o, v_ref, current_user, r.f, v_ref;
+    END IF;
+  END LOOP;
+END $prop$;
+
 \if :{?selftest}
 \else
 \set selftest 0
@@ -7741,6 +7768,32 @@ BEGIN
   END;
 END $$;
 \endif
+
+-- PROPRIETARIO DELLE FUNZIONI staging.storia36_*: devono essere di chi possiede lo schema staging (oggi `heuresys`, il ruolo con cui
+-- gira la custodia). Una corsa a mano come `postgres` crea le funzioni NUOVE di proprieta' di `postgres` e la custodia successiva
+-- cade su «must be owner of function» (13/11/2026: storia36_data_allineamento, _livello_at, _ral_corrente_at, _riporto_at).
+--   · come superuser: riassegna da solo le funzioni al proprietario dello schema (idempotente, nessun effetto se gia' a posto);
+--   · come ruolo normale: se una funzione e' di un altro, si ferma SUBITO con il comando esatto invece del messaggio criptico.
+DO $prop$
+DECLARE
+  r record;
+  v_ref name := (SELECT pg_get_userbyid(nspowner) FROM pg_namespace WHERE nspname = 'staging');
+  v_su boolean := (SELECT rolsuper FROM pg_roles WHERE rolname = current_user);
+BEGIN
+  FOR r IN SELECT p.oid::regprocedure::text AS f, pg_get_userbyid(p.proowner) AS o
+             FROM pg_proc p
+            WHERE p.pronamespace = 'staging'::regnamespace AND p.proname LIKE 'storia36%'
+              AND pg_get_userbyid(p.proowner) <> v_ref
+  LOOP
+    IF v_su THEN
+      EXECUTE format('ALTER FUNCTION %s OWNER TO %I', r.f, v_ref);
+      RAISE NOTICE 'storia36: % era di %, ora e'' di %', r.f, r.o, v_ref;
+    ELSIF NOT pg_has_role(current_user, r.o, 'MEMBER') THEN
+      RAISE EXCEPTION 'storia36: la funzione % e'' di %, non di % (proprietario dello schema staging), e la verifica gira come %, che non puo'' cambiarla. Serve un superuser: o rilancia questa stessa verifica da superuser (riassegna da sola le funzioni), o esegui ALTER FUNCTION % OWNER TO %;',
+        r.f, r.o, v_ref, current_user, r.f, v_ref;
+    END IF;
+  END LOOP;
+END $prop$;
 
 -- ============================================================================
 -- RUNNER — esegue TUTTI i check, stampa l'esito di ognuno, fallisce alla fine

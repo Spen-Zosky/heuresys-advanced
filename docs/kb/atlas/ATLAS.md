@@ -1,18 +1,18 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `a41c6e99` (2026-11-13T14:37:19+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `d0725bda` (2026-11-14T11:16:34+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
 | Layer | Valore |
 |---|---|
-| Moduli API | 120 |
-| Route API | 712 |
+| Moduli API | 121 |
+| Route API | 718 |
 | Pagine web | 132 |
-| Schemi shared | 133 |
-| Tabelle DB | 411 (vuote: 70) |
+| Schemi shared | 134 |
+| Tabelle DB | 413 (vuote: 76) |
 | Viste / matview | 88 / 0 |
-| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 340 |
+| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 364 |
 
 ## Moduli API
 
@@ -73,7 +73,7 @@
 | learning-path-steps | /v1/learning-path-steps | 5 | 4 | 3 | 1 |
 | learning-paths | /v1/learning-paths | 5 | 4 | 2 | 1 |
 | mandate-acts | /v1/mandate-acts | 6 | 1 | 5 | 0 |
-| me | /v1/me | 75 | 32 | 64 | 48 |
+| me | /v1/me | 76 | 32 | 64 | 49 |
 | mentorship | /v1/mentorship | 17 | 4 | 4 | 3 |
 | mfa-policy | /v1/mfa-policy | 4 | 2 | 4 | 1 |
 | notifications | /v1/notifications | 2 | 2 | 2 | 0 |
@@ -82,6 +82,7 @@
 | okrs | /v1/okrs | 7 | 4 | 3 | 3 |
 | operating-models | /v1/operating-models | 4 | 3 | 1 | 1 |
 | org-health | /v1/org-health | 1 | 1 | 11 | 1 |
+| organigramma | — | 0 | 0 | 5 | 1 |
 | organization-unit-history | /v1/organization-unit-history | 3 | 3 | 2 | 1 |
 | organization-unit-kpi-templates | /v1/organization-unit-kpi-templates | 4 | 3 | 3 | 1 |
 | organization-unit-processes | /v1/organization-unit-processes | 4 | 3 | 4 | 2 |
@@ -119,7 +120,7 @@
 | talent-review | /v1/talent-review | 6 | 1 | 8 | 2 |
 | teams | /v1/teams | 6 | 3 | 3 | 2 |
 | tenant-blueprints | /v1/tenant-blueprints | 20 | 2 | 15 | 1 |
-| tenant-consolidation | /v1/consolidation-vocabulary, /v1/tenant-consolidations | 14 | 3 | 30 | 2 |
+| tenant-consolidation | /v1/consolidation-runs, /v1/consolidation-vocabulary, /v1/tenant-consolidations | 18 | 3 | 35 | 2 |
 | tenant-import-runs | /v1/tenant-import-runs | 5 | 2 | 15 | 1 |
 | tenant-materialization | /v1/tenant-materialization | 2 | 1 | 18 | 1 |
 | tenants | /v1/tenants | 7 | 4 | 3 | 1 |
@@ -132,7 +133,7 @@
 | users | /v1/users | 10 | 5 | 8 | 1 |
 | visualization-edges | /v1/visualization-edges | 4 | 3 | 3 | 1 |
 | visualization-exports | /v1/visualization-exports | 4 | 2 | 2 | 1 |
-| visualization-graphs | /v1/visualization-graphs | 9 | 4 | 6 | 1 |
+| visualization-graphs | /v1/visualization-graphs | 10 | 4 | 7 | 1 |
 | visualization-layouts | /v1/visualization-layouts | 5 | 4 | 2 | 1 |
 | visualization-node-layouts | /v1/visualization-node-layouts | 4 | 3 | 4 | 1 |
 | visualization-nodes | /v1/visualization-nodes | 5 | 4 | 2 | 1 |
@@ -218,6 +219,12 @@
 - `sys.sys_occupation_classification_mappings`
 - `sys.sys_platform_user_tenant_assignments`
 - `sys.sys_platform_vocabulary_equivalences`
+- `sys.sys_tenant_consolidation_decisions`
+- `sys.sys_tenant_consolidation_links`
+- `sys.sys_tenant_consolidation_proposals`
+- `sys.sys_tenant_consolidation_rounds`
+- `sys.sys_tenant_consolidation_working_items`
+- `sys.sys_tenant_consolidations`
 
 ## Key counts live
 

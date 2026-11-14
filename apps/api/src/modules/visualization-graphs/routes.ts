@@ -10,6 +10,7 @@ import {
   VizGraphSummaryResponseSchema, VizGraphRenderResponseSchema,
   CreateVizGraphBodySchema, UpdateVizGraphBodySchema, VizGraphIdParamSchema,
   CreateVizGraphVersionBodySchema, VizGraphVersionResponseSchema, VizGraphVersionListResponseSchema,
+  VizGraphRigeneraResponseSchema,
 } from "@heuresys/shared";
 import { visualizationGraphsService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
@@ -60,6 +61,12 @@ export const visualizationGraphsRoutes: FastifyPluginAsyncZod = async (app) => {
     const r = await visualizationGraphsService.createVersion(actor(req), req.params.id, req.body);
     reply.code(201).send(r);
   });
+
+  // Piano organigrammi a blocchi (2026-11-14, V2): «Aggiorna dai dati vivi» di un organigramma salvato.
+  app.post("/:id/rigenera", {
+    preHandler: [app.verifyCsrf, requirePermission("visualization:create")],
+    schema: { params: VizGraphIdParamSchema, response: { 200: VizGraphRigeneraResponseSchema } },
+  }, async (req) => visualizationGraphsService.rigenera(actor(req), req.params.id));
 
   app.patch("/:id", {
     preHandler: [app.verifyCsrf, requirePermission("visualization:update_layout")],

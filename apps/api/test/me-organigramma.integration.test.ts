@@ -17,7 +17,7 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
-import { comporre } from "../src/modules/organigramma/repository.js";
+import { comporre } from "../src/modules/organigramma/comporre.js";
 import type { OrganigrammaResponse } from "@heuresys/shared";
 
 const EMAIL = "paolo.caputo@rtl-bank.org";

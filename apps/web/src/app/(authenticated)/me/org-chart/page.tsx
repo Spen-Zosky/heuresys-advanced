@@ -1,69 +1,35 @@
 "use client";
 
+/**
+ * /me/org-chart — il mio organigramma.
+ *
+ * Piano docs/piani/PIANO_organigrammi-a-blocchi_20261114.md (V6). Lo stesso organigramma vivo
+ * di /organization/org-chart (`GET /v1/me/organigramma`), con la propria unità in risalto: nei
+ * blocchi il riquadro ha il bordo del colore primario, nei nodi il ramo che porta a lei è aperto.
+ * Prima era il grafo a forza salvato, con le posizioni di un'organizzazione che non c'è più.
+ */
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { Card, CardContent } from "@heuresys/ui";
 import { PageHeader } from "@/components/intestazione-pagina";
 import { apiFetch } from "@/lib/api/fetch";
-import { EChartsCard } from "../../_charts-client";
-import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
+import { useOrganigramma, VistaOrganigramma } from "@/components/organigramma/vista";
 
-interface VizGraph { graphId: string; name: string; type: string; isActive: boolean }
-interface RenderNode { nodeId: string; label: string; sourceEntityId: string | null }
-interface RenderEdge { sourceNodeId: string; targetNodeId: string }
-interface RenderPayload { graph: { graphId: string; name: string }; nodes: RenderNode[]; edges: RenderEdge[] }
-interface MePositions { items: Array<{ positionId: string; isPrimary: boolean }>; total: number }
+interface MeProfilo { userId: string }
 
-/** Organigramma personale (S1011 F5.2) — reuses the live ORG_CHART graph, highlights the caller's own node. */
 export default function MeOrgChartPage() {
   const { t } = useTranslation("ess");
-  const graphs = useQuery({
-    queryKey: ["me-org-chart", "graphs"],
-    queryFn: () => apiFetch<{ items: VizGraph[]; total: number }>("/v1/visualization-graphs?type=ORG_CHART&limit=10"),
-  });
-  const graphId = graphs.data?.items[0]?.graphId ?? null;
-  const render = useQuery({
-    queryKey: ["me-org-chart", "render", graphId],
-    queryFn: () => apiFetch<RenderPayload>(`/v1/visualization-graphs/${graphId}/render`),
-    enabled: !!graphId,
-  });
-  const positions = useQuery({
-    queryKey: ["me", "positions"],
-    queryFn: () => apiFetch<MePositions>("/v1/me/positions"),
-  });
-
-  const ownPositionId =
-    positions.data?.items.find((p) => p.isPrimary)?.positionId ?? positions.data?.items[0]?.positionId ?? null;
-  const nodes = render.data?.nodes ?? [];
-
-  const option = {
-    tooltip: { trigger: "item" as const },
-    series: [
-      {
-        type: "graph" as const,
-        layout: "force" as const,
-        roam: true,
-        label: { show: true, position: "right" as const, fontSize: 11, color: "hsl(var(--foreground))" },
-        force: { repulsion: 60, edgeLength: 80, gravity: 0.08 },
-        data: nodes.map((n) => {
-          // nodeId is the visualization node's own UUID — the position lives in
-          // sourceEntityId (census F4 S1026: the highlight never fired on nodeId)
-          const mine = n.sourceEntityId !== null && n.sourceEntityId === ownPositionId;
-          return {
-            id: n.nodeId, name: n.label,
-            symbolSize: mine ? 30 : 14,
-            itemStyle: { color: mine ? "hsl(var(--palette-4))" : "hsl(var(--palette-1))", borderColor: mine ? "hsl(var(--foreground))" : undefined, borderWidth: mine ? 3 : 0 },
-          };
-        }),
-        links: (render.data?.edges ?? []).map((e) => ({ source: e.sourceNodeId, target: e.targetNodeId })),
-        lineStyle: { color: "hsl(var(--palette-1))", opacity: 0.6, curveness: 0.1 },
-        emphasis: { focus: "adjacency" as const },
-      },
-    ],
-  };
+  const io = useQuery({ queryKey: ["me", "profile"], queryFn: () => apiFetch<MeProfilo>("/v1/me/profile") });
+  const org = useOrganigramma();
+  const mio = io.data?.userId ?? null;
+  const evidenzia = useMemo(
+    () => new Set((org.data?.unita ?? []).filter((u) => mio && u.persone.some((p) => p.id === mio)).map((u) => u.id)),
+    [org.data, mio],
+  );
 
   return (
-    <main data-testid="me-org-chart-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <main data-testid="me-org-chart-page" className="mx-auto max-w-[96rem] space-y-6 px-6 pb-8">
       <PageHeader
         title={t("orgChart.title")}
         description={t("orgChart.description")}
@@ -74,23 +40,9 @@ export default function MeOrgChartPage() {
         }
       />
       <Card>
-        <CardHeader>
-          <CardTitle>{render.data ? t("orgChart.nodeCount", { count: nodes.length }) : t("orgChart.title")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {graphs.isLoading || (graphId && render.isLoading) ? (
-            <StatoCaricamento />
-          ) : !graphId ? (
-            <StatoVuoto titolo={t("orgChart.empty")} testId="me-org-chart-empty" />
-          ) : render.isError ? (
-            <StatoErrore errore={render.error} titolo={t("orgChart.error")} testId="me-org-chart-error" onRiprova={() => void render.refetch()} />
-          ) : nodes.length === 0 ? (
-            <StatoVuoto titolo={t("orgChart.noNodes")} testId="me-org-chart-nodes-empty" />
-          ) : (
-            <div data-testid="me-org-chart-graph">
-              <EChartsCard option={option} height={520} ariaLabel={t("orgChart.graphAria")} />
-            </div>
-          )}
+        <CardContent className="space-y-2 pt-6" data-testid="me-org-chart-graph">
+          {evidenzia.size ? <p className="text-xs text-muted-foreground">{t("orgChart.tuaUnita")}</p> : null}
+          <VistaOrganigramma evidenzia={evidenzia} testId="me-org-chart-vista" />
         </CardContent>
       </Card>
     </main>

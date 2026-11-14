@@ -1,82 +1,31 @@
 "use client";
 
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useTranslation } from "react-i18next";
+/**
+ * /organization/org-chart — l'organigramma del cliente.
+ *
+ * Piano docs/piani/PIANO_organigrammi-a-blocchi_20261114.md (V6). Fino al 2026-11-14 questa
+ * pagina disegnava il grafo a forza salvato (`sys_visualization_*`), scritto una volta da un seed
+ * e mai aggiornato: 162 nodi di posizione sovrapposti, nomi in inglese di posizioni scomparse,
+ * «HR Director» staccato dal «CEO». Ora l'organigramma si calcola dai dati vivi a ogni apertura
+ * (`GET /v1/me/organigramma`), a blocchi con le persone come nel banco del datastore, oppure a
+ * nodi; «Aggiorna» lo ricalcola. Un mandato che vede più clienti sceglie con `?tenantId=`.
+ */
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { useSearchParams } from "next/navigation";
+import { useTranslation } from "react-i18next";
+import { Card, CardContent } from "@heuresys/ui";
 import { PageHeader } from "@/components/intestazione-pagina";
-import { apiFetch } from "@/lib/api/fetch";
-import { EChartsCard } from "../../_charts-client";
-import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
-
-// Real schema fields (graphId/type/isActive), not the stale visualizationGraphId/
-// graphKind this page used before F4.4. The list query also now filters by ?type=
-// (the previous ?graphKind= was silently ignored → it returned every graph).
-interface VizGraph {
-  graphId: string;
-  name: string;
-  type: string;
-  isActive: boolean;
-}
-interface RenderNode {
-  nodeId: string;
-  label: string;
-}
-interface RenderEdge {
-  sourceNodeId: string;
-  targetNodeId: string;
-}
-interface RenderPayload {
-  graph: { graphId: string; name: string };
-  nodes: RenderNode[];
-  edges: RenderEdge[];
-}
+import { VistaOrganigramma } from "@/components/organigramma/vista";
 
 export default function OrgChartPage() {
   const { t } = useTranslation("admin");
-  const graphs = useQuery({
-    queryKey: ["visualization-graphs", "ORG_CHART"],
-    queryFn: () =>
-      apiFetch<{ items: VizGraph[]; total: number }>(
-        "/v1/visualization-graphs?type=ORG_CHART&limit=10",
-      ),
-  });
-
-  const [activeGraphId, setActiveGraphId] = useState<string | null>(null);
-  const effectiveGraphId = activeGraphId ?? graphs.data?.items[0]?.graphId ?? null;
-
-  // Composite render payload (graph + nodes + edges) in one call (F4.4).
-  const render = useQuery({
-    queryKey: ["visualization-render", effectiveGraphId],
-    queryFn: () => apiFetch<RenderPayload>(`/v1/visualization-graphs/${effectiveGraphId}/render`),
-    enabled: !!effectiveGraphId,
-  });
-
-  const nodeCount = render.data?.nodes.length ?? 0;
-  const graphOption = {
-    tooltip: { trigger: "item" as const },
-    series: [
-      {
-        type: "graph" as const,
-        layout: "force" as const,
-        roam: true,
-        label: { show: true, position: "right" as const, fontSize: 11, color: "hsl(var(--foreground))" },
-        force: { repulsion: 60, edgeLength: 80, gravity: 0.08 },
-        data: (render.data?.nodes ?? []).map((n) => ({ id: n.nodeId, name: n.label })),
-        links: (render.data?.edges ?? []).map((e) => ({ source: e.sourceNodeId, target: e.targetNodeId })),
-        lineStyle: { color: "hsl(var(--palette-1))", opacity: 0.6, curveness: 0.1 },
-        itemStyle: { color: "hsl(var(--palette-1))" },
-        emphasis: { focus: "adjacency" as const },
-      },
-    ],
-  };
-
+  const tenantId = useSearchParams().get("tenantId");
   return (
-    <main data-testid="org-chart-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <main data-testid="org-chart-page" className="mx-auto max-w-[96rem] space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="org-chart-title"
         title={t("orgChart.title")}
+        description={t("orgChart.description")}
         breadcrumbs={
           <Link
             href="/organization"
@@ -86,67 +35,12 @@ export default function OrgChartPage() {
             {t("orgChart.back")}
           </Link>
         }
-        badges={
-          <span data-testid="org-chart-count" className="text-sm text-muted-foreground">
-            {graphs.data ? t("orgChart.count", { count: graphs.data.total }) : graphs.isError ? t("common:stato.nonDisponibile") : t("common:loading")}
-          </span>
-        }
       />
-
-      <section className="flex flex-wrap gap-2" data-testid="org-chart-picker">
-        {graphs.data?.items.map((g) => (
-          <button
-            key={g.graphId}
-            type="button"
-            onClick={() => setActiveGraphId(g.graphId)}
-            className={`rounded-card border px-3 py-1 text-xs transition-colors ${
-              effectiveGraphId === g.graphId
-                ? // token, non text-white: in dark il primary è #5E9DF5 e il bianco
-                  // scende a 2.75:1 (axe serious) — --color-primary-fg è l'ink
-                  // per-modo già ritarato in S982 (light 5.2:1, dark 6.5:1).
-                  "border-transparent bg-primary text-[color:var(--color-primary-fg)]"
-                : "border-border bg-card text-foreground hover:bg-muted"
-            }`}
-            data-testid="org-chart-picker-btn"
-          >
-            {g.name}
-          </button>
-        ))}
-      </section>
-
       <Card>
-        <CardHeader>
-          <CardTitle>{t("orgChart.cardTitle", { label: render.data ? t("orgChart.nodeCount", { count: nodeCount }) : t("orgChart.dash") })}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {!effectiveGraphId ? (
-            <StatoVuoto titolo={t("orgChart.emptyPrefix")} testId="org-chart-empty" />
-          ) : render.isLoading ? (
-            <StatoCaricamento />
-          ) : render.isError ? (
-            <StatoErrore
-              errore={render.error}
-              titolo={t("orgChart.error")}
-              testId="org-chart-error"
-              onRiprova={() => void render.refetch()}
-            />
-          ) : nodeCount === 0 ? (
-            <StatoVuoto titolo={t("orgChart.noNodes")} testId="org-chart-nodes-empty" />
-          ) : (
-            <div data-testid="org-chart-graph">
-              <EChartsCard
-                option={graphOption}
-                height={520}
-                ariaLabel={t("orgChart.graphAria")}
-              />
-            </div>
-          )}
+        <CardContent className="pt-6" data-testid="org-chart-graph">
+          <VistaOrganigramma tenantId={tenantId} testId="org-chart-vista" />
         </CardContent>
       </Card>
-
-      <p className="text-xs text-muted-foreground">
-        {t("orgChart.note")}
-      </p>
     </main>
   );
 }

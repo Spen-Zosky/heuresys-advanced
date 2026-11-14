@@ -184,7 +184,8 @@ export const consolidationRunRoutes: FastifyPluginAsyncZod = async (app) => {
 
   app.get("/deliveries", {
     config: conf,
-    preHandler: [LEGGE],
+    // Le consegne sono il catalogo dei prototipi del datastore: le vede chi può accoglierle, non ogni lettore.
+    preHandler: [requirePermission("consolidation:run")],
     schema: { response: { 200: AvailableDeliveryListResponseSchema } },
   }, async (req) => svc.deliveries(actor(req)));
 

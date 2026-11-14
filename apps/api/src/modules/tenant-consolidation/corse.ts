@@ -370,6 +370,11 @@ export async function risultatoIniziale(
 /* ── la corsa definitiva ──────────────────────────────────────────────────────────────── */
 
 /**
+ * Perché qui basta il mandato del Direttore HR e non `blueprint:activate` (rilievo di sicurezza del
+ * 2026-11-14, valutato): la versione è nel registro di QUESTO tenant (la si cerca per tenant), e dalla
+ * 000463 ogni attivazione fissa la propria versione, quindi pubblicarla la rende adottabile ma non
+ * cambia il modello di nessun altro tenant. Il catalogo dei prototipi non è un dato di un cliente.
+ *
  * La corsa diventa il modello in uso del tenant: la sua versione si pubblica (se è una bozza),
  * l'attivazione del tenant passa a lei (l'attivazione di un'altra variante si ritira, quella della
  * stessa variante cambia versione), la definitiva di prima diventa SUPERATA.

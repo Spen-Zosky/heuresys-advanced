@@ -65,6 +65,7 @@ export function RegistroCorse({
   const deliveries = useQuery({
     queryKey: ["consolidation-runs", "deliveries"],
     queryFn: () => apiFetch<AvailableDeliveryList>(`${RUNS}/deliveries`),
+    enabled: canRun,
   });
 
   // Di partenza la corsa caricata più di recente: l'API le restituisce in quell'ordine.

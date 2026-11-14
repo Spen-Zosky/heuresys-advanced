@@ -1,3 +1,8 @@
+-- @migrate: once
+-- 2026-11-14 (piano PIANO_registro-corse-consolidamento_20261114.md, W6): questo file e' un PASSAGGIO concluso (fase 4
+-- della ricostruzione dell'organigramma), e la sua auto-verifica conta TUTTE le unita' del database (43 con capo, 161
+-- assegnazioni). Riapplicato a ogni deploy, si rompeva appena il consolidamento creava un'unita' nuova (AREA-01/02,
+-- 2026-11-14 03:07): la guardia di un passaggio non sorveglia lo stato di oggi. Su un database nuovo gira comunque.
 -- ═══════════════════════════════════════════════════════════════════════════════
 -- 000247_organization_unit_managers.sql
 --

@@ -58,8 +58,11 @@ describe.skipIf(!collaudo)("l'applicazione delle decisioni (AC-8)", () => {
     const s = await pool.query<{ id: string; v: string }>(
       `SELECT tenant_consolidation_id id, tenant_consolidation_variant_version_id v FROM sys.sys_tenant_consolidations
         WHERE tenant_consolidation_tenant_id = $1 AND tenant_consolidation_status IN ('GIRI','IN_CONFERMA') LIMIT 1`, [direttore.tenantId]);
-    sessioneId = s.rows[0]!.id;
-    variantVersionId = s.rows[0]!.v;
+    // il database può non avere una sessione aperta (il giro del 01/11 di RTL è stato annullato): se ne apre una qui
+    const aperta: { id: string; v: string } = s.rows[0] ?? await svc.start(direttore, { trigger: "RICHIESTA" })
+      .then((x) => ({ id: x.consolidationId, v: x.variantVersionId }));
+    sessioneId = aperta.id;
+    variantVersionId = aperta.v;
     await svc.applyChanges(direttore, sessioneId); // le decisioni già prese in precedenza si eseguono una volta, qui
 
     // Una competenza del tenant e due del prototipo: una per l'abbinamento, una assente dal tenant (lacuna).

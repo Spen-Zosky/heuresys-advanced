@@ -26,6 +26,9 @@ import {
   CONSOLIDATION_GROUP_VALUES,
   nextConsolidationGroup,
   type ApplyChangesResult,
+  type AvailableDeliveryList,
+  type BlueprintRun,
+  type ReceiveDeliveryBody,
   type ConsolidationAccess,
   type ConsolidationGroup,
   type ConsolidationProposal,
@@ -41,6 +44,15 @@ import { consolidaGruppo, nuovoStato, type Giudice } from "./engine.js";
 import { giudiceDaAmbiente } from "./giudice.js";
 import { applicaDecisione } from "./applicazione.js";
 import { vociDelPrototipo, vociDelTenant } from "./sorgenti.js";
+import {
+  accogliConsegna,
+  consegneDisponibili,
+  corsa,
+  elencoCorse,
+  rendiDefinitiva,
+  risultatoIniziale,
+  sessioneAperta,
+} from "./corse.js";
 
 /** La soglia degli abbinamenti certi, la stessa che la pagina usa (`@heuresys/shared`). */
 export const SOGLIA_CERTI = CONSOLIDATION_CERTAIN_THRESHOLD;
@@ -141,9 +153,23 @@ export async function eseguiGiri(
     stato.rejected.push(...rifiuti);
     await consolidaGruppo(stato, giudice, { vocabulary: vocabolario });
     const scritte = await withTransaction((client) => repo.saveGroup(client, id, stato, null));
+    const ms = Date.now() - inizio;
     await repo.releaseRun(pool, id, {
-      group, ok: true, proposals: scritte, rounds: stato.rounds.length, fuse: stato.fuseTripped, ms: Date.now() - inizio,
+      group, ok: true, proposals: scritte, rounds: stato.rounds.length, fuse: stato.fuseTripped, ms,
     });
+    // la misura di partenza della corsa: solo il primo giro del gruppo nella prima sessione la scrive
+    const conta = (o: string) => stato.proposals.filter((p) => p.outcome === o).length;
+    await risultatoIniziale(pool, id, group, {
+      tenantItems: tenant.length,
+      prototypeItems: prototipo.length,
+      proposals: stato.proposals.length,
+      matches: conta("CORRISPONDENZA"),
+      certain: stato.proposals.filter((p) => p.outcome === "CORRISPONDENZA" && p.confidence >= SOGLIA_CERTI).length,
+      gaps: conta("LACUNA"),
+      customizations: conta("PERSONALIZZAZIONE"),
+      ms,
+      at: new Date().toISOString(),
+    }).catch(() => undefined);
   } catch (e) {
     const codice = e instanceof InternalError ? e.code : "CONSOLIDATION_RUN_FAILED";
     await repo.releaseRun(pool, id, { group, ok: false, error: codice, ms: Date.now() - inizio }).catch(() => undefined);
@@ -172,8 +198,24 @@ export const tenantConsolidationService = {
 
   async start(actor: ActorContext, body: StartConsolidationBody): Promise<TenantConsolidation> {
     const tenantId = tenantDi(actor);
-    // Senza versione indicata vale quella attiva per il tenant: è il prototipo che ha davvero.
-    const variantVersionId = body.variantVersionId ?? (await repo.activeVariantVersion(pool, tenantId));
+    // Una corsa del registro porta il suo modello; senza, la versione indicata; senza, quella attiva
+    // per il tenant: è il prototipo che ha davvero.
+    let runId: string | null = null;
+    let variantVersionId: string | null | undefined = body.variantVersionId;
+    if (body.runId) {
+      const c = await corsa(pool, tenantId, body.runId);
+      if (!c) throw new NotFoundError("Corsa non trovata nel registro", "BLUEPRINT_RUN_NOT_FOUND");
+      if (!c.variantVersionId) {
+        throw new UnprocessableEntityError(
+          { runId: "senza modello" },
+          "La versione di modello di questa corsa non c'è più",
+          "CONSOLIDATION_VERSION_INVALID",
+        );
+      }
+      runId = c.runId;
+      variantVersionId = c.variantVersionId;
+    }
+    variantVersionId ??= await repo.activeVariantVersion(pool, tenantId);
     if (!variantVersionId) {
       throw new UnprocessableEntityError(
         { variantVersionId: "nessuna attiva" },
@@ -188,11 +230,29 @@ export const tenantConsolidationService = {
         "CONSOLIDATION_VERSION_INVALID",
       );
     }
-    const creata = await repo.createConsolidation(pool, tenantId, {
-      variantVersionId,
-      trigger: body.trigger,
-      userId: actor.userId,
-      openGroup: CONSOLIDATION_GROUP_VALUES[0],
+    // Senza corsa indicata, la sessione si lega alla corsa del registro che porta lo stesso modello, se c'è.
+    runId ??= (await elencoCorse(pool, tenantId)).find((c) => c.variantVersionId === variantVersionId)?.runId ?? null;
+    const versione = variantVersionId;
+    const creata = await withTransaction(async (client) => {
+      if (body.closeOpen) {
+        await client.query(
+          `UPDATE sys.sys_tenant_consolidations
+              SET tenant_consolidation_status = 'CHIUSA', tenant_consolidation_open_group = NULL,
+                  tenant_consolidation_closed_at = now()
+            WHERE tenant_consolidation_tenant_id = $1 AND tenant_consolidation_status IN ('GIRI', 'IN_CONFERMA')
+              AND tenant_consolidation_metadata->>'running_group' IS NULL`,
+          [tenantId],
+        );
+      }
+      const s = await repo.createConsolidation(client, tenantId, {
+        variantVersionId: versione,
+        trigger: body.trigger,
+        userId: actor.userId,
+        openGroup: CONSOLIDATION_GROUP_VALUES[0],
+        runId,
+      });
+      if (s && runId) await sessioneAperta(client, runId, s.consolidationId);
+      return s;
     });
     if (!creata) {
       throw new ConflictError(
@@ -398,6 +458,31 @@ export const tenantConsolidationService = {
       await repo.setStatus(client, id, prossimo ? "GIRI" : "IN_CONFERMA", prossimo);
       return (await repo.getConsolidation(client, tenantId, id))!;
     });
+  },
+
+  /** Il registro delle corse del tenant, dalla più recente: la pagina parte dalla prima. */
+  async runs(actor: ActorContext): Promise<BlueprintRun[]> {
+    await gruppiLeggibili(actor);
+    return elencoCorse(pool, tenantDi(actor));
+  },
+
+  /** Le consegne del datastore che si possono accogliere, con quelle già nel registro segnate. */
+  async deliveries(actor: ActorContext): Promise<AvailableDeliveryList> {
+    await gruppiLeggibili(actor);
+    return consegneDisponibili(tenantDi(actor));
+  },
+
+  /** Accoglie una consegna come versione di modello e la mette nel registro (idempotente). */
+  async receive(actor: ActorContext, body: ReceiveDeliveryBody): Promise<BlueprintRun> {
+    return accogliConsegna(tenantDi(actor), actor.userId, body.code, body.packageVersion);
+  },
+
+  /** La corsa diventa il modello in uso del tenant. Solo il Direttore HR: è una scelta sul modello, non su una voce. */
+  async makeDefinitive(actor: ActorContext, runId: string): Promise<BlueprintRun> {
+    if (!userHasPermission(actor, "consolidation:decide")) {
+      throw new ForbiddenError("Solo il Direttore HR rende definitiva una corsa", "PERMISSION_DENIED");
+    }
+    return rendiDefinitiva(tenantDi(actor), runId, actor.userId);
   },
 
   async vocabulary() {

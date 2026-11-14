@@ -264,6 +264,72 @@
       }
     }
   },
+  "consolidationRuns": {
+    "title": "Corse del modello",
+    "count": "{{count}} corse nel registro",
+    "pick": "Corsa con cui lavorare",
+    "option": "{{model}} · caricata il {{date}} · {{status}}",
+    "empty": "Il registro delle corse è vuoto: nessuna corsa del datastore è stata ancora caricata come modello.",
+    "never": "Con il modello «{{model}}», caricato in advanced il {{date}}, non è ancora mai stato fatto un consolidamento.",
+    "neverHint": "Il primo giro di ogni gruppo resterà nel registro come misura di partenza, con il tempo che l'agente impiega a trovare le differenze.",
+    "range": "dal {{from}} al {{to}}",
+    "fields": {
+      "description": "Azienda descritta",
+      "executed": "Corsa eseguita nel datastore",
+      "loaded": "Modello caricato in advanced",
+      "status": "Stato"
+    },
+    "results": {
+      "caption": "Risultati del primo consolidamento con questo modello",
+      "group": "Gruppo",
+      "items": "Voci (azienda / modello)",
+      "itemsValue": "{{tenant}} / {{prototype}}",
+      "proposals": "Proposte",
+      "certain": "Certe",
+      "gaps": "Lacune",
+      "customizations": "Personalizzazioni",
+      "time": "Tempo dell'agente"
+    },
+    "startFirst": "Avvia il primo consolidamento con questa corsa",
+    "startAgain": "Avvia un nuovo consolidamento con questa corsa",
+    "confirmReplace": "C'è un consolidamento aperto: verrà chiuso e se ne aprirà uno nuovo con questa corsa. Le decisioni già prese restano nel registro. Procedere?",
+    "makeDefinitive": "Rendi definitiva",
+    "confirmDefinitive": "La corsa diventa il modello in uso della tua azienda: il modello attuale viene sostituito. Procedere?",
+    "deliveries": "Corse consegnate dal datastore e non ancora caricate",
+    "delivery": "{{description}} · corsa del {{executed}} · consegnata il {{delivered}}",
+    "receive": "Carica come modello",
+    "receiving": "Caricamento…",
+    "inUse": "In uso",
+    "caption": "Registro delle corse: la più recente in alto",
+    "cols": {
+      "model": "Modello",
+      "executed": "Corsa eseguita",
+      "loaded": "Caricato",
+      "consolidations": "Consolidamenti",
+      "agentTime": "Tempo dell'agente",
+      "code": "Codice della corsa",
+      "status": "Stato"
+    },
+    "statuses": {
+      "CARICATA": "Mai consolidata",
+      "IN_CONSOLIDAMENTO": "In consolidamento",
+      "DEFINITIVA": "Definitiva",
+      "SUPERATA": "Superata"
+    },
+    "errors": {
+      "BLUEPRINT_RUN_NOT_FOUND": "Corsa non trovata nel registro.",
+      "BLUEPRINT_RUN_DELIVERY_NOT_FOUND": "La consegna non è più nella cartella del datastore.",
+      "BLUEPRINT_RUN_DELIVERIES_UNAVAILABLE": "Questo server non vede le consegne del datastore.",
+      "BLUEPRINT_RUN_DELIVERY_REJECTED": "La consegna non si è potuta caricare: il manifesto o l'impronta non reggono.",
+      "BLUEPRINT_RUN_HASH_MISMATCH": "La corsa è già nel registro con un contenuto diverso.",
+      "BLUEPRINT_RUN_LOAD_FAILED": "Il caricamento del modello non è riuscito.",
+      "BLUEPRINT_RUN_VERSION_MISSING": "Il modello di questa corsa non c'è più.",
+      "BLUEPRINT_RUN_VERSION_RETIRED": "Il modello di questa corsa è stato ritirato.",
+      "CONSOLIDATION_ALREADY_OPEN": "C'è già un consolidamento aperto.",
+      "CONSOLIDATION_VERSION_INVALID": "Il modello di questa corsa non c'è più.",
+      "PERMISSION_DENIED": "Non hai il mandato per questa operazione."
+    }
+  },
   "consolidation": {
     "title": "Consolidamento con il prototipo",
     "description": "L'agente confronta i dati della tua azienda con il prototipo, un gruppo alla volta, e propone. Decidi tu: niente cambia nei dati finché una proposta non è confermata.",

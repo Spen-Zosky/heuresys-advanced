@@ -264,6 +264,72 @@
       }
     }
   },
+  "consolidationRuns": {
+    "title": "Model runs",
+    "count": "{{count}} runs in the register",
+    "pick": "Run to work with",
+    "option": "{{model}} · loaded on {{date}} · {{status}}",
+    "empty": "The run register is empty: no datastore run has been loaded as a model yet.",
+    "never": "No consolidation has ever been run with the model “{{model}}”, loaded into advanced on {{date}}.",
+    "neverHint": "The first round of each group stays in the register as the baseline, with the time the agent takes to find the differences.",
+    "range": "from {{from}} to {{to}}",
+    "fields": {
+      "description": "Company described",
+      "executed": "Run executed in the datastore",
+      "loaded": "Model loaded into advanced",
+      "status": "Status"
+    },
+    "results": {
+      "caption": "Results of the first consolidation with this model",
+      "group": "Group",
+      "items": "Items (company / model)",
+      "itemsValue": "{{tenant}} / {{prototype}}",
+      "proposals": "Proposals",
+      "certain": "Certain",
+      "gaps": "Gaps",
+      "customizations": "Customizations",
+      "time": "Agent time"
+    },
+    "startFirst": "Start the first consolidation with this run",
+    "startAgain": "Start a new consolidation with this run",
+    "confirmReplace": "A consolidation is open: it will be closed and a new one opened with this run. Decisions already taken stay in the register. Proceed?",
+    "makeDefinitive": "Make definitive",
+    "confirmDefinitive": "The run becomes your company's model in use: the current model is replaced. Proceed?",
+    "deliveries": "Runs delivered by the datastore and not yet loaded",
+    "delivery": "{{description}} · run of {{executed}} · delivered on {{delivered}}",
+    "receive": "Load as model",
+    "receiving": "Loading…",
+    "inUse": "In use",
+    "caption": "Run register: most recent first",
+    "cols": {
+      "model": "Model",
+      "executed": "Run executed",
+      "loaded": "Loaded",
+      "consolidations": "Consolidations",
+      "agentTime": "Agent time",
+      "code": "Run code",
+      "status": "Status"
+    },
+    "statuses": {
+      "CARICATA": "Never consolidated",
+      "IN_CONSOLIDAMENTO": "Being consolidated",
+      "DEFINITIVA": "Definitive",
+      "SUPERATA": "Superseded"
+    },
+    "errors": {
+      "BLUEPRINT_RUN_NOT_FOUND": "Run not found in the register.",
+      "BLUEPRINT_RUN_DELIVERY_NOT_FOUND": "The delivery is no longer in the datastore folder.",
+      "BLUEPRINT_RUN_DELIVERIES_UNAVAILABLE": "This server cannot see the datastore deliveries.",
+      "BLUEPRINT_RUN_DELIVERY_REJECTED": "The delivery could not be loaded: the manifest or the fingerprint do not hold.",
+      "BLUEPRINT_RUN_HASH_MISMATCH": "The run is already in the register with different content.",
+      "BLUEPRINT_RUN_LOAD_FAILED": "Loading the model failed.",
+      "BLUEPRINT_RUN_VERSION_MISSING": "This run's model no longer exists.",
+      "BLUEPRINT_RUN_VERSION_RETIRED": "This run's model has been retired.",
+      "CONSOLIDATION_ALREADY_OPEN": "A consolidation is already open.",
+      "CONSOLIDATION_VERSION_INVALID": "This run's model no longer exists.",
+      "PERMISSION_DENIED": "You do not have the mandate for this operation."
+    }
+  },
   "consolidation": {
     "title": "Consolidation with the prototype",
     "description": "The agent compares your company's data with the prototype, one group at a time, and proposes. You decide: nothing changes in the data until a proposal is confirmed.",

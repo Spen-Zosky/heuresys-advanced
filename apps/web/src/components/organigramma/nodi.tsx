@@ -79,7 +79,10 @@ export function OrganigrammaNodi({
     return { radici: r, foglie: conto.foglie, profondita: conto.prof };
   }, [unita, evidenzia]);
 
-  const altezza = Math.max(420, Math.min(1400, foglie * 30 + 80));
+  // Prova dal vivo del 14/11: con 30 punti per foglia e le etichette a sinistra del nodo, i nomi
+  // lunghi cadevano sopra i tratti verticali dei rami vicini. Più aria fra le foglie, e le
+  // etichette dei nodi con figli stanno sopra il pallino, dove non passa nessun tratto.
+  const altezza = Math.max(480, Math.min(1800, foglie * 42 + 100));
   const option = {
     tooltip: {
       trigger: "item" as const,
@@ -90,8 +93,8 @@ export function OrganigrammaNodi({
       data: [r],
       top: radici.length > 1 ? `${(100 / radici.length) * i + 2}%` : "2%",
       bottom: radici.length > 1 ? `${100 - (100 / radici.length) * (i + 1) + 2}%` : "2%",
-      left: "12%",
-      right: "22%",
+      left: "6%",
+      right: "24%",
       orient: "LR" as const,
       layout: "orthogonal" as const,
       edgeShape: "polyline" as const,
@@ -101,11 +104,11 @@ export function OrganigrammaNodi({
       animationDuration: 250,
       lineStyle: { color: "var(--muted-foreground)", width: 1.2, curveness: 0 },
       label: {
-        position: "left" as const, verticalAlign: "middle" as const, align: "right" as const,
+        position: "top" as const, distance: 6, align: "center" as const,
         fontSize: 12, color: "var(--foreground)", backgroundColor: "var(--background)", padding: [2, 4],
         formatter: (p: unknown) => { const q = p as { name: string; value: number }; return `${q.name}  (${q.value})`; },
       },
-      leaves: { label: { position: "right" as const, align: "left" as const } },
+      leaves: { label: { position: "right" as const, align: "left" as const, verticalAlign: "middle" as const, distance: 6 } },
       emphasis: { focus: "descendant" as const },
     })),
   };

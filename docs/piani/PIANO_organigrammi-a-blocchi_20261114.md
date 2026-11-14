@@ -16,9 +16,9 @@ Vincolo: un grafo salvato in `sys_visualization_*` non può contenere persone (s
 
 | id | cosa | chi | fatta quando | stato |
 |---|---|---|---|---|
-| V1 | API `GET /v1/me/organigramma`: unità con responsabile, persone «Cognome, Nome» con la posizione, addetti, livello, filiale; posizioni con riporto e titolare; calcolata a ogni chiamata, perimetro dei clienti come la rubrica (permesso `user_profile:read:self`), `?tenantId=` per chi vede più clienti; schema Zod condiviso | Claude | test di integrazione verde sul gemello o in CI, risposta dal vivo con 38 unità e 158 persone | da fare |
+| V1 | API `GET /v1/me/organigramma`: unità con responsabile, persone «Cognome, Nome» con la posizione, addetti, livello, filiale; posizioni con riporto e titolare; calcolata a ogni chiamata, perimetro dei clienti come la rubrica (permesso `user_profile:read:self`), `?tenantId=` per chi vede più clienti; schema Zod condiviso | Claude | test di integrazione verde sul gemello o in CI, risposta dal vivo con 38 unità e 158 persone | fatta: le stesse query, lette in sola lettura sulla produzione il 2026-11-14, danno 38 unità, 162 posizioni, 158 persone, 1 posizione senza riporto; CI in corso |
 | V2 | API `POST /v1/visualization-graphs/:id/rigenera` per i grafi ORG_CHART: ricostruisce nodi e archi dalle posizioni attive (solo posizioni, mai persone), stessa logica del seed | Claude | test di integrazione verde; dal vivo il grafo RTL ha 162 nodi e 161 archi | da fare |
-| V3 | Componente `OrganigrammaBlocchi`: porta in React dell'algoritmo del banco (colonne per le figlie foglia, gruppi sede centrale e filiali, tratteggio per le filiali, vertice pieno), riquadri con nomi delle persone (responsabile per primo, in grassetto), colori dai token, clic → scheda a cascata, «Esporta SVG» | Claude | test unitario della disposizione (nessuna sovrapposizione, ogni figlia sotto il padre), schermata dal vivo | da fare |
+| V3 | Componente `OrganigrammaBlocchi`: porta in React dell'algoritmo del banco (colonne per le figlie foglia, gruppi sede centrale e filiali, tratteggio per le filiali, vertice pieno), riquadri con nomi delle persone (responsabile per primo, in grassetto), colori dai token, clic → scheda a cascata, «Esporta SVG» | Claude | test unitario della disposizione (nessuna sovrapposizione, ogni figlia sotto il padre), schermata dal vivo | fatta: 8 prove verdi; resa con i dati veri di RTL in tema chiaro e scuro (sede centrale 28 unità e 90 persone, filiali 10 e 68) |
 | V4 | Scheda a cascata: alla scheda dell'unità si aggiungono tipo, persone, struttura sotto di sé a blocchi; ai comandi «‹ Indietro» e «Chiudi cascata» come nel banco | Claude | schermata dal vivo con due livelli aperti | da fare |
 | V5 | Vista a nodi riprogettata: un nodo per unità (38, non 162 posizioni), albero ordinato invece della forza, etichette sempre leggibili, grandezza per addetti, rami richiudibili; clic → stessa scheda a cascata | Claude | schermata dal vivo, nessuna etichetta sovrapposta a profondità 2 | da fare |
 | V6 | Pagine: `/organization/org-chart` e `/me/org-chart` con schede «Blocchi» (predefinita) e «Nodi», pulsante «Aggiorna» e ora del calcolo; `/me/org-chart` evidenzia la propria unità; `/visualizations/[graphId]` con «Aggiorna dai dati vivi» sui grafi ORG_CHART; `/consolidation` con l'organigramma a blocchi del cliente in un riquadro a parte | Claude | E2E esistenti verdi (test id conservati), login dal vivo con una persona di RTL | da fare |
@@ -41,7 +41,9 @@ La bonifica dei `name_it`/`name_en` residui nei metadati delle unità (dati del 
 
 ## 4. Registro delle scoperte
 
-(vuoto)
+S1. Con le dieci filiali di RTL, che non hanno uffici sotto, la regola del banco (figlie foglia in colonna) produce una torre alta 1.500 punti e illeggibile. Differenza voluta: oltre 5 figlie foglia si affiancano (`MAX_COLONNA`), sotto le 5 resta la colonna come nel banco.
+
+S2. Una vista ad albero di nodi non si può provare con il disegno lato server (ECharts disegna su canvas): si prova dal vivo dopo il rilascio, con lo spec `organigramma-blocchi.spec.ts`.
 
 ## 5. Chiusura
 

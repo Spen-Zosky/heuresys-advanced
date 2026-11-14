@@ -33,6 +33,7 @@ test.describe("D5 (#49) — la storia della persona", () => {
         await page.goto("/users");
         await expect(righe.first()).toBeVisible({ timeout: 20_000 });
         await righe.nth(i).getByRole("link").first().click();
+        await page.getByTestId("scheda-storia").click();
         await expect(page.getByTestId("user-timeline-panel")).toBeVisible({ timeout: 20_000 });
         // Il pannello è visibile anche mentre carica: si aspetta uno stato
         // TERMINALE (elenco o vuoto), altrimenti si conterebbero zero fatti

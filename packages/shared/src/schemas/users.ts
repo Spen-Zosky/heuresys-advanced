@@ -107,12 +107,32 @@ export const UserListQuerySchema = z.object({
   /** C4 (#42): ILIKE on display name OR email — lets approver/assignee pickers
    *  search server-side instead of filtering a `?limit=200` bulk fetch. */
   search: z.string().min(1).max(255).optional(),
+  /** Regola R5 del repertorio interfacce (docs/kb/xtras/INTERFACCE_INTELLIGENTI.md):
+   *  un mandato di piattaforma filtra per tenant; per chi ha un tenant e' ignorato,
+   *  perche' il perimetro lo decide il servizio, non la richiesta. */
+  tenantId: z.uuid().optional(),
   ...paginationFields(200, 50),
 });
 export type UserListQuery = z.infer<typeof UserListQuerySchema>;
 
+/**
+ * Una riga dell'elenco: la persona piu' il contesto che serve per riconoscerla
+ * (regola R2 del repertorio interfacce): il ruolo che ricopre (titolo della posizione
+ * primaria attiva), l'unita' in cui sta, la sede in cui opera (la filiale della prima
+ * unita' antenata che ne ha una) e, per chi vede piu' tenant, il nome del tenant.
+ * I campi sono null quando il dato non c'e': mai inventati.
+ */
+export const UserListItemSchema = UserSchema.extend({
+  positionTitle: z.string().nullable(),
+  organizationUnitName: z.string().nullable(),
+  siteName: z.string().nullable(),
+  siteCity: z.string().nullable(),
+  tenantName: z.string().nullable(),
+});
+export type UserListItem = z.infer<typeof UserListItemSchema>;
+
 export const UserListResponseSchema = z.object({
-  items: z.array(UserSchema),
+  items: z.array(UserListItemSchema),
   total: z.number().int().min(0),
 });
 export type UserListResponse = z.infer<typeof UserListResponseSchema>;

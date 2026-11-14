@@ -31,6 +31,7 @@ interface RigaSessione {
   tenant_consolidation_started_by: string | null;
   tenant_consolidation_started_at: Date;
   tenant_consolidation_metadata: Record<string, unknown> | null;
+  tenant_consolidation_run_id: string | null;
 }
 
 function mappaSessione(r: RigaSessione): TenantConsolidation {
@@ -45,13 +46,15 @@ function mappaSessione(r: RigaSessione): TenantConsolidation {
     startedAt: r.tenant_consolidation_started_at.toISOString(),
     runningGroup: (r.tenant_consolidation_metadata?.["running_group"] ?? null) as TenantConsolidation["runningGroup"],
     lastRun: (r.tenant_consolidation_metadata?.["last_run"] ?? null) as TenantConsolidation["lastRun"],
+    runId: r.tenant_consolidation_run_id,
   };
 }
 
 const SESSIONE = `
   tenant_consolidation_id, tenant_consolidation_tenant_id, tenant_consolidation_variant_version_id,
   tenant_consolidation_trigger, tenant_consolidation_status, tenant_consolidation_open_group,
-  tenant_consolidation_started_by, tenant_consolidation_started_at, tenant_consolidation_metadata`;
+  tenant_consolidation_started_by, tenant_consolidation_started_at, tenant_consolidation_metadata,
+  tenant_consolidation_run_id`;
 
 export async function listConsolidations(q: DbConnector, tenantId: string): Promise<TenantConsolidation[]> {
   const { rows } = await q.query<RigaSessione>(
@@ -108,16 +111,17 @@ export async function activeVariantVersion(q: DbConnector, tenantId: string): Pr
 export async function createConsolidation(
   q: DbConnector,
   tenantId: string,
-  v: { variantVersionId: string; trigger: string; userId: string | null; openGroup: ConsolidationGroup },
+  v: { variantVersionId: string; trigger: string; userId: string | null; openGroup: ConsolidationGroup; runId?: string | null },
 ): Promise<TenantConsolidation | null> {
   const { rows } = await q.query<RigaSessione>(
     `INSERT INTO sys.sys_tenant_consolidations
        (tenant_consolidation_tenant_id, tenant_consolidation_variant_version_id,
-        tenant_consolidation_trigger, tenant_consolidation_open_group, tenant_consolidation_started_by)
-     VALUES ($1, $2, $3, $4, $5)
+        tenant_consolidation_trigger, tenant_consolidation_open_group, tenant_consolidation_started_by,
+        tenant_consolidation_run_id)
+     VALUES ($1, $2, $3, $4, $5, $6)
      ON CONFLICT DO NOTHING
      RETURNING ${SESSIONE}`,
-    [tenantId, v.variantVersionId, v.trigger, v.openGroup, v.userId],
+    [tenantId, v.variantVersionId, v.trigger, v.openGroup, v.userId, v.runId ?? null],
   );
   return rows[0] ? mappaSessione(rows[0]) : null;
 }
@@ -130,8 +134,8 @@ export async function setStatus(
 ): Promise<void> {
   await q.query(
     `UPDATE sys.sys_tenant_consolidations
-        SET tenant_consolidation_status = $2, tenant_consolidation_open_group = $3,
-            tenant_consolidation_closed_at = CASE WHEN $2 = 'CHIUSA' THEN now() ELSE tenant_consolidation_closed_at END
+        SET tenant_consolidation_status = $2::varchar, tenant_consolidation_open_group = $3,
+            tenant_consolidation_closed_at = CASE WHEN $2::varchar = 'CHIUSA' THEN now() ELSE tenant_consolidation_closed_at END
       WHERE tenant_consolidation_id = $1`,
     [id, status, openGroup],
   );
@@ -255,17 +259,19 @@ export async function insertDecision(
     delegationId: string | null;
     supersedesId: string | null;
   },
-): Promise<void> {
-  await q.query(
+): Promise<string> {
+  const { rows } = await q.query<{ id: string }>(
     `INSERT INTO sys.sys_tenant_consolidation_decisions
        (tenant_consolidation_decision_proposal_id, tenant_consolidation_decision_tenant_id,
         tenant_consolidation_decision_value, tenant_consolidation_decision_form,
         tenant_consolidation_decision_adr48_state, tenant_consolidation_decision_reason,
         tenant_consolidation_decision_decided_by, tenant_consolidation_decision_delegation_id,
         tenant_consolidation_decision_supersedes_id)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+     RETURNING tenant_consolidation_decision_id::text AS id`,
     [v.proposalId, tenantId, v.decision, v.form, v.adr48State, v.reason, v.userId, v.delegationId, v.supersedesId],
   );
+  return rows[0]!.id;
 }
 
 /** L'avanzamento di ogni gruppo della sessione (R-8), contato dal registro e non stimato. */
@@ -543,4 +549,45 @@ export async function pendingInGroup(q: DbConnector, consolidationId: string, gr
     [consolidationId, group],
   );
   return rows[0]?.n ?? 0;
+}
+
+/**
+ * Le decisioni valide della sessione che non sono ancora state eseguite sui dati: senza riga di
+ * collegamento, oppure con un collegamento che porta una decisione più vecchia. Nell'ordine dei gruppi.
+ */
+export async function decisioniDaApplicare(
+  q: DbConnector,
+  tenantId: string,
+  consolidationId: string,
+): Promise<Array<{
+  proposalId: string; group: ConsolidationGroup; tenantKeys: string[]; prototypeKeys: string[];
+  decisionId: string; decision: Decision; form: LinkForm | null; adr48State: "EREDITATA" | "CONSERVATA" | "PROPRIA" | null;
+}>> {
+  const { rows } = await q.query(
+    `SELECT p.tenant_consolidation_proposal_id AS proposal_id, p.tenant_consolidation_proposal_group AS grp,
+            p.tenant_consolidation_proposal_tenant_keys AS tenant_keys, p.tenant_consolidation_proposal_prototype_keys AS prototype_keys,
+            d.tenant_consolidation_decision_id AS decision_id, d.tenant_consolidation_decision_value AS decision,
+            d.tenant_consolidation_decision_form AS form, d.tenant_consolidation_decision_adr48_state AS adr48
+       FROM sys.sys_tenant_consolidation_proposals p
+       JOIN sys.sys_tenant_consolidations c ON c.tenant_consolidation_id = p.tenant_consolidation_proposal_consolidation_id
+       JOIN LATERAL (
+         SELECT x.* FROM sys.sys_tenant_consolidation_decisions x
+          WHERE x.tenant_consolidation_decision_proposal_id = p.tenant_consolidation_proposal_id
+            AND NOT EXISTS (SELECT 1 FROM sys.sys_tenant_consolidation_decisions s
+                             WHERE s.tenant_consolidation_decision_supersedes_id = x.tenant_consolidation_decision_id)
+          ORDER BY x.tenant_consolidation_decision_decided_at DESC LIMIT 1) d ON true
+       LEFT JOIN sys.sys_tenant_consolidation_links l ON l.tenant_consolidation_link_proposal_id = p.tenant_consolidation_proposal_id
+      WHERE c.tenant_consolidation_id = $2 AND c.tenant_consolidation_tenant_id = $1
+        AND p.tenant_consolidation_proposal_superseded_at IS NULL
+        AND l.tenant_consolidation_link_decision_id IS DISTINCT FROM d.tenant_consolidation_decision_id
+      ORDER BY array_position(ARRAY['ORGANIZATION','POSITIONS_ROLES','SKILLS','PROCESSES','INDICATORS_GOALS'],
+                              p.tenant_consolidation_proposal_group::text),
+               d.tenant_consolidation_decision_decided_at`,
+    [tenantId, consolidationId],
+  );
+  return rows.map((r) => ({
+    proposalId: r.proposal_id, group: r.grp as ConsolidationGroup, tenantKeys: r.tenant_keys, prototypeKeys: r.prototype_keys,
+    decisionId: r.decision_id, decision: r.decision as Decision, form: r.form as LinkForm | null,
+    adr48State: r.adr48 as "EREDITATA" | "CONSERVATA" | "PROPRIA" | null,
+  }));
 }

@@ -77,10 +77,14 @@ BEGIN
   -- Il gruppo `personal` deve essere quello REALE delle altre voci /me/*: se lo avessi
   -- scritto a memoria e fosse un altro, la voce esisterebbe e non comparirebbe da nessuna
   -- parte — il difetto peggiore, perche' tace.
+  -- EMENDATA dalla 000484 (ADR-0035): l'area personale ora ha quattro gruppi (me,
+  -- me_profile, me_growth, me_results), e me-performance e me-time-off stanno in due
+  -- diversi. L'intento resta: la voce è nell'area PERSONALE come le altre /me/*, e la
+  -- sezione è ciò che lo dice (il gruppo dice solo in quale sottoinsieme).
   SELECT count(*) INTO n_gruppo FROM sys.sys_ui_interfaces
    WHERE ui_interface_code = 'me-performance'
-     AND ui_interface_sidebar_group = (
-       SELECT ui_interface_sidebar_group FROM sys.sys_ui_interfaces
+     AND ui_interface_perspective = (
+       SELECT ui_interface_perspective FROM sys.sys_ui_interfaces
         WHERE ui_interface_code = 'me-time-off');
   IF n_gruppo <> 1 THEN
     RAISE EXCEPTION '000313: me-performance non sta nel gruppo delle altre voci personali';

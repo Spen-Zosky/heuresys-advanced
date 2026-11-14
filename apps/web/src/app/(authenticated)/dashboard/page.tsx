@@ -4,15 +4,9 @@ import type { ReactNode } from "react";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import {
-  AuditFeed,
-  type AuditEvent,
-  type AuditTone,
-  Badge,
-  PageHeader,
-  StatsCard,
-  formatRelativeTime,
-} from "@heuresys/ui";
+import { AuditFeed, type AuditEvent, type AuditTone, Badge, formatRelativeTime } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
+import { StatsCard } from "@/components/indicatori-leggibili";
 import {
   Activity,
   BadgeCheck,
@@ -71,14 +65,14 @@ export default function DashboardPage() {
 
   if (widgets.isLoading) {
     return (
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="mx-auto max-w-7xl px-6 pb-8">
         <StatoCaricamento testId="dashboard-loading" />
       </main>
     );
   }
   if (widgets.isError) {
     return (
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="mx-auto max-w-7xl px-6 pb-8">
         <StatoErrore errore={widgets.error} titolo={t("dashboard.error")} testId="dashboard-error" onRiprova={() => void widgets.refetch()} />
       </main>
     );
@@ -106,7 +100,7 @@ export default function DashboardPage() {
   });
 
   return (
-    <main data-testid="dashboard-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
+    <main data-testid="dashboard-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       <PageHeader
         data-testid="dashboard-title"
         title={t("dashboard.title")}

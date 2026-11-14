@@ -22,12 +22,19 @@ import {
   ConfirmCertainResponseSchema,
   ConsolidationAccessSchema,
   ConsolidationGroupSchema,
+  ApplyChangesResultSchema,
+  AvailableDeliveryListResponseSchema,
+  BlueprintRunIdParamSchema,
+  BlueprintRunListResponseSchema,
+  BlueprintRunSchema,
+  ReceiveDeliveryBodySchema,
+  PendingChangesSchema,
+  ConsolidationProposalSchema,
   ConsolidationIdParamSchema,
   ConsolidationListResponseSchema,
   ConsolidationProgressResponseSchema,
   ConsolidationProposalListQuerySchema,
   ConsolidationProposalListResponseSchema,
-  ConsolidationProposalSchema,
   ConsolidationRunStartedSchema,
   DecideProposalBodySchema,
   StartConsolidationBodySchema,
@@ -123,6 +130,18 @@ export const tenantConsolidationRoutes: FastifyPluginAsyncZod = async (app) => {
     schema: { params: PROPOSTA, body: DecideProposalBodySchema, response: { 200: ConsolidationProposalSchema } },
   }, async (req) => svc.decide(actor(req), req.params.proposalId, req.body));
 
+  app.get("/:id/pending-changes", {
+    config: conf,
+    preHandler: [LEGGE],
+    schema: { params: ConsolidationIdParamSchema, response: { 200: PendingChangesSchema } },
+  }, async (req) => svc.pendingChanges(actor(req), req.params.id));
+
+  app.post("/:id/apply-changes", {
+    config: conf,
+    preHandler: [app.verifyCsrf, DECIDE],
+    schema: { params: ConsolidationIdParamSchema, response: { 200: ApplyChangesResultSchema } },
+  }, async (req) => svc.applyChanges(actor(req), req.params.id));
+
   app.post("/proposals/confirm-certain", {
     config: conf,
     preHandler: [app.verifyCsrf, DECIDE],
@@ -146,4 +165,39 @@ export const consolidationVocabularyRoutes: FastifyPluginAsyncZod = async (app) 
       response: { 200: VocabularyEquivalenceSchema },
     },
   }, async (req) => svc.decideVocabulary(actor(req), req.params.id, req.body.status));
+};
+
+/**
+ * Il registro delle corse del modello (000489): ha un prefisso suo (`/v1/consolidation-runs`) perché
+ * le sue rotte statiche non si mescolano con `/:id` delle sessioni. Leggere segue il consolidamento
+ * (ruolo o delega); accogliere una consegna è di chi avvia le sessioni; rendere definitiva una corsa è
+ * del Direttore HR, e il servizio lo ricontrolla.
+ */
+export const consolidationRunRoutes: FastifyPluginAsyncZod = async (app) => {
+  const conf = { orgGate: "service", tenantGate: "service" } as const;
+
+  app.get("/", {
+    config: conf,
+    preHandler: [LEGGE],
+    schema: { response: { 200: BlueprintRunListResponseSchema } },
+  }, async (req) => ({ items: await svc.runs(actor(req)) }));
+
+  app.get("/deliveries", {
+    config: conf,
+    // Le consegne sono il catalogo dei prototipi del datastore: le vede chi può accoglierle, non ogni lettore.
+    preHandler: [requirePermission("consolidation:run")],
+    schema: { response: { 200: AvailableDeliveryListResponseSchema } },
+  }, async (req) => svc.deliveries(actor(req)));
+
+  app.post("/receive", {
+    config: conf,
+    preHandler: [app.verifyCsrf, requirePermission("consolidation:run")],
+    schema: { body: ReceiveDeliveryBodySchema, response: { 200: BlueprintRunSchema } },
+  }, async (req) => svc.receive(actor(req), req.body));
+
+  app.post("/:runId/definitive", {
+    config: conf,
+    preHandler: [app.verifyCsrf, DECIDE],
+    schema: { params: BlueprintRunIdParamSchema, response: { 200: BlueprintRunSchema } },
+  }, async (req) => svc.makeDefinitive(actor(req), req.params.runId));
 };

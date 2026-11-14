@@ -2,7 +2,8 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, PageHeader } from "@heuresys/ui";
+import { Badge } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import type { VrioCapabilityItem, VrioScorecard, VrioVerdict } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
@@ -56,8 +57,12 @@ function buildColumns(
       cell: (r) => (
         <span className="flex flex-col leading-tight">
           <span className="font-medium text-foreground">{r.skillGroupName}</span>
-          <span className="text-[10px] text-muted-foreground">
-            {t("vrio.cols.skillCount", { count: r.skillCount })}
+          <span className="max-w-sm text-[10px] text-muted-foreground">
+            {/* il gruppo ESCO da solo può ingannare (la sicurezza informatica sta fra i servizi
+                della difesa): si dice quali competenze dell'azienda lo compongono davvero */}
+            {r.skillExamples.length > 0
+              ? t("vrio.cols.skillExamples", { count: r.skillCount, esempi: r.skillExamples.join(", ") })
+              : t("vrio.cols.skillCount", { count: r.skillCount })}
           </span>
         </span>
       ),
@@ -117,7 +122,7 @@ export default function VrioScorecardPage() {
   const data = scorecard.data;
 
   return (
-    <main data-testid="vrio-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="vrio-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="vrio-title"
         title={t("vrio.title")}

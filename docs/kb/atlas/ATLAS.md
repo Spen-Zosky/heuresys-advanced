@@ -1,18 +1,18 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `19bd730d` (2026-11-08T19:09:15+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `0be4a4e4` (2026-11-14T18:22:04+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
 | Layer | Valore |
 |---|---|
-| Moduli API | 118 |
-| Route API | 708 |
+| Moduli API | 121 |
+| Route API | 718 |
 | Pagine web | 132 |
-| Schemi shared | 131 |
-| Tabelle DB | 396 (vuote: 68) |
-| Viste / matview | 87 / 0 |
-| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 334 |
+| Schemi shared | 134 |
+| Tabelle DB | 414 (vuote: 44) |
+| Viste / matview | 88 / 0 |
+| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 364 |
 
 ## Moduli API
 
@@ -24,14 +24,14 @@
 | agent-capabilities | /v1/agent-capabilities | 7 | 0 | 5 | 1 |
 | agent-conversations | /v1/agent-conversations | 10 | 0 | 4 | 1 |
 | agent-tokens | /v1/auth/agent-tokens | 1 | 0 | 2 | 0 |
-| analytics | /v1/analytics | 10 | 1 | 13 | 5 |
+| analytics | /v1/analytics | 10 | 1 | 15 | 5 |
 | approvals | /v1/approvals | 5 | 3 | 6 | 5 |
 | assessment-methods | /v1/assessment-methods | 1 | 1 | 1 | 1 |
 | assessment-results | /v1/assessment-results | 3 | 2 | 2 | 2 |
 | assessments | /v1/assessments | 4 | 3 | 2 | 2 |
 | auth | /v1/auth, /v1/auth/mfa | 34 | 3 | 16 | 7 |
 | blueprint-activations | /v1/blueprint-activations | 5 | 3 | 4 | 1 |
-| blueprint-families | /v1/blueprint-families | 5 | 4 | 2 | 1 |
+| blueprint-families | /v1/blueprint-families | 5 | 4 | 4 | 1 |
 | blueprint-overrides | /v1/blueprint-overrides | 4 | 3 | 3 | 1 |
 | blueprint-processes | /v1/blueprint-processes | 5 | 4 | 3 | 1 |
 | blueprint-variants | /v1/blueprint-variants | 5 | 4 | 3 | 1 |
@@ -46,7 +46,7 @@
 | compensation | /v1/compensation | 14 | 2 | 15 | 5 |
 | content | /v1/content | 20 | 5 | 5 | 5 |
 | content-blueprint-links | /v1/content-blueprint-links | 5 | 4 | 4 | 1 |
-| dashboard | /v1/dashboard | 4 | 1 | 25 | 4 |
+| dashboard | /v1/dashboard | 4 | 1 | 26 | 4 |
 | data-classification | /v1/data-classification | 1 | 1 | 1 | 1 |
 | delegations | /v1/delegations | 4 | 2 | 12 | 2 |
 | engagement | /v1/engagement | 4 | 1 | 5 | 2 |
@@ -73,7 +73,7 @@
 | learning-path-steps | /v1/learning-path-steps | 5 | 4 | 3 | 1 |
 | learning-paths | /v1/learning-paths | 5 | 4 | 2 | 1 |
 | mandate-acts | /v1/mandate-acts | 6 | 1 | 5 | 0 |
-| me | /v1/me | 73 | 32 | 64 | 46 |
+| me | /v1/me | 76 | 32 | 64 | 49 |
 | mentorship | /v1/mentorship | 17 | 4 | 4 | 3 |
 | mfa-policy | /v1/mfa-policy | 4 | 2 | 4 | 1 |
 | notifications | /v1/notifications | 2 | 2 | 2 | 0 |
@@ -82,6 +82,7 @@
 | okrs | /v1/okrs | 7 | 4 | 3 | 3 |
 | operating-models | /v1/operating-models | 4 | 3 | 1 | 1 |
 | org-health | /v1/org-health | 1 | 1 | 11 | 1 |
+| organigramma | — | 0 | 0 | 5 | 1 |
 | organization-unit-history | /v1/organization-unit-history | 3 | 3 | 2 | 1 |
 | organization-unit-kpi-templates | /v1/organization-unit-kpi-templates | 4 | 3 | 3 | 1 |
 | organization-unit-processes | /v1/organization-unit-processes | 4 | 3 | 4 | 2 |
@@ -90,16 +91,18 @@
 | platform-tenant-assignments | /v1/platform-tenant-assignments | 3 | 1 | 3 | 1 |
 | position-career-paths | /v1/position-career-paths | 4 | 3 | 3 | 1 |
 | position-succession-relevance | /v1/position-succession-relevance | 4 | 3 | 2 | 1 |
-| positions | /v1/positions | 16 | 4 | 12 | 4 |
+| positions | /v1/positions | 16 | 4 | 16 | 4 |
 | predictions | /v1/predictions | 4 | 1 | 2 | 3 |
 | process-kpi-templates | /v1/process-kpi-templates | 4 | 3 | 3 | 1 |
 | projects | /v1/projects | 7 | 3 | 3 | 1 |
 | provenance | /v1/provenance | 2 | 1 | 1 | 1 |
 | public-job-postings | /v1/public | 2 | 0 | 2 | 1 |
 | public-stats | /v1/public | 1 | 0 | 11 | 1 |
+| quadro | — | 0 | 0 | 23 | 1 |
 | reference-sync | /v1/reference-sync | 4 | 2 | 3 | 2 |
 | research | — | 0 | 0 | 20 | 1 |
 | review-cycles | /v1/review-cycles | 4 | 2 | 1 | 2 |
+| rubrica | — | 0 | 0 | 4 | 1 |
 | seed-acquisition-runs | /v1/seed-acquisition-runs | 6 | 3 | 1 | 1 |
 | seed-approval-decisions | /v1/seed-approval-decisions | 3 | 2 | 2 | 1 |
 | seed-candidate-records | /v1/seed-candidate-records | 5 | 2 | 3 | 1 |
@@ -117,7 +120,7 @@
 | talent-review | /v1/talent-review | 6 | 1 | 8 | 2 |
 | teams | /v1/teams | 6 | 3 | 3 | 2 |
 | tenant-blueprints | /v1/tenant-blueprints | 20 | 2 | 15 | 1 |
-| tenant-consolidation | /v1/consolidation-vocabulary, /v1/tenant-consolidations | 12 | 3 | 28 | 1 |
+| tenant-consolidation | /v1/consolidation-runs, /v1/consolidation-vocabulary, /v1/tenant-consolidations | 18 | 3 | 35 | 2 |
 | tenant-import-runs | /v1/tenant-import-runs | 5 | 2 | 15 | 1 |
 | tenant-materialization | /v1/tenant-materialization | 2 | 1 | 18 | 1 |
 | tenants | /v1/tenants | 7 | 4 | 3 | 1 |
@@ -127,10 +130,10 @@
 | user-position-assignments | /v1/user-position-assignments | 5 | 4 | 6 | 0 |
 | user-target-positions | /v1/user-target-positions | 6 | 4 | 3 | 1 |
 | user-timeline | /v1/user-timeline | 2 | 1 | 1 | 1 |
-| users | /v1/users | 10 | 5 | 3 | 1 |
+| users | /v1/users | 10 | 5 | 8 | 1 |
 | visualization-edges | /v1/visualization-edges | 4 | 3 | 3 | 1 |
 | visualization-exports | /v1/visualization-exports | 4 | 2 | 2 | 1 |
-| visualization-graphs | /v1/visualization-graphs | 9 | 4 | 6 | 1 |
+| visualization-graphs | /v1/visualization-graphs | 10 | 4 | 7 | 1 |
 | visualization-layouts | /v1/visualization-layouts | 5 | 4 | 2 | 1 |
 | visualization-node-layouts | /v1/visualization-node-layouts | 4 | 3 | 4 | 1 |
 | visualization-nodes | /v1/visualization-nodes | 5 | 4 | 2 | 1 |
@@ -156,6 +159,7 @@
 - `sys.sys_agent_capabilities`
 - `sys.sys_agent_capability_activations`
 - `sys.sys_agent_capability_operations`
+- `sys.sys_agent_proposals`
 - `sys.sys_auth_mfa_otp_challenges`
 - `sys.sys_auth_mfa_recovery_codes`
 - `sys.sys_auth_mfa_webauthn_credentials`
@@ -165,47 +169,16 @@
 - `sys.sys_blueprint_content_agents`
 - `sys.sys_blueprint_content_capabilities`
 - `sys.sys_blueprint_content_capability_links`
-- `sys.sys_blueprint_content_career_paths`
-- `sys.sys_blueprint_content_career_steps`
-- `sys.sys_blueprint_content_ccnl_conditions`
-- `sys.sys_blueprint_content_ccnl_institutes`
-- `sys.sys_blueprint_content_ccnl_levels`
-- `sys.sys_blueprint_content_ccnl`
-- `sys.sys_blueprint_content_context`
 - `sys.sys_blueprint_content_decision_rights`
 - `sys.sys_blueprint_content_decisions`
-- `sys.sys_blueprint_content_derivations`
 - `sys.sys_blueprint_content_design_principles`
-- `sys.sys_blueprint_content_engagement_links`
-- `sys.sys_blueprint_content_engagements`
-- `sys.sys_blueprint_content_evidence_gaps`
-- `sys.sys_blueprint_content_evidence_links`
-- `sys.sys_blueprint_content_evidence`
-- `sys.sys_blueprint_content_gaps`
-- `sys.sys_blueprint_content_goals`
-- `sys.sys_blueprint_content_incentive_links`
-- `sys.sys_blueprint_content_incentives`
 - `sys.sys_blueprint_content_job_role_links`
 - `sys.sys_blueprint_content_legal_entities`
-- `sys.sys_blueprint_content_obligation_positions`
-- `sys.sys_blueprint_content_obligations`
-- `sys.sys_blueprint_content_packages`
-- `sys.sys_blueprint_content_perimeters`
-- `sys.sys_blueprint_content_position_occupations`
-- `sys.sys_blueprint_content_position_processes`
-- `sys.sys_blueprint_content_position_responsibilities`
-- `sys.sys_blueprint_content_position_skill_requirements`
-- `sys.sys_blueprint_content_process_sites`
-- `sys.sys_blueprint_content_process_steps`
-- `sys.sys_blueprint_content_receipts`
-- `sys.sys_blueprint_content_sites`
 - `sys.sys_blueprint_content_strategies`
 - `sys.sys_blueprint_content_strategy_items`
-- `sys.sys_blueprint_content_training_positions`
 - `sys.sys_blueprint_content_training_skills`
-- `sys.sys_blueprint_content_training`
-- `sys.sys_blueprint_content_unit_processes`
 - `sys.sys_conflitti_ibridi`
+- `sys.sys_content_blueprint_links`
 - `sys.sys_content_media`
 - `sys.sys_generated_record_origins`
 - `sys.sys_mandate_act_audit`
@@ -214,6 +187,12 @@
 - `sys.sys_occupation_classification_mappings`
 - `sys.sys_platform_user_tenant_assignments`
 - `sys.sys_platform_vocabulary_equivalences`
+- `sys.sys_tenant_consolidation_decisions`
+- `sys.sys_tenant_consolidation_links`
+- `sys.sys_tenant_consolidation_proposals`
+- `sys.sys_tenant_consolidation_rounds`
+- `sys.sys_tenant_consolidation_working_items`
+- `sys.sys_tenant_consolidations`
 
 ## Key counts live
 
@@ -222,10 +201,10 @@
 - positions: **319**
 - org_units: **45**
 - roles: **24**
-- permissions: **249**
-- role_permission_mappings: **1293**
+- permissions: **250**
+- role_permission_mappings: **1317**
 - ui_interfaces_active: **78**
-- skills: **14031**
+- skills: **14032**
 
 ## Anomalie shared exports
 

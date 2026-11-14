@@ -10,7 +10,7 @@
     "columns": {
       "name": "Nome",
       "family": "Famiglia",
-      "industry": "Industry"
+      "industry": "Settore"
     }
   },
   "detail": {
@@ -37,7 +37,7 @@
       "optional": "Opzionale"
     },
     "activationColumns": {
-      "tenantId": "Tenant",
+      "tenantId": "Azienda",
       "status": "Stato",
       "activatedAt": "In vigore dal"
     },
@@ -52,36 +52,35 @@
     }
   },
   "processes": {
-    "title": "Processi BPM",
-    "description": "Catalogo processi blueprint-anchored.",
+    "title": "Catalogo dei processi",
+    "description": "I processi del modello di impianto del tenant, nell'ordine della catena del valore.",
     "count": "{{count}} processi",
     "error": "Impossibile caricare i processi.",
     "emptyTitle": "Nessun processo",
     "emptyDescription": "Non ci sono processi.",
-    "caption": "Catalogo processi (blueprint-anchored)",
-    "yes": "sì",
-    "no": "no",
+    "caption": "Processi in ordine di catena del valore",
     "columns": {
-      "ordinal": "#",
-      "code": "Codice",
-      "name": "Nome",
-      "optional": "Opzionale"
-    }
+      "ordinal": "N.",
+      "name": "Processo",
+      "optional": "Tipo"
+    },
+    "optionalYes": "Facoltativo",
+    "optionalNo": "Essenziale"
   },
   "brownfield": {
-    "title": "Brownfield adaptation",
+    "title": "Adattamento dei dati esistenti",
     "description": "Inventario, mapping e run di import dei dati legacy.",
     "tabs": {
-      "inventory": "Inventory",
-      "mapping": "Mapping",
-      "runs": "Runs"
+      "inventory": "Inventario",
+      "mapping": "Corrispondenze",
+      "runs": "Esecuzioni"
     },
     "inventoryEmpty": "Nessun export registrato",
-    "inventoryCaption": "Source exports",
+    "inventoryCaption": "Esportazioni di origine",
     "mappingEmpty": "Nessuna mapping registrata",
-    "mappingCaption": "Table mappings",
+    "mappingCaption": "Corrispondenze fra tabelle",
     "runsEmpty": "Nessun run",
-    "runsCaption": "Import runs",
+    "runsCaption": "Esecuzioni di importazione",
     "inventoryColumns": {
       "system": "Sistema",
       "capturedAt": "Catturato",
@@ -89,28 +88,28 @@
       "status": "Stato"
     },
     "mappingColumns": {
-      "sourceTable": "Source table",
-      "targetTable": "Target table",
+      "sourceTable": "Tabella di origine",
+      "targetTable": "Tabella di destinazione",
       "status": "Stato"
     },
     "runsColumns": {
-      "run": "Run",
-      "wave": "Wave",
-      "scope": "Scope",
+      "run": "Esecuzione",
+      "wave": "Ondata",
+      "scope": "Perimetro",
       "status": "Stato",
       "startedAt": "Inizio"
     }
   },
   "seedRuns": {
-    "title": "Seed acquisition — Runs",
-    "description": "Run della pipeline di acquisizione seed.",
-    "count": "{{count}} run",
-    "error": "Impossibile caricare i run.",
-    "emptyTitle": "Nessun run",
-    "emptyDescription": "Nessun run di acquisizione registrato.",
-    "caption": "Pipeline runs",
+    "title": "Acquisizione dei dati di base — esecuzioni",
+    "description": "Esecuzioni della procedura che acquisisce i dati di base.",
+    "count": "{{count}} esecuzioni",
+    "error": "Impossibile caricare le esecuzioni.",
+    "emptyTitle": "Nessuna esecuzione",
+    "emptyDescription": "Nessuna esecuzione di acquisizione registrata.",
+    "caption": "Esecuzioni della pipeline",
     "columns": {
-      "runId": "Run ID",
+      "runId": "Esecuzione",
       "code": "Codice",
       "status": "Stato",
       "startedAt": "Inizio",
@@ -180,7 +179,8 @@
       "processCount": "{{count}} processi",
       "unavailable": "Nessun modello per questa combinazione",
       "availableTitle": "Combinazioni che esistono oggi",
-      "noFallback": "Non viene proposto un modello simile: sarebbe una risposta falsa."
+      "noFallback": "Non viene proposto un modello simile: sarebbe una risposta falsa.",
+      "version": "versione {{n}}"
     },
     "decisions": {
       "inclusion": "Decisione",
@@ -194,7 +194,10 @@
       "clear": "Torna al modello",
       "saved": "Decisione registrata.",
       "cleared": "La decisione è stata tolta: vale il modello.",
-      "empty": "Ancora nessun modello ancorato: non c'è niente su cui decidere."
+      "empty": "Ancora nessun modello ancorato: non c'è niente su cui decidere.",
+      "preparedByAgent": "Preparata dall'assistente: controlla e registra, oppure cambiala.",
+      "undoAgent": "Annulla l'ultimo passo dell'assistente",
+      "agentPending": "Decisioni preparate dall'assistente e non ancora registrate: {{n}}"
     },
     "submit": {
       "action": "Sottoponi alla firma",
@@ -217,31 +220,31 @@
     },
     "build": {
       "title": "Costruzione dell'azienda",
-      "description": "Il piano di cio' che nascerebbe, e la firma che lo fa nascere. Due passaggi distinti, e nessuno dei due costruisce da solo.",
+      "description": "Il piano di ciò che nascerebbe, e la firma che lo fa nascere. Due passaggi distinti, e nessuno dei due costruisce da solo.",
       "plan": "Il piano",
-      "planIsReadOnly": "Chiedere il piano non scrive niente: e' una lettura, e i numeri qui sotto sono una previsione.",
-      "planError": "Il piano non e' calcolabile per questa versione.",
+      "planIsReadOnly": "Chiedere il piano non scrive niente: è una lettura, e i numeri qui sotto sono una previsione.",
+      "planError": "Il piano non è calcolabile per questa versione.",
       "what": "Cosa",
       "willCreate": "Nascerebbero",
-      "alreadyThere": "Ci sono gia'",
-      "alreadyThereMeans": "«Ci sono gia'» e' cio' che distingue una costruzione nuova da una ri-applicazione su un'azienda gia' popolata.",
+      "alreadyThere": "Ci sono già",
+      "alreadyThereMeans": "«Ci sono gia'» è ciò che distingue una costruzione nuova da una ri-applicazione su un'azienda già popolata.",
       "apply": "Applicazione",
       "applyOpensApproval": "Applicare NON costruisce: apre una richiesta di approvazione. La costruzione avviene quando quella richiesta viene approvata.",
       "applyAction": "Chiedi l'approvazione",
       "applying": "Invio in corso...",
       "applyDone": "Richiesta di approvazione aperta.",
-      "applyError": "La richiesta non e' stata aperta.",
-      "noCountsYet": "Nessun conteggio di righe, e non e' una dimenticanza: niente e' stato ancora costruito.",
+      "applyError": "La richiesta non è stata aperta.",
+      "noCountsYet": "Nessun conteggio di righe, e non è una dimenticanza: niente è stato ancora costruito.",
       "approvalRequest": "Richiesta",
       "toApprovals": "Vai alle approvazioni",
       "blockedNoPermission": "Serve il permesso di scrittura sui fascicoli.",
-      "blockedApplied": "Questa versione e' gia' stata applicata.",
-      "blockedNotApproved": "La versione e' in stato {{status}}: si applica solo una versione approvata.",
+      "blockedApplied": "Questa versione è già stata applicata.",
+      "blockedNotApproved": "La versione è in stato {{status}}: si applica solo una versione approvata.",
       "registry": "Registro delle righe generate",
-      "registryHint": "Dopo la costruzione, ogni riga nata da questa versione e' elencata nel registro, con la tabella e la ragione.",
+      "registryHint": "Dopo la costruzione, ogni riga nata da questa versione è elencata nel registro, con la tabella e la ragione.",
       "toRegistry": "Apri il registro",
       "rows": {
-        "orgUnits": "Unita' organizzative",
+        "orgUnits": "Unità organizzative",
         "positions": "Posizioni",
         "users": "Persone segnaposto",
         "assignments": "Assegnazioni",

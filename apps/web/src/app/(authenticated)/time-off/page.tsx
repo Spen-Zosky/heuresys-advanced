@@ -3,8 +3,11 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { KPIStrip, PageHeader, type KpiCardData } from "@heuresys/ui";
+import { type KpiCardData } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
+import { KPIStrip } from "@/components/indicatori-leggibili";
 import { TimeOffRequestStatusEnum } from "@heuresys/shared";
+import { SchedePagina } from "@/components/schede-pagina";
 import type {
   TimeOffRequest, LeaveAccrualRule, LeaveBalanceTransaction,
 } from "@heuresys/shared";
@@ -52,10 +55,10 @@ function buildRuleColumns(t: TFunction, enumLabel: EnumLabelFn): DataColumn<Leav
 
 function buildTxnColumns(t: TFunction, enumLabel: EnumLabelFn, f: Formati): DataColumn<LeaveBalanceTransaction>[] {
   return [
-    { header: t("timeOff.cols.txnType"), cell: (r) => <span className="font-mono text-xs">{enumLabel("timeOffTxnType", r.type)}</span> },
+    { header: t("timeOff.cols.txnType"), cell: (r) => <span className="text-xs">{enumLabel("timeOffTxnType", r.type)}</span> },
     { header: t("timeOff.cols.days"), align: "right", cell: (r) => <span className="tabular-nums">{r.daysAmount}</span> },
     { header: t("timeOff.cols.description"), cell: (r) => <span className="text-xs text-muted-foreground">{r.description ?? "—"}</span> },
-    { header: t("timeOff.cols.reference"), cell: (r) => <span className="text-xs">{r.referenceType ?? "—"}</span> },
+    { header: t("timeOff.cols.reference"), cell: (r) => <span className="text-xs">{r.referenceType ? t(`timeOff.referenceType.${r.referenceType}`, { defaultValue: r.referenceType }) : "—"}</span> },
     { header: t("timeOff.cols.date"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.createdAt)}</span> },
   ];
 }
@@ -93,73 +96,79 @@ export default function TimeOffPage() {
   ], [requests.total, rules.total, txns.total, t, f]);
 
   return (
-    <main data-testid="time-off-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="time-off-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader data-testid="time-off-title" title={t("timeOff.title")} description={t("timeOff.description")} />
 
       <KPIStrip items={kpis} />
 
-      <section className="space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold text-foreground">{t("timeOff.requests")}</h2>
-          <select
-            data-testid="time-off-status-filter"
-            aria-label={t("timeOff.cols.status")}
-            className="rounded-control border border-border bg-card px-2 py-1 text-sm text-muted-foreground"
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-          >
-            <option value="">{t("timeOff.allStatuses")}</option>
-            {REQUEST_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-          </select>
-        </div>
-        <EntityTable<TimeOffRequest>
-          isLoading={requests.query.isLoading}
-          isError={requests.query.isError}
-          error={requests.query.error}
-          errorMessage={t("timeOff.error")}
-          rows={requests.rows}
-          server={requests.server}
-          rowKey={(r) => r.requestId}
-          rowTestId="time-off-request-row"
-          columns={requestColumns}
-          emptyTitle={t("timeOff.empty")}
-          caption={t("timeOff.requests")}
-        />
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-foreground">{t("timeOff.accrualRules")}</h2>
-        <EntityTable<LeaveAccrualRule>
-          isLoading={rules.query.isLoading}
-          isError={rules.query.isError}
-          error={rules.query.error}
-          errorMessage={t("timeOff.error")}
-          rows={rules.rows}
-          server={rules.server}
-          rowKey={(r) => r.accrualRuleId}
-          rowTestId="time-off-rule-row"
-          columns={ruleColumns}
-          emptyTitle={t("timeOff.empty")}
-          caption={t("timeOff.accrualRules")}
-        />
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-foreground">{t("timeOff.transactions")}</h2>
-        <EntityTable<LeaveBalanceTransaction>
-          isLoading={txns.query.isLoading}
-          isError={txns.query.isError}
-          error={txns.query.error}
-          errorMessage={t("timeOff.error")}
-          rows={txns.rows}
-          server={txns.server}
-          rowKey={(r) => r.transactionId}
-          rowTestId="time-off-txn-row"
-          columns={txnColumns}
-          emptyTitle={t("timeOff.empty")}
-          caption={t("timeOff.transactions")}
-        />
-      </section>
+      {/* C5: le sezioni lunghe stanno in schede orizzontali */}
+      <SchedePagina
+        schede={[
+          { id: "richieste", titolo: t("timeOff.requests"), contenuto: (
+            <div className="space-y-3">
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <select
+                data-testid="time-off-status-filter"
+                aria-label={t("timeOff.cols.status")}
+                className="rounded-control border border-border bg-card px-2 py-1 text-sm text-muted-foreground"
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+              >
+                <option value="">{t("timeOff.allStatuses")}</option>
+                {REQUEST_STATUSES.map((s) => <option key={s} value={s}>{enumLabel("timeOffStatus", s)}</option>)}
+              </select>
+            </div>
+            <EntityTable<TimeOffRequest>
+              isLoading={requests.query.isLoading}
+              isError={requests.query.isError}
+              error={requests.query.error}
+              errorMessage={t("timeOff.error")}
+              rows={requests.rows}
+              server={requests.server}
+              rowKey={(r) => r.requestId}
+              rowTestId="time-off-request-row"
+              columns={requestColumns}
+              emptyTitle={t("timeOff.empty")}
+              caption={t("timeOff.requests")}
+            />
+            </div>
+          ) },
+          { id: "regole", titolo: t("timeOff.accrualRules"), contenuto: (
+            <div className="space-y-3">
+            <EntityTable<LeaveAccrualRule>
+              isLoading={rules.query.isLoading}
+              isError={rules.query.isError}
+              error={rules.query.error}
+              errorMessage={t("timeOff.error")}
+              rows={rules.rows}
+              server={rules.server}
+              rowKey={(r) => r.accrualRuleId}
+              rowTestId="time-off-rule-row"
+              columns={ruleColumns}
+              emptyTitle={t("timeOff.empty")}
+              caption={t("timeOff.accrualRules")}
+            />
+            </div>
+          ) },
+          { id: "movimenti", titolo: t("timeOff.transactions"), contenuto: (
+            <div className="space-y-3">
+            <EntityTable<LeaveBalanceTransaction>
+              isLoading={txns.query.isLoading}
+              isError={txns.query.isError}
+              error={txns.query.error}
+              errorMessage={t("timeOff.error")}
+              rows={txns.rows}
+              server={txns.server}
+              rowKey={(r) => r.transactionId}
+              rowTestId="time-off-txn-row"
+              columns={txnColumns}
+              emptyTitle={t("timeOff.empty")}
+              caption={t("timeOff.transactions")}
+            />
+            </div>
+          ) },
+        ]}
+      />
     </main>
   );
 }

@@ -231,3 +231,14 @@ describe("T6b — le proposte", () => {
     expect(r.peek("sconosciuta", PERSONA)).toBe("unknown");
   });
 });
+
+describe("titoloDa: il titolo è la domanda, non il contesto della pagina", () => {
+  it("toglie la riga «Contesto: …» davanti alla domanda", async () => {
+    const { titoloDa } = await import("../src/conversazione.js");
+    expect(titoloDa("Contesto: Pagina «Heuresys» (/me)\n\na quali processi partecipo e con che ruolo?")).toBe(
+      "a quali processi partecipo e con che ruolo?",
+    );
+    expect(titoloDa("una domanda senza contesto")).toBe("una domanda senza contesto");
+    expect(titoloDa("")).toBe("Conversazione");
+  });
+});

@@ -13,6 +13,7 @@
  * a mostrare solo l'anagrafica, diventa rosso.
  */
 
+import { cifra } from "./cifra";
 import { test, expect } from "@playwright/test";
 import { storageStateFor, gotoAuthenticated, API_BASE } from "./fixtures";
 
@@ -42,10 +43,18 @@ test.describe("scheda persona — il dossier", () => {
     await expect(page.getByTestId("user-display-name")).not.toContainText(/^IT_[A-Z]{2}_/);
 
     // ogni sezione del dossier ha il suo posto sulla pagina
+    // C5: ogni capitolo sta nella sua scheda
+    const SCHEDA: Record<string, string> = {
+      positions: "lavoro", contracts: "lavoro", payslips: "lavoro",
+      performance: "risultati", goals: "risultati", career: "risultati",
+      skills: "competenze", learning: "competenze", certifications: "competenze",
+      attendance: "presenze",
+    };
     for (const sezione of [
       "positions", "contracts", "payslips", "performance",
       "attendance", "skills", "learning", "certifications", "goals", "career",
     ]) {
+      await page.getByTestId(`scheda-${SCHEDA[sezione]}`).click();
       await expect(
         page.getByTestId(`dossier-${sezione}`),
         `sezione assente dalla pagina: ${sezione}`,
@@ -53,9 +62,10 @@ test.describe("scheda persona — il dossier", () => {
     }
 
     // e il contenuto è quello reale: il numero di buste mostrato viene dai dati
+    await page.getByTestId("scheda-lavoro").click();
     const buste = dossier.paySlips.length as number;
     expect(buste, "il soggetto del collaudo non ha storia retributiva").toBeGreaterThan(0);
-    await expect(page.getByTestId("dossier-payslips")).toContainText(String(buste));
+    await expect(page.getByTestId("dossier-payslips")).toContainText(cifra(buste));
 
     // nessuna data in formato macchina sulla scheda (era uno dei difetti censiti)
     const testo = await page.getByTestId("user-detail-page").innerText();

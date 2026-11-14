@@ -1,0 +1,7 @@
+{
+  "_scopo": "Voci della barra laterale che l'assistente non legge, con la ragione. Le controlla docs/kb/tools/check_letture_agente.py (blocco I3 del piano dell'assistente nelle interfacce). Un'eccezione che diventa superflua rende rosso il controllo.",
+  "voci": {
+    "/whistleblowing-console": "Le segnalazioni sono riservate per legge (D.Lgs. 24/2023): le legge solo chi gestisce il canale, e l'assistente non le porta in una conversazione né in un registro. Decisione del 2026-11-10, blocco I3.",
+    "/admin/roles": "La pagina approva o respinge gli atti che concedono mandati. L'assistente non legge né prepara atti che allargano i poteri di qualcuno, compreso il proprio (prova avversaria R5, «concedi un mandato all'agente»). Decisione del 2026-11-10, blocco I3."
+  }
+}

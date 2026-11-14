@@ -1111,6 +1111,7 @@ export const SKILLS_GROUP_SHARE_TOP_N = 25;
 
 export interface SkillsGroupShareGroupRow {
   groupCode: string;
+  groupName: string | null;
   groupUri: string;
   skillCount: number;
   sharePct: number;
@@ -1136,20 +1137,35 @@ function escoGroupCode(uri: string): string {
   return (m?.[1] ?? uri).replace(/\/+$/, "");
 }
 
-export async function getSkillsGroupShare(q: DbConnector): Promise<SkillsGroupShare> {
+export async function getSkillsGroupShare(q: DbConnector, tenantId: string | null = null): Promise<SkillsGroupShare> {
+  // I21 (ADR-0043): il catalogo resta aperto a tutte le industrie, ma un'azienda ne vede il proprio
+  // perimetro — le competenze che le sue persone hanno davvero. Il mandato di piattaforma
+  // (tenantId nullo) vede il catalogo intero.
+  const perimetro = `($1::uuid IS NULL OR EXISTS (
+       SELECT 1 FROM sys.sys_user_skills us
+        WHERE us.user_skill_skill_id = sys_skills.skill_id AND us.user_skill_tenant_id = $1::uuid))`;
   const totals = await q.query<{ total: string; grouped: string; groups: string }>(
     `SELECT count(*)::text AS total,
             count(skill_metadata->>'skill_group_uri')::text AS grouped,
             count(DISTINCT skill_metadata->>'skill_group_uri')::text AS groups
-       FROM sys.sys_skills`,
+       FROM sys.sys_skills
+      WHERE ${perimetro}`,
+    [tenantId],
   );
   const perGroup = await q.query<{ group_uri: string; n: string }>(
     `SELECT skill_metadata->>'skill_group_uri' AS group_uri, count(*)::text AS n
        FROM sys.sys_skills
-      WHERE skill_metadata->>'skill_group_uri' IS NOT NULL
+      WHERE skill_metadata->>'skill_group_uri' IS NOT NULL AND ${perimetro}
       GROUP BY 1
       ORDER BY count(*) DESC, 1`,
+    [tenantId],
   );
+
+  // C1/C3: il gruppo si legge per nome (sys.sys_skill_groups), il codice ESCO resta accanto.
+  const nomi = await q.query<{ uri: string; name: string }>(
+    `SELECT skill_group_esco_uri AS uri, skill_group_name AS name FROM sys.sys_skill_groups`,
+  );
+  const nomePerCodice = new Map(nomi.rows.map((r) => [escoGroupCode(r.uri), r.name]));
 
   const t = totals.rows[0];
   const totalSkills = Number(t?.total ?? 0);
@@ -1165,6 +1181,7 @@ export async function getSkillsGroupShare(q: DbConnector): Promise<SkillsGroupSh
 
   const groups: SkillsGroupShareGroupRow[] = top.map((g) => ({
     groupCode: g.groupCode,
+    groupName: nomePerCodice.get(g.groupCode) ?? null,
     groupUri: g.groupUri,
     skillCount: g.count,
     sharePct: totalGrouped > 0 ? Math.round((g.count / totalGrouped) * 10000) / 100 : 0,

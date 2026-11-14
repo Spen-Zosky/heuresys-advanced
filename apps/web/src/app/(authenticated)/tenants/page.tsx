@@ -8,7 +8,7 @@ import { Button } from "@heuresys/ui";
 import type { Tenant, CreateTenantBodyInput, IndustryCode } from "@heuresys/shared";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
-import { StatusBadge } from "@/components/status-pill";
+import { EnumStatusBadge } from "@/components/enum-badge";
 import { apiFetch } from "@/lib/api/fetch";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
 
@@ -81,7 +81,6 @@ export default function TenantsListPage() {
             >
               {row.tenantName ?? t("tenants.fallbackName")}
             </Link>
-            <span className="font-mono text-xs text-muted-foreground">{row.tenantCode}</span>
           </div>
         ),
       },
@@ -93,7 +92,7 @@ export default function TenantsListPage() {
         header: t("tenants.columns.size"),
         cell: (row) => <span className="text-xs text-muted-foreground">{row.tenantSizeBand ?? t("tenants.dash")}</span>,
       },
-      { header: t("tenants.columns.status"), cell: (row) => <StatusBadge value={row.tenantStatus} /> },
+      { header: t("tenants.columns.status"), cell: (row) => <EnumStatusBadge domain="tenantStatus" value={row.tenantStatus} /> },
       ...(canArchive
         ? [
             {

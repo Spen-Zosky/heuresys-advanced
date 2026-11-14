@@ -1,3 +1,7 @@
+-- GUARDIA ALLINEAMENTO-RTL (ADR-0035): questo file racconta un passaggio storico di RTL che l'allineamento alla corsa (db/scripts/rtl-allinea) ha superato.
+-- Dove il giornale dell'allineamento esiste il corpo si salta; altrove si applica come sempre.
+SELECT (to_regclass('staging.rtl_allinea_org_undo') IS NULL) AS esegui_storica \gset
+\if :esegui_storica
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 000311 — Nessuno lavora con un contratto scaduto (mandato di Enzo, 2026-08-14)
 --
@@ -189,3 +193,4 @@ BEGIN
   RAISE NOTICE '000311 ok — nessuno lavora piu con un contratto scaduto; % persone attive, % contratti, 0 retribuzioni abbassate',
     n_persone, n_contratti;
 END $$;
+\endif

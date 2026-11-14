@@ -4,7 +4,8 @@ import { useMemo } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { Badge, Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import type {
   EngagementSurveyListResponse,
   EngagementSurvey,
@@ -59,11 +60,12 @@ export default function EngagementPage() {
           </Link>
         ),
       },
-      { header: t("engagement.columns.status"), cell: (s) => <Badge variant={statusVariant(s.status)}>{t(`engagement.status.${s.status}`, s.status)}</Badge> },
       { header: t("engagement.columns.type"), cell: (s) => <span className="text-muted-foreground">{enumLabel("surveyCategory", s.type)}</span> },
       { header: t("engagement.columns.responses"), cell: (s) => <span className="text-muted-foreground">{s.responseCount}</span> },
       { header: t("engagement.columns.questions"), cell: (s) => <span className="text-muted-foreground">{s.questionCount}</span> },
       { header: t("engagement.columns.invitations"), cell: (s) => <span className="text-muted-foreground">{s.totalInvitations}</span> },
+      // Repertorio interfacce, R3: lo stato chiude la riga.
+      { header: t("engagement.columns.status"), cell: (s) => <Badge variant={statusVariant(s.status)}>{t(`engagement.status.${s.status}`, s.status)}</Badge> },
     ],
     [t, enumLabel],
   );
@@ -76,7 +78,7 @@ export default function EngagementPage() {
   };
 
   return (
-    <main data-testid="engagement-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="engagement-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="engagement-title"
         title={t("engagement.title")}

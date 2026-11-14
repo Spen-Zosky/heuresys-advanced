@@ -30,6 +30,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { AgentConversationSummary } from "@heuresys/shared/schemas/agent-conversations";
 import { csrfStore } from "./api/csrf-store";
+import { MAX_RIGA, domandaDaPrompt, righeDaMessaggio } from "./agente/risposta";
 import {
   elencoConversazioni,
   leggiAttivita,
@@ -332,6 +333,12 @@ export function useAgentStream(opzioni: OpzioniAgentStream = {}): UseAgentStream
           return;
         }
       }
+      if (kind === "message") {
+        // Lo stream dell'SDK non si mostra: solo il testo dell'assistente e gli strumenti che usa.
+        for (const r of righeDaMessaggio(data)) pushLine(r.kind, r.text);
+        return;
+      }
+      if (kind === "conversation") return; // identificativi tecnici, già in `conversationId`
       pushLine(kind, data.replace(/\s+/g, " ").slice(0, 600));
     },
     [pushLine],
@@ -472,11 +479,11 @@ export function useAgentStream(opzioni: OpzioniAgentStream = {}): UseAgentStream
         const righe: StreamLine[] = [];
         let n = 0;
         if (ultima) {
-          righe.push({ id: ++n, kind: "prompt", text: ultima.prompt.replace(/\s+/g, " ").slice(0, 600) });
+          righe.push({ id: ++n, kind: "prompt", text: domandaDaPrompt(ultima.prompt).slice(0, 600) });
           const dettaglio = await leggiAttivita(ultima.id);
           for (const e of dettaglio.events) {
             const l = lineaDaEvento(e);
-            righe.push({ id: ++n, kind: l.kind, text: l.text.replace(/\s+/g, " ").slice(0, 600) });
+            righe.push({ id: ++n, kind: l.kind, text: l.kind === "message" ? l.text.slice(0, MAX_RIGA) : l.text.replace(/\s+/g, " ").slice(0, 600) });
           }
           const p = propostaDaDecidere(dettaglio.proposals);
           if (p) {

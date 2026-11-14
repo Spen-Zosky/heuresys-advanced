@@ -5,7 +5,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
 import type { BlueprintActivation, BlueprintVariant, BlueprintProcess, ContentLinkForProcess } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
@@ -62,7 +63,7 @@ export default function BlueprintVariantDetailPage() {
 
   if (variant.isLoading) {
     return (
-      <main className="mx-auto max-w-5xl px-6 py-8">
+      <main className="mx-auto max-w-5xl px-6 pb-8">
         <StatoCaricamento />
       </main>
     );
@@ -70,7 +71,7 @@ export default function BlueprintVariantDetailPage() {
   if (variant.isError) {
     const status = isApiError(variant.error) ? variant.error.status : 0;
     return (
-      <main className="mx-auto max-w-5xl px-6 py-8">
+      <main className="mx-auto max-w-5xl px-6 pb-8">
         <Link href="/blueprints" className="text-sm underline">{t("detail.back")}</Link>
         <div className="mt-4">
           <StatoErrore
@@ -85,7 +86,7 @@ export default function BlueprintVariantDetailPage() {
   }
   const v = variant.data!;
   return (
-    <main data-testid="blueprint-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 py-8">
+    <main data-testid="blueprint-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="blueprint-name"
         title={v.name}

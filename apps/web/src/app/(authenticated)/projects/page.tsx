@@ -3,9 +3,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
-import {
-  PageHeader, Card, CardContent, Badge,
-} from "@heuresys/ui";
+import { Card, CardContent, Badge } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { FolderKanban } from "lucide-react";
 import type { ProjectListResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
@@ -36,7 +35,7 @@ export default function ProjectsPage() {
   const items = q.data?.items ?? [];
 
   return (
-    <main data-testid="projects-page" className="mx-auto max-w-6xl space-y-8 px-6 py-8">
+    <main data-testid="projects-page" className="mx-auto max-w-6xl space-y-8 px-6 pb-8">
       <PageHeader
         title={t("projects.title")}
         description={t("projects.description")}

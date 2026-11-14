@@ -27,6 +27,8 @@ import type { EnumLabelFn } from "./enum-labels";
 /** Il minimo che serve: qualunque risposta API che porti nome e tipo va bene. */
 export type PersonaConTipo = {
   displayName: string;
+  firstName?: string | null;
+  lastName?: string | null;
   type?: string | null;
 };
 
@@ -46,6 +48,40 @@ export function nonEUnaPersona(u: PersonaConTipo): boolean {
  * tutte le righe non distingue nessuna riga.
  */
 export function etichettaPersona(u: PersonaConTipo, enumLabel: EnumLabelFn): string {
-  if (!nonEUnaPersona(u)) return u.displayName;
-  return `${u.displayName} (${enumLabel("userType", u.type)})`;
+  // R1 (blocco B8): anche nelle caselle di scelta la persona si scrive «Cognome, Nome».
+  const nome = cognomeNome(u) || u.displayName;
+  if (!nonEUnaPersona(u)) return nome;
+  return `${nome} (${enumLabel("userType", u.type)})`;
+}
+
+/**
+ * R1 del repertorio interfacce (docs/kb/xtras/INTERFACCE_INTELLIGENTI.md, regola di Enzo
+ * del 10/11/2026): in ogni elenco una persona si scrive «Cognome, Nome», così l'occhio
+ * scorre l'ordine alfabetico per cognome. Senza cognome (un'utenza di servizio) resta il
+ * nome com'è.
+ */
+export function cognomeNome(u: {
+  displayName: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+}): string {
+  const cognome = u.lastName?.trim();
+  const nome = u.firstName?.trim();
+  if (cognome && nome) return `${cognome}, ${nome}`;
+  if (cognome) return cognome;
+  return u.displayName ?? "";
+}
+
+/**
+ * C1/C4: la stringa del browser («Mozilla/5.0 (X11; Linux x86_64) …») non dice niente a chi la
+ * legge. Si scrive il browser e il sistema, come «Chrome su Windows».
+ */
+export function dispositivoLeggibile(ua: string | null | undefined): string | null {
+  if (!ua) return null;
+  const browser = /Edg\//.test(ua) ? "Edge" : /OPR\//.test(ua) ? "Opera" : /Firefox\//.test(ua) ? "Firefox"
+    : /Chrome\//.test(ua) ? "Chrome" : /Safari\//.test(ua) ? "Safari" : /curl\//.test(ua) ? "curl" : null;
+  const sistema = /Android/.test(ua) ? "Android" : /iPhone|iPad|iOS/.test(ua) ? "iOS" : /Windows/.test(ua) ? "Windows"
+    : /Mac OS X|Macintosh/.test(ua) ? "macOS" : /Linux/.test(ua) ? "Linux" : null;
+  if (browser && sistema) return `${browser} su ${sistema}`;
+  return browser ?? sistema ?? "Dispositivo non riconosciuto";
 }

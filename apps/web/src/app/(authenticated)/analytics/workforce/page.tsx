@@ -2,7 +2,9 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, PageHeader, StatsCard } from "@heuresys/ui";
+import { Badge } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
+import { StatsCard } from "@/components/indicatori-leggibili";
 import { Building2, TrendingUp, Users } from "lucide-react";
 import { EChartsCard } from "../../_charts-client";
 import type { WorkforceAnalyticsResponse, WorkforceByDimensionRow } from "@heuresys/shared";
@@ -82,14 +84,14 @@ export default function WorkforceAnalyticsPage() {
 
   if (q.isLoading) {
     return (
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="mx-auto max-w-7xl px-6 pb-8">
         <StatoCaricamento testId="analytics-workforce-loading" />
       </main>
     );
   }
   if (q.isError) {
     return (
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="mx-auto max-w-7xl px-6 pb-8">
         <StatoErrore errore={q.error} titolo={t("error")} testId="analytics-workforce-error" onRiprova={() => void q.refetch()} />
       </main>
     );
@@ -99,7 +101,7 @@ export default function WorkforceAnalyticsPage() {
   const hasData = d.byOrgUnit.length > 0;
 
   return (
-    <main data-testid="analytics-workforce-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
+    <main data-testid="analytics-workforce-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       <PageHeader
         data-testid="analytics-workforce-title"
         title={t("workforce.title")}

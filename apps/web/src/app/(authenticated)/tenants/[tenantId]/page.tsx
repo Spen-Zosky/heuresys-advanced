@@ -5,7 +5,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import type { EnterpriseTypingProfile, Tenant } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
@@ -51,7 +52,7 @@ export default function TenantDetailPage() {
 
   if (tenant.isLoading) {
     return (
-      <main className="mx-auto max-w-5xl px-6 py-8">
+      <main className="mx-auto max-w-5xl px-6 pb-8">
         <StatoCaricamento />
       </main>
     );
@@ -59,7 +60,7 @@ export default function TenantDetailPage() {
   if (tenant.isError) {
     const status = isApiError(tenant.error) ? tenant.error.status : 0;
     return (
-      <main className="mx-auto max-w-5xl px-6 py-8" data-testid="tenant-error">
+      <main className="mx-auto max-w-5xl px-6 pb-8" data-testid="tenant-error">
         <Link href="/tenants" className="text-sm underline">{t("tenants.detail.back")}</Link>
         <div className="mt-4">
           <StatoErrore
@@ -74,7 +75,7 @@ export default function TenantDetailPage() {
   }
   const tn = tenant.data!;
   return (
-    <main data-testid="tenant-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 py-8">
+    <main data-testid="tenant-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="tenant-name"
         title={tn.tenantName}
@@ -124,7 +125,6 @@ export default function TenantDetailPage() {
                 { label: t("tenants.detail.fields.industry"), value: tn.tenantIndustryCode ?? t("tenants.detail.dash") },
                 { label: t("tenants.detail.fields.sizeBand"), value: tn.tenantSizeBand ?? t("tenants.detail.dash") },
                 { label: t("tenants.detail.fields.status"), value: <EnumStatusBadge domain="tenantStatus" value={tn.tenantStatus} /> },
-                { label: t("tenants.detail.fields.tenantId"), value: tn.tenantId, mono: true },
                 { label: t("tenants.detail.fields.createdAt"), value: tn.createdAt, mono: true },
               ]}
             />

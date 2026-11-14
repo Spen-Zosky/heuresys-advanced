@@ -39,6 +39,9 @@ export const JobRoleListQuerySchema = z.object({
   jobFamilyId: z.uuid().optional(),
   seniorityLevel: JobRoleSenioritySchema.optional(),
   search: z.string().min(1).max(255).optional(),
+  /** Solo per la piattaforma: il catalogo come lo vede quel cliente (I21), per esempio nella
+   *  tendina dei ruoli di una sua posizione. Per un cliente il perimetro è già il suo. */
+  tenantId: z.uuid().optional(),
   ...paginationFields(200, 50),
 });
 export type JobRoleListQuery = z.infer<typeof JobRoleListQuerySchema>;

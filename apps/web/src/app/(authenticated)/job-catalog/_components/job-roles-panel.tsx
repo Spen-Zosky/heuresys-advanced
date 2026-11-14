@@ -25,6 +25,7 @@ import { isApiError } from "@/lib/api/errors";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { conteggio } from "./conteggio";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -72,7 +73,7 @@ export function JobRolesPanel() {
       const q = new URLSearchParams({ limit: String(LIST_LIMIT) });
       if (cerca.trim()) q.set("search", cerca.trim());
       if (filtroFamiglia) q.set("jobFamilyId", filtroFamiglia);
-      return apiFetch<{ items: JobRole[] }>(`/v1/job-roles?${q.toString()}`);
+      return apiFetch<{ items: JobRole[]; total: number }>(`/v1/job-roles?${q.toString()}`);
     },
   });
   const families = useQuery({
@@ -135,8 +136,8 @@ export function JobRolesPanel() {
   });
 
   const columns: DataColumn<JobRole>[] = [
-    { header: t("jobCatalog.role.code"), cell: (r) => <span className="font-mono text-xs">{r.code}</span> },
-    { header: t("jobCatalog.role.name"), cell: (r) => <span className="font-medium text-foreground">{r.name}</span> },
+    // Repertorio interfacce (B2): il nome apre la riga, il codice tecnico non va a video (R2, R4).
+    { header: t("jobCatalog.role.name"), cell: (r) => <span className="font-medium text-foreground" data-testid="role-name">{r.name}</span> },
     {
       header: t("jobCatalog.role.family"),
       cell: (r) => <span className="text-sm text-muted-foreground">{nomeFamiglia(r.jobFamilyId)}</span>,
@@ -144,7 +145,7 @@ export function JobRolesPanel() {
     {
       header: t("jobCatalog.role.seniority"),
       cell: (r) => (
-        <span className="text-xs uppercase text-muted-foreground">
+        <span className="text-sm text-muted-foreground">
           {r.seniorityLevel ? enumLabel("jobRoleSeniority", r.seniorityLevel) : t("jobCatalog.dash")}
         </span>
       ),
@@ -179,7 +180,9 @@ export function JobRolesPanel() {
       <CardHeader>
         <CardTitle>
           {t("jobCatalog.role.title")}
-          <span className="ml-2 text-sm font-normal text-muted-foreground">{roles.data?.items.length ?? 0}</span>
+          <span className="ml-2 text-sm font-normal text-muted-foreground" data-testid="job-roles-count">
+            {conteggio(roles.data, t)}
+          </span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">

@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { apiFetch } from "@/lib/api/fetch";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { useFormat } from "@/lib/format";
 
 interface MeKpi {
   positionKpiRequirementId: string;
@@ -26,6 +27,7 @@ interface MeKpisList {
 
 export default function MeKpisPage() {
   const { t } = useTranslation("ess");
+  const fmt = useFormat();
   const enumLabel = useEnumLabel();
   const kpis = useQuery({
     queryKey: ["me", "kpis"],
@@ -35,27 +37,29 @@ export default function MeKpisPage() {
   const columns = useMemo<DataColumn<MeKpi>[]>(
     () => [
       { header: t("kpis.colKpi"), cell: (k) => <span className="font-medium text-foreground">{k.kpiName}</span> },
-      { header: t("kpis.colCode"), cell: (k) => <span className="font-mono text-xs">{k.kpiCode}</span> },
+      // R2/C1: il codice resta nel dettaglio della riga
+      { header: t("kpis.colCode"), secondaria: true, cell: (k) => <span className="font-mono text-xs" data-grezzo="">{k.kpiCode}</span> },
       { header: t("kpis.colDirection"), cell: (k) => <span className="text-xs text-muted-foreground">{enumLabel("kpiPolarity", k.polarity)}</span> },
-      { header: t("kpis.colWeight"), cell: (k) => <span className="text-xs text-muted-foreground">{k.weight}</span> },
+      { header: t("kpis.colWeight"), align: "right", cell: (k) => <span className="text-xs tabular-nums text-muted-foreground">{fmt.numero(k.weight, 2)}</span> },
+      // C9: misura, obiettivo e data in una cella sola; un indicatore mai misurato lo dice in parole,
+      // invece di tre trattini
       {
         header: t("kpis.colLatest"),
-        cell: (k) => <span className="text-xs text-muted-foreground">{k.latestMeasuredValue ?? "—"}</span>,
-      },
-      {
-        header: t("kpis.colTarget"),
-        cell: (k) => <span className="text-xs text-muted-foreground">{k.latestTargetValue ?? "—"}</span>,
-      },
-      {
-        header: t("kpis.colDate"),
-        cell: (k) => (
-          <span className="text-xs text-muted-foreground">
-            {k.latestRecordedAt ? k.latestRecordedAt.slice(0, 10) : "—"}
-          </span>
-        ),
+        cell: (k) =>
+          k.latestMeasuredValue === null || k.latestMeasuredValue === undefined ? (
+            <span className="text-xs text-muted-foreground">{t("kpis.notMeasured")}</span>
+          ) : (
+            <span className="text-xs text-muted-foreground">
+              <span className="tabular-nums text-foreground">{fmt.numero(k.latestMeasuredValue, 2)}</span>
+              {k.latestTargetValue !== null && k.latestTargetValue !== undefined
+                ? ` · ${t("kpis.targetIs", { value: fmt.numero(k.latestTargetValue, 2) })}`
+                : ""}
+              {k.latestRecordedAt ? ` · ${fmt.data(k.latestRecordedAt)}` : ""}
+            </span>
+          ),
       },
     ],
-    [t, enumLabel],
+    [t, enumLabel, fmt],
   );
 
   return (

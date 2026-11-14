@@ -17,6 +17,7 @@
  * test che duplicano una fonte di verita').
  */
 
+import { cifra } from "./cifra";
 import { test, expect } from "@playwright/test";
 import { storageStateFor, PERSONAS, API_BASE, passwordFor, totpFor } from "./fixtures";
 
@@ -141,11 +142,11 @@ test("la profondita' cambia il grafo, e la pagina lo riflette", async ({ page, r
   await expect(page.getByTestId("skills-graph-canvas")).toBeVisible({ timeout: 20_000 });
 
   // Il default della pagina e' 2 salti.
-  await expect(page.getByTestId("analytics-skills-graph")).toContainText(String(a2));
+  await expect(page.getByTestId("analytics-skills-graph")).toContainText(cifra(a2));
 
   // Un salto solo: il numero deve SCENDERE a quello che l'API dichiara per depth=1.
   await page.getByTestId("skills-graph-depth").getByRole("button").first().click();
-  await expect(page.getByTestId("analytics-skills-graph")).toContainText(String(a1), {
+  await expect(page.getByTestId("analytics-skills-graph")).toContainText(cifra(a1), {
     timeout: 20_000,
   });
 });

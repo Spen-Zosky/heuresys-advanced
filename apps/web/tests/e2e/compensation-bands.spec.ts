@@ -39,7 +39,7 @@ test.describe("#53 E4 — catalogo delle fasce retributive", () => {
     const api = await fetchBands(request);
     test.skip(api.total === 0, "nessuna fascia con importi su questo tenant");
 
-    await page.goto("/compensation-intelligence", { waitUntil: "domcontentloaded", timeout: 60_000 });
+    await page.goto("/compensation-intelligence?scheda=fasce", { waitUntil: "domcontentloaded", timeout: 60_000 });
     await expect(page.getByTestId("compensation-bands")).toBeVisible({ timeout: 45_000 });
     await expect(page.getByTestId("comp-band-row")).toHaveCount(api.total, { timeout: 30_000 });
   });
@@ -52,7 +52,7 @@ test.describe("#53 E4 — catalogo delle fasce retributive", () => {
     for (const b of api.items) expect(b.midEur).not.toBeNull();
 
     // …e la pagina non deve mostrare il segnaposto al posto di un importo.
-    await page.goto("/compensation-intelligence", { waitUntil: "domcontentloaded", timeout: 60_000 });
+    await page.goto("/compensation-intelligence?scheda=fasce", { waitUntil: "domcontentloaded", timeout: 60_000 });
     const prima = page.getByTestId("comp-band-row").first();
     await expect(prima).toBeVisible({ timeout: 45_000 });
     await expect(prima).not.toContainText("—");
@@ -63,7 +63,7 @@ test.describe("#53 E4 — catalogo delle fasce retributive", () => {
     const legacy = api.items.filter((b) => b.code.startsWith("LEGACY_BAND::"));
     test.skip(legacy.length === 0, "nessuna fascia importata dal legacy su questo tenant");
 
-    await page.goto("/compensation-intelligence", { waitUntil: "domcontentloaded", timeout: 60_000 });
+    await page.goto("/compensation-intelligence?scheda=fasce", { waitUntil: "domcontentloaded", timeout: 60_000 });
     await expect(page.getByTestId("comp-band-row").first()).toBeVisible({ timeout: 45_000 });
 
     // Il difetto delle 87 righe preesistenti era esattamente questo: il nome ERA il
@@ -80,7 +80,7 @@ test.describe("#53 E4 — le fasce sono un dato riservato", () => {
   test.use({ storageState: storageStateFor("employee") });
 
   test("un dipendente non vede il catalogo delle fasce", async ({ page }) => {
-    await page.goto("/compensation-intelligence", { waitUntil: "domcontentloaded", timeout: 60_000 });
+    await page.goto("/compensation-intelligence?scheda=fasce", { waitUntil: "domcontentloaded", timeout: 60_000 });
     await expect(page.getByTestId("comp-band-row")).toHaveCount(0);
   });
 });

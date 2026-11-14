@@ -190,6 +190,9 @@ mkdir -p "$ZP"
 # lancia anche a mano. Politica decisa da Enzo: si spoglia SOLO la API key e si PRESERVA
 # ANTHROPIC_AUTH_TOKEN, che e' la via dell'abbonamento; in sua assenza vale il login
 # claude.ai della CLI.
+# Token di lunga durata degli agenti, se la macchina ce l'ha (regola di Enzo del 2026-11-13):
+# ~/.claude/tools/token-agenti.sh carica esporta CLAUDE_CODE_OAUTH_TOKEN, che non scade come il login.
+[[ -r "$HOME/.claude/tools/token-agenti.sh" ]] && . "$HOME/.claude/tools/token-agenti.sh" carica
 if [[ -n "${ANTHROPIC_API_KEY:-}" ]]; then
   log "trovata ANTHROPIC_API_KEY nell'ambiente: la tolgo per questa corsa (scavalca il login ad abbonamento)"
   unset ANTHROPIC_API_KEY

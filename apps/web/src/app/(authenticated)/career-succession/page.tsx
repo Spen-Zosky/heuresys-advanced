@@ -4,30 +4,16 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { PageHeader } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { StatoCaricamento, StatoVuoto } from "@/components/stato-pagina";
-import type { SuccessionPool, SuccessorCandidate } from "@heuresys/shared";
+import type { CareerPath, SuccessionPool, SuccessorCandidate } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
-import { StatusBadge } from "@/components/status-pill";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { EChartsCard } from "../_charts-client";
 import { NomeOppure } from "@/components/senza-nome";
 
-// B-xx: CareerPath stays a LOCAL interface (NOT deduped) — the shared `CareerPath`
-// schema has no fromJobRoleId/toJobRoleId/difficulty fields at all (it has
-// tenantId/description/kind/isGlobal/metadata instead), but the "Difficulty" column
-// below renders `p.difficulty`. Flagged, not touched (C4/#42 REGOLA CRITICA: used
-// field missing from the shared type = STOP).
-interface CareerPath {
-  careerPathId: string;
-  code: string;
-  name: string;
-  fromJobRoleId: string | null;
-  toJobRoleId: string | null;
-  difficulty: string | null;
-}
 interface ReadinessDistItem {
   readinessLevel: string;
   count: number;
@@ -45,14 +31,12 @@ function buildTabs(t: TFunction): ReadonlyArray<{ key: Tab; label: string }> {
 
 function buildPathsCols(t: TFunction): DataColumn<CareerPath>[] {
   return [
-    { header: t("career.pathsCols.code"), cell: (p) => <span className="font-mono text-xs text-muted-foreground">{p.code}</span> },
     { header: t("career.pathsCols.name"), cell: (p) => <span className="font-medium text-foreground">{p.name}</span> },
-    { header: t("career.pathsCols.difficulty"), cell: (p) => <StatusBadge value={p.difficulty} /> },
+    { header: t("career.pathsCols.kind"), cell: (p) => <EnumStatusBadge domain="careerPathKind" value={p.kind} /> },
   ];
 }
 function buildPoolsCols(t: TFunction): DataColumn<SuccessionPool>[] {
   return [
-    { header: t("career.poolsCols.code"), cell: (p) => <span className="font-mono text-xs text-muted-foreground">{p.code}</span> },
     { header: t("career.poolsCols.name"), cell: (p) => <span className="font-medium text-foreground">{p.name}</span> },
     { header: t("career.poolsCols.status"), cell: (p) => <EnumStatusBadge domain="successionPoolStatus" value={p.status} /> },
   ];
@@ -61,7 +45,7 @@ function buildCandidatesCols(t: TFunction): DataColumn<SuccessorCandidate>[] {
   return [
     { header: t("career.candidatesCols.user"), cell: (c) => <span className="text-xs text-foreground"><NomeOppure nome={c.userName} id={c.userId} /></span> },
     { header: t("career.candidatesCols.pool"), cell: (c) => <span className="text-xs text-muted-foreground"><NomeOppure nome={c.poolName} id={c.poolId} /></span> },
-    { header: t("career.candidatesCols.readiness"), cell: (c) => <StatusBadge value={c.readinessLevel} /> },
+    { header: t("career.candidatesCols.readiness"), cell: (c) => <EnumStatusBadge domain="readinessLevel" value={c.readinessLevel} /> },
     { header: t("career.candidatesCols.status"), cell: (c) => <EnumStatusBadge domain="successorCandidateStatus" value={c.status} /> },
   ];
 }
@@ -126,7 +110,7 @@ export default function CareerSuccessionPage() {
   };
 
   return (
-    <main data-testid="career-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="career-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader data-testid="career-title" title={t("career.title")} description={t("career.description")} />
 
       <nav className="flex gap-1 border-b border-border" data-testid="career-tabs">

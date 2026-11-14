@@ -1,3 +1,4 @@
+import { cognomeNome } from "./person-label";
 /**
  * apps/web/src/lib/recruiting.ts — il cluster `/recruiting` (`#54` F4): chiavi di query,
  * chiamate e vocabolari, in un posto solo.
@@ -140,8 +141,9 @@ export function useActivePositions() {
 export type { Candidate, CandidateApplication, JobPosting, JobRequisition };
 
 /** «Mario Rossi» — il candidato non e' un utente, e il suo nome sta su due colonne. */
+/** R1: «Cognome, Nome», come ogni altra persona (lib/person-label.ts). */
 export function candidateName(c: Pick<Candidate, "firstName" | "lastName">): string {
-  return `${c.firstName} ${c.lastName}`.trim();
+  return cognomeNome({ displayName: `${c.firstName} ${c.lastName}`.trim(), firstName: c.firstName, lastName: c.lastName });
 }
 
 /** Pattern del codice imposto da `JobRequisitionCreateBodySchema` / `JobPostingCreateBodySchema`. */

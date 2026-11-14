@@ -64,7 +64,7 @@ test.describe("percorsi formativi", () => {
         idModuli.push(((await res.json()) as { learningModuleId: string }).learningModuleId);
       }
 
-      await gotoAuthenticated(page, "/learning");
+      await gotoAuthenticated(page, "/learning?scheda=percorsi");
       await expect(page.getByTestId("learning-page")).toBeVisible({ timeout: 45_000 });
       await expect(page.getByTestId("learning-paths-panel")).toBeVisible();
 

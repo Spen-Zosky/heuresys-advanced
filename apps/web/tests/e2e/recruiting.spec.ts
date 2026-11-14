@@ -95,6 +95,8 @@ test.describe.serial("#54 F4 — recruiting, ciclo intero con login reale", () =
       await page.goto("/recruiting/candidates");
       await expect(page.getByTestId("candidates-page")).toBeVisible();
 
+      // C5: il modulo sta nella scheda «Nuovo candidato», l'elenco nelle schede per stato
+      await page.getByTestId("scheda-nuovo").click();
       await page.getByTestId("candidate-first-name").fill("Chiara");
       await page.getByTestId("candidate-last-name").fill(CAND_LAST);
       await page.getByTestId("candidate-email").fill(CAND_EMAIL);
@@ -102,6 +104,7 @@ test.describe.serial("#54 F4 — recruiting, ciclo intero con login reale", () =
       await page.getByTestId("candidate-submit").click();
       await attendiFeedbackOk(page, "candidate-feedback");
 
+      await page.getByTestId("scheda-attivi").click();
       const scheda = page.getByTestId("candidate-row").filter({ hasText: CAND_LAST });
       await expect(scheda).toHaveCount(1);
       await expect(scheda.getByTestId("candidate-row-status")).toHaveText(/Attivo|Active/);
@@ -118,7 +121,7 @@ test.describe.serial("#54 F4 — recruiting, ciclo intero con login reale", () =
     test("la pipeline mostra la carta e la candidatura si apre dal Kanban", async ({ page }) => {
       await page.goto("/recruiting");
       await expect(page.getByTestId("pipeline-board")).toBeVisible();
-      const carta = page.getByTestId("pipeline-board").locator("text=Chiara " + CAND_LAST);
+      const carta = page.getByTestId("pipeline-board").locator(`text=${CAND_LAST}, Chiara`);
       await expect(carta.first()).toBeVisible();
       // il conteggio viene dall'API, non dalla tavola
       const n = Number(await page.getByTestId("summary-applications").innerText());

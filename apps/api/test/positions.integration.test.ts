@@ -167,6 +167,65 @@ describe("/v1/positions/* integration", () => {
     expect((none.json() as { total: number }).total).toBe(0);
   });
 
+  /**
+   * Repertorio interfacce (blocco B2, 10/11/2026). R2: l'elenco è per titolo e ogni riga
+   * porta titolare, unità, sede e tenant (null quando il dato non c'è). R5: il filtro
+   * `tenantId` vale solo per la piattaforma; per chi ha un tenant è ignorato.
+   */
+  it("LIST: ordinato per titolo, con titolare, unità, sede e tenant (R2, R5)", async () => {
+    const r = await suite.app.inject({
+      method: "GET", url: "/v1/positions?limit=200&isActive=true",
+      headers: { cookie: cookieHeader(tenantS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as {
+      total: number;
+      items: {
+        title: string; tenantId: string; isActive: boolean;
+        incumbentLastName: string | null; organizationUnitName: string | null;
+        siteName: string | null; tenantName: string | null;
+      }[];
+    };
+    expect(body.items.length).toBeGreaterThan(0);
+    for (const p of body.items) {
+      expect(p.isActive).toBe(true);
+      expect(p).toHaveProperty("incumbentLastName");
+      expect(p).toHaveProperty("siteName");
+      expect(p.tenantName).toBeTruthy();
+    }
+    const iniziali = body.items.map((p) => p.title.trim().toLowerCase().charAt(0));
+    expect(iniziali).toEqual([...iniziali].sort());
+    // Una posizione attiva con unità ha quasi sempre una sede risolta risalendo l'albero.
+    const conUnita = body.items.filter((p) => p.organizationUnitName);
+    expect(conUnita.length).toBeGreaterThan(0);
+    expect(conUnita.filter((p) => p.siteName).length).toBeGreaterThanOrEqual(Math.floor(conUnita.length * 0.9));
+    // Almeno un titolare risolto: il tenant reale ha posti occupati.
+    expect(body.items.some((p) => p.incumbentLastName)).toBe(true);
+
+    const tenantId = body.items[0]!.tenantId;
+    const tutte = await suite.app.inject({
+      method: "GET", url: "/v1/positions?limit=1&isActive=true",
+      headers: { cookie: cookieHeader(platformS.cookies) },
+    });
+    const filtrate = await suite.app.inject({
+      method: "GET", url: `/v1/positions?limit=200&isActive=true&tenantId=${tenantId}`,
+      headers: { cookie: cookieHeader(platformS.cookies) },
+    });
+    expect(filtrate.statusCode).toBe(200);
+    const f = filtrate.json() as { total: number; items: { tenantId: string }[] };
+    expect(f.total).toBe(body.total);
+    expect(f.items.every((p) => p.tenantId === tenantId)).toBe(true);
+    expect((tutte.json() as { total: number }).total).toBeGreaterThanOrEqual(f.total);
+
+    // Chi ha un tenant non allarga il perimetro chiedendo un altro tenant.
+    const altro = await suite.app.inject({
+      method: "GET", url: "/v1/positions?limit=1&isActive=true&tenantId=00000000-0000-4000-8000-000000000000",
+      headers: { cookie: cookieHeader(tenantS.cookies) },
+    });
+    expect(altro.statusCode).toBe(200);
+    expect((altro.json() as { total: number }).total).toBe(body.total);
+  });
+
   it("GET :id reads a position in own tenant", async () => {
     const r = await suite.app.inject({
       method: "GET",

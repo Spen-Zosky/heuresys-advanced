@@ -48,7 +48,8 @@ interface RequestRow {
 }
 
 const REQUEST_COLS = `request_id, request_tenant_id, request_subject_user_id,
-  (SELECT u.user_display_name FROM sys.sys_users u WHERE u.user_id = request_subject_user_id) AS subject_user_name,
+  (SELECT COALESCE(NULLIF(concat_ws(', ', NULLIF(trim(u.user_last_name), ''), NULLIF(trim(u.user_first_name), '')), ''), u.user_display_name)
+     FROM sys.sys_users u WHERE u.user_id = request_subject_user_id) AS subject_user_name,
   request_leave_type, request_start_date::text AS request_start_date, request_end_date::text AS request_end_date,
   request_days_requested, request_half_day_start, request_half_day_end, request_reason, request_status,
   request_approver_user_id, request_approved_at, request_rejection_reason, request_overlap_approved,

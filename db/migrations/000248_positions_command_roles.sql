@@ -1,3 +1,7 @@
+-- GUARDIA ALLINEAMENTO-RTL (ADR-0035): questo file racconta un passaggio storico di RTL che l'allineamento alla corsa (db/scripts/rtl-allinea) ha superato.
+-- Dove il giornale dell'allineamento esiste il corpo si salta; altrove si applica come sempre.
+SELECT (to_regclass('staging.rtl_allinea_org_undo') IS NULL) AS esegui_storica \gset
+\if :esegui_storica
 -- ═══════════════════════════════════════════════════════════════════════════════
 -- 000248_positions_command_roles.sql
 --
@@ -251,3 +255,4 @@ COMMIT;
 --    WHERE user_position_assignment_notes LIKE '%fase 5a%';
 --   DELETE FROM sys.sys_positions WHERE position_code LIKE 'POS-CMD-%';
 -- COMMIT;
+\endif

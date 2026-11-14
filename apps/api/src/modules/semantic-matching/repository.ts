@@ -156,17 +156,28 @@ export async function deriveUserProfiles(q: DbConnector, modelId: string): Promi
 }
 
 // ── kNN queries (cosine; ORDER BY <=> ASC = nearest) ──
+// Il nome della professione si mostra in italiano quando il catalogo lo porta
+// (esco_occupation_mapping_esco_label_it, caricata dal datastore), altrimenti quello del vettore.
+// Si legge per chiave JSON così la query regge anche su uno schema dove la colonna non c'è ancora.
+const ETICHETTA_ITALIANA = `coalesce((
+         SELECT nullif(btrim(to_jsonb(m) ->> 'esco_occupation_mapping_esco_label_it'), '')
+           FROM sys.sys_esco_occupation_mappings m
+          WHERE m.esco_occupation_mapping_esco_uri = v.esco_uri
+          ORDER BY 1 NULLS LAST LIMIT 1), v.label_text)`;
 export async function knnOccupationsForUser(q: DbConnector, userId: string, limit: number): Promise<{ items: OccupationMatch[]; evidenceCount: number }> {
   const prof = await q.query<{ derived_from_evidence_count: number }>(
     `SELECT derived_from_evidence_count FROM sys.sys_user_profile_embeddings WHERE user_id = $1`, [userId]);
   if (prof.rowCount === 0) return { items: [], evidenceCount: 0 };
   const r = await q.query<{ esco_uri: string; label_text: string | null; isco_code: string | null; score: string }>(
-    `WITH me AS (SELECT embedding FROM sys.sys_user_profile_embeddings WHERE user_id = $1)
-     SELECT oe.esco_uri, oe.label_text, oe.isco_code,
-            (1 - (oe.embedding <=> (SELECT embedding FROM me)))::text AS score
-     FROM sys.sys_esco_occupation_embeddings oe
-     ORDER BY oe.embedding <=> (SELECT embedding FROM me)
-     LIMIT $2`, [userId, limit]);
+    `WITH me AS (SELECT embedding FROM sys.sys_user_profile_embeddings WHERE user_id = $1),
+     vicine AS (
+       SELECT oe.esco_uri, oe.label_text, oe.isco_code,
+              (1 - (oe.embedding <=> (SELECT embedding FROM me))) AS s
+       FROM sys.sys_esco_occupation_embeddings oe
+       ORDER BY oe.embedding <=> (SELECT embedding FROM me)
+       LIMIT $2)
+     SELECT v.esco_uri, ${ETICHETTA_ITALIANA} AS label_text, v.isco_code, v.s::text AS score
+       FROM vicine v ORDER BY v.s DESC`, [userId, limit]);
   return {
     items: r.rows.map((x) => ({ escoUri: x.esco_uri, label: x.label_text, iscoCode: x.isco_code, score: num(x.score) })),
     evidenceCount: prof.rows[0]!.derived_from_evidence_count,
@@ -355,11 +366,13 @@ export async function knnSimilarUsers(
  */
 export async function knnOccupationsByVector(q: DbConnector, vec: number[], limit: number): Promise<OccupationMatch[]> {
   const r = await q.query<{ esco_uri: string; label_text: string | null; isco_code: string | null; score: string }>(
-    `SELECT oe.esco_uri, oe.label_text, oe.isco_code,
-            (1 - (oe.embedding <=> $1::vector))::text AS score
-     FROM sys.sys_esco_occupation_embeddings oe
-     ORDER BY oe.embedding <=> $1::vector
-     LIMIT $2`, [toVectorLiteral(vec), limit]);
+    `WITH vicine AS (
+       SELECT oe.esco_uri, oe.label_text, oe.isco_code, (1 - (oe.embedding <=> $1::vector)) AS s
+       FROM sys.sys_esco_occupation_embeddings oe
+       ORDER BY oe.embedding <=> $1::vector
+       LIMIT $2)
+     SELECT v.esco_uri, ${ETICHETTA_ITALIANA} AS label_text, v.isco_code, v.s::text AS score
+       FROM vicine v ORDER BY v.s DESC`, [toVectorLiteral(vec), limit]);
   return r.rows.map((x) => ({ escoUri: x.esco_uri, label: x.label_text, iscoCode: x.isco_code, score: num(x.score) }));
 }
 

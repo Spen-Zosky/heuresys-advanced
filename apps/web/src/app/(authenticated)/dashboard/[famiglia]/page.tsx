@@ -28,16 +28,9 @@ import { useMemo } from "react";
 import { useParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import {
-  Badge,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  PageHeader,
-  Sparkline,
-  StatsCard,
-} from "@heuresys/ui";
+import { Badge, Card, CardContent, CardHeader, CardTitle, Sparkline } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
+import { StatsCard } from "@/components/indicatori-leggibili";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { LayoutDashboard, Lock, EyeOff } from "lucide-react";
 import type {
@@ -47,6 +40,7 @@ import type {
 } from "@heuresys/shared";
 import { apiFetch } from "../../../../lib/api/fetch";
 import { EntityTable } from "../../../../components/data-table-panel";
+import { testoLeggibile } from "../../../../lib/i18n";
 
 /** Le viste con valori si disegnano per forma; le altre dicono perché non li hanno. */
 function Vista({ v, t }: { v: DashboardBlockData; t: (k: string) => string }) {
@@ -97,7 +91,7 @@ function Vista({ v, t }: { v: DashboardBlockData; t: (k: string) => string }) {
           ) : (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {v.content.counters.map((c) => (
-                <StatsCard key={c.key} label={c.label} value={c.value} />
+                <StatsCard key={c.key} label={testoLeggibile(c.label)} value={c.value} />
               ))}
             </div>
           )}
@@ -149,9 +143,10 @@ function Vista({ v, t }: { v: DashboardBlockData; t: (k: string) => string }) {
             rowKey={(r) => r.id}
             caption={v.name}
             columns={[
-              { header: t("dashboard.famiglie.colonnaVoce"), cell: (r) => r.label },
-              { header: t("dashboard.famiglie.colonnaDettaglio"), cell: (r) => r.detail ?? "—" },
-              { header: t("dashboard.famiglie.colonnaValore"), align: "right", cell: (r) => (r.value === null ? "—" : r.value.toLocaleString(lingua)) },
+              // R2: le intestazioni le dà la vista; le generiche restano solo come ripiego.
+              { header: v.content.columns?.label ?? t("dashboard.famiglie.colonnaVoce"), cell: (r) => testoLeggibile(r.label) },
+              { header: v.content.columns?.detail ?? t("dashboard.famiglie.colonnaDettaglio"), cell: (r) => (r.detail ? testoLeggibile(r.detail) : "—") },
+              { header: v.content.columns?.value ?? t("dashboard.famiglie.colonnaValore"), align: "right", cell: (r) => (r.value === null ? "—" : r.value.toLocaleString(lingua)) },
             ]}
           />
         )}

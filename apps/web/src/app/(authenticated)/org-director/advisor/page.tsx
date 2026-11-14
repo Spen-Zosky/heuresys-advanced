@@ -2,7 +2,8 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, PageHeader } from "@heuresys/ui";
+import { Badge } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import type { AdvisorSuggestionsResponse, AdvisorSuggestion, AdvisorCitation } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
@@ -35,13 +36,8 @@ function Citation({ c, t }: { c: AdvisorCitation; t: ReturnType<typeof useTransl
 function buildColumns(t: ReturnType<typeof useTranslation>["t"]): DataColumn<AdvisorSuggestion>[] {
   return [
     {
-      header: t("advisor.cols.priority"),
-      align: "right",
-      cell: (r) => (
-        <span data-testid={`advisor-priority-${r.ruleId}`}>
-          <StatusPill tone={PRIORITY_TONE(r.priority)}>{Math.round(r.priority)}</StatusPill>
-        </span>
-      ),
+      header: t("advisor.cols.subject"),
+      cell: (r) => <span className="text-sm font-medium text-foreground">{r.subjectLabel}</span>,
     },
     {
       header: t("advisor.cols.rule"),
@@ -51,10 +47,6 @@ function buildColumns(t: ReturnType<typeof useTranslation>["t"]): DataColumn<Adv
           <span className="text-[10px] text-muted-foreground">{t(`advisor.subjectTypes.${r.subjectType}`)}</span>
         </span>
       ),
-    },
-    {
-      header: t("advisor.cols.subject"),
-      cell: (r) => <span className="text-sm font-medium text-foreground">{r.subjectLabel}</span>,
     },
     {
       header: t("advisor.cols.action"),
@@ -67,11 +59,21 @@ function buildColumns(t: ReturnType<typeof useTranslation>["t"]): DataColumn<Adv
     {
       header: t("advisor.cols.citations"),
       cell: (r) => (
-        <ul data-testid="advisor-citations" className="space-y-0.5">
+        <ul data-testid="advisor-citations" className="flex max-w-md flex-wrap gap-x-3 gap-y-0.5">
           {r.citations.map((c, i) => (
             <Citation key={`${c.source}-${c.field}-${i}`} c={c} t={t} />
           ))}
         </ul>
+      ),
+    },
+    // C3/R3: la priorità chiude la riga, non la apre
+    {
+      header: t("advisor.cols.priority"),
+      align: "right",
+      cell: (r) => (
+        <span data-testid={`advisor-priority-${r.ruleId}`}>
+          <StatusPill tone={PRIORITY_TONE(r.priority)}>{Math.round(r.priority)}</StatusPill>
+        </span>
       ),
     },
   ];
@@ -89,7 +91,7 @@ export default function AdvisorPage() {
   const data = advisor.data;
 
   return (
-    <main data-testid="advisor-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="advisor-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="advisor-title"
         title={t("advisor.title")}
@@ -109,6 +111,7 @@ export default function AdvisorPage() {
         error={advisor.error}
         errorMessage={t("advisor.errorMessage")}
         rows={data?.items ?? []}
+        pageSize={10}
         rowKey={(r) => `${r.ruleId}-${r.subjectId}`}
         rowTestId="advisor-row"
         columns={columns}

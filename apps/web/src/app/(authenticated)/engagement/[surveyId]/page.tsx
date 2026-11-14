@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import type { EngagementSurveyResultsResponse, EngagementQuestionResult } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
@@ -54,7 +55,7 @@ export default function EngagementResultsPage() {
   const hasRated = (d?.questions ?? []).some((q) => q.avgRating != null);
 
   return (
-    <main data-testid="engagement-results-page" className="mx-auto max-w-5xl space-y-6 px-6 py-8">
+    <main data-testid="engagement-results-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
       <div className="text-sm">
         <Link href="/engagement" className="text-muted-foreground hover:underline" data-testid="engagement-results-back">
           ← {t("engagement.results.back")}

@@ -2,6 +2,7 @@
 
 import { use, useState } from "react";
 import Link from "next/link";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type {
@@ -18,6 +19,7 @@ import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { StatusPill } from "@/components/status-pill";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { useFormat } from "@/lib/format";
+import { Leggibile } from "@/lib/leggibile";
 
 /**
  * #198 Tenant Builder P3, T7 — LA COSTRUZIONE: il piano prima, e la firma dopo.
@@ -157,21 +159,20 @@ export default function TenantBlueprintBuildPage({
 
   return (
     <div className="space-y-6" data-testid="tenant-blueprint-build">
-      <header>
-        <Link
-          href={`/tenant-blueprints/${id}`}
-          className="text-sm text-muted-foreground underline-offset-2 hover:underline"
-        >
-          {t("dossier.back")}
-        </Link>
-        <div className="mt-1 flex flex-wrap items-center gap-3">
-          <h1 className="text-xl font-semibold text-foreground">{t("dossier.build.title")}</h1>
+      <PageHeader
+        breadcrumbs={
+          <Link href={`/tenant-blueprints/${id}`} className="underline-offset-2 hover:underline">
+            {t("dossier.back")}
+          </Link>
+        }
+        title={t("dossier.build.title")}
+        badges={
           <StatusPill tone={versione.status === "APPLIED" ? "success" : "info"}>
             {enumLabel("tenantBlueprintVersionStatus", versione.status)}
           </StatusPill>
-        </div>
-        <p className="mt-1 text-sm text-muted-foreground">{t("dossier.build.description")}</p>
-      </header>
+        }
+        description={t("dossier.build.description")}
+      />
 
       {piano.isError ? (
         // ⚠ IL MOTIVO, NON UN ERRORE GENERICO (#211 F4, S1072). Qui c'era
@@ -227,7 +228,7 @@ export default function TenantBlueprintBuildPage({
                 </th>
               </tr>
             </thead>
-            <tbody>
+            <tbody><Leggibile>
               {righe.map((r) => (
                 <tr key={r.chiave} className="border-t border-border" data-testid={`build-row-${r.chiave}`}>
                   <td className="py-1 text-foreground">{r.etichetta}</td>
@@ -239,7 +240,7 @@ export default function TenantBlueprintBuildPage({
                   </td>
                 </tr>
               ))}
-            </tbody>
+            </Leggibile></tbody>
           </table>
           <p className="mt-2 text-xs text-muted-foreground">
             {t("dossier.build.alreadyThereMeans")}

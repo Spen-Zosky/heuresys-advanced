@@ -27,7 +27,7 @@ export function RiskTab() {
       <ProfileSection title={t("career.risk.flightTitle")} testId="career-flight-risk">
         {flightRisk ? (
           <>
-            <Field label={t("career.risk.value")} value={flightRisk.value != null ? flightRisk.value.toFixed(2) : null} testId="career-flight-value" />
+            <Field label={t("career.risk.value")} value={flightRisk.value != null ? fmt.numeroFisso(flightRisk.value, 2) : null} testId="career-flight-value" />
             <Field label={t("career.risk.band")} value={enumLabel("flightRiskBand", flightRisk.band)} testId="career-flight-band" />
             <Field label={t("career.risk.model")} value={flightRisk.modelVersion} />
             <Field label={t("career.risk.computedAt")} value={flightRisk.computedAt ? fmtDate(flightRisk.computedAt.slice(0, 10)) : null} />

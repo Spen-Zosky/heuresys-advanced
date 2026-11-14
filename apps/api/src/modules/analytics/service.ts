@@ -268,10 +268,10 @@ export const analyticsService = {
   },
 
   // The ESCO skill catalogue is platform-global (tenantId=null), so the group
-  // share is global; scope is reported for surface parity only (no tenant filter).
+  // I21: global for the platform mandate; a tenant sees the skills its people actually hold.
   async skillsGroupShare(a: ActorContext): Promise<SkillsGroupShareAnalyticsResponse> {
     const s = await buildScope(a);
-    const g = await repo.getSkillsGroupShare(pool);
+    const g = await repo.getSkillsGroupShare(pool, s.kind === "PLATFORM" ? null : s.tenantId);
     return {
       scope: { kind: s.kind, tenantId: s.tenantId },
       groups: g.groups,

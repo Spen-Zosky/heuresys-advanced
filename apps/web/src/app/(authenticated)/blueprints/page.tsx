@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import Link from "next/link";
-import type { BlueprintVariant } from "@heuresys/shared";
+import type { BlueprintFamily, BlueprintVariant } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { Button } from "@heuresys/ui";
@@ -17,16 +17,6 @@ import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { useFormat } from "@/lib/format";
 
-// B-xx: BlueprintFamily stays a LOCAL interface (NOT deduped to @heuresys/shared) —
-// the shared `BlueprintFamily` schema has no `industryCode` field at all, but the
-// "Industry" column below renders `f.industryCode`. Flagged, not touched (C4/#42
-// REGOLA CRITICA: used field missing from the shared type = STOP on this type).
-interface BlueprintFamily {
-  blueprintFamilyId: string;
-  code: string;
-  name: string;
-  industryCode: string | null;
-}
 interface VariantRow extends BlueprintVariant {
   famName: string | null;
   industry: string | null;
@@ -42,12 +32,11 @@ function buildColumns(t: TFunction): DataColumn<VariantRow>[] {
           <Link href={`/blueprints/${v.blueprintVariantId}`} data-testid="blueprint-link" className="font-medium text-foreground underline-offset-2 hover:underline">
             {v.name ? v.name : na}
           </Link>
-          {v.code ? <span className="font-mono text-xs text-muted-foreground">{v.code}</span> : null}
         </div>
       ),
     },
     { header: t("list.columns.family"), cell: (v) => <span className="text-foreground">{v.famName ?? na}</span> },
-    { header: t("list.columns.industry"), cell: (v) => <span className="text-xs uppercase text-muted-foreground">{v.industry ?? na}</span> },
+    { header: t("list.columns.industry"), cell: (v) => <span className="text-xs text-muted-foreground">{v.industry ?? na}</span> },
   ];
 }
 
@@ -116,7 +105,7 @@ export default function BlueprintsPage() {
 
   const rows: VariantRow[] = variants.rows.map((v) => {
     const fam = familyById.get(v.familyId);
-    return { ...v, famName: fam?.name ?? null, industry: fam?.industryCode ?? null };
+    return { ...v, famName: fam?.name ?? null, industry: fam?.industryName ? (fam.industryCode ? `${fam.industryCode} · ${fam.industryName}` : fam.industryName) : null };
   });
 
   const columns = useMemo(() => buildColumns(t), [t]);

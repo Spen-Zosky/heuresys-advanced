@@ -124,6 +124,16 @@ export async function codiciDelProfilo(
  * attore senza cliente che NON amministra la piattaforma non è un caso legittimo su un
  * catalogo di prodotto: vede un profilo vuoto, che è la stessa scelta fail-closed di sopra.
  */
+/** Il catalogo come lo vede un cliente, chiunque lo chieda (I21): la piattaforma lo usa per le
+ *  tendine di una scheda di quel cliente. */
+export async function perimetroDelCliente(
+  q: DbConnector,
+  tenantId: string,
+  dominio: DominioDiProfilo,
+): Promise<PerimetroDiCatalogo> {
+  return { tipo: "profilo", codici: await codiciDelProfilo(q, tenantId, dominio), tenantId };
+}
+
 export async function perimetroDiCatalogo(
   q: DbConnector,
   actor: ActorContext,

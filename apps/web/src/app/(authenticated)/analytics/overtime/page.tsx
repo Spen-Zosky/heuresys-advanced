@@ -2,7 +2,9 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, PageHeader, StatsCard, formatCurrency } from "@heuresys/ui";
+import { Badge, formatCurrency } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
+import { StatsCard } from "@/components/indicatori-leggibili";
 import { ClipboardList, Clock, Euro } from "lucide-react";
 import { EChartsCard } from "../../_charts-client";
 import type {
@@ -143,14 +145,14 @@ export default function OvertimeAnalyticsPage() {
 
   if (q.isLoading) {
     return (
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="mx-auto max-w-7xl px-6 pb-8">
         <StatoCaricamento testId="analytics-overtime-loading" />
       </main>
     );
   }
   if (q.isError) {
     return (
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="mx-auto max-w-7xl px-6 pb-8">
         <StatoErrore errore={q.error} titolo={t("error")} testId="analytics-overtime-error" onRiprova={() => void q.refetch()} />
       </main>
     );
@@ -165,7 +167,7 @@ export default function OvertimeAnalyticsPage() {
   const typeName = (r: OvertimeByTypeRow) => t(`overtime.types.${r.type}`);
 
   return (
-    <main data-testid="analytics-overtime-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
+    <main data-testid="analytics-overtime-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       <PageHeader
         data-testid="analytics-overtime-title"
         title={t("overtime.title")}

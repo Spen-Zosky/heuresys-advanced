@@ -47,11 +47,31 @@ function ponte(over: Partial<ConstructorParameters<typeof PonteVista>[0]> = {}) 
 }
 
 describe("catalogo chiuso", () => {
-  it("ogni comando è di classe A e di modo «mostra»", () => {
-    for (const v of Object.values(CATALOGO_VISTA)) {
+  it("ogni comando è di classe A; «lavora» c'è solo per gli oggetti che la persona registra (I5)", () => {
+    for (const [nome, v] of Object.entries(CATALOGO_VISTA)) {
       expect(v.classe).toBe("A");
-      expect(v.modo).toBe("mostra");
+      expect(v.modo).toBe(nome.startsWith("tabella.") ? "mostra" : "lavora");
     }
+  });
+
+  it("fascicolo.decidi valida gli argomenti e il blocco dice che la persona registra", async () => {
+    const pagina: PaginaDichiarata = { percorso: "/tenant-blueprints/x", comandi: ["fascicolo.decidi", "fascicolo.annulla"] };
+    const testo = contestoPagina(pagina);
+    expect(testo).toContain("fascicolo.decidi (prepara, la persona registra)");
+    const { p } = ponte({ pagina });
+    expect((await p.comanda("fascicolo.decidi", { processo: "HR-01", inclusione: "FORSE", motivazione: "m" })).stato).toBe("rifiutata");
+    expect((await p.comanda("fascicolo.decidi", { processo: "HR-01", inclusione: "IN", motivazione: "  " })).stato).toBe("rifiutata");
+  });
+
+  it("il blocco dice i nomi esatti degli argomenti di ogni comando, ricavati dallo schema", () => {
+    const testo = contestoPagina({
+      percorso: "/x",
+      comandi: ["fascicolo.decidi", "fascicolo.annulla", "tabella.filtra", "tabella.ordina", "tabella.azzera"],
+    });
+    expect(testo).toContain('Argomenti: { "processo": string, "inclusione": "IN" | "PARTIAL" | "OUT", "motivazione": string }');
+    expect(testo).toContain('"colonna": string, "valore": string | number | boolean');
+    expect(testo).toContain('"verso": "crescente" | "decrescente"');
+    expect(testo).toMatch(/fascicolo\.annulla .*Argomenti: \{\}/u);
   });
 
   it("lo strumento ha la classe A nel catalogo delle azioni", () => {

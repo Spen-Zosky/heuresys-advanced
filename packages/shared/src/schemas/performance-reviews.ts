@@ -35,6 +35,8 @@ export const PerformanceReviewSchema = z.object({
   tenantId: z.uuid(),
   subjectUserId: z.uuid().nullable(),
   subjectEmail: z.string().nullable(),
+  /** «Cognome, Nome» della persona valutata (repertorio interfacce, R1). */
+  subjectName: z.string().nullable().optional(),
   reviewerUserId: z.uuid().nullable(),
   reviewCycleId: z.uuid().nullable(),
   periodStart: z.string().nullable(),

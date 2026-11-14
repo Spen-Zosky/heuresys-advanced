@@ -105,3 +105,21 @@ describe("personeAmmesse: solo chi è nominato (ADR-0056 D3)", () => {
     expect(e.has("d4")).toBe(false);
   });
 });
+
+describe("strumenti integrati: l'assistente non ha gli strumenti di sviluppo", () => {
+  it("restano solo ToolSearch e Skill, nessuno che scriva o lanci comandi", async () => {
+    const { STRUMENTI_INTEGRATI } = await import("../src/sdk-agent.js");
+    expect([...STRUMENTI_INTEGRATI].sort()).toEqual(["Skill", "ToolSearch"]);
+    for (const vietato of ["Bash", "Write", "Edit", "WebSearch", "Workflow", "CronCreate", "NotebookEdit"]) {
+      expect(STRUMENTI_INTEGRATI as readonly string[]).not.toContain(vietato);
+    }
+  });
+});
+
+describe("connettori dell'abbonamento: l'assistente non li vede", () => {
+  it("accetta solo gli MCP passati dal gateway e spegne i connettori claude.ai", async () => {
+    const { ISOLAMENTO_MCP } = await import("../src/sdk-agent.js");
+    expect(ISOLAMENTO_MCP.strictMcpConfig).toBe(true);
+    expect(ISOLAMENTO_MCP.env.ENABLE_CLAUDEAI_MCP_SERVERS).toBe("false");
+  });
+});

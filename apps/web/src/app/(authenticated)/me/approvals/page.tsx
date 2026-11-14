@@ -2,7 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Card, CardContent, PageHeader } from "@heuresys/ui";
+import { Card, CardContent } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { CheckSquare } from "lucide-react";
 import type { MeApprovalsResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
@@ -10,6 +11,7 @@ import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pa
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { useFormat } from "@/lib/format";
+import { EntityTable } from "@/components/data-table-panel";
 
 /** Le mie approvazioni (S1011 F5.3) — track-only view of the caller's own approval requests. */
 export default function MeApprovalsPage() {
@@ -29,7 +31,7 @@ export default function MeApprovalsPage() {
   ];
 
   return (
-    <main data-testid="me-approvals-page" className="mx-auto max-w-5xl space-y-6 px-6 py-8">
+    <main data-testid="me-approvals-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
       <PageHeader title={t("approvals.title")} description={t("approvals.description")} />
 
       {q.isLoading ? (
@@ -57,38 +59,33 @@ export default function MeApprovalsPage() {
               motivo={t("approvals.emptyDesc")}
             />
           ) : (
-            <div className="overflow-hidden rounded-card border border-border bg-card shadow-card">
-              <table data-testid="me-approvals-table" className="w-full border-collapse text-sm">
-                <thead>
-                  <tr className="border-b border-border bg-muted text-left text-[11px] uppercase tracking-wider text-muted-foreground">
-                    <th className="px-4 py-2">{t("approvals.colTitle")}</th>
-                    <th className="px-4 py-2">{t("approvals.colProcess")}</th>
-                    <th className="px-4 py-2">{t("approvals.colStatus")}</th>
-                    <th className="px-4 py-2">{t("approvals.colPriority")}</th>
-                    <th className="px-4 py-2">{t("approvals.colCreated")}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {items.map((a, i) => (
-                    <tr key={`appr-${i}`} data-testid="me-approvals-row" className="transition-colors hover:bg-muted/60">
-                      <td className="px-4 py-2 align-middle font-medium text-foreground">{a.title ?? "—"}</td>
-                      <td className="px-4 py-2 align-middle text-xs">
-                        {a.processName ? (
-                          <>
-                            <span className="text-foreground">{a.processName}</span>
-                            {a.processStepName && <span className="block text-muted-foreground">{a.processStepName}</span>}
-                          </>
-                        ) : (
-                          <span className="text-muted-foreground">{t("approvals.noProcess")}</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-2 align-middle"><EnumStatusBadge domain="approvalStatus" value={a.status} /></td>
-                      <td className="px-4 py-2 align-middle text-xs text-muted-foreground">{enumLabel("notificationPriority", a.priority)}</td>
-                      <td className="px-4 py-2 align-middle text-xs text-muted-foreground">{fmt.data(a.createdAt)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            /* C5, C12: 179 richieste in una tabella sola erano dodici schermate; ora pagine da 25,
+               e ogni riga apre la sua scheda */
+            <div data-testid="me-approvals-table">
+              <EntityTable<(typeof items)[number]>
+                isLoading={false}
+                isError={false}
+                rows={items}
+                rowKey={(a) => `${a.createdAt}-${a.title ?? ""}-${a.status}`}
+                rowTestId="me-approvals-row"
+                originPath="/v1/me/approvals"
+                caption={t("approvals.title")}
+                columns={[
+                  { header: t("approvals.colTitle"), cell: (a) => <span className="font-medium text-foreground">{a.title ?? "—"}</span> },
+                  {
+                    header: t("approvals.colProcess"),
+                    cell: (a) => a.processName ? (
+                      <span className="text-xs">
+                        <span className="text-foreground">{a.processName}</span>
+                        {a.processStepName && <span className="block text-muted-foreground">{a.processStepName}</span>}
+                      </span>
+                    ) : <span className="text-xs text-muted-foreground">{t("approvals.noProcess")}</span>,
+                  },
+                  { header: t("approvals.colPriority"), cell: (a) => <span className="text-xs text-muted-foreground">{enumLabel("notificationPriority", a.priority)}</span> },
+                  { header: t("approvals.colCreated"), cell: (a) => <span className="text-xs text-muted-foreground">{fmt.data(a.createdAt)}</span> },
+                  { header: t("approvals.colStatus"), cell: (a) => <EnumStatusBadge domain="approvalStatus" value={a.status} /> },
+                ]}
+              />
             </div>
           )}
         </>

@@ -38,11 +38,11 @@ export default function MeDocumentsPage() {
       {
         // basename only — the full URI is an internal storage path (census F4
         // S1026: it embedded the owner's UUID in an end-user page)
-        header: t("documents.colUri"),
+        header: t("documents.colUri"), secondaria: true,
         cell: (d) => <span className="font-mono text-xs break-all text-muted-foreground">{d.uri.split("/").pop() ?? d.uri}</span>,
       },
       {
-        header: t("documents.colMime"),
+        header: t("documents.colMime"), secondaria: true,
         cell: (d) => <span className="text-xs text-muted-foreground">{d.mimeType ?? "—"}</span>,
       },
     ],

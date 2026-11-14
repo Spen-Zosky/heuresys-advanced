@@ -5,7 +5,9 @@ import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader } from "@heuresys/ui";
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
+import { SchedePagina } from "@/components/schede-pagina";
 import type {
   ContentDocument,
   ContentDocumentListResponse,
@@ -194,18 +196,19 @@ export default function ContentPage() {
         ),
       },
       { header: t("content.columns.kind"), cell: (d) => <span className="text-muted-foreground">{t(`content.kind.${d.kind}`)}</span> },
-      { header: t("content.columns.status"), cell: (d) => <Badge variant={statusVariant(d.status)}>{t(`content.status.${d.status}`)}</Badge> },
       {
         header: t("content.columns.category"),
         cell: (d) => <span className="text-muted-foreground">{d.categoryId ? catMap.get(d.categoryId) ?? "—" : "—"}</span>,
       },
       { header: t("content.columns.updated"), cell: (d) => <span className="text-xs text-muted-foreground">{fmt.data(d.updatedAt)}</span> },
+      // Repertorio interfacce, R3: lo stato chiude la riga.
+      { header: t("content.columns.status"), cell: (d) => <Badge variant={statusVariant(d.status)}>{t(`content.status.${d.status}`)}</Badge> },
     ],
     [t, catMap, fmt],
   );
 
   return (
-    <main data-testid="content-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="content-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="content-title"
         title={t("content.title")}
@@ -217,6 +220,11 @@ export default function ContentPage() {
         }
       />
 
+      {/* C5: documenti e categorie in due schede, invece di una pagina lunga. */}
+      <SchedePagina
+        schede={[
+          { id: "documenti", titolo: t("content.tabs.documents"), contenuto: (
+      <div className="space-y-6">
       {/* Create document */}
       {canCreate && (
       <Card>
@@ -445,8 +453,9 @@ export default function ContentPage() {
           caption={t("content.caption")}
         />
       </div>
-
-      {/* Categories */}
+      </div>
+          ) },
+          { id: "categorie", titolo: t("content.tabs.categories"), contenuto: (
       <Card data-testid="content-categories">
         <CardHeader>
           <CardTitle>{t("content.categories.cardTitle")}</CardTitle>
@@ -515,6 +524,9 @@ export default function ContentPage() {
           )}
         </CardContent>
       </Card>
+          ) },
+        ]}
+      />
     </main>
   );
 }

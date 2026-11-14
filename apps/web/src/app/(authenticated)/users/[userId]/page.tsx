@@ -21,7 +21,8 @@ import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import type { ReactNode } from "react";
-import { Button, Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { Button, Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { TimelinePanel } from "@/components/timeline-panel";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import type { UserDossier } from "@heuresys/shared";
@@ -35,7 +36,9 @@ import { useEnumLabel } from "@/lib/enum-labels";
 import { useFormat } from "@/lib/format";
 import { IdentityEditor } from "./_components/identity-editor";
 import { RolesEditor } from "./_components/roles-editor";
+import { SchedePagina } from "@/components/schede-pagina";
 import { chiediConferma } from "@/lib/api/step-up";
+import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 
 /* --- formattazione: mai una data ISO o un numero nudo davanti a una persona --- */
 // F-1 (piano interfacce, 2026-11-04): la forma comune di `@/lib/format`, nella lingua del portale.
@@ -60,29 +63,20 @@ function Section({
 }
 
 /** Tabellina compatta: le righe scorrono da sole se la pagina è stretta. */
+/** C12: ogni riga del fascicolo si apre nella sua scheda, come nelle altre tabelle. */
 function MiniTable({ head, rows, empty }: { head: string[]; rows: ReactNode[][]; empty: string }) {
   if (rows.length === 0) return <StatoVuoto titolo={empty} compatto />;
+  const righe = rows.map((r, i) => ({ i, r }));
+  const colonne: DataColumn<{ i: number; r: ReactNode[] }>[] = head.map((h, j) => ({ header: h, cell: (x) => x.r[j] }));
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b text-left text-xs uppercase tracking-wide text-muted-foreground">
-            {head.map((h) => (
-              <th key={h} className="py-2 pr-4 font-medium">{h}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r, i) => (
-            <tr key={i} className="border-b last:border-0">
-              {r.map((c, j) => (
-                <td key={j} className="py-2 pr-4 align-top">{c}</td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <EntityTable<{ i: number; r: ReactNode[] }>
+      isLoading={false}
+      isError={false}
+      rows={righe}
+      rowKey={(x) => String(x.i)}
+      columns={colonne}
+      pageSize={25}
+    />
   );
 }
 
@@ -103,7 +97,7 @@ export default function UserDetailPage() {
 
   if (q.isLoading) {
     return (
-      <main className="mx-auto max-w-5xl px-6 py-8">
+      <main className="mx-auto max-w-5xl px-6 pb-8">
         <StatoCaricamento />
       </main>
     );
@@ -111,7 +105,7 @@ export default function UserDetailPage() {
   if (q.isError) {
     const code = isApiError(q.error) ? q.error.status : 0;
     return (
-      <main className="mx-auto max-w-5xl px-6 py-8" data-testid="user-error">
+      <main className="mx-auto max-w-5xl px-6 pb-8" data-testid="user-error">
         <Link href="/users" className="text-sm underline">{t("users.detail.back")}</Link>
         <div className="mt-4">
           <StatoErrore
@@ -137,7 +131,7 @@ export default function UserDetailPage() {
   const s = (k: string) => t(`users.detail.dossier.${k}`);
 
   return (
-    <main data-testid="user-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 py-8">
+    <main data-testid="user-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="user-display-name"
         title={p.displayName ?? t("users.detail.unnamed")}
@@ -194,179 +188,203 @@ export default function UserDetailPage() {
         </CardContent>
       </Card>
 
-      <Section title={s("positions")} count={d.positions.length} testId="dossier-positions">
-        <MiniTable
-          head={[s("col.position"), s("col.kind"), s("col.from"), s("col.to"), s("col.status")]}
-          empty={s("empty.positions")}
-          rows={d.positions.map((x) => [
-            x.positionTitle,
-            x.isPrimary ? s("primary") : s("secondary"),
-            f.data(x.startDate),
-            f.data(x.endDate),
-            <EnumStatusBadge key="s" domain="assignmentStatus" value={x.status} />,
-          ])}
-        />
-      </Section>
+      {/* C5: il dossier è lungo otto schermate; ogni capitolo sta nella sua scheda */}
+      <SchedePagina
+        schede={[
+          { id: "lavoro", titolo: t("users.detail.tabs.work"), conteggio: d.positions.length + d.contracts.length, contenuto: (
+          <>
+          <Section title={s("positions")} count={d.positions.length} testId="dossier-positions">
+            <MiniTable
+              head={[s("col.position"), s("col.kind"), s("col.from"), s("col.to"), s("col.status")]}
+              empty={s("empty.positions")}
+              rows={d.positions.map((x) => [
+                x.positionTitle,
+                x.isPrimary ? s("primary") : s("secondary"),
+                f.data(x.startDate),
+                f.data(x.endDate),
+                <EnumStatusBadge key="s" domain="assignmentStatus" value={x.status} />,
+              ])}
+            />
+          </Section>
 
-      <Section title={s("contracts")} count={d.contracts.length} testId="dossier-contracts">
-        <MiniTable
-          head={[s("col.type"), s("col.level"), s("col.ral"), s("col.hours"), s("col.from"), s("col.status")]}
-          empty={s("empty.contracts")}
-          rows={d.contracts.map((c, i) => [
-            c.type ? enumLabel("contractType", c.type) : "—",
-            c.ccnlLevel ?? "—",
-            isMasked(c, "grossAnnualSalary") ? <MaskedCell key={`m${i}`} /> : f.importo(c.grossAnnualSalary, c.currency, 0),
-            c.workHoursWeekly ?? "—",
-            f.data(c.startDate),
-            <EnumStatusBadge key={i} domain="contractStatus" value={c.status ?? ""} />,
-          ])}
-        />
-      </Section>
+          <Section title={s("contracts")} count={d.contracts.length} testId="dossier-contracts">
+            <MiniTable
+              head={[s("col.type"), s("col.level"), s("col.ral"), s("col.hours"), s("col.from"), s("col.status")]}
+              empty={s("empty.contracts")}
+              rows={d.contracts.map((c, i) => [
+                c.type ? enumLabel("contractType", c.type) : "—",
+                c.ccnlLevel ?? "—",
+                isMasked(c, "grossAnnualSalary") ? <MaskedCell key={`m${i}`} /> : f.importo(c.grossAnnualSalary, c.currency, 0),
+                c.workHoursWeekly ?? "—",
+                f.data(c.startDate),
+                <EnumStatusBadge key={i} domain="contractStatus" value={c.status ?? ""} />,
+              ])}
+            />
+          </Section>
 
-      <Section title={s("paySlips")} count={d.paySlips.length} testId="dossier-payslips">
-        <MiniTable
-          head={[s("col.period"), s("col.gross"), s("col.net"), s("col.paidOn")]}
-          empty={s("empty.paySlips")}
-          rows={d.paySlips.slice(0, 12).map((x) => [
-            x.period,
-            f.importo(x.grossPay, x.currency),
-            f.importo(x.netPay, x.currency),
-            f.data(x.paymentDate),
-          ])}
-        />
-        {d.paySlips.length > 12 && (
-          <p className="mt-3 text-xs text-muted-foreground">{s("moreRows")}</p>
-        )}
-      </Section>
+          <Section title={s("paySlips")} count={d.paySlips.length} testId="dossier-payslips">
+            <MiniTable
+              head={[s("col.period"), s("col.gross"), s("col.net"), s("col.paidOn")]}
+              empty={s("empty.paySlips")}
+              rows={d.paySlips.slice(0, 12).map((x, i) => [
+                x.period,
+                // C9/ADR-0032: un importo trattenuto lo dice, non è un trattino
+                isMasked(x, "grossPay") ? <MaskedCell key={`g${i}`} /> : f.importo(x.grossPay, x.currency),
+                isMasked(x, "netPay") ? <MaskedCell key={`n${i}`} /> : f.importo(x.netPay, x.currency),
+                f.data(x.paymentDate),
+              ])}
+            />
+            {d.paySlips.length > 12 && (
+              <p className="mt-3 text-xs text-muted-foreground">{s("moreRows")}</p>
+            )}
+          </Section>
+          </>
+          ) },
+          { id: "risultati", titolo: t("users.detail.tabs.results"), conteggio: d.performance.length + d.goals.length, contenuto: (
+          <>
+          <Section title={s("performance")} count={d.performance.length} testId="dossier-performance">
+            <MiniTable
+              head={[s("col.period"), s("col.type"), s("col.overall"), s("col.box"), s("col.status")]}
+              empty={s("empty.performance")}
+              rows={d.performance.map((x, i) => [
+                `${f.data(x.periodStart)} – ${f.data(x.periodEnd)}`,
+                x.type ?? "—",
+                x.overallRating ?? "—",
+                x.performanceBox ?? "—",
+                <EnumStatusBadge key={i} domain="reviewStatus" value={x.status ?? ""} />,
+              ])}
+            />
+          </Section>
 
-      <Section title={s("performance")} count={d.performance.length} testId="dossier-performance">
-        <MiniTable
-          head={[s("col.period"), s("col.type"), s("col.overall"), s("col.box"), s("col.status")]}
-          empty={s("empty.performance")}
-          rows={d.performance.map((x, i) => [
-            `${f.data(x.periodStart)} – ${f.data(x.periodEnd)}`,
-            x.type ?? "—",
-            x.overallRating ?? "—",
-            x.performanceBox ?? "—",
-            <EnumStatusBadge key={i} domain="reviewStatus" value={x.status ?? ""} />,
-          ])}
-        />
-      </Section>
+          <Section title={s("goals")} count={d.goals.length} testId="dossier-goals">
+            <MiniTable
+              head={[s("col.goal"), s("col.progress"), s("col.due"), s("col.status")]}
+              empty={s("empty.goals")}
+              rows={d.goals.slice(0, 12).map((x, i) => [
+                x.title,
+                f.percento(x.progressPercent, "0-100"),
+                f.data(x.dueDate),
+                <EnumStatusBadge key={i} domain="goalStatus" value={x.status ?? ""} />,
+              ])}
+            />
+            {d.goals.length > 12 && (
+              <p className="mt-3 text-xs text-muted-foreground">{s("moreRows")}</p>
+            )}
+          </Section>
 
-      <Section title={s("attendance")} count={d.attendance.leaveBalances.length} testId="dossier-attendance">
-        <MiniTable
-          head={[s("col.leaveType"), s("col.entitled"), s("col.used"), s("col.pending"), s("col.carryover")]}
-          empty={s("empty.attendance")}
-          rows={d.attendance.leaveBalances.map((b, i) => [
-            <span key={i}>{b.leaveType ? enumLabel("leaveType", b.leaveType) : "—"}</span>,
-            b.totalDays ?? "—",
-            b.usedDays ?? "—",
-            b.pendingDays ?? "—",
-            b.carryoverDays ?? "—",
-          ])}
-        />
-      </Section>
+          <Section title={s("career")} count={d.careerTargets.length} testId="dossier-career">
+            <MiniTable
+              head={[s("col.target"), s("col.horizon"), s("col.review")]}
+              empty={s("empty.career")}
+              rows={d.careerTargets.map((x, i) => [
+                x.positionId,
+                x.horizon ? enumLabel("careerHorizon", x.horizon) : "—",
+                <EnumStatusBadge key={i} domain="reviewStatus" value={x.reviewStatus ?? ""} />,
+              ])}
+            />
+          </Section>
+          </>
+          ) },
+          { id: "competenze", titolo: t("users.detail.tabs.skills"), conteggio: d.skills.length + d.certifications.length, contenuto: (
+          <>
+          <Section title={s("skills")} count={d.skills.length} testId="dossier-skills">
+            <MiniTable
+              head={[s("col.skill"), s("col.level"), s("col.source"), s("col.assessedOn")]}
+              empty={s("empty.skills")}
+              rows={d.skills.map((x) => [
+                x.skillName,
+                x.declaredProficiency,
+                x.source,
+                f.data(x.assessedAt),
+              ])}
+            />
+          </Section>
 
-      <Section title={s("skills")} count={d.skills.length} testId="dossier-skills">
-        <MiniTable
-          head={[s("col.skill"), s("col.level"), s("col.source"), s("col.assessedOn")]}
-          empty={s("empty.skills")}
-          rows={d.skills.map((x) => [
-            x.skillName,
-            x.declaredProficiency,
-            x.source,
-            f.data(x.assessedAt),
-          ])}
-        />
-      </Section>
+          <Section title={s("learning")} count={d.learning.length} testId="dossier-learning">
+            <MiniTable
+              head={[s("col.course"), s("col.mandatory"), s("col.status"), s("col.enrolledOn")]}
+              empty={s("empty.learning")}
+              rows={d.learning.slice(0, 12).map((x, i) => [
+                x.title ?? x.moduleTitle ?? x.pathName ?? "—",
+                x.isMandatory ? s("yes") : s("no"),
+                <EnumStatusBadge key={i} domain="learningStatus" value={x.status ?? ""} />,
+                f.data(x.enrolledAt),
+              ])}
+            />
+            {d.learning.length > 12 && (
+              <p className="mt-3 text-xs text-muted-foreground">{s("moreRows")}</p>
+            )}
+          </Section>
 
-      <Section title={s("learning")} count={d.learning.length} testId="dossier-learning">
-        <MiniTable
-          head={[s("col.course"), s("col.mandatory"), s("col.status"), s("col.enrolledOn")]}
-          empty={s("empty.learning")}
-          rows={d.learning.slice(0, 12).map((x, i) => [
-            x.title ?? x.moduleTitle ?? x.pathName ?? "—",
-            x.isMandatory ? s("yes") : s("no"),
-            <EnumStatusBadge key={i} domain="learningStatus" value={x.status ?? ""} />,
-            f.data(x.enrolledAt),
-          ])}
-        />
-        {d.learning.length > 12 && (
-          <p className="mt-3 text-xs text-muted-foreground">{s("moreRows")}</p>
-        )}
-      </Section>
+          <Section title={s("certifications")} count={d.certifications.length} testId="dossier-certifications">
+            <MiniTable
+              head={[s("col.certification"), s("col.issuer"), s("col.issuedOn"), s("col.expiresOn")]}
+              empty={s("empty.certifications")}
+              rows={d.certifications.map((x) => [
+                x.name,
+                x.issuer,
+                f.data(x.issuedDate),
+                f.data(x.expiresDate),
+              ])}
+            />
+          </Section>
+          </>
+          ) },
+          { id: "presenze", titolo: t("users.detail.tabs.attendance"), contenuto: (
+          <>
+          <Section title={s("attendance")} count={d.attendance.leaveBalances.length} testId="dossier-attendance">
+            <MiniTable
+              head={[s("col.leaveType"), s("col.entitled"), s("col.used"), s("col.pending"), s("col.carryover")]}
+              empty={s("empty.attendance")}
+              rows={d.attendance.leaveBalances.map((b, i) => [
+                <span key={i}>{b.leaveType ? enumLabel("leaveType", b.leaveType) : "—"}</span>,
+                b.totalDays ?? "—",
+                b.usedDays ?? "—",
+                b.pendingDays ?? "—",
+                b.carryoverDays ?? "—",
+              ])}
+            />
+          </Section>
+          </>
+          ) },
+          { id: "storia", titolo: t("users.detail.tabs.history"), nascosta: !canReadTimeline, contenuto: (
+          <>
+          {/* D5 (#49): il percorso della persona, non solo il suo presente.
+              L'API decide chi puo' vederla (asse organizzativo, I18): qui si
+              mostra e basta. */}
+          {/* S-6: la storia chiede timeline:read; senza il permesso il riquadro non chiede e non compare. */}
+          {canReadTimeline && (
+            <TimelinePanel basePath="/v1/user-timeline" userId={userId} testId="user-timeline-panel" />
+          )}
+          </>
+          ) },
+          { id: "gestione", titolo: t("users.detail.tabs.manage"), contenuto: (
+          <>
+          {/* Fin qui la scheda RACCONTA. Da qui si GOVERNA: anagrafica e ruoli
+              sono le due cose che un amministratore deve poter cambiare senza
+              passare dal database (#44). Entrambe si nascondono da sole a chi non
+              ha il permesso — l'autorità resta comunque l'API. */}
+          <IdentityEditor userId={userId} />
+          <RolesEditor userId={userId} />
 
-      <Section title={s("certifications")} count={d.certifications.length} testId="dossier-certifications">
-        <MiniTable
-          head={[s("col.certification"), s("col.issuer"), s("col.issuedOn"), s("col.expiresOn")]}
-          empty={s("empty.certifications")}
-          rows={d.certifications.map((x) => [
-            x.name,
-            x.issuer,
-            f.data(x.issuedDate),
-            f.data(x.expiresDate),
-          ])}
-        />
-      </Section>
-
-      <Section title={s("goals")} count={d.goals.length} testId="dossier-goals">
-        <MiniTable
-          head={[s("col.goal"), s("col.progress"), s("col.due"), s("col.status")]}
-          empty={s("empty.goals")}
-          rows={d.goals.slice(0, 12).map((x, i) => [
-            x.title,
-            f.percento(x.progressPercent, "0-100"),
-            f.data(x.dueDate),
-            <EnumStatusBadge key={i} domain="goalStatus" value={x.status ?? ""} />,
-          ])}
-        />
-        {d.goals.length > 12 && (
-          <p className="mt-3 text-xs text-muted-foreground">{s("moreRows")}</p>
-        )}
-      </Section>
-
-      <Section title={s("career")} count={d.careerTargets.length} testId="dossier-career">
-        <MiniTable
-          head={[s("col.target"), s("col.horizon"), s("col.review")]}
-          empty={s("empty.career")}
-          rows={d.careerTargets.map((x, i) => [
-            x.positionId,
-            x.horizon ? enumLabel("careerHorizon", x.horizon) : "—",
-            <EnumStatusBadge key={i} domain="reviewStatus" value={x.reviewStatus ?? ""} />,
-          ])}
-        />
-      </Section>
-
-      {/* D5 (#49): il percorso della persona, non solo il suo presente.
-          L'API decide chi puo' vederla (asse organizzativo, I18): qui si
-          mostra e basta. */}
-      {/* S-6: la storia chiede timeline:read; senza il permesso il riquadro non chiede e non compare. */}
-      {canReadTimeline && (
-        <TimelinePanel basePath="/v1/user-timeline" userId={userId} testId="user-timeline-panel" />
-      )}
-
-      {/* Fin qui la scheda RACCONTA. Da qui si GOVERNA: anagrafica e ruoli
-          sono le due cose che un amministratore deve poter cambiare senza
-          passare dal database (#44). Entrambe si nascondono da sole a chi non
-          ha il permesso — l'autorità resta comunque l'API. */}
-      <IdentityEditor userId={userId} />
-      <RolesEditor userId={userId} />
-
-      {/* L'anagrafica tecnica resta, ma in fondo: serve a chi la cerca, non è
-          il modo di presentare una persona. */}
-      <Card data-testid="dossier-technical">
-        <CardHeader><CardTitle>{t("users.detail.cardTitle")}</CardTitle></CardHeader>
-        <CardContent>
-          <FieldGrid
-            testId="user-fields"
-            fields={[
-              { label: t("users.detail.fields.userId"), value: p.userId, mono: true, testId: "field-userId" },
-              { label: s("location"), value: org.location ?? "—" },
-              { label: s("employeeStatus"), value: emp?.status ?? "—" },
-            ]}
-          />
-        </CardContent>
-      </Card>
+          {/* L'anagrafica tecnica resta, ma in fondo: serve a chi la cerca, non è
+              il modo di presentare una persona. */}
+          <Card data-testid="dossier-technical">
+            <CardHeader><CardTitle>{t("users.detail.cardTitle")}</CardTitle></CardHeader>
+            <CardContent>
+              <FieldGrid
+                testId="user-fields"
+                fields={[
+                  { label: s("location"), value: org.location ?? "—" },
+                  { label: s("employeeStatus"), value: emp?.status ? enumLabel("employeeStatus", emp.status) : "—" },
+                ]}
+              />
+            </CardContent>
+          </Card>
+          </>
+          ) },
+        ]}
+      />
     </main>
   );
 }

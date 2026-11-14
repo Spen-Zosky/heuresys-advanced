@@ -24,7 +24,9 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, Input, KGGraphCanvas, PageHeader, StatsCard } from "@heuresys/ui";
+import { Badge, Input, KGGraphCanvas } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
+import { StatsCard } from "@/components/indicatori-leggibili";
 import { Network, Share2, Waypoints } from "lucide-react";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import type { Skill, SkillGraphResponse } from "@heuresys/shared";
@@ -60,7 +62,7 @@ export default function SkillsGraphPage() {
   const d = graph.data;
 
   return (
-    <main data-testid="analytics-skills-graph" className="mx-auto max-w-7xl px-6 py-8">
+    <main data-testid="analytics-skills-graph" className="mx-auto max-w-7xl px-6 pb-8">
       <PageHeader
         title={t("skillsGraph.title")}
         description={t("skillsGraph.description")}

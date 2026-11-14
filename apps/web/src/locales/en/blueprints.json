@@ -52,21 +52,20 @@
     }
   },
   "processes": {
-    "title": "BPM Processes",
-    "description": "Blueprint-anchored process catalog.",
+    "title": "Process catalogue",
+    "description": "The processes of the tenant's blueprint, in value-chain order.",
     "count": "{{count}} processes",
     "error": "Unable to load the processes.",
     "emptyTitle": "No processes",
     "emptyDescription": "There are no processes.",
-    "caption": "Process catalog (blueprint-anchored)",
-    "yes": "yes",
-    "no": "no",
+    "caption": "Processes in value-chain order",
     "columns": {
-      "ordinal": "#",
-      "code": "Code",
-      "name": "Name",
-      "optional": "Optional"
-    }
+      "ordinal": "No.",
+      "name": "Process",
+      "optional": "Type"
+    },
+    "optionalYes": "Optional",
+    "optionalNo": "Core"
   },
   "brownfield": {
     "title": "Brownfield adaptation",
@@ -103,7 +102,7 @@
   },
   "seedRuns": {
     "title": "Seed acquisition — Runs",
-    "description": "Seed acquisition pipeline runs.",
+    "description": "Runs of the procedure that acquires the base data.",
     "count": "{{count}} runs",
     "error": "Unable to load the runs.",
     "emptyTitle": "No runs",
@@ -180,7 +179,8 @@
       "processCount": "{{count}} processes",
       "unavailable": "No model for this combination",
       "availableTitle": "Combinations that exist today",
-      "noFallback": "No similar model is proposed: it would be a false answer."
+      "noFallback": "No similar model is proposed: it would be a false answer.",
+      "version": "version {{n}}"
     },
     "decisions": {
       "inclusion": "Decision",
@@ -194,7 +194,10 @@
       "clear": "Back to the model",
       "saved": "Decision recorded.",
       "cleared": "The decision was removed: the model applies.",
-      "empty": "No model pinned yet: there is nothing to decide on."
+      "empty": "No model pinned yet: there is nothing to decide on.",
+      "preparedByAgent": "Prepared by the assistant: check and record it, or change it.",
+      "undoAgent": "Undo the assistant's last step",
+      "agentPending": "Decisions prepared by the assistant and not yet recorded: {{n}}"
     },
     "submit": {
       "action": "Submit for signature",

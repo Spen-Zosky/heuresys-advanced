@@ -7,7 +7,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
-import { Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader } from "@heuresys/ui";
+import { Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import type { Skill } from "@heuresys/shared";
 import { StatusPill } from "@/components/status-pill";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
@@ -69,7 +70,7 @@ export default function MeSelfAssessmentPage() {
   const onSubmit = handleSubmit(async (vals) => { await create.mutateAsync(vals); });
 
   return (
-    <main data-testid="self-assessment-page" className="mx-auto max-w-3xl space-y-6 px-6 py-8">
+    <main data-testid="self-assessment-page" className="mx-auto max-w-3xl space-y-6 px-6 pb-8">
       <div className="space-y-3">
         <Link
           href="/me/skills"

@@ -77,9 +77,11 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_position_compensation_profiles",
       "sys_positions",
       "sys_skill_categories",
+      "sys_skill_groups",
       "sys_skills",
       "sys_user_position_assignments",
       "sys_user_skill_evidence",
+      "sys_user_skills",
       "sys_users"
     ]
   },
@@ -162,7 +164,9 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "/v1/blueprint-families"
     ],
     "tabelle": [
+      "sys_activity_classifications",
       "sys_blueprint_families",
+      "sys_blueprint_family_activity_classes",
       "sys_blueprint_variants"
     ]
   },
@@ -356,6 +360,7 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_dashboard_block_data_classes",
       "sys_dashboard_blocks",
       "sys_dashboards",
+      "sys_industry_codes",
       "sys_learning_gaps",
       "sys_learning_paths",
       "sys_organization_unit_processes",
@@ -913,9 +918,11 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "/v1/positions"
     ],
     "tabelle": [
+      "sys_branches",
       "sys_kpi_definitions",
       "sys_learning_modules",
       "sys_learning_paths",
+      "sys_organization_units",
       "sys_position_intelligence_profiles_v",
       "sys_position_kpi_requirements",
       "sys_position_learning_requirements",
@@ -924,6 +931,8 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_positions",
       "sys_skill_learning_mappings",
       "sys_skills",
+      "sys_tenancies",
+      "sys_user_position_assignments",
       "sys_users"
     ]
   },
@@ -1197,6 +1206,7 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
   },
   "tenant-consolidation": {
     "prefissi": [
+      "/v1/consolidation-runs",
       "/v1/consolidation-vocabulary",
       "/v1/tenant-consolidations"
     ],
@@ -1204,23 +1214,29 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_auth_permissions",
       "sys_auth_role_permissions",
       "sys_blueprint_activations",
+      "sys_blueprint_content_dashboards",
       "sys_blueprint_content_goals",
+      "sys_blueprint_content_job_roles",
       "sys_blueprint_content_kpis",
       "sys_blueprint_content_positions",
       "sys_blueprint_content_process_steps",
       "sys_blueprint_content_skills",
       "sys_blueprint_content_units",
       "sys_blueprint_process_registry",
+      "sys_blueprint_runs",
       "sys_blueprint_variant_versions",
+      "sys_blueprint_variants",
       "sys_job_roles",
       "sys_kpi_definitions",
       "sys_organization_units",
       "sys_platform_vocabulary_equivalences",
       "sys_position_skill_requirements",
       "sys_positions",
+      "sys_reward_gate_catalog",
       "sys_skills",
       "sys_tenancies",
       "sys_tenant_consolidation_decisions",
+      "sys_tenant_consolidation_links",
       "sys_tenant_consolidation_proposals",
       "sys_tenant_consolidation_rounds",
       "sys_tenant_consolidation_working_items",
@@ -1359,7 +1375,12 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
     ],
     "tabelle": [
       "sys_auth_roles",
+      "sys_branches",
+      "sys_organization_units",
+      "sys_positions",
+      "sys_tenancies",
       "sys_user_auth_roles",
+      "sys_user_position_assignments",
       "sys_users"
     ]
   },
@@ -1387,6 +1408,7 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "/v1/visualization-graphs"
     ],
     "tabelle": [
+      "sys_positions",
       "sys_visualization_edges",
       "sys_visualization_graphs",
       "sys_visualization_layouts",

@@ -52,8 +52,11 @@ test.describe("tassonomia competenze", () => {
 
     await gotoAuthenticated(page, "/skill-taxonomy");
     await expect(page.getByTestId("skill-taxonomy-page")).toBeVisible({ timeout: 45_000 });
+    // C5: un pannello per scheda
     await expect(page.getByTestId("skill-families-panel")).toBeVisible();
+    await page.getByTestId("scheda-categorie").click();
     await expect(page.getByTestId("skill-categories-panel")).toBeVisible();
+    await page.getByTestId("scheda-livelli").click();
     await expect(page.getByTestId("proficiency-levels-panel")).toBeVisible();
 
     // i livelli di padronanza sono un riferimento REALE, non una tabella vuota
@@ -84,6 +87,7 @@ test.describe("tassonomia competenze", () => {
       famigliaId = ((await postFam.json()) as { skillFamilyId: string }).skillFamilyId;
 
       // --- categoria DENTRO quella famiglia ---
+      await page.getByTestId("scheda-categorie").click();
       await page.getByTestId("category-create-toggle").click();
       await page.getByTestId("category-create-code").fill(codCat);
       await page.getByTestId("category-create-name").fill(`Categoria di collaudo ${marca}`);
@@ -110,6 +114,7 @@ test.describe("tassonomia competenze", () => {
       await page.reload({ waitUntil: "domcontentloaded" });
       // 77 famiglie impaginate a 25: senza cercare, quella appena creata non e'
       // sulla prima pagina. La ricerca e' lato server.
+      await page.getByTestId("scheda-famiglie").click();
       await page.getByTestId("family-search").fill(codFam);
       await expect(page.getByTestId(`family-edit-${codFam}`)).toBeVisible({ timeout: 30_000 });
       await page.getByTestId(`family-edit-${codFam}`).click();

@@ -2,12 +2,15 @@
 
 import type { KeyboardEvent, ReactNode } from "react";
 import { useState } from "react";
-import { Badge, Button, DataTableWithCrossHair, PageHeader } from "@heuresys/ui";
+import { Badge, Button, DataTableWithCrossHair, Dialog, DialogContent, DialogDescription, DialogTitle } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { useTranslation } from "react-i18next";
 import type { ServerPagination } from "@/lib/hooks/use-paginated-list";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { OrigineDelDato, OrigineDellaRiga } from "@/components/origine-del-dato";
 import { descrivi, useTabellaAgente } from "@/lib/agente/use-tabella-agente";
+import { ConSpiegazione } from "@/components/spiegazione";
+import { useLeggibile } from "@/lib/leggibile";
 
 /**
  * Canonical list-page composition (brand-component-contract.md: "Data table /
@@ -29,6 +32,34 @@ export interface DataColumn<T> {
   align?: "left" | "right";
   headClassName?: string;
   cellClassName?: string;
+  /**
+   * C2, C3: un dato che serve a chi controlla, non a chi lavora (codice tecnico, email). Non va in
+   * tabella ma nella scheda della riga. Senza indicazione lo è ogni colonna la cui intestazione
+   * dice «Codice», «Code», «Email» o «Identificativo».
+   */
+  secondaria?: boolean;
+}
+
+/** Colonne di identificativi: la rete di leggibilità non le tocca («24122» resta un CAP). */
+const INTESTAZIONE_IDENTIFICATIVO = /\b(cap|matricola|telefono|cellulare|iban|pernr|partita iva|codice fiscale|numero di (badge|documento|pratica))\b/i;
+const grezza = <T,>(c: DataColumn<T>) => typeof c.header === "string" && INTESTAZIONE_IDENTIFICATIVO.test(c.header);
+
+const INTESTAZIONE_SECONDARIA = /^\s*(codice|code|cod\.|e-?mail|identificativo|id)\b/i;
+/** Una cella è vuota quando non porta niente: assente, stringa vuota, il trattino, o un elemento
+ *  che contiene soltanto uno di questi. */
+export function cellaVuota(n: unknown, profondita = 0): boolean {
+  if (n === null || n === undefined || n === false || n === "") return true;
+  if (typeof n === "string") return /^\s*(—|–|-|n\/d)?\s*$/i.test(n);
+  if (Array.isArray(n)) return n.every((x) => cellaVuota(x, profondita + 1));
+  if (profondita < 3 && typeof n === "object" && "props" in (n as object)) {
+    const p = (n as { props?: { children?: unknown } }).props;
+    if (p && "children" in p && typeof (n as { type?: unknown }).type === "string") return cellaVuota(p.children, profondita + 1);
+  }
+  return false;
+}
+
+function eSecondaria<T>(c: DataColumn<T>): boolean {
+  return c.secondaria ?? (typeof c.header === "string" && INTESTAZIONE_SECONDARIA.test(c.header));
 }
 
 export interface EntityTableProps<T> {
@@ -70,10 +101,16 @@ export interface EntityTableProps<T> {
   originPath?: string;
 }
 
+/** Le intestazioni dello stato: la colonna che chiude la riga (R3). */
+const INTESTAZIONE_STATO = /^(stato|status|attiv[ao]|stato del dato)$/i;
+
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
 
 export function EntityTable<T>(props: EntityTableProps<T>) {
   const { t } = useTranslation();
+  // C1, C2, C4 del piano interfaccia sistematica: ogni cella passa per la rete di leggibilità
+  // (numeri it-IT, codici e frasi inglesi in italiano, email e identificativi in nomi).
+  const leggi = useLeggibile();
   const {
     isLoading, isError, errorTestId, errorMessage, error, deniedReason,
     rows: righeRicevute, rowKey, rowTestId, onRowClick, columns,
@@ -87,6 +124,10 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
   const rows = agente.righe;
 
   const [pageIndex, setPageIndex] = useState(0);
+  // C12: una riga senza pagina di dettaglio apre la sua scheda (tutte le colonne, con le persone,
+  // posizioni e unità che aprono a loro volta la propria). Nessuna riga «che sembra cliccabile e
+  // non apre niente», e nessuna tabella che obbliga a leggere di traverso una riga lunga.
+  const [rigaAperta, setRigaAperta] = useState<T | null>(null);
   const [pageSize, setPageSize] = useState(pageSizeProp ?? 25);
   const [trackedRows, setTrackedRows] = useState(rows);
 
@@ -141,13 +182,23 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
       return typeof v === "string" ? <OrigineDellaRiga valore={v} /> : null;
     },
   };
-  // Prima della colonna delle azioni (intestazione vuota), se c'è.
-  const ultima = columns[columns.length - 1];
+  // Prima della colonna delle azioni (intestazione vuota) e prima dello stato, che chiude la
+  // riga (repertorio interfacce, R3): l'origine è un dato come gli altri, lo stato resta in coda.
+  let coda = columns.length;
+  if (coda > 0 && columns[coda - 1]!.header === "") coda--;
+  const penultima = columns[coda - 1];
+  if (penultima && typeof penultima.header === "string" && INTESTAZIONE_STATO.test(penultima.header.trim())) coda--;
   const colonne: DataColumn<T>[] = !conOrigine
     ? columns
-    : ultima && ultima.header === ""
-      ? [...columns.slice(0, -1), colonnaOrigine, ultima]
-      : [...columns, colonnaOrigine];
+    : [...columns.slice(0, coda), colonnaOrigine, ...columns.slice(coda)];
+  // In tabella le colonne del lavoro; nella scheda della riga tutte (C2, C3).
+  // C9: una colonna vuota in tutte le righe in vista non dice niente; esce dalla tabella e resta
+  // nella scheda della riga.
+  const vuotaOvunque = (c: DataColumn<T>) =>
+    visibleRows.length > 0 && c.header !== "" && visibleRows.every((r) => cellaVuota(c.cell(r)));
+  const primarie = colonne.filter((c) => !eSecondaria(c) && !vuotaOvunque(c));
+  const inTabella = primarie.filter((c) => c.header !== "").length >= 2 ? primarie : colonne;
+  const titoloRiga = inTabella.find((c) => c.header !== "") ?? colonne[0];
   const from = total === 0 ? 0 : start + 1;
   const to = end;
   const goToPage = (i: number) =>
@@ -179,9 +230,9 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
       <DataTableWithCrossHair caption={caption} className="w-full border-collapse text-sm">
         <thead>
           <tr className="border-b border-border bg-muted text-left text-[11px] uppercase tracking-wider text-muted-foreground">
-            {colonne.map((c, i) => (
+            {inTabella.map((c, i) => (
               <th key={i} className={`px-4 py-2 ${c.align === "right" ? "text-right" : ""} ${c.headClassName ?? ""}`}>
-                {c.header}
+                <ConSpiegazione>{c.header}</ConSpiegazione>
               </th>
             ))}
           </tr>
@@ -191,30 +242,52 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
             <tr
               key={rowKey(row)}
               data-testid={rowTestId}
-              className={`transition-colors hover:bg-muted/60 ${onRowClick ? "cursor-pointer" : ""}`}
-              {...(onRowClick
-                ? {
-                    onClick: () => onRowClick(row),
-                    tabIndex: 0,
-                    role: "button",
-                    onKeyDown: (e: KeyboardEvent<HTMLTableRowElement>) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        onRowClick(row);
-                      }
-                    },
-                  }
-                : {})}
+              className="cursor-pointer transition-colors hover:bg-muted/60"
+              tabIndex={0}
+              role="button"
+              {...(onRowClick ? {} : { "data-scheda-riga": "" })}
+              onClick={(e) => {
+                // un comando dentro la cella (collegamento, pulsante, campo) fa il suo lavoro
+                if ((e.target as HTMLElement).closest("a, button, input, select, textarea, label, [data-riferimento]")) return;
+                if (onRowClick) onRowClick(row);
+                else setRigaAperta(row);
+              }}
+              onKeyDown={(e: KeyboardEvent<HTMLTableRowElement>) => {
+                if (e.target !== e.currentTarget) return;
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  if (onRowClick) onRowClick(row);
+                  else setRigaAperta(row);
+                }
+              }}
             >
-              {colonne.map((c, i) => (
-                <td key={i} className={`px-4 py-2 align-middle ${c.align === "right" ? "text-right tabular-nums" : ""} ${c.cellClassName ?? ""}`}>
-                  {c.cell(row)}
+              {inTabella.map((c, i) => (
+                <td key={i} className={`px-4 py-2 align-middle ${c.align === "right" ? "text-right tabular-nums" : ""} ${c.cellClassName ?? ""}`} {...(grezza(c) ? { "data-grezzo": "" } : {})}>
+                  {grezza(c) ? c.cell(row) : leggi.nodo(c.cell(row))}
                 </td>
               ))}
             </tr>
           ))}
         </tbody>
       </DataTableWithCrossHair>
+      <Dialog open={rigaAperta !== null} onOpenChange={(o) => { if (!o) setRigaAperta(null); }}>
+        {rigaAperta !== null ? (
+          <DialogContent className="max-h-[85vh] max-w-xl overflow-y-auto" data-testid="scheda-riga">
+            <DialogTitle className="text-lg font-bold leading-tight">{leggi.nodo(titoloRiga?.cell(rigaAperta))}</DialogTitle>
+            <DialogDescription className="text-xs">{caption ?? t("dettaglio.riga")}</DialogDescription>
+            <dl className="mt-3 divide-y divide-border">
+              {colonne.map((c, i) =>
+                c.header === "" || c === titoloRiga ? null : (
+                  <div key={i} className="grid grid-cols-[10rem_1fr] gap-3 py-1.5 text-sm">
+                    <dt className="text-muted-foreground"><ConSpiegazione>{c.header}</ConSpiegazione></dt>
+                    <dd className="min-w-0" {...(grezza(c) ? { "data-grezzo": "" } : {})}>{grezza(c) ? c.cell(rigaAperta) : leggi.nodo(c.cell(rigaAperta))}</dd>
+                  </div>
+                ),
+              )}
+            </dl>
+          </DialogContent>
+        ) : null}
+      </Dialog>
       {showPagination ? (
         <div
           data-testid="table-pagination"
@@ -281,7 +354,7 @@ export function DataTablePanel<T>(props: DataTablePanelProps<T>) {
   } = props;
 
   return (
-    <main data-testid={pageTestId} className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid={pageTestId} className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid={titleTestId}
         title={title}

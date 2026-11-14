@@ -11,6 +11,7 @@ import type {
   VizGraph, VizGraphListQuery, CreateVizGraphBody, UpdateVizGraphBody,
   VizGraphSummaryResponse, VizGraphRenderResponse,
   CreateVizGraphVersionBody, VizGraphVersionResponse, VizGraphVersionListResponse,
+  VizGraphRigeneraResponse,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 import { withTransaction } from "../../db/client.js";
@@ -84,6 +85,17 @@ export const visualizationGraphsService = {
    * Tutto dentro UNA transazione: una versione a metà (grafo senza nodi, o con
    * nodi e senza archi) sarebbe peggio di nessuna versione.
    */
+  /** V2 del piano organigrammi a blocchi: riallinea un grafo ORG_CHART ai dati vivi. */
+  async rigenera(actor: ActorContext, id: string): Promise<VizGraphRigeneraResponse> {
+    const g = await repo.findGraphById(pool, id);
+    if (!g || !visible(actor, g)) throw new NotFoundError("VizGraph");
+    if (g.type !== "ORG_CHART") {
+      throw new ConflictError("Si rigenera dai dati vivi solo un organigramma", "VIZ_GRAPH_NOT_ORG_CHART");
+    }
+    const conti = await withTransaction((client) => repo.riallineaOrgChart(client, g.graphId, g.tenantId));
+    const graph = (await repo.findGraphById(pool, id)) ?? g;
+    return { graph, ...conti };
+  },
   async createVersion(
     actor: ActorContext, id: string, body: CreateVizGraphVersionBody,
   ): Promise<VizGraphVersionResponse> {

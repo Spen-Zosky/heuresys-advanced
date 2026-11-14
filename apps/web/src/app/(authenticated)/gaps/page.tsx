@@ -1,9 +1,12 @@
 "use client";
 
+import { SchedePagina } from "@/components/schede-pagina";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, KPIStrip, PageHeader, type KpiCardData } from "@heuresys/ui";
+import { Badge, type KpiCardData } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
+import { KPIStrip } from "@/components/indicatori-leggibili";
 import type { LearningGap, LearningGapSummaryResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
@@ -113,7 +116,7 @@ export default function AdminGapsPage() {
   );
 
   return (
-    <main data-testid="gaps-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="gaps-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="gaps-title"
         title={t("gaps.title")}
@@ -129,27 +132,32 @@ export default function AdminGapsPage() {
         <KPIStrip items={sevItems} />
       </section>
 
-      <div data-testid="gaps-list">
-        <EntityTable<LearningGap>
-          isLoading={gaps.query.isLoading}
-          isError={gaps.query.isError}
-          error={gaps.query.error}
-          errorTestId="gaps-error"
-          errorMessage={t("gaps.error")}
-          rows={gaps.rows}
-          server={gaps.server}
-          rowKey={(g) => g.learningGapId}
-          rowTestId="gaps-row"
-          columns={columns}
-          emptyTestId="gaps-empty"
-          emptyTitle={t("gaps.emptyTitle")}
-          emptyDescription={t("gaps.emptyDescription")}
-          caption={t("gaps.caption")}
-        />
-      </div>
-
-      {/* #30 (S1018): gap-closure layer — remediation plans + analysis results */}
-      <GapClosurePanel />
+      {/* C5: le lacune e i piani per chiuderle stanno in due schede */}
+      <SchedePagina
+        schede={[
+          { id: "lacune", titolo: t("gaps.tabs.gaps"), conteggio: gaps.query.data ? gaps.total : null, contenuto: (
+          <div data-testid="gaps-list">
+            <EntityTable<LearningGap>
+              isLoading={gaps.query.isLoading}
+              isError={gaps.query.isError}
+              error={gaps.query.error}
+              errorTestId="gaps-error"
+              errorMessage={t("gaps.error")}
+              rows={gaps.rows}
+              server={gaps.server}
+              rowKey={(g) => g.learningGapId}
+              rowTestId="gaps-row"
+              columns={columns}
+              emptyTestId="gaps-empty"
+              emptyTitle={t("gaps.emptyTitle")}
+              emptyDescription={t("gaps.emptyDescription")}
+              caption={t("gaps.caption")}
+            />
+          </div>
+          ) },
+          { id: "piani", titolo: t("gaps.tabs.closure"), contenuto: <GapClosurePanel /> },
+        ]}
+      />
     </main>
   );
 }

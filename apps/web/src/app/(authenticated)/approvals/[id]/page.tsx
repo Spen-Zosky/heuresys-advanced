@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
 import type { ApprovalRequestDetail, ApprovalStatus, ApprovalStepStatus, ApprovalStepDetail } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
@@ -88,7 +89,7 @@ export default function ApprovalDetailPage() {
   useContestoAgente(d ? t("approvals.detail.agent.context", { title: d.title, id }) : null);
 
   return (
-    <main data-testid="approval-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 py-8">
+    <main data-testid="approval-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
       <div className="text-sm">
         <Link href="/approvals" className="text-muted-foreground hover:underline" data-testid="approval-detail-back">
           ← {t("approvals.detail.back")}

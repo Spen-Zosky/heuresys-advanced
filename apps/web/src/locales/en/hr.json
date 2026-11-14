@@ -108,6 +108,10 @@
       "forbidden": "You do not have permission for this operation.",
       "duplicate": "A KPI with this code already exists.",
       "readOnly": "You do not have permission to edit this KPI."
+    },
+    "tabs": {
+      "catalogue": "Indicators",
+      "metrology": "Measurement methods"
     }
   },
   "goals": {
@@ -166,7 +170,7 @@
     }
   },
   "orgDirector": {
-    "title": "Org-Director Console",
+    "title": "Organisation design",
     "description": "Capability and maturity per org unit, from the MLCE and Maturity engines.",
     "count": "{{count}} units",
     "errorMessage": "Failed to load capability/maturity",
@@ -214,10 +218,14 @@
         "demand": "Positions · critical",
         "holders": "Holders"
       }
+    },
+    "tabs": {
+      "units": "Organisational units",
+      "essential": "Essential capabilities"
     }
   },
   "processOwner": {
-    "title": "Process-Owner Console",
+    "title": "Process owner",
     "description": "Blueprint process catalog (graph navigation, not BPM runtime).",
     "count": "{{count}} processes",
     "errorMessage": "Failed to load processes",
@@ -227,7 +235,7 @@
     "core": "Core",
     "optional": "Optional",
     "cols": {
-      "ordinal": "#",
+      "ordinal": "No.",
       "code": "Code",
       "name": "Process",
       "kind": "Kind",
@@ -249,11 +257,78 @@
         "role": "RACI role"
       },
       "roles": {
-        "OWNER": "Owner · A",
-        "CONTRIBUTOR": "Contributor · R",
+        "OWNER": "Accountable · A",
+        "CONTRIBUTOR": "Responsible · R",
         "CONSULTED": "Consulted · C",
         "INFORMED": "Informed · I"
       }
+    }
+  },
+  "consolidationRuns": {
+    "title": "Model runs",
+    "count": "{{count}} runs in the register",
+    "pick": "Run to work with",
+    "option": "{{model}} · loaded on {{date}} · {{status}}",
+    "empty": "The run register is empty: no datastore run has been loaded as a model yet.",
+    "never": "No consolidation has ever been run with the model “{{model}}”, loaded into advanced on {{date}}.",
+    "neverHint": "The first round of each group stays in the register as the baseline, with the time the agent takes to find the differences.",
+    "range": "from {{from}} to {{to}}",
+    "fields": {
+      "description": "Company described",
+      "executed": "Run executed in the datastore",
+      "loaded": "Model loaded into advanced",
+      "status": "Status"
+    },
+    "results": {
+      "caption": "Results of the first consolidation with this model",
+      "group": "Group",
+      "items": "Items (company / model)",
+      "itemsValue": "{{tenant}} / {{prototype}}",
+      "proposals": "Proposals",
+      "certain": "Certain",
+      "gaps": "Gaps",
+      "customizations": "Customizations",
+      "time": "Agent time"
+    },
+    "startFirst": "Start the first consolidation with this run",
+    "startAgain": "Start a new consolidation with this run",
+    "confirmReplace": "A consolidation is open: it will be closed and a new one opened with this run. Decisions already taken stay in the register. Proceed?",
+    "makeDefinitive": "Make definitive",
+    "confirmDefinitive": "The run becomes your company's model in use: the current model is replaced. Proceed?",
+    "deliveries": "Runs delivered by the datastore and not yet loaded",
+    "delivery": "{{description}} · run of {{executed}} · delivered on {{delivered}}",
+    "receive": "Load as model",
+    "receiving": "Loading…",
+    "inUse": "In use",
+    "caption": "Run register: most recent first",
+    "cols": {
+      "model": "Model",
+      "executed": "Run executed",
+      "loaded": "Loaded",
+      "consolidations": "Consolidations",
+      "agentTime": "Agent time",
+      "code": "Run code",
+      "status": "Status"
+    },
+    "statuses": {
+      "CARICATA": "Never consolidated",
+      "IN_CONSOLIDAMENTO": "Being consolidated",
+      "DEFINITIVA": "Definitive",
+      "SUPERATA": "Superseded"
+    },
+    "errors": {
+      "BLUEPRINT_RUN_NOT_FOUND": "Run not found in the register.",
+      "BLUEPRINT_RUN_DELIVERY_NOT_FOUND": "The delivery is no longer in the datastore folder.",
+      "BLUEPRINT_RUN_DELIVERIES_UNAVAILABLE": "This server cannot see the datastore deliveries.",
+      "BLUEPRINT_RUN_DELIVERY_REJECTED": "The delivery could not be loaded: the manifest or the fingerprint do not hold.",
+      "BLUEPRINT_RUN_HASH_MISMATCH": "The run is already in the register with different content.",
+      "BLUEPRINT_RUN_LOAD_FAILED": "Loading the model failed.",
+      "BLUEPRINT_RUN_VERSION_MISSING": "This run's model no longer exists.",
+      "BLUEPRINT_RUN_NOT_ACTIVATABLE": "This run's model does not carry roles and dashboards yet: making it the model in use would empty your company's.",
+      "BLUEPRINT_RUN_VERSION_RETIRED": "This run's model has been retired.",
+      "CONSOLIDATION_ALREADY_OPEN": "A consolidation is already open.",
+      "CONSOLIDATION_VERSION_INVALID": "This run's model no longer exists.",
+      "PERMISSION_DENIED": "You do not have the mandate for this operation."
     }
   },
   "consolidation": {
@@ -335,7 +410,43 @@
       "CONSOLIDATION_GROUP_PENDING": "Some proposals in this group still need a decision.",
       "CONSOLIDATION_RUN_FAILED": "error during the run.",
       "PERMISSION_DENIED": "You have no mandate for this decision."
-    }
+    },
+    "decideNow": "Decide",
+    "modal": {
+      "title": "Decision on the proposal",
+      "recommendation": "The agent's recommendation",
+      "recommends": "The agent recommends: {{decision}}",
+      "because": "Why: {{reason}}",
+      "confidence": "Confidence {{value}} out of 100",
+      "current": "Current decision: {{decision}}",
+      "noneYet": "No decision taken so far",
+      "choose": "Your choice",
+      "form": "In which form",
+      "forms": {
+        "NORMALIZZATA": "Normalized: your name and code stay, the prototype fills in what is missing",
+        "FORMA_TENANT": "Your form: only the link, nothing changes in your data",
+        "NOME_PROTOTIPO": "Prototype name: name and code take the prototype's form too"
+      },
+      "confirm": "Confirm the decision",
+      "confirming": "Recording…",
+      "close": "Close",
+      "sameHint": "You can reconfirm the same choice. The decision is recorded: the data change only when you press “Apply changes”."
+    },
+    "applyChanges": "Apply changes ({{count}})",
+    "applying": "Applying to the data…",
+    "applyResult": {
+      "title": "Changes applied: {{count}} decisions applied to the data",
+      "detail": "Values changed {{changed}}, items created {{created}}, earlier effects withdrawn {{reverted}}."
+    },
+    "nextTitle": "What to do now",
+    "nextRunning": "The {{group}} round is running. Nothing to do: the page refreshes itself when it finishes.",
+    "nextRun": "This group has no proposals yet. Press «Run the rounds on {{group}}»: the agent compares your company's data with the prototype and prepares proposals.",
+    "nextDecide": "{{count}} proposals still need a decision in the table below. Open each row and choose, or use «Confirm the certain matches» for the safe ones. The group cannot be closed while any remain.",
+    "nextApply": "You decided every proposal, but the decisions are not in the data yet. Next step: press «Apply changes ({{count}})». Only then does your company data change.",
+    "nextClose": "Everything is decided and applied. Next step: press «Close the group and move to the next». The {{next}} group opens.",
+    "nextCloseLast": "Everything is decided and applied. Next step: press «Close the group and move to the next»: it is the last group, the session moves to confirmation.",
+    "nextOther": "The open group is {{group}}. You can read this group, but the steps to take are in the open group: select it in the row above.",
+    "stepsHint": "In order: 1. decide the proposals · 2. «Apply changes» · 3. «Close the group and move to the next». «Run the rounds» only makes the agent prepare proposals."
   },
   "gaps": {
     "title": "Gap analysis",
@@ -371,6 +482,10 @@
       "target": "Target",
       "kind": "Kind",
       "score": "Score"
+    },
+    "tabs": {
+      "gaps": "Gaps",
+      "closure": "Remediation plans and analysis"
     }
   },
   "career": {
@@ -384,7 +499,7 @@
     "pathsCols": {
       "code": "Code",
       "name": "Name",
-      "difficulty": "Difficulty"
+      "kind": "Path type"
     },
     "poolsCols": {
       "code": "Code",
@@ -505,6 +620,10 @@
       "moveUp": "Up",
       "searchModule": "Search a module",
       "searchModulePlaceholder": "at least 2 characters…"
+    },
+    "tabs": {
+      "modules": "Modules",
+      "paths": "Paths"
     }
   },
   "training": {
@@ -597,6 +716,7 @@
     "cols": {
       "capability": "Capability",
       "skillCount": "{{count}} skills",
+      "skillExamples": "{{count}} skills, including {{esempi}}",
       "value": "Value",
       "rarity": "Rarity",
       "inimitability": "Inimitability",
@@ -628,7 +748,8 @@
     "methodIdle": "Status says whether the unit is healthy in absolute terms, standing says where to look first relative to the others. A dimension without data leaves the calculation and lowers coverage, not the score.",
     "cols": {
       "unit": "Org-unit",
-      "headcount": "{{count}} people",
+      "headcount_one": "{{count}} person",
+      "headcount_other": "{{count}} people",
       "index": "Index",
       "status": "Status",
       "standing": "Standing",
@@ -944,7 +1065,13 @@
       "applied": "Application registered: find it in the pipeline.",
       "applyError": "Application rejected by the server.",
       "emptyTitle": "No candidates",
-      "emptyDesc": "Register the first candidate."
+      "emptyDesc": "Register the first candidate.",
+      "write": "Write",
+      "tabs": {
+        "active": "Active",
+        "hired": "Hired",
+        "other": "Withdrawn, excluded and archived"
+      }
     },
     "application": {
       "title": "Application",

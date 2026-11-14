@@ -20,6 +20,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
+import { conteggio } from "./conteggio";
 
 const LIST_LIMIT = 200;
 
@@ -54,7 +55,7 @@ export function JobFamiliesPanel() {
   const families = useQuery({
     queryKey: ["job-families", "list", cerca],
     queryFn: () =>
-      apiFetch<{ items: JobFamily[] }>(
+      apiFetch<{ items: JobFamily[]; total: number }>(
         `/v1/job-families?limit=${LIST_LIMIT}${cerca.trim() ? `&search=${encodeURIComponent(cerca.trim())}` : ""}`,
       ),
   });
@@ -93,8 +94,8 @@ export function JobFamiliesPanel() {
   });
 
   const columns: DataColumn<JobFamily>[] = [
-    { header: t("jobCatalog.family.code"), cell: (f) => <span className="font-mono text-xs">{f.code}</span> },
-    { header: t("jobCatalog.family.name"), cell: (f) => <span className="font-medium text-foreground">{f.name}</span> },
+    // Repertorio interfacce (B2): il nome apre la riga, il codice tecnico non va a video (R2, R4).
+    { header: t("jobCatalog.family.name"), cell: (f) => <span className="font-medium text-foreground" data-testid="family-name">{f.name}</span> },
     {
       header: t("jobCatalog.family.description"),
       cell: (f) => <span className="text-sm text-muted-foreground">{f.description ?? t("jobCatalog.dash")}</span>,
@@ -118,8 +119,8 @@ export function JobFamiliesPanel() {
       <CardHeader>
         <CardTitle>
           {t("jobCatalog.family.title")}
-          <span className="ml-2 text-sm font-normal text-muted-foreground">
-            {families.data?.items.length ?? 0}
+          <span className="ml-2 text-sm font-normal text-muted-foreground" data-testid="job-families-count">
+            {conteggio(families.data, t)}
           </span>
         </CardTitle>
       </CardHeader>

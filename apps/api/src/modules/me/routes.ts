@@ -10,6 +10,11 @@
  *   - Routes here use `requirePermission(":self")` perms from the seed.
  */
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
+import { QuadroQuerySchema, QuadroResponseSchema, RubricaResponseSchema } from "@heuresys/shared";
+import { areeDa, leggiQuadro } from "../quadro/service.js";
+import { leggiRubrica } from "../rubrica/repository.js";
+import { organigrammaDi } from "../organigramma/service.js";
+import { OrganigrammaQuerySchema, OrganigrammaResponseSchema } from "@heuresys/shared";
 import type { FastifyRequest } from "fastify";
 import {
   MeProfileSchema, MeProfileFullSchema, MeContractsResponseSchema, MePaySlipsResponseSchema,
@@ -474,6 +479,31 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
   // #99 F6b — le deleghe che mi riguardano, dai due lati (conferite e ricevute). I17: il
   // permesso riusato è `approval:read:self`, che il ruolo base USER detiene — la delega
   // nasce per le approvazioni, quindi è la stessa materia, non un permesso nuovo per comodità.
+  // Classe C2 del piano interfaccia sistematica: la rubrica del perimetro (nomi di persone,
+  // posizioni, unità) per non mostrare mai un'email o un identificativo al posto di un nome.
+  // Solo nomi, gli stessi dell'organigramma: il pavimento è il permesso di sola persona che ha
+  // ogni ruolo.
+  app.get("/rubrica", {
+    preHandler: [requirePermission("user_profile:read:self")],
+    schema: { response: { 200: RubricaResponseSchema } },
+  }, async (req) => leggiRubrica(actorFromRequest(req)));
+
+  // Piano organigrammi a blocchi (2026-11-14): l'organigramma vivo di un cliente, con le persone
+  // per unità. Gli stessi nomi della rubrica, raccolti per albero: stesso pavimento di permesso.
+  app.get("/organigramma", {
+    preHandler: [requirePermission("user_profile:read:self")],
+    schema: { querystring: OrganigrammaQuerySchema, response: { 200: OrganigrammaResponseSchema } },
+  }, async (req) => organigrammaDi(actorFromRequest(req), req.query));
+
+  // Classe C15: il quadro degli insight di una pagina, sul perimetro di chi guarda (ADR-0027).
+  // Conteggi, mai nomi né importi individuali; le lenti sensibili solo per i mandati HR.
+  app.get("/quadro", {
+    preHandler: [requirePermission("user_profile:read:self")],
+    schema: { querystring: QuadroQuerySchema, response: { 200: QuadroResponseSchema } },
+  }, async (req) =>
+    leggiQuadro(actorFromRequest(req), areeDa(req.query.aree), (chiave, errore) =>
+      req.log.warn({ chiave, err: errore }, "quadro: lente non calcolata")));
+
   app.get("/delegations", {
     preHandler: [requirePermission("approval:read:self")],
     schema: { response: { 200: MeDelegationsResponseSchema } },

@@ -195,6 +195,8 @@ export const TenantConsolidationSchema = z.object({
   runningGroup: ConsolidationGroupSchema.nullable(),
   /** L'esito dell'ultimo giro, buono o no, come lo ha scritto il motore. */
   lastRun: ConsolidationLastRunSchema.nullable(),
+  /** La corsa del registro con cui è stata aperta, se c'è (000489). */
+  runId: z.uuid().nullable(),
 });
 export type TenantConsolidation = z.infer<typeof TenantConsolidationSchema>;
 
@@ -219,9 +221,31 @@ export const ConsolidationProposalSchema = z.object({
 });
 export type ConsolidationProposal = z.infer<typeof ConsolidationProposalSchema>;
 
+/** «Esegui modifiche»: l'esito dell'applicazione di tutte le decisioni registrate ai dati del tenant. */
+export const ApplyChangesResultSchema = z.object({
+  /** Decisioni eseguite in questo ciclo. */
+  applied: z.number().int(),
+  /** Valori cambiati nei dati. */
+  changed: z.number().int(),
+  /** Voci create (adozioni). */
+  created: z.number().int(),
+  /** Effetti di decisioni sostituite rimessi com'erano. */
+  reverted: z.number().int(),
+  /** Ciò che non si è potuto fare, con la ragione in italiano. */
+  skipped: z.array(z.string()),
+});
+export type ApplyChangesResult = z.infer<typeof ApplyChangesResultSchema>;
+
+export const PendingChangesSchema = z.object({ pending: z.number().int() });
+export type PendingChanges = z.infer<typeof PendingChangesSchema>;
+
 export const StartConsolidationBodySchema = z.object({
   /** Se manca, la versione del prototipo attiva per il tenant (`sys_blueprint_activations`). */
   variantVersionId: z.uuid().optional(),
+  /** La corsa del registro con cui fare il giro: ne prende il modello. Vince su `variantVersionId`. */
+  runId: z.uuid().optional(),
+  /** Una sessione ancora aperta si chiude (CHIUSA) prima di aprire la nuova; senza, la nuova è rifiutata (409). */
+  closeOpen: z.boolean().optional(),
   trigger: ConsolidationTriggerSchema,
 });
 export type StartConsolidationBody = z.infer<typeof StartConsolidationBodySchema>;
@@ -283,3 +307,82 @@ export const VocabularyListResponseSchema = z.object({ items: z.array(Vocabulary
 export const VocabularyDecideBodySchema = z.object({ status: z.enum(["APPROVATA", "RITIRATA"]) }).strict();
 
 export const ConsolidationRunStartedSchema = z.object({ started: z.literal(true), group: ConsolidationGroupSchema });
+
+/* ── Il registro delle corse del modello (000489) ──────────────────────────────────────── */
+
+/**
+ * CARICATA: accolta come versione di modello, mai consolidata. IN_CONSOLIDAMENTO: almeno una
+ * sessione è stata aperta con lei. DEFINITIVA: è il modello in uso del tenant (una sola).
+ * SUPERATA: era definitiva e un'altra ha preso il suo posto.
+ */
+export const BLUEPRINT_RUN_STATUS_VALUES = ["CARICATA", "IN_CONSOLIDAMENTO", "DEFINITIVA", "SUPERATA"] as const;
+export const BlueprintRunStatusSchema = z.enum(BLUEPRINT_RUN_STATUS_VALUES);
+export type BlueprintRunStatus = z.infer<typeof BlueprintRunStatusSchema>;
+
+/** I risultati del primo giro di un gruppo con questo modello: la misura di partenza. */
+export const BlueprintRunGroupResultSchema = z.object({
+  tenantItems: z.number().int(),
+  prototypeItems: z.number().int(),
+  proposals: z.number().int(),
+  matches: z.number().int(),
+  certain: z.number().int(),
+  gaps: z.number().int(),
+  customizations: z.number().int(),
+  /** Quanto ha impiegato l'agente, in millisecondi. */
+  ms: z.number().int(),
+  at: z.iso.datetime(),
+});
+export type BlueprintRunGroupResult = z.infer<typeof BlueprintRunGroupResultSchema>;
+
+export const BlueprintRunSchema = z.object({
+  runId: z.uuid(),
+  code: z.string(),
+  packageVersion: z.number().int(),
+  packageHash: z.string(),
+  description: z.string().nullable(),
+  executedFrom: z.iso.datetime().nullable(),
+  executedTo: z.iso.datetime().nullable(),
+  variantVersionId: z.uuid().nullable(),
+  modelLabel: z.string(),
+  modelLoadedAt: z.iso.datetime(),
+  status: BlueprintRunStatusSchema,
+  /** Il modello è quello dell'attivazione ACTIVE del tenant adesso. */
+  inUse: z.boolean(),
+  firstConsolidationId: z.uuid().nullable(),
+  /** Quante sessioni sono state aperte con questa corsa. */
+  consolidations: z.number().int(),
+  initialResults: z.partialRecord(ConsolidationGroupSchema, BlueprintRunGroupResultSchema),
+  definitiveAt: z.iso.datetime().nullable(),
+});
+export type BlueprintRun = z.infer<typeof BlueprintRunSchema>;
+export const BlueprintRunListResponseSchema = z.object({ items: z.array(BlueprintRunSchema) });
+
+/** Una consegna del datastore che advanced può accogliere (la cartella delle consegne, ADR-0047). */
+export const AvailableDeliverySchema = z.object({
+  code: z.string(),
+  packageVersion: z.number().int(),
+  packageHash: z.string(),
+  contract: z.string(),
+  description: z.string().nullable(),
+  executedFrom: z.iso.datetime().nullable(),
+  executedTo: z.iso.datetime().nullable(),
+  deliveredAt: z.iso.datetime(),
+  /** Già nel registro di questo tenant: la corsa non va accolta di nuovo. */
+  runId: z.uuid().nullable(),
+});
+export type AvailableDelivery = z.infer<typeof AvailableDeliverySchema>;
+export const AvailableDeliveryListResponseSchema = z.object({
+  /** Falso quando il server non ha una cartella delle consegne configurata. */
+  configured: z.boolean(),
+  items: z.array(AvailableDeliverySchema),
+});
+export type AvailableDeliveryList = z.infer<typeof AvailableDeliveryListResponseSchema>;
+
+export const ReceiveDeliveryBodySchema = z
+  .object({
+    code: z.string().regex(/^p[0-9a-z_]{6,60}$/),
+    packageVersion: z.number().int().min(1),
+  })
+  .strict();
+export type ReceiveDeliveryBody = z.infer<typeof ReceiveDeliveryBodySchema>;
+export const BlueprintRunIdParamSchema = z.object({ runId: z.uuid() });

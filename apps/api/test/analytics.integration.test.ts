@@ -830,12 +830,22 @@ describe("GET /v1/analytics/* integration", () => {
     expect(new Date(body.generatedAt).getTime()).toBeGreaterThan(0);
   });
 
-  it("skills-group-share: TENANT_ADMIN sees TENANT scope tag but the same global catalogue", async () => {
+  it("skills-group-share: TENANT_ADMIN sees its own perimeter — the skills its people hold (I21)", async () => {
     const platformBody = await getJson<SkillsGroupShareBody>("/v1/analytics/skills-group-share", platformS);
     const body = await getJson<SkillsGroupShareBody>("/v1/analytics/skills-group-share", tenantS);
     expect(body.scope.kind).toBe("TENANT");
-    // The ESCO catalogue is global → TENANT sees the same totals as PLATFORM.
-    expect(body.totalGrouped).toBe(platformBody.totalGrouped);
-    expect(body.distinctGroups).toBe(platformBody.distinctGroups);
+    const tenantId = body.scope.tenantId!;
+    // Il catalogo ESCO resta aperto a tutte le industrie, ma l'azienda ne vede il proprio
+    // perimetro (ADR-0043): le competenze che le sue persone hanno, contate dal vivo.
+    const held = await pool.query<{ total: string; grouped: string }>(
+      `SELECT count(*)::text AS total, count(s.skill_metadata->>'skill_group_uri')::text AS grouped
+         FROM sys.sys_skills s
+        WHERE EXISTS (SELECT 1 FROM sys.sys_user_skills us
+                       WHERE us.user_skill_skill_id = s.skill_id AND us.user_skill_tenant_id = $1)`,
+      [tenantId],
+    );
+    expect(body.totalSkills).toBe(Number(held.rows[0]!.total));
+    expect(body.totalGrouped).toBe(Number(held.rows[0]!.grouped));
+    expect(body.totalGrouped).toBeLessThanOrEqual(platformBody.totalGrouped);
   });
 });

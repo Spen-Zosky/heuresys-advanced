@@ -42,7 +42,7 @@
   "auth": {
     "login": {
       "title": "Accedi a Heuresys",
-      "subtitle": "Console di amministrazione e portale dipendente",
+      "subtitle": "Amministrazione e portale del dipendente",
       "emailLabel": "Email",
       "emailPlaceholder": "nome@azienda.it",
       "passwordLabel": "Password",
@@ -69,7 +69,7 @@
         "chooseMethod": "Scegli un metodo",
         "methodTotp": "App authenticator",
         "methodEmail": "Codice via email",
-        "methodPasskey": "Passkey",
+        "methodPasskey": "Chiave d'accesso",
         "methodSms": "Codice via SMS",
         "totpInstructions": "Scansiona il codice QR con la tua app authenticator, poi inserisci il codice a 6 cifre.",
         "secretLabel": "Chiave manuale",
@@ -133,7 +133,7 @@
       "TECHNICAL": "Tecnico",
       "SALES": "Vendite",
       "CUSTOMER": "Cliente",
-      "PERFORMANCE": "Performance",
+      "PERFORMANCE": "Prestazione",
       "PROJECT": "Progetto",
       "FINANCIAL": "Finanziario",
       "SECURITY": "Sicurezza",
@@ -145,7 +145,7 @@
     "goalUpdateType": {
       "PROGRESS": "Avanzamento",
       "STATUS_CHANGE": "Cambio stato",
-      "MILESTONE": "Milestone",
+      "MILESTONE": "Traguardo",
       "BLOCKER": "Blocco",
       "NOTE": "Nota"
     },
@@ -178,6 +178,19 @@
       "COMPLETED": "Completato",
       "ABANDONED": "Abbandonato"
     },
+    "scopeKind": {
+      "PLATFORM": "tutte le aziende",
+      "TENANT": "intera azienda",
+      "TEAM": "la tua squadra"
+    },
+    "employeeStatus": {
+      "ACTIVE": "In servizio",
+      "INACTIVE": "Non in servizio",
+      "TERMINATED": "Cessato",
+      "ON_LEAVE": "In aspettativa",
+      "SUSPENDED": "Sospeso",
+      "PROBATION": "In prova"
+    },
     "timeOffStatus": {
       "PENDING": "In attesa",
       "APPROVED": "Approvata",
@@ -189,7 +202,10 @@
       "ACCRUAL": "Maturazione",
       "USAGE": "Utilizzo",
       "ADJUSTMENT": "Rettifica",
-      "CARRYOVER": "Riporto"
+      "CARRYOVER": "Riporto",
+      "EXPIRY": "Scadenza",
+      "RESET": "Azzeramento",
+      "TRANSFER": "Trasferimento"
     },
     "severity": {
       "LOW": "Bassa",
@@ -262,9 +278,14 @@
       "DEACTIVATED": "Disattivato"
     },
     "userType": {
-      "STANDARD": "Standard",
-      "GENERATED_INCUMBENT": "Incumbent generato",
-      "SERVICE": "Di servizio"
+      "STANDARD": "Persona",
+      "GENERATED_INCUMBENT": "Titolare segnaposto",
+      "SERVICE": "Utenza di servizio"
+    },
+    "userTypePlural": {
+      "STANDARD": "Persone",
+      "SERVICE": "Utenze di servizio",
+      "GENERATED_INCUMBENT": "Titolari segnaposto"
     },
     "contractType": {
       "permanent": "Tempo indeterminato",
@@ -288,7 +309,12 @@
     },
     "perfReviewStatus": {
       "IN_PROGRESS": "In corso",
-      "COMPLETED": "Completata"
+      "COMPLETED": "Completata",
+      "DRAFT": "Bozza",
+      "SUBMITTED": "Inviata",
+      "CALIBRATED": "Calibrata",
+      "FINALIZED": "Chiusa",
+      "CANCELLED": "Annullata"
     },
     "flightRiskBand": {
       "LOW": "Basso",
@@ -314,7 +340,14 @@
       "DIVISION": "Divisione",
       "DEPARTMENT": "Dipartimento",
       "OFFICE": "Ufficio",
-      "TEAM": "Team"
+      "TEAM": "Team",
+      "GENERAL_MANAGEMENT": "Direzione generale",
+      "AREA": "Area",
+      "BRANCH": "Filiale",
+      "SERVICE": "Servizio",
+      "UNIT": "Unità",
+      "PLANT": "Stabilimento",
+      "WAREHOUSE": "Magazzino"
     },
     "vizGraphType": {
       "ORG_CHART": "Organigramma",
@@ -326,6 +359,14 @@
       "KPI_CASCADE": "Cascata KPI",
       "POSITION_INTELLIGENCE_MAP": "Mappa position intelligence",
       "ENTERPRISE_BLUEPRINT_MAP": "Mappa blueprint aziendale"
+    },
+    "vizExportFormat": {
+      "SVG": "Immagine SVG",
+      "PDF": "PDF",
+      "PNG": "Immagine PNG",
+      "GENERIC_JSON": "Dati JSON",
+      "REACT_FLOW_JSON": "Grafo JSON (React Flow)",
+      "MERMAID": "Diagramma Mermaid"
     },
     "vizEdgeType": {
       "REPORTS_TO": "Riporta a",
@@ -369,7 +410,7 @@
       "SMS_OTP": "Codice via SMS"
     },
     "notificationPriority": {
-      "INFO": "Info",
+      "INFO": "Informativa",
       "MEDIUM": "Media",
       "HIGH": "Alta",
       "CRITICAL": "Critica"
@@ -392,7 +433,7 @@
       "MANAGER_INTERVENTION": "Intervento del manager",
       "PEER_COACHING": "Coaching tra pari",
       "ON_THE_JOB_EXPOSURE": "Esperienza sul campo",
-      "MENTORING": "Mentoring"
+      "MENTORING": "Affiancamento"
     },
     "approvalStatus": {
       "PENDING": "In attesa",
@@ -412,11 +453,15 @@
       "closed": "Chiuso"
     },
     "surveyCategory": {
-      "engagement": "Engagement",
+      "engagement": "Coinvolgimento",
       "wellbeing": "Benessere",
       "exit": "Uscita",
-      "onboarding": "Onboarding",
-      "custom": "Personalizzato"
+      "onboarding": "Inserimento",
+      "custom": "Personalizzato",
+      "pulse": "Rilevazione rapida",
+      "survey": "Sondaggio",
+      "feedback": "Riscontro",
+      "climate": "Clima"
     },
     "questionType": {
       "rating": "Valutazione",
@@ -446,9 +491,9 @@
       "LOW": "Basso",
       "MEDIUM": "Medio",
       "HIGH": "Alto",
-      "CORE": "Core",
-      "STAR": "Star",
-      "HIGH_PERFORMER": "High performer"
+      "CORE": "Pilastro",
+      "STAR": "Stella",
+      "HIGH_PERFORMER": "Prestazione elevata"
     },
     "successorCandidateStatus": {
       "CANDIDATE": "Candidato",
@@ -464,7 +509,7 @@
     },
     "contentKind": {
       "article": "Articolo",
-      "policy": "Policy",
+      "policy": "Regolamento",
       "announcement": "Annuncio",
       "handbook": "Manuale",
       "process_doc": "Documento di processo"
@@ -497,7 +542,8 @@
       "SABBATICAL": "Aspettativa",
       "UNPAID": "Non retribuito",
       "OTHER": "Altro",
-      "PAID_LEAVE": "Permesso retribuito"
+      "PAID_LEAVE": "Permesso retribuito",
+      "UNPAID_LEAVE": "Aspettativa non retribuita"
     },
     "whistleblowingStatus": {
       "NEW": "Nuova",
@@ -527,16 +573,16 @@
       "JUNIOR": "Junior",
       "MID": "Intermedio",
       "SENIOR": "Senior",
-      "LEAD": "Lead",
+      "LEAD": "Responsabile",
       "EXECUTIVE": "Dirigenziale"
     },
     "learningKind": {
       "COURSE": "Corso",
       "MICRO_LESSON": "Microlezione",
       "LAB": "Laboratorio",
-      "WORKSHOP": "Workshop",
+      "WORKSHOP": "Laboratorio",
       "CERTIFICATION_PREP": "Preparazione a certificazione",
-      "COACHING": "Coaching"
+      "COACHING": "Accompagnamento"
     },
     "learningDelivery": {
       "SELF_PACED": "Autonoma",
@@ -592,14 +638,6 @@
       "PER_PAY_PERIOD": "A ogni periodo di paga",
       "LUMP_SUM": "In un'unica soluzione"
     },
-    "vizExportFormat": {
-      "SVG": "Immagine SVG",
-      "PDF": "PDF",
-      "PNG": "Immagine PNG",
-      "GENERIC_JSON": "Dati JSON",
-      "REACT_FLOW_JSON": "Grafo JSON (React Flow)",
-      "MERMAID": "Diagramma Mermaid"
-    },
     "fitDimension": {
       "SKILL": "Competenze",
       "KPI": "Indicatori",
@@ -638,6 +676,95 @@
       "MEDIUM": "Media",
       "HIGH": "Alta",
       "EXTREME": "Estrema"
+    },
+    "vizNodeSourceType": {
+      "POSITION": "Posizione",
+      "USER": "Persona",
+      "SKILL": "Competenza",
+      "KPI": "Indicatore",
+      "PROCESS": "Processo",
+      "UNIT": "Unità organizzativa",
+      "LEARNING_MODULE": "Modulo formativo",
+      "CAREER_PATH": "Percorso di carriera",
+      "BLUEPRINT_VARIANT": "Variante del modello",
+      "SUCCESSION_POOL": "Bacino di successione",
+      "GENERIC": "Altro"
+    },
+    "kpiUnit": {
+      "count": "numero",
+      "hours": "ore",
+      "days": "giorni",
+      "months": "mesi",
+      "minutes": "minuti",
+      "percent": "%",
+      "percentage": "%",
+      "pct": "%",
+      "score": "punteggio",
+      "ratio": "rapporto",
+      "currency": "valuta",
+      "EUR": "euro",
+      "fte": "persone a tempo pieno",
+      "FTE": "persone a tempo pieno",
+      "index": "indice",
+      "rate": "tasso",
+      "number": "numero"
+    },
+    "sizeBand": {
+      "XS": "micro",
+      "S": "piccola",
+      "M": "media",
+      "L": "grande",
+      "XL": "molto grande"
+    },
+    "supervisionIntensity": {
+      "LOW": "bassa",
+      "MEDIUM": "media",
+      "HIGH": "alta",
+      "EXTREME": "molto alta"
+    },
+    "compensationGateStatus": {
+      "PASSED": "superato",
+      "WARNING": "con avviso",
+      "BLOCKED": "bloccato",
+      "ESCALATED": "inoltrato a chi decide",
+      "OVERRIDDEN_WITH_REASON": "forzato con motivazione",
+      "PENDING": "in attesa"
+    },
+    "compensationChangeReason": {
+      "salary_recalculation": "Ricalcolo della retribuzione",
+      "level_realignment": "Riallineamento di livello",
+      "executive_band_override": "Fascia dirigenziale fuori tabella"
+    },
+    "ccnlCode": {
+      "CCNL_CRED_2024": "CCNL Credito 2024"
+    },
+    "perfCycleStatus": {
+      "DRAFT": "Bozza",
+      "SELF_ASSESSMENT": "Autovalutazione",
+      "MANAGER_REVIEW": "Valutazione del responsabile",
+      "CALIBRATION": "Calibrazione",
+      "FINALIZED": "Chiuso",
+      "SHARED": "Comunicato",
+      "CANCELLED": "Annullato"
+    },
+    "calibrationStatus": {
+      "SCHEDULED": "In programma",
+      "IN_PROGRESS": "In corso",
+      "COMPLETED": "Conclusa",
+      "CANCELLED": "Annullata"
+    },
+    "careerPathDifficulty": {
+      "EASY": "Facile",
+      "MEDIUM": "Media",
+      "HARD": "Impegnativa",
+      "STRETCH": "Molto sfidante"
+    },
+    "readinessLevel": {
+      "READY_NOW": "Pronto ora",
+      "READY_6_MONTHS": "Pronto entro 6 mesi",
+      "READY_1_YEAR": "Pronto entro un anno",
+      "READY_2_YEARS": "Pronto entro due anni",
+      "NOT_READY": "Non ancora pronto"
     }
   },
   "masked": "nascosto per il tuo profilo",
@@ -743,7 +870,7 @@
     "fleet": {
       "title": "Tenant",
       "description": "Tenant attivi, con il numero di utenti e l'ultimo accesso",
-      "tenant": "Tenant",
+      "tenant": "Azienda",
       "status": "Stato",
       "users": "Utenti",
       "lastActivity": "Ultima attività",
@@ -772,12 +899,21 @@
     },
     "rbac": {
       "unavailableTitle": "Matrice dei permessi non disponibile",
-      "unavailableDesc": "Non è stato possibile leggere l'associazione fra ruoli e permessi."
+      "unavailableDesc": "Non è stato possibile leggere l'associazione fra ruoli e permessi.",
+      "moved": "I {{count}} permessi per ruolo si leggono e si governano nella pagina dei ruoli.",
+      "open": "Apri Ruoli e permessi"
     },
     "audit": {
-      "tenant": "tenant {{code}}",
+      "tenant": "azienda {{code}}",
       "emptyTitle": "Nessun evento recente",
       "emptyDesc": "Il registro degli eventi è vuoto nella finestra corrente."
+    },
+    "tabs": {
+      "fleet": "Aziende",
+      "requests": "Richieste ed errori",
+      "database": "Database",
+      "audit": "Registro",
+      "permissions": "Ruoli e permessi"
     }
   },
   "unnamed": "senza nome",
@@ -830,20 +966,20 @@
     "vistaAzzera": "Torna alla tabella intera",
     "comandoVista": "Comando della vista: {{nome}}",
     "title": "Assistente su questa pagina",
-    "description": "Strumento di sviluppo: chiedi all'agente qualcosa su ciò che vedi in questa pagina. Tool e input di eventuali scritture sono già oscurati dal gateway.",
+    "description": "Chiedi all'assistente qualcosa su ciò che vedi in questa pagina. Le scritture le decidi tu.",
     "contextLabel": "Contesto",
-    "promptLabel": "Prompt",
+    "promptLabel": "Domanda",
     "promptPlaceholder": "Es. Riassumi ciò che mostra questa pagina.",
     "run": "Esegui",
     "running": "In esecuzione…",
     "stop": "Interrompi",
-    "streamTitle": "Stream eventi",
-    "streamEmpty": "Nessun evento ancora. Invia un prompt per avviare l'agente.",
+    "streamTitle": "Conversazione",
+    "streamEmpty": "Nessuna risposta ancora. Scrivi una domanda.",
     "approvalTitle": "Approvazione richiesta",
     "approvalDesc": "L'agente vuole eseguire una scrittura. Tool e input sono già oscurati dal gateway.",
     "approvalDescRead": "L'assistente ha già consultato dati di {{persone}} persone diverse in questa richiesta, più di quante ne conti il reparto più grande dell'azienda. Vuoi che continui a leggere? Non è un divieto: se confermi, procede.",
     "approvalDescReadUnknown": "L'assistente sta per leggere altri dati, ma quante persone abbia consultato finora non risulta misurato. Vuoi che continui?",
-    "approvalTool": "Tool",
+    "approvalTool": "Strumento",
     "approvalInput": "Input (oscurato)",
     "allow": "Consenti",
     "deny": "Nega",
@@ -869,6 +1005,66 @@
     "statoFATTA": "Fatta",
     "statoFALLITA": "Non riuscita",
     "statoINTERROTTA": "Interrotta",
-    "aggiornata": "Aggiornata il {{quando}}"
+    "aggiornata": "Aggiornata il {{quando}}",
+    "inCorso": "lavoro in corso",
+    "comprimiAttivita": "Mostra o nascondi le attività",
+    "latoTitolo": "Ciò che ha toccato",
+    "latoPagina": "Sulla pagina",
+    "latoLetture": "Ha letto",
+    "latoProposta": "Aspetta la tua decisione",
+    "latoVuoto": "Ancora niente: qui compare ciò che l'assistente fa sulla pagina, legge o ti propone."
+  },
+  "dettaglio": {
+    "riga": "Dettaglio della riga"
+  },
+  "organigramma": {
+    "aggiorna": "Aggiorna",
+    "aggiornando": "Aggiornamento…",
+    "calcolato": "Calcolato dai dati vivi il {{quando}}",
+    "viste": {
+      "blocchi": "Blocchi",
+      "nodi": "Nodi"
+    },
+    "legenda": "Clic su un riquadro per aprire l'unità con le sue figlie, le persone e le posizioni. Riquadro pieno = vertice; tratteggiato = filiale. In grassetto il responsabile.",
+    "legendaNodi": "Un nodo per unità: la grandezza dice quante persone ci lavorano, comprese quelle delle unità sotto. Clic sul nome per aprire la scheda, clic sul pallino per aprire o chiudere il ramo; rotella per lo zoom.",
+    "completo": "Organigramma completo",
+    "completoNota": "Panoramica senza i nomi; sotto, la sede centrale e le filiali con le persone.",
+    "centrale": "Sede centrale",
+    "filiali": "Filiali",
+    "riepilogo": "{{unita}} unità, {{persone}} persone",
+    "riepilogoFiliali": "{{sedi}} filiali, {{unita}} unità, {{persone}} persone",
+    "persone_one": "{{count}} persona",
+    "persone_other": "{{count}} persone",
+    "conSotto_one": "{{count}} persona con le unità sotto",
+    "conSotto_other": "{{count}} persone con le unità sotto",
+    "altri_one": "e un'altra persona",
+    "altri_other": "e altre {{count}} persone",
+    "esportaSvg": "Esporta SVG",
+    "riduci": "Riduci",
+    "ingrandisci": "Ingrandisci",
+    "vuoto": "Nessuna unità attiva per questo cliente.",
+    "errore": "Impossibile calcolare l'organigramma.",
+    "aria": "Organigramma a blocchi di {{cliente}}",
+    "ariaNodi": "Albero delle unità di {{cliente}}",
+    "avvisi": {
+      "unitaSenzaResponsabile_one": "{{count}} unità senza responsabile",
+      "unitaSenzaResponsabile_other": "{{count}} unità senza responsabile",
+      "riportiFuoriCliente_one": "{{count}} posizione riporta a una posizione non attiva",
+      "riportiFuoriCliente_other": "{{count}} posizioni riportano a una posizione non attiva"
+    },
+    "scheda": {
+      "indietro": "‹ Indietro",
+      "chiudiCascata": "Chiudi cascata",
+      "chiudi": "Chiudi",
+      "tipo": "Tipo",
+      "persone": "Persone",
+      "struttura": "Struttura sotto di sé ({{count}} unità)",
+      "addetti": "Persone",
+      "addettiConSotto": "{{diretti}} nell'unità, {{totali}} con le unità sotto"
+    },
+    "consolidamento": {
+      "titolo": "Organigramma del cliente oggi",
+      "spiegazione": "L'organizzazione com'è adesso, con le persone di ogni unità: il punto di partenza delle proposte del consolidamento."
+    }
   }
 }

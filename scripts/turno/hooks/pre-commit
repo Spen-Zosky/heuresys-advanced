@@ -1,0 +1,12 @@
+#!/bin/sh
+# Turni gemelli (docs/piani/PIANO_turni-advanced-datastore_20261110.md, guardia GU2): si committa e si
+# pubblica solo dalla macchina che ha il turno. Si attiva una volta per macchina con
+#   git config core.hooksPath scripts/turno/hooks
+top="$(git rev-parse --show-toplevel)"
+for p in python3 python; do
+  if "$p" -c "import sys" >/dev/null 2>&1; then
+    exec "$p" "$top/scripts/turno/controlla-turno.py" heuresys-advanced
+  fi
+done
+echo "turno: python non trovato, bloccato nel dubbio" >&2
+exit 1

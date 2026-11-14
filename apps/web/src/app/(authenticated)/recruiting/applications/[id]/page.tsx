@@ -5,9 +5,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import {
-  PageHeader, Card, CardHeader, CardTitle, CardContent, Badge, Button, Input,
-} from "@heuresys/ui";
+import { Card, CardHeader, CardTitle, CardContent, Badge, Button, Input } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import type {
   ApplicationStage, CandidateApplication, Interview, InterviewFeedback,
   InterviewFeedbackListResponse, InterviewListResponse, InterviewStatus,
@@ -148,14 +147,14 @@ export default function ApplicationDetailPage() {
 
   if (app.isLoading) {
     return (
-      <main className="mx-auto max-w-5xl px-6 py-8">
+      <main className="mx-auto max-w-5xl px-6 pb-8">
         <StatoCaricamento testId="application-loading" />
       </main>
     );
   }
   if (app.isError || !app.data) {
     return (
-      <main className="mx-auto max-w-5xl px-6 py-8">
+      <main className="mx-auto max-w-5xl px-6 pb-8">
         <StatoErrore
           errore={app.error}
           titolo={t("recruiting.application.error")}
@@ -172,7 +171,7 @@ export default function ApplicationDetailPage() {
   const interviewers = users.data?.items ?? [];
 
   return (
-    <main data-testid="application-page" className="mx-auto max-w-5xl space-y-8 px-6 py-8">
+    <main data-testid="application-page" className="mx-auto max-w-5xl space-y-8 px-6 pb-8">
       <PageHeader
         title={candidate ? candidateName(candidate) : t("recruiting.application.title")}
         description={posting ? `${posting.code} · ${posting.title}` : a.postingId}

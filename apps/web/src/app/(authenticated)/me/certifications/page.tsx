@@ -8,16 +8,8 @@ import { z } from "zod";
 import { CreateMeCertificationBodySchema } from "@heuresys/shared";
 import { limiteMassimo } from "../../../../lib/contratto";
 import { useTranslation } from "react-i18next";
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Input,
-  PageHeader,
-} from "@heuresys/ui";
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { useFormat, type Formati } from "@/lib/format";
@@ -86,7 +78,7 @@ function buildColumns(t: CertI18n, fmt: Formati): DataColumn<MeCertification>[] 
     { header: t("certifications.colIssued"), cell: (c) => <span className="text-xs text-muted-foreground">{fmt.data(c.issuedDate)}</span> },
     { header: t("certifications.colExpires"), cell: (c) => <span className="text-xs text-muted-foreground">{fmt.data(c.expiresDate)}</span> },
     {
-      header: t("certifications.colCredential"),
+      header: t("certifications.colCredential"), secondaria: true,
       cell: (c) => <span className="font-mono text-xs text-muted-foreground">{c.credentialId ?? "—"}</span>,
     },
   ];
@@ -145,7 +137,7 @@ export default function MeCertificationsPage() {
   });
 
   return (
-    <main data-testid="me-certifications-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main data-testid="me-certifications-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="me-certifications-title"
         title={t("certifications.title")}

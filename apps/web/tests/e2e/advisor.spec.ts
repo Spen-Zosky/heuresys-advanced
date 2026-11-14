@@ -11,6 +11,7 @@
  * e avrebbe perso esattamente la proprietà per cui la capability esiste.
  */
 
+import { comeAVideo } from "./cifra";
 import { test, expect } from "@playwright/test";
 import { storageStateFor, PERSONAS, API_BASE, passwordFor, totpFor } from "./fixtures";
 
@@ -36,6 +37,8 @@ async function fetchAdvisor(request: import("@playwright/test").APIRequestContex
   return api.json();
 }
 
+const PER_PAGINA = 10;
+
 interface Citation { source: string; field: string; value: number | string; subjectLabel: string }
 interface Suggestion { ruleId: string; subjectId: string; subjectLabel: string; priority: number; citations: Citation[] }
 
@@ -54,7 +57,8 @@ test.describe("#58 F4 — consigli operativi", () => {
     await page.goto("/org-director/advisor", { waitUntil: "domcontentloaded", timeout: 60_000 });
     await expect(page.getByTestId("advisor-row").first()).toBeVisible({ timeout: 45_000 });
 
-    await expect(page.getByTestId("advisor-row")).toHaveCount(api.total);
+    // C5: dieci raccomandazioni per pagina, nell'ordine dell'API
+    await expect(page.getByTestId("advisor-row")).toHaveCount(Math.min(api.total, PER_PAGINA));
     // priorità più alta in cima: è l'ordine su cui un direttore decide da dove partire
     await expect(page.getByTestId("advisor-row").first()).toContainText(api.items[0]!.subjectLabel);
   });
@@ -71,7 +75,7 @@ test.describe("#58 F4 — consigli operativi", () => {
     await expect(page.getByTestId("advisor-row").first()).toBeVisible({ timeout: 45_000 });
 
     // nessuna riga senza fonti: il conteggio dei blocchi citazione eguaglia quello delle righe
-    await expect(page.getByTestId("advisor-citations")).toHaveCount(api.total);
+    await expect(page.getByTestId("advisor-citations")).toHaveCount(Math.min(api.total, PER_PAGINA));
 
     // e le citazioni della prima raccomandazione compaiono col loro valore reale
     const first = api.items[0]!;
@@ -79,7 +83,7 @@ test.describe("#58 F4 — consigli operativi", () => {
     await expect(row.getByTestId("advisor-citation")).toHaveCount(first.citations.length);
     for (const c of first.citations) {
       await expect(row.getByTestId("advisor-citations")).toContainText(c.field);
-      await expect(row.getByTestId("advisor-citations")).toContainText(String(c.value));
+      await expect(row.getByTestId("advisor-citations")).toContainText(comeAVideo(c.value));
     }
   });
 

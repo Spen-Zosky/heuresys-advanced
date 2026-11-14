@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, Card, CardContent, CardHeader, CardTitle, PageHeader, MarkdownView } from "@heuresys/ui";
+import { Badge, Card, CardContent, CardHeader, CardTitle, MarkdownView } from "@heuresys/ui";
+import { PageHeader } from "@/components/intestazione-pagina";
 import type { ContentDocumentDetailResponse, ListContentMediaResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { useFormat } from "@/lib/format";
@@ -53,7 +54,7 @@ export default function MeHandbookDetailPage() {
 
   if (detail.isLoading) {
     return (
-      <main data-testid="handbook-detail-page" className="mx-auto max-w-3xl space-y-4 px-6 py-8">
+      <main data-testid="handbook-detail-page" className="mx-auto max-w-3xl space-y-4 px-6 pb-8">
         <Link href="/me/handbook" data-testid="handbook-back" className="inline-flex text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
           {t("handbook.back")}
         </Link>
@@ -64,7 +65,7 @@ export default function MeHandbookDetailPage() {
 
   if (detail.isError) {
     return (
-      <main data-testid="handbook-detail-page" className="mx-auto max-w-3xl space-y-4 px-6 py-8">
+      <main data-testid="handbook-detail-page" className="mx-auto max-w-3xl space-y-4 px-6 pb-8">
         <Link href="/me/handbook" data-testid="handbook-back" className="inline-flex text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
           {t("handbook.back")}
         </Link>
@@ -78,7 +79,7 @@ export default function MeHandbookDetailPage() {
   const attachments = media.data?.items ?? [];
 
   return (
-    <main data-testid="handbook-detail-page" className="mx-auto max-w-3xl space-y-6 px-6 py-8">
+    <main data-testid="handbook-detail-page" className="mx-auto max-w-3xl space-y-6 px-6 pb-8">
       <Link href="/me/handbook" data-testid="handbook-back" className="inline-flex text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
         {t("handbook.back")}
       </Link>

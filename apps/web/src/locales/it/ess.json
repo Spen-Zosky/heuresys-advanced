@@ -36,7 +36,7 @@
     "notFound": "Documento non trovato.",
     "kind": {
       "article": "Articolo",
-      "policy": "Policy",
+      "policy": "Regolamento",
       "announcement": "Annuncio",
       "handbook": "Manuale",
       "process_doc": "Doc di processo"
@@ -58,7 +58,7 @@
     "gapsCount": "{{count}} aperti",
     "tabs": {
       "summary": "Riepilogo",
-      "performance": "Performance",
+      "performance": "Prestazione",
       "attendance": "Presenze",
       "aria": "Sezioni My HR",
       "history": "Storia"
@@ -173,7 +173,7 @@
     "issuerLabel": "Ente",
     "issuedLabel": "Data rilascio",
     "expiresLabel": "Scadenza",
-    "credentialLabel": "Credential ID",
+    "credentialLabel": "Numero dell'attestato",
     "docUriLabel": "URL documento",
     "docUriPlaceholder": "https://…",
     "submit": "Aggiungi",
@@ -181,15 +181,15 @@
     "successMsg": "Certificazione aggiunta.",
     "errorUnexpected": "Errore inatteso",
     "validation": {
-      "required": "Required",
-      "isoDate": "ISO date YYYY-MM-DD",
-      "url": "Must be a valid URL (file upload UI lands in MVP-3.5)"
+      "required": "Obbligatorio",
+      "isoDate": "Data nel formato AAAA-MM-GG",
+      "url": "Deve essere un indirizzo web valido"
     },
     "colName": "Nome",
     "colIssuer": "Ente",
     "colIssued": "Rilasciato",
     "colExpires": "Scadenza",
-    "colCredential": "Credential ID",
+    "colCredential": "Numero dell'attestato",
     "errorMessage": "Impossibile caricare le certificazioni.",
     "emptyTitle": "Nessuna certificazione",
     "emptyDesc": "Non hai ancora caricato certificazioni.",
@@ -201,7 +201,7 @@
     "count": "{{count}} documenti",
     "colKind": "Tipo",
     "colTitle": "Titolo",
-    "colUri": "URI",
+    "colUri": "Indirizzo",
     "colMime": "Tipo MIME",
     "errorMessage": "Impossibile caricare i documenti.",
     "emptyTitle": "Nessun documento",
@@ -213,7 +213,7 @@
     "description": "Gap di sviluppo aperti sulle tue skill.",
     "count": "{{count}} aperti",
     "skillFallback": "Generale",
-    "colSkill": "Skill",
+    "colSkill": "Competenza",
     "colSeverity": "Severità",
     "colScore": "Punteggio",
     "colDetected": "Rilevato",
@@ -260,7 +260,7 @@
     "colStatus": "Stato"
   },
   "inbox": {
-    "title": "Inbox",
+    "title": "Posta in arrivo",
     "description": "Le tue notifiche e comunicazioni recenti.",
     "count": "{{count}} notifiche",
     "unreadAria": "{{count}} notifiche non lette",
@@ -284,12 +284,14 @@
     "colDirection": "Direzione",
     "colWeight": "Peso",
     "colLatest": "Ultima misura",
-    "colTarget": "Target",
+    "colTarget": "Obiettivo",
     "colDate": "Data",
     "errorMessage": "Impossibile caricare i KPI.",
     "emptyTitle": "Nessun KPI assegnato",
     "emptyDesc": "Non hai KPI assegnati.",
-    "caption": "Obiettivi attivi"
+    "caption": "Obiettivi attivi",
+    "notMeasured": "Non ancora misurato",
+    "targetIs": "obiettivo {{value}}"
   },
   "learning": {
     "title": "La mia formazione",
@@ -317,7 +319,7 @@
     "colCode": "Codice",
     "colScope": "Ambito",
     "global": "GLOBALE",
-    "tenant": "TENANT",
+    "tenant": "AZIENDA",
     "colAction": "Azione",
     "enroll": "Iscriviti",
     "enrolling": "…",
@@ -350,7 +352,7 @@
     "jobRoles": {
       "title": "Ruoli compatibili",
       "colRole": "Ruolo",
-      "colSeniority": "Seniority",
+      "colSeniority": "Anzianità",
       "colScore": "Affinità",
       "emptyDesc": "Nessun ruolo corrisponde al tuo profilo al momento."
     }
@@ -362,8 +364,8 @@
     "colCode": "Codice",
     "colTitle": "Titolo",
     "colType": "Tipo",
-    "primary": "PRIMARY",
-    "alt": "ALT",
+    "primary": "PRINCIPALE",
+    "alt": "ALTERNATIVA",
     "colStatus": "Stato",
     "colStart": "Inizio",
     "colEnd": "Fine",
@@ -377,27 +379,27 @@
     "description": "Gestisci i tuoi dati anagrafici e le preferenze di contatto.",
     "anagraficaTitle": "Anagrafica",
     "displayNameLabel": "Nome visualizzato",
-    "localeLabel": "Locale",
-    "timezoneLabel": "Timezone",
+    "localeLabel": "Lingua",
+    "timezoneLabel": "Fuso orario",
     "phoneLabel": "Telefono",
-    "linkedinLabel": "LinkedIn URL",
-    "bioLabel": "Bio",
+    "linkedinLabel": "Profilo LinkedIn",
+    "bioLabel": "Presentazione",
     "saved": "Salvato.",
     "errorSave": "Errore durante il salvataggio.",
     "submit": "Salva modifiche",
     "submitting": "Salvataggio…",
     "appearanceTitle": "Aspetto",
     "themeLabel": "Tema",
-    "paletteLabel": "Palette",
+    "paletteLabel": "Tavolozza dei colori",
     "theme": {
       "dark": "Scuro",
       "light": "Chiaro"
     },
     "palette": {
-      "balanced": "Balanced",
-      "coolOcean": "Cool ocean",
-      "warmSunset": "Warm sunset",
-      "brandMono": "Brand mono"
+      "balanced": "Equilibrata",
+      "coolOcean": "Oceano",
+      "warmSunset": "Tramonto",
+      "brandMono": "Monocromatica del marchio"
     },
     "settingsTitle": "Impostazioni",
     "full": {
@@ -479,7 +481,7 @@
         "department": "Dipartimento",
         "location": "Sede",
         "costCenter": "Centro di costo",
-        "manager": "Manager"
+        "manager": "Responsabile"
       },
       "lifecycle": {
         "title": "Ciclo di vita",
@@ -502,14 +504,14 @@
       },
       "sap": {
         "title": "SAP",
-        "pernr": "PERNR",
+        "pernr": "Matricola SAP",
         "companyCode": "Codice società",
         "personnelArea": "Area del personale",
         "personnelSubarea": "Sottoarea del personale"
       },
       "auth": {
         "title": "Autenticazione",
-        "username": "Username",
+        "username": "Nome utente",
         "roles": "Ruoli",
         "lastLogin": "Ultimo accesso"
       },
@@ -523,7 +525,7 @@
         "gross": "RAL",
         "workHours": "Ore settimanali",
         "scheduleType": "Tipo orario",
-        "partTime": "Part-time",
+        "partTime": "Tempo parziale",
         "startDate": "Data inizio",
         "endDate": "Data fine",
         "probationEnd": "Fine periodo di prova",
@@ -631,7 +633,7 @@
     "error": "Impossibile caricare le tue skill.",
     "emptyTitle": "Nessuna skill ancora registrata",
     "emptyDesc": "Le tue skill appariranno qui una volta dichiarate o importate.",
-    "colSkill": "Skill",
+    "colSkill": "Competenza",
     "colLevel": "Livello",
     "colYears": "Esperienza",
     "colVerified": "Verificata",
@@ -652,7 +654,7 @@
     "cardTitle": "Nuova dichiarazione",
     "filterLabel": "Cerca skill",
     "filterPlaceholder": "Digita per filtrare…",
-    "skillLabel": "Skill",
+    "skillLabel": "Competenza",
     "selectPlaceholder": "— Seleziona —",
     "moreResults": "Mostrate {{shown}} di {{total}} skill — affina la ricerca.",
     "skillRequired": "Skill richiesta.",
@@ -678,8 +680,8 @@
     "error": "Impossibile caricare i tuoi team.",
     "emptyTitle": "Nessun team",
     "emptyDesc": "Non fai parte di alcun team al momento.",
-    "leadAria": "Team lead",
-    "lead": "Lead",
+    "leadAria": "Responsabile della squadra",
+    "lead": "Responsabile",
     "member": "Membro"
   },
   "analytics": {
@@ -726,13 +728,9 @@
   },
   "orgChart": {
     "title": "Organigramma",
-    "description": "La tua posizione nell'organizzazione.",
+    "description": "La tua unità nell'organizzazione, con le persone e le unità intorno a te.",
     "personalView": "Vista personale",
-    "nodeCount": "{{count}} posizioni",
-    "empty": "Nessun organigramma disponibile.",
-    "error": "Impossibile caricare l'organigramma.",
-    "noNodes": "Organigramma vuoto.",
-    "graphAria": "Grafico organigramma"
+    "tuaUnita": "La tua unità è evidenziata."
   },
   "approvals": {
     "title": "Le mie approvazioni",
@@ -758,7 +756,7 @@
     "count": "{{count}} valutazioni",
     "errorMessage": "Impossibile caricare le tue valutazioni.",
     "emptyTitle": "Nessuna valutazione comunicata",
-    "emptyDescription": "Non ti e' ancora stata comunicata alcuna valutazione. Quelle non comunicate non compaiono qui: le vedrai dopo il colloquio.",
+    "emptyDescription": "Non ti è ancora stata comunicata alcuna valutazione. Quelle non comunicate non compaiono qui: le vedrai dopo il colloquio.",
     "caption": "Elenco delle mie valutazioni",
     "colPeriod": "Periodo",
     "colType": "Tipo",

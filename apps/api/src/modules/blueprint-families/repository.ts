@@ -15,10 +15,23 @@ interface Row {
   blueprint_family_name: string; blueprint_family_description: string | null;
   blueprint_family_metadata: Record<string, unknown>;
   created_at: Date; updated_at: Date;
+  industry_code: string | null; industry_name: string | null;
 }
 
+// Il settore della famiglia è la sua classe d'attività primaria (000301): il codice
+// e il nome della classificazione, la prima per codice se ce ne sono più d'una.
+// La sottoquery vale anche in RETURNING, così insert e update tornano la stessa forma.
+const SETTORE = `(SELECT c.activity_classification_code || chr(9) || c.activity_classification_name
+    FROM sys.sys_blueprint_family_activity_classes m
+    JOIN sys.sys_activity_classifications c
+      ON c.activity_classification_id = m.blueprint_family_activity_class_classification_id
+   WHERE m.blueprint_family_activity_class_family_id = blueprint_family_id
+     AND m.blueprint_family_activity_class_kind = 'PRIMARY'
+   ORDER BY c.activity_classification_code LIMIT 1)`;
 const COLS = `blueprint_family_id, blueprint_family_code, blueprint_family_name,
-  blueprint_family_description, blueprint_family_metadata, created_at, updated_at`;
+  blueprint_family_description, blueprint_family_metadata, created_at, updated_at,
+  split_part(${SETTORE}, chr(9), 1) AS industry_code,
+  split_part(${SETTORE}, chr(9), 2) AS industry_name`;
 
 function toFam(r: Row): BlueprintFamily {
   return {
@@ -26,6 +39,7 @@ function toFam(r: Row): BlueprintFamily {
     code: r.blueprint_family_code, name: r.blueprint_family_name,
     description: r.blueprint_family_description, metadata: r.blueprint_family_metadata,
     createdAt: r.created_at.toISOString(), updatedAt: r.updated_at.toISOString(),
+    industryCode: r.industry_code || null, industryName: r.industry_name || null,
   };
 }
 

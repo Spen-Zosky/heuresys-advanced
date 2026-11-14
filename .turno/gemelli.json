@@ -20,6 +20,11 @@
     "_da_eliminare"
   ],
   "escludi_nomi": ["_da_eliminare"],
+  "guardia_produzione": { "rif": "origin/prod" },
+  "manifesto": {
+    "modo": "tracciati",
+    "inclusi": ["db/seeds", "db/data", "apps/showcase", "apps/web/tests", "apps/agent-gateway/.data"]
+  },
   "riti": {
     "dopo_presa": [ { "cmd": "bash scripts/turno/dopo-presa-debian.sh", "macchine": ["debian"] } ],
     "prima_di_chiudere": [ "python3 scripts/turno/controlla-turno.py heuresys-advanced" ]

@@ -36,3 +36,7 @@ R5. Distruttiva, dati non creati da questa sessione: si esegue solo con il sì s
 - S4. Il modello vecchio (FIN_BANKING v1) non si cancella e per ora non si ritira: è ancora il modello in uso di RTL (S2), e cancellarlo toglierebbe 96 assegnazioni processo-unità, 73 modelli di indicatore e 7 porte di RTL.
 
 Configurazione di macchina (non nel repo): drop-in `/etc/systemd/system/heuresys-advanced-api.service.d/consegne-datastore.conf` con `DATASTORE_CONSEGNE_DIR`.
+
+## Prossimo ciclo, già accettato da Enzo (2026-11-14 04:49 UTC): la cascata della decisione
+
+Nella finestra della decisione l'agente spiega la cascata della voce (prerequisiti: per un'unità l'unità madre e il responsabile; conseguenze: posizioni, processi, indicatori che dipendono da lei nel modello) e fra le scelte c'è «Aggiorna cascata», che applica insieme la voce e le sue dipendenze. La cascata si ricava dai legami reali dello schema (chiavi esterne) e del contenuto del modello, mai da un elenco scritto a mano; si vede prima di confermare; si applica in un'unica transazione con il giornale di ritorno (`staging.tenant_consolidation_undo`). Caso che lo motiva: S1. PR separata, dopo il rilascio della PR 248; tocca `applicazione.ts` e `decisione-dialog.tsx`, da coordinare con il thread della pagina.

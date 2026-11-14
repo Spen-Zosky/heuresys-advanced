@@ -527,10 +527,12 @@ export const tenantConsolidationService = {
   /** Le modifiche nella bozza e non ancora approvate, per l'avviso nell'intestazione. */
   async pendingApproval(actor: ActorContext): Promise<PendingApproval> {
     const tenantId = tenantDi(actor);
-    await gruppiLeggibili(actor);
+    const leggibili = await gruppiLeggibili(actor);
     const aperta = (await repo.listConsolidations(pool, tenantId)).find((s) => s.status === "GIRI" || s.status === "IN_CONFERMA");
     if (!aperta) return { pending: 0, consolidationId: null, since: null };
-    const da = await repo.decisioniDaApplicare(pool, tenantId, aperta.consolidationId);
+    // un delegato conta solo le decisioni dei gruppi della sua delega
+    const da = (await repo.decisioniDaApplicare(pool, tenantId, aperta.consolidationId))
+      .filter((r) => leggibili === null || leggibili.includes(r.group));
     const { rows } = await pool.query<{ t: Date | null }>(
       `SELECT min(d.tenant_consolidation_decision_decided_at) AS t
          FROM sys.sys_tenant_consolidation_decisions d WHERE d.tenant_consolidation_decision_id = ANY($1::uuid[])`,
@@ -542,11 +544,15 @@ export const tenantConsolidationService = {
   /** La cascata di una proposta, con i nomi delle voci, prima di decidere. */
   async cascade(actor: ActorContext, proposalId: string): Promise<CascadeResponse> {
     const tenantId = tenantDi(actor);
-    await gruppiLeggibili(actor);
+    const leggibili = await gruppiLeggibili(actor);
     const [p] = await repo.getProposals(pool, tenantId, [proposalId]);
     if (!p) throw new NotFoundError("Proposta non trovata", "CONSOLIDATION_PROPOSAL_NOT_FOUND");
+    if (leggibili !== null && !leggibili.includes(p.group)) {
+      throw new ForbiddenError("La proposta è fuori dai gruppi della delega", "PERMISSION_DENIED");
+    }
     const s = await sessione(tenantId, p.consolidationId);
-    const voci = await cascataDi(pool, s.variantVersionId, p);
+    // un delegato vede della cascata solo le voci dei gruppi della sua delega
+    const voci = (await cascataDi(pool, s.variantVersionId, p)).filter((v) => leggibili === null || leggibili.includes(v.group));
     const gruppi = [...new Set(voci.map((v) => v.group))];
     const nomi = new Map<string, string>();
     await Promise.all(gruppi.map(async (g) => {

@@ -3,6 +3,7 @@
 import { useSyncExternalStore, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
+import { AvvisoBozzaConsolidamento } from "@/components/avviso-bozza-consolidamento";
 import {
   Button,
   DashboardShell,
@@ -342,6 +343,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
           // nome è la violazione `label-content-name-mismatch` misurata su 97 pagine. È
           // decorativo: si nasconde ai lettori di schermo invece di cambiare il nome.
           logoBadge={<HeuresysLogoBadge aria-hidden="true">{t("shell:brand.badge")}</HeuresysLogoBadge>}
+          rightExtras={<AvvisoBozzaConsolidamento abilitato={(ifaces.data?.routes ?? []).some((r) => r.route === "/consolidation" && r.allowed)} />}
         />
       }
       sidebar={

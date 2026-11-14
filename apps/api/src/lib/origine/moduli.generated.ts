@@ -164,7 +164,9 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "/v1/blueprint-families"
     ],
     "tabelle": [
+      "sys_activity_classifications",
       "sys_blueprint_families",
+      "sys_blueprint_family_activity_classes",
       "sys_blueprint_variants"
     ]
   },

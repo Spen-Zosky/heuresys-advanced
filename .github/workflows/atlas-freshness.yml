@@ -33,6 +33,10 @@ on:
       - "db/migrations/**"
       - "docs/kb/tools/build_atlas.py"
       - ".github/workflows/atlas-freshness.yml"
+      # L'atlante stesso: il commit che lo rigenera è quello che rifà verde un rosso.
+      # Senza questa riga il rosso restava l'ultimo esito nella finestra del rilascio e il
+      # deploy-watch si fermava (cf0519e0 dopo #251, c9059413 dopo #233, 14/11/2026).
+      - "docs/kb/atlas/**"
   workflow_dispatch: {}
 
 permissions:

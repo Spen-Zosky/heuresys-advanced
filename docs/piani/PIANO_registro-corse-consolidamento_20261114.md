@@ -14,9 +14,9 @@ Fuori da questo ciclo: il ritorno al datastore (AC-14); la consegna automatica d
 | R1 | Migrazione 000489: `sys.sys_blueprint_runs` (registro delle corse per tenant) + avvio della sessione legato alla corsa | Claude | catena verde su copia, riapplicata senza differenze | fatta: catena verde due volte su copia (000062 e 000429 emendate) |
 | R2 | API: `GET /v1/consolidation/runs` (registro, più recente prima), `GET /v1/consolidation/runs/available` (consegne del datastore, con «già nel registro»), `POST /v1/consolidation/runs/receive` (accoglie una consegna come nuova versione di modello e la registra), `POST /v1/consolidation/runs/:id/definitive`; `POST /v1/consolidation` accetta `runId`; il primo giro di ogni gruppo scrive i risultati iniziali e il tempo dell'agente nel registro | Claude | prove d'integrazione verdi | fatta: 17/17 prove sul consolidamento verdi su copia |
 | R3 | Pagina /consolidation: scelta della corsa (predefinita la più recente del registro), storico del registro, avviso «modello mai consolidato» con descrizione e data di caricamento, tempo dell'agente | Claude | login reale di una persona HRMS_MANAGER di RTL | scritta, prova dal vivo dopo il rilascio |
-| R4 | In produzione, dopo backup verificato: accogliere la consegna e registrarla come corsa più recente (attivazione rimandata, vedi S2) | Claude | attivazione ACTIVE di RTL sulla nuova versione, riga nel registro | da fare |
+| R4 | In produzione, dopo backup verificato: accogliere la consegna e registrarla come corsa più recente (attivazione rimandata, vedi S2) | Claude | attivazione ACTIVE di RTL sulla nuova versione, riga nel registro | fatta: corsa p20261010010521tjb nel registro di RTL il 2026-11-14 17:10 UTC (caricamento 6,1 s) |
 | R5 | Annullare il giro del 01/11 (2 unità con il giornale di ritorno, sessione con proposte, decisioni, collegamenti) ed eliminare la versione vecchia | Enzo dà il sì nel thread, Claude esegue | conteggi a zero, backup prima | giro annullato 03:52 UTC (sì di Enzo 03:44:55); eliminazione della versione vecchia: aspetta Enzo |
-| R6 | PR, CI verde, unione, rilascio, verifica dal vivo | Claude | `scripts/verifica-deploy.sh` DEPLOYATO e R3 ripetuta in produzione | da fare |
+| R6 | PR, CI verde, unione, rilascio, verifica dal vivo | Claude | `scripts/verifica-deploy.sh` DEPLOYATO e R3 ripetuta in produzione | fatta: PR 248 unita, in produzione dalle 15:40 UTC (2cbede6c); prova con login reale lasciata a Enzo: il secondo fattore di Valentina Conti non è ricavabile |
 
 ## Simulazione
 
@@ -36,3 +36,42 @@ R5. Distruttiva, dati non creati da questa sessione: si esegue solo con il sì s
 - S4. Il modello vecchio (FIN_BANKING v1) non si cancella e per ora non si ritira: è ancora il modello in uso di RTL (S2), e cancellarlo toglierebbe 96 assegnazioni processo-unità, 73 modelli di indicatore e 7 porte di RTL.
 
 Configurazione di macchina (non nel repo): drop-in `/etc/systemd/system/heuresys-advanced-api.service.d/consegne-datastore.conf` con `DATASTORE_CONSEGNE_DIR`.
+
+## Prossimo ciclo, già accettato da Enzo (2026-11-14 04:49 UTC): la cascata della decisione
+
+Nella finestra della decisione l'agente spiega la cascata della voce (prerequisiti: per un'unità l'unità madre e il responsabile; conseguenze: posizioni, processi, indicatori che dipendono da lei nel modello) e fra le scelte c'è «Aggiorna cascata», che applica insieme la voce e le sue dipendenze. La cascata si ricava dai legami reali dello schema (chiavi esterne) e del contenuto del modello, mai da un elenco scritto a mano; si vede prima di confermare; si applica in un'unica transazione con il giornale di ritorno (`staging.tenant_consolidation_undo`). Caso che lo motiva: S1. PR separata, dopo il rilascio della PR 248; tocca `applicazione.ts` e `decisione-dialog.tsx`, da coordinare con il thread della pagina.
+
+## Prossimo ciclo, proposto dal thread degli organigrammi (2026-11-14 04:57 UTC): sede e organico delle unità
+
+Il modello porta per ogni unità `blueprint_content_unit_site_code` (sede centrale, centro operativo, filiali), `blueprint_content_unit_planned_headcount` e `blueprint_content_unit_headcount_note` (il perché di quell'organico); `sys.sys_organization_units` non ha dove tenerli (solo `organization_unit_metadata`). Valutazione: il consolidamento li porta nei dati, con colonne vere (sede come riferimento alle sedi del tenant, organico previsto, ragione dell'organico) e non dentro il jsonb, così le viste a blocchi dell'organigramma diventano uguali a quelle del banco. Entra nella cascata dell'unità (ciclo sopra): adottare o confermare un'unità porta anche la sua sede e il suo organico. Prima indagine: dove advanced tiene già le sedi (`sys.sys_branches`, legata alle unità) e chi legge `organization_unit_metadata`.
+
+## Prossimo ciclo, base della PR della cascata (Enzo, 2026-11-14 05:14 UTC): oggetto di lavoro e approvazione definitiva
+
+Cambia la base del consolidamento, quindi viene prima della cascata e della sede/organico.
+
+| id | cosa | fatta quando |
+|---|---|---|
+| W1 | Decisioni, «Esegui modifiche (N)» e «Passa alla sezione successiva» scrivono solo nell'oggetto di lavoro della sessione (estende `sys_tenant_consolidation_working_items`); le valutazioni toccate da una modifica o da una cascata si ricalcolano lì | prova: dopo «Esegui modifiche» i dati vivi del tenant sono identici (conteggi e impronte) |
+| W2 | Pulsante rosso «Approva definitivamente le modifiche»: solo il Direttore HR, conferma esplicita con l'anteprima delle differenze; backup verificato automatico; un'unica transazione con il giornale di ritorno | prova d'integrazione e login reale |
+| W3 | Guardie lato server: un solo oggetto di lavoro aperto per tenant; controllo di obsolescenza (i dati vivi toccati non sono cambiati dall'apertura, altrimenti si rivalida); niente approvazione con un giro dell'agente in corso; dentro la transazione girano i controlli degli invarianti che oggi scattano al rilascio (caso S1: 000247), e se uno cade l'approvazione si ferma e lo dice; «Scarta modifiche» | prove rosse prima e verdi dopo |
+| W4 | Flag «modifiche non approvate» sulla sessione di consolidamento, letto nella chiamata che dopo il login carica i permessi; segnale arancione intermittente nell'header fino all'approvazione, con testo e link alla pagina (leggibile anche con l'animazione ridotta) | E2E: la prima decisione accende il segnale, l'approvazione o lo scarto lo spengono |
+| W5 | Il registro delle corse tiene anche l'esito finale: chi ha approvato, quando, quante modifiche per gruppo | prova d'integrazione |
+| W6 | La 000247 conta solo il tenant per cui è scritta (RTL), così un altro tenant non rompe la catena | catena verde su copia con un'unità senza responsabile in un altro tenant |
+
+Poi, su questa base: la cascata della decisione e la sede/organico delle unità (sezioni sopra).
+
+## Indagine I1 (prossimo ciclo): dove tenere nei dati operativi ciò che il modello porta e advanced no
+
+Richiesta di Enzo, misurata dal thread degli organigrammi sul catalogo di heuresys_advanced (2026-11-14 05:18 UTC). Per ogni voce: tabella e colonna di destinazione, indici, chiavi esterne, gruppo del consolidamento e posto nella cascata; esito scritto qui prima di qualunque migrazione.
+
+| voce | nel modello | in advanced oggi |
+|---|---|---|
+| I1.1 unità: genere (AREA, DIREZIONE…), centrale o filiale, processi per unità con il ruolo nel processo | `blueprint_content_unit_type`, `_site_code`, `sys_blueprint_content_unit_processes` | `organization_unit_type`; da verificare se `sys_organization_unit_processes` porta il ruolo |
+| I1.2 unità: sede, organico previsto, ragione dell'organico | `_site_code`, `_planned_headcount`, `_headcount_note` | assenti: colonne vere su `sys_organization_units` (servono alle viste dell'organigramma) |
+| I1.3 posizioni: livello CCNL e grado aziendale con il motivo; criticità con il motivo | inquadramento.assegnazioni, criticita[].motivo | `sys_positions` senza livello né CCNL; criticità senza motivo |
+| I1.4 preposti di succursale, con il minimo per sede | da misurare | da misurare |
+| I1.5 obblighi normativi per posizione con la formazione richiesta | `sys_blueprint_content_obligation_positions`, `_training_positions` | manca il legame operativo posizione-obbligo |
+| I1.6 schemi di incentivo per posizione; commesse con unità e posizioni | `_incentive_links`, `_engagement_links` | da misurare |
+| I1.7 pesi degli obiettivi per ruolo; responsabili di processo | goals, process registry | da misurare |
+
+Quando la colonna di I1.2 è unita, si avvisa il thread «Rifare gli organigrammi di advanced come il banco» (la aggiunge a `/v1/me/organigramma` e alle viste).

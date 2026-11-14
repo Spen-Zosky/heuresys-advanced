@@ -18,6 +18,9 @@ import { useTranslation } from "react-i18next";
 import { EChartsCard } from "@/app/(authenticated)/_charts-client";
 import type { OrganigrammaUnita } from "@heuresys/shared";
 
+/** Il riquadro al passaggio è HTML: i nomi delle unità li scrive il cliente, quindi si proteggono. */
+const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" })[c]!);
+
 interface NodoAlbero {
   id: string;
   name: string;
@@ -80,7 +83,7 @@ export function OrganigrammaNodi({
   const option = {
     tooltip: {
       trigger: "item" as const,
-      formatter: (p: unknown) => { const q = p as { name: string; value: number }; return `${q.name}<br/>${t("organigramma.conSotto", { count: q.value })}`; },
+      formatter: (p: unknown) => { const q = p as { name: string; value: number }; return `${esc(q.name)}<br/>${esc(t("organigramma.conSotto", { count: q.value }))}`; },
     },
     series: radici.map((r, i) => ({
       type: "tree" as const,

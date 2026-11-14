@@ -29,6 +29,7 @@ import { useFormat } from "@/lib/format";
 import { StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { DecisioneDialog } from "./decisione-dialog";
 import { RegistroCorse } from "./registro-corse";
+import { OrganigrammaCliente } from "./organigramma-cliente";
 
 // AC-10 — La pagina del Direttore HR per il consolidamento del tenant col prototipo
 // (`.programmi/consolidamento/agente/`). L'agente propone, una persona decide: qui si avviano
@@ -269,6 +270,8 @@ export default function ConsolidationPage() {
           onErrore={setErrore}
         />
       ) : null}
+
+      {access.data ? <OrganigrammaCliente /> : null}
 
       {sessions.data && corrente === null ? (
         <StatoVuoto

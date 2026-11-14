@@ -93,8 +93,8 @@ export function OrganigrammaNodi({
       data: [r],
       top: radici.length > 1 ? `${(100 / radici.length) * i + 2}%` : "2%",
       bottom: radici.length > 1 ? `${100 - (100 / radici.length) * (i + 1) + 2}%` : "2%",
-      left: "6%",
-      right: "24%",
+      left: "8%",
+      right: "10%",
       orient: "LR" as const,
       layout: "orthogonal" as const,
       edgeShape: "polyline" as const,
@@ -108,7 +108,8 @@ export function OrganigrammaNodi({
         fontSize: 12, color: "var(--foreground)", backgroundColor: "var(--background)", padding: [2, 4],
         formatter: (p: unknown) => { const q = p as { name: string; value: number }; return `${q.name}  (${q.value})`; },
       },
-      leaves: { label: { position: "right" as const, align: "left" as const, verticalAlign: "middle" as const, distance: 6 } },
+      // Anche le foglie con l'etichetta sopra: a destra, una foglia del secondo livello con un nome
+      // lungo arrivava fino ai tratti verticali del livello dopo (seconda prova dal vivo, 14/11).
       emphasis: { focus: "descendant" as const },
     })),
   };

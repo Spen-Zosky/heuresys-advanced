@@ -370,7 +370,16 @@
     "applyResult": {
       "title": "Modifiche eseguite: {{count}} decisioni applicate ai dati",
       "detail": "Valori cambiati {{changed}}, voci create {{created}}, effetti precedenti ritirati {{reverted}}."
-    }
+    },
+    "nextTitle": "Cosa fare adesso",
+    "nextRunning": "Il giro su {{group}} è in corso. Non devi fare niente: la pagina si aggiorna da sola quando ha finito.",
+    "nextRun": "Per questo gruppo non ci sono ancora proposte. Premi «Avvia i giri su {{group}}»: l'agente confronta i dati della tua azienda con il prototipo e prepara le proposte.",
+    "nextDecide": "Restano {{count}} proposte da decidere nella tabella qui sotto. Apri ogni riga e scegli, oppure usa «Conferma gli abbinamenti certi» per quelle sicure. Finché ne resta una, il gruppo non si può chiudere.",
+    "nextApply": "Hai deciso tutte le proposte, ma le decisioni non sono ancora nei dati. Passo successivo: premi «Esegui modifiche ({{count}})». Solo allora cambiano i dati della tua azienda.",
+    "nextClose": "Tutto è deciso e applicato. Passo successivo: premi «Chiudi il gruppo e passa al successivo». Si apre il gruppo {{next}}.",
+    "nextCloseLast": "Tutto è deciso e applicato. Passo successivo: premi «Chiudi il gruppo e passa al successivo»: è l'ultimo gruppo, la sessione passa in conferma.",
+    "nextOther": "Il gruppo aperto è {{group}}. Puoi consultare questo gruppo, ma i passi da fare sono nel gruppo aperto: selezionalo nella fila qui sopra.",
+    "stepsHint": "In ordine: 1. decidi le proposte · 2. «Esegui modifiche» · 3. «Chiudi il gruppo e passa al successivo». «Avvia i giri» serve solo per far preparare le proposte all'agente."
   },
   "gaps": {
     "title": "Analisi dei divari",

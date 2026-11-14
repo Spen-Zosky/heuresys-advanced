@@ -400,15 +400,20 @@ export async function rendiDefinitiva(tenantId: string, runId: string, userId: s
     // Il profilo del tenant (lib/scope/profilo.ts) legge ruoli e cruscotti dalla versione attiva: una
     // versione che non li porta svuoterebbe il catalogo dei ruoli e i cruscotti del tenant. Il pacchetto
     // 0.3 del datastore oggi non li porta (richiesta M2-M6 del programma di consolidamento): si rifiuta.
-    const pieno = await c.query<{ ruoli: number; cruscotti: number }>(
+    // Le porte di ricompensa sono della variante e la 000400 pretende che ogni tenant attivo ne abbia:
+    // una variante senza porte non si adotta da qui (il catalogo è di piattaforma, non lo scrive un tenant).
+    const pieno = await c.query<{ ruoli: number; cruscotti: number; porte: number }>(
       `SELECT (SELECT count(*)::int FROM sys.sys_blueprint_content_job_roles WHERE blueprint_content_job_role_version_id = $1) AS ruoli,
-              (SELECT count(*)::int FROM sys.sys_blueprint_content_dashboards WHERE blueprint_content_dashboard_version_id = $1) AS cruscotti`,
-      [r.ver],
+              (SELECT count(*)::int FROM sys.sys_blueprint_content_dashboards WHERE blueprint_content_dashboard_version_id = $1) AS cruscotti,
+              (SELECT count(*)::int FROM sys.sys_reward_gate_catalog WHERE reward_gate_catalog_blueprint_variant_id = $2) AS porte`,
+      [r.ver, r.variante],
     );
     const vuoto = pieno.rows[0]!;
-    if (vuoto.ruoli === 0 || vuoto.cruscotti === 0) {
+    const mancano = [vuoto.ruoli === 0 ? "i ruoli" : null, vuoto.cruscotti === 0 ? "i cruscotti" : null,
+      vuoto.porte === 0 ? "le porte di ricompensa" : null].filter((x): x is string => x !== null);
+    if (mancano.length > 0) {
       throw new ConflictError(
-        `Il modello di questa corsa non porta ancora ${vuoto.ruoli === 0 ? "i ruoli" : ""}${vuoto.ruoli === 0 && vuoto.cruscotti === 0 ? " né " : ""}${vuoto.cruscotti === 0 ? "i cruscotti" : ""}: renderlo il modello in uso svuoterebbe quelli del tenant`,
+        `Il modello di questa corsa non porta ancora ${mancano.join(", ")}: renderlo il modello in uso svuoterebbe quelli del tenant`,
         "BLUEPRINT_RUN_NOT_ACTIVATABLE",
       );
     }
@@ -437,23 +442,6 @@ export async function rendiDefinitiva(tenantId: string, runId: string, userId: s
         [a.id, r.ver, userId],
       );
     } else {
-      // Le porte di ricompensa sono della variante, e la 000400 pretende che ogni tenant attivo ne abbia:
-      // se la variante nuova non ne ha, porta con sé quelle della variante che il tenant lascia.
-      if (a) {
-        await c.query(
-          `INSERT INTO sys.sys_reward_gate_catalog
-             (reward_gate_catalog_blueprint_variant_id, reward_gate_catalog_code, reward_gate_catalog_name,
-              reward_gate_catalog_description, reward_gate_catalog_is_blocking, reward_gate_catalog_metadata)
-           SELECT $2, g.reward_gate_catalog_code, g.reward_gate_catalog_name, g.reward_gate_catalog_description,
-                  g.reward_gate_catalog_is_blocking,
-                  g.reward_gate_catalog_metadata || jsonb_build_object('portata_da', $3::text)
-             FROM sys.sys_reward_gate_catalog g
-            WHERE g.reward_gate_catalog_blueprint_variant_id = $1
-              AND NOT EXISTS (SELECT 1 FROM sys.sys_reward_gate_catalog n WHERE n.reward_gate_catalog_blueprint_variant_id = $2)
-           ON CONFLICT DO NOTHING`,
-          [a.variante, r.variante, a.variante],
-        );
-      }
       if (a) {
         await c.query(
           `UPDATE sys.sys_blueprint_activations

@@ -217,6 +217,10 @@ describe("registro delle corse del modello", () => {
       await pool.query(
         `INSERT INTO sys.sys_blueprint_content_dashboards (blueprint_content_dashboard_version_id, blueprint_content_dashboard_code, blueprint_content_dashboard_name)
          VALUES ($1, 'self', 'Cruscotto di prova')`, [v]);
+      await pool.query(
+        `INSERT INTO sys.sys_reward_gate_catalog (reward_gate_catalog_blueprint_variant_id, reward_gate_catalog_code, reward_gate_catalog_name)
+         SELECT blueprint_variant_version_variant_id, 'CONDUCT_GATE', 'Conduct Gate'
+           FROM sys.sys_blueprint_variant_versions WHERE blueprint_variant_version_id = $1`, [v]);
     }
 
     const a = await svc.makeDefinitive(direttore, runA.runId);
@@ -238,7 +242,7 @@ describe("registro delle corse del modello", () => {
       [t],
     );
     expect(att.rows.map((x) => x.v)).toEqual([versioneB]);
-    // le porte di ricompensa seguono il tenant sulla variante nuova (la 000400 le pretende)
+    // la 000400 resta verde: la variante adottata ha le sue porte di ricompensa
     const porte = await pool.query<{ n: number }>(
       `SELECT count(*)::int AS n FROM sys.v_reward_gate_completeness`,
     );

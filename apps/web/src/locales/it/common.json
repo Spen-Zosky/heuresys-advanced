@@ -765,6 +765,13 @@
       "READY_1_YEAR": "Pronto entro un anno",
       "READY_2_YEARS": "Pronto entro due anni",
       "NOT_READY": "Non ancora pronto"
+    },
+    "siteKind": {
+      "SEDE_CENTRALE": "Sede centrale",
+      "FILIALE": "Filiale",
+      "STABILIMENTO": "Stabilimento",
+      "MAGAZZINO": "Magazzino",
+      "UFFICIO": "Ufficio"
     }
   },
   "masked": "nascosto per il tuo profilo",
@@ -1060,11 +1067,16 @@
       "persone": "Persone",
       "struttura": "Struttura sotto di sé ({{count}} unità)",
       "addetti": "Persone",
-      "addettiConSotto": "{{diretti}} nell'unità, {{totali}} con le unità sotto"
+      "addettiConSotto": "{{diretti}} nell'unità, {{totali}} con le unità sotto",
+      "sede": "Sede",
+      "organicoPrevisto": "Organico previsto",
+      "ragioneOrganico": "Perché questo organico"
     },
     "consolidamento": {
       "titolo": "Organigramma del cliente oggi",
       "spiegazione": "L'organizzazione com'è adesso, con le persone di ogni unità: il punto di partenza delle proposte del consolidamento."
-    }
+    },
+    "previste_one": "{{count}} prevista",
+    "previste_other": "{{count}} previste"
   }
 }

@@ -7,6 +7,8 @@ import type { OrganigrammaResponse, OrganigrammaUnita } from "@heuresys/shared";
 export interface RigaUnita {
   id: string; codice: string | null; nome: string; tipo: string | null; relazione: string | null;
   padreId: string | null; responsabileId: string | null; responsabile: string | null;
+  /** Sede e organico dal modello (000490): facoltativi, vuoti finché il consolidamento non li porta. */
+  sedeCodice?: string | null; sedeTipo?: string | null; organicoPrevisto?: number | null; ragioneOrganico?: string | null;
 }
 export interface RigaPersona {
   id: string; etichetta: string; posizioneId: string; posizione: string; unitaId: string | null;
@@ -80,10 +82,12 @@ export function comporre(
     const pos = posizioniPerUnita.get(u.id) ?? [];
     return {
       id: u.id, codice: u.codice, nome: u.nome, tipo: u.tipo, relazione: u.relazione,
-      padreId: padreDi(u), livello: livello.get(u.id) ?? 1, filiale: u.tipo === "BRANCH",
+      padreId: padreDi(u), livello: livello.get(u.id) ?? 1, filiale: u.tipo === "BRANCH" || u.sedeTipo === "FILIALE",
       responsabileId: u.responsabileId, responsabile: u.responsabile,
       persone: pers, posizioni: pos.length, scoperte: pos.filter((p) => !p.titolareId).length,
       addettiTotali: totali.get(u.id) ?? pers.length,
+      sedeCodice: u.sedeCodice ?? null, sedeTipo: u.sedeTipo ?? null,
+      organicoPrevisto: u.organicoPrevisto ?? null, ragioneOrganico: u.ragioneOrganico ?? null,
     };
   });
 

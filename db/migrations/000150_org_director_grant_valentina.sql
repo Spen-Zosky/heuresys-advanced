@@ -22,7 +22,7 @@
 -- ============================================================================
 
 -- ADR-0057 (emendamento del 2026-11-10): il modello dei ruoli e' applicato? Lo dice il registro
--- delle corse di db/scripts/modello-ruoli.sql, creato da 000485. Prima di 000485 la tabella non
+-- delle corse di db/scripts/modello-ruoli.sql, creato da 000490. Prima di 000490 la tabella non
 -- esiste e la risposta e' «no»: su un database nuovo le migrazioni che concedono ruoli fanno
 -- quello che hanno sempre fatto.
 CREATE OR REPLACE FUNCTION sys.f_modello_ruoli_applicato()

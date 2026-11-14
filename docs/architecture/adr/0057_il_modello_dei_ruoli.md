@@ -22,13 +22,13 @@ Misura del 2026-11-10 sul dump di produzione delle 03:42, ripristinato in una co
 
 **R1.** Due assi separati (ADR-0027): il ruolo di comando viene dall'organigramma, il ruolo funzionale dal lavoro della persona.
 
-**R2.** Il ruolo di comando si calcola e non si concede a mano (`sys.v_ruoli_di_comando_attesi`, migrazione 000485): titolare della sede o della Direzione Generale = `CEO`; di una filiale = `BRANCH_MANAGER`; di un'unità con figlie attive = `MANAGER`; di un'unità foglia = `TEAM_LEADER`. Guidare una squadra senza reggere un'unità non dà `TEAM_LEADER` (decisione di Enzo del 2026-10-31 su Marco Rinaldi). Vince il grado più alto. Al massimo uno per persona.
+**R2.** Il ruolo di comando si calcola e non si concede a mano (`sys.v_ruoli_di_comando_attesi`, migrazione 000490): titolare della sede o della Direzione Generale = `CEO`; di una filiale = `BRANCH_MANAGER`; di un'unità con figlie attive = `MANAGER`; di un'unità foglia = `TEAM_LEADER`. Guidare una squadra senza reggere un'unità non dà `TEAM_LEADER` (decisione di Enzo del 2026-10-31 su Marco Rinaldi). Vince il grado più alto. Al massimo uno per persona.
 
 **R3.** `USER` è di tutti e non si tocca. `TEAM_MEMBER` non si concede più: l'appartenenza a una squadra è in `sys.sys_team_members`.
 
 **R4.** Il ruolo funzionale lo decide Enzo per nome, con il motivo; al massimo uno per persona, un'eccezione si dichiara con il suo motivo. L'elenco vigente è in `db/scripts/modello-ruoli.sql`.
 
-**R5.** Un ruolo che ne contiene un altro lo sostituisce. Perché sia vero, 000485 aggiunge a `BRANCH_MANAGER` e `CEO` i permessi di `TEAM_LEADER`, a `CEO` quelli di `BRANCH_MANAGER` (solo aggiunte, elencate in `staging.modello_ruoli_permessi_aggiunti`). `TENANT_ADMIN` non assorbe i 3 permessi di `HRMS_MANAGER` (`agent_capability:activate`, `consolidation:decide`, `consolidation:run`): lo vietano l'allowlist deny-by-default D-57 e 000481, verificate da `rbac-tenant-admin-allowlist.test.ts` e `agent-capabilities.integration.test.ts`.
+**R5.** Un ruolo che ne contiene un altro lo sostituisce. Perché sia vero, 000490 aggiunge a `BRANCH_MANAGER` e `CEO` i permessi di `TEAM_LEADER`, a `CEO` quelli di `BRANCH_MANAGER` (solo aggiunte, elencate in `staging.modello_ruoli_permessi_aggiunti`). `TENANT_ADMIN` non assorbe i 3 permessi di `HRMS_MANAGER` (`agent_capability:activate`, `consolidation:decide`, `consolidation:run`): lo vietano l'allowlist deny-by-default D-57 e 000481, verificate da `rbac-tenant-admin-allowlist.test.ts` e `agent-capabilities.integration.test.ts`.
 
 **R6.** Ogni mandato regge su un atto approvato da un secondo titolare di mandato (ADR-0050 D4). Le concessioni dell'allineamento portano motivo e concedente (ADR-0055); gli atti di conferma si fanno dall'interfaccia, dopo l'allineamento.
 
@@ -48,6 +48,6 @@ Il resto dell'elenco: Marco Bruno `DATA_STEWARD`; Laura Santoro `DPO`; Andrea Ma
 
 ## §4 — Conseguenze
 
-- Il rilascio di 000485 non cambia le concessioni di nessuno: aggiunge permessi, viste e registro. L'allineamento delle persone in produzione è un passo a parte, con una frase scritta di Enzo, da fare dopo l'armonizzazione dell'organigramma con la corsa del datastore (decisione di Enzo del 2026-11-10: la corsa è la fonte di verità), così i ruoli di comando si calcolano una volta sola sull'organigramma definitivo.
+- Il rilascio di 000490 non cambia le concessioni di nessuno: aggiunge permessi, viste e registro. L'allineamento delle persone in produzione è un passo a parte, con una frase scritta di Enzo, da fare dopo l'armonizzazione dell'organigramma con la corsa del datastore (decisione di Enzo del 2026-11-10: la corsa è la fonte di verità), così i ruoli di comando si calcolano una volta sola sull'organigramma definitivo.
 - La regola di Enzo sui doppioni (2026-11-10): lo stesso ruolo in filiali diverse è una voce sola del catalogo con più titolari; due capi della stessa unità non possono esistere, e nel modello non possono perché il comando nasce dall'unico titolare dell'unità.
 - Le prove e i testi che citano Federica Marchetti come Tenant Admin o Maria Colombo come HRMS Manager vanno allineati quando il modello si applica alla base delle prove.

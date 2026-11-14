@@ -1,5 +1,5 @@
 -- ============================================================================
--- 000485 — Il modello dei ruoli (ADR-0057; modello approvato da Enzo il 2026-11-10).
+-- 000490 — Il modello dei ruoli (ADR-0057; modello approvato da Enzo il 2026-11-10).
 --
 -- PERCHE' ESISTE. Misura del 2026-11-10 sul dump di produzione delle 03:42: 402 concessioni
 -- attive su 167 utenti di RTL Bank, ruoli a pila (i 10 direttori di filiale con BRANCH_MANAGER,
@@ -31,7 +31,7 @@
 -- ROLLBACK di §1: i permessi aggiunti sono elencati in staging.modello_ruoli_permessi_aggiunti;
 -- si ritirano con
 --   UPDATE sys.sys_auth_role_permissions SET revoked_at = now(),
---          revoked_by_migration = '000485-rollback'
+--          revoked_by_migration = '000490-rollback'
 --    WHERE (auth_role_id, auth_permission_id) IN (SELECT auth_role_id, auth_permission_id
 --                                                  FROM staging.modello_ruoli_permessi_aggiunti);
 -- ============================================================================
@@ -103,7 +103,7 @@ ON CONFLICT DO NOTHING;
 
 -- §1-bis ritiro di cio' che una versione precedente di §1 aveva dato a TENANT_ADMIN da HRMS_MANAGER
 UPDATE sys.sys_auth_role_permissions rp
-   SET revoked_at = now(), revoked_by_migration = '000485-no-tenant-admin-hrms'
+   SET revoked_at = now(), revoked_by_migration = '000490-no-tenant-admin-hrms'
   FROM staging.modello_ruoli_permessi_aggiunti a
   JOIN sys.sys_auth_roles d ON d.auth_role_id = a.auth_role_id AND d.auth_role_code = 'TENANT_ADMIN'
  WHERE a.da_ruolo = 'HRMS_MANAGER'
@@ -143,7 +143,7 @@ SELECT DISTINCT ON (user_id) user_id, tenant_id, ruolo, unita, fonte
  ORDER BY user_id, grado, unita;
 
 COMMENT ON VIEW sys.v_ruoli_di_comando_attesi IS
-  'ADR-0057 R2 (mig 000485): il ruolo di comando che l''organigramma assegna a ogni persona: titolare di sede o Direzione Generale = CEO, di filiale = BRANCH_MANAGER, di un''unita con figlie = MANAGER, di un''unita foglia = TEAM_LEADER. Vince il grado piu alto. Utenze di collaudo escluse.';
+  'ADR-0057 R2 (mig 000490): il ruolo di comando che l''organigramma assegna a ogni persona: titolare di sede o Direzione Generale = CEO, di filiale = BRANCH_MANAGER, di un''unita con figlie = MANAGER, di un''unita foglia = TEAM_LEADER. Vince il grado piu alto. Utenze di collaudo escluse.';
 
 -- §3 cio' che il modello non prevede ----------------------------------------------------------
 CREATE OR REPLACE VIEW sys.v_ruoli_fuori_modello AS
@@ -172,7 +172,7 @@ SELECT 'TEAM_MEMBER_CONCESSO', g.user_auth_role_user_id, 'TEAM_MEMBER', g.user_a
  WHERE g.user_auth_role_revoked_at IS NULL AND r.auth_role_code = 'TEAM_MEMBER';
 
 COMMENT ON VIEW sys.v_ruoli_fuori_modello IS
-  'ADR-0057 (mig 000485): concessioni di comando che l''organigramma non giustifica, comandi attesi mancanti, TEAM_MEMBER ancora concessi. Si svuota con db/scripts/modello-ruoli.sql. Informativa: non e una guardia della catena.';
+  'ADR-0057 (mig 000490): concessioni di comando che l''organigramma non giustifica, comandi attesi mancanti, TEAM_MEMBER ancora concessi. Si svuota con db/scripts/modello-ruoli.sql. Informativa: non e una guardia della catena.';
 
 -- verifica: le inclusioni di §1 reggono -------------------------------------------------------
 DO $$
@@ -190,9 +190,9 @@ BEGIN
                         AND x.revoked_at IS NULL);
   IF v_mancano > 0 THEN
     -- un permesso ritirato apposta sul ruolo che contiene: non lo si ridà, ma si dice
-    RAISE NOTICE '000485: % permessi del ruolo contenuto restano ritirati sul ruolo che contiene', v_mancano;
+    RAISE NOTICE '000490: % permessi del ruolo contenuto restano ritirati sul ruolo che contiene', v_mancano;
   END IF;
-  RAISE NOTICE '000485: modello dei ruoli in catena (viste e registro); le concessioni le allinea db/scripts/modello-ruoli.sql';
+  RAISE NOTICE '000490: modello dei ruoli in catena (viste e registro); le concessioni le allinea db/scripts/modello-ruoli.sql';
 END $$;
 
 COMMIT;

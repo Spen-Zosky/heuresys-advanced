@@ -10,7 +10,7 @@
 -- smettono di concedere ruoli (sys.f_modello_ruoli_applicato()).
 --
 -- LO STATO A CUI PORTA (non si adatta a cio' che trova):
---   · ruolo di COMANDO = sys.v_ruoli_di_comando_attesi (000485), al massimo uno per persona;
+--   · ruolo di COMANDO = sys.v_ruoli_di_comando_attesi (000490), al massimo uno per persona;
 --   · ruolo FUNZIONALE = l'elenco _funzionali qui sotto, deciso da Enzo, al massimo uno per
 --     persona salvo le eccezioni dichiarate (una persona con due righe nell'elenco);
 --   · TEAM_MEMBER non e' concesso a nessuno; USER non si tocca;
@@ -25,7 +25,7 @@
 --   esiste, e' ACTIVE e sta nel tenant dichiarato; ogni ruolo esiste; il concedente esiste ed e'
 --   ACTIVE; nessuna unita' attiva e' retta da un'utenza di collaudo; tabella bloccata.
 -- GIORNALE: staging.modello_ruoli_undo (run_id, azione, riga, ruolo, motivo) e
---   staging.modello_ruoli_corse (000485).
+--   staging.modello_ruoli_corse (000490).
 -- INVERSA: db/scripts/modello-ruoli-inversa.sql -v run_id=<uuid>.
 -- POST-CONDIZIONI: le righe fuori dal giornale identiche a prima; utenti, posizioni, unita' e
 --   assegnazioni invariati; sys.v_ruoli_fuori_modello vuota nel perimetro; al massimo un

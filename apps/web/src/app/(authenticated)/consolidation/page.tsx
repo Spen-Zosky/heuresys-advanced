@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/intestazione-pagina";
 import {
   CONSOLIDATION_CERTAIN_THRESHOLD,
   CONSOLIDATION_GROUP_VALUES,
+  nextConsolidationGroup,
   type ApplyChangesResult,
   type PendingChanges,
   type ConsolidationAccess,
@@ -214,6 +215,22 @@ export default function ConsolidationPage() {
   const delGruppo = avanzamento.find((g) => g.group === gruppo) ?? null;
   const ultimo = corrente?.lastRun ?? null;
 
+  // Il passo successivo, detto in parole: chi decide non deve indovinare l'ordine dei pulsanti.
+  const aperto = corrente?.status === "GIRI" ? corrente.openGroup : null;
+  const prossimoPasso: { chiave: string; vars: Record<string, unknown> } | null = (() => {
+    if (!corrente || !aperto || !(canRun || access.data?.decidesAs)) return null;
+    const nomeAperto = t(`consolidation.groups.${aperto}`);
+    if (inCorso) return { chiave: "nextRunning", vars: { group: t(`consolidation.groups.${inCorso}`) } };
+    if (gruppo !== aperto) return { chiave: "nextOther", vars: { group: nomeAperto } };
+    if (righe.length === 0) return { chiave: "nextRun", vars: { group: nomeAperto } };
+    if (delGruppo && delGruppo.pending > 0) return { chiave: "nextDecide", vars: { count: delGruppo.pending } };
+    if ((pendenti.data?.pending ?? 0) > 0) return { chiave: "nextApply", vars: { count: pendenti.data?.pending ?? 0 } };
+    const prossimo = nextConsolidationGroup(aperto);
+    return prossimo
+      ? { chiave: "nextClose", vars: { next: t(`consolidation.groups.${prossimo}`) } }
+      : { chiave: "nextCloseLast", vars: {} };
+  })();
+
   return (
     <main data-testid="consolidation-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
@@ -331,6 +348,14 @@ export default function ConsolidationPage() {
               </p>
             ) : null}
 
+            {prossimoPasso ? (
+              <div role="status" data-testid="consolidation-next-step" className="rounded-card border border-primary/40 bg-card px-4 py-3 text-sm space-y-1">
+                <p className="font-medium text-foreground">{t("consolidation.nextTitle")}</p>
+                <p>{t(`consolidation.${prossimoPasso.chiave}`, prossimoPasso.vars)}</p>
+                <p className="text-xs text-muted-foreground">{t("consolidation.stepsHint")}</p>
+              </div>
+            ) : null}
+
             <div className="flex flex-wrap gap-2">
               {canRun && corrente.status === "GIRI" && corrente.openGroup ? (
                 <Button
@@ -375,6 +400,7 @@ export default function ConsolidationPage() {
         <section data-testid="consolidation-proposals" className="space-y-3">
           <PageHeader
             data-testid="consolidation-proposals-title"
+            senzaQuadro
             title={t("consolidation.proposalsTitle", { group: t(`consolidation.groups.${gruppo}`) })}
             description={t("consolidation.proposalsDescription")}
             badges={proposals.data

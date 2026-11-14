@@ -12,15 +12,16 @@
  * le pagine importano `PageHeader` da qui invece che da @heuresys/ui.
  *
  * Sotto il titolo si monta il quadro degli insight (classe C15): ogni pagina con un titolo lo
- * riceve senza toccarla.
+ * riceve senza toccarla. `senzaQuadro` lo toglie dalle intestazioni di sezione: sulla stessa
+ * pagina il quadro compare una volta sola, sotto il titolo principale.
  */
 import type { ReactNode } from "react";
 import type { PageHeaderProps } from "@heuresys/ui";
 import { QuadroInsight } from "@/components/quadro-insight";
 
-export function PageHeader(props: PageHeaderProps & { children?: ReactNode }) {
+export function PageHeader(props: PageHeaderProps & { children?: ReactNode; senzaQuadro?: boolean }) {
   // `divider` della libreria non si usa: la barra di colore del titolo separa già
-  const { title, description, breadcrumbs, actions, badges, className, ...resto } = props;
+  const { title, description, breadcrumbs, actions, badges, className, senzaQuadro, ...resto } = props;
   const rest = { ...resto };
   delete rest.divider;
   return (
@@ -39,7 +40,7 @@ export function PageHeader(props: PageHeaderProps & { children?: ReactNode }) {
         {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
       </div>
       {/* C15: le cose che contano su questa pagina, prima di tutto il resto */}
-      <QuadroInsight />
+      {senzaQuadro ? null : <QuadroInsight />}
     </header>
   );
 }

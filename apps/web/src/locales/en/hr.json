@@ -437,7 +437,16 @@
     "applyResult": {
       "title": "Changes applied: {{count}} decisions applied to the data",
       "detail": "Values changed {{changed}}, items created {{created}}, earlier effects withdrawn {{reverted}}."
-    }
+    },
+    "nextTitle": "What to do now",
+    "nextRunning": "The {{group}} round is running. Nothing to do: the page refreshes itself when it finishes.",
+    "nextRun": "This group has no proposals yet. Press «Run the rounds on {{group}}»: the agent compares your company's data with the prototype and prepares proposals.",
+    "nextDecide": "{{count}} proposals still need a decision in the table below. Open each row and choose, or use «Confirm the certain matches» for the safe ones. The group cannot be closed while any remain.",
+    "nextApply": "You decided every proposal, but the decisions are not in the data yet. Next step: press «Apply changes ({{count}})». Only then does your company data change.",
+    "nextClose": "Everything is decided and applied. Next step: press «Close the group and move to the next». The {{next}} group opens.",
+    "nextCloseLast": "Everything is decided and applied. Next step: press «Close the group and move to the next»: it is the last group, the session moves to confirmation.",
+    "nextOther": "The open group is {{group}}. You can read this group, but the steps to take are in the open group: select it in the row above.",
+    "stepsHint": "In order: 1. decide the proposals · 2. «Apply changes» · 3. «Close the group and move to the next». «Run the rounds» only makes the agent prepare proposals."
   },
   "gaps": {
     "title": "Gap analysis",

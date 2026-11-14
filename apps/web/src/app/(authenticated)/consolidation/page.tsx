@@ -27,6 +27,7 @@ import { StatusPill, type StatusTone } from "@/components/status-pill";
 import { useFormat } from "@/lib/format";
 import { StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { DecisioneDialog } from "./decisione-dialog";
+import { RegistroCorse } from "./registro-corse";
 
 // AC-10 — La pagina del Direttore HR per il consolidamento del tenant col prototipo
 // (`.programmi/consolidamento/agente/`). L'agente propone, una persona decide: qui si avviano
@@ -239,6 +240,16 @@ export default function ConsolidationPage() {
             void access.refetch();
             void sessions.refetch();
           }}
+        />
+      ) : null}
+
+      {access.data ? (
+        <RegistroCorse
+          canRun={canRun}
+          isDirector={access.data.decidesAs === "DIRETTORE"}
+          sessioneAperta={corrente}
+          occupato={occupato}
+          onErrore={setErrore}
         />
       ) : null}
 

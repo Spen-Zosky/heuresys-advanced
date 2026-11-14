@@ -31,6 +31,7 @@ interface RigaSessione {
   tenant_consolidation_started_by: string | null;
   tenant_consolidation_started_at: Date;
   tenant_consolidation_metadata: Record<string, unknown> | null;
+  tenant_consolidation_run_id: string | null;
 }
 
 function mappaSessione(r: RigaSessione): TenantConsolidation {
@@ -45,13 +46,15 @@ function mappaSessione(r: RigaSessione): TenantConsolidation {
     startedAt: r.tenant_consolidation_started_at.toISOString(),
     runningGroup: (r.tenant_consolidation_metadata?.["running_group"] ?? null) as TenantConsolidation["runningGroup"],
     lastRun: (r.tenant_consolidation_metadata?.["last_run"] ?? null) as TenantConsolidation["lastRun"],
+    runId: r.tenant_consolidation_run_id,
   };
 }
 
 const SESSIONE = `
   tenant_consolidation_id, tenant_consolidation_tenant_id, tenant_consolidation_variant_version_id,
   tenant_consolidation_trigger, tenant_consolidation_status, tenant_consolidation_open_group,
-  tenant_consolidation_started_by, tenant_consolidation_started_at, tenant_consolidation_metadata`;
+  tenant_consolidation_started_by, tenant_consolidation_started_at, tenant_consolidation_metadata,
+  tenant_consolidation_run_id`;
 
 export async function listConsolidations(q: DbConnector, tenantId: string): Promise<TenantConsolidation[]> {
   const { rows } = await q.query<RigaSessione>(
@@ -108,16 +111,17 @@ export async function activeVariantVersion(q: DbConnector, tenantId: string): Pr
 export async function createConsolidation(
   q: DbConnector,
   tenantId: string,
-  v: { variantVersionId: string; trigger: string; userId: string | null; openGroup: ConsolidationGroup },
+  v: { variantVersionId: string; trigger: string; userId: string | null; openGroup: ConsolidationGroup; runId?: string | null },
 ): Promise<TenantConsolidation | null> {
   const { rows } = await q.query<RigaSessione>(
     `INSERT INTO sys.sys_tenant_consolidations
        (tenant_consolidation_tenant_id, tenant_consolidation_variant_version_id,
-        tenant_consolidation_trigger, tenant_consolidation_open_group, tenant_consolidation_started_by)
-     VALUES ($1, $2, $3, $4, $5)
+        tenant_consolidation_trigger, tenant_consolidation_open_group, tenant_consolidation_started_by,
+        tenant_consolidation_run_id)
+     VALUES ($1, $2, $3, $4, $5, $6)
      ON CONFLICT DO NOTHING
      RETURNING ${SESSIONE}`,
-    [tenantId, v.variantVersionId, v.trigger, v.openGroup, v.userId],
+    [tenantId, v.variantVersionId, v.trigger, v.openGroup, v.userId, v.runId ?? null],
   );
   return rows[0] ? mappaSessione(rows[0]) : null;
 }

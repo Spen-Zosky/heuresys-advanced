@@ -185,6 +185,8 @@ VALUES
    '[sign-off: EXCLUDE — registro dell''agente di consolidamento del tenant (mig 000464, AC-3). Righe nuove scritte solo dall''API: non hanno sorgente nel legacy (ADR-0038), quindi non sono un bersaglio di riconciliazione. Registrata qui e non in 000464: il controllo di 0 UNCLASSIFIED gira in questo file.]'),
   ('sys_tenant_consolidation_links', 'D', 'EXCLUDE', NULL,
    '[sign-off: EXCLUDE — collegamenti fra le voci del tenant e quelle del prototipo scritti dall''applicazione delle decisioni del consolidamento (mig 000488, AC-8). Righe nuove scritte solo dall''API: non hanno sorgente nel legacy (ADR-0038), quindi non sono un bersaglio di riconciliazione. Registrata qui e non in 000488: il controllo di 0 UNCLASSIFIED gira in questo file.]'),
+  ('sys_blueprint_runs', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — registro delle corse del datastore accolte come versioni di modello, per tenant (mig 000489). Righe nuove scritte solo dall''API (modulo tenant-consolidation): non hanno sorgente nel legacy (ADR-0038), quindi non sono un bersaglio di riconciliazione. Registrata qui e non in 000489: il controllo di 0 UNCLASSIFIED gira in questo file.]'),
   ('sys_platform_vocabulary_equivalences', 'D', 'EXCLUDE', NULL,
    '[sign-off: EXCLUDE — registro dell''agente di consolidamento del tenant (mig 000464, AC-3). Righe nuove scritte solo dall''API: non hanno sorgente nel legacy (ADR-0038), quindi non sono un bersaglio di riconciliazione. Registrata qui e non in 000464: il controllo di 0 UNCLASSIFIED gira in questo file.]'),
   ('sys_mandate_acts', 'D', 'EXCLUDE', NULL,

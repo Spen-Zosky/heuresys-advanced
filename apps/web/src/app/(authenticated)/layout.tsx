@@ -275,7 +275,12 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
   for (const section of sections) {
     for (const i of section.interfaces) {
       const { gruppo, ramo } = ramoDi(i.route, i.sidebarGroup);
-      const voce = { id: i.code, label: i.label, href: i.route, icona: i.icon ?? null, ordine: i.order, ramo, ...(NAV_TESTID[i.code] ? { testId: NAV_TESTID[i.code] } : {}) };
+      // Il registro delle interfacce porta le etichette in italiano: in inglese si traducono per
+      // rotta (`shell:nav.voci.<rotta>`); una rotta senza traduzione tiene l'etichetta del registro.
+      const etichetta = i18n.language === "en"
+        ? t(`shell:nav.voci.${i.route.replace(/^\//, "").replace(/\//g, "_")}`, { defaultValue: i.label })
+        : i.label;
+      const voce = { id: i.code, label: etichetta, href: i.route, icona: i.icon ?? null, ordine: i.order, ramo, ...(NAV_TESTID[i.code] ? { testId: NAV_TESTID[i.code] } : {}) };
       const arr = byGroup.get(gruppo);
       if (arr) arr.push(voce);
       else byGroup.set(gruppo, [voce]);
@@ -378,6 +383,11 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
       }
       footer={
         <DashboardFooter
+          socials={(["linkedin", "github", "discord", "facebook", "x"] as const).map((id) => ({
+            id,
+            href: "#",
+            label: t(`shell:brand.social.${id}`),
+          }))}
           rightSlot={
             <>
               <span>{t("shell:brand.version")}</span>

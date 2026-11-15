@@ -21,6 +21,8 @@ Classe del difetto «posizioni disattivate contate»: le altre query che aggrega
 | N5 | Modali che scorrono e si ridimensionano: classe comune per tutte le `DialogContent` di `apps/web` (8 file) | Claude | prova dal vivo sulla scheda | aperta |
 | N6 | Diagramma del grafo salvato (`/visualizations/[graphId]`, Mermaid) dentro `AreaNavigabile` | Claude | prova dal vivo o, se la persona non vede la pagina, compilazione | aperta |
 | N7 | Rete organizzativa: filtro `position_is_active` in `getOrgNetwork`; posizioni scoperte nel riepilogo; titoli e note in italiano chiaro; etichette dei grafici «posizione — unità (titolare)»; prova di integrazione che confronta con il conteggio diretto | Claude | test di integrazione verde; numeri dal vivo uguali alle misure | aperta |
+| N9 | Rilievi del thread forense (15/11): riallineamento ORG_CHART con tipo, gruppo e posizione di ogni nodo (storia36 C11a rosso: 141 nodi della v3 senza tipo e posizione); responsabile nel profilo dal titolare della posizione superiore (D2-01); elenco e conteggio dei grafi solo sulle versioni in uso; scheda /analytics/* solo con `analytics:view` (S-02); «(unassigned)» in italiano | Claude | prove di integrazione verdi; misure prima/dopo; v3 riparata dal vivo | aperta |
+| N10 | Dopo il rilascio: «Aggiorna dai dati vivi» su RTL_ORG_CHART v3 (backup verificato prima), poi C11a verde | Claude | `verify-storia36` C11a verde | aperta |
 | N8 | PR, CI verde, unione; rilascio con backup verificato, `verifica-deploy.sh` DEPLOYATO; verifica dal vivo con schermate | Claude | esiti scritti qui sotto | aperta |
 
 ## Cosa non si chiude in questo ciclo

@@ -81,8 +81,10 @@ export function scoreUnit(row: repo.OrgHealthUnitRow): OrgHealthUnit {
   }
 
   // Too little of the model available -> the honest answer is "we don't know".
+  // A unit with no people (e.g. a general management that holds only the units below it)
+  // has nobody to measure: it stays in the list, without a band.
   const status: OrgHealthStatus =
-    index === null || coverage < ORG_HEALTH_MIN_COVERAGE ? "INSUFFICIENT_DATA" : bandFor(index);
+    row.headcount === 0 || index === null || coverage < ORG_HEALTH_MIN_COVERAGE ? "INSUFFICIENT_DATA" : bandFor(index);
 
   return {
     orgUnitId: row.orgUnitId,

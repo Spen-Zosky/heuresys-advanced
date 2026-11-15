@@ -877,8 +877,8 @@
   "visualizations": {
     "title": "Visualizations",
     "description": "Registered graphs with type and status.",
-    "count": "{{count}} graphs",
     "count_one": "{{count}} graph",
+    "count_other": "{{count}} graphs",
     "countLoading": "…",
     "errorMessage": "Unable to load the graphs.",
     "emptyTitle": "No graphs",

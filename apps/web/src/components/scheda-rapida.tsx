@@ -24,6 +24,8 @@ import { useTranslation } from "react-i18next";
 import { Building2, Briefcase, ChevronRight, User, X } from "lucide-react";
 import { daRubrica, sottoalbero, type UnitaBlocco } from "@/lib/organigramma-blocchi";
 import { OrganigrammaBlocchi } from "@/components/organigramma/blocchi";
+import { useOrganigramma } from "@/components/organigramma/dati";
+import { codiceInParole } from "@/lib/enum-labels";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@heuresys/ui";
 import type { RubricaResponse } from "@heuresys/shared";
 import { useRubrica } from "@/lib/leggibile";
@@ -173,6 +175,10 @@ function CorpoUnita({ id, ix, blocchi, rif }: {
   const { t } = useTranslation("common");
   const enumLabel = useEnumLabel();
   const s = useScheda();
+  // Sede, organico previsto e la sua ragione non stanno nella rubrica: vengono dall'organigramma
+  // vivo (la stessa richiesta della vista, già in cache quando la scheda si apre da lì).
+  const org = useOrganigramma();
+  const vivo = org.data?.unita.find((x) => x.id === id);
   const u = ix.unita.get(id);
   if (!u) return <p className="text-sm text-muted-foreground">Questa unità non è nel tuo perimetro.</p>;
   const figlie = [...ix.unita.values()].filter((x) => x.padreId === u.id && x.attiva);
@@ -197,7 +203,18 @@ function CorpoUnita({ id, ix, blocchi, rif }: {
         <Riga etichetta={t("organigramma.scheda.tipo")}>{u.tipo ? enumLabel("orgUnitType", u.tipo) : null}</Riga>
         <Riga etichetta="Responsabile">{rif("persona", u.responsabileId)}</Riga>
         <Riga etichetta="Fa parte di">{u.padreId ? rif("unita", u.padreId) : "vertice"}</Riga>
+        {vivo?.sedeCodice ? (
+          <Riga etichetta={t("organigramma.scheda.sede")}>
+            {codiceInParole(vivo.sedeCodice)}{vivo.sedeTipo ? <span className="text-muted-foreground"> — {enumLabel("siteKind", vivo.sedeTipo)}</span> : null}
+          </Riga>
+        ) : null}
         <Riga etichetta={t("organigramma.scheda.addetti")}>{t("organigramma.scheda.addettiConSotto", { diretti: persone.length, totali })}</Riga>
+        {vivo?.organicoPrevisto != null ? (
+          <Riga etichetta={t("organigramma.scheda.organicoPrevisto")}>{vivo.organicoPrevisto}</Riga>
+        ) : null}
+        {vivo?.ragioneOrganico ? (
+          <Riga etichetta={t("organigramma.scheda.ragioneOrganico")}>{vivo.ragioneOrganico}</Riga>
+        ) : null}
         <Riga etichetta="Posizioni">{`${posizioni.length}${scoperte ? `, di cui ${scoperte} scoperte` : ""}`}</Riga>
       </dl>
       {sotto.length > 1 ? (

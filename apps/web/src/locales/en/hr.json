@@ -486,6 +486,31 @@
       },
       "update_one": "Update cascade (one item)",
       "update_other": "Update cascade ({{count}} items)"
+    },
+    "bulk": {
+      "select": "Pick",
+      "selectRow": "Pick this proposal",
+      "outcome": "Outcome",
+      "state": "State",
+      "all": "All",
+      "undecided": "To decide",
+      "decided": "Decided",
+      "minConfidence": "Confidence from",
+      "maxConfidence": "Confidence up to",
+      "shown": "{{shown}} proposals of {{total}} with these filters",
+      "selectAll": "Pick the {{count}} filtered",
+      "clear": "Clear the picks",
+      "selected_one": "One proposal picked",
+      "selected_other": "{{count}} proposals picked",
+      "withCascade": "Also update each one's cascade",
+      "revise": "Also revise those already decided",
+      "recommended": "Apply the agent's recommendation ({{count}})",
+      "reject": "Reject / do not adopt ({{count}})",
+      "cascade": "Update the cascade of the decided ({{count}})",
+      "undo": "Back to undecided ({{count}})",
+      "hint": "Bulk choices go into the draft like single ones: «Preview changes» shows what would change, and only the red button writes the data.",
+      "result": "Done in the draft: {{decided}} decisions, {{cascaded}} in cascade, {{skipped}} skipped.",
+      "resultUndo": "Back to undecided: {{count}}."
     }
   },
   "gaps": {

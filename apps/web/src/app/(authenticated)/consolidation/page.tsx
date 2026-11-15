@@ -475,7 +475,7 @@ export default function ConsolidationPage() {
       ) : null}
       {conferma ? (
         <Dialog open onOpenChange={(o) => { if (!o) setConferma(null); }}>
-          <DialogContent data-testid="consolidation-approval-dialog">
+          <DialogContent className="max-h-[90vh] overflow-y-auto" data-testid="consolidation-approval-dialog">
             <DialogHeader>
               <DialogTitle>{t(`consolidation.approval.${conferma}Title`)}</DialogTitle>
               <DialogDescription>{t(`consolidation.approval.${conferma}Body`, { count: nBozza })}</DialogDescription>

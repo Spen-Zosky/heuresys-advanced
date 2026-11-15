@@ -119,11 +119,12 @@ export interface MfaExemptionRecord {
 
 const EXEMPTION_SELECT = `
   SELECT e.auth_mfa_exemption_id AS exemption_id, u.user_tenant_id AS tenant_id,
-         u.user_id, u.user_email, u.user_display_name, u.user_type,
+         u.user_id, u.user_email, u.user_type,
+         COALESCE(NULLIF(concat_ws(', ', NULLIF(trim(u.user_last_name), ''), NULLIF(trim(u.user_first_name), '')), ''), u.user_display_name) AS user_display_name,
          e.auth_mfa_exemption_reason AS reason, e.auth_mfa_exemption_enabled AS enabled,
          (e.auth_mfa_exemption_expires_at IS NULL OR e.auth_mfa_exemption_expires_at <= now()) AS expired,
          e.auth_mfa_exemption_expires_at AS expires_at, e.created_at,
-         a.user_display_name AS author_display_name, e.updated_at
+         COALESCE(NULLIF(concat_ws(', ', NULLIF(trim(a.user_last_name), ''), NULLIF(trim(a.user_first_name), '')), ''), a.user_display_name) AS author_display_name, e.updated_at
     FROM sys.sys_auth_mfa_exemptions e
     JOIN sys.sys_users u ON u.user_id = e.auth_mfa_exemption_user_id
     LEFT JOIN sys.sys_users a ON a.user_id = e.created_by`;

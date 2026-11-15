@@ -1,9 +1,11 @@
 "use client";
 
 import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import type { BlueprintProcess } from "@heuresys/shared";
+import type { BlueprintActivation, BlueprintProcess } from "@heuresys/shared";
+import { apiFetch } from "@/lib/api/fetch";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
@@ -23,10 +25,22 @@ function buildColumns(t: TFunction): DataColumn<BlueprintProcess>[] {
 
 export default function ProcessesPage() {
   const { t } = useTranslation("blueprints");
+  // D3-16: i processi sono quelli della variante ATTIVATA dal tenant; senza il filtro la pagina
+  // mescolava i processi di tutti i modelli del catalogo (due modelli, numeri d'ordine che ricominciano).
+  // Con piu' attivazioni attive (un mandato di piattaforma vede tutti i tenant) non c'e' una variante sola
+  // e l'elenco resta intero.
+  const attive = useQuery({
+    queryKey: ["blueprint-activations", "active"],
+    queryFn: () => apiFetch<{ items: BlueprintActivation[]; total: number }>("/v1/blueprint-activations?status=ACTIVE&limit=200"),
+  });
+  const varianti = new Set((attive.data?.items ?? []).map((a) => a.variantId));
+  const variantId = varianti.size === 1 ? [...varianti][0] : "";
   // C4 (#42): server-side pagination (was `?limit=200`).
   const processes = usePaginatedList<BlueprintProcess>({
-    queryKey: ["blueprint-processes", "list"],
+    queryKey: ["blueprint-processes", "list", variantId],
     path: "/v1/blueprint-processes",
+    params: { variantId },
+    enabled: !attive.isLoading,
   });
 
   const columns = useMemo(() => buildColumns(t), [t]);

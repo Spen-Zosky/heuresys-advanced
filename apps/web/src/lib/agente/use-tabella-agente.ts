@@ -10,7 +10,9 @@
  * comandi della vista; l'esito è quello vero (`vista-tabella.ts`). Le righe non escono dal browser.
  */
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { useVistaAgente, type VistaDichiarata } from "./contesto";
+import { testo } from "../testi";
 import {
   COMANDI_TABELLA,
   applicaVista,
@@ -38,6 +40,8 @@ export function useTabellaAgente<T>(
   rows: T[],
   server?: { total: number },
 ): TabellaAgente<T> {
+  const { i18n } = useTranslation();
+  const lingua = i18n.language;
   const [stato, setStato] = useState<StatoVistaTabella>({});
   const statoRef = useRef(stato);
   useEffect(() => {
@@ -52,7 +56,7 @@ export function useTabellaAgente<T>(
 
   const totale = server ? server.total : rows.length;
   const dichiarata = useMemo<VistaDichiarata>(() => {
-    const ctx = { colonne: nomiColonne, paginaServer: server !== undefined && server.total > rows.length, totale };
+    const ctx = { colonne: nomiColonne, paginaServer: server !== undefined && server.total > rows.length, totale, lingua };
     return {
       vista: {
         tipo: "tabella",
@@ -61,7 +65,7 @@ export function useTabellaAgente<T>(
         righeMostrate: righe.length,
         totale,
         ...(ctx.paginaServer ? { paginaDelServer: true } : {}),
-        ...(vistaAttiva(stato) ? { vistaDellAssistente: descrivi(stato, nomiColonne) } : {}),
+        ...(vistaAttiva(stato) ? { vistaDellAssistente: descrivi(stato, nomiColonne, lingua) } : {}),
       },
       comandi: COMANDI_TABELLA,
       esegui: (nome, argomenti) => {
@@ -70,21 +74,21 @@ export function useTabellaAgente<T>(
         statoRef.current = r.stato;
         setStato(r.stato);
         const mostrate = vistaAttiva(r.stato) ? applicaVista(rows, celle, r.stato).length : rows.length;
-        const conto = `Righe mostrate: ${mostrate} di ${rows.length} caricate.`;
+        const conto = testo(lingua, "esitoAgente.righeMostrate", { mostrate, caricate: rows.length });
         return { ...r.esito, dettaglio: r.esito.dettaglio ? `${r.esito.dettaglio} ${conto}` : conto };
       },
     };
-  }, [nomiColonne, server, rows, righe.length, totale, stato, celle]);
+  }, [nomiColonne, server, rows, righe.length, totale, stato, celle, lingua]);
   useVistaAgente(dichiarata);
 
   return { righe, stato, nomiColonne, azzera: () => setStato({}) };
 }
 
 /** Che cosa ha cambiato l'assistente, in parole: per il modello e per la riga sopra la tabella. */
-export function descrivi(s: StatoVistaTabella, nomi: readonly string[]): string {
+export function descrivi(s: StatoVistaTabella, nomi: readonly string[], lingua?: string): string {
   const parti: string[] = [];
-  if (s.testo) parti.push(`ricerca «${s.testo}»`);
-  if (s.filtro) parti.push(`${nomi[s.filtro.colonna] ?? "colonna"} contiene «${s.filtro.valore}»`);
-  if (s.ordine) parti.push(`ordinata per ${nomi[s.ordine.colonna] ?? "colonna"}, ${s.ordine.verso}`);
+  if (s.testo) parti.push(testo(lingua, "esitoAgente.ricerca", { testo: s.testo }));
+  if (s.filtro) parti.push(testo(lingua, "esitoAgente.contiene", { colonna: nomi[s.filtro.colonna] ?? testo(lingua, "esitoAgente.colonna"), valore: s.filtro.valore }));
+  if (s.ordine) parti.push(testo(lingua, "esitoAgente.ordinata", { colonna: nomi[s.ordine.colonna] ?? testo(lingua, "esitoAgente.colonna"), verso: testo(lingua, `esitoAgente.${s.ordine.verso}`) }));
   return parti.join(" · ");
 }

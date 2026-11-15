@@ -57,6 +57,9 @@ export const UserDossierProfileSchema = MeProfileFullSchema.partial({
 });
 export type UserDossierProfile = z.infer<typeof UserDossierProfileSchema>;
 
+/** D3-23: il bersaglio di carriera con il nome della posizione, perché la scheda non mostri un identificativo. */
+export const DossierCareerTargetSchema = MeCareerTargetSchema.extend({ positionName: z.string().nullable() });
+
 export const UserDossierSchema = z.object({
   /** Chi è: anagrafica (professionale sempre; privata solo a self/HR/platform), organizzazione, rapporto. */
   profile: UserDossierProfileSchema,
@@ -84,6 +87,6 @@ export const UserDossierSchema = z.object({
    */
   stepUpRequired: z.array(z.enum(["COMPENSATION", "EVALUATION"])).optional(),
   /** Dove vuole arrivare: gli obiettivi di carriera. */
-  careerTargets: z.array(MeCareerTargetSchema),
+  careerTargets: z.array(DossierCareerTargetSchema),
 });
 export type UserDossier = z.infer<typeof UserDossierSchema>;

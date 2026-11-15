@@ -95,6 +95,7 @@ const ESCLUSI = "input, textarea, select, option, code, pre, script, style, [con
  */
 export function ReteDiPagina({ children }: { children: ReactNode }) {
   const l = useLeggibile();
+  const lingua = useFormat().locale;
   const radice = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const r = radice.current;
@@ -117,7 +118,7 @@ export function ReteDiPagina({ children }: { children: ReactNode }) {
       if (el.hasAttribute("data-spiegazione") || el.querySelector("[data-spiegazione]") || el.closest(ESCLUSI)) return;
       const testo = (el.textContent ?? "").trim();
       if (!testo || testo.length > 40) return;
-      const v = spiegazioneDi(testo);
+      const v = spiegazioneDi(testo, lingua);
       if (!v) return;
       el.setAttribute("data-spiegazione", "auto");
       el.setAttribute("title", v.esteso ? `${v.esteso}. ${v.testo}` : v.testo);
@@ -146,6 +147,6 @@ export function ReteDiPagina({ children }: { children: ReactNode }) {
     });
     o.observe(r, { subtree: true, childList: true, characterData: true });
     return () => o.disconnect();
-  }, [l]);
+  }, [l, lingua]);
   return <div ref={radice} className="contents" data-rete-leggibile>{children}</div>;
 }

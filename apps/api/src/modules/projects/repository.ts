@@ -162,7 +162,7 @@ export async function loadProjectMembers(db: Eseguibile, id: string): Promise<Pr
   }>(
     `SELECT m.project_member_user_id, m.project_member_role,
             u.user_email AS email,
-            nullif(trim(concat_ws(' ', u.user_first_name, u.user_last_name)), '') AS full_name,
+            COALESCE(nullif(concat_ws(', ', nullif(trim(u.user_last_name), ''), nullif(trim(u.user_first_name), '')), ''), nullif(trim(u.user_display_name), '')) AS full_name,
             m.project_member_starts_on, m.project_member_ends_on,
             (m.project_member_starts_on <= CURRENT_DATE
              AND (m.project_member_ends_on IS NULL
@@ -170,7 +170,7 @@ export async function loadProjectMembers(db: Eseguibile, id: string): Promise<Pr
        FROM sys.sys_project_members m
        LEFT JOIN sys.sys_users u ON u.user_id = m.project_member_user_id
       WHERE m.project_member_project_id = $1
-      ORDER BY (m.project_member_role = 'LEAD') DESC, full_name ASC NULLS LAST`, [id]);
+      ORDER BY (m.project_member_role = 'LEAD') DESC, full_name ASC NULLS LAST /* S-09: «Cognome, Nome» */`, [id]);
 
   return r.rows.map((x) => ({
     userId: x.project_member_user_id,

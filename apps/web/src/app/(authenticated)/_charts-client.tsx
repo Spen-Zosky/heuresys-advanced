@@ -30,7 +30,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState, type ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import { formati, localeDi } from "@/lib/format";
-import { letturaDelGrafico, type ChartTable } from "@/lib/lettura-grafico";
+import { assiDerivati, letturaDelGrafico, type ChartTable } from "@/lib/lettura-grafico";
 
 const RawEChartsCard = dynamic(
   // Subpath `/charts` isolates echarts so this lazy import does NOT drag the whole
@@ -146,8 +146,9 @@ type EChartsCardProps = RawProps & {
   lingua?: string;
 };
 
-function conNomiDegliAssi(option: RawProps["option"], assi: { x?: string; y?: string } | undefined): RawProps["option"] {
-  if (!assi) return option;
+function conNomiDegliAssi(option: RawProps["option"], assiPagina: { x?: string; y?: string } | undefined): RawProps["option"] {
+  const assi = assiDerivati(option, assiPagina);
+  if (!assi.x && !assi.y) return option;
   const o = { ...(option as Record<string, unknown>) };
   const metti = (k: "xAxis" | "yAxis", nome: string | undefined, verticale: boolean) => {
     const a = o[k];

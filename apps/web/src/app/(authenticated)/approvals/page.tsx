@@ -96,6 +96,8 @@ export default function ApprovalsPage() {
           </Link>
         ),
       },
+      // D3-02: chi ha chiesto, «Cognome, Nome» (l'API lo scrive cosi').
+      { header: t("approvals.columns.requester"), cell: (r) => <span className="text-foreground">{r.requesterName ?? "—"}</span> },
       {
         // V-3 (ADR-0049): processo e attivita' della richiesta.
         header: t("approvals.columns.process"),

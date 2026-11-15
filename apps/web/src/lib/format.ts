@@ -78,6 +78,8 @@ export interface Formati {
   dimensione(byte: number | null | undefined): string;
   /** «3 giorni fa» */
   relativo(v: Istante, ora?: number): string;
+  /** «Italia» · «Italy» — il nome del paese dal codice ISO 3166 (D3-21); il codice se non si risolve */
+  paese(codice: string | null | undefined): string;
 }
 
 export function formati(lingua: string | undefined): Formati {
@@ -176,7 +178,16 @@ export function formati(lingua: string | undefined): Formati {
     return data(v);
   };
 
-  return { locale, data, dataOra, ora, numero, numeroFisso, importo, percento, durata, dimensione, relativo };
+  const paese = (codice: string | null | undefined) => {
+    if (!codice) return VUOTO;
+    try {
+      return new Intl.DisplayNames([locale], { type: "region" }).of(codice.toUpperCase()) ?? codice;
+    } catch {
+      return codice;
+    }
+  };
+
+  return { locale, data, dataOra, ora, numero, numeroFisso, importo, percento, durata, dimensione, relativo, paese };
 }
 
 /** Le funzioni di forma nella lingua corrente del portale. */

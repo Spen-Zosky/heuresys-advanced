@@ -54,7 +54,7 @@ export function DecisioneDialog({
 
   return (
     <Dialog open onOpenChange={(aperta) => { if (!aperta) onChiudi(); }}>
-      <DialogContent data-testid="consolidation-decision-dialog">
+      <DialogContent className="max-h-[90vh] overflow-y-auto" data-testid="consolidation-decision-dialog">
         <DialogHeader>
           <DialogTitle>{t("consolidation.modal.title")}</DialogTitle>
           <DialogDescription>

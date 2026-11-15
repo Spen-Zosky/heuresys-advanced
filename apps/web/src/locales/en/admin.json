@@ -5,6 +5,7 @@
     "count": "{{count}} requests",
     "columns": {
       "title": "Title",
+      "requester": "Requester",
       "status": "Status",
       "policy": "Quorum",
       "priority": "Priority",
@@ -50,6 +51,7 @@
     },
     "filters": {
       "statusAll": "All statuses",
+      "statusActive": "Not archived",
       "processAll": "All processes",
       "process": "Process",
       "stepAll": "All activities",
@@ -461,6 +463,7 @@
     "dash": "—",
     "activeYes": "Active",
     "activeNo": "Inactive",
+    "filters": { "active": "Active only", "inactive": "Inactive only", "all": "All" },
     "form": {
       "createTitle": "New organization unit",
       "editTitle": "Organization unit — edit",
@@ -746,7 +749,16 @@
       "user_profile": "User profiles",
       "visualization": "Visualizations",
       "vocabulary": "Vocabulary",
-      "whistleblowing": "Whistleblowing"
+      "whistleblowing": "Whistleblowing",
+      "career": "Career",
+      "certification": "Certifications",
+      "consent": "Consents",
+      "document": "Documents",
+      "insight": "Insights",
+      "job_requisition": "Staffing requests",
+      "me": "Personal area",
+      "performance_review": "Performance reviews",
+      "review_cycle": "Review cycles"
     },
     "actions": {
       "activate": "activate",
@@ -777,7 +789,21 @@
       "update_layout": "update the layout",
       "use": "use",
       "view": "view",
-      "write": "write"
+      "write": "write",
+      "content_read": "read content",
+      "enroll_self": "enroll oneself",
+      "export_self": "export own data",
+      "manage_self": "manage own data",
+      "mark_read_self": "mark as read",
+      "preferences_read": "read preferences",
+      "preferences_update": "update preferences",
+      "read_self": "read own data",
+      "request_self": "request for oneself",
+      "request_target_self": "name the target of one's own request",
+      "respond_self": "respond for oneself",
+      "sessions_manage": "manage sessions",
+      "update_self": "update own data",
+      "upload_self": "upload own files"
     }
   },
   "dashboard": {
@@ -1164,7 +1190,9 @@
     "exemptions": {
       "title": "Second-factor exemptions",
       "description": "Who may sign in without the second factor, why, who decided it and until when. An expired exemption no longer opens anything; mandate holders cannot have one.",
-      "empty": "No exemptions.",
+      "empty": "No active exemptions.",
+      "showInactive": "Also show expired and disabled ({{count}})",
+      "hideInactive": "Hide expired and disabled",
       "state": {
         "ACTIVE": "Active",
         "EXPIRED": "Expired",

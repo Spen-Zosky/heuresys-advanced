@@ -131,7 +131,7 @@ export function StepUpDialog() {
 
   return (
     <Dialog open={aperta} onOpenChange={(o) => { if (!o) chiudi(false); }}>
-      <DialogContent data-testid="step-up-dialog">
+      <DialogContent className="max-h-[90vh] overflow-y-auto" data-testid="step-up-dialog">
         <DialogHeader>
           <DialogTitle>{t("stepUp.title")}</DialogTitle>
           <DialogDescription>{t("stepUp.description")}</DialogDescription>

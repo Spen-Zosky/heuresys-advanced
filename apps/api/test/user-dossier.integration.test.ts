@@ -65,6 +65,34 @@ describe("GET /v1/users/:userId/dossier", () => {
     }
   });
 
+  it("D3-23: un obiettivo di carriera porta il nome della posizione, non solo l'identificativo", async () => {
+    const { bottom } = await hierarchyChain();
+    const s = await login(bottom.email);
+    const pos = (await pool.query<{ id: string; tenant: string; titolo: string }>(
+      `SELECT position_id AS id, position_tenant_id AS tenant, position_title AS titolo
+         FROM sys.sys_positions
+        WHERE position_tenant_id = (SELECT user_tenant_id FROM sys.sys_users WHERE user_id = $1)
+          AND position_title IS NOT NULL LIMIT 1`,
+      [bottom.userId],
+    )).rows[0]!;
+    const ins = await pool.query<{ id: string }>(
+      `INSERT INTO sys.sys_user_target_positions
+         (user_target_position_tenant_id, user_target_position_user_id, user_target_position_position_id, user_target_position_horizon)
+       VALUES ($1, $2, $3, 'SHORT_TERM') RETURNING user_target_position_id AS id`,
+      [pos.tenant, bottom.userId, pos.id],
+    );
+    try {
+      const res = await dossier(s, bottom.userId);
+      expect(res.statusCode).toBe(200);
+      const b = res.json() as { careerTargets: Array<{ userTargetPositionId: string; positionId: string; positionName: string | null }> };
+      const mio = b.careerTargets.find((c) => c.userTargetPositionId === ins.rows[0]!.id);
+      expect(mio, "l'obiettivo inserito non torna dal dossier").toBeTruthy();
+      expect(mio!.positionName).toBe(pos.titolo);
+    } finally {
+      await pool.query(`DELETE FROM sys.sys_user_target_positions WHERE user_target_position_id = $1`, [ins.rows[0]!.id]);
+    }
+  });
+
   it("le buste del dossier sono quelle che il database ha davvero (atteso derivato, non ricopiato)", async () => {
     const { bottom } = await hierarchyChain();
     const s = await login(bottom.email);

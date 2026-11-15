@@ -32,6 +32,7 @@ import { isApiError } from "@/lib/api/errors";
 import { FieldGrid } from "@/components/detail-panel";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { MaskedCell, isMasked } from "@/components/masked-cell";
+import { NomeOppure } from "@/components/senza-nome";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { useFormat } from "@/lib/format";
 import { IdentityEditor } from "./_components/identity-editor";
@@ -248,9 +249,9 @@ export default function UserDetailPage() {
               empty={s("empty.performance")}
               rows={d.performance.map((x, i) => [
                 `${f.data(x.periodStart)} – ${f.data(x.periodEnd)}`,
-                x.type ?? "—",
-                x.overallRating ?? "—",
-                x.performanceBox ?? "—",
+                x.type ? enumLabel("perfReviewType", x.type) : "—",
+                x.overallRating != null ? f.numeroFisso(x.overallRating, 1) : "—",
+                x.performanceBox != null ? f.numero(x.performanceBox) : "—",
                 <EnumStatusBadge key={i} domain="reviewStatus" value={x.status ?? ""} />,
               ])}
             />
@@ -277,7 +278,7 @@ export default function UserDetailPage() {
               head={[s("col.target"), s("col.horizon"), s("col.review")]}
               empty={s("empty.career")}
               rows={d.careerTargets.map((x, i) => [
-                x.positionId,
+                <NomeOppure key={i} nome={x.positionName} id={x.positionId} />,
                 x.horizon ? enumLabel("careerHorizon", x.horizon) : "—",
                 <EnumStatusBadge key={i} domain="reviewStatus" value={x.reviewStatus ?? ""} />,
               ])}
@@ -293,8 +294,8 @@ export default function UserDetailPage() {
               empty={s("empty.skills")}
               rows={d.skills.map((x) => [
                 x.skillName,
-                x.declaredProficiency,
-                x.source,
+                enumLabel("proficiency", x.declaredProficiency),
+                enumLabel("skillEvidenceSource", x.source),
                 f.data(x.assessedAt),
               ])}
             />
@@ -338,10 +339,10 @@ export default function UserDetailPage() {
               empty={s("empty.attendance")}
               rows={d.attendance.leaveBalances.map((b, i) => [
                 <span key={i}>{b.leaveType ? enumLabel("leaveType", b.leaveType) : "—"}</span>,
-                b.totalDays ?? "—",
-                b.usedDays ?? "—",
-                b.pendingDays ?? "—",
-                b.carryoverDays ?? "—",
+                b.totalDays != null ? f.numero(b.totalDays, 2) : "—",
+                b.usedDays != null ? f.numero(b.usedDays, 2) : "—",
+                b.pendingDays != null ? f.numero(b.pendingDays, 2) : "—",
+                b.carryoverDays != null ? f.numero(b.carryoverDays, 2) : "—",
               ])}
             />
           </Section>

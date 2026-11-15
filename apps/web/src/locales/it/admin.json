@@ -5,6 +5,7 @@
     "count": "{{count}} richieste",
     "columns": {
       "title": "Titolo",
+      "requester": "Richiedente",
       "status": "Stato",
       "policy": "Regola di approvazione",
       "priority": "Priorità",
@@ -50,6 +51,7 @@
     },
     "filters": {
       "statusAll": "Tutti gli stati",
+      "statusActive": "Non archiviati",
       "processAll": "Tutti i processi",
       "process": "Processo",
       "stepAll": "Tutte le attività",
@@ -461,6 +463,7 @@
     "dash": "—",
     "activeYes": "Attiva",
     "activeNo": "Non attiva",
+    "filters": { "active": "Solo attive", "inactive": "Solo non attive", "all": "Tutte" },
     "form": {
       "createTitle": "Nuova unità organizzativa",
       "editTitle": "Unità organizzativa — modifica",
@@ -746,7 +749,16 @@
       "user_profile": "Profili delle persone",
       "visualization": "Visualizzazioni",
       "vocabulary": "Vocabolario",
-      "whistleblowing": "Segnalazioni"
+      "whistleblowing": "Segnalazioni",
+      "career": "Carriera",
+      "certification": "Certificazioni",
+      "consent": "Consensi",
+      "document": "Documenti",
+      "insight": "Approfondimenti",
+      "job_requisition": "Richieste di personale",
+      "me": "Area personale",
+      "performance_review": "Valutazioni delle prestazioni",
+      "review_cycle": "Cicli di valutazione"
     },
     "actions": {
       "activate": "attivare",
@@ -777,7 +789,21 @@
       "update_layout": "modificare la disposizione",
       "use": "usare",
       "view": "vedere",
-      "write": "scrivere"
+      "write": "scrivere",
+      "content_read": "leggere i contenuti",
+      "enroll_self": "iscriversi",
+      "export_self": "esportare i propri dati",
+      "manage_self": "gestire i propri dati",
+      "mark_read_self": "segnare come letto",
+      "preferences_read": "leggere le preferenze",
+      "preferences_update": "modificare le preferenze",
+      "read_self": "leggere i propri dati",
+      "request_self": "fare richiesta per sé",
+      "request_target_self": "indicare il destinatario della propria richiesta",
+      "respond_self": "rispondere per sé",
+      "sessions_manage": "gestire le sessioni",
+      "update_self": "modificare i propri dati",
+      "upload_self": "caricare i propri file"
     }
   },
   "dashboard": {
@@ -1164,7 +1190,9 @@
     "exemptions": {
       "title": "Esenzioni dal secondo fattore",
       "description": "Chi può entrare senza il secondo fattore, perché, chi l'ha deciso e fino a quando. Un'esenzione scaduta non apre più niente; chi porta un mandato non può averne.",
-      "empty": "Nessuna esenzione.",
+      "empty": "Nessuna esenzione attiva.",
+      "showInactive": "Mostra anche scadute e spente ({{count}})",
+      "hideInactive": "Nascondi scadute e spente",
       "state": {
         "ACTIVE": "Attiva",
         "EXPIRED": "Scaduta",

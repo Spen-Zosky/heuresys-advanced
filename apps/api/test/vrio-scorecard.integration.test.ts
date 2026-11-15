@@ -99,12 +99,12 @@ describe("#56 F2 — VRIO scorecard", () => {
     expect(b.weights.inimitability).toEqual({ ...IW });
   });
 
-  it("the headcount is the tenant's real workforce, not a constant", async () => {
+  it("the headcount is the tenant's real workforce (people, not service accounts), not a constant", async () => {
     const b = (await vrio(tenantAdmin)).json() as Scorecard;
     const { rows } = await pool.query<{ n: string }>(
       `SELECT count(*)::text AS n FROM sys.sys_users u
          JOIN sys.sys_tenancies t ON t.tenant_id = u.user_tenant_id
-        WHERE t.tenant_name = 'RTL Bank'`,
+        WHERE t.tenant_name = 'RTL Bank' AND u.user_type NOT IN ('SERVICE', 'GENERATED_INCUMBENT')`,
     );
     expect(b.headcount).toBe(Number(rows[0]?.n));
     for (const it of b.items) expect(it.evidence.headcount).toBe(b.headcount);

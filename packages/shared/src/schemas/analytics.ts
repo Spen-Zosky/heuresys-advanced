@@ -215,9 +215,11 @@ export type SkillsByCategoryAnalyticsResponse = z.infer<
 
 // --- Org-network metrics (P3) ---
 // Structural metrics over the position reports-to graph (position_reports_to_position_id).
-// POSITION-centric: the full org chart (~158 positions, is_active not filtered) is the
-// graph. span-of-control = direct reports per manager; hierarchy depth = distance from a
-// root; reach/centrality = total descendants (transitive reports). Counts are integral.
+// POSITION-centric: the ACTIVE positions are the graph (position_is_active — until 15/11/2026
+// the inactive ones were counted too: 316 instead of 162 on RTL, piano
+// PIANO_organigrammi-navigazione_20261115.md N7). span-of-control = direct reports per manager;
+// hierarchy depth = distance from a root; reach = total descendants (transitive reports).
+// `holder` = «Cognome, Nome» of the active holder, null when the position is vacant.
 export const OrgNetworkDepthRowSchema = z.object({
   depth: z.number().int(), // 0 = root
   positionCount: z.number().int(),
@@ -227,6 +229,7 @@ export type OrgNetworkDepthRow = z.infer<typeof OrgNetworkDepthRowSchema>;
 export const OrgNetworkSpanRowSchema = z.object({
   positionTitle: z.string(),
   orgUnit: z.string(), // organization_unit_name or '(unassigned)'
+  holder: z.string().nullable(),
   directReports: z.number().int(),
 });
 export type OrgNetworkSpanRow = z.infer<typeof OrgNetworkSpanRowSchema>;
@@ -234,6 +237,7 @@ export type OrgNetworkSpanRow = z.infer<typeof OrgNetworkSpanRowSchema>;
 export const OrgNetworkReachRowSchema = z.object({
   positionTitle: z.string(),
   orgUnit: z.string(),
+  holder: z.string().nullable(),
   reach: z.number().int(), // transitive descendants (excludes self)
 });
 export type OrgNetworkReachRow = z.infer<typeof OrgNetworkReachRowSchema>;
@@ -243,6 +247,7 @@ export const OrgNetworkAnalyticsResponseSchema = z.object({
   totalPositions: z.number().int(),
   rootPositions: z.number().int(), // no reports-to (or reports-to outside the scoped set)
   managersCount: z.number().int(), // positions with ≥1 direct report
+  vacantPositions: z.number().int(), // active positions without an ACTIVE assignment
   avgSpanOfControl: z.number().nullable(), // avg direct reports among managers (2 dp); null if none
   maxDepth: z.number().int(),
   byDepth: z.array(OrgNetworkDepthRowSchema), // depth asc

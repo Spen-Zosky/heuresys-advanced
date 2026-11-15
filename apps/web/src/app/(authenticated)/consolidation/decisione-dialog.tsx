@@ -1,4 +1,5 @@
 "use client";
+import { MODALE } from "@/lib/modale";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -54,7 +55,7 @@ export function DecisioneDialog({
 
   return (
     <Dialog open onOpenChange={(aperta) => { if (!aperta) onChiudi(); }}>
-      <DialogContent data-testid="consolidation-decision-dialog">
+      <DialogContent className={MODALE.piccola} data-testid="consolidation-decision-dialog">
         <DialogHeader>
           <DialogTitle>{t("consolidation.modal.title")}</DialogTitle>
           <DialogDescription>

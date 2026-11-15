@@ -29,6 +29,10 @@ export interface UnitaBlocco {
   sede?: string | null;
   /** Organico previsto dal modello, quando c'è. */
   organicoPrevisto?: number | null;
+  /** Tipo dell'unità (HEADQUARTERS, GENERAL_MANAGEMENT, DIVISION…), per riconoscere il vertice. */
+  tipo?: string | null;
+  /** L'unità da aprire con il doppio clic, quando il riquadro ne riassume due (il vertice). */
+  apri?: string;
 }
 export interface NodoDisposto {
   u: UnitaBlocco;
@@ -49,9 +53,45 @@ export interface Disposizione {
   nodi: NodoDisposto[];
   /** Comandi di percorso SVG («M x y V y H x»), uno per tratto. */
   linee: string[];
+  /** Il nome della società, scritto come titolo sopra il vertice (non è un riquadro). */
+  etichetta: string | null;
+}
+
+/**
+ * Il vertice dell'organigramma è il Direttore Generale, non la società (Enzo, 15/11/2026).
+ *
+ * Nei dati di RTL la radice è l'unità della società («RTL Bank S.p.A.», tipo HEADQUARTERS): porta
+ * la posizione del Direttore Generale e, come figlie, le direzioni di staff e l'unità «Direzione
+ * Generale» (tipo GENERAL_MANAGEMENT), vuota, che contiene le divisioni. Disegnata così, la
+ * società era una casella sopra il Direttore Generale e le divisioni finivano un livello sotto le
+ * direzioni di staff. Qui, quando l'unica radice ha una e una sola figlia di direzione generale:
+ *  - la radice diventa l'etichetta (il nome della società, sopra il disegno);
+ *  - la direzione generale diventa il vertice, con le persone della radice (il Direttore Generale)
+ *    e gli addetti di tutta la società; il doppio clic apre la radice, dove sta il suo titolare;
+ *  - sotto il vertice prima le figlie della direzione generale (le divisioni), poi le altre figlie
+ *    della radice (le direzioni di staff).
+ * Negli altri casi non cambia niente. Pura; provata da `organigramma-blocchi.test.ts`.
+ */
+export function conVertice<T extends UnitaBlocco>(unita: T[]): { unita: T[]; etichetta: string | null } {
+  const ids = new Set(unita.map((u) => u.id));
+  const radici = unita.filter((u) => !u.padreId || !ids.has(u.padreId) || u.padreId === u.id);
+  if (radici.length !== 1) return { unita, etichetta: null };
+  const r = radici[0]!;
+  const dg = unita.filter((u) => u.padreId === r.id && u.tipo === "GENERAL_MANAGEMENT");
+  if (dg.length !== 1) return { unita, etichetta: null };
+  const g = dg[0]!;
+  const vertice: T = {
+    ...g, padreId: null, apri: r.id,
+    persone: [...r.persone, ...g.persone], addettiTotali: Math.max(r.addettiTotali, g.addettiTotali),
+  };
+  const sottoG = unita.filter((u) => u.padreId === g.id);
+  const staff = unita.filter((u) => u.padreId === r.id && u.id !== g.id).map((u) => ({ ...u, padreId: g.id }));
+  const resto = unita.filter((u) => u.id !== r.id && u.id !== g.id && u.padreId !== g.id && u.padreId !== r.id);
+  return { unita: [vertice, ...sottoG, ...staff, ...resto], etichetta: r.nome };
 }
 
 export const NW = 200;
+export const ALTEZZA_ETICHETTA = 30;
 const GX = 16, GY = 36, SP = 8, IND = 22, MARGINE = 8;
 const RIGA_TITOLO = 14, RIGA_NOME = 13, TESTA = 8, PIEDE = 18;
 export const MAX_NOMI = 12;
@@ -74,7 +114,9 @@ export function taglia(testo: string, max = 32): string {
   return testo.length > max ? testo.slice(0, max - 1) + "…" : testo;
 }
 
-export function disponi(unita: UnitaBlocco[], opzioni: { conPersone: boolean }): Disposizione {
+export function disponi(tutte: UnitaBlocco[], opzioni: { conPersone: boolean }): Disposizione {
+  const { unita, etichetta } = conVertice(tutte);
+  const Y0 = MARGINE + (etichetta ? ALTEZZA_ETICHETTA : 0);
   const perId = new Map(unita.map((u) => [u.id, u]));
   const figli = new Map<string, UnitaBlocco[]>();
   for (const u of unita) {
@@ -140,7 +182,7 @@ export function disponi(unita: UnitaBlocco[], opzioni: { conPersone: boolean }):
   };
 
   let X = MARGINE, H = 0;
-  for (const r of radici) { H = Math.max(H, piazza(r, X, MARGINE, true)); X += mis(r).w + GX * 2; }
+  for (const r of radici) { H = Math.max(H, piazza(r, X, Y0, true)); X += mis(r).w + GX * 2; }
 
   const linee: string[] = [];
   for (const [id, p] of pos) {
@@ -162,9 +204,10 @@ export function disponi(unita: UnitaBlocco[], opzioni: { conPersone: boolean }):
   }
   return {
     larghezza: Math.max(X - GX * 2, NW) + MARGINE * 2,
-    altezza: H + MARGINE * 2,
+    altezza: H + Y0 + MARGINE,
     nodi: [...pos.values()].map((n) => ({ u: n.u, x: n.x, y: n.y, w: n.w, h: n.h, radice: n.radice, titolo: n.titolo, nomi: n.nomi, altri: n.altri })),
     linee,
+    etichetta,
   };
 }
 
@@ -275,7 +318,7 @@ export function daRubrica(r: {
     pers.sort((a, b) => Number(b.responsabile) - Number(a.responsabile));
     return {
       id: u.id, nome: u.nome, padreId: u.padreId && ids.has(u.padreId) ? u.padreId : null,
-      filiale: u.tipo === "BRANCH", persone: pers, addettiTotali: tot(u.id, new Set()),
+      filiale: u.tipo === "BRANCH", persone: pers, addettiTotali: tot(u.id, new Set()), tipo: u.tipo,
     };
   });
 }

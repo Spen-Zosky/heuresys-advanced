@@ -569,11 +569,12 @@ describe("GET /v1/analytics/* integration", () => {
     totalPositions: number;
     rootPositions: number;
     managersCount: number;
+    vacantPositions: number;
     avgSpanOfControl: number | null;
     maxDepth: number;
     byDepth: Array<{ depth: number; positionCount: number }>;
-    topSpan: Array<{ positionTitle: string; orgUnit: string; directReports: number }>;
-    topReach: Array<{ positionTitle: string; orgUnit: string; reach: number }>;
+    topSpan: Array<{ positionTitle: string; orgUnit: string; holder: string | null; directReports: number }>;
+    topReach: Array<{ positionTitle: string; orgUnit: string; holder: string | null; reach: number }>;
     generatedAt: string;
   }
 
@@ -648,6 +649,44 @@ describe("GET /v1/analytics/* integration", () => {
     expect(body.scope.kind).toBe("TENANT");
     expect(body.scope.tenantId).not.toBeNull();
     expect(body.totalPositions).toBeGreaterThan(0);
+  });
+
+  // Piano docs/piani/PIANO_organigrammi-navigazione_20261115.md (N7). Il 15/11/2026 la pagina
+  // mostrava per RTL 316 posizioni (162 attive + 154 disattivate), 16 riporti diretti del Direttore
+  // Generale e un raggio di 315: la query non filtrava `position_is_active`. Ogni numero qui si
+  // ricava dalle sole posizioni attive del tenant, con una query scritta a parte.
+  it("org-network: TENANT conta solo le posizioni attive, e ogni numero torna con il database", async () => {
+    const body = await getJson<OrgNetworkBody>("/v1/analytics/org-network", tenantS);
+    const t = body.scope.tenantId!;
+    const attive = `SELECT position_id, position_reports_to_position_id AS rt FROM sys.sys_positions
+                     WHERE position_tenant_id = '${t}' AND position_is_active`;
+    expect(body.totalPositions).toBe(await num(`SELECT count(*)::text AS n FROM (${attive}) s`));
+    expect(body.rootPositions).toBe(
+      await num(`WITH s AS (${attive}) SELECT count(*)::text AS n FROM s WHERE rt IS NULL OR rt NOT IN (SELECT position_id FROM s)`),
+    );
+    expect(body.managersCount).toBe(
+      await num(`WITH s AS (${attive}) SELECT count(DISTINCT rt)::text AS n FROM s WHERE rt IN (SELECT position_id FROM s)`),
+    );
+    expect(body.vacantPositions).toBe(
+      await num(`WITH s AS (${attive}) SELECT count(*)::text AS n FROM s WHERE NOT EXISTS (
+                   SELECT 1 FROM sys.sys_user_position_assignments a
+                    WHERE a.user_position_assignment_position_id = s.position_id AND a.user_position_assignment_status = 'ACTIVE')`),
+    );
+    // Il primo per riporti diretti ne ha quanti ne conta il database.
+    const primo = body.topSpan[0]!;
+    expect(primo.directReports).toBe(
+      await num(`WITH s AS (${attive}) SELECT max(c)::text AS n FROM (SELECT count(*) c FROM s WHERE rt IN (SELECT position_id FROM s) GROUP BY rt) x`),
+    );
+    // Il raggio più grande non supera le posizioni attive meno il vertice stesso.
+    expect(body.topReach[0]!.reach).toBeLessThanOrEqual(body.totalPositions - 1);
+    // Nessuna posizione disattivata fra i responsabili mostrati.
+    const titoliDisattivi = await pool.query<{ v: string }>(
+      `SELECT DISTINCT position_title AS v FROM sys.sys_positions p WHERE position_tenant_id = $1 AND NOT position_is_active
+        AND NOT EXISTS (SELECT 1 FROM sys.sys_positions q WHERE q.position_tenant_id = $1 AND q.position_is_active AND q.position_title = p.position_title)`,
+      [t],
+    );
+    const soloDisattivi = new Set(titoliDisattivi.rows.map((r) => r.v));
+    for (const r of [...body.topSpan, ...body.topReach]) expect(soloDisattivi.has(r.positionTitle)).toBe(false);
   });
 
   // --- Overtime requests — anchors derived live from sys.sys_overtime

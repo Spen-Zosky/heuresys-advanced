@@ -223,6 +223,7 @@ export const analyticsService = {
       totalPositions: o.totalPositions,
       rootPositions: o.rootPositions,
       managersCount: o.managersCount,
+      vacantPositions: o.vacantPositions,
       avgSpanOfControl: o.avgSpanOfControl,
       maxDepth: o.maxDepth,
       byDepth: o.byDepth,

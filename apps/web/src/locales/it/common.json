@@ -1032,8 +1032,13 @@
       "blocchi": "Blocchi",
       "nodi": "Nodi"
     },
-    "legenda": "Clic su un riquadro per aprire l'unità con le sue figlie, le persone e le posizioni. Riquadro pieno = vertice; tratteggiato = filiale. In grassetto il responsabile.",
-    "legendaNodi": "Un nodo per unità: la grandezza dice quante persone ci lavorano, comprese quelle delle unità sotto. Clic sul nome per aprire la scheda, clic sul pallino per aprire o chiudere il ramo; rotella per lo zoom.",
+    "legenda": "Doppio clic su un riquadro per aprire l'unità con le sue figlie, le persone e le posizioni. Riquadro pieno = vertice; tratteggiato = filiale. In grassetto il responsabile.",
+    "legendaSocieta": "{{societa}} è la società: è scritta come titolo sopra il disegno; al vertice c'è la Direzione Generale con il Direttore Generale, e sotto di lei prima le divisioni e poi le direzioni di staff.",
+    "legendaNodi": "Un nodo per unità, con la stessa struttura dei blocchi. La grandezza del pallino e il numero fra parentesi dicono quante persone lavorano nell'unità, comprese quelle delle unità sotto. Doppio clic su un nodo per aprire la scheda; clic sul pallino per chiudere o riaprire il ramo.",
+    "navigazione": {
+      "aiuto": "Rotella o tasti + e − per ingrandire e ridurre · trascina per spostare · doppio clic sul vuoto per riadattare",
+      "adatta": "Adatta"
+    },
     "completo": "Organigramma completo",
     "completoNota": "Panoramica senza i nomi; sotto, la sede centrale e le filiali con le persone.",
     "centrale": "Sede centrale",

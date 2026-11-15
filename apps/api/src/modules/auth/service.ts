@@ -198,6 +198,9 @@ export interface AuthService {
     email: string;
     roles: RoleCode[];
     tenantId: string | null;
+    firstName: string | null;
+    lastName: string | null;
+    displayName: string | null;
   }>;
   requestPasswordReset(input: PasswordResetRequestInput): Promise<void>;
   completePasswordReset(input: PasswordResetCompleteInput): Promise<void>;

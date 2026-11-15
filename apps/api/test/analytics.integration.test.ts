@@ -7,7 +7,7 @@
  * Hits the live OCI VM DB through the tunnel (no mocks). DATA-DERIVED doctrine
  * (S1025, D-74): no pinned live counts — every expected scalar is derived from
  * the same source tables the endpoint aggregates, and the rest is asserted as
- * INVARIANTS (rollups reconcile, ordering, scope semantics, no '(unassigned)'
+ * INVARIANTS (rollups reconcile, ordering, scope semantics, no '(senza unità)'
  * fallthrough). TENANT-scope tests compare against the PLATFORM body fetched in
  * the same test, gated on live-derived single-tenancy of the source.
  */
@@ -113,7 +113,7 @@ describe("GET /v1/analytics/* integration", () => {
     expect(body.byOrgUnit.length).toBeGreaterThan(0);
     expect(body.byJobRole.length).toBeGreaterThan(0);
     // The OU rollup must sum to the total: position-less users fall into the
-    // COALESCE '(unassigned)' bucket, so total == ouSum still holds.
+    // COALESCE '(senza unità)' bucket, so total == ouSum still holds.
     const ouSum = body.byOrgUnit.reduce((acc, r2) => acc + r2.headcount, 0);
     expect(ouSum).toBe(body.totalHeadcount);
     expect(new Date(body.generatedAt).getTime()).toBeGreaterThan(0);
@@ -212,9 +212,9 @@ describe("GET /v1/analytics/* integration", () => {
     );
     const monthlySum = body.monthly.reduce((acc, m) => acc + m.totalHours, 0);
     expect(monthlySum).toBeCloseTo(body.totalHours, 0);
-    // Every attendance row resolves to a real OU (no '(unassigned)') and the OU
+    // Every attendance row resolves to a real OU (no '(senza unità)') and the OU
     // dimension count matches the live chain.
-    expect(body.byOrgUnit.some((o) => o.dimension === "(unassigned)")).toBe(false);
+    expect(body.byOrgUnit.some((o) => o.dimension === "(senza unità)")).toBe(false);
     const ouCount = await num(
       `SELECT count(DISTINCT ou.organization_unit_id)::text AS n
          FROM (SELECT DISTINCT attendance_subject_user_id AS u_id FROM sys.sys_attendance) att
@@ -426,8 +426,8 @@ describe("GET /v1/analytics/* integration", () => {
     );
     const expectedLevels = PROFICIENCY_RANK.filter((l) => lvlRows.some((r2) => r2.p === l));
     expect(body.proficiencyLevels).toEqual(expectedLevels);
-    // No '(unassigned)' fallthrough in the heatmap.
-    expect(body.cells.some((c) => c.orgUnit === "(unassigned)")).toBe(false);
+    // No '(senza unità)' fallthrough in the heatmap.
+    expect(body.cells.some((c) => c.orgUnit === "(senza unità)")).toBe(false);
     expect(body.cells.length).toBeGreaterThan(0);
     // Per-proficiency column rollup derived live from the single source table.
     const { rows: bypRows } = await pool.query<{ p: string; ev: string; us: string }>(
@@ -766,9 +766,9 @@ describe("GET /v1/analytics/* integration", () => {
     );
     const monthlyCountSum = body.monthly.reduce((acc, m) => acc + m.count, 0);
     expect(monthlyCountSum).toBe(body.totalRequests);
-    // byOrgUnit: every request resolves (no '(unassigned)'), hours-desc ordered,
+    // byOrgUnit: every request resolves (no '(senza unità)'), hours-desc ordered,
     // and the OU dimension count matches the live chain.
-    expect(body.byOrgUnit.some((o) => o.dimension === "(unassigned)")).toBe(false);
+    expect(body.byOrgUnit.some((o) => o.dimension === "(senza unità)")).toBe(false);
     const ouCount = await num(
       `SELECT count(DISTINCT ou.organization_unit_id)::text AS n
          FROM (SELECT DISTINCT overtime_subject_user_id AS u_id FROM sys.sys_overtime) ot

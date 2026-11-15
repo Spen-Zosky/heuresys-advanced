@@ -105,7 +105,7 @@ export async function getWorkforceTotals(
   );
 
   const byOu = await q.query<{ dimension: string; headcount: string }>(
-    `SELECT COALESCE(ou.organization_unit_name, '(unassigned)') AS dimension,
+    `SELECT COALESCE(ou.organization_unit_name, '(senza unità)') AS dimension,
             count(DISTINCT u.user_id)::text AS headcount
        FROM sys.sys_users u
        ${PRIMARY_ASSIGNMENT_JOIN}
@@ -268,7 +268,7 @@ export async function getAttendanceTotals(
     ot: string;
     total: string;
   }>(
-    `SELECT COALESCE(ou.organization_unit_name, '(unassigned)') AS dimension,
+    `SELECT COALESCE(ou.organization_unit_name, '(senza unità)') AS dimension,
             round(sum(at.attendance_hours_regular), 2)::text AS reg,
             round(sum(at.attendance_hours_overtime), 2)::text AS ot,
             round(sum(at.attendance_hours_total), 2)::text AS total
@@ -408,7 +408,7 @@ export async function getCompensationEquity(
     q3: string;
     maxv: string;
   }>(
-    `SELECT COALESCE(ou.organization_unit_name, '(unassigned)') AS ou,
+    `SELECT COALESCE(ou.organization_unit_name, '(senza unità)') AS ou,
             count(*)::text AS n,
             min(b.compensation_band_mid_eur)::text AS minv,
             percentile_cont(0.25) WITHIN GROUP (ORDER BY b.compensation_band_mid_eur)::text AS q1,
@@ -429,7 +429,7 @@ export async function getCompensationEquity(
     band_code: string;
     position_title: string;
   }>(
-    `SELECT COALESCE(ou.organization_unit_name, '(unassigned)') AS ou,
+    `SELECT COALESCE(ou.organization_unit_name, '(senza unità)') AS ou,
             b.compensation_band_mid_eur::text AS mid,
             (b.compensation_band_max_eur - b.compensation_band_min_eur)::text AS spread,
             b.compensation_band_code AS band_code,
@@ -448,7 +448,7 @@ export async function getCompensationEquity(
     medianmid: string | null;
   }>(
     `SELECT count(*)::text AS total,
-            count(DISTINCT COALESCE(ou.organization_unit_name, '(unassigned)'))::text AS oucount,
+            count(DISTINCT COALESCE(ou.organization_unit_name, '(senza unità)'))::text AS oucount,
             min(b.compensation_band_mid_eur)::text AS minmid,
             max(b.compensation_band_mid_eur)::text AS maxmid,
             (percentile_cont(0.5) WITHIN GROUP (ORDER BY b.compensation_band_mid_eur))::text AS medianmid
@@ -551,7 +551,7 @@ export async function getSkillsCoverage(
     evidence_count: string;
     distinct_users: string;
   }>(
-    `SELECT COALESCE(ou.organization_unit_name, '(unassigned)') AS org_unit,
+    `SELECT COALESCE(ou.organization_unit_name, '(senza unità)') AS org_unit,
             e.user_skill_evidence_declared_proficiency AS proficiency,
             count(*)::text AS evidence_count,
             count(DISTINCT u.user_id)::text AS distinct_users
@@ -578,7 +578,7 @@ export async function getSkillsCoverage(
   const totals = await q.query<{ total: string; users: string; ous: string }>(
     `SELECT count(*)::text AS total,
             count(DISTINCT u.user_id)::text AS users,
-            count(DISTINCT COALESCE(ou.organization_unit_name, '(unassigned)'))::text AS ous
+            count(DISTINCT COALESCE(ou.organization_unit_name, '(senza unità)'))::text AS ous
        ${SKILLS_FROM}
       WHERE ${sc.sql}`,
     sc.params,
@@ -818,7 +818,7 @@ export async function getOrgNetwork(
   const SCOPED = `
     WITH RECURSIVE scoped AS (
       SELECT p.position_id, p.position_title, p.position_reports_to_position_id AS reports_to,
-             COALESCE(ou.organization_unit_name, '(unassigned)') AS org_unit,
+             COALESCE(ou.organization_unit_name, '(senza unità)') AS org_unit,
              tit.holder
         FROM sys.sys_positions p
         LEFT JOIN sys.sys_organization_units ou
@@ -1078,7 +1078,7 @@ export async function getOvertimeRollups(
 
   // Subject user → PRIMARY/ACTIVE assignment → position → OU (1 primary active per user → no fan-out).
   const byOu = await q.query<{ dimension: string; cnt: string; hours: string }>(
-    `SELECT COALESCE(ou.organization_unit_name, '(unassigned)') AS dimension,
+    `SELECT COALESCE(ou.organization_unit_name, '(senza unità)') AS dimension,
             count(*)::text AS cnt,
             round(sum(ot.overtime_hours), 2)::text AS hours
        FROM sys.sys_overtime ot

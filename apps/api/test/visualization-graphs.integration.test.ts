@@ -83,6 +83,13 @@ describe("/v1/visualization-graphs/* integration", () => {
     const body = r.json() as { items: Array<{ type: string; count: number }>; total: number };
     expect(Array.isArray(body.items)).toBe(true);
     expect(typeof body.total).toBe("number");
+    // 15/11/2026: si contano solo le versioni in uso; le vecchie sono storia dello stesso grafo.
+    const somma = body.items.reduce((s, i) => s + i.count, 0);
+    const attivi = await pool.query<{ n: number }>(
+      `SELECT count(*)::int AS n FROM sys.sys_visualization_graphs g
+        WHERE g.graph_is_active AND g.graph_tenant_id = (SELECT user_tenant_id FROM sys.sys_users WHERE user_email = 'governo@collaudo.invalid')`,
+    );
+    expect(somma).toBe(attivi.rows[0]!.n);
   });
 
   it("CREATE then GET /:id happy path; random uuid → 404 NOT_FOUND", async () => {
@@ -346,6 +353,63 @@ describe("/v1/visualization-graphs/* integration", () => {
       const r2 = await post(`/v1/visualization-graphs/${gr.graphId}/rigenera`, {});
       const b2 = r2.json() as { nodi: number; archi: number; nodiAggiunti: number; nodiTolti: number };
       expect([b2.nodi, b2.archi, b2.nodiAggiunti, b2.nodiTolti]).toEqual([b.nodi, b.archi, 0, 0]);
+    });
+
+    // Piano PIANO_organigrammi-navigazione_20261115.md: il 14/11 la v3 di RTL_ORG_CHART è uscita dal
+    // riallineamento con 141 nodi senza tipo e senza posizione nella disposizione predefinita
+    // (controllo storia36 C11a rosso in produzione). Dopo «rigenera» ogni nodo ha un tipo e una
+    // posizione in ogni disposizione del grafo, e un nodo bloccato resta dov'è.
+    it("ogni nodo esce con un tipo e una posizione in ogni disposizione; i nodi bloccati restano", async () => {
+      const g = await post("/v1/visualization-graphs", { code: `${SUITE_PREFIX}_RIG_LAY`, type: "ORG_CHART", name: "Con disposizione" });
+      const gr = g.json() as { graphId: string; tenantId: string };
+      createdGraphIds.push(gr.graphId);
+      const lay = await pool.query<{ layout_id: string }>(
+        `INSERT INTO sys.sys_visualization_layouts (layout_graph_id, layout_engine, layout_version, is_default)
+         VALUES ($1, 'HIERARCHICAL', 1, true) RETURNING layout_id`,
+        [gr.graphId],
+      );
+      const layoutId = lay.rows[0]!.layout_id;
+      // Un nodo già presente e bloccato da una persona in un punto preciso.
+      const una = await pool.query<{ position_id: string }>(
+        `SELECT position_id FROM sys.sys_positions WHERE position_tenant_id = $1 AND position_is_active ORDER BY position_id LIMIT 1`,
+        [gr.tenantId],
+      );
+      const nodo = await pool.query<{ node_id: string }>(
+        `INSERT INTO sys.sys_visualization_nodes (node_graph_id, node_source_entity_type, node_source_entity_id, node_label)
+         VALUES ($1, 'POSITION', $2, 'x') RETURNING node_id`,
+        [gr.graphId, una.rows[0]!.position_id],
+      );
+      await pool.query(
+        `INSERT INTO sys.sys_visualization_node_layouts (layout_id, node_id, x, y, locked) VALUES ($1, $2, 12345, 678, true)`,
+        [layoutId, nodo.rows[0]!.node_id],
+      );
+
+      const r = await post(`/v1/visualization-graphs/${gr.graphId}/rigenera`, {});
+      expect(r.statusCode).toBe(200);
+      const conti = await pool.query<{ senza_tipo: number; senza_posto: number; nodi: number; radici: number }>(
+        `SELECT count(*) FILTER (WHERE n.node_type IS NULL)::int AS senza_tipo,
+                count(*) FILTER (WHERE NOT EXISTS (SELECT 1 FROM sys.sys_visualization_node_layouts nl
+                                                    WHERE nl.layout_id = $2 AND nl.node_id = n.node_id))::int AS senza_posto,
+                count(*)::int AS nodi,
+                count(*) FILTER (WHERE n.node_type = 'ROOT')::int AS radici
+           FROM sys.sys_visualization_nodes n WHERE n.node_graph_id = $1`,
+        [gr.graphId, layoutId],
+      );
+      expect(conti.rows[0]!.nodi).toBeGreaterThan(1);
+      expect(conti.rows[0]!.senza_tipo).toBe(0);
+      expect(conti.rows[0]!.senza_posto).toBe(0);
+      // Le radici sono le posizioni attive senza un superiore attivo, contate a parte.
+      const radici = await pool.query<{ n: number }>(
+        `SELECT count(*)::int AS n FROM sys.sys_positions p WHERE p.position_tenant_id = $1 AND p.position_is_active
+            AND NOT EXISTS (SELECT 1 FROM sys.sys_positions s WHERE s.position_id = p.position_reports_to_position_id AND s.position_is_active)`,
+        [gr.tenantId],
+      );
+      expect(conti.rows[0]!.radici).toBe(radici.rows[0]!.n);
+      const fermo = await pool.query<{ x: string; y: string }>(
+        `SELECT x::text, y::text FROM sys.sys_visualization_node_layouts WHERE layout_id = $1 AND node_id = $2`,
+        [layoutId, nodo.rows[0]!.node_id],
+      );
+      expect([Number(fermo.rows[0]!.x), Number(fermo.rows[0]!.y)]).toEqual([12345, 678]);
     });
 
     it("un grafo che non è un organigramma → 409 VIZ_GRAPH_NOT_ORG_CHART", async () => {

@@ -7,6 +7,7 @@
  * delle evidenze, KPI assegnato ma non richiesto assente, sondaggio compilato «da compilare»,
  * responsabile di squadra «Membro», avvisi aperti su un passo deciso).
  */
+import { readFileSync } from "node:fs";
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
@@ -135,6 +136,41 @@ describe("portale personale: rilievi D2 del controllo forense", () => {
       .teams.find((x) => (x.teamId ?? x.id) === target!.team);
     expect(team).toBeDefined();
     expect(team!.members.find((m) => m.userId === target!.uid)?.role).toBe("LEAD");
+  });
+
+  it("D2-14 e D2-07: la migrazione 000492 riscrive i titoli, chiude gli avvisi ed e' idempotente", async () => {
+    const sql = readFileSync(new URL("../../../db/migrations/000492_titoli_e_avvisi_delle_approvazioni_in_italiano.sql", import.meta.url), "utf8")
+      // l'utente dell'API non vede lo schema staging (lo usa il migratore): la prova gira sugli stessi
+      // enunciati con funzione e giornale temporanei, che spariscono con la transazione annullata
+      .replace(/^BEGIN;$/m, "").replace(/^COMMIT;$/m, "").replaceAll("staging.", "pg_temp.");
+    const u = await pool.query<{ id: string; tenant: string }>(
+      `SELECT user_id::text AS id, user_tenant_id::text AS tenant FROM sys.sys_users WHERE lower(user_email) = 'paolo.caputo@rtl-bank.org'`);
+    const a = u.rows[0]!;
+    const ins = (titolo: string) => pool.query<{ id: string }>(
+      `INSERT INTO sys.sys_approval_requests (approval_request_tenant_id, approval_request_title, approval_request_status, created_by)
+       VALUES ($1, $2, 'APPLIED', $3) RETURNING approval_request_id::text AS id`, [a.tenant, titolo, a.id]);
+    const ferie = (await ins("Richiesta di ferie — 9.00 giorni dal 16/08/2026")).rows[0]!.id;
+    const mezzo = (await ins("Richiesta di ferie — 10.50 giorni dal 01/09/2026")).rows[0]!.id;
+    const comp = (await ins("Adeguamento retributivo — 1,158 EUR")).rows[0]!.id;
+    const titolo = async (id: string) => (await pool.query<{ t: string }>(
+      `SELECT approval_request_title AS t FROM sys.sys_approval_requests WHERE approval_request_id = $1`, [id])).rows[0]!.t;
+
+    await pool.query(sql);
+    expect(await titolo(ferie)).toBe("Richiesta di ferie — 9 giorni dal 16/08/2026");
+    expect(await titolo(mezzo)).toBe("Richiesta di ferie — 10,5 giorni dal 01/09/2026");
+    expect(await titolo(comp)).toBe("Adeguamento retributivo — 1.158 EUR");
+    const aperti = await pool.query<{ n: string }>(
+      `SELECT count(*)::text AS n FROM sys.sys_inbox_notifications n
+         JOIN sys.sys_approval_steps s ON s.approval_step_id = n.notification_resource_id
+        WHERE n.notification_resource_type = 'APPROVAL_STEP' AND n.notification_type IN ('APPROVAL_REMINDER', 'APPROVAL_OVERDUE')
+          AND n.notification_status <> 'DISMISSED' AND s.approval_step_status <> 'PENDING'`);
+    expect(Number(aperti.rows[0]!.n)).toBe(0);
+
+    const giornale = async () => Number((await pool.query<{ n: string }>(`SELECT count(*)::text AS n FROM pg_temp.approvazioni_italiano_undo`)).rows[0]!.n);
+    const prima = await giornale();
+    await pool.query(sql); // seconda passata: niente da riscrivere, niente di nuovo nel giornale
+    expect(await giornale()).toBe(prima);
+    expect(await titolo(ferie)).toBe("Richiesta di ferie — 9 giorni dal 16/08/2026");
   });
 
   it("D2-07: decidere un passo chiude gli avvisi di sollecito e di scadenza che lo riguardano", async () => {

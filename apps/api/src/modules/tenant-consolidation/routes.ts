@@ -19,6 +19,10 @@ import { requirePermission, userHasPermission } from "../../middleware/rbac.js";
 import { ForbiddenError, UnauthorizedError } from "../../errors/index.js";
 import {
   ConfirmCertainBodySchema,
+  ApprovalPreviewSchema,
+  CascadeResponseSchema,
+  DiscardResultSchema,
+  PendingApprovalSchema,
   ConfirmCertainResponseSchema,
   ConsolidationAccessSchema,
   ConsolidationGroupSchema,
@@ -141,6 +145,32 @@ export const tenantConsolidationRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [app.verifyCsrf, DECIDE],
     schema: { params: ConsolidationIdParamSchema, response: { 200: ApplyChangesResultSchema } },
   }, async (req) => svc.applyChanges(actor(req), req.params.id));
+
+  // La bozza: anteprima dell'approvazione (transazione annullata) e scarto delle decisioni non approvate.
+  app.post("/:id/preview-changes", {
+    config: conf,
+    preHandler: [app.verifyCsrf, DECIDE],
+    schema: { params: ConsolidationIdParamSchema, response: { 200: ApprovalPreviewSchema } },
+  }, async (req) => svc.previewChanges(actor(req), req.params.id));
+
+  app.post("/:id/discard-changes", {
+    config: conf,
+    preHandler: [app.verifyCsrf, DECIDE],
+    schema: { params: ConsolidationIdParamSchema, response: { 200: DiscardResultSchema } },
+  }, async (req) => svc.discardChanges(actor(req), req.params.id));
+
+  // L'avviso nell'intestazione: ci sono modifiche nella bozza non ancora approvate?
+  app.get("/pending-approval", {
+    config: conf,
+    preHandler: [LEGGE],
+    schema: { response: { 200: PendingApprovalSchema } },
+  }, async (req) => svc.pendingApproval(actor(req)));
+
+  app.get("/proposals/:proposalId/cascade", {
+    config: conf,
+    preHandler: [LEGGE],
+    schema: { params: PROPOSTA, response: { 200: CascadeResponseSchema } },
+  }, async (req) => svc.cascade(actor(req), req.params.proposalId));
 
   app.post("/proposals/confirm-certain", {
     config: conf,

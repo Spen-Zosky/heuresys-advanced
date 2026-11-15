@@ -365,7 +365,7 @@
     "lastRunFailed": "L'ultimo giro su {{group}} non è riuscito: {{error}}",
     "run": "Avvia i giri su {{group}}",
     "confirmCertain": "Conferma gli abbinamenti certi: {{count}} (fiducia ≥ {{threshold}})",
-    "closeGroup": "Chiudi il gruppo e passa al successivo",
+    "closeGroup": "Passa alla sezione successiva",
     "proposalsTitle": "Proposte: {{group}}",
     "proposalsDescription": "Una riga per voce. La fiducia va da 0 a 100; la motivazione è dell'agente.",
     "count": "{{count}} proposte",
@@ -432,8 +432,8 @@
       "close": "Chiudi",
       "sameHint": "Puoi riconfermare anche la stessa scelta. La decisione viene registrata: i dati cambiano solo quando premi «Esegui modifiche»."
     },
-    "applyChanges": "Esegui modifiche ({{count}})",
-    "applying": "Applico ai dati…",
+    "applyChanges": "Apporta modifiche ({{count}})",
+    "applying": "Provo le modifiche nella bozza…",
     "applyResult": {
       "title": "Modifiche eseguite: {{count}} decisioni applicate ai dati",
       "detail": "Valori cambiati {{changed}}, voci create {{created}}, effetti precedenti ritirati {{reverted}}."
@@ -442,11 +442,51 @@
     "nextRunning": "Il giro su {{group}} è in corso. Non devi fare niente: la pagina si aggiorna da sola quando ha finito.",
     "nextRun": "Per questo gruppo non ci sono ancora proposte. Premi «Avvia i giri su {{group}}»: l'agente confronta i dati della tua azienda con il prototipo e prepara le proposte.",
     "nextDecide": "Restano {{count}} proposte da decidere nella tabella qui sotto. Apri ogni riga e scegli, oppure usa «Conferma gli abbinamenti certi» per quelle sicure. Finché ne resta una, il gruppo non si può chiudere.",
-    "nextApply": "Hai deciso tutte le proposte, ma le decisioni non sono ancora nei dati. Passo successivo: premi «Esegui modifiche ({{count}})». Solo allora cambiano i dati della tua azienda.",
-    "nextClose": "Tutto è deciso e applicato. Passo successivo: premi «Chiudi il gruppo e passa al successivo». Si apre il gruppo {{next}}.",
-    "nextCloseLast": "Tutto è deciso e applicato. Passo successivo: premi «Chiudi il gruppo e passa al successivo»: è l'ultimo gruppo, la sessione passa in conferma.",
+    "nextClose": "Tutto è deciso. Passo successivo: premi «Passa alla sezione successiva». Si apre il gruppo {{next}}. Le decisioni restano nella bozza fino all'approvazione definitiva.",
+    "nextCloseLast": "Tutto è deciso. Passo successivo: premi «Passa alla sezione successiva»: è l'ultimo gruppo. Poi «Approva definitivamente le modifiche» porta la bozza nei dati.",
     "nextOther": "Il gruppo aperto è {{group}}. Puoi consultare questo gruppo, ma i passi da fare sono nel gruppo aperto: selezionalo nella fila qui sopra.",
-    "stepsHint": "In ordine: 1. decidi le proposte · 2. «Esegui modifiche» · 3. «Chiudi il gruppo e passa al successivo». «Avvia i giri» serve solo per far preparare le proposte all'agente."
+    "stepsHint": "In ordine: 1. decidi le proposte (anche con «Aggiorna cascata») · 2. «Apporta modifiche» per vedere che cosa cambierebbe · 3. «Passa alla sezione successiva» · alla fine il pulsante rosso «Approva definitivamente le modifiche». «Avvia i giri» serve solo per far preparare le proposte all'agente.",
+    "approval": {
+      "header_one": "Una modifica del consolidamento da approvare",
+      "header_other": "{{count}} modifiche del consolidamento da approvare",
+      "headerHint": "Le decisioni del consolidamento sono nella bozza: i dati non cambiano finché il Direttore HR non le approva definitivamente.",
+      "approve_one": "Approva definitivamente la modifica",
+      "approve_other": "Approva definitivamente le modifiche ({{count}})",
+      "discard": "Scarta modifiche",
+      "hint": "Le decisioni restano nella bozza finché non le approvi: solo il pulsante rosso cambia i dati del tenant.",
+      "approvaTitle": "Approvare definitivamente le modifiche?",
+      "approvaBody_one": "Una decisione della bozza entra nei dati del tenant, con il giornale di ritorno. Se l'approvazione accendesse un controllo del database, niente viene scritto.",
+      "approvaBody_other": "{{count}} decisioni della bozza entrano nei dati del tenant, con il giornale di ritorno. Se l'approvazione accendesse un controllo del database, niente viene scritto.",
+      "approvaConfirm": "Approva definitivamente",
+      "scartaTitle": "Scartare le modifiche della bozza?",
+      "scartaBody_one": "Una decisione non ancora approvata torna da decidere. Ciò che è già stato approvato non cambia.",
+      "scartaBody_other": "{{count}} decisioni non ancora approvate tornano da decidere. Ciò che è già stato approvato non cambia.",
+      "scartaConfirm": "Scarta modifiche",
+      "previewTitle_one": "Anteprima: una decisione da approvare",
+      "previewTitle_other": "Anteprima: {{count}} decisioni da approvare",
+      "previewHint": "È una prova: i dati del tenant non sono cambiati. Per scriverli usa «Approva definitivamente le modifiche».",
+      "violations": "L'approvazione si fermerebbe: accenderebbe questi controlli del database: {{views}}.",
+      "noViolations": "Nessun controllo del database si accenderebbe.",
+      "toRecompute": "Da ricalcolare dopo l'approvazione (non la fermano): {{views}}."
+    },
+    "cascade": {
+      "title": "La cascata nel modello",
+      "loading": "Leggo la cascata…",
+      "empty": "Questa voce non ha prerequisiti né conseguenze nel modello.",
+      "PREREQUISITO_one": "Un prerequisito",
+      "PREREQUISITO_other": "{{count}} prerequisiti",
+      "CONSEGUENZA_one": "Una conseguenza",
+      "CONSEGUENZA_other": "{{count}} conseguenze",
+      "undecided": "da decidere",
+      "fields": "La decisione porta con sé anche: {{fields}}.",
+      "field": {
+        "SITE": "la sede",
+        "PLANNED_HEADCOUNT": "l'organico previsto",
+        "HEADCOUNT_NOTE": "la ragione dell'organico"
+      },
+      "update_one": "Aggiorna cascata (una voce)",
+      "update_other": "Aggiorna cascata ({{count}} voci)"
+    }
   },
   "gaps": {
     "title": "Analisi dei divari",

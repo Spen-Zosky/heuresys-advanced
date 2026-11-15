@@ -255,9 +255,51 @@ export const DecideProposalBodySchema = z
     decision: DecisionSchema,
     form: LinkFormSchema.optional(),
     reason: z.string().max(1000).optional(),
+    /** «Aggiorna cascata»: la stessa scelta anche sulle proposte della cascata ancora senza decisione. */
+    cascade: z.boolean().optional(),
   })
   .strict();
 export type DecideProposalBody = z.infer<typeof DecideProposalBodySchema>;
+
+/* ── La cascata di una decisione ───────────────────────────────────────────────────────── */
+
+export const CASCADE_RELATION_VALUES = ["PREREQUISITO", "CONSEGUENZA"] as const;
+export const CascadeItemSchema = z.object({
+  proposalId: z.uuid(),
+  relation: z.enum(CASCADE_RELATION_VALUES),
+  group: ConsolidationGroupSchema,
+  outcome: ProposalOutcomeSchema,
+  prototypeKeys: z.array(z.string()),
+  decision: DecisionSchema.nullable(),
+});
+export type CascadeItem = z.infer<typeof CascadeItemSchema>;
+export const CascadeResponseSchema = z.object({
+  items: z.array(CascadeItemSchema.extend({ prototypeItems: z.array(ConsolidationItemRefSchema) })),
+  /** I campi che la decisione porta con sé (per un'unità: sede, organico previsto, ragione dell'organico). */
+  fields: z.array(z.string()),
+});
+export type CascadeResponse = z.infer<typeof CascadeResponseSchema>;
+
+/* ── La bozza e l'approvazione definitiva ──────────────────────────────────────────────── */
+
+/** Le modifiche registrate e non ancora approvate: alimenta l'avviso nell'intestazione. */
+export const PendingApprovalSchema = z.object({
+  pending: z.number().int(),
+  consolidationId: z.uuid().nullable(),
+  since: z.iso.datetime().nullable(),
+});
+export type PendingApproval = z.infer<typeof PendingApprovalSchema>;
+
+/** L'anteprima: che cosa farebbe l'approvazione, provata in una transazione annullata. */
+export const ApprovalPreviewSchema = z.object({
+  result: ApplyChangesResultSchema,
+  /** Le sentinelle del database che l'approvazione accenderebbe: se ce n'è una, l'approvazione si ferma. */
+  violations: z.array(z.object({ view: z.string(), before: z.number().int(), after: z.number().int() })),
+  /** Dati derivati che l'approvazione rende vecchi (embedding): non la fermano, si ricalcolano dopo. */
+  toRecompute: z.array(z.object({ view: z.string(), before: z.number().int(), after: z.number().int() })),
+});
+export type ApprovalPreview = z.infer<typeof ApprovalPreviewSchema>;
+export const DiscardResultSchema = z.object({ discarded: z.number().int() });
 
 /** La conferma a gruppi degli abbinamenti certi (R-5): un gesto, più proposte. */
 export const ConfirmCertainBodySchema = z.object({

@@ -27,6 +27,7 @@
 
 import type { DashboardBlockContent } from "@heuresys/shared";
 import type { DbConnector } from "./repository.js";
+import { soloPersone } from "../../lib/scope/persone.js";
 
 /** Il perimetro su cui un fornitore calcola il proprio contenuto. */
 export interface PerimetroBlocchi {
@@ -68,6 +69,24 @@ const sn = (v: unknown): string | null => (v === null || v === undefined ? null 
  */
 const P = (p: PerimetroBlocchi): [string | null, string[]] => [p.tenantId, p.unitaDelPerimetro];
 
+/**
+ * D9: gli eventi della storia di una persona che non entrano nelle viste «attivita» dei cruscotti
+ * di famiglia. Sono retributivi o di valutazione (classi COMPENSATION/EVALUATION): una vista aperta
+ * non li mostra mentre l'organico accanto e' trattenuto.
+ */
+const TIPI_EVENTO_RISERVATI = ["SALARY_CHANGE", "LEVEL_CHANGE", "REVIEW_COMPLETED"];
+
+/** Il tipo di evento in italiano: il codice interno non si mostra (R4). */
+const ETICHETTA_EVENTO: Record<string, string> = {
+  COURSE_COMPLETED: "Corso completato",
+  CERTIFICATION_EARNED: "Certificazione ottenuta",
+  HIRE: "Assunzione",
+  SALARY_CHANGE: "Variazione retributiva",
+  LEVEL_CHANGE: "Cambio di livello",
+  REVIEW_COMPLETED: "Valutazione conclusa",
+};
+const etichettaEvento = (tipo: unknown): string => ETICHETTA_EVENTO[s(tipo)] ?? "Evento";
+
 /** Le unità del perimetro, espanse alla discendenza: I19 vuole la catena, non il solo livello. */
 const CTE_UNITA = `
   WITH RECURSIVE perimetro AS (
@@ -85,20 +104,34 @@ const CTE_UNITA = `
  * AZIENDA (company) — 4 viste
  * ------------------------------------------------------------------ */
 
+/**
+ * D5: «Rapporti conclusi» sono le persone che nel perimetro hanno avuto un rapporto e oggi non ne
+ * hanno nessuno attivo. Una persona con un'assegnazione conclusa e una attiva (un cambio di
+ * posizione) NON e' un rapporto concluso: il conteggio per stato di assegnazione dava 140 uscite
+ * dove nessuno era uscito. Le utenze di servizio non sono persone (D1).
+ */
 const companyHeadcount: Fornitore = async (q, p) => {
   const r = await q.query<{ attivi: string; cessati: string; posizioni: string; unita: string }>(
     `${CTE_UNITA}
      SELECT
        (SELECT count(DISTINCT a.user_position_assignment_user_id)
           FROM sys.sys_user_position_assignments a
+          JOIN sys.sys_users su ON su.user_id = a.user_position_assignment_user_id
           JOIN sys.sys_positions pos ON pos.position_id = a.user_position_assignment_position_id
          WHERE a.user_position_assignment_status = 'ACTIVE'
+           AND ${soloPersone("su")}
            AND pos.position_organization_unit_id IN (SELECT organization_unit_id FROM perimetro)) AS attivi,
        (SELECT count(DISTINCT a.user_position_assignment_user_id)
           FROM sys.sys_user_position_assignments a
+          JOIN sys.sys_users su ON su.user_id = a.user_position_assignment_user_id
           JOIN sys.sys_positions pos ON pos.position_id = a.user_position_assignment_position_id
          WHERE a.user_position_assignment_status = 'ENDED'
-           AND pos.position_organization_unit_id IN (SELECT organization_unit_id FROM perimetro)) AS cessati,
+           AND ${soloPersone("su")}
+           AND pos.position_organization_unit_id IN (SELECT organization_unit_id FROM perimetro)
+           AND NOT EXISTS (
+             SELECT 1 FROM sys.sys_user_position_assignments b
+              WHERE b.user_position_assignment_user_id = a.user_position_assignment_user_id
+                AND b.user_position_assignment_status = 'ACTIVE')) AS cessati,
        (SELECT count(*) FROM sys.sys_positions pos
          WHERE pos.position_is_active
            AND pos.position_organization_unit_id IN (SELECT organization_unit_id FROM perimetro)) AS posizioni,
@@ -114,16 +147,38 @@ const companyHeadcount: Fornitore = async (q, p) => {
   ]);
 };
 
+/**
+ * D5: l'andamento dell'organico e' l'organico a fine mese (le persone in servizio quel giorno),
+ * non il numero di assegnazioni iniziate: un cambio di posizione non e' un'assunzione, e il
+ * consolidamento di agosto 2026 (135 nuove assegnazioni) non e' un picco di persone. Il rapporto
+ * di una persona va dalla sua prima assegnazione alla fine dell'ultima, se non ne ha una attiva.
+ */
 const companyAndamentoOrganico: Fornitore = async (q, p) => {
   const r = await q.query<{ bucket: string; value: string }>(
-    `${CTE_UNITA}
-     SELECT to_char(date_trunc('month', a.user_position_assignment_start_date), 'YYYY-MM') AS bucket,
-            count(*) AS value
-       FROM sys.sys_user_position_assignments a
-       JOIN sys.sys_positions pos ON pos.position_id = a.user_position_assignment_position_id
-      WHERE pos.position_organization_unit_id IN (SELECT organization_unit_id FROM perimetro)
-        AND a.user_position_assignment_start_date IS NOT NULL
-        AND a.user_position_assignment_start_date >= (CURRENT_DATE - INTERVAL '24 months')
+    `${CTE_UNITA},
+     rapporti AS (
+       SELECT a.user_position_assignment_user_id AS uid,
+              min(a.user_position_assignment_start_date) AS dal,
+              CASE WHEN bool_or(a.user_position_assignment_status = 'ACTIVE') THEN NULL
+                   ELSE coalesce(max(a.user_position_assignment_end_date), max(a.user_position_assignment_start_date))
+              END AS al
+         FROM sys.sys_user_position_assignments a
+         JOIN sys.sys_users su ON su.user_id = a.user_position_assignment_user_id
+         JOIN sys.sys_positions pos ON pos.position_id = a.user_position_assignment_position_id
+        WHERE pos.position_organization_unit_id IN (SELECT organization_unit_id FROM perimetro)
+          AND a.user_position_assignment_start_date IS NOT NULL
+          AND ${soloPersone("su")}
+        GROUP BY 1
+     ),
+     mesi AS (
+       SELECT to_char(m, 'YYYY-MM') AS bucket,
+              least((m + INTERVAL '1 month' - INTERVAL '1 day')::date, CURRENT_DATE) AS fine
+         FROM generate_series(date_trunc('month', CURRENT_DATE) - INTERVAL '23 months',
+                              date_trunc('month', CURRENT_DATE), INTERVAL '1 month') AS m
+     )
+     SELECT mesi.bucket, count(r.uid) AS value
+       FROM mesi
+       LEFT JOIN rapporti r ON r.dal <= mesi.fine AND (r.al IS NULL OR r.al > mesi.fine)
       GROUP BY 1 ORDER BY 1`,
     P(p),
   );
@@ -214,31 +269,37 @@ const processAttivitaRecenti: Fornitore = async (q, p) => {
             e.user_timeline_event_type AS detail,
             to_char(e.user_timeline_event_occurred_at, 'DD/MM/YYYY') AS occorso
        FROM sys.sys_user_timeline_events e
+       JOIN sys.sys_users su ON su.user_id = e.user_timeline_event_user_id
       WHERE ($1::uuid IS NULL OR e.user_timeline_event_tenant_id = $1::uuid)
+        AND ${soloPersone("su")}
+        AND e.user_timeline_event_type <> ALL($2::text[])
       ORDER BY e.user_timeline_event_occurred_at DESC NULLS LAST LIMIT 15`,
-    [p.tenantId],
+    [p.tenantId, TIPI_EVENTO_RISERVATI],
   );
   return elenco(
     r.rows.map((x) => ({
       id: s(x.id),
       label: s(x.label),
-      detail: `${s(x.detail)} · ${s(x.occorso)}`,
+      detail: `${etichettaEvento(x.detail)} · ${s(x.occorso)}`,
       value: null,
     })),
   );
 };
 
+/**
+ * D10: la vista si chiama «in coda», quindi mostra le richieste in attesa di una decisione. Prima
+ * raggruppava ogni stato e la coda risultava piena di richieste gia' concluse (578 applicate,
+ * 138 approvate, 25 respinte, nessuna in attesa). Se non ce n'e' nessuna lo dice con uno zero.
+ */
 const processApprovazioniInCoda: Fornitore = async (q, p) => {
-  const r = await q.query<{ stato: string; value: string }>(
-    `SELECT approval_request_status AS stato, count(*) AS value
+  const r = await q.query<{ value: string }>(
+    `SELECT count(*) AS value
        FROM sys.sys_approval_requests
       WHERE ($1::uuid IS NULL OR approval_request_tenant_id = $1::uuid)
-      GROUP BY 1 ORDER BY 2 DESC`,
+        AND approval_request_status = 'PENDING'`,
     [p.tenantId],
   );
-  return contatori(
-    r.rows.map((x) => ({ key: s(x.stato).toLowerCase(), label: s(x.stato), value: n(x.value) })),
-  );
+  return contatori([{ key: "pending", label: "In attesa di una decisione", value: n(r.rows[0]?.value) }]);
 };
 
 /* ------------------------------------------------------------------ *
@@ -349,6 +410,8 @@ const branchOrganico: Fornitore = async (q, p) => {
        LEFT JOIN sys.sys_user_position_assignments a
               ON a.user_position_assignment_position_id = pos.position_id
              AND a.user_position_assignment_status = 'ACTIVE'
+             AND EXISTS (SELECT 1 FROM sys.sys_users su
+                          WHERE su.user_id = a.user_position_assignment_user_id AND ${soloPersone("su")})
       GROUP BY 1, 2 ORDER BY 3 DESC, 2`,
     P(p),
   );
@@ -364,16 +427,19 @@ const branchAttivita: Fornitore = async (q, p) => {
             e.user_timeline_event_summary AS label,
             e.user_timeline_event_type AS detail
        FROM sys.sys_user_timeline_events e
+       JOIN sys.sys_users su ON su.user_id = e.user_timeline_event_user_id
        JOIN sys.sys_user_position_assignments a
          ON a.user_position_assignment_user_id = e.user_timeline_event_user_id
         AND a.user_position_assignment_status = 'ACTIVE'
        JOIN sys.sys_positions pos ON pos.position_id = a.user_position_assignment_position_id
       WHERE pos.position_organization_unit_id IN (SELECT organization_unit_id FROM filiali)
+        AND ${soloPersone("su")}
+        AND e.user_timeline_event_type <> ALL($3::text[])
       ORDER BY e.user_timeline_event_occurred_at DESC NULLS LAST LIMIT 15`,
-    P(p),
+    [...P(p), TIPI_EVENTO_RISERVATI],
   );
   return elenco(
-    r.rows.map((x) => ({ id: s(x.id), label: s(x.label), detail: s(x.detail), value: null })),
+    r.rows.map((x) => ({ id: s(x.id), label: s(x.label), detail: etichettaEvento(x.detail), value: null })),
   );
 };
 
@@ -401,19 +467,11 @@ const branchCompetenze: Fornitore = async (q, p) => {
  * HR MANAGEMENT (hr) — 5 viste
  * ------------------------------------------------------------------ */
 
+/** D5: le persone in servizio e i rapporti conclusi, con la stessa definizione di «company/headcount». */
 const hrOrganico: Fornitore = async (q, p) => {
-  const r = await q.query<{ stato: string; value: string }>(
-    `${CTE_UNITA}
-     SELECT a.user_position_assignment_status AS stato, count(DISTINCT a.user_position_assignment_user_id) AS value
-       FROM sys.sys_user_position_assignments a
-       JOIN sys.sys_positions pos ON pos.position_id = a.user_position_assignment_position_id
-      WHERE pos.position_organization_unit_id IN (SELECT organization_unit_id FROM perimetro)
-      GROUP BY 1 ORDER BY 2 DESC`,
-    P(p),
-  );
-  return contatori(
-    r.rows.map((x) => ({ key: s(x.stato).toLowerCase(), label: s(x.stato), value: n(x.value) })),
-  );
+  const c = await companyHeadcount(q, p);
+  if (c.kind !== "counters") return c;
+  return contatori(c.counters.filter((x) => x.key === "attivi" || x.key === "cessati"));
 };
 
 const hrRetribuzioni: Fornitore = async (q, p) => {
@@ -505,7 +563,7 @@ const platformSaluteSistema: Fornitore = async (q) => {
   }>(
     `SELECT
        (SELECT count(*) FROM sys.sys_tenancies WHERE tenant_status = 'ACTIVE') AS tenant_attivi,
-       (SELECT count(*) FROM sys.sys_users WHERE user_status = 'ACTIVE') AS utenti,
+       (SELECT count(*) FROM sys.sys_users u WHERE u.user_status = 'ACTIVE' AND ${soloPersone("u")}) AS utenti,
        (SELECT count(*) FROM sys.sys_organization_units WHERE organization_unit_is_active) AS unita,
        (SELECT count(*) FROM sys.sys_positions WHERE position_is_active) AS posizioni,
        (SELECT count(*) FROM sys.sys_skills) AS competenze`,
@@ -513,7 +571,7 @@ const platformSaluteSistema: Fornitore = async (q) => {
   const x = r.rows[0];
   return contatori([
     { key: "tenant", label: "Aziende attive", value: n(x?.tenant_attivi) },
-    { key: "utenti", label: "Utenti attivi", value: n(x?.utenti) },
+    { key: "utenti", label: "Persone attive", value: n(x?.utenti) },
     { key: "unita", label: "Unità organizzative", value: n(x?.unita) },
     { key: "posizioni", label: "Posizioni attive", value: n(x?.posizioni) },
     { key: "competenze", label: "Competenze a catalogo", value: n(x?.competenze) },
@@ -634,18 +692,18 @@ const selfProfilo: Fornitore = async (q, p) => {
 };
 
 const selfAttivita: Fornitore = async (q, p) => {
-  const r = await q.query<{ id: string; label: string; detail: string }>(
+  const r = await q.query<{ id: string; label: string; tipo: string; occorso: string }>(
     `SELECT e.user_timeline_event_id::text AS id,
             e.user_timeline_event_summary AS label,
-            e.user_timeline_event_type || ' · ' ||
-            to_char(e.user_timeline_event_occurred_at, 'DD/MM/YYYY') AS detail
+            e.user_timeline_event_type AS tipo,
+            to_char(e.user_timeline_event_occurred_at, 'DD/MM/YYYY') AS occorso
        FROM sys.sys_user_timeline_events e
       WHERE e.user_timeline_event_user_id = $1::uuid
       ORDER BY e.user_timeline_event_occurred_at DESC NULLS LAST LIMIT 15`,
     [p.userId],
   );
   return elenco(
-    r.rows.map((x) => ({ id: s(x.id), label: s(x.label), detail: s(x.detail), value: null })),
+    r.rows.map((x) => ({ id: s(x.id), label: s(x.label), detail: `${etichettaEvento(x.tipo)} · ${s(x.occorso)}`, value: null })),
   );
 };
 

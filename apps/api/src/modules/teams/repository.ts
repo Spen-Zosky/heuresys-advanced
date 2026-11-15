@@ -105,12 +105,19 @@ interface MemberRow {
 
 export async function loadTeamMembers(pool: Pool, teamId: string): Promise<TeamMember[]> {
   const res = await pool.query<MemberRow>(
-    `SELECT m.team_member_user_id, m.team_member_role, m.team_member_is_active,
+    // D2-06: il responsabile e' team_lead_user_id della squadra; la sola riga LEAD mancava in
+    // una squadra su 26 e il responsabile compariva come «Membro».
+    `SELECT m.team_member_user_id,
+            CASE WHEN m.team_member_role = 'LEAD' OR m.team_member_user_id = t.team_lead_user_id
+                 THEN 'LEAD' ELSE 'MEMBER' END AS team_member_role,
+            m.team_member_is_active,
             u.user_email, u.user_display_name
        FROM sys.sys_team_members m
+       JOIN sys.sys_teams t ON t.team_id = m.team_member_team_id
        LEFT JOIN sys.sys_users u ON u.user_id = m.team_member_user_id
       WHERE m.team_member_team_id = $1
-      ORDER BY (m.team_member_role = 'LEAD') DESC, u.user_display_name NULLS LAST`,
+      ORDER BY (m.team_member_role = 'LEAD' OR m.team_member_user_id = t.team_lead_user_id) DESC,
+               u.user_display_name NULLS LAST`,
     [teamId],
   );
   return res.rows.map((r) => ({
@@ -293,12 +300,19 @@ async function loadTeamMembersBatch(
   teamIds: string[],
 ): Promise<Map<string, TeamMember[]>> {
   const res = await pool.query<MemberRow & { team_member_team_id: string }>(
-    `SELECT m.team_member_team_id, m.team_member_user_id, m.team_member_role, m.team_member_is_active,
+    // D2-06: come loadTeamMembers, il responsabile e' team_lead_user_id anche senza riga LEAD.
+    `SELECT m.team_member_team_id, m.team_member_user_id,
+            CASE WHEN m.team_member_role = 'LEAD' OR m.team_member_user_id = t.team_lead_user_id
+                 THEN 'LEAD' ELSE 'MEMBER' END AS team_member_role,
+            m.team_member_is_active,
             u.user_email, u.user_display_name
        FROM sys.sys_team_members m
+       JOIN sys.sys_teams t ON t.team_id = m.team_member_team_id
        LEFT JOIN sys.sys_users u ON u.user_id = m.team_member_user_id
       WHERE m.team_member_team_id = ANY($1)
-      ORDER BY m.team_member_team_id, (m.team_member_role = 'LEAD') DESC, u.user_display_name NULLS LAST`,
+      ORDER BY m.team_member_team_id,
+               (m.team_member_role = 'LEAD' OR m.team_member_user_id = t.team_lead_user_id) DESC,
+               u.user_display_name NULLS LAST`,
     [teamIds],
   );
   const byTeam = new Map<string, TeamMember[]>();

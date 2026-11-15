@@ -834,6 +834,7 @@
       "code": "Codice",
       "name": "Nome",
       "type": "Tipo",
+      "version": "Versione in uso",
       "status": "Stato"
     },
     "chartSeries": "Grafici",

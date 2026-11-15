@@ -788,6 +788,7 @@
     "methodIdle": "Lo stato dice se l'unità è sana in assoluto, la posizione dice dove guardare per prima rispetto alle altre. Una dimensione senza dati esce dal calcolo e abbassa la copertura, non il punteggio.",
     "cols": {
       "unit": "Unità organizzativa",
+      "headcount_zero": "Nessuna persona assegnata direttamente all'unità",
       "headcount_one": "{{count}} persona",
       "headcount_other": "{{count}} persone",
       "index": "Indice",

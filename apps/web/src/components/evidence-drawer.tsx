@@ -1,5 +1,6 @@
 "use client";
 
+import { MODALE } from "@/lib/modale";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -66,7 +67,7 @@ export function EvidenceDrawer({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto">
+      <DialogContent className={MODALE.media}>
         <DialogHeader>
           <DialogTitle>{t("evidence.title")}</DialogTitle>
           <DialogDescription>{subjectName}</DialogDescription>

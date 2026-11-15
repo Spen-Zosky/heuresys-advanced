@@ -56,6 +56,9 @@ export default function VisualizationsPage() {
   const graphs = usePaginatedList<VizGraph>({
     queryKey: ["visualization-graphs"],
     path: "/v1/visualization-graphs",
+    // Solo la versione in uso di ogni grafo (15/11/2026, rilievo forense): le precedenti sono
+    // la sua storia e si vedono nella scheda «Versioni» del dettaglio.
+    params: { isActive: "true" },
   });
   // Type distribution — server-side GROUP BY aggregate (API-first, F4.3).
   const summary = useQuery({
@@ -84,6 +87,7 @@ export default function VisualizationsPage() {
         ),
       },
       { header: t("visualizations.columns.type"), cell: (g) => <span className="text-xs text-muted-foreground">{enumLabel("vizGraphType", g.type)}</span> },
+      { header: t("visualizations.columns.version"), cell: (g) => <span className="text-xs tabular-nums text-muted-foreground">{t("visualizations.detail.versionBadge", { version: g.version })}</span> },
       { header: t("visualizations.columns.status"), cell: (g) => <StatusPill tone={g.isActive ? "success" : "neutral"}>{g.isActive ? t("visualizations.activeOn") : t("visualizations.activeOff")}</StatusPill> },
     ],
     [t, enumLabel],

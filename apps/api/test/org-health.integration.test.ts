@@ -86,18 +86,28 @@ describe("#57 F3 — organizational health index", () => {
     expect(b.bands).toEqual({ ...B });
     expect(b.minCoverage).toBe(ORG_HEALTH_MIN_COVERAGE);
 
-    // one row per org-unit with at least one PRIMARY-ACTIVE incumbent
+    // One row per ACTIVE org-unit, people or not (15/11/2026): the scorecard has the same
+    // structure as the org chart. Before, the Direzione Generale (0 people) was missing.
     const { rows } = await pool.query<{ n: string }>(
-      `SELECT count(DISTINCT p.position_organization_unit_id)::text AS n
-         FROM sys.sys_user_position_assignments a
-         JOIN sys.sys_positions p ON p.position_id = a.user_position_assignment_position_id
-         JOIN sys.sys_tenancies t ON t.tenant_id = p.position_tenant_id AND t.tenant_name = 'RTL Bank'
-        WHERE a.user_position_assignment_kind = 'PRIMARY'
-          AND a.user_position_assignment_status = 'ACTIVE'
-          AND p.position_organization_unit_id IS NOT NULL`,
+      `SELECT count(*)::text AS n
+         FROM sys.sys_organization_units o
+         JOIN sys.sys_tenancies t ON t.tenant_id = o.organization_unit_tenant_id AND t.tenant_name = 'RTL Bank'
+        WHERE o.organization_unit_is_active`,
     );
     expect(b.total).toBe(Number(rows[0]?.n));
-    for (const u of b.units) expect(u.headcount).toBeGreaterThan(0);
+    // A unit without people stays in the list, with headcount 0 and no band.
+    for (const u of b.units) if (u.headcount === 0) expect(u.status).toBe("INSUFFICIENT_DATA");
+    // The headcounts add up to the people with a PRIMARY-ACTIVE position in an active unit.
+    const persone = await pool.query<{ n: string }>(
+      `SELECT count(*)::text AS n
+         FROM sys.sys_user_position_assignments a
+         JOIN sys.sys_positions p ON p.position_id = a.user_position_assignment_position_id
+         JOIN sys.sys_organization_units o ON o.organization_unit_id = p.position_organization_unit_id AND o.organization_unit_is_active
+         JOIN sys.sys_tenancies t ON t.tenant_id = p.position_tenant_id AND t.tenant_name = 'RTL Bank'
+        WHERE a.user_position_assignment_kind = 'PRIMARY'
+          AND a.user_position_assignment_status = 'ACTIVE'`,
+    );
+    expect(b.units.reduce((s, u) => s + u.headcount, 0)).toBe(Number(persone.rows[0]?.n));
   });
 
   it("the index EQUALS the declared weighted mean of the dimensions that have data", async () => {

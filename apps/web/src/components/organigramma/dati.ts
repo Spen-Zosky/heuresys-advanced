@@ -24,6 +24,6 @@ export function aBlocchi(r: OrganigrammaResponse | undefined): UnitaBlocco[] {
   return (r?.unita ?? []).map((u) => ({
     id: u.id, nome: u.nome, padreId: u.padreId, filiale: u.filiale, addettiTotali: u.addettiTotali,
     persone: u.persone.map((p) => ({ etichetta: p.etichetta, responsabile: p.responsabile })),
-    sede: u.sedeCodice, organicoPrevisto: u.organicoPrevisto,
+    sede: u.sedeCodice, organicoPrevisto: u.organicoPrevisto, tipo: u.tipo,
   }));
 }

@@ -106,7 +106,7 @@ export async function getWorkforceTotals(
   );
 
   const byOu = await q.query<{ dimension: string; headcount: string }>(
-    `SELECT COALESCE(ou.organization_unit_name, 'Senza unità') AS dimension,
+    `SELECT COALESCE(ou.organization_unit_name, '(senza unità)') AS dimension,
             count(DISTINCT u.user_id)::text AS headcount
        FROM sys.sys_users u
        ${PRIMARY_ASSIGNMENT_JOIN}
@@ -269,7 +269,7 @@ export async function getAttendanceTotals(
     ot: string;
     total: string;
   }>(
-    `SELECT COALESCE(ou.organization_unit_name, 'Senza unità') AS dimension,
+    `SELECT COALESCE(ou.organization_unit_name, '(senza unità)') AS dimension,
             round(sum(at.attendance_hours_regular), 2)::text AS reg,
             round(sum(at.attendance_hours_overtime), 2)::text AS ot,
             round(sum(at.attendance_hours_total), 2)::text AS total
@@ -409,7 +409,7 @@ export async function getCompensationEquity(
     q3: string;
     maxv: string;
   }>(
-    `SELECT COALESCE(ou.organization_unit_name, 'Senza unità') AS ou,
+    `SELECT COALESCE(ou.organization_unit_name, '(senza unità)') AS ou,
             count(*)::text AS n,
             min(b.compensation_band_mid_eur)::text AS minv,
             percentile_cont(0.25) WITHIN GROUP (ORDER BY b.compensation_band_mid_eur)::text AS q1,
@@ -430,7 +430,7 @@ export async function getCompensationEquity(
     band_code: string;
     position_title: string;
   }>(
-    `SELECT COALESCE(ou.organization_unit_name, 'Senza unità') AS ou,
+    `SELECT COALESCE(ou.organization_unit_name, '(senza unità)') AS ou,
             b.compensation_band_mid_eur::text AS mid,
             (b.compensation_band_max_eur - b.compensation_band_min_eur)::text AS spread,
             b.compensation_band_code AS band_code,
@@ -449,7 +449,7 @@ export async function getCompensationEquity(
     medianmid: string | null;
   }>(
     `SELECT count(*)::text AS total,
-            count(DISTINCT COALESCE(ou.organization_unit_name, 'Senza unità'))::text AS oucount,
+            count(DISTINCT COALESCE(ou.organization_unit_name, '(senza unità)'))::text AS oucount,
             min(b.compensation_band_mid_eur)::text AS minmid,
             max(b.compensation_band_mid_eur)::text AS maxmid,
             (percentile_cont(0.5) WITHIN GROUP (ORDER BY b.compensation_band_mid_eur))::text AS medianmid
@@ -552,7 +552,7 @@ export async function getSkillsCoverage(
     evidence_count: string;
     distinct_users: string;
   }>(
-    `SELECT COALESCE(ou.organization_unit_name, 'Senza unità') AS org_unit,
+    `SELECT COALESCE(ou.organization_unit_name, '(senza unità)') AS org_unit,
             e.user_skill_evidence_declared_proficiency AS proficiency,
             count(*)::text AS evidence_count,
             count(DISTINCT u.user_id)::text AS distinct_users
@@ -579,7 +579,7 @@ export async function getSkillsCoverage(
   const totals = await q.query<{ total: string; users: string; ous: string }>(
     `SELECT count(*)::text AS total,
             count(DISTINCT u.user_id)::text AS users,
-            count(DISTINCT COALESCE(ou.organization_unit_name, 'Senza unità'))::text AS ous
+            count(DISTINCT COALESCE(ou.organization_unit_name, '(senza unità)'))::text AS ous
        ${SKILLS_FROM}
       WHERE ${sc.sql}`,
     sc.params,
@@ -770,12 +770,14 @@ export interface OrgNetworkDepthRow {
 export interface OrgNetworkSpanRow {
   positionTitle: string;
   orgUnit: string;
+  holder: string | null;
   directReports: number;
 }
 
 export interface OrgNetworkReachRow {
   positionTitle: string;
   orgUnit: string;
+  holder: string | null;
   reach: number;
 }
 
@@ -783,6 +785,7 @@ export interface OrgNetwork {
   totalPositions: number;
   rootPositions: number;
   managersCount: number;
+  vacantPositions: number;
   avgSpanOfControl: number | null;
   maxDepth: number;
   byDepth: OrgNetworkDepthRow[];
@@ -791,9 +794,11 @@ export interface OrgNetwork {
 }
 
 function orgNetworkScopeClause(scope: ScopeFilter): { sql: string; params: unknown[] } {
-  if (scope.isPlatformScope) return { sql: "TRUE", params: [] };
+  // Solo le posizioni attive (15/11/2026): le disattivate restano nella tabella come storia, e
+  // contarle faceva di RTL una banca da 316 posizioni con livelli e riporti che non esistono più.
+  if (scope.isPlatformScope) return { sql: "p.position_is_active", params: [] };
   const params: unknown[] = [scope.tenantId];
-  const clauses = [`p.position_tenant_id = $1`];
+  const clauses = [`p.position_tenant_id = $1`, `p.position_is_active`];
   if (scope.teamPositionIds.length > 0) {
     params.push(scope.teamPositionIds);
     clauses.push(`p.position_id = ANY($${params.length}::uuid[])`);
@@ -814,22 +819,35 @@ export async function getOrgNetwork(
   const SCOPED = `
     WITH RECURSIVE scoped AS (
       SELECT p.position_id, p.position_title, p.position_reports_to_position_id AS reports_to,
-             COALESCE(ou.organization_unit_name, '(unassigned)') AS org_unit
+             COALESCE(ou.organization_unit_name, '(senza unità)') AS org_unit,
+             tit.holder
         FROM sys.sys_positions p
         LEFT JOIN sys.sys_organization_units ou
           ON ou.organization_unit_id = p.position_organization_unit_id
+        -- Il titolare «Cognome, Nome» (R1): con tre «Analista Rischio» il solo titolo non dice chi è.
+        LEFT JOIN LATERAL (
+              SELECT coalesce(nullif(concat_ws(', ', nullif(trim(u.user_last_name), ''), nullif(trim(u.user_first_name), '')), ''),
+                              u.user_display_name) AS holder
+                FROM sys.sys_user_position_assignments a
+                JOIN sys.sys_users u ON u.user_id = a.user_position_assignment_user_id
+               WHERE a.user_position_assignment_position_id = p.position_id
+                 AND a.user_position_assignment_status = 'ACTIVE'
+               ORDER BY a.user_position_assignment_start_date DESC NULLS LAST, u.user_id
+               LIMIT 1
+        ) tit ON true
        WHERE ${sc.sql}
     )`;
 
   // Totals: total positions + roots (no reports-to, or reports-to a position outside
-  // the scoped set — so a scoped subtree counts its in-scope top as a root).
-  const totals = await q.query<{ total: string; roots: string }>(
+  // the scoped set — so a scoped subtree counts its in-scope top as a root) + vacant.
+  const totals = await q.query<{ total: string; roots: string; vacant: string }>(
     `${SCOPED}
      SELECT count(*)::text AS total,
             count(*) FILTER (
               WHERE reports_to IS NULL
                  OR reports_to NOT IN (SELECT position_id FROM scoped)
-            )::text AS roots
+            )::text AS roots,
+            count(*) FILTER (WHERE holder IS NULL)::text AS vacant
        FROM scoped`,
     sc.params,
   );
@@ -848,19 +866,23 @@ export async function getOrgNetwork(
     sc.params,
   );
 
-  // Top span-of-control: positions ranked by direct reports (correlated count; 158 rows).
+  // Top span-of-control: positions ranked by direct reports; only real managers (≥1 report).
   const topSpan = await q.query<{
     position_title: string;
     org_unit: string;
+    holder: string | null;
     direct_reports: string;
   }>(
-    `${SCOPED}
-     SELECT s.position_title,
-            s.org_unit,
-            (SELECT count(*) FROM scoped c WHERE c.reports_to = s.position_id)::text AS direct_reports
-       FROM scoped s
-      ORDER BY (SELECT count(*) FROM scoped c WHERE c.reports_to = s.position_id) DESC,
-               s.position_title
+    `${SCOPED},
+     spans AS (
+       SELECT s.position_title, s.org_unit, s.holder,
+              (SELECT count(*) FROM scoped c WHERE c.reports_to = s.position_id) AS dr
+         FROM scoped s
+     )
+     SELECT position_title, org_unit, holder, dr::text AS direct_reports
+       FROM spans
+      WHERE dr > 0
+      ORDER BY dr DESC, position_title, holder NULLS LAST
       LIMIT 15`,
     sc.params,
   );
@@ -893,6 +915,7 @@ export async function getOrgNetwork(
   const reach = await q.query<{
     position_title: string;
     org_unit: string;
+    holder: string | null;
     reach: string;
   }>(
     `${SCOPED},
@@ -907,10 +930,11 @@ export async function getOrgNetwork(
      )
      SELECT a.position_title,
             a.org_unit,
+            a.holder,
             (count(*) - 1)::text AS reach
        FROM descendants d
        JOIN scoped a ON a.position_id = d.ancestor
-      GROUP BY a.position_id, a.position_title, a.org_unit
+      GROUP BY a.position_id, a.position_title, a.org_unit, a.holder
      HAVING (count(*) - 1) > 0
       ORDER BY (count(*) - 1) DESC, a.position_title
       LIMIT 15`,
@@ -924,6 +948,7 @@ export async function getOrgNetwork(
     totalPositions: Number(totals.rows[0]?.total ?? 0),
     rootPositions: Number(totals.rows[0]?.roots ?? 0),
     managersCount: Number(ss?.managers ?? 0),
+    vacantPositions: Number(totals.rows[0]?.vacant ?? 0),
     avgSpanOfControl: ss?.avg_span == null ? null : Number(ss.avg_span),
     maxDepth,
     byDepth: depth.rows.map((r) => ({
@@ -933,11 +958,13 @@ export async function getOrgNetwork(
     topSpan: topSpan.rows.map((r) => ({
       positionTitle: r.position_title,
       orgUnit: r.org_unit,
+      holder: r.holder,
       directReports: Number(r.direct_reports),
     })),
     topReach: reach.rows.map((r) => ({
       positionTitle: r.position_title,
       orgUnit: r.org_unit,
+      holder: r.holder,
       reach: Number(r.reach),
     })),
   };
@@ -1052,7 +1079,7 @@ export async function getOvertimeRollups(
 
   // Subject user → PRIMARY/ACTIVE assignment → position → OU (1 primary active per user → no fan-out).
   const byOu = await q.query<{ dimension: string; cnt: string; hours: string }>(
-    `SELECT COALESCE(ou.organization_unit_name, 'Senza unità') AS dimension,
+    `SELECT COALESCE(ou.organization_unit_name, '(senza unità)') AS dimension,
             count(*)::text AS cnt,
             round(sum(ot.overtime_hours), 2)::text AS hours
        FROM sys.sys_overtime ot

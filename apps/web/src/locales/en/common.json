@@ -1091,8 +1091,13 @@
       "blocchi": "Boxes",
       "nodi": "Nodes"
     },
-    "legenda": "Click a box to open the unit with its sub-units, people and positions. Filled box = top; dashed = branch. The head of the unit is in bold.",
-    "legendaNodi": "One node per unit: its size says how many people work there, including the units below. Click the name to open the card, click the dot to expand or collapse the branch; scroll to zoom.",
+    "legenda": "Double-click a box to open the unit with its sub-units, people and positions. Filled box = top; dashed = branch. The head of the unit is in bold.",
+    "legendaSocieta": "{{societa}} is the company: it is written as the title above the chart; at the top is General Management with the General Manager, and below it first the divisions and then the staff departments.",
+    "legendaNodi": "One node per unit, with the same structure as the boxes. The size of the dot and the number in brackets say how many people work in the unit, including the units below. Double-click a node to open its card; click the dot to collapse or expand the branch.",
+    "navigazione": {
+      "aiuto": "Mouse wheel or + and − keys to zoom · drag to move · double-click an empty area to fit",
+      "adatta": "Fit"
+    },
     "completo": "Full organisation chart",
     "completoNota": "Overview without names; below, head office and branches with their people.",
     "centrale": "Head office",

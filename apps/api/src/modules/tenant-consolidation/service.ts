@@ -201,7 +201,9 @@ async function riversa(
 ): Promise<ApprovalPreview> {
   const client = await pool.connect();
   try {
-    await client.query("BEGIN");
+    // REPEATABLE READ: le due misure delle sentinelle vedono la stessa fotografia del database più le
+    // sole scritture di questa approvazione, così ciò che scrive un altro tenant nel frattempo non la ferma.
+    await client.query("BEGIN ISOLATION LEVEL REPEATABLE READ");
     const s = await repo.getConsolidation(client, tenantId, id, true);
     if (!s) throw new NotFoundError("Sessione di consolidamento non trovata", "CONSOLIDATION_NOT_FOUND");
     if (s.runningGroup) {

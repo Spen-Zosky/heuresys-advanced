@@ -291,7 +291,20 @@ export async function loadProfileFull(q: DbConnector, userId: string, roles: str
          JOIN sys.sys_positions p ON p.position_id = a.user_position_assignment_position_id
          LEFT JOIN sys.sys_organization_units ou ON ou.organization_unit_id = p.position_organization_unit_id
          LEFT JOIN sys.sys_positions mp ON mp.position_id = p.position_reports_to_position_id
-         LEFT JOIN sys.sys_users mu ON mu.user_id = mp.position_owner_user_id
+         -- Il responsabile è il TITOLARE della posizione a cui si riporta (incarico PRIMARY ACTIVE),
+         -- non il suo proprietario (I1: proprietario e titolare sono distinti). Il 15/11/2026, con il
+         -- proprietario, 126 persone su 161 vedevano «Responsabile: —» (rilievo forense D2-01).
+         -- Il proprietario resta come ripiego, per la posizione superiore scoperta.
+         LEFT JOIN LATERAL (
+               SELECT ma.user_position_assignment_user_id AS user_id
+                 FROM sys.sys_user_position_assignments ma
+                WHERE ma.user_position_assignment_position_id = mp.position_id
+                  AND ma.user_position_assignment_status = 'ACTIVE'
+                ORDER BY (ma.user_position_assignment_kind = 'PRIMARY') DESC,
+                         ma.user_position_assignment_start_date DESC NULLS LAST, ma.user_position_assignment_user_id
+                LIMIT 1
+         ) mt ON true
+         LEFT JOIN sys.sys_users mu ON mu.user_id = coalesce(mt.user_id, mp.position_owner_user_id)
         WHERE a.user_position_assignment_user_id = $1
           AND a.user_position_assignment_kind = 'PRIMARY'
           -- come sopra: l'ordinamento da solo non basta, un incarico chiuso di

@@ -19,8 +19,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { cn } from "@heuresys/ui";
-import { useMyInterfaces } from "../lib/api/auth";
-import { pageVerdict } from "../lib/page-guard";
+import { useCurrentUserPermissions } from "@/lib/api/auth";
 
 type Tab = { href: string; key: string };
 type Group = { id: string; tabs: ReadonlyArray<Tab> };
@@ -84,22 +83,30 @@ function matchHref(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+/**
+ * Il permesso che l'API chiede per i dati di una scheda. Rilievo forense S-02 (15/11/2026): la
+ * scheda «Rete organizzativa» compariva a 16 ruoli che aprono /organization ma non hanno
+ * `analytics:view`, e portava a una pagina in 403. Ogni pagina /analytics/* legge da
+ * /v1/analytics/*, che chiede `analytics:view` su ogni rotta (apps/api/src/modules/analytics/routes.ts).
+ */
+export function permessoDellaScheda(href: string): string | null {
+  return href.startsWith("/analytics/") ? "analytics:view" : null;
+}
+
 export function SectionTabs() {
   const pathname = usePathname() ?? "";
   const { t } = useTranslation("shell");
-  const ifaces = useMyInterfaces();
+  const perms = useCurrentUserPermissions();
   const group = MERGE_GROUPS.find((g) => g.tabs.some((tb) => matchHref(pathname, tb.href)));
   if (!group) return null;
-  // S-02 (forense 15/11): una scheda compare solo a chi può aprirne la pagina, con la stessa
-  // regola della guardia (pageVerdict sul registro /v1/me/interfaces). Finché il registro non
-  // è arrivato si mostra la sola scheda corrente, per non offrire per un attimo pagine negate.
-  const routes = ifaces.data?.routes;
-  const visibili = group.tabs.filter(
-    (tb) =>
-      matchHref(pathname, tb.href) ||
-      (routes !== undefined && pageVerdict(tb.href, routes, SECTION_TAB_GROUPS).kind !== "denied"),
-  );
-  if (visibili.length < 2) return null;
+  // Una scheda si mostra se chi guarda ha il permesso dei suoi dati; quella su cui si è resta
+  // sempre (la pagina stessa dice «non hai accesso» se serve). Mentre i permessi si caricano, le
+  // schede con un permesso compaiono dopo, non prima.
+  const tabs = group.tabs.filter((tb) => {
+    const p = permessoDellaScheda(tb.href);
+    return !p || matchHref(pathname, tb.href) || (perms.data?.permissions.includes(p) ?? false);
+  });
+  if (tabs.length < 2) return null;
 
   return (
     <div className="mx-auto max-w-7xl px-6 pt-6">
@@ -108,7 +115,7 @@ export function SectionTabs() {
         aria-label={t("tabs.label")}
         className="flex gap-1 overflow-x-auto border-b border-border"
       >
-        {visibili.map((tb) => {
+        {tabs.map((tb) => {
           const active = matchHref(pathname, tb.href);
           return (
             <Link

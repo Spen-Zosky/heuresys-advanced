@@ -9,6 +9,7 @@ import { Button, Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
 import { SchedePagina } from "@/components/schede-pagina";
 import { PageHeader } from "@/components/intestazione-pagina";
 import { MermaidDiagram } from "../../_charts-client";
+import { AreaNavigabile } from "@/components/organigramma/area-navigabile";
 import { apiFetch } from "@/lib/api/fetch";
 import { apiDownload } from "@/lib/api/download";
 import { isApiError } from "@/lib/api/errors";
@@ -270,12 +271,15 @@ export default function VisualizationDetailPage() {
               <CardHeader>
                 <CardTitle>{t("visualizations.detail.diagramTitle")}</CardTitle>
               </CardHeader>
-              <CardContent className="overflow-x-auto" data-testid="visualization-renderer">
-                <MermaidDiagram
-                  source={mermaidSource}
-                  ariaLabel={t("visualizations.detail.diagramAria", { name: g.name })}
-                  className="min-w-full"
-                />
+              <CardContent data-testid="visualization-renderer">
+                {/* Piano PIANO_organigrammi-navigazione_20261115.md (N6): la stessa navigazione degli
+                    organigrammi vivi (fit, rotella e + −, trascinamento, doppio clic sul vuoto). */}
+                <AreaNavigabile ariaLabel={t("visualizations.detail.diagramAria", { name: g.name })} altezzaMax="75vh" testId="visualization-area">
+                  <MermaidDiagram
+                    source={mermaidSource}
+                    ariaLabel={t("visualizations.detail.diagramAria", { name: g.name })}
+                  />
+                </AreaNavigabile>
               </CardContent>
             </Card>
           ) : null}

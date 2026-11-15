@@ -1,4 +1,5 @@
 "use client";
+import { MODALE } from "@/lib/modale";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -475,7 +476,7 @@ export default function ConsolidationPage() {
       ) : null}
       {conferma ? (
         <Dialog open onOpenChange={(o) => { if (!o) setConferma(null); }}>
-          <DialogContent className="max-h-[90vh] overflow-y-auto" data-testid="consolidation-approval-dialog">
+          <DialogContent className={MODALE.piccola} data-testid="consolidation-approval-dialog">
             <DialogHeader>
               <DialogTitle>{t(`consolidation.approval.${conferma}Title`)}</DialogTitle>
               <DialogDescription>{t(`consolidation.approval.${conferma}Body`, { count: nBozza })}</DialogDescription>

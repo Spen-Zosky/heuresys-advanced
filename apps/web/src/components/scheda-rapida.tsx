@@ -18,6 +18,7 @@
  * (`GET /v1/me/rubrica`): la catena si percorre con qualunque ruolo, senza chiamate che un ruolo
  * non può fare. Il dettaglio completo resta nella pagina, raggiungibile da «Apri la pagina».
  */
+import { MODALE } from "@/lib/modale";
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
@@ -251,7 +252,9 @@ export function SchedeProvider({ children }: { children: ReactNode }) {
       <Dialog open={!!cima} onOpenChange={(o) => { if (!o) setPila([]); }}>
         {cima ? (
           <DialogContent
-            className={`max-h-[90vh] overflow-y-auto ${cima.tipo === "unita" ? "max-w-5xl" : "max-w-xl"}`}
+            className={cima.tipo === "unita" ? MODALE.grande : MODALE.media}
+            // La scheda ha già «Chiudi» / «Chiudi cascata»: la X di serie sarebbe un secondo pulsante uguale.
+            showCloseButton={false}
             data-testid="scheda-rapida"
             // Come nel banco: Esc chiude solo l'ultima scheda della cascata.
             onEscapeKeyDown={(e) => { if (pila.length > 1) { e.preventDefault(); indietro(); } }}

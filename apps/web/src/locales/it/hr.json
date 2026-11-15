@@ -450,7 +450,7 @@
       "confirm": "Conferma la decisione",
       "confirming": "Registro…",
       "close": "Chiudi",
-      "sameHint": "Puoi riconfermare anche la stessa scelta. La decisione viene registrata: i dati cambiano solo quando premi «Esegui modifiche»."
+      "sameHint": "Puoi riconfermare anche la stessa scelta. La decisione va nella bozza: i dati cambiano solo con «Approva definitivamente le modifiche»."
     },
     "applyChanges": "Apporta modifiche ({{count}})",
     "applyChanges_one": "Apporta la modifica ({{count}})",

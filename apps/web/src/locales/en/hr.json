@@ -450,7 +450,7 @@
       "confirm": "Confirm the decision",
       "confirming": "Recording…",
       "close": "Close",
-      "sameHint": "You can reconfirm the same choice. The decision is recorded: the data change only when you press “Apply changes”."
+      "sameHint": "You can reconfirm the same choice. The decision goes into the draft: the data change only with «Approve the changes for good»."
     },
     "applyChanges": "Preview changes ({{count}})",
     "applyChanges_one": "Preview change ({{count}})",

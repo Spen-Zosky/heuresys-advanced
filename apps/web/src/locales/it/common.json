@@ -9,7 +9,10 @@
     "save": "Errore durante il salvataggio.",
     "boundaryTitle": "Qualcosa è andato storto",
     "boundaryBody": "Si è verificato un errore imprevisto durante il caricamento di questa sezione. Riprova; se il problema persiste, ricarica la pagina.",
-    "boundaryRef": "Riferimento:"
+    "boundaryRef": "Riferimento:",
+    "notFoundTitle": "Pagina non trovata",
+    "notFoundBody": "L'indirizzo che hai aperto non esiste o non è più disponibile.",
+    "notFoundHome": "Torna alla pagina iniziale"
   },
   "actions": {
     "cancel": "Annulla",
@@ -1013,6 +1016,10 @@
       "infrastruttura": "tecnica"
     },
     "perRiga": "origine riga per riga",
+    "conteggio_one": "{{stato}}: {{count}} tabella",
+    "conteggio_other": "{{stato}}: {{count}} tabelle",
+    "conteggioPerRiga_one": "{{count}} tabella con l'origine riga per riga",
+    "conteggioPerRiga_other": "{{count}} tabelle con l'origine riga per riga",
     "colonna": "Origine",
     "riga": {
       "IMPORT": "Importata",

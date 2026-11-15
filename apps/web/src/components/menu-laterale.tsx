@@ -59,6 +59,10 @@ function Voce({ v, attiva, icona, livello }: { v: VoceMenu; attiva: boolean; ico
         href={v.href}
         prefetch={false}
         aria-current={attiva ? "page" : undefined}
+        // Con la barra ridotta alle sole icone l'etichetta visibile sparisce: il nome accessibile e
+        // il suggerimento restano (axe: link-name; E-SENZA-NOME del giro del 15/11).
+        aria-label={v.label}
+        title={v.label}
         data-menu-attiva={attiva ? "" : undefined}
         className={`nav-link flex items-center gap-2 rounded-control py-1.5 pr-2 text-sm transition ${
           attiva ? "bg-accent font-medium text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground"

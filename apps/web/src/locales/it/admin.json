@@ -350,7 +350,8 @@
   "tenants": {
     "title": "Tenant",
     "description": "Registry dei tenant con codice, country e stato.",
-    "count": "{{count}} totali",
+    "count_one": "{{count}} totale",
+    "count_other": "{{count}} totali",
     "errorMessage": "Accesso negato o errore di caricamento.",
     "emptyTitle": "Nessun tenant",
     "emptyDescription": "Non ci sono tenant registrati.",

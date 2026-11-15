@@ -56,13 +56,14 @@ function Voce({ i }: { i: Insight }) {
 }
 
 export function QuadroInsight() {
-  const { t } = useTranslation("common");
+  const { t, i18n } = useTranslation("common");
+  const lingua = i18n.language === "en" ? "en" : "it";
   const pathname = usePathname();
   const aree = areeDellaRotta(pathname);
   const [tutte, setTutte] = useState(false);
   const q = useQuery({
-    queryKey: ["me", "quadro", aree.join(",")],
-    queryFn: ({ signal }) => apiFetch<QuadroResponse>(`/v1/me/quadro?aree=${aree.join(",")}`, { signal }),
+    queryKey: ["me", "quadro", aree.join(","), lingua],
+    queryFn: ({ signal }) => apiFetch<QuadroResponse>(`/v1/me/quadro?aree=${aree.join(",")}&lingua=${lingua}`, { signal }),
     enabled: aree.length > 0,
     staleTime: 5 * 60_000,
     retry: 0,

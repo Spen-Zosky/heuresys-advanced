@@ -350,7 +350,8 @@
   "tenants": {
     "title": "Tenants",
     "description": "Tenant registry with code, country and status.",
-    "count": "{{count}} total",
+    "count_one": "{{count}} total",
+    "count_other": "{{count}} total",
     "errorMessage": "Access denied or loading error.",
     "emptyTitle": "No tenants",
     "emptyDescription": "There are no registered tenants.",

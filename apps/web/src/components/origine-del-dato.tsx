@@ -29,10 +29,19 @@ export function OrigineDelDato({ path }: { path: string }) {
   });
   const modulo = q.data?.modules[0];
   if (!modulo?.origin) return null;
-  const dettaglio = modulo.tables
-    .filter((x) => x.state !== null && x.state !== "infrastruttura")
-    .map((x) => `${x.table}: ${t(`origine.stato.${x.state}`)}${x.perRow ? ` (${t("origine.perRiga")})` : ""}`)
-    .join("\n");
+  // Il dettaglio dice quante tabelle hanno ciascuna origine, senza i nomi tecnici delle tabelle
+  // (nomi di database, che a una persona non dicono niente).
+  const perStato = new Map<string, number>();
+  let perRiga = 0;
+  for (const x of modulo.tables) {
+    if (x.state === null || x.state === "infrastruttura") continue;
+    perStato.set(x.state, (perStato.get(x.state) ?? 0) + 1);
+    if (x.perRow) perRiga += 1;
+  }
+  const dettaglio = [
+    ...[...perStato].map(([stato, quante]) => t("origine.conteggio", { count: quante, stato: t(`origine.stato.${stato}`) })),
+    ...(perRiga > 0 ? [t("origine.conteggioPerRiga", { count: perRiga })] : []),
+  ].join("\n");
   return (
     <Badge
       variant="outline"

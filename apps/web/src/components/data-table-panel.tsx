@@ -244,7 +244,9 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
               data-testid={rowTestId}
               className="cursor-pointer transition-colors hover:bg-muted/60"
               tabIndex={0}
-              role="button"
+              // niente role="button": la riga contiene collegamenti e pulsanti, e un controllo
+              // dentro un controllo è la violazione axe `nested-interactive`. La riga resta una
+              // riga di tabella, apribile con Invio o Spazio.
               {...(onRowClick ? {} : { "data-scheda-riga": "" })}
               onClick={(e) => {
                 // un comando dentro la cella (collegamento, pulsante, campo) fa il suo lavoro

@@ -539,12 +539,8 @@ function buildRewardGateColumns(
     {
       header: t("compensation.cols.gate"),
       cell: (g) => (
-        <span>
-          <span className="font-mono text-xs">{g.catalogCode}</span>
-          <span className="block text-xs text-muted-foreground">
-            {g.catalogName}
-          </span>
-        </span>
+        // il nome del cancello, mai il codice a vista: il codice resta nel suggerimento
+        <span className="text-xs" title={g.catalogCode}>{g.catalogName}</span>
       ),
     },
     {

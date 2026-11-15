@@ -1,5 +1,5 @@
 -- ============================================================================================
--- 000492 — I titoli delle approvazioni parlano italiano e gli avvisi dei passi decisi si chiudono
+-- 000493 — I titoli delle approvazioni parlano italiano e gli avvisi dei passi decisi si chiudono
 --          (controllo forense del portale personale, rilievi D2-14 e D2-07).
 --
 -- PERCHÉ.

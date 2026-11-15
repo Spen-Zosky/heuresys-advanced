@@ -1,4 +1,4 @@
--- 000493 — L'amministratore delegato legge cruscotti e analisi (forense frontend 2026-11-15, D8).
+-- 000494 — L'amministratore delegato legge cruscotti e analisi (forense frontend 2026-11-15, D8).
 --
 -- IL FATTO, misurato il 2026-11-15 sulla matrice ruolo x permesso viva. `CEO` ha 48 permessi e fra
 -- questi `dashboard_company:view`, quindi l'intento di prodotto e' che veda il cruscotto Azienda;
@@ -55,9 +55,9 @@ BEGIN
        AND p.auth_permission_code IN ('dashboard:view', 'analytics:view', 'talent:read',
                                       'goal:read', 'okr:read', 'performance-review:read');
     IF n_ceo <> 6 THEN
-      RAISE EXCEPTION '000493: il CEO ha % delle 6 concessioni di lettura (una e'' ritirata o manca un permesso)', n_ceo;
+      RAISE EXCEPTION '000494: il CEO ha % delle 6 concessioni di lettura (una e'' ritirata o manca un permesso)', n_ceo;
     END IF;
   END IF;
-  RAISE NOTICE '000493 ok — il CEO legge dashboard, analisi, talenti, obiettivi, OKR e valutazioni.';
+  RAISE NOTICE '000494 ok — il CEO legge dashboard, analisi, talenti, obiettivi, OKR e valutazioni.';
 END
 $post$;

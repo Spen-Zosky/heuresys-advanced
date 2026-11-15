@@ -16,7 +16,7 @@ Tutte le ondate sono riunite nel ramo `claude/project-thread-elue8v` (PR #262). 
 
 ## Ondata 2: portale personale (ramo `claude/forense-portale`)
 
-CORRETTI: D2-01, 02, 03, 04, 05, 07, 11, 12, 13, 14 (seed e migrazione 000492 con giornale `staging.approvazioni_italiano_undo`), 15, 23, 24, 26. CORRETTI IN PARTE: D2-06 (ruolo di capo squadra; squadre disallineate = dato), D2-08 (pagina; dato no), D2-10 (vocabolari mancanti per fascia paga e area), D2-16, D2-17, D2-18, D2-21. NON CORRETTI: D2-09, D2-19, D2-20 (pagina nuova), D2-22, D2-25 (dato). Test nuovo `me-forense-portale.integration.test.ts`, 7/7.
+CORRETTI: D2-01, 02, 03, 04, 05, 07, 11, 12, 13, 14 (seed e migrazione 000493 con giornale `staging.approvazioni_italiano_undo`), 15, 23, 24, 26. CORRETTI IN PARTE: D2-06 (ruolo di capo squadra; squadre disallineate = dato), D2-08 (pagina; dato no), D2-10 (vocabolari mancanti per fascia paga e area), D2-16, D2-17, D2-18, D2-21. NON CORRETTI: D2-09, D2-19, D2-20 (pagina nuova), D2-22, D2-25 (dato). Test nuovo `me-forense-portale.integration.test.ts`, 7/7.
 
 ## Ondata 3: amministrazione e sorgente (ramo `claude/forense-amministrazione`)
 
@@ -24,7 +24,7 @@ CORRETTI: D3-02, 09, 12, 13 (filtro; i residui restano nel dato), 14, 16, 20, 21
 
 ## Ondata 4: cruscotti e analisi (ramo `claude/forense-cruscotti`)
 
-CORRETTI: D1, D2, D3 (con perimetro, mascheramento e soglia di anonimato per orizzonte dopo la revisione di sicurezza), D4, D5, D6, D7, D8 (migrazione 000493: il CEO legge cruscotti, analisi, talenti, obiettivi, OKR, valutazioni), D9, D10, D11, D14, D16. IN PARTE: D12 (dato alla fonte), D13, D15 (dato), D17. NON CORRETTI: D18, D19, D20 (dato o scelta di progetto), D21 (organigrammi, altro thread).
+CORRETTI: D1, D2, D3 (con perimetro, mascheramento e soglia di anonimato per orizzonte dopo la revisione di sicurezza), D4, D5, D6, D7, D8 (migrazione 000494: il CEO legge cruscotti, analisi, talenti, obiettivi, OKR, valutazioni), D9, D10, D11, D14, D16. IN PARTE: D12 (dato alla fonte), D13, D15 (dato), D17. NON CORRETTI: D18, D19, D20 (dato o scelta di progetto), D21 (organigrammi, altro thread).
 
 ## Dati da decidere con Enzo (nessuna scrittura fatta)
 

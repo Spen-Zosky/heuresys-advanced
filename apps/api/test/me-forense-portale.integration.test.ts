@@ -138,8 +138,8 @@ describe("portale personale: rilievi D2 del controllo forense", () => {
     expect(team!.members.find((m) => m.userId === target!.uid)?.role).toBe("LEAD");
   });
 
-  it("D2-14 e D2-07: la migrazione 000492 riscrive i titoli, chiude gli avvisi ed e' idempotente", async () => {
-    const sql = readFileSync(new URL("../../../db/migrations/000492_titoli_e_avvisi_delle_approvazioni_in_italiano.sql", import.meta.url), "utf8")
+  it("D2-14 e D2-07: la migrazione 000493 riscrive i titoli, chiude gli avvisi ed e' idempotente", async () => {
+    const sql = readFileSync(new URL("../../../db/migrations/000493_titoli_e_avvisi_delle_approvazioni_in_italiano.sql", import.meta.url), "utf8")
       // l'utente dell'API non vede lo schema staging (lo usa il migratore): la prova gira sugli stessi
       // enunciati con funzione e giornale temporanei, che spariscono con la transazione annullata
       .replace(/^BEGIN;$/m, "").replace(/^COMMIT;$/m, "").replaceAll("staging.", "pg_temp.");

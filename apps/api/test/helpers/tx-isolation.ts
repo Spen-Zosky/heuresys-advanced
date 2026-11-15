@@ -82,7 +82,8 @@ function makeClientFacade(): PoolClient {
   const facade: any = {
     query: (...args: any[]) => {
       const stmt = firstStatement(args);
-      if (stmt === "BEGIN") {
+      // «BEGIN ISOLATION LEVEL …» vale come BEGIN: dentro la transazione del file il livello è già fissato.
+      if (stmt === "BEGIN" || /^BEGIN ISOLATION LEVEL /i.test(stmt)) {
         const name = `d52_sp_${++savepointSeq}`;
         savepointStack.push(name);
         return (fileClient as any).query(`SAVEPOINT ${name}`);

@@ -13,7 +13,12 @@
  */
 import type { PoolClient } from "pg";
 
-export interface Violazione { view: string; before: number; after: number }
+/**
+ * Una sentinella che l'approvazione accenderebbe. Si dice solo quante righe nuove porta: i conti
+ * assoluti delle viste sono di tutta la piattaforma (le sentinelle non sono per tenant) e non escono
+ * verso chi approva in un tenant (I5).
+ */
+export interface Violazione { view: string; added: number }
 
 /**
  * Sentinelle di dati derivati che si ricalcolano da sé: crescono quando l'approvazione rinomina una
@@ -22,7 +27,10 @@ export interface Violazione { view: string; before: number; after: number }
  */
 export const SENTINELLE_RICALCOLABILI: ReadonlySet<string> = new Set(["v_embedding_impronta_non_combacia"]);
 
-/** Il conto di ogni vista sentinella sys.v_*, in una sola chiamata. */
+/**
+ * Il conto di ogni vista sentinella sys.v_*, in una sola chiamata. Resta un conto interno: serve solo a
+ * confrontare prima e dopo dentro la stessa transazione (REPEATABLE READ), non si restituisce.
+ */
 export async function contaSentinelle(c: PoolClient): Promise<Map<string, number>> {
   const { rows } = await c.query<{ v: string; n: string }>(
     `SELECT viewname AS v,
@@ -39,7 +47,7 @@ export function accese(prima: Map<string, number>, dopo: Map<string, number>, ri
   for (const [view, after] of dopo) {
     if (SENTINELLE_RICALCOLABILI.has(view) !== ricalcolabili) continue;
     const before = prima.get(view) ?? 0;
-    if (after > before) out.push({ view, before, after });
+    if (after > before) out.push({ view, added: after - before });
   }
   return out.sort((a, b) => a.view.localeCompare(b.view));
 }

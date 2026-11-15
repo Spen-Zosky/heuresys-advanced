@@ -294,9 +294,9 @@ export type PendingApproval = z.infer<typeof PendingApprovalSchema>;
 export const ApprovalPreviewSchema = z.object({
   result: ApplyChangesResultSchema,
   /** Le sentinelle del database che l'approvazione accenderebbe: se ce n'è una, l'approvazione si ferma. */
-  violations: z.array(z.object({ view: z.string(), before: z.number().int(), after: z.number().int() })),
+  violations: z.array(z.object({ view: z.string(), added: z.number().int() })),
   /** Dati derivati che l'approvazione rende vecchi (embedding): non la fermano, si ricalcolano dopo. */
-  toRecompute: z.array(z.object({ view: z.string(), before: z.number().int(), after: z.number().int() })),
+  toRecompute: z.array(z.object({ view: z.string(), added: z.number().int() })),
 });
 export type ApprovalPreview = z.infer<typeof ApprovalPreviewSchema>;
 export const DiscardResultSchema = z.object({ discarded: z.number().int() });

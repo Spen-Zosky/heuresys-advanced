@@ -102,7 +102,12 @@ beforeAll(async () => {
   // periodi sullo stesso indicatore. Contare le righe faceva fallire il test su un
   // comportamento corretto, ed e' l'atteso a essere stato corretto, non il codice.
   conBersaglio = await scegli(
-    `SELECT u.user_email AS email, count(DISTINCT kt.kpi_target_kpi_id)::text AS n
+    // Forense 15/11 (D2-04): /v1/me/kpis mostra i KPI della posizione PIU' quelli con un bersaglio
+    // assegnato, quindi le righe con bersaglio sono tutti i KPI distinti con bersaglio della persona.
+    `SELECT u.user_email AS email,
+            (SELECT count(DISTINCT t2.kpi_target_kpi_id) FROM sys.sys_kpi_targets t2
+               JOIN sys.sys_kpi_definitions d2 ON d2.kpi_definition_id = t2.kpi_target_kpi_id
+              WHERE t2.kpi_target_user_id = u.user_id)::text AS n
        FROM sys.sys_users u
        JOIN sys.sys_user_position_assignments a
          ON a.user_position_assignment_user_id = u.user_id
@@ -113,7 +118,7 @@ beforeAll(async () => {
        JOIN sys.sys_kpi_targets kt
          ON kt.kpi_target_user_id = u.user_id AND kt.kpi_target_kpi_id = pkr.kpi_definition_id
       WHERE u.user_status = 'ACTIVE'
-      GROUP BY 1 ORDER BY 2 DESC LIMIT 1`,
+      GROUP BY u.user_id, u.user_email ORDER BY count(DISTINCT kt.kpi_target_kpi_id) DESC, u.user_email LIMIT 1`,
   );
 }, 60_000);
 

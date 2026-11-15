@@ -300,6 +300,36 @@ export const ApprovalPreviewSchema = z.object({
 });
 export type ApprovalPreview = z.infer<typeof ApprovalPreviewSchema>;
 export const DiscardResultSchema = z.object({ discarded: z.number().int() });
+/** «Rimetti da decidere»: senza elenco scarta tutta la bozza; con l'elenco, solo quelle proposte. */
+export const DiscardChangesBodySchema = z.object({ proposalIds: z.array(z.uuid()).min(1).max(1000).optional() }).strict();
+export type DiscardChangesBody = z.infer<typeof DiscardChangesBodySchema>;
+
+/**
+ * Le decisioni in blocco (Enzo, 2026-11-15), tutte nella bozza:
+ *   · RACCOMANDATA: a ogni proposta la scelta che l'esito raccomanda (corrispondenza → confermata,
+ *     lacuna → adottata, personalizzazione → personalizzazione);
+ *   · RIFIUTO: a ogni proposta il suo «no» (rifiutata, o non adottata per una lacuna);
+ *   · CASCATA: niente di nuovo sulle proposte scelte; la loro decisione attuale si propaga alla cascata.
+ * Con `cascade` anche RACCOMANDATA e RIFIUTO aggiornano la cascata di ogni proposta.
+ */
+export const BULK_DECISION_MODES = ["RACCOMANDATA", "RIFIUTO", "CASCATA"] as const;
+export const BulkDecideBodySchema = z
+  .object({
+    proposalIds: z.array(z.uuid()).min(1).max(1000),
+    mode: z.enum(BULK_DECISION_MODES),
+    cascade: z.boolean().optional(),
+    /** Con false si rivedono anche le proposte già decise (solo il Direttore HR). Predefinito: true. */
+    onlyUndecided: z.boolean().optional(),
+  })
+  .strict();
+export type BulkDecideBody = z.infer<typeof BulkDecideBodySchema>;
+export const BulkDecideResultSchema = z.object({
+  decided: z.number().int(),
+  /** Le decisioni registrate in più sulle voci della cascata. */
+  cascaded: z.number().int(),
+  skipped: z.array(z.object({ proposalId: z.uuid(), reason: z.string() })),
+});
+export type BulkDecideResult = z.infer<typeof BulkDecideResultSchema>;
 
 /** La conferma a gruppi degli abbinamenti certi (R-5): un gesto, più proposte. */
 export const ConfirmCertainBodySchema = z.object({

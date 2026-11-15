@@ -509,6 +509,31 @@
       },
       "update_one": "Aggiorna cascata (una voce)",
       "update_other": "Aggiorna cascata ({{count}} voci)"
+    },
+    "bulk": {
+      "select": "Scegli",
+      "selectRow": "Scegli questa proposta",
+      "outcome": "Esito",
+      "state": "Stato",
+      "all": "Tutti",
+      "undecided": "Da decidere",
+      "decided": "Decise",
+      "minConfidence": "Fiducia da",
+      "maxConfidence": "Fiducia fino a",
+      "shown": "{{shown}} proposte su {{total}} con questi filtri",
+      "selectAll": "Scegli le {{count}} filtrate",
+      "clear": "Togli la scelta",
+      "selected_one": "Una proposta scelta",
+      "selected_other": "{{count}} proposte scelte",
+      "withCascade": "Aggiorna anche la cascata di ognuna",
+      "revise": "Rivedi anche quelle già decise",
+      "recommended": "Applica la raccomandazione dell'agente ({{count}})",
+      "reject": "Rifiuta / non adottare ({{count}})",
+      "cascade": "Aggiorna la cascata delle decise ({{count}})",
+      "undo": "Rimetti da decidere ({{count}})",
+      "hint": "Le scelte in blocco vanno nella bozza come quelle singole: «Apporta modifiche» mostra che cosa cambierebbe, e solo il pulsante rosso scrive i dati.",
+      "result": "Fatto nella bozza: {{decided}} decisioni, {{cascaded}} in cascata, {{skipped}} saltate.",
+      "resultUndo": "Tornate da decidere: {{count}}."
     }
   },
   "gaps": {

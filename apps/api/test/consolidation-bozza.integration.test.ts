@@ -157,7 +157,7 @@ describe("bozza, cascata e approvazione definitiva", () => {
     expect(a.violations).toEqual([]);
     expect((await datiUnita()).site).toBeNull();
     expect(await codiceDi(svc.applyChanges(lettore, sessione))).toBe("PERMISSION_DENIED");
-    expect(accese(new Map([["v_x", 0], ["v_y", 3]]), new Map([["v_x", 1], ["v_y", 2]]))).toEqual([{ view: "v_x", before: 0, after: 1 }]);
+    expect(accese(new Map([["v_x", 0], ["v_y", 3]]), new Map([["v_x", 1], ["v_y", 2]]))).toEqual([{ view: "v_x", added: 1 }]);
   });
 
   it("l'approvazione riversa: l'unità prende sede e organico dal modello, e l'avviso si spegne", async () => {

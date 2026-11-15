@@ -187,6 +187,23 @@ add("sys_mentorship_programs", "program_description",
     "Sostegno ai nuovi responsabili nel passaggio da collaboratore a guida delle persone. Attenzione al coaching, alla restituzione di riscontri e alle dinamiche della squadra.")
 
 
+# --- italiani con «team» (confronto con la produzione, 15/11): squadra, come nel resto del tenant ---
+for t, c, en, it in [
+    ("sys_goal_updates", "update_content", "Collaborazione con il team di sviluppo per accelerare i tempi", "Collaborazione con la squadra di sviluppo per accelerare i tempi"),
+    ("sys_goal_updates", "update_content", "Formazione del team completata, fase operativa avviata", "Formazione della squadra completata, fase operativa avviata"),
+    ("sys_goal_check_ins", "check_in_notes", "Bloccato su una dipendenza da un altro team (Finanza e Operations). Riallineamento in agenda.", "Bloccato su una dipendenza da un'altra squadra (Finanza e Operations). Riallineamento in agenda."),
+    ("sys_goal_check_ins", "check_in_notes", "Dipendenza esterna in ritardo (fornitore o altro team). Monitoraggio settimanale.", "Dipendenza esterna in ritardo (fornitore o altra squadra). Monitoraggio settimanale."),
+    ("sys_goal_comments", "comment_content", "Possiamo coinvolgere il team IT per supporto tecnico?", "Possiamo coinvolgere la squadra IT per un supporto tecnico?"),
+    ("sys_goal_comments", "comment_content", "Suggerisco di coinvolgere il team compliance per la prossima fase", "Suggerisco di coinvolgere la squadra compliance per la prossima fase"),
+    ("sys_feedback_360_responses", "response_strengths", "Bravo a costruire relazioni fra i team", "Bravo a costruire relazioni fra le squadre"),
+    ("sys_feedback_360_responses", "response_strengths", "Ottimo atteggiamento e influenza positiva sul team", "Ottimo atteggiamento e influenza positiva sulla squadra"),
+    ("sys_feedback_360_responses", "response_strengths", "Ottima collaborazione e supporto al team", "Ottima collaborazione e supporto alla squadra"),
+    ("sys_goals", "goal_description", "Raggiungere gli obiettivi di performance definiti nel piano individuale. Partecipare attivamente alle iniziative di team.", "Raggiungere gli obiettivi di performance definiti nel piano individuale. Partecipare attivamente alle iniziative di squadra."),
+    ("sys_goals", "goal_description", "Sostenere la crescita del team e il passaggio di conoscenze", "Sostenere la crescita della squadra e il passaggio di conoscenze"),
+]:
+    add(t, c, en, it)
+
+
 def q(s):
     return "'" + s.replace("'", "''") + "'"
 

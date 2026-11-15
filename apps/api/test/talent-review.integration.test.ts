@@ -194,9 +194,9 @@ describe("#29 A/L3 talent-review 9-box read", () => {
   });
 
   it("critical-coverage catalog: PLATFORM_ADMIN all; TENANT_ADMIN own-tenant (live-derived)", async () => {
-    const liveAll = await liveCount(`SELECT count(*)::text AS n FROM sys.sys_critical_role_coverage_status`);
+    const liveAll = await liveCount(`SELECT count(*)::text AS n FROM sys.sys_critical_positions`);
     const liveRtl = await liveCount(
-      `SELECT count(*)::text AS n FROM sys.sys_critical_role_coverage_status WHERE critical_role_coverage_status_tenant_id = $1`,
+      `SELECT count(*)::text AS n FROM sys.sys_critical_positions WHERE critical_position_tenant_id = $1`,
       [rtlTenantId]);
     const rA = await suite.app.inject({
       method: "GET", url: "/v1/talent-review/critical-coverage?limit=200", headers: { cookie: ch(admin.cookies) },
@@ -208,5 +208,33 @@ describe("#29 A/L3 talent-review 9-box read", () => {
     expect((rA.json() as { total: number }).total).toBe(liveAll);
     expect(rF.statusCode).toBe(200);
     expect((rF.json() as { total: number }).total).toBe(liveRtl);
+  });
+
+  it("D3: la copertura dei ruoli critici riguarda le posizioni critiche, con i candidati dei loro bacini", async () => {
+    const [posizioni, candidati] = await Promise.all([
+      pool.query<{ position_id: string }>(`SELECT critical_position_position_id AS position_id FROM sys.sys_critical_positions`),
+      pool.query<{ position_id: string; livello: string; n: string }>(
+        `SELECT sp.succession_pool_position_id AS position_id, sc.successor_candidate_readiness_level AS livello,
+                count(DISTINCT sc.successor_candidate_user_id)::text AS n
+           FROM sys.sys_succession_pools sp
+           JOIN sys.sys_successor_candidates sc ON sc.successor_candidate_pool_id = sp.succession_pool_id
+           JOIN sys.sys_users su ON su.user_id = sc.successor_candidate_user_id AND su.user_type <> 'SERVICE'
+          WHERE sp.succession_pool_position_id IN (SELECT critical_position_position_id FROM sys.sys_critical_positions)
+          GROUP BY 1, 2`),
+    ]);
+    const r = await suite.app.inject({
+      method: "GET", url: "/v1/talent-review/critical-coverage?limit=200", headers: { cookie: ch(admin.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const items = (r.json() as { items: Array<{ positionId: string; readyNowCount: number; ready6moCount: number; ready1yCount: number }> }).items;
+    // Stesse posizioni delle posizioni critiche: nessuna riga fuori da quell'elenco.
+    expect(new Set(items.map((i) => i.positionId))).toEqual(new Set(posizioni.rows.map((x) => x.position_id)));
+    const atteso = (pos: string, liv: string) =>
+      Number(candidati.rows.find((c) => c.position_id === pos && c.livello === liv)?.n ?? 0);
+    for (const i of items) {
+      expect(i.readyNowCount).toBe(atteso(i.positionId, "READY_NOW"));
+      expect(i.ready6moCount).toBe(atteso(i.positionId, "READY_6_MONTHS"));
+      expect(i.ready1yCount).toBe(atteso(i.positionId, "READY_1_YEAR"));
+    }
   });
 });

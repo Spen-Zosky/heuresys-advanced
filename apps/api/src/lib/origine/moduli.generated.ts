@@ -1410,6 +1410,7 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "/v1/visualization-graphs"
     ],
     "tabelle": [
+      "sys_organization_units",
       "sys_positions",
       "sys_visualization_edges",
       "sys_visualization_graphs",

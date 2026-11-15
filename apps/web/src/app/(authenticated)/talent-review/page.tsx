@@ -79,9 +79,9 @@ function buildCriticalPositionColumns(t: TFunction, f: Formati): DataColumn<Crit
 function buildCoverageColumns(t: TFunction): DataColumn<CriticalCoverage>[] {
   return [
     { header: t("talentReview.cols.position"), cell: (r) => <span title={r.positionId}><NomeOppure nome={r.positionTitle} id={r.positionId} /></span> },
-    { header: t("talentReview.cols.readyNow"), align: "right", cell: (r) => <span className="tabular-nums">{r.readyNowCount}</span> },
-    { header: t("talentReview.cols.ready6mo"), align: "right", cell: (r) => <span className="tabular-nums">{r.ready6moCount}</span> },
-    { header: t("talentReview.cols.ready1y"), align: "right", cell: (r) => <span className="tabular-nums">{r.ready1yCount}</span> },
+    { header: t("talentReview.cols.readyNow"), align: "right", cell: (r) => <span className="tabular-nums">{r.readyNowCount ?? "—"}</span> },
+    { header: t("talentReview.cols.ready6mo"), align: "right", cell: (r) => <span className="tabular-nums">{r.ready6moCount ?? "—"}</span> },
+    { header: t("talentReview.cols.ready1y"), align: "right", cell: (r) => <span className="tabular-nums">{r.ready1yCount ?? "—"}</span> },
     { header: t("talentReview.cols.coverage"), align: "right", cell: (r) => <span className="tabular-nums">{r.overallScore ?? t("talentReview.coverageNotComputed")}</span> },
   ];
 }

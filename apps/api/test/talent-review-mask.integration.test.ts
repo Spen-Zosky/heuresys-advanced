@@ -22,6 +22,7 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
+import { orgSubtreeUserIds } from "../src/lib/scope/org.js";
 
 const PLATFORM_EMAIL = "platform-test-admin@collaudo.invalid";
 const HR_MANDATE_EMAIL = "federica.marchetti@rtl-bank.org";
@@ -138,16 +139,67 @@ describe("#124 D4 — talent-review è mascherato al solo mandato piattaforma", 
     );
   });
 
-  it("posizioni critiche e copertura sono per POSIZIONE, non per persona: non si mascherano", async () => {
-    // Il criterio che regge D4: si maschera ciò che giudica una persona. Una
-    // posizione critica giudica un RUOLO, e la copertura conta candidati senza
-    // nominarli — mascherarle toglierebbe la vista di rischio organizzativo
-    // senza proteggere nessuno.
-    for (const url of ["/v1/talent-review/critical-positions?limit=50",
-                       "/v1/talent-review/critical-coverage?limit=50"]) {
-      const p = await listAs(platform, url);
-      for (const row of p.items) {
-        expect(row["masked"], `${url}: non ha un soggetto persona, mascherarlo sarebbe un errore`).toBeUndefined();
+  it("le posizioni critiche giudicano un RUOLO, non una persona: non si mascherano", async () => {
+    const p = await listAs(platform, "/v1/talent-review/critical-positions?limit=50");
+    for (const row of p.items) expect(row["masked"]).toBeUndefined();
+  });
+
+  // La copertura conta i candidati per orizzonte di prontezza: sono persone valutate (EVALUATION).
+  const K = 5; // K_ANONIMATO_MINIMO di engagement
+  const CONTEGGI = ["readyNowCount", "ready6moCount", "ready1yCount"];
+  async function candidatiPerPosizione(permessi: string[] | null): Promise<Map<string, number>> {
+    const r = await pool.query<{ position_id: string; n: string }>(
+      `SELECT sp.succession_pool_position_id AS position_id, count(DISTINCT sc.successor_candidate_user_id)::text AS n
+         FROM sys.sys_succession_pools sp
+         JOIN sys.sys_successor_candidates sc ON sc.successor_candidate_pool_id = sp.succession_pool_id
+         JOIN sys.sys_users su ON su.user_id = sc.successor_candidate_user_id AND su.user_type <> 'SERVICE'
+        WHERE sp.succession_pool_position_id IN (SELECT critical_position_position_id FROM sys.sys_critical_positions)
+          AND ($1::uuid[] IS NULL OR sc.successor_candidate_user_id = ANY($1::uuid[]))
+        GROUP BY 1`,
+      [permessi],
+    );
+    return new Map(r.rows.map((x) => [x.position_id, Number(x.n)]));
+  }
+
+  it("la copertura dei ruoli critici: al mandato piattaforma i conteggi sono mascherati", async () => {
+    const p = await listAs(platform, "/v1/talent-review/critical-coverage?limit=50");
+    expect(p.items.length).toBeGreaterThan(0);
+    for (const row of p.items) {
+      for (const f of CONTEGGI) expect(Object.hasOwn(row, f), `${f} dev'essere assente per il platform`).toBe(false);
+      expect(row["masked"]).toEqual([...CONTEGGI].sort());
+    }
+  });
+
+  it("la copertura dei ruoli critici: le celle con pochi candidati sono nascoste per chiunque", async () => {
+    const atteso = await candidatiPerPosizione(null);
+    const h = await listAs(hrMandate, "/v1/talent-review/critical-coverage?limit=50");
+    for (const row of h.items) {
+      const n = atteso.get(row["positionId"] as string) ?? 0;
+      const nascosta = n > 0 && n < K;
+      expect(Object.hasOwn(row, "readyNowCount"), `posizione con ${n} candidati`).toBe(!nascosta);
+      expect(row["masked"] !== undefined).toBe(nascosta);
+    }
+  });
+
+  it("la copertura dei ruoli critici: un MANAGER vede i candidati della sola sua catena", async () => {
+    const manager = await login("paolo.caputo@rtl-bank.org");
+    const u = await pool.query<{ user_id: string }>(
+      `SELECT user_id FROM sys.sys_users WHERE user_email = 'paolo.caputo@rtl-bank.org'`);
+    const catena = await orgSubtreeUserIds(pool, u.rows[0]!.user_id);
+    const atteso = await candidatiPerPosizione(catena);
+    const res = await t.app.inject({
+      method: "GET", url: "/v1/talent-review/critical-coverage?limit=50",
+      headers: { cookie: cookieHeader(manager.cookies) },
+    });
+    expect(res.statusCode).toBe(200);
+    const items = (res.json() as { items: Record<string, unknown>[] }).items;
+    for (const row of items) {
+      const n = atteso.get(row["positionId"] as string) ?? 0;
+      const nascosta = n > 0 && n < K;
+      expect(Object.hasOwn(row, "readyNowCount")).toBe(!nascosta);
+      if (!nascosta) {
+        const somma = CONTEGGI.reduce((a, f) => a + Number(row[f] ?? 0), 0);
+        expect(somma).toBeLessThanOrEqual(n); // niente candidati fuori dalla catena
       }
     }
   });

@@ -65,7 +65,7 @@ export const talentReviewRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => talentReviewService.listCriticalPositions(actor(req), req.query));
 
   app.get("/critical-coverage", {
-    config: { orgGate: "catalog", tenantGate: "service" },
+    config: { orgGate: "aggregate", tenantGate: "service" },
     preHandler: [requirePermission("talent:read")],
     schema: {
       querystring: CriticalCoverageListQuerySchema,

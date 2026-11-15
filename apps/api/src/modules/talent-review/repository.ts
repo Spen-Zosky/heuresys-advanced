@@ -7,6 +7,7 @@
  */
 import type { Pool, PoolClient } from "pg";
 import { soloPersone } from "../../lib/scope/persone.js";
+import { K_ANONIMATO_MINIMO } from "../engagement/repository.js";
 import type {
   NineBoxRow, NineBoxListQuery,
   FitScore, FitScoreListQuery,
@@ -436,11 +437,21 @@ function toCriticalCoverage(r: CriticalCoverageDbRow): CriticalCoverage {
     tenantId: r.critical_position_tenant_id,
     positionId: r.critical_position_position_id,
     positionTitle: r.position_title ?? null,
-    readyNowCount: Number(r.ready_now),
-    ready6moCount: Number(r.ready_6mo),
-    ready1yCount: Number(r.ready_1y),
+    // I conteggi per orizzonte sono dati di valutazione di persone (EVALUATION): sotto la soglia
+    // di anonimato (come engagement) una cella con 1..K-1 candidati identificherebbe chi e' pronto,
+    // quindi i conteggi si tolgono e i loro nomi si dichiarano in `masked`. Zero candidati non
+    // identifica nessuno e resta.
+    ...(() => {
+      const n = Number(r.candidati);
+      if (n > 0 && n < K_ANONIMATO_MINIMO) return { masked: ["ready1yCount", "ready6moCount", "readyNowCount"] };
+      return {
+        readyNowCount: Number(r.ready_now),
+        ready6moCount: Number(r.ready_6mo),
+        ready1yCount: Number(r.ready_1y),
+      };
+    })(),
     overallScore: null,
-    payload: { ready2yCount: Number(r.ready_2y), candidates: Number(r.candidati), source: "successor_candidates" },
+    payload: { source: "successor_candidates" },
     computedAt: new Date().toISOString(),
     createdAt: r.created_at.toISOString(),
   };
@@ -450,6 +461,8 @@ export async function listCriticalCoverage(
   q: DbConnector,
   tenantId: string | undefined,
   query: CriticalCoverageListQuery,
+  /** Il perimetro di chi guarda (sottoalbero o se' stesso): vuoto/assente = tutti i candidati del tenant. */
+  userIdAllowList?: string[],
 ): Promise<{ items: CriticalCoverage[]; total: number }> {
   const where: string[] = [];
   const params: unknown[] = [];
@@ -463,6 +476,8 @@ export async function listCriticalCoverage(
     `SELECT count(*)::text AS total FROM sys.sys_critical_positions cp ${wc}`,
     params,
   );
+  params.push(userIdAllowList ?? null);
+  const allow = params.length;
   params.push(query.limit);
   const lim = params.length;
   params.push(query.offset);
@@ -482,6 +497,7 @@ export async function listCriticalCoverage(
              AND sp.succession_pool_tenant_id = cp.critical_position_tenant_id
        LEFT JOIN sys.sys_successor_candidates sc
               ON sc.successor_candidate_pool_id = sp.succession_pool_id
+             AND ($${allow}::uuid[] IS NULL OR sc.successor_candidate_user_id = ANY($${allow}::uuid[]))
              AND EXISTS (SELECT 1 FROM sys.sys_users su
                           WHERE su.user_id = sc.successor_candidate_user_id AND ${soloPersone("su")})
        ${wc}

@@ -63,6 +63,18 @@ describe("insights API (cap③ flight-risk)", () => {
     expect((await recompute(plainUser)).statusCode).toBe(403);
   });
 
+  it("D1: le persone valutate sono persone: nessuna utenza di servizio nell'elenco", async () => {
+    await recompute(admin);
+    const r = await list(admin);
+    expect(r.statusCode).toBe(200);
+    const items = (r.json() as ListBody).items;
+    const servizio = await pool.query<{ user_id: string }>(
+      `SELECT user_id FROM sys.sys_users WHERE user_type = 'SERVICE'`,
+    );
+    const idServizio = new Set(servizio.rows.map((x) => x.user_id));
+    expect(items.filter((it) => idServizio.has(it.userId))).toEqual([]);
+  });
+
   it("RBAC: MANAGER has insights:view but NOT insights:admin", async () => {
     expect((await list(manager)).statusCode).toBe(200);
     expect((await recompute(manager)).statusCode).toBe(403);

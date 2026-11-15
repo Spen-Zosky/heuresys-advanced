@@ -155,6 +155,53 @@ describe("GET /v1/dashboard/widgets integration", () => {
     expect(body.trends).toEqual([]);
   });
 
+  it("D1/D2: il contatore delle persone e l'attivita' recente escludono le utenze di servizio", async () => {
+    const r = await suite.app.inject({
+      method: "GET", url: "/v1/dashboard/widgets", headers: { cookie: ch(tenantS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as {
+      scope: { tenantId: string };
+      counters: { users: number };
+      recentActivity: Array<{ kind: string; resourceId: string }>;
+    };
+    const atteso = await pool.query<{ n: string }>(
+      `SELECT count(*)::text AS n FROM sys.sys_users WHERE user_tenant_id = $1 AND user_type <> 'SERVICE'`,
+      [body.scope.tenantId],
+    );
+    expect(body.counters.users).toBe(Number(atteso.rows[0]!.n));
+    const servizio = await pool.query<{ user_id: string }>(
+      `SELECT user_id FROM sys.sys_users WHERE user_type = 'SERVICE'`,
+    );
+    const idServizio = new Set(servizio.rows.map((x) => x.user_id));
+    expect(body.recentActivity.filter((a) => idServizio.has(a.resourceId))).toEqual([]);
+  });
+
+  it("D2/D7: chi guida una catena vede nell'attivita' solo la sua catena e non i contatori del tenant", async () => {
+    const r = await suite.app.inject({
+      method: "GET", url: "/v1/dashboard/widgets", headers: { cookie: ch(managerS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as {
+      scope: { teamPositionIds: string[] };
+      counters: { learningPaths: number | null; blueprints: number | null; pendingRecommendations: number | null };
+      recentActivity: Array<{ kind: string; resourceId: string }>;
+    };
+    expect(body.counters.learningPaths).toBeNull();
+    expect(body.counters.blueprints).toBeNull();
+    expect(body.counters.pendingRecommendations).toBeNull();
+    const nelPerimetro = await pool.query<{ id: string }>(
+      `SELECT a.user_position_assignment_user_id AS id FROM sys.sys_user_position_assignments a
+        WHERE a.user_position_assignment_status = 'ACTIVE'
+          AND a.user_position_assignment_position_id = ANY($1::uuid[])
+       UNION
+       SELECT p FROM unnest($1::uuid[]) AS p`,
+      [body.scope.teamPositionIds],
+    );
+    const ammessi = new Set(nelPerimetro.rows.map((x) => x.id));
+    for (const a of body.recentActivity) expect(ammessi.has(a.resourceId)).toBe(true);
+  });
+
   it("USER (employee) has no dashboard:view permission → 403", async () => {
     const r = await suite.app.inject({
       method: "GET", url: "/v1/dashboard/widgets",

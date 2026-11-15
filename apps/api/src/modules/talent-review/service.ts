@@ -111,9 +111,18 @@ export const talentReviewService = {
     return repo.listCriticalPositions(pool, tenantId, query);
   },
 
-  /** Critical-role coverage (position-level, no person rows) — tenant-scoped only. */
+  /**
+   * Copertura dei ruoli critici: i conteggi per orizzonte sono persone valutate (EVALUATION).
+   * Perimetro di chi guarda (I18: sottoalbero o se' stesso, mandato HR = tenant), celle sotto la
+   * soglia di anonimato nascoste, conteggi mascherati al solo mandato piattaforma (ADR-0032).
+   */
   async listCriticalCoverage(actor: ActorContext, query: CriticalCoverageListQuery) {
-    const tenantId = isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
-    return repo.listCriticalCoverage(pool, tenantId, query);
+    const f = await orgFilter(actor);
+    const page = await repo.listCriticalCoverage(pool, f.tenantId, query, f.userIdAllowList);
+    if (!masksUnderPlatformMandate(actor, "EVALUATION", null)) return page;
+    return {
+      ...page,
+      items: page.items.map((r) => maskFields(r, ["readyNowCount", "ready6moCount", "ready1yCount"])),
+    };
   },
 };

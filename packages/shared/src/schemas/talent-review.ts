@@ -190,11 +190,14 @@ export const CriticalCoverageSchema = z.object({
   positionId: z.uuid(),
   /** F-3 (piano interfacce, L6): il titolo della posizione, perche' una persona non legge un UUID. */
   positionTitle: z.string().nullable(),
-  readyNowCount: z.number().int(),
-  ready6moCount: z.number().int(),
-  ready1yCount: z.number().int(),
+  // Opzionali per la MASCHERATURA (mandato di piattaforma, ADR-0032) e per la soglia di
+  // anonimato (celle con pochi candidati): i campi sono ASSENTI e i nomi arrivano in `masked`.
+  readyNowCount: z.number().int().optional(),
+  ready6moCount: z.number().int().optional(),
+  ready1yCount: z.number().int().optional(),
   overallScore: z.number().nullable(),
   payload: z.record(z.string(), z.unknown()),
+  masked: z.array(z.string()).optional(),
   computedAt: z.iso.datetime(),
   createdAt: z.iso.datetime(),
 });

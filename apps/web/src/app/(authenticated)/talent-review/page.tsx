@@ -63,10 +63,14 @@ function buildSuccessionColumns(t: TFunction, enumLabel: EnumLabelFn, f: Formati
   ];
 }
 
+/** D12: il codice interno della corsa di importazione non si mostra (R4): resta la frase generica. */
+const CODICE_CORSA = /corsa\s+p\d{6,}\w*/i;
+const motivazioneLeggibile = (m: string | null, t: TFunction) => (m === null || m === "" ? "—" : CODICE_CORSA.test(m) ? t("talentReview.rationaleImported") : m);
+
 function buildCriticalPositionColumns(t: TFunction, f: Formati): DataColumn<CriticalPosition>[] {
   return [
     { header: t("talentReview.cols.position"), cell: (r) => <span title={r.positionId}><NomeOppure nome={r.positionTitle} id={r.positionId} /></span> },
-    { header: t("talentReview.cols.rationale"), cell: (r) => <span className="text-xs text-muted-foreground">{r.rationale ?? "—"}</span> },
+    { header: t("talentReview.cols.rationale"), cell: (r) => <span className="text-xs text-muted-foreground">{motivazioneLeggibile(r.rationale, t)}</span> },
     { header: t("talentReview.cols.businessImpact"), align: "right", cell: (r) => <span className="tabular-nums">{r.businessImpactScore ?? "—"}</span> },
     { header: t("talentReview.cols.flaggedAt"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.flaggedAt)}</span> },
   ];
@@ -75,10 +79,10 @@ function buildCriticalPositionColumns(t: TFunction, f: Formati): DataColumn<Crit
 function buildCoverageColumns(t: TFunction): DataColumn<CriticalCoverage>[] {
   return [
     { header: t("talentReview.cols.position"), cell: (r) => <span title={r.positionId}><NomeOppure nome={r.positionTitle} id={r.positionId} /></span> },
-    { header: t("talentReview.cols.readyNow"), align: "right", cell: (r) => <span className="tabular-nums">{r.readyNowCount}</span> },
-    { header: t("talentReview.cols.ready6mo"), align: "right", cell: (r) => <span className="tabular-nums">{r.ready6moCount}</span> },
-    { header: t("talentReview.cols.ready1y"), align: "right", cell: (r) => <span className="tabular-nums">{r.ready1yCount}</span> },
-    { header: t("talentReview.cols.coverage"), align: "right", cell: (r) => <span className="tabular-nums">{r.overallScore ?? "—"}</span> },
+    { header: t("talentReview.cols.readyNow"), align: "right", cell: (r) => <span className="tabular-nums">{r.readyNowCount ?? "—"}</span> },
+    { header: t("talentReview.cols.ready6mo"), align: "right", cell: (r) => <span className="tabular-nums">{r.ready6moCount ?? "—"}</span> },
+    { header: t("talentReview.cols.ready1y"), align: "right", cell: (r) => <span className="tabular-nums">{r.ready1yCount ?? "—"}</span> },
+    { header: t("talentReview.cols.coverage"), align: "right", cell: (r) => <span className="tabular-nums">{r.overallScore ?? t("talentReview.coverageNotComputed")}</span> },
   ];
 }
 

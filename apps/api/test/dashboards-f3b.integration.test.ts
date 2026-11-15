@@ -18,6 +18,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
+import { pool } from "../src/db/client.js";
 
 interface Contenuto {
   kind: "counters" | "series" | "list";
@@ -187,6 +188,55 @@ describe("#142 F3b — i dati dentro le viste", () => {
       // da sola: si verifica che il contatore sia positivo e coerente col fatto che questa
       // stessa suite è autenticata, quindi almeno un utente attivo esiste per costruzione.
       expect(utenti?.value ?? 0).toBeGreaterThan(0);
+    });
+
+    it("D5: i rapporti conclusi sono le persone senza nessuna assegnazione attiva, non le assegnazioni concluse", async () => {
+      const d = (await dati(MANDATO_HR, "hr")).json() as Dati;
+      const organico = d.blocks.find((v) => v.code === "organico");
+      expect(organico?.access).toBe("open");
+      const per = (k: string) => organico?.content?.counters?.find((c) => c.key === k)?.value;
+      const atteso = await pool.query<{ attivi: string; cessati: string }>(
+        `SELECT
+           (SELECT count(DISTINCT a.user_position_assignment_user_id)::text
+              FROM sys.sys_user_position_assignments a
+              JOIN sys.sys_users u ON u.user_id = a.user_position_assignment_user_id AND u.user_type <> 'SERVICE'
+             WHERE a.user_position_assignment_status = 'ACTIVE'
+               AND a.user_position_assignment_tenant_id = $1) AS attivi,
+           (SELECT count(DISTINCT a.user_position_assignment_user_id)::text
+              FROM sys.sys_user_position_assignments a
+              JOIN sys.sys_users u ON u.user_id = a.user_position_assignment_user_id AND u.user_type <> 'SERVICE'
+             WHERE a.user_position_assignment_status = 'ENDED'
+               AND a.user_position_assignment_tenant_id = $1
+               AND NOT EXISTS (SELECT 1 FROM sys.sys_user_position_assignments b
+                                WHERE b.user_position_assignment_user_id = a.user_position_assignment_user_id
+                                  AND b.user_position_assignment_status = 'ACTIVE')) AS cessati`,
+        [d.scope.tenantId],
+      );
+      expect(per("attivi")).toBe(Number(atteso.rows[0]!.attivi));
+      expect(per("cessati")).toBe(Number(atteso.rows[0]!.cessati));
+    });
+
+    it("D10: le approvazioni «in coda» sono solo quelle in attesa", async () => {
+      const d = (await dati(MANDATO_TECNICO, "process")).json() as Dati;
+      const coda = d.blocks.find((v) => v.code === "approvazioni-in-coda");
+      if (coda?.access !== "open") return; // mandato che non la apre: il fatto da provare non esiste
+      const attese = await pool.query<{ n: string }>(
+        `SELECT count(*)::text AS n FROM sys.sys_approval_requests WHERE approval_request_status = 'PENDING'`,
+      );
+      const totale = (coda.content?.counters ?? []).reduce((a, c) => a + c.value, 0);
+      expect(totale).toBe(Number(attese.rows[0]!.n));
+    });
+
+    it("D9: le viste di attivita' aperte non mostrano eventi retributivi ne' codici interni", async () => {
+      for (const [famiglia, vista] of [["process", "attivita-recenti"], ["branch", "attivita-filiale"]] as const) {
+        const r = await dati(MANDATO_HR, famiglia);
+        if (r.statusCode !== 200) continue;
+        const b = (r.json() as Dati).blocks.find((v) => v.code === vista);
+        if (b?.access !== "open") continue;
+        for (const riga of b.content?.rows ?? []) {
+          expect(riga.detail ?? "").not.toMatch(/SALARY_CHANGE|LEVEL_CHANGE|REVIEW_COMPLETED|COURSE_COMPLETED|CERTIFICATION_EARNED|HIRE/);
+        }
+      }
     });
 
     it("una vista senza fornitore si dichiara invece di sembrare vuota", async () => {

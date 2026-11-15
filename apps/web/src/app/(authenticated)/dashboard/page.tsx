@@ -115,11 +115,15 @@ export default function DashboardPage() {
       <section data-testid="dashboard-counters" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {trendedCards.map((def) => {
           const tr = trendByKey.get(def.key);
+          const valore = w.counters[def.key];
+          // D7: un contatore che per chi guarda non ha un numero onesto (per esempio i percorsi
+          // formativi di un'intera azienda accanto a «4 persone») non si mostra.
+          if (valore === null) return null;
           return (
             <div key={def.key} data-testid={def.testId}>
               <StatsCard
                 label={def.label}
-                value={w.counters[def.key]}
+                value={valore}
                 icon={def.icon}
                 {...(tr
                   ? { trend: tr.deltaPct, trendDirection: tr.direction, sparkline: tr.series, description: t("dashboard.trendDesc") }

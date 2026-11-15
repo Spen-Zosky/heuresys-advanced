@@ -107,7 +107,7 @@ const INTESTAZIONE_STATO = /^(stato|status|attiv[ao]|stato del dato)$/i;
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
 
 export function EntityTable<T>(props: EntityTableProps<T>) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   // C1, C2, C4 del piano interfaccia sistematica: ogni cella passa per la rete di leggibilità
   // (numeri it-IT, codici e frasi inglesi in italiano, email e identificativi in nomi).
   const leggi = useLeggibile();
@@ -216,7 +216,7 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
     <div className="overflow-hidden rounded-card border border-border bg-card shadow-card">
       {agente.stato.testo !== undefined || agente.stato.filtro !== undefined || agente.stato.ordine !== undefined ? (
         <div data-testid="vista-assistente" className="flex items-center justify-between gap-3 border-b border-border bg-muted px-3 py-1.5 text-xs">
-          <span>{t("agente.vistaCambiata", { cosa: descrivi(agente.stato, agente.nomiColonne), righe: rows.length })}</span>
+          <span>{t("agente.vistaCambiata", { cosa: descrivi(agente.stato, agente.nomiColonne, i18n.language), righe: rows.length })}</span>
           <Button variant="ghost" size="sm" data-testid="vista-assistente-azzera" onClick={agente.azzera}>
             {t("agente.vistaAzzera")}
           </Button>

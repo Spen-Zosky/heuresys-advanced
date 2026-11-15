@@ -1078,5 +1078,597 @@
     },
     "previste_one": "{{count}} prevista",
     "previste_other": "{{count}} previste"
+  },
+  "glossario": {
+    "cosaVuolDire": "Che cosa vuol dire {{termine}}",
+    "sigle": {
+      "KPI": {
+        "esteso": "Indicatore chiave di prestazione",
+        "testo": "Una misura scelta per dire se un obiettivo o un processo sta andando come deve, confrontata con un valore atteso."
+      },
+      "OKR": {
+        "esteso": "Obiettivi e risultati chiave",
+        "testo": "Un obiettivo qualitativo accompagnato da pochi risultati misurabili che dicono quando è raggiunto."
+      },
+      "ESCO": {
+        "esteso": "Classificazione europea di abilità, competenze e occupazioni",
+        "testo": "Il vocabolario della Commissione europea che dà un nome comune a mestieri e competenze."
+      },
+      "ISCO": {
+        "esteso": "Classificazione internazionale delle professioni",
+        "testo": "La classificazione delle professioni dell'Organizzazione internazionale del lavoro (ISCO-08)."
+      },
+      "RACI": {
+        "esteso": "Responsabile, Approvatore, Consultato, Informato",
+        "testo": "Chi esegue un'attività, chi ne risponde, chi va sentito prima e chi va avvisato dopo."
+      },
+      "VRIO": {
+        "esteso": "Valore, Rarità, Inimitabilità, Organizzazione",
+        "testo": "Il modo di giudicare se una capacità è un vantaggio competitivo duraturo: deve essere di valore, rara, difficile da copiare e sostenuta dall'organizzazione."
+      },
+      "CCNL": {
+        "esteso": "Contratto collettivo nazionale di lavoro",
+        "testo": "Il contratto del settore che fissa livelli, minimi retributivi, orari, ferie e permessi. Per una banca è il CCNL del Credito."
+      },
+      "RAL": {
+        "esteso": "Retribuzione annua lorda",
+        "testo": "Quanto la persona guadagna in un anno prima di tasse e contributi, senza i premi variabili."
+      },
+      "ROL": {
+        "esteso": "Riduzione dell'orario di lavoro",
+        "testo": "Ore di permesso retribuito che il contratto collettivo riconosce ogni anno, oltre alle ferie."
+      },
+      "FTE": {
+        "esteso": "Equivalente a tempo pieno",
+        "testo": "Le persone contate in proporzione all'orario: due persone a metà tempo valgono 1 FTE."
+      },
+      "HR": {
+        "esteso": "Risorse umane",
+        "testo": "La funzione che gestisce persone, organizzazione, retribuzioni e sviluppo."
+      },
+      "GDPR": {
+        "esteso": "Regolamento generale sulla protezione dei dati",
+        "testo": "Il regolamento europeo 2016/679 sul trattamento dei dati personali."
+      },
+      "DPO": {
+        "esteso": "Responsabile della protezione dei dati",
+        "testo": "La figura che sorveglia che i dati personali siano trattati secondo il GDPR; vede i dati sensibili in forma mascherata."
+      },
+      "MFA": {
+        "esteso": "Autenticazione a più fattori",
+        "testo": "L'accesso chiede, oltre alla parola d'ordine, un secondo elemento: un codice dal telefono o da un'app."
+      },
+      "TOTP": {
+        "esteso": "Codice temporaneo",
+        "testo": "Il codice di sei cifre che un'app di autenticazione genera e che cambia ogni 30 secondi."
+      },
+      "RBAC": {
+        "esteso": "Accesso basato sui ruoli",
+        "testo": "Ciò che una persona può fare dipende dai ruoli che le sono assegnati."
+      },
+      "OU": {
+        "esteso": "Unità organizzativa",
+        "testo": "Un nodo dell'organigramma: direzione, area, ufficio, filiale."
+      },
+      "NACE": {
+        "esteso": "Classificazione europea delle attività economiche",
+        "testo": "Il codice del settore in cui opera un'azienda; in Italia la sua versione è ATECO."
+      },
+      "ATECO": {
+        "esteso": "Classificazione italiana delle attività economiche",
+        "testo": "La versione italiana della NACE, usata da ISTAT e Camere di commercio."
+      },
+      "ERP": {
+        "esteso": "Sistema gestionale integrato",
+        "testo": "Il gestionale che tiene contabilità, acquisti, paghe (per esempio SAP o Zucchetti)."
+      },
+      "IA": {
+        "esteso": "Intelligenza artificiale",
+        "testo": "Gli agenti che leggono i dati, propongono e, dove permesso, eseguono."
+      },
+      "AI": {
+        "esteso": "Intelligenza artificiale",
+        "testo": "Gli agenti che leggono i dati, propongono e, dove permesso, eseguono."
+      },
+      "IBAN": {
+        "esteso": "Codice internazionale di conto bancario",
+        "testo": "Il codice del conto su cui si accredita lo stipendio."
+      },
+      "PIP": {
+        "esteso": "Quadro delle informazioni della posizione",
+        "testo": "Tutto ciò che descrive una posizione: compiti, competenze attese, relazioni, dati retributivi."
+      },
+      "SLA": {
+        "esteso": "Livello di servizio concordato",
+        "testo": "Il tempo entro cui una richiesta deve essere presa in carico o chiusa."
+      }
+    },
+    "concetti": {
+      "coorte": {
+        "termine": "coorte",
+        "testo": "Il gruppo di persone che segue la stessa edizione di un'iniziativa formativa, con le stesse date."
+      },
+      "posti": {
+        "termine": "posti",
+        "testo": "Quante persone l'edizione può accogliere; i posti liberi sono la differenza con gli iscritti."
+      },
+      "dimensione": {
+        "termine": "dimensione",
+        "testo": "La fascia di grandezza dell'azienda cliente, misurata sul numero di persone."
+      },
+      "priorita": {
+        "termine": "priorità",
+        "testo": "Quanto presto va decisa la richiesta: alta vuol dire che il ritardo blocca qualcuno."
+      },
+      "grado": {
+        "termine": "grado",
+        "testo": "Il gradino del livello nella scala della tassonomia: più alto vuol dire più padronanza."
+      },
+      "famiglia": {
+        "termine": "famiglia",
+        "testo": "Il raggruppamento di categorie affini della tassonomia delle competenze."
+      },
+      "unitaSuperiore": {
+        "termine": "unità superiore",
+        "testo": "L'unità organizzativa che contiene questa, un gradino sopra nell'albero."
+      },
+      "processoEAttivita": {
+        "termine": "processo e attività",
+        "testo": "Il processo di lavoro a cui appartiene la richiesta e il passo in cui è ferma."
+      },
+      "affinita": {
+        "termine": "affinità",
+        "testo": "Quanto il profilo della persona somiglia a quello richiesto, da 0 a 100: più alto vuol dire meno strada da fare."
+      },
+      "affinitaRuolo": {
+        "termine": "affinità ruolo",
+        "testo": "Quanto le competenze della persona coprono quelle del ruolo professionale, da 0 a 100."
+      },
+      "capacita": {
+        "termine": "capacità",
+        "testo": "Ciò che l'organizzazione sa fare grazie alle persone e alle competenze che ha, misurato sulle posizioni che la portano."
+      },
+      "carico": {
+        "termine": "carico",
+        "testo": "Quante richieste o persone pesano su qualcuno in rapporto a ciò che può reggere."
+      },
+      "fiducia": {
+        "termine": "fiducia",
+        "testo": "Quanto è solida la stima: bassa vuol dire pochi dati o dati vecchi, quindi da prendere con cautela."
+      },
+      "rarita": {
+        "termine": "rarità",
+        "testo": "Quanto è difficile trovare la risorsa fuori: una capacità rara è un vantaggio che i concorrenti non hanno."
+      },
+      "inimitabilita": {
+        "termine": "inimitabilità",
+        "testo": "Quanto sarebbe difficile per un concorrente copiare la risorsa (analisi VRIO)."
+      },
+      "evidenza": {
+        "termine": "evidenza",
+        "testo": "Il fatto che sostiene il giudizio: un corso finito, una valutazione, un attestato."
+      },
+      "giudizio": {
+        "termine": "giudizio",
+        "testo": "La valutazione espressa su questo punto, con la sua motivazione."
+      },
+      "verdetto": {
+        "termine": "verdetto",
+        "testo": "L'esito della verifica: confermato, da rivedere o respinto."
+      },
+      "umore": {
+        "termine": "umore",
+        "testo": "Come la persona ha detto di sentirsi nella rilevazione, su una scala da molto male a molto bene."
+      },
+      "soddisfazione": {
+        "termine": "soddisfazione",
+        "testo": "Quanto le persone si dicono soddisfatte, in media sulle risposte raccolte."
+      },
+      "riportiDiretti": {
+        "termine": "riporti diretti",
+        "testo": "Le persone che riportano direttamente a questa posizione, un gradino sotto."
+      },
+      "riportiTransitivi": {
+        "termine": "riporti transitivi",
+        "testo": "Tutte le persone sotto questa posizione nella catena, a qualunque profondità."
+      },
+      "posizioniTotali": {
+        "termine": "posizioni totali",
+        "testo": "Le posizioni attive dell'unità, occupate e scoperte."
+      },
+      "prototipo": {
+        "termine": "prototipo",
+        "testo": "Il modello organizzativo di riferimento del settore da cui l'azienda parte e che adatta."
+      },
+      "regolaDiApprovazione": {
+        "termine": "regola di approvazione",
+        "testo": "Chi deve approvare, in che ordine e con quali soglie, per questo tipo di richiesta."
+      },
+      "rilevazioni": {
+        "termine": "rilevazioni",
+        "testo": "Le volte in cui la misura è stata raccolta nel periodo."
+      },
+      "iscrizione": {
+        "termine": "iscrizione",
+        "testo": "La persona è iscritta all'iniziativa: lo stato dice se l'ha iniziata, finita o lasciata."
+      },
+      "obbligatorio": {
+        "termine": "obbligatorio",
+        "testo": "Il corso va fatto per legge o per regola interna; mancarlo è un'inadempienza."
+      },
+      "occupazione": {
+        "termine": "occupazione",
+        "testo": "La professione nella classificazione europea ESCO a cui corrisponde il ruolo."
+      },
+      "criticita": {
+        "termine": "criticità",
+        "testo": "Quanto pesa la posizione per l'organizzazione se restasse scoperta: alta vuol dire che senza titolare un processo importante si ferma."
+      },
+      "copertura": {
+        "termine": "copertura",
+        "testo": "Quota di posizioni con un titolare attivo sul totale delle posizioni attive."
+      },
+      "scoperta": {
+        "termine": "scoperta",
+        "testo": "Una posizione attiva senza un titolare assegnato."
+      },
+      "scoperte": {
+        "termine": "scoperte",
+        "testo": "Posizioni attive senza un titolare assegnato."
+      },
+      "titolare": {
+        "termine": "titolare",
+        "testo": "La persona che oggi occupa la posizione. È distinta dal proprietario, che risponde della posizione."
+      },
+      "proprietario": {
+        "termine": "proprietario",
+        "testo": "Chi risponde della posizione (di solito il responsabile dell'unità): la definisce e decide chi la occupa."
+      },
+      "riportaA": {
+        "termine": "riporta a",
+        "testo": "La posizione sopra nella catena gerarchica."
+      },
+      "successione": {
+        "termine": "successione",
+        "testo": "Le persone pronte, o preparate, a prendere una posizione quando il titolare la lascia."
+      },
+      "prontezza": {
+        "termine": "prontezza",
+        "testo": "Fra quanto tempo un candidato alla successione potrebbe davvero prendere la posizione: ora, entro un anno, entro tre."
+      },
+      "potenziale": {
+        "termine": "potenziale",
+        "testo": "Quanto si prevede che la persona possa crescere, distinto da come lavora oggi (la prestazione)."
+      },
+      "prestazione": {
+        "termine": "prestazione",
+        "testo": "Come la persona ha lavorato nel periodo, secondo la valutazione."
+      },
+      "nineBox": {
+        "termine": "nine box",
+        "testo": "La griglia tre per tre che incrocia prestazione e potenziale e suggerisce che cosa fare con ciascuna persona."
+      },
+      "9Box": {
+        "termine": "9-box",
+        "testo": "La griglia tre per tre che incrocia prestazione e potenziale e suggerisce che cosa fare con ciascuna persona."
+      },
+      "gap": {
+        "termine": "gap",
+        "testo": "La distanza fra il livello di competenza che la posizione chiede e quello che la persona ha."
+      },
+      "divario": {
+        "termine": "divario",
+        "testo": "La distanza fra il livello di competenza che la posizione chiede e quello che la persona ha."
+      },
+      "livello": {
+        "termine": "livello",
+        "testo": "Il livello d'inquadramento del contratto collettivo, che fissa il minimo retributivo."
+      },
+      "bandaRetributiva": {
+        "termine": "banda retributiva",
+        "testo": "L'intervallo di retribuzione previsto per un livello o una famiglia di posizioni: minimo, punto medio, massimo."
+      },
+      "compaRatio": {
+        "termine": "compa-ratio",
+        "testo": "La retribuzione della persona divisa per il punto medio della sua banda: 100% è il centro, sotto 80% o sopra 120% merita uno sguardo."
+      },
+      "turnover": {
+        "termine": "turnover",
+        "testo": "Le uscite del periodo in rapporto all'organico medio."
+      },
+      "assenteismo": {
+        "termine": "assenteismo",
+        "testo": "Le ore di assenza non programmata in rapporto alle ore lavorabili."
+      },
+      "maturazione": {
+        "termine": "maturazione",
+        "testo": "I giorni o le ore di ferie e permessi che la persona acquisisce col passare dei mesi."
+      },
+      "saldo": {
+        "termine": "saldo",
+        "testo": "Quanto resta da godere: maturato, più riporto, meno goduto."
+      },
+      "riporto": {
+        "termine": "riporto",
+        "testo": "Ferie o permessi non goduti l'anno prima e portati in quello corrente."
+      },
+      "perimetro": {
+        "termine": "perimetro",
+        "testo": "L'insieme di unità e persone che il tuo ruolo ti lascia vedere."
+      },
+      "mandato": {
+        "termine": "mandato",
+        "testo": "Il ruolo che dà accesso: dice che cosa puoi fare (leggere, modificare) e su quale perimetro."
+      },
+      "tenant": {
+        "termine": "tenant",
+        "testo": "Un'azienda cliente della piattaforma, con i propri dati separati dagli altri."
+      },
+      "provenienza": {
+        "termine": "provenienza",
+        "testo": "Da dove viene il dato: creato qui (nativo), importato da un altro sistema, o importato e poi arricchito (ibrido)."
+      },
+      "origine": {
+        "termine": "origine",
+        "testo": "Da dove viene il dato: creato qui (nativo), importato da un altro sistema, o importato e poi arricchito (ibrido)."
+      },
+      "organico": {
+        "termine": "organico",
+        "testo": "Le persone con un rapporto di lavoro attivo."
+      },
+      "anzianita": {
+        "termine": "anzianità",
+        "testo": "Da quanto tempo la persona lavora in azienda."
+      },
+      "unitaOrganizzativa": {
+        "termine": "unità organizzativa",
+        "testo": "Un nodo dell'organigramma: direzione, area, ufficio, filiale."
+      },
+      "ferie": {
+        "termine": "ferie",
+        "testo": "I giorni di riposo retribuito che maturano ogni mese secondo il contratto collettivo."
+      },
+      "permessi": {
+        "termine": "permessi",
+        "testo": "Ore di assenza retribuita (ROL, ex festività, permessi per legge) oltre alle ferie."
+      },
+      "straordinario": {
+        "termine": "straordinario",
+        "testo": "Le ore lavorate oltre l'orario contrattuale, pagate con una maggiorazione o recuperate."
+      },
+      "straordinari": {
+        "termine": "straordinari",
+        "testo": "Le ore lavorate oltre l'orario contrattuale, pagate con una maggiorazione o recuperate."
+      },
+      "obiettivo": {
+        "termine": "obiettivo",
+        "testo": "Un risultato concordato per il periodo, con un peso e un modo per misurarlo."
+      },
+      "obiettivi": {
+        "termine": "obiettivi",
+        "testo": "I risultati concordati per il periodo, ciascuno con un peso e un modo per misurarlo."
+      },
+      "peso": {
+        "termine": "peso",
+        "testo": "Quanto conta questa voce sul totale: i pesi di una persona sommano a 100%."
+      },
+      "risultatoChiave": {
+        "termine": "risultato chiave",
+        "testo": "Un numero che dice se l'obiettivo è raggiunto (il «key result» di un OKR)."
+      },
+      "valutazione": {
+        "termine": "valutazione",
+        "testo": "Il giudizio di periodo sulla prestazione, dato dal responsabile e, dove previsto, calibrato."
+      },
+      "ciclo": {
+        "termine": "ciclo",
+        "testo": "Il periodo di valutazione (di solito un anno) con le sue scadenze: obiettivi, verifica intermedia, valutazione finale."
+      },
+      "competenza": {
+        "termine": "competenza",
+        "testo": "Una capacità professionale descritta in un catalogo (ESCO o aziendale), con un livello da 1 a 5."
+      },
+      "competenze": {
+        "termine": "competenze",
+        "testo": "Le capacità professionali descritte in un catalogo (ESCO o aziendale), ciascuna con un livello da 1 a 5."
+      },
+      "livelloAtteso": {
+        "termine": "livello atteso",
+        "testo": "Il livello di competenza che la posizione chiede a chi la occupa."
+      },
+      "certificazione": {
+        "termine": "certificazione",
+        "testo": "Un attestato rilasciato da un ente, con una data di scadenza dopo la quale va rinnovato."
+      },
+      "certificazioni": {
+        "termine": "certificazioni",
+        "testo": "Attestati rilasciati da un ente, ciascuno con una data di scadenza dopo la quale va rinnovato."
+      },
+      "scadenza": {
+        "termine": "scadenza",
+        "testo": "La data oltre la quale la voce non vale più e va rinnovata o chiusa."
+      },
+      "percorsoFormativo": {
+        "termine": "percorso formativo",
+        "testo": "Una sequenza di corsi pensata per colmare un divario di competenza o preparare a un ruolo."
+      },
+      "approvatore": {
+        "termine": "approvatore",
+        "testo": "Chi deve decidere sulla richiesta: il responsabile, o chi ha ricevuto la delega."
+      },
+      "delega": {
+        "termine": "delega",
+        "testo": "Il potere di approvare passato temporaneamente a un'altra persona (per esempio durante un'assenza)."
+      },
+      "punteggio": {
+        "termine": "punteggio",
+        "testo": "Il valore numerico della valutazione, sulla scala indicata accanto."
+      },
+      "rischioDiUscita": {
+        "termine": "rischio di uscita",
+        "testo": "La probabilità stimata che la persona lasci l'azienda nei prossimi mesi, da segnali come anzianità, valutazioni e mercato."
+      },
+      "indice": {
+        "termine": "indice",
+        "testo": "Un numero composto da più misure, su una scala da 0 a 100: più alto è meglio, salvo dove indicato."
+      },
+      "fascia": {
+        "termine": "fascia",
+        "testo": "L'intervallo retributivo previsto per il livello: minimo, punto medio, massimo."
+      },
+      "variabile": {
+        "termine": "variabile",
+        "testo": "La parte della retribuzione legata ai risultati, pagata se si superano le soglie concordate."
+      },
+      "premio": {
+        "termine": "premio",
+        "testo": "Un importo una tantum legato a un risultato o a un evento."
+      },
+      "lordo": {
+        "termine": "lordo",
+        "testo": "L'importo prima di tasse e contributi."
+      },
+      "netto": {
+        "termine": "netto",
+        "testo": "L'importo che arriva sul conto, dopo tasse e contributi."
+      },
+      "inquadramento": {
+        "termine": "inquadramento",
+        "testo": "Livello e qualifica del contratto collettivo che definiscono minimi e mansioni."
+      },
+      "mansione": {
+        "termine": "mansione",
+        "testo": "Il lavoro che la persona svolge, come descritto nel contratto."
+      },
+      "sede": {
+        "termine": "sede",
+        "testo": "Il luogo di lavoro abituale della persona."
+      },
+      "ruoloProfessionale": {
+        "termine": "ruolo professionale",
+        "testo": "Il mestiere descritto nel catalogo (famiglia e ruolo), indipendente dalla singola posizione."
+      },
+      "maturato": {
+        "termine": "maturato",
+        "testo": "Quanto si è acquisito finora nell'anno: giorni o ore che crescono ogni mese."
+      },
+      "goduto": {
+        "termine": "goduto",
+        "testo": "Quanto si è già usato: giorni o ore di assenza fruiti."
+      },
+      "residuo": {
+        "termine": "residuo",
+        "testo": "Quanto resta da usare: maturato più riporto, meno goduto."
+      },
+      "flightRisk": {
+        "termine": "flight-risk|flight risk|rischio di fuga",
+        "testo": "La probabilità stimata che la persona lasci l'azienda nei prossimi mesi, da segnali come anzianità, valutazioni e mercato."
+      },
+      "scope": {
+        "termine": "scope",
+        "testo": "L'insieme di unità e persone su cui una regola o un permesso vale."
+      },
+      "policy": {
+        "termine": "policy",
+        "testo": "La regola scritta che dice che cosa è permesso o richiesto, e a chi."
+      },
+      "workflow": {
+        "termine": "workflow",
+        "testo": "La sequenza dei passi di una pratica, con chi li esegue e in quale ordine."
+      },
+      "feedback": {
+        "termine": "feedback",
+        "testo": "Il riscontro che una persona dà o riceve su un lavoro, un colloquio o un periodo."
+      }
+    }
+  },
+  "lettura": {
+    "asseX": "Asse orizzontale",
+    "asseY": "Asse verticale",
+    "gruppo": "Gruppo {{n}}",
+    "scatter": "{{punti}} punti in {{gruppi}} gruppi; la media più alta di «{{asse}}» è {{valore}} ({{nome}}).",
+    "vediNumeri": "Vedi i numeri del grafico",
+    "vediElementi": "Vedi gli elementi del grafico",
+    "voce": "Voce",
+    "punti": "Punti",
+    "media": "{{asse}} (media)",
+    "heatmap": "Il valore più alto è {{alto}} ({{nomeAlto}}), il più basso {{basso}} ({{nomeBasso}}), su {{celle}} celle.",
+    "minimo": "Minimo",
+    "mediana": "Mediana",
+    "massimo": "Massimo",
+    "boxSolo": "Mediana {{med}}, da {{min}} a {{max}}.",
+    "boxPiu": "La mediana più alta è {{alta}} ({{nomeAlta}}), la più bassa {{bassa}} ({{nomeBassa}}).",
+    "alberoElementi": "{{n}} elementi",
+    "alberoCollegamenti": " e {{n}} collegamenti",
+    "alberoInTesta": "; in testa: {{lista}}",
+    "valore": "Valore",
+    "serie": "Serie {{n}}",
+    "unico": "un solo valore, {{valore}} ({{nome}}).",
+    "altoBasso": "il valore più alto è {{alto}} ({{nomeAlto}}), il più basso {{basso}} ({{nomeBasso}}){{totale}}.",
+    "totale": "; totale {{totale}} su {{voci}} voci"
+  },
+  "schedaRapida": {
+    "persona": "Persona",
+    "posizione": "Posizione",
+    "unita": "Unità",
+    "unitaOrganizzativa": "Unità organizzativa",
+    "percorso": "Percorso",
+    "nonIndicato": "Non indicato",
+    "personaFuori": "Questa persona non è nel tuo perimetro.",
+    "posizioneFuori": "Questa posizione non è nel tuo perimetro.",
+    "unitaFuori": "Questa unità non è nel tuo perimetro.",
+    "riportaA": "Riporta a",
+    "stato": "Stato",
+    "attiva": "Attiva",
+    "nonAttiva": "Non attiva",
+    "stessaUnita": "Nella stessa unità",
+    "apriScheda": "Apri la scheda completa →",
+    "titolare": "Titolare",
+    "scoperta": "Scoperta",
+    "criticita": "Criticità",
+    "codice": "Codice",
+    "leRiportano": "Le riportano",
+    "apriPosizione": "Apri la pagina della posizione →",
+    "responsabile": "Responsabile",
+    "faParteDi": "Fa parte di",
+    "vertice": "vertice",
+    "posizioni": "Posizioni",
+    "posizioniScoperte": ", di cui {{n}} scoperte",
+    "unitaSotto": "Unità sotto",
+    "scopertaMin": "scoperta",
+    "caricamento": "Caricamento…"
+  },
+  "quadroInsight": {
+    "daGuardare": "Da guardare",
+    "mostraMeno": "Mostra meno",
+    "altre": "Altre {{count}} cose da guardare",
+    "nessunaAnomalia_one": "Nessuna anomalia: {{count}} verifica fatta su questa pagina.",
+    "nessunaAnomalia_other": "Nessuna anomalia: {{count}} verifiche fatte su questa pagina."
+  },
+  "esitoAgente": {
+    "ricerca": "ricerca «{{testo}}»",
+    "contiene": "{{colonna}} contiene «{{valore}}»",
+    "ordinata": "ordinata per {{colonna}}, {{verso}}",
+    "colonna": "colonna",
+    "crescente": "crescente",
+    "decrescente": "decrescente",
+    "righeMostrate": "Righe mostrate: {{mostrate}} di {{caricate}} caricate.",
+    "nessunTesto": "Manca il testo da cercare.",
+    "nessunValore": "Manca il valore del filtro.",
+    "parziale": "Vale solo per la pagina caricata: le righe sono {{totale}} in tutto, e le altre stanno sul server.",
+    "colonnaAssente": "La tabella non ha la colonna «{{colonna}}». Colonne: {{colonne}}.",
+    "comandoTabella": "Questa tabella non sa eseguire il comando.",
+    "nessunPasso": "Non c'è un passo dell'assistente da annullare.",
+    "annullato": "Annullato l'ultimo passo. Decisioni preparate e non salvate: {{n}}.",
+    "comandoPagina": "Questa pagina non accetta il comando.",
+    "nonModificabile": "Il fascicolo non si può modificare: la versione è già firmata o la persona non ha il permesso.",
+    "processoAssente": "Il fascicolo non ha il processo «{{processo}}».",
+    "decisioneNo": "La decisione dev'essere IN, PARTIAL oppure OUT.",
+    "senzaMotivazione": "Senza motivazione una decisione non si prepara: la regola del fascicolo la chiede.",
+    "motivazioneLunga": "La motivazione supera {{max}} caratteri.",
+    "preparata": "Preparata sulla pagina la decisione {{inclusione}} per «{{processo}}», da salvare dalla persona. Decisioni preparate e non salvate: {{n}}.",
+    "tipoFascicolo": "fascicolo del modello del tenant",
+    "comeModello": "come dice il modello",
+    "limiteContratto": "il contratto non dichiara un massimo per «{{nome}}»: il form non puo' derivarlo"
   }
 }

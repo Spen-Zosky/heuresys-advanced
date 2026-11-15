@@ -1078,5 +1078,597 @@
     },
     "previste_one": "{{count}} planned",
     "previste_other": "{{count}} planned"
+  },
+  "glossario": {
+    "cosaVuolDire": "What {{termine}} means",
+    "sigle": {
+      "KPI": {
+        "esteso": "Key performance indicator",
+        "testo": "A measure chosen to tell whether a goal or a process is going as it should, compared with an expected value."
+      },
+      "OKR": {
+        "esteso": "Objectives and key results",
+        "testo": "A qualitative objective with a few measurable results that say when it is reached."
+      },
+      "ESCO": {
+        "esteso": "European classification of skills, competences and occupations",
+        "testo": "The European Commission vocabulary that gives a common name to jobs and skills."
+      },
+      "ISCO": {
+        "esteso": "International standard classification of occupations",
+        "testo": "The occupation classification of the International Labour Organization (ISCO-08)."
+      },
+      "RACI": {
+        "esteso": "Responsible, Accountable, Consulted, Informed",
+        "testo": "Who carries out an activity, who answers for it, who must be heard before and who must be told after."
+      },
+      "VRIO": {
+        "esteso": "Value, Rarity, Imitability, Organization",
+        "testo": "A way to judge whether a capability is a lasting competitive advantage: it must be valuable, rare, hard to copy and supported by the organization."
+      },
+      "CCNL": {
+        "esteso": "National collective labour agreement",
+        "testo": "The sector agreement that sets levels, minimum pay, hours, holidays and leave. For a bank it is the credit-sector CCNL."
+      },
+      "RAL": {
+        "esteso": "Gross annual salary",
+        "testo": "What the person earns in a year before tax and contributions, without variable bonuses."
+      },
+      "ROL": {
+        "esteso": "Working time reduction",
+        "testo": "Hours of paid leave that the collective agreement grants every year, on top of holidays."
+      },
+      "FTE": {
+        "esteso": "Full-time equivalent",
+        "testo": "People counted in proportion to their hours: two half-time people are 1 FTE."
+      },
+      "HR": {
+        "esteso": "Human resources",
+        "testo": "The function that manages people, organization, pay and development."
+      },
+      "GDPR": {
+        "esteso": "General Data Protection Regulation",
+        "testo": "The European regulation 2016/679 on the processing of personal data."
+      },
+      "DPO": {
+        "esteso": "Data protection officer",
+        "testo": "The role that oversees that personal data is processed according to the GDPR; sees sensitive data in masked form."
+      },
+      "MFA": {
+        "esteso": "Multi-factor authentication",
+        "testo": "Access asks, besides the password, for a second element: a code from the phone or an app."
+      },
+      "TOTP": {
+        "esteso": "Time-based one-time code",
+        "testo": "The six-digit code that an authenticator app generates and that changes every 30 seconds."
+      },
+      "RBAC": {
+        "esteso": "Role-based access control",
+        "testo": "What a person can do depends on the roles assigned to them."
+      },
+      "OU": {
+        "esteso": "Organizational unit",
+        "testo": "A node of the org chart: department, area, office, branch."
+      },
+      "NACE": {
+        "esteso": "European classification of economic activities",
+        "testo": "The code of the sector a company operates in; in Italy its version is ATECO."
+      },
+      "ATECO": {
+        "esteso": "Italian classification of economic activities",
+        "testo": "The Italian version of NACE, used by ISTAT and the Chambers of Commerce."
+      },
+      "ERP": {
+        "esteso": "Enterprise resource planning system",
+        "testo": "The management system that holds accounting, purchasing and payroll (for example SAP or Zucchetti)."
+      },
+      "IA": {
+        "esteso": "Artificial intelligence",
+        "testo": "The agents that read the data, propose and, where allowed, execute."
+      },
+      "AI": {
+        "esteso": "Artificial intelligence",
+        "testo": "The agents that read the data, propose and, where allowed, execute."
+      },
+      "IBAN": {
+        "esteso": "International bank account number",
+        "testo": "The code of the account into which the salary is paid."
+      },
+      "PIP": {
+        "esteso": "Position information picture",
+        "testo": "Everything that describes a position: duties, expected skills, relationships, pay data."
+      },
+      "SLA": {
+        "esteso": "Service level agreement",
+        "testo": "The time within which a request must be taken on or closed."
+      }
+    },
+    "concetti": {
+      "coorte": {
+        "termine": "cohort",
+        "testo": "The group of people who follow the same edition of a training initiative, with the same dates."
+      },
+      "posti": {
+        "termine": "seats",
+        "testo": "How many people the edition can take; free seats are the difference from the enrolled."
+      },
+      "dimensione": {
+        "termine": "size",
+        "testo": "The size band of the client company, measured on the number of people."
+      },
+      "priorita": {
+        "termine": "priority",
+        "testo": "How soon the request must be decided: high means that the delay blocks someone."
+      },
+      "grado": {
+        "termine": "grade",
+        "testo": "The step of the level in the taxonomy scale: higher means more mastery."
+      },
+      "famiglia": {
+        "termine": "family",
+        "testo": "The grouping of related categories of the skills taxonomy."
+      },
+      "unitaSuperiore": {
+        "termine": "parent unit",
+        "testo": "The organizational unit that contains this one, a step above in the tree."
+      },
+      "processoEAttivita": {
+        "termine": "process and activity",
+        "testo": "The work process the request belongs to and the step where it is waiting."
+      },
+      "affinita": {
+        "termine": "affinity",
+        "testo": "How much the person's profile resembles the required one, from 0 to 100: higher means less distance to cover."
+      },
+      "affinitaRuolo": {
+        "termine": "role affinity",
+        "testo": "How much the person's skills cover those of the job role, from 0 to 100."
+      },
+      "capacita": {
+        "termine": "capability",
+        "testo": "What the organization can do thanks to the people and skills it has, measured on the positions that carry it."
+      },
+      "carico": {
+        "termine": "load",
+        "testo": "How many requests or people weigh on someone compared with what they can bear."
+      },
+      "fiducia": {
+        "termine": "confidence",
+        "testo": "How solid the estimate is: low means few or old data, so to be taken with caution."
+      },
+      "rarita": {
+        "termine": "rarity",
+        "testo": "How hard it is to find the resource outside: a rare capability is an advantage that competitors do not have."
+      },
+      "inimitabilita": {
+        "termine": "imitability",
+        "testo": "How hard it would be for a competitor to copy the resource (VRIO analysis)."
+      },
+      "evidenza": {
+        "termine": "evidence",
+        "testo": "The fact that supports the judgement: a finished course, a review, a certificate."
+      },
+      "giudizio": {
+        "termine": "judgement",
+        "testo": "The assessment given on this point, with its reason."
+      },
+      "verdetto": {
+        "termine": "verdict",
+        "testo": "The outcome of the check: confirmed, to be reviewed or rejected."
+      },
+      "umore": {
+        "termine": "mood",
+        "testo": "How the person said they feel in the survey, on a scale from very bad to very good."
+      },
+      "soddisfazione": {
+        "termine": "satisfaction",
+        "testo": "How satisfied people say they are, on average over the answers collected."
+      },
+      "riportiDiretti": {
+        "termine": "direct reports",
+        "testo": "The people who report directly to this position, one step below."
+      },
+      "riportiTransitivi": {
+        "termine": "indirect reports",
+        "testo": "All the people under this position in the chain, at any depth."
+      },
+      "posizioniTotali": {
+        "termine": "total positions",
+        "testo": "The active positions of the unit, filled and vacant."
+      },
+      "prototipo": {
+        "termine": "prototype",
+        "testo": "The reference organizational model of the sector that the company starts from and adapts."
+      },
+      "regolaDiApprovazione": {
+        "termine": "approval rule",
+        "testo": "Who must approve, in what order and with which thresholds, for this kind of request."
+      },
+      "rilevazioni": {
+        "termine": "readings",
+        "testo": "The times the measure was collected in the period."
+      },
+      "iscrizione": {
+        "termine": "enrolment",
+        "testo": "The person is enrolled in the initiative: the status tells whether they started it, finished it or left it."
+      },
+      "obbligatorio": {
+        "termine": "mandatory",
+        "testo": "The course must be taken by law or by internal rule; missing it is a breach."
+      },
+      "occupazione": {
+        "termine": "occupation",
+        "testo": "The profession in the European ESCO classification that the role corresponds to."
+      },
+      "criticita": {
+        "termine": "criticality",
+        "testo": "How much the position weighs for the organization if it stayed vacant: high means that without a holder an important process stops."
+      },
+      "copertura": {
+        "termine": "coverage",
+        "testo": "Share of positions with an active holder out of all the active positions."
+      },
+      "scoperta": {
+        "termine": "vacant",
+        "testo": "An active position without an assigned holder."
+      },
+      "scoperte": {
+        "termine": "vacant positions",
+        "testo": "Active positions without an assigned holder."
+      },
+      "titolare": {
+        "termine": "holder",
+        "testo": "The person who currently occupies the position. It is distinct from the owner, who answers for the position."
+      },
+      "proprietario": {
+        "termine": "owner",
+        "testo": "Who answers for the position (usually the head of the unit): defines it and decides who occupies it."
+      },
+      "riportaA": {
+        "termine": "reports to",
+        "testo": "The position above in the hierarchical chain."
+      },
+      "successione": {
+        "termine": "succession",
+        "testo": "The people ready, or being prepared, to take a position when the holder leaves it."
+      },
+      "prontezza": {
+        "termine": "readiness",
+        "testo": "How long before a succession candidate could really take the position: now, within a year, within three."
+      },
+      "potenziale": {
+        "termine": "potential",
+        "testo": "How much the person is expected to be able to grow, distinct from how they work today (performance)."
+      },
+      "prestazione": {
+        "termine": "performance",
+        "testo": "How the person worked in the period, according to the review."
+      },
+      "nineBox": {
+        "termine": "nine box",
+        "testo": "The three-by-three grid that crosses performance and potential and suggests what to do with each person."
+      },
+      "9Box": {
+        "termine": "9-box",
+        "testo": "The three-by-three grid that crosses performance and potential and suggests what to do with each person."
+      },
+      "gap": {
+        "termine": "gap",
+        "testo": "The distance between the skill level the position asks for and the one the person has."
+      },
+      "divario": {
+        "termine": "shortfall",
+        "testo": "The distance between the skill level the position asks for and the one the person has."
+      },
+      "livello": {
+        "termine": "level",
+        "testo": "The classification level of the collective agreement, which sets the minimum pay."
+      },
+      "bandaRetributiva": {
+        "termine": "pay band",
+        "testo": "The pay range foreseen for a level or a family of positions: minimum, midpoint, maximum."
+      },
+      "compaRatio": {
+        "termine": "compa-ratio",
+        "testo": "The person's pay divided by the midpoint of their band: 100% is the centre, below 80% or above 120% deserves a look."
+      },
+      "turnover": {
+        "termine": "turnover",
+        "testo": "The exits of the period in relation to the average headcount."
+      },
+      "assenteismo": {
+        "termine": "absenteeism",
+        "testo": "The hours of unplanned absence in relation to the workable hours."
+      },
+      "maturazione": {
+        "termine": "accrual",
+        "testo": "The days or hours of holiday and leave that the person earns as the months go by."
+      },
+      "saldo": {
+        "termine": "balance",
+        "testo": "What is left to take: accrued, plus carry-over, minus taken."
+      },
+      "riporto": {
+        "termine": "carry-over",
+        "testo": "Holidays or leave not taken the year before and carried into the current one."
+      },
+      "perimetro": {
+        "termine": "scope",
+        "testo": "The set of units and people that your role lets you see."
+      },
+      "mandato": {
+        "termine": "mandate",
+        "testo": "The role that gives access: it says what you can do (read, edit) and on which scope."
+      },
+      "tenant": {
+        "termine": "tenant",
+        "testo": "A client company of the platform, with its data kept separate from the others."
+      },
+      "provenienza": {
+        "termine": "provenance",
+        "testo": "Where the data comes from: created here (native), imported from another system, or imported and then enriched (hybrid)."
+      },
+      "origine": {
+        "termine": "origin",
+        "testo": "Where the data comes from: created here (native), imported from another system, or imported and then enriched (hybrid)."
+      },
+      "organico": {
+        "termine": "headcount",
+        "testo": "The people with an active employment relationship."
+      },
+      "anzianita": {
+        "termine": "seniority",
+        "testo": "How long the person has worked at the company."
+      },
+      "unitaOrganizzativa": {
+        "termine": "organizational unit",
+        "testo": "A node of the org chart: department, area, office, branch."
+      },
+      "ferie": {
+        "termine": "holidays",
+        "testo": "The days of paid rest that accrue every month under the collective agreement."
+      },
+      "permessi": {
+        "termine": "leave",
+        "testo": "Hours of paid absence (ROL, former holidays, statutory leave) on top of holidays."
+      },
+      "straordinario": {
+        "termine": "overtime",
+        "testo": "The hours worked beyond the contractual hours, paid with a premium or recovered."
+      },
+      "straordinari": {
+        "termine": "overtime hours",
+        "testo": "The hours worked beyond the contractual hours, paid with a premium or recovered."
+      },
+      "obiettivo": {
+        "termine": "goal",
+        "testo": "A result agreed for the period, with a weight and a way to measure it."
+      },
+      "obiettivi": {
+        "termine": "goals",
+        "testo": "The results agreed for the period, each with a weight and a way to measure it."
+      },
+      "peso": {
+        "termine": "weight",
+        "testo": "How much this item counts on the total: a person's weights add up to 100%."
+      },
+      "risultatoChiave": {
+        "termine": "key result",
+        "testo": "A number that says whether the goal is reached (the \"key result\" of an OKR)."
+      },
+      "valutazione": {
+        "termine": "review",
+        "testo": "The period judgement on performance, given by the manager and, where foreseen, calibrated."
+      },
+      "ciclo": {
+        "termine": "cycle",
+        "testo": "The review period (usually a year) with its deadlines: goals, mid-year check, final review."
+      },
+      "competenza": {
+        "termine": "skill",
+        "testo": "A professional ability described in a catalogue (ESCO or company), with a level from 1 to 5."
+      },
+      "competenze": {
+        "termine": "skills",
+        "testo": "The professional abilities described in a catalogue (ESCO or company), each with a level from 1 to 5."
+      },
+      "livelloAtteso": {
+        "termine": "expected level",
+        "testo": "The skill level that the position asks of whoever occupies it."
+      },
+      "certificazione": {
+        "termine": "certification",
+        "testo": "A certificate issued by a body, with an expiry date after which it must be renewed."
+      },
+      "certificazioni": {
+        "termine": "certifications",
+        "testo": "Certificates issued by a body, each with an expiry date after which it must be renewed."
+      },
+      "scadenza": {
+        "termine": "expiry",
+        "testo": "The date after which the item is no longer valid and must be renewed or closed."
+      },
+      "percorsoFormativo": {
+        "termine": "learning path",
+        "testo": "A sequence of courses designed to close a skill gap or prepare for a role."
+      },
+      "approvatore": {
+        "termine": "approver",
+        "testo": "Who must decide on the request: the manager, or whoever received the delegation."
+      },
+      "delega": {
+        "termine": "delegation",
+        "testo": "The power to approve passed temporarily to another person (for example during an absence)."
+      },
+      "punteggio": {
+        "termine": "score",
+        "testo": "The numeric value of the review, on the scale shown next to it."
+      },
+      "rischioDiUscita": {
+        "termine": "flight risk",
+        "testo": "The estimated probability that the person leaves the company in the coming months, from signals such as seniority, reviews and the market."
+      },
+      "indice": {
+        "termine": "index",
+        "testo": "A number made of several measures, on a scale from 0 to 100: higher is better, unless stated otherwise."
+      },
+      "fascia": {
+        "termine": "band",
+        "testo": "The pay range foreseen for the level: minimum, midpoint, maximum."
+      },
+      "variabile": {
+        "termine": "variable pay",
+        "testo": "The part of pay tied to results, paid if the agreed thresholds are exceeded."
+      },
+      "premio": {
+        "termine": "bonus",
+        "testo": "A one-off amount tied to a result or an event."
+      },
+      "lordo": {
+        "termine": "gross",
+        "testo": "The amount before tax and contributions."
+      },
+      "netto": {
+        "termine": "net",
+        "testo": "The amount that reaches the account, after tax and contributions."
+      },
+      "inquadramento": {
+        "termine": "classification",
+        "testo": "Level and grade of the collective agreement that define minimums and duties."
+      },
+      "mansione": {
+        "termine": "duty",
+        "testo": "The work the person does, as described in the contract."
+      },
+      "sede": {
+        "termine": "site",
+        "testo": "The person's usual place of work."
+      },
+      "ruoloProfessionale": {
+        "termine": "job role",
+        "testo": "The job described in the catalogue (family and role), independent of the single position."
+      },
+      "maturato": {
+        "termine": "accrued",
+        "testo": "What has been earned so far in the year: days or hours that grow every month."
+      },
+      "goduto": {
+        "termine": "taken",
+        "testo": "What has already been used: days or hours of absence taken."
+      },
+      "residuo": {
+        "termine": "remaining",
+        "testo": "What is left to use: accrued plus carry-over, minus taken."
+      },
+      "flightRisk": {
+        "termine": "flight-risk|flight risk",
+        "testo": "The estimated probability that the person leaves the company in the coming months, from signals such as seniority, reviews and the market."
+      },
+      "scope": {
+        "termine": "scope",
+        "testo": "The set of units and people a rule or a permission applies to."
+      },
+      "policy": {
+        "termine": "policy",
+        "testo": "The written rule that says what is allowed or required, and for whom."
+      },
+      "workflow": {
+        "termine": "workflow",
+        "testo": "The sequence of steps of a case, with who carries them out and in what order."
+      },
+      "feedback": {
+        "termine": "feedback",
+        "testo": "The response a person gives or receives on a piece of work, an interview or a period."
+      }
+    }
+  },
+  "lettura": {
+    "asseX": "Horizontal axis",
+    "asseY": "Vertical axis",
+    "gruppo": "Group {{n}}",
+    "scatter": "{{punti}} points in {{gruppi}} groups; the highest average of «{{asse}}» is {{valore}} ({{nome}}).",
+    "vediNumeri": "See the chart numbers",
+    "vediElementi": "See the chart elements",
+    "voce": "Item",
+    "punti": "Points",
+    "media": "{{asse}} (average)",
+    "heatmap": "The highest value is {{alto}} ({{nomeAlto}}), the lowest {{basso}} ({{nomeBasso}}), over {{celle}} cells.",
+    "minimo": "Minimum",
+    "mediana": "Median",
+    "massimo": "Maximum",
+    "boxSolo": "Median {{med}}, from {{min}} to {{max}}.",
+    "boxPiu": "The highest median is {{alta}} ({{nomeAlta}}), the lowest {{bassa}} ({{nomeBassa}}).",
+    "alberoElementi": "{{n}} elements",
+    "alberoCollegamenti": " and {{n}} links",
+    "alberoInTesta": "; leading: {{lista}}",
+    "valore": "Value",
+    "serie": "Series {{n}}",
+    "unico": "a single value, {{valore}} ({{nome}}).",
+    "altoBasso": "the highest value is {{alto}} ({{nomeAlto}}), the lowest {{basso}} ({{nomeBasso}}){{totale}}.",
+    "totale": "; total {{totale}} over {{voci}} items"
+  },
+  "schedaRapida": {
+    "persona": "Person",
+    "posizione": "Position",
+    "unita": "Unit",
+    "unitaOrganizzativa": "Organizational unit",
+    "percorso": "Path",
+    "nonIndicato": "Not specified",
+    "personaFuori": "This person is not in your scope.",
+    "posizioneFuori": "This position is not in your scope.",
+    "unitaFuori": "This unit is not in your scope.",
+    "riportaA": "Reports to",
+    "stato": "Status",
+    "attiva": "Active",
+    "nonAttiva": "Inactive",
+    "stessaUnita": "In the same unit",
+    "apriScheda": "Open the full record →",
+    "titolare": "Holder",
+    "scoperta": "Vacant",
+    "criticita": "Criticality",
+    "codice": "Code",
+    "leRiportano": "Reporting to it",
+    "apriPosizione": "Open the position page →",
+    "responsabile": "Manager",
+    "faParteDi": "Part of",
+    "vertice": "top level",
+    "posizioni": "Positions",
+    "posizioniScoperte": ", of which {{n}} vacant",
+    "unitaSotto": "Units below",
+    "scopertaMin": "vacant",
+    "caricamento": "Loading…"
+  },
+  "quadroInsight": {
+    "daGuardare": "To look at",
+    "mostraMeno": "Show fewer",
+    "altre": "{{count}} more to look at",
+    "nessunaAnomalia_one": "No anomalies: {{count}} check done on this page.",
+    "nessunaAnomalia_other": "No anomalies: {{count}} checks done on this page."
+  },
+  "esitoAgente": {
+    "ricerca": "search «{{testo}}»",
+    "contiene": "{{colonna}} contains «{{valore}}»",
+    "ordinata": "sorted by {{colonna}}, {{verso}}",
+    "colonna": "column",
+    "crescente": "ascending",
+    "decrescente": "descending",
+    "righeMostrate": "Rows shown: {{mostrate}} of {{caricate}} loaded.",
+    "nessunTesto": "The text to search for is missing.",
+    "nessunValore": "The filter value is missing.",
+    "parziale": "It only applies to the loaded page: there are {{totale}} rows in all, and the others are on the server.",
+    "colonnaAssente": "The table has no column «{{colonna}}». Columns: {{colonne}}.",
+    "comandoTabella": "This table cannot run the command.",
+    "nessunPasso": "There is no assistant step to undo.",
+    "annullato": "The last step was undone. Decisions prepared and not saved: {{n}}.",
+    "comandoPagina": "This page does not accept the command.",
+    "nonModificabile": "The file cannot be edited: the version is already signed or the person lacks the permission.",
+    "processoAssente": "The file has no process «{{processo}}».",
+    "decisioneNo": "The decision must be IN, PARTIAL or OUT.",
+    "senzaMotivazione": "A decision is not prepared without a reason: the file rule asks for one.",
+    "motivazioneLunga": "The reason exceeds {{max}} characters.",
+    "preparata": "Decision {{inclusione}} for «{{processo}}» was prepared on the page, to be saved by the person. Decisions prepared and not saved: {{n}}.",
+    "tipoFascicolo": "tenant model file",
+    "comeModello": "as the model says",
+    "limiteContratto": "the contract does not declare a maximum for «{{nome}}»: the form cannot derive it"
   }
 }

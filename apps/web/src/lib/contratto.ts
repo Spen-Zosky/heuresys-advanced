@@ -1,4 +1,5 @@
 import type { z } from "zod";
+import { testo } from "./testi";
 
 /**
  * Il limite massimo di un campo di testo, LETTO dal contratto condiviso invece che riscritto.
@@ -13,7 +14,7 @@ import type { z } from "zod";
  * NON dichiara un massimo, lancia: un form che credeva di avere un limite e non ce l'ha piu' deve
  * fallire al primo disegno, non tacere.
  */
-export function limiteMassimo(campo: z.ZodType, nome = "campo"): number {
+export function limiteMassimo(campo: z.ZodType, nome = "campo", lingua?: string): number {
   let s: unknown = campo;
   for (let i = 0; i < 6; i++) {
     const anyS = s as { maxLength?: number | null; unwrap?: () => unknown; removeDefault?: () => unknown };
@@ -22,5 +23,5 @@ export function limiteMassimo(campo: z.ZodType, nome = "campo"): number {
     if (typeof anyS.removeDefault === "function") { s = anyS.removeDefault(); continue; }
     break;
   }
-  throw new Error(`il contratto non dichiara un massimo per «${nome}»: il form non puo' derivarlo`);
+  throw new Error(testo(lingua, "esitoAgente.limiteContratto", { nome }));
 }

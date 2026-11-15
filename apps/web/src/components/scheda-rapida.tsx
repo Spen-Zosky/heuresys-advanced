@@ -74,20 +74,23 @@ function indicizza(r: RubricaResponse | undefined): Indici {
   };
 }
 
-function nomeDi(ix: Indici, p: Passo): string {
-  if (p.tipo === "persona") return ix.persone.get(p.id)?.etichetta ?? "Persona";
-  if (p.tipo === "posizione") return ix.posizioni.get(p.id)?.titolo ?? "Posizione";
-  return ix.unita.get(p.id)?.nome ?? "Unità";
+type Tr = (chiave: string, parametri?: Record<string, string | number>) => string;
+
+function nomeDi(ix: Indici, p: Passo, t: Tr): string {
+  if (p.tipo === "persona") return ix.persone.get(p.id)?.etichetta ?? t("schedaRapida.persona");
+  if (p.tipo === "posizione") return ix.posizioni.get(p.id)?.titolo ?? t("schedaRapida.posizione");
+  return ix.unita.get(p.id)?.nome ?? t("schedaRapida.unita");
 }
 
 const ICONA = { persona: User, posizione: Briefcase, unita: Building2 } as const;
-const TIPO = { persona: "Persona", posizione: "Posizione", unita: "Unità organizzativa" } as const;
+const TIPO = { persona: "schedaRapida.persona", posizione: "schedaRapida.posizione", unita: "schedaRapida.unitaOrganizzativa" } as const;
 
 function Riga({ etichetta, children }: { etichetta: string; children: ReactNode }) {
+  const { t } = useTranslation("common");
   return (
     <div className="grid grid-cols-[9rem_1fr] gap-3 py-1.5 text-sm">
       <dt className="text-muted-foreground">{etichetta}</dt>
-      <dd className="min-w-0">{children ?? <span className="text-muted-foreground">Non indicato</span>}</dd>
+      <dd className="min-w-0">{children ?? <span className="text-muted-foreground">{t("schedaRapida.nonIndicato")}</span>}</dd>
     </div>
   );
 }
@@ -113,26 +116,27 @@ function Elenco({ titolo, voci }: { titolo: string; voci: Array<{ tipo: TipoSche
 
 function Corpo({ passo, ix, blocchi }: { passo: Passo; ix: Indici; blocchi: UnitaBlocco[] }) {
   const enumLabel = useEnumLabel();
+  const { t } = useTranslation("common");
   const rif = (tipo: TipoScheda, id: string | null | undefined) =>
-    id ? <Riferimento tipo={tipo} id={id}>{nomeDi(ix, { tipo, id })}</Riferimento> : null;
+    id ? <Riferimento tipo={tipo} id={id}>{nomeDi(ix, { tipo, id }, t)}</Riferimento> : null;
 
   if (passo.tipo === "persona") {
     const p = ix.persone.get(passo.id);
-    if (!p) return <p className="text-sm text-muted-foreground">Questa persona non è nel tuo perimetro.</p>;
+    if (!p) return <p className="text-sm text-muted-foreground">{t("schedaRapida.personaFuori")}</p>;
     const pos = p.posizioneId ? ix.posizioni.get(p.posizioneId) : undefined;
     const capo = pos?.riportaAId ? ix.posizioni.get(pos.riportaAId) : undefined;
     const colleghi = [...ix.persone.values()].filter((x) => x.unitaId && x.unitaId === p.unitaId && x.id !== p.id);
     return (
       <>
         <dl className="divide-y divide-border">
-          <Riga etichetta="Posizione">{rif("posizione", p.posizioneId)}</Riga>
-          <Riga etichetta="Unità">{rif("unita", p.unitaId)}</Riga>
-          <Riga etichetta="Riporta a">{capo?.titolareId ? rif("persona", capo.titolareId) : capo ? rif("posizione", capo.id) : null}</Riga>
-          <Riga etichetta="Stato">{p.attiva ? "Attiva" : "Non attiva"}</Riga>
+          <Riga etichetta={t("schedaRapida.posizione")}>{rif("posizione", p.posizioneId)}</Riga>
+          <Riga etichetta={t("schedaRapida.unita")}>{rif("unita", p.unitaId)}</Riga>
+          <Riga etichetta={t("schedaRapida.riportaA")}>{capo?.titolareId ? rif("persona", capo.titolareId) : capo ? rif("posizione", capo.id) : null}</Riga>
+          <Riga etichetta={t("schedaRapida.stato")}>{p.attiva ? t("schedaRapida.attiva") : t("schedaRapida.nonAttiva")}</Riga>
         </dl>
-        <Elenco titolo="Nella stessa unità" voci={colleghi.slice(0, 50).map((c) => ({ tipo: "persona", id: c.id, nome: c.etichetta, nota: c.posizione }))} />
+        <Elenco titolo={t("schedaRapida.stessaUnita")} voci={colleghi.slice(0, 50).map((c) => ({ tipo: "persona", id: c.id, nome: c.etichetta, nota: c.posizione }))} />
         <div className="mt-4 text-right">
-          <Link href={`/users/${p.id}`} className="text-sm font-medium text-primary hover:underline">Apri la scheda completa →</Link>
+          <Link href={`/users/${p.id}`} className="text-sm font-medium text-primary hover:underline">{t("schedaRapida.apriScheda")}</Link>
         </div>
       </>
     );
@@ -140,20 +144,20 @@ function Corpo({ passo, ix, blocchi }: { passo: Passo; ix: Indici; blocchi: Unit
 
   if (passo.tipo === "posizione") {
     const p = ix.posizioni.get(passo.id);
-    if (!p) return <p className="text-sm text-muted-foreground">Questa posizione non è nel tuo perimetro.</p>;
+    if (!p) return <p className="text-sm text-muted-foreground">{t("schedaRapida.posizioneFuori")}</p>;
     const riporti = [...ix.posizioni.values()].filter((x) => x.riportaAId === p.id);
     return (
       <>
         <dl className="divide-y divide-border">
-          <Riga etichetta="Titolare">{p.titolareId ? rif("persona", p.titolareId) : <span className="text-warning">Scoperta</span>}</Riga>
-          <Riga etichetta="Unità">{rif("unita", p.unitaId)}</Riga>
-          <Riga etichetta="Riporta a">{rif("posizione", p.riportaAId)}</Riga>
-          <Riga etichetta="Criticità">{p.criticita ? enumLabel("positionCriticality", p.criticita) : null}</Riga>
-          <Riga etichetta="Codice">{p.codice ? <span className="font-mono text-xs text-muted-foreground">{p.codice}</span> : null}</Riga>
+          <Riga etichetta={t("schedaRapida.titolare")}>{p.titolareId ? rif("persona", p.titolareId) : <span className="text-warning">{t("schedaRapida.scoperta")}</span>}</Riga>
+          <Riga etichetta={t("schedaRapida.unita")}>{rif("unita", p.unitaId)}</Riga>
+          <Riga etichetta={t("schedaRapida.riportaA")}>{rif("posizione", p.riportaAId)}</Riga>
+          <Riga etichetta={t("schedaRapida.criticita")}>{p.criticita ? enumLabel("positionCriticality", p.criticita) : null}</Riga>
+          <Riga etichetta={t("schedaRapida.codice")}>{p.codice ? <span className="font-mono text-xs text-muted-foreground">{p.codice}</span> : null}</Riga>
         </dl>
-        <Elenco titolo="Le riportano" voci={riporti.map((r) => ({ tipo: "posizione", id: r.id, nome: r.titolo, nota: r.titolare }))} />
+        <Elenco titolo={t("schedaRapida.leRiportano")} voci={riporti.map((r) => ({ tipo: "posizione", id: r.id, nome: r.titolo, nota: r.titolare }))} />
         <div className="mt-4 text-right">
-          <Link href={`/positions/${p.id}`} className="text-sm font-medium text-primary hover:underline">Apri la pagina della posizione →</Link>
+          <Link href={`/positions/${p.id}`} className="text-sm font-medium text-primary hover:underline">{t("schedaRapida.apriPosizione")}</Link>
         </div>
       </>
     );
@@ -180,7 +184,7 @@ function CorpoUnita({ id, ix, blocchi, rif }: {
   const org = useOrganigramma();
   const vivo = org.data?.unita.find((x) => x.id === id);
   const u = ix.unita.get(id);
-  if (!u) return <p className="text-sm text-muted-foreground">Questa unità non è nel tuo perimetro.</p>;
+  if (!u) return <p className="text-sm text-muted-foreground">{t("schedaRapida.unitaFuori")}</p>;
   const figlie = [...ix.unita.values()].filter((x) => x.padreId === u.id && x.attiva);
   const posizioni = [...ix.posizioni.values()].filter((x) => x.unitaId === u.id && x.attiva);
   const scoperte = posizioni.filter((x) => !x.titolareId).length;
@@ -201,8 +205,8 @@ function CorpoUnita({ id, ix, blocchi, rif }: {
       ) : null}
       <dl className="divide-y divide-border">
         <Riga etichetta={t("organigramma.scheda.tipo")}>{u.tipo ? enumLabel("orgUnitType", u.tipo) : null}</Riga>
-        <Riga etichetta="Responsabile">{rif("persona", u.responsabileId)}</Riga>
-        <Riga etichetta="Fa parte di">{u.padreId ? rif("unita", u.padreId) : "vertice"}</Riga>
+        <Riga etichetta={t("schedaRapida.responsabile")}>{rif("persona", u.responsabileId)}</Riga>
+        <Riga etichetta={t("schedaRapida.faParteDi")}>{u.padreId ? rif("unita", u.padreId) : t("schedaRapida.vertice")}</Riga>
         {vivo?.sedeCodice ? (
           <Riga etichetta={t("organigramma.scheda.sede")}>
             {codiceInParole(vivo.sedeCodice)}{vivo.sedeTipo ? <span className="text-muted-foreground"> — {enumLabel("siteKind", vivo.sedeTipo)}</span> : null}
@@ -215,7 +219,7 @@ function CorpoUnita({ id, ix, blocchi, rif }: {
         {vivo?.ragioneOrganico ? (
           <Riga etichetta={t("organigramma.scheda.ragioneOrganico")}>{vivo.ragioneOrganico}</Riga>
         ) : null}
-        <Riga etichetta="Posizioni">{`${posizioni.length}${scoperte ? `, di cui ${scoperte} scoperte` : ""}`}</Riga>
+        <Riga etichetta={t("schedaRapida.posizioni")}>{`${posizioni.length}${scoperte ? t("schedaRapida.posizioniScoperte", { n: scoperte }) : ""}`}</Riga>
       </dl>
       {sotto.length > 1 ? (
         <section className="mt-4" data-testid="scheda-struttura">
@@ -223,9 +227,9 @@ function CorpoUnita({ id, ix, blocchi, rif }: {
           <OrganigrammaBlocchi unita={sotto} {...(s ? { onApri: (x: string) => s.apri("unita", x) } : {})} nomeFile={`unita_${u.codice ?? u.id}`} ariaLabel={u.nome} altezzaMax="45vh" />
         </section>
       ) : null}
-      <Elenco titolo="Unità sotto" voci={figlie.map((f) => ({ tipo: "unita", id: f.id, nome: f.nome }))} />
+      <Elenco titolo={t("schedaRapida.unitaSotto")} voci={figlie.map((f) => ({ tipo: "unita", id: f.id, nome: f.nome }))} />
       <Elenco titolo={t("organigramma.scheda.persone")} voci={persone.map((p) => ({ tipo: "persona", id: p.id, nome: p.etichetta, nota: p.posizione }))} />
-      <Elenco titolo="Posizioni" voci={posizioni.map((x) => ({ tipo: "posizione", id: x.id, nome: x.titolo, nota: x.titolare ?? "scoperta" }))} />
+      <Elenco titolo={t("schedaRapida.posizioni")} voci={posizioni.map((x) => ({ tipo: "posizione", id: x.id, nome: x.titolo, nota: x.titolare ?? t("schedaRapida.scopertaMin") }))} />
     </>
   );
 }
@@ -253,11 +257,11 @@ export function SchedeProvider({ children }: { children: ReactNode }) {
             onEscapeKeyDown={(e) => { if (pila.length > 1) { e.preventDefault(); indietro(); } }}
           >
             {pila.length > 1 ? (
-              <nav aria-label="Percorso" className="mb-1 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
+              <nav aria-label={t("schedaRapida.percorso")} className="mb-1 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
                 {pila.slice(0, -1).map((p, i) => (
                   <span key={`${p.id}-${i}`} className="flex items-center gap-1">
                     <button type="button" className="hover:text-foreground hover:underline" onClick={() => setPila((x) => x.slice(0, i + 1))}>
-                      {nomeDi(ix, p)}
+                      {nomeDi(ix, p, t)}
                     </button>
                     <ChevronRight className="h-3 w-3" aria-hidden />
                   </span>
@@ -267,8 +271,8 @@ export function SchedeProvider({ children }: { children: ReactNode }) {
             <div className="flex items-start gap-3">
               <span className="mt-0.5 rounded-md bg-primary/10 p-2 text-primary"><Icona className="h-5 w-5" aria-hidden /></span>
               <div className="min-w-0">
-                <DialogTitle className="text-lg font-bold leading-tight">{nomeDi(ix, cima)}</DialogTitle>
-                <DialogDescription className="text-xs">{TIPO[cima.tipo]}</DialogDescription>
+                <DialogTitle className="text-lg font-bold leading-tight">{nomeDi(ix, cima, t)}</DialogTitle>
+                <DialogDescription className="text-xs">{t(TIPO[cima.tipo])}</DialogDescription>
               </div>
               <div className="ml-auto flex shrink-0 items-center gap-2">
                 {pila.length > 1 ? (
@@ -288,7 +292,7 @@ export function SchedeProvider({ children }: { children: ReactNode }) {
               </div>
             </div>
             <div className="mt-3">
-              {rubrica.isLoading ? <p className="text-sm text-muted-foreground">Caricamento…</p> : <Corpo passo={cima} ix={ix} blocchi={blocchi} />}
+              {rubrica.isLoading ? <p className="text-sm text-muted-foreground">{t("schedaRapida.caricamento")}</p> : <Corpo passo={cima} ix={ix} blocchi={blocchi} />}
             </div>
           </DialogContent>
         ) : null}

@@ -11,6 +11,7 @@
  * che è la fonte: un nome che qui non c'è torna «rifiutata».
  */
 import { isValidElement, type ReactNode } from "react";
+import { testo } from "../testi";
 
 export const COMANDI_TABELLA = ["tabella.cerca", "tabella.filtra", "tabella.ordina", "tabella.azzera"] as const;
 export type ComandoTabella = (typeof COMANDI_TABELLA)[number];
@@ -104,6 +105,8 @@ export function applicaVista<T>(righe: readonly T[], celle: (r: T) => string[], 
 }
 
 export interface ContestoComando {
+  /** La lingua dei messaggi di esito (S-06); senza, l'italiano. */
+  lingua?: string;
   /** I nomi delle colonne come li vede la persona. */
   colonne: readonly string[];
   /** Vero se le righe sono una pagina sola di un elenco più lungo, che sta sul server. */
@@ -121,34 +124,35 @@ export function eseguiComando(
   argomenti: Record<string, unknown>,
   ctx: ContestoComando,
 ): { stato: StatoVistaTabella; esito: EsitoPagina } {
+  const tr = (chiave: string, parametri?: Record<string, string | number>) => testo(ctx.lingua, chiave, parametri);
   const rifiuta = (dettaglio: string) => ({ stato, esito: { stato: "rifiutata" as const, dettaglio } });
   const parziale = ctx.paginaServer
-    ? { stato: "parziale" as const, dettaglio: `Vale solo per la pagina caricata: le righe sono ${ctx.totale} in tutto, e le altre stanno sul server.` }
+    ? { stato: "parziale" as const, dettaglio: tr("esitoAgente.parziale", { totale: ctx.totale }) }
     : { stato: "ok" as const };
   const colonnaDi = (v: unknown) => (typeof v === "string" ? trovaColonna(ctx.colonne, v) : undefined);
 
   switch (nome) {
     case "tabella.cerca": {
-      if (typeof argomenti.testo !== "string" || !argomenti.testo.trim()) return rifiuta("Manca il testo da cercare.");
+      if (typeof argomenti.testo !== "string" || !argomenti.testo.trim()) return rifiuta(tr("esitoAgente.nessunTesto"));
       return { stato: { ...stato, testo: argomenti.testo.trim() }, esito: parziale };
     }
     case "tabella.filtra": {
       const c = colonnaDi(argomenti.colonna);
-      if (c === undefined) return rifiuta(`La tabella non ha la colonna «${String(argomenti.colonna)}». Colonne: ${ctx.colonne.filter(Boolean).join(", ")}.`);
+      if (c === undefined) return rifiuta(tr("esitoAgente.colonnaAssente", { colonna: String(argomenti.colonna), colonne: ctx.colonne.filter(Boolean).join(", ") }));
       const v = argomenti.valore;
-      if (typeof v !== "string" && typeof v !== "number" && typeof v !== "boolean") return rifiuta("Manca il valore del filtro.");
+      if (typeof v !== "string" && typeof v !== "number" && typeof v !== "boolean") return rifiuta(tr("esitoAgente.nessunValore"));
       return { stato: { ...stato, filtro: { colonna: c, valore: String(v) } }, esito: parziale };
     }
     case "tabella.ordina": {
       const c = colonnaDi(argomenti.colonna);
-      if (c === undefined) return rifiuta(`La tabella non ha la colonna «${String(argomenti.colonna)}». Colonne: ${ctx.colonne.filter(Boolean).join(", ")}.`);
+      if (c === undefined) return rifiuta(tr("esitoAgente.colonnaAssente", { colonna: String(argomenti.colonna), colonne: ctx.colonne.filter(Boolean).join(", ") }));
       const verso = argomenti.verso === "decrescente" ? "decrescente" : "crescente";
       return { stato: { ...stato, ordine: { colonna: c, verso } }, esito: parziale };
     }
     case "tabella.azzera":
       return { stato: {}, esito: { stato: "ok" } };
     default:
-      return rifiuta("Questa tabella non sa eseguire il comando.");
+      return rifiuta(tr("esitoAgente.comandoTabella"));
   }
 }
 

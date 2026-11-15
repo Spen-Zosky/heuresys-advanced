@@ -131,6 +131,7 @@
     "emptyTitle": "No open positions",
     "emptyDesc": "There are no public postings right now.",
     "count": "{{count}} positions",
+    "count_one": "{{count}} position",
     "noLocation": "Location not specified",
     "publishedOn": "published on {{date}}",
     "expiresOn": "expires on {{date}}"

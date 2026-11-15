@@ -131,6 +131,7 @@
     "emptyTitle": "Nessuna posizione aperta",
     "emptyDesc": "Al momento non ci sono annunci pubblici.",
     "count": "{{count}} posizioni",
+    "count_one": "{{count}} posizione",
     "noLocation": "Sede non indicata",
     "publishedOn": "pubblicato il {{date}}",
     "expiresOn": "scade il {{date}}"

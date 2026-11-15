@@ -7,7 +7,7 @@
  * Hits the live OCI VM DB through the tunnel (no mocks). DATA-DERIVED doctrine
  * (S1025, D-74): no pinned live counts — every expected scalar is derived from
  * the same source tables the endpoint aggregates, and the rest is asserted as
- * INVARIANTS (rollups reconcile, ordering, scope semantics, no '(unassigned)'
+ * INVARIANTS (rollups reconcile, ordering, scope semantics, no 'Senza unità'
  * fallthrough). TENANT-scope tests compare against the PLATFORM body fetched in
  * the same test, gated on live-derived single-tenancy of the source.
  */
@@ -113,10 +113,26 @@ describe("GET /v1/analytics/* integration", () => {
     expect(body.byOrgUnit.length).toBeGreaterThan(0);
     expect(body.byJobRole.length).toBeGreaterThan(0);
     // The OU rollup must sum to the total: position-less users fall into the
-    // COALESCE '(unassigned)' bucket, so total == ouSum still holds.
+    // COALESCE 'Senza unità' bucket, so total == ouSum still holds.
     const ouSum = body.byOrgUnit.reduce((acc, r2) => acc + r2.headcount, 0);
     expect(ouSum).toBe(body.totalHeadcount);
     expect(new Date(body.generatedAt).getTime()).toBeGreaterThan(0);
+  });
+
+  it("D4: l'organico per titolo non e' troncato: la somma torna al totale e i titoli sono tutti", async () => {
+    const body = await getJson<WorkforceBody>("/v1/analytics/workforce", platformS);
+    const somma = body.byJobRole.reduce((acc, r2) => acc + r2.headcount, 0);
+    expect(somma).toBe(body.totalHeadcount);
+    const titoli = await num(
+      `SELECT count(DISTINCT coalesce(p.position_title, 'Senza posizione'))::text AS n
+         FROM sys.sys_users u
+         LEFT JOIN sys.sys_user_position_assignments a
+           ON a.user_position_assignment_user_id = u.user_id
+          AND a.user_position_assignment_kind = 'PRIMARY' AND a.user_position_assignment_status = 'ACTIVE'
+         LEFT JOIN sys.sys_positions p ON p.position_id = a.user_position_assignment_position_id
+        WHERE u.user_type <> 'SERVICE'`,
+    );
+    expect(body.byJobRole.length).toBe(titoli);
   });
 
   it("workforce: TENANT_ADMIN sees TENANT scope filtered to own tenant", async () => {
@@ -212,9 +228,9 @@ describe("GET /v1/analytics/* integration", () => {
     );
     const monthlySum = body.monthly.reduce((acc, m) => acc + m.totalHours, 0);
     expect(monthlySum).toBeCloseTo(body.totalHours, 0);
-    // Every attendance row resolves to a real OU (no '(unassigned)') and the OU
+    // Every attendance row resolves to a real OU (no 'Senza unità') and the OU
     // dimension count matches the live chain.
-    expect(body.byOrgUnit.some((o) => o.dimension === "(unassigned)")).toBe(false);
+    expect(body.byOrgUnit.some((o) => o.dimension === "Senza unità")).toBe(false);
     const ouCount = await num(
       `SELECT count(DISTINCT ou.organization_unit_id)::text AS n
          FROM (SELECT DISTINCT attendance_subject_user_id AS u_id FROM sys.sys_attendance) att
@@ -426,8 +442,8 @@ describe("GET /v1/analytics/* integration", () => {
     );
     const expectedLevels = PROFICIENCY_RANK.filter((l) => lvlRows.some((r2) => r2.p === l));
     expect(body.proficiencyLevels).toEqual(expectedLevels);
-    // No '(unassigned)' fallthrough in the heatmap.
-    expect(body.cells.some((c) => c.orgUnit === "(unassigned)")).toBe(false);
+    // No 'Senza unità' fallthrough in the heatmap.
+    expect(body.cells.some((c) => c.orgUnit === "Senza unità")).toBe(false);
     expect(body.cells.length).toBeGreaterThan(0);
     // Per-proficiency column rollup derived live from the single source table.
     const { rows: bypRows } = await pool.query<{ p: string; ev: string; us: string }>(
@@ -680,6 +696,15 @@ describe("GET /v1/analytics/* integration", () => {
     expect((r.json() as { error: { code: string } }).error.code).toBe("FORBIDDEN");
   });
 
+  it("D6: il compenso totale dello straordinario non somma le richieste respinte o annullate", async () => {
+    const body = await getJson<OvertimeBody>("/v1/analytics/overtime", platformS);
+    const atteso = await num(
+      `SELECT coalesce(round(sum(overtime_total_compensation), 2), 0)::text AS n
+         FROM sys.sys_overtime WHERE overtime_status NOT IN ('REJECTED', 'CANCELLED')`,
+    );
+    expect(body.totalCompensationEur ?? 0).toBeCloseTo(atteso, 1);
+  });
+
   it("overtime: PLATFORM_ADMIN sees the request rollup (derived live)", async () => {
     const body = await getJson<OvertimeBody>("/v1/analytics/overtime", platformS);
     expect(body.scope.kind).toBe("PLATFORM");
@@ -727,9 +752,9 @@ describe("GET /v1/analytics/* integration", () => {
     );
     const monthlyCountSum = body.monthly.reduce((acc, m) => acc + m.count, 0);
     expect(monthlyCountSum).toBe(body.totalRequests);
-    // byOrgUnit: every request resolves (no '(unassigned)'), hours-desc ordered,
+    // byOrgUnit: every request resolves (no 'Senza unità'), hours-desc ordered,
     // and the OU dimension count matches the live chain.
-    expect(body.byOrgUnit.some((o) => o.dimension === "(unassigned)")).toBe(false);
+    expect(body.byOrgUnit.some((o) => o.dimension === "Senza unità")).toBe(false);
     const ouCount = await num(
       `SELECT count(DISTINCT ou.organization_unit_id)::text AS n
          FROM (SELECT DISTINCT overtime_subject_user_id AS u_id FROM sys.sys_overtime) ot

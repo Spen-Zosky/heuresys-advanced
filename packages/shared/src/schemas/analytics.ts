@@ -57,7 +57,7 @@ export const AttendanceMonthlyRowSchema = z.object({
 export type AttendanceMonthlyRow = z.infer<typeof AttendanceMonthlyRowSchema>;
 
 export const AttendanceByOrgUnitRowSchema = z.object({
-  dimension: z.string(), // organization_unit_name, COALESCE '(unassigned)'
+  dimension: z.string(), // organization_unit_name, COALESCE 'Senza unità'
   regularHours: z.number(),
   overtimeHours: z.number(),
   totalHours: z.number(),
@@ -82,7 +82,7 @@ export type AttendanceAnalyticsResponse = z.infer<typeof AttendanceAnalyticsResp
 // € values are integral but kept z.number() for headroom; nullable summary fields
 // are null only when the scope is empty.
 export const CompensationBandingByOuRowSchema = z.object({
-  ou: z.string(), // organization_unit_name or '(unassigned)'
+  ou: z.string(), // organization_unit_name or 'Senza unità'
   count: z.number().int(), // banded profiles in this OU
   min: z.number(),
   q1: z.number(),
@@ -105,6 +105,8 @@ export const CompensationAnalyticsResponseSchema = z.object({
   scope: z.object({ kind: AnalyticsScopeKindSchema, tenantId: z.uuid().nullable() }),
   totalProfiles: z.number().int(), // banded profiles in scope
   ouCount: z.number().int(), // distinct OUs with banded profiles
+  /** Vero quando le unita' di vertice sono escluse dal calcolo per il livello di chi guarda (ADR-0036 par. 5): D16. */
+  topUnitsExcluded: z.boolean().optional(),
   // Opzionali per la MASCHERATURA, non perche' possano mancare nel dato: sotto
   // mandato di sola piattaforma questi campi vengono TOLTI e i loro nomi
   // dichiarati in `masked`. 280 posizioni su 299 hanno UN SOLO titolare, quindi
@@ -140,7 +142,7 @@ export type SkillsCoverageProficiency = z.infer<typeof SkillsCoverageProficiency
 
 // One heatmap cell: OU × proficiency → evidence count + distinct users.
 export const SkillsCoverageCellSchema = z.object({
-  orgUnit: z.string(), // OU name, or '(unassigned)' when no PRIMARY/ACTIVE assignment
+  orgUnit: z.string(), // OU name, or 'Senza unità' when no PRIMARY/ACTIVE assignment
   proficiency: SkillsCoverageProficiencySchema,
   evidenceCount: z.number().int(),
   distinctUsers: z.number().int(),
@@ -226,7 +228,7 @@ export type OrgNetworkDepthRow = z.infer<typeof OrgNetworkDepthRowSchema>;
 
 export const OrgNetworkSpanRowSchema = z.object({
   positionTitle: z.string(),
-  orgUnit: z.string(), // organization_unit_name or '(unassigned)'
+  orgUnit: z.string(), // organization_unit_name or 'Senza unità'
   directReports: z.number().int(),
 });
 export type OrgNetworkSpanRow = z.infer<typeof OrgNetworkSpanRowSchema>;
@@ -304,7 +306,7 @@ export const OvertimeMonthlyRowSchema = z.object({
 export type OvertimeMonthlyRow = z.infer<typeof OvertimeMonthlyRowSchema>;
 
 export const OvertimeByOrgUnitRowSchema = z.object({
-  dimension: z.string(), // organization_unit_name, COALESCE '(unassigned)'
+  dimension: z.string(), // organization_unit_name, COALESCE 'Senza unità'
   count: z.number().int(),
   hours: z.number(),
 });

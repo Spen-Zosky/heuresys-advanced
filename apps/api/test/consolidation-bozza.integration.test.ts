@@ -87,8 +87,24 @@ beforeAll(async () => {
       GROUP BY 1, 2
       ORDER BY bool_or(u.blueprint_content_unit_site_code IS NOT NULL AND u.blueprint_content_unit_planned_headcount IS NOT NULL) DESC, 1, 2
       LIMIT 1`);
-  if (!m.rows[0]) throw new Error("nessun modello con un'unità e le sue posizioni nel database");
-  ({ ver: versione, unit: unitaModello, pos: posizioneModello } = m.rows[0]);
+  if (m.rows[0]) {
+    ({ ver: versione, unit: unitaModello, pos: posizioneModello } = m.rows[0]);
+  } else {
+    // Il database della CI non ha contenuto di modello per unità e posizioni: se ne scrive uno minimo
+    // su una versione esistente (l'isolamento transazionale del file lo annulla).
+    const v = await pool.query<{ id: string }>(
+      `SELECT blueprint_variant_version_id AS id FROM sys.sys_blueprint_variant_versions ORDER BY created_at DESC LIMIT 1`);
+    if (!v.rows[0]) throw new Error("nessuna versione di modello nel database");
+    versione = v.rows[0].id; unitaModello = "UNITA-PROVA-BOZZA"; posizioneModello = "POS-PROVA-BOZZA";
+    await pool.query(
+      `INSERT INTO sys.sys_blueprint_content_units
+         (blueprint_content_unit_version_id, blueprint_content_unit_code, blueprint_content_unit_name, blueprint_content_unit_type)
+       VALUES ($1, $2, 'Unità di prova della bozza', 'DIVISION')`, [versione, unitaModello]);
+    await pool.query(
+      `INSERT INTO sys.sys_blueprint_content_positions
+         (blueprint_content_position_version_id, blueprint_content_position_code, blueprint_content_position_title, blueprint_content_position_unit_code)
+       VALUES ($1, $2, 'Posizione di prova della bozza', $3)`, [versione, posizioneModello, unitaModello]);
+  }
   await pool.query(
     `UPDATE sys.sys_blueprint_content_units
         SET blueprint_content_unit_site_code = coalesce(blueprint_content_unit_site_code, 'SEDE-PROVA'),

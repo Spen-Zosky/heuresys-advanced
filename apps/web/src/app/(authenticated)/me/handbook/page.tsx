@@ -7,6 +7,7 @@ import { Input } from "@heuresys/ui";
 import type { ContentDocument } from "@heuresys/shared";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
+import { useFormat } from "@/lib/format";
 
 /**
  * ESS knowledge base — "Manuale del dipendente" (cap④ CMS P2, ADR-0011).
@@ -15,6 +16,7 @@ import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
  */
 export default function MeHandbookPage() {
   const { t } = useTranslation("ess");
+  const fmt = useFormat();
   const [q, setQ] = useState("");
 
   // C4 (#42): server-side pagination (was `?limit=200`).
@@ -35,9 +37,9 @@ export default function MeHandbookPage() {
         ),
       },
       { header: t("handbook.colKind"), cell: (d) => <span className="text-muted-foreground">{t(`handbook.kind.${d.kind}`)}</span> },
-      { header: t("handbook.colUpdated"), cell: (d) => <span className="text-xs text-muted-foreground">{(d.publishedAt ?? d.updatedAt).slice(0, 10)}</span> },
+      { header: t("handbook.colUpdated"), cell: (d) => <span className="text-xs text-muted-foreground">{fmt.data(d.publishedAt ?? d.updatedAt)}</span> },
     ],
-    [t],
+    [t, fmt],
   );
 
   return (

@@ -67,3 +67,13 @@ export function fmtMoney(amount: number | null | undefined, currency: string | n
   if (amount == null) return null;
   return formati(i18n.language).importo(amount, currency ?? null);
 }
+
+/** Nome del paese nella lingua del portale a partire dal codice ISO (IT diventa Italia); un codice sconosciuto resta com'e'. */
+export function fmtPaese(codice: string | null | undefined): string | null {
+  if (!codice) return null;
+  try {
+    return new Intl.DisplayNames([i18n.language], { type: "region" }).of(codice.toUpperCase()) ?? codice;
+  } catch {
+    return codice;
+  }
+}

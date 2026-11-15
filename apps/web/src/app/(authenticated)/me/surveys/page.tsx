@@ -54,16 +54,18 @@ export default function MeSurveysPage() {
                     <p className="text-xs text-muted-foreground">{t("surveys.questionCount", { count: s.questionCount })}</p>
                   </div>
                   <div className="flex items-center gap-3">
-                    {s.completedAt ? (
+                    {s.completed ? (
                       <Badge variant="outline" className="border-success text-success" data-testid="me-survey-completed">{t("surveys.completed")}</Badge>
                     ) : (
                       <Badge variant="secondary" data-testid="me-survey-pending">{t("surveys.pending")}</Badge>
                     )}
-                    <Link href={`/me/surveys/${s.surveyId}`}>
-                      <Button size="sm" variant={s.completedAt ? "outline" : "default"} data-testid="me-survey-open">
-                        {s.completedAt ? t("surveys.review") : t("surveys.answer")}
-                      </Button>
-                    </Link>
+                    {(s.completed || s.status === "active") && (
+                      <Link href={`/me/surveys/${s.surveyId}`}>
+                        <Button size="sm" variant={s.completed ? "outline" : "default"} data-testid="me-survey-open">
+                          {s.completed ? t("surveys.review") : t("surveys.answer")}
+                        </Button>
+                      </Link>
+                    )}
                   </div>
                 </li>
               ))}

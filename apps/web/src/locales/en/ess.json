@@ -62,7 +62,8 @@
       "pending": "pending",
       "recentTitle": "Recent attendance",
       "overtimeTitle": "Overtime"
-    }
+    },
+    "learningDone": "{{count}} completed"
   },
   "career": {
     "title": "My career",
@@ -90,7 +91,8 @@
       "priority": "Priority",
       "weight": "Weight",
       "type": "Type",
-      "due": "Due"
+      "due": "Due",
+      "overdue": "overdue"
     },
     "risk": {
       "none": "No data",
@@ -172,7 +174,14 @@
     "errorMessage": "Unable to load the certifications.",
     "emptyTitle": "No certifications",
     "emptyDesc": "You haven't uploaded any certifications yet.",
-    "caption": "Certifications list"
+    "caption": "Certifications list",
+    "colState": "Status",
+    "state": {
+      "expired": "Expired",
+      "expiring": "Expiring soon",
+      "valid": "Valid",
+      "noExpiry": "No expiry"
+    }
   },
   "documents": {
     "title": "My documents",
@@ -199,7 +208,9 @@
     "errorMessage": "Unable to load the gaps.",
     "emptyTitle": "No open gaps",
     "emptyDesc": "You have no open development gaps.",
-    "caption": "Development gaps"
+    "caption": "Development gaps",
+    "levels": "level {{current}} of {{target}}",
+    "gapSize": "gap {{value}}"
   },
   "timeOff": {
     "title": "Time off",
@@ -228,7 +239,7 @@
       "NO_APPROVER_RESOLVABLE": "No direct manager found: contact HR.",
       "VALIDATION_FAILED": "Check the dates: invalid range."
     },
-    "historyTitle": "Request history",
+    "historyTitle": "Previous years",
     "historyError": "Unable to load the history.",
     "historyEmptyTitle": "No request recorded",
     "historyEmptyDesc": "Approved requests appear here; pending ones live in Approvals.",
@@ -236,7 +247,8 @@
     "colType": "Type",
     "colPeriod": "Period",
     "colDays": "Days",
-    "colStatus": "Status"
+    "colStatus": "Status",
+    "daysUsedLabel": "days used"
   },
   "inbox": {
     "title": "Inbox",
@@ -328,7 +340,8 @@
     "emptyDesc": "No path matches the filter.",
     "caption": "Learning paths catalogue",
     "errorEnroll": "Error during enrollment.",
-    "enrolledConfirm": "Enrollment confirmed for {{path}}."
+    "enrolledConfirm": "Enrollment confirmed for {{path}}.",
+    "alreadyAssigned": "Already assigned"
   },
   "matching": {
     "title": "Compatible occupations",

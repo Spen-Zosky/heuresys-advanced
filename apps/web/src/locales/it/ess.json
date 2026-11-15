@@ -83,7 +83,8 @@
       "pending": "in attesa",
       "recentTitle": "Presenze recenti",
       "overtimeTitle": "Straordinari"
-    }
+    },
+    "learningDone": "{{count}} completati"
   },
   "career": {
     "title": "La mia carriera",
@@ -111,7 +112,8 @@
       "priority": "Priorità",
       "weight": "Peso",
       "type": "Tipo",
-      "due": "Scadenza"
+      "due": "Scadenza",
+      "overdue": "scaduto"
     },
     "risk": {
       "none": "Nessun dato",
@@ -193,7 +195,14 @@
     "errorMessage": "Impossibile caricare le certificazioni.",
     "emptyTitle": "Nessuna certificazione",
     "emptyDesc": "Non hai ancora caricato certificazioni.",
-    "caption": "Elenco certificazioni"
+    "caption": "Elenco certificazioni",
+    "colState": "Stato",
+    "state": {
+      "expired": "Scaduto",
+      "expiring": "In scadenza",
+      "valid": "Valido",
+      "noExpiry": "Senza scadenza"
+    }
   },
   "documents": {
     "title": "I miei documenti",
@@ -220,7 +229,9 @@
     "errorMessage": "Impossibile caricare i gap.",
     "emptyTitle": "Nessun gap aperto",
     "emptyDesc": "Non hai gap di sviluppo aperti.",
-    "caption": "Gap di sviluppo"
+    "caption": "Gap di sviluppo",
+    "levels": "livello {{current}} su {{target}}",
+    "gapSize": "scarto {{value}}"
   },
   "timeOff": {
     "title": "Ferie e permessi",
@@ -249,7 +260,7 @@
       "NO_APPROVER_RESOLVABLE": "Nessun responsabile diretto trovato: contatta HR.",
       "VALIDATION_FAILED": "Controlla le date: intervallo non valido."
     },
-    "historyTitle": "Storico richieste",
+    "historyTitle": "Anni precedenti",
     "historyError": "Impossibile caricare lo storico.",
     "historyEmptyTitle": "Nessuna richiesta registrata",
     "historyEmptyDesc": "Le richieste approvate compaiono qui; quelle in attesa sono in Approvazioni.",
@@ -257,7 +268,8 @@
     "colType": "Tipo",
     "colPeriod": "Periodo",
     "colDays": "Giorni",
-    "colStatus": "Stato"
+    "colStatus": "Stato",
+    "daysUsedLabel": "giorni usati"
   },
   "inbox": {
     "title": "Posta in arrivo",
@@ -328,7 +340,8 @@
     "emptyDesc": "Nessun percorso corrisponde al filtro.",
     "caption": "Catalogo percorsi formativi",
     "errorEnroll": "Errore durante l'iscrizione.",
-    "enrolledConfirm": "Iscrizione confermata per {{path}}."
+    "enrolledConfirm": "Iscrizione confermata per {{path}}.",
+    "alreadyAssigned": "Già assegnato"
   },
   "matching": {
     "title": "Occupazioni compatibili",

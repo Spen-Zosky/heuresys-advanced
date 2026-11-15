@@ -9,6 +9,7 @@ import { apiFetch } from "../../../../lib/api/fetch";
 interface MeProfile { displayName: string | null; email: string; roles: string[] }
 interface MePositions { items: Array<{ positionTitle: string; positionCode: string; isPrimary: boolean }>; total: number }
 interface MeCount { total: number }
+interface MeLearningList { total: number; items: Array<{ status: string }> }
 
 const ICON_CLS = "h-4 w-4";
 
@@ -17,11 +18,13 @@ export function MeSummaryTab() {
   const { t } = useTranslation("ess");
   const profile = useQuery({ queryKey: ["me", "profile"], queryFn: () => apiFetch<MeProfile>("/v1/me/profile") });
   const positions = useQuery({ queryKey: ["me", "positions"], queryFn: () => apiFetch<MePositions>("/v1/me/positions") });
-  const learning = useQuery({ queryKey: ["me", "learning"], queryFn: () => apiFetch<MeCount>("/v1/me/learning") });
+  const learning = useQuery({ queryKey: ["me", "learning"], queryFn: () => apiFetch<MeLearningList>("/v1/me/learning") });
   const gaps = useQuery({ queryKey: ["me", "gaps"], queryFn: () => apiFetch<MeCount>("/v1/me/gaps") });
 
   const primary = positions.data?.items.find((p) => p.isPrimary);
-  const learningTotal = learning.data?.total ?? 0;
+  // D2-21: «assegnati» conta solo cio' che resta da fare; i completati hanno un numero a parte
+  const learningDone = learning.data?.items.filter((l) => l.status === "COMPLETED").length ?? 0;
+  const learningTotal = (learning.data?.total ?? 0) - learningDone;
   const gapsTotal = gaps.data?.total ?? 0;
 
   return (
@@ -32,7 +35,7 @@ export function MeSummaryTab() {
         </h1>
         <p className="text-sm text-muted-foreground" data-testid="me-email">{profile.data?.email ?? ""}</p>
         <p className="text-sm text-muted-foreground" data-testid="me-roles">
-          {t("landing.rolesLabel", { roles: profile.data?.roles.join(", ") ?? "—" })}
+          {t("landing.rolesLabel", { roles: profile.data?.roles.map((r) => t(`shell:roles.${r}`, { defaultValue: r })).join(", ") ?? "—" })}
         </p>
       </header>
 
@@ -42,7 +45,7 @@ export function MeSummaryTab() {
             <StatsCard label={t("landing.primaryPositionLabel")} value="…" icon={<Briefcase className={`${ICON_CLS} text-palette-1`} />} />
           ) : primary ? (
             <>
-              <StatsCard label={t("landing.primaryPositionLabel")} value={primary.positionTitle} description={primary.positionCode} icon={<Briefcase className={`${ICON_CLS} text-palette-1`} />} />
+              <StatsCard label={t("landing.primaryPositionLabel")} value={primary.positionTitle} icon={<Briefcase className={`${ICON_CLS} text-palette-1`} />} />
               <span data-testid="me-primary-position-title" className="sr-only">{primary.positionTitle}</span>
             </>
           ) : (
@@ -55,7 +58,7 @@ export function MeSummaryTab() {
 
         <div data-testid="me-card-learning">
           <StatsCard label={t("landing.learningLabel")} value={learningTotal} unit={t("landing.learningUnit")} icon={<GraduationCap className={`${ICON_CLS} text-palette-4`} />} />
-          <span data-testid="me-learning-count" className="sr-only">{t("landing.learningCount", { count: learningTotal })}</span>
+          <span data-testid="me-learning-count" className="sr-only">{t("landing.learningCount", { count: learningTotal })}{learningDone > 0 ? ` · ${t("landing.learningDone", { count: learningDone })}` : ""}</span>
         </div>
 
         <div data-testid="me-card-gaps">

@@ -772,6 +772,49 @@
       "STABILIMENTO": "Stabilimento",
       "MAGAZZINO": "Magazzino",
       "UFFICIO": "Ufficio"
+    },
+    "gender": {
+      "MALE": "Uomo",
+      "FEMALE": "Donna",
+      "OTHER": "Altro"
+    },
+    "maritalStatus": {
+      "SINGLE": "Celibe o nubile",
+      "MARRIED": "Coniugato",
+      "DIVORCED": "Divorziato",
+      "WIDOWED": "Vedovo",
+      "CIVIL_UNION": "Unione civile"
+    },
+    "familyRelationship": {
+      "spouse": "Coniuge",
+      "child": "Figlio",
+      "parent": "Genitore",
+      "sibling": "Fratello o sorella",
+      "friend": "Amico"
+    },
+    "degree": {
+      "DIP": "Diploma",
+      "BSC": "Laurea triennale",
+      "MSC": "Laurea magistrale",
+      "MBA": "Master (MBA)",
+      "PHD": "Dottorato"
+    },
+    "attendanceStatus": {
+      "PRESENT": "Presente",
+      "ABSENT": "Assente",
+      "SICK": "Malattia",
+      "HOLIDAY": "Festività",
+      "VACATION": "Ferie",
+      "PAID_LEAVE": "Permesso retribuito",
+      "UNPAID_LEAVE": "Permesso non retribuito",
+      "TRAINING": "Formazione",
+      "REMOTE": "Da remoto",
+      "BUSINESS_TRIP": "Trasferta"
+    },
+    "potential": {
+      "LOW": "Basso",
+      "MEDIUM": "Medio",
+      "HIGH": "Alto"
     }
   },
   "masked": "nascosto per il tuo profilo",

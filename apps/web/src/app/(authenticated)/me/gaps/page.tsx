@@ -37,11 +37,25 @@ export default function MeGapsPage() {
               </span>
             );
           }
+          // D2-17: ogni competenza della lacuna con il suo livello attuale, quello da raggiungere e lo scarto
+          // (prima compariva solo il primo nome e i livelli non si vedevano mai).
           return (
-            <span className="font-medium text-foreground" title={nomi.join(" · ")}>
-              {nomi[0]}
-              {nomi.length > 1 && <span className="ml-1 font-normal text-muted-foreground">+{nomi.length - 1}</span>}
-            </span>
+            <ul className="space-y-0.5" data-testid="me-gap-skills">
+              {g.skillGaps.map((s, i) => (
+                <li key={`${s.skillName}-${i}`} className="text-sm">
+                  <span className="font-medium text-foreground">{s.skillName}</span>
+                  {(s.currentLevel !== null || s.targetLevel !== null) && (
+                    <span className="ml-2 text-xs tabular-nums text-muted-foreground">
+                      {t("gaps.levels", {
+                        current: s.currentLevel !== null ? fmt.numero(s.currentLevel, 1) : "—",
+                        target: s.targetLevel !== null ? fmt.numero(s.targetLevel, 1) : "—",
+                      })}
+                      {s.gap !== null ? ` · ${t("gaps.gapSize", { value: fmt.numero(s.gap, 1) })}` : ""}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
           );
         },
       },

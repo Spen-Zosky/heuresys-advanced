@@ -32,9 +32,9 @@ export function MePerformanceTab() {
           testId={i === 0 ? "perf-primary" : undefined}
         >
           <Field label={t("landing.perf.status")} value={enumLabel("perfReviewStatus", r.status)} />
-          <Field label={t("landing.perf.overall")} value={r.overallRating != null ? fmt.numeroFisso(r.overallRating, 1) : null} testId={i === 0 ? "perf-overall" : undefined} />
-          <Field label={t("landing.perf.goal")} value={r.goalRating != null ? fmt.numeroFisso(r.goalRating, 1) : null} />
-          <Field label={t("landing.perf.competency")} value={r.competencyRating != null ? fmt.numeroFisso(r.competencyRating, 1) : null} />
+          <Field label={t("landing.perf.overall")} value={r.overallRating != null ? fmt.numeroFisso(r.overallRating, 2) : null} testId={i === 0 ? "perf-overall" : undefined} />
+          <Field label={t("landing.perf.goal")} value={r.goalRating != null ? fmt.numeroFisso(r.goalRating, 2) : null} />
+          <Field label={t("landing.perf.competency")} value={r.competencyRating != null ? fmt.numeroFisso(r.competencyRating, 2) : null} />
           <Field label={t("landing.perf.perfBox")} value={r.performanceBox != null ? String(r.performanceBox) : null} />
           <Field label={t("landing.perf.potBox")} value={r.potentialBox != null ? String(r.potentialBox) : null} />
           <Field label={t("landing.perf.period")} value={`${fmtDate(r.periodStart) ?? "—"} → ${fmtDate(r.periodEnd) ?? "—"}`} />

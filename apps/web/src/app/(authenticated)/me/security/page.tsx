@@ -885,7 +885,7 @@ export default function MeSecurityPage() {
                     <li key={s.familyId} data-testid="me-security-session-row" className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
                       <div>
                         <div className="flex items-center gap-2 font-medium text-foreground">
-                          <span>{s.ip ?? t("security.sessions.unknownDevice")}</span>
+                          <span>{s.ip ? s.ip.replace(/\/(32|128)$/, "") : t("security.sessions.unknownDevice")}</span>
                           {isCurrent && <Badge variant="outline" className="border-success text-success" data-testid="me-security-session-current-badge">{t("security.sessions.thisDevice")}</Badge>}
                         </div>
                         <div className="font-mono text-xs text-muted-foreground">

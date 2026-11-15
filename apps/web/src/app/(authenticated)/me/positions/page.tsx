@@ -35,8 +35,9 @@ export default function MePositionsPage() {
 
   const columns = useMemo<DataColumn<MePositionAssignment>[]>(
     () => [
-      { header: t("positions.colCode"), cell: (p) => <span className="font-mono text-xs">{p.positionCode}</span> },
       { header: t("positions.colTitle"), cell: (p) => <span className="font-medium text-foreground">{p.positionTitle}</span> },
+      // R2/C1 (D2-10): il codice resta nel dettaglio della riga, non e' la prima colonna
+      { header: t("positions.colCode"), secondaria: true, cell: (p) => <span className="font-mono text-xs" data-grezzo="">{p.positionCode}</span> },
       {
         header: t("positions.colType"),
         cell: (p) => (

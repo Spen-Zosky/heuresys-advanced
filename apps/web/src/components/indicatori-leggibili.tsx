@@ -15,18 +15,20 @@ import {
   type KPIStripProps,
   type StatsCardProps,
 } from "@heuresys/ui";
+import { useTranslation } from "react-i18next";
 import { useLeggibile } from "@/lib/leggibile";
 import { spiegazioneDi } from "@/lib/glossario";
 import { Spiegazione } from "@/components/spiegazione";
 
 export function StatsCard(props: StatsCardProps) {
   const l = useLeggibile();
+  const { i18n } = useTranslation();
   const value =
     typeof props.value === "number" || typeof props.value === "string"
       ? l.testo(String(props.value))
       : props.value;
   const label = l.testo(props.label);
-  const s = spiegazioneDi(label);
+  const s = spiegazioneDi(label, i18n.language);
   const carta = (
     <StatsCardUi {...props} label={label} value={value} animate={false} />
   );
@@ -44,11 +46,12 @@ export function StatsCard(props: StatsCardProps) {
 
 export function KPIStrip({ items }: KPIStripProps) {
   const l = useLeggibile();
+  const { i18n } = useTranslation();
   return (
     <KPIStripUi
       items={items.map((i) => {
         const label = l.testo(i.label);
-        const s = spiegazioneDi(label);
+        const s = spiegazioneDi(label, i18n.language);
         return {
           ...i,
           label,

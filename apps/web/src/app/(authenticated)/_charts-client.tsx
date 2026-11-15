@@ -29,8 +29,8 @@
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState, type ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
-import { localeDi } from "@/lib/format";
-import { letturaDelGrafico, type ChartTable } from "@/lib/lettura-grafico";
+import { formati, localeDi } from "@/lib/format";
+import { assiDerivati, letturaDelGrafico, type ChartTable } from "@/lib/lettura-grafico";
 
 const RawEChartsCard = dynamic(
   // Subpath `/charts` isolates echarts so this lazy import does NOT drag the whole
@@ -85,7 +85,8 @@ type RawProps = ComponentProps<typeof RawEChartsCard>;
  * Una pagina che ha già un `formatter` suo lo tiene.
  */
 function numeroLocale(locale: string) {
-  const nf = new Intl.NumberFormat(locale, { maximumFractionDigits: 2 });
+  // S-08 (forense 15/11): il separatore delle migliaia sempre, come lib/format.ts («4.069», non «4069»).
+  const nf = new Intl.NumberFormat(locale, { maximumFractionDigits: 2, useGrouping: "always" } as unknown as Intl.NumberFormatOptions);
   return (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? nf.format(v) : String(v ?? ""));
 }
 
@@ -127,6 +128,10 @@ function rendiLeggibile(option: RawProps["option"], locale: string): RawProps["o
   if (o.tooltip && typeof o.tooltip === "object" && !Array.isArray(o.tooltip)) {
     const tt = o.tooltip as Record<string, unknown>;
     if (tt.valueFormatter === undefined && tt.formatter === undefined) o.tooltip = { ...tt, valueFormatter: num };
+  } else if (o.tooltip === undefined && serie > 0) {
+    // Un grafico senza `tooltip` non dice niente al passaggio del mouse (C-DINAMICO del giro
+    // del 15/11): il suggerimento per elemento, con i numeri nella forma della lingua, è il minimo.
+    o.tooltip = { trigger: "item", valueFormatter: num };
   }
   return o as RawProps["option"];
 }
@@ -145,8 +150,9 @@ type EChartsCardProps = RawProps & {
   lingua?: string;
 };
 
-function conNomiDegliAssi(option: RawProps["option"], assi: { x?: string; y?: string } | undefined): RawProps["option"] {
-  if (!assi) return option;
+function conNomiDegliAssi(option: RawProps["option"], assiPagina: { x?: string; y?: string } | undefined): RawProps["option"] {
+  const assi = assiDerivati(option, assiPagina);
+  if (!assi.x && !assi.y) return option;
   const o = { ...(option as Record<string, unknown>) };
   const metti = (k: "xAxis" | "yAxis", nome: string | undefined, verticale: boolean) => {
     const a = o[k];
@@ -171,7 +177,8 @@ function conNomiDegliAssi(option: RawProps["option"], assi: { x?: string; y?: st
 }
 
 function TabellaEquivalente({ tabella, lingua }: { tabella: ChartTable; lingua: string | undefined }) {
-  const fmt = (v: string | number) => (typeof v === "number" ? v.toLocaleString(lingua, { maximumFractionDigits: 2 }) : v);
+  const f = formati(lingua);
+  const fmt = (v: string | number) => (typeof v === "number" ? f.numero(v, 2) : v);
   return (
     <details className="mt-3 text-sm" data-testid="chart-table">
       <summary className="cursor-pointer text-xs text-muted-foreground">{tabella.titolo}</summary>

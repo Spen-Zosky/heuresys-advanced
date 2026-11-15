@@ -2,7 +2,8 @@
 
 import { useTranslation } from "react-i18next";
 import type { MeProfileFull } from "@heuresys/shared";
-import { Field, ProfileSection, fmtDate } from "./field";
+import { Field, ProfileSection, fmtDate, fmtPaese } from "./field";
+import { useEnumLabel } from "@/lib/enum-labels";
 
 const DOC_KIND_KEY: Record<string, string> = {
   NATIONAL_ID: "profile.full.docKind.nationalId",
@@ -17,6 +18,7 @@ const ADDR_KIND_KEY: Record<string, string> = {
 /** Panoramica — anagraphic identity, documents, addresses, contacts, family, education, banking. */
 export function OverviewTab({ data }: { data: MeProfileFull }) {
   const { t } = useTranslation("ess");
+  const enumLabel = useEnumLabel();
   const id = data.identity;
 
   return (
@@ -27,9 +29,9 @@ export function OverviewTab({ data }: { data: MeProfileFull }) {
         <Field label={t("profile.full.identity.middleName")} value={id.middleName} />
         <Field label={t("profile.full.identity.birthDate")} value={fmtDate(id.birthDate)} />
         <Field label={t("profile.full.identity.birthPlace")} value={id.birthPlace} />
-        <Field label={t("profile.full.identity.gender")} value={id.gender} />
-        <Field label={t("profile.full.identity.nationality")} value={id.nationality} />
-        <Field label={t("profile.full.identity.maritalStatus")} value={id.maritalStatus} />
+        <Field label={t("profile.full.identity.gender")} value={id.gender ? enumLabel("gender", id.gender) : null} />
+        <Field label={t("profile.full.identity.nationality")} value={fmtPaese(id.nationality)} />
+        <Field label={t("profile.full.identity.maritalStatus")} value={id.maritalStatus ? enumLabel("maritalStatus", id.maritalStatus) : null} />
         <Field label={t("profile.full.identity.taxId")} value={id.taxId} testId="ov-taxId" />
       </ProfileSection>
 
@@ -56,7 +58,7 @@ export function OverviewTab({ data }: { data: MeProfileFull }) {
           <Field label={t("profile.full.address.street")} value={a.street} />
           <Field label={t("profile.full.address.city")} value={a.city} />
           <Field label={t("profile.full.address.postalCode")} value={a.postalCode} />
-          <Field label={t("profile.full.address.country")} value={a.country} />
+          <Field label={t("profile.full.address.country")} value={fmtPaese(a.country)} />
           <Field label={t("profile.full.address.region")} value={a.region} />
         </ProfileSection>
       ))}
@@ -64,20 +66,18 @@ export function OverviewTab({ data }: { data: MeProfileFull }) {
       <ProfileSection title={t("profile.full.contacts.title")} testId="section-contacts">
         <Field label={t("profile.full.contacts.phoneMobile")} value={data.contacts.phoneMobile} />
         <Field label={t("profile.full.contacts.phoneHome")} value={data.contacts.phoneHome} />
-        <div className="contents" data-giro-email-ammessa="">
-          <Field label={t("profile.full.contacts.personalEmail")} value={data.contacts.personalEmail} />
-        </div>
+        <Field label={t("profile.full.contacts.personalEmail")} value={data.contacts.personalEmail} emailAmmessa />
       </ProfileSection>
 
       <ProfileSection title={t("profile.full.family.title")} testId="section-family">
         <Field label={t("profile.full.emergency.name")} value={data.emergency.name} />
         <Field label={t("profile.full.emergency.phone")} value={data.emergency.phone} />
-        <Field label={t("profile.full.emergency.relationship")} value={data.emergency.relationship} />
+        <Field label={t("profile.full.emergency.relationship")} value={data.emergency.relationship ? enumLabel("familyRelationship", data.emergency.relationship) : null} />
         {data.family.map((f, i) => (
           <Field
             key={`fam-${i}`}
             label={t("profile.full.family.member")}
-            value={`${[f.firstName, f.lastName].filter(Boolean).join(" ")}${f.relationship ? ` (${f.relationship})` : ""}${f.birthDate ? ` · ${fmtDate(f.birthDate)}` : ""}${f.isDependent ? ` · ${t("profile.full.family.dependent")}` : ""}`}
+            value={`${[f.firstName, f.lastName].filter(Boolean).join(" ")}${f.relationship ? ` (${enumLabel("familyRelationship", f.relationship)})` : ""}${f.birthDate ? ` · ${fmtDate(f.birthDate)}` : ""}${f.isDependent ? ` · ${t("profile.full.family.dependent")}` : ""}`}
           />
         ))}
       </ProfileSection>
@@ -89,7 +89,7 @@ export function OverviewTab({ data }: { data: MeProfileFull }) {
           data.education.map((e, i) => (
             <Field
               key={`edu-${i}`}
-              label={e.degree}
+              label={enumLabel("degree", e.degree)}
               value={`${e.institution}${e.fieldOfStudy ? ` · ${e.fieldOfStudy}` : ""}${e.grade ? ` · ${e.grade}` : ""}`}
             />
           ))

@@ -502,7 +502,7 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     schema: { querystring: QuadroQuerySchema, response: { 200: QuadroResponseSchema } },
   }, async (req) =>
     leggiQuadro(actorFromRequest(req), areeDa(req.query.aree), (chiave, errore) =>
-      req.log.warn({ chiave, err: errore }, "quadro: lente non calcolata")));
+      req.log.warn({ chiave, err: errore }, "quadro: lente non calcolata"), req.query.lingua));
 
   app.get("/delegations", {
     preHandler: [requirePermission("approval:read:self")],

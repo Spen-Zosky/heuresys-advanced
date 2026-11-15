@@ -105,6 +105,8 @@ export const CompensationAnalyticsResponseSchema = z.object({
   scope: z.object({ kind: AnalyticsScopeKindSchema, tenantId: z.uuid().nullable() }),
   totalProfiles: z.number().int(), // banded profiles in scope
   ouCount: z.number().int(), // distinct OUs with banded profiles
+  /** Vero quando le unita' di vertice sono escluse dal calcolo per il livello di chi guarda (ADR-0036 par. 5): D16. */
+  topUnitsExcluded: z.boolean().optional(),
   // Opzionali per la MASCHERATURA, non perche' possano mancare nel dato: sotto
   // mandato di sola piattaforma questi campi vengono TOLTI e i loro nomi
   // dichiarati in `masked`. 280 posizioni su 299 hanno UN SOLO titolare, quindi

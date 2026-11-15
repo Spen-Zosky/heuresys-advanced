@@ -9,6 +9,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { useCan } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/errors";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
+import { NomeOppure } from "@/components/senza-nome";
 import { useFormat } from "@/lib/format";
 
 /**
@@ -85,7 +86,7 @@ export function SemanticSearchPanel() {
     () => [
       {
         header: t("semanticSearch.colSkill"),
-        cell: (m) => <span className="font-medium text-foreground">{m.skillName ?? m.skillId}</span>,
+        cell: (m) => <span className="font-medium text-foreground"><NomeOppure nome={m.skillName} id={m.skillId} /></span>,
       },
       {
         header: t("semanticSearch.colScore"),

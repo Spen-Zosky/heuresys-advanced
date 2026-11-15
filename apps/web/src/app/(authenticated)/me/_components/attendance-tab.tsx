@@ -7,11 +7,13 @@ import type { MeAttendanceResponse } from "@heuresys/shared";
 import { apiFetch } from "../../../../lib/api/fetch";
 import { Field, ProfileSection, fmtDate } from "../profile/_components/field";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { useFormat } from "@/lib/format";
 
 /** Presenze — imported attendance/overtime/leave (read-only consultation), lazy on tab open. */
 export function MeAttendanceTab() {
   const { t } = useTranslation("ess");
   const enumLabel = useEnumLabel();
+  const fmt = useFormat();
   const q = useQuery({
     queryKey: ["me", "attendance"],
     queryFn: () => apiFetch<MeAttendanceResponse>("/v1/me/attendance"),
@@ -31,7 +33,7 @@ export function MeAttendanceTab() {
             <Field
               key={`bal-${i}`}
               label={`${enumLabel("leaveType", b.leaveType)} ${b.year ?? ""}`}
-              value={`${b.usedDays ?? 0}/${b.totalDays ?? 0} ${t("landing.att.daysUsed")}${b.pendingDays ? ` · ${b.pendingDays} ${t("landing.att.pending")}` : ""}`}
+              value={`${fmt.numero(b.usedDays ?? 0, 1)}/${fmt.numero(b.totalDays ?? 0, 1)} ${t("landing.att.daysUsed")}${b.pendingDays ? ` · ${fmt.numero(b.pendingDays, 1)} ${t("landing.att.pending")}` : ""}`}
             />
           ))
         )}
@@ -48,8 +50,8 @@ export function MeAttendanceTab() {
                 <li key={`att-${i}`} className="flex items-center justify-between gap-4 py-2">
                   <span className="text-foreground">{fmtDate(a.date)}</span>
                   <span className="text-muted-foreground">{a.clockIn ?? "—"}–{a.clockOut ?? "—"}</span>
-                  <span className="text-muted-foreground">{a.hoursTotal != null ? `${a.hoursTotal}h` : "—"}</span>
-                  <span className="text-xs text-muted-foreground">{a.status ?? ""}</span>
+                  <span className="text-muted-foreground">{a.hoursTotal != null ? `${fmt.numero(a.hoursTotal, 1)} h` : "—"}</span>
+                  <span className="text-xs text-muted-foreground">{a.status ? enumLabel("attendanceStatus", a.status) : ""}</span>
                 </li>
               ))}
             </ul>
@@ -66,7 +68,7 @@ export function MeAttendanceTab() {
                 <li key={`ot-${i}`} className="flex items-center justify-between gap-4 py-2">
                   <span className="text-foreground">{fmtDate(o.date)}</span>
                   <span className="text-muted-foreground">{enumLabel("overtimeType", o.type)}</span>
-                  <span className="text-muted-foreground">{o.hours != null ? `${o.hours}h` : "—"}</span>
+                  <span className="text-muted-foreground">{o.hours != null ? `${fmt.numero(o.hours, 1)} h` : "—"}</span>
                   <span className="text-xs text-muted-foreground">{o.status ? enumLabel("overtimeStatus", o.status) : ""}</span>
                 </li>
               ))}

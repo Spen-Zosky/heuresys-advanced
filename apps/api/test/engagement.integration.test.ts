@@ -53,9 +53,10 @@ describe("engagement normalized read-model (m2b)", () => {
     expect(b.items.length).toBe(b.total);
     // i conteggi sono veri: si confrontano con la fonte, non con una fotografia
     const somme = await pool.query<{ risposte: string; domande: string }>(
-      `SELECT (SELECT count(*) FROM sys.sys_survey_responses r
+      // Forense 15/11 (D3-06): per sondaggio si contano le persone che hanno risposto.
+      `SELECT (SELECT coalesce(sum(n), 0) FROM (SELECT count(DISTINCT r.survey_response_subject_user_id) AS n FROM sys.sys_survey_responses r
                 JOIN sys.sys_surveys s2 ON s2.survey_id = r.survey_response_survey_id
-               WHERE s2.survey_tenant_id = u.user_tenant_id)::text AS risposte,
+               WHERE s2.survey_tenant_id = u.user_tenant_id GROUP BY r.survey_response_survey_id) per_sondaggio)::text AS risposte,
               (SELECT count(*) FROM sys.sys_survey_questions q
                 JOIN sys.sys_surveys s3 ON s3.survey_id = q.survey_question_survey_id
                WHERE s3.survey_tenant_id = u.user_tenant_id)::text AS domande

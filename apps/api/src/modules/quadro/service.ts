@@ -14,7 +14,7 @@ import { pool } from "../../db/client.js";
 import { perimetroClienti, type ActorContext } from "../../lib/actor.js";
 import { HR_MANDATED_ROLES, resolveOrgReadScope } from "../../lib/scope/resolver.js";
 import { userHasPermission } from "../../middleware/rbac.js";
-import { LENTI } from "./lenti.js";
+import { LENTI, testoPer, type Lingua } from "./lenti.js";
 
 const PESO: Record<Insight["tono"], number> = { rischio: 0, attenzione: 1, informazione: 2, positivo: 3 };
 
@@ -28,7 +28,9 @@ export async function leggiQuadro(
   actor: ActorContext,
   aree: AreaQuadro[],
   registra: (chiave: string, errore: unknown) => void = () => {},
+  lingua: Lingua = "it",
 ): Promise<QuadroResponse> {
+  const testo = testoPer(lingua);
   const scope = await resolveOrgReadScope(pool, actor);
   const perimetro = perimetroClienti(actor);
   const clienti = scope.kind === "all" ? (perimetro === undefined ? null : [...perimetro]) : [scope.tenantId];
@@ -63,7 +65,7 @@ export async function leggiQuadro(
         }
         const valore = Number(riga?.valore ?? 0);
         const prima = riga?.prima === null || riga?.prima === undefined ? null : Number(riga.prima);
-        const letto = l.leggi(valore, prima);
+        const letto = l.leggi(valore, prima, testo);
         if (!letto) return null;
         const andamento = l.chiave === "giorni-di-assenza-30" && prima ? Math.round(((valore - prima) / prima) * 100) : null;
         const area = l.aree.find((a) => aree.includes(a)) ?? l.aree[0]!;

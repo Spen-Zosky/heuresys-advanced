@@ -11,6 +11,7 @@
  * senza aprirla. Le schede che non stanno in larghezza scorrono (`TabsOverflow` di @heuresys/ui
  * non serve: qui il contenuto è sempre di questa pagina).
  */
+import { useFormat } from "@/lib/format";
 import { useCallback, type ReactNode } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@heuresys/ui";
@@ -25,6 +26,7 @@ export interface SchedaPagina {
 }
 
 export function SchedePagina({ schede, chiave = "scheda" }: { schede: SchedaPagina[]; chiave?: string }) {
+  const fmt = useFormat();
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -50,7 +52,7 @@ export function SchedePagina({ schede, chiave = "scheda" }: { schede: SchedaPagi
             {s.titolo}
             {typeof s.conteggio === "number" ? (
               <span className="ml-1.5 rounded-full bg-muted px-1.5 text-[11px] font-medium tabular-nums text-muted-foreground">
-                {s.conteggio.toLocaleString("it-IT")}
+                {fmt.numero(s.conteggio)}
               </span>
             ) : null}
           </TabsTrigger>

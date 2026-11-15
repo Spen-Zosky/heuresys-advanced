@@ -485,7 +485,8 @@ export async function loadVrioInputs(tenantId: string | null, q: Queryable = poo
 
   const headcountRes = await q.query<{ headcount: string }>(
     `SELECT count(*)::text AS headcount FROM sys.sys_users u
-      WHERE ($1::uuid IS NULL OR u.user_tenant_id = $1::uuid)`,
+      WHERE ($1::uuid IS NULL OR u.user_tenant_id = $1::uuid)
+        AND u.user_type NOT IN ('SERVICE', 'GENERATED_INCUMBENT')`, // D3-09: le persone, non le utenze di servizio
     [tenantId],
   );
   const headcount = Number(headcountRes.rows[0]?.headcount ?? 0);

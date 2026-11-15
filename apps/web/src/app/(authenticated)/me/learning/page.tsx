@@ -46,7 +46,7 @@ export default function MeLearningPage() {
       },
       {
         header: t("learning.colDeadline"),
-        cell: (l) => <span className="text-xs text-muted-foreground">{l.deadline ?? "—"}</span>,
+        cell: (l) => <span className="text-xs text-muted-foreground">{l.deadline ? fmt.data(l.deadline) : "—"}</span>,
       },
     ],
     [t, fmt],

@@ -183,6 +183,22 @@ describe("/v1/projects/* integration (#143 F4)", () => {
     }
   });
 
+  it("S-09 — i membri si scrivono «Cognome, Nome», con il nome del database come atteso", async () => {
+    const r = await suite.app.inject({
+      method: "GET", url: `/v1/projects/${ledProjectId}`, headers: { cookie: ch(leadS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const p = r.json() as { members: Array<{ userId: string; fullName: string | null }> };
+    const attesi = await pool.query<{ id: string; n: string | null }>(
+      `SELECT user_id AS id, COALESCE(nullif(concat_ws(', ', nullif(trim(user_last_name), ''), nullif(trim(user_first_name), '')), ''), nullif(trim(user_display_name), '')) AS n
+         FROM sys.sys_users WHERE user_id = ANY($1::uuid[])`,
+      [p.members.map((m) => m.userId)],
+    );
+    const perId = new Map(attesi.rows.map((x) => [x.id, x.n]));
+    for (const m of p.members) expect(m.fullName).toBe(perId.get(m.userId) ?? null);
+    expect(p.members.some((m) => m.fullName?.includes(", ")), "nessun membro con cognome e nome").toBe(true);
+  });
+
   it("⭐ I18 — guidare un progetto NON apre il dossier di un membro", async () => {
     // La prova che conta: il capo chiede i dati sensibili di una persona che gli lavora
     // insieme. Se l'appartenenza funzionale li aprisse, questa risposta sarebbe 200 con

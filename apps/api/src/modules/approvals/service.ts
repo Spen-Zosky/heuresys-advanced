@@ -118,6 +118,7 @@ const toListItem = (r: repo.ApprovalRequestListRow): ApprovalRequestListItem => 
   processStepId: r.processStepId,
   processStepName: r.processStepName,
   delegatedStepCount: r.delegatedStepCount,
+  requesterName: r.requesterName,
 });
 
 interface ChainPlan {

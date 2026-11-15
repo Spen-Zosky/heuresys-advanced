@@ -76,12 +76,16 @@ export function cognomeNome(u: {
  * C1/C4: la stringa del browser («Mozilla/5.0 (X11; Linux x86_64) …») non dice niente a chi la
  * legge. Si scrive il browser e il sistema, come «Chrome su Windows».
  */
-export function dispositivoLeggibile(ua: string | null | undefined): string | null {
+export function dispositivoLeggibile(
+  ua: string | null | undefined,
+  /** compone la frase nella lingua dell'interfaccia («Chrome su Windows» / «Chrome on Windows») */
+  componi: (browser: string, sistema: string) => string = (b, s) => `${b} / ${s}`,
+): string | null {
   if (!ua) return null;
   const browser = /Edg\//.test(ua) ? "Edge" : /OPR\//.test(ua) ? "Opera" : /Firefox\//.test(ua) ? "Firefox"
     : /Chrome\//.test(ua) ? "Chrome" : /Safari\//.test(ua) ? "Safari" : /curl\//.test(ua) ? "curl" : null;
   const sistema = /Android/.test(ua) ? "Android" : /iPhone|iPad|iOS/.test(ua) ? "iOS" : /Windows/.test(ua) ? "Windows"
     : /Mac OS X|Macintosh/.test(ua) ? "macOS" : /Linux/.test(ua) ? "Linux" : null;
-  if (browser && sistema) return `${browser} su ${sistema}`;
-  return browser ?? sistema ?? "Dispositivo non riconosciuto";
+  if (browser && sistema) return componi(browser, sistema);
+  return browser ?? sistema ?? null;
 }

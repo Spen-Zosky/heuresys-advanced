@@ -3,8 +3,10 @@
     "title": "Approvals",
     "description": "Create and track approval requests.",
     "count": "{{count}} requests",
+    "count_one": "{{count}} request",
     "columns": {
       "title": "Title",
+      "requester": "Requester",
       "status": "Status",
       "policy": "Quorum",
       "priority": "Priority",
@@ -50,6 +52,7 @@
     },
     "filters": {
       "statusAll": "All statuses",
+      "statusActive": "Not archived",
       "processAll": "All processes",
       "process": "Process",
       "stepAll": "All activities",
@@ -105,11 +108,12 @@
     "title": "Climate and surveys",
     "description": "Survey results and quick check-in trend.",
     "count": "{{count}} surveys",
+    "count_one": "{{count}} survey",
     "columns": {
       "title": "Title",
       "status": "Status",
       "type": "Type",
-      "responses": "Responses",
+      "responses": "Respondents",
       "questions": "Questions",
       "invitations": "Invitations"
     },
@@ -125,17 +129,19 @@
       "workload": "Workload",
       "satisfaction": "Satisfaction",
       "totalChecks": "{{count}} check-ins in all",
+      "totalChecks_one": "{{count}} check-in in all",
       "empty": "No quick check-in data.",
       "axisWeek": "Week",
       "axisScore": "Average score",
       "tableTitle": "Show the data as a table",
       "colCount": "Check-ins",
-      "weekShort": "Wk {{n}}"
+      "weekShort": "Wk of {{n}}"
     },
     "results": {
       "back": "Back to Engagement",
       "notFound": "Survey not found.",
       "subtitle": "{{count}} questions",
+      "subtitle_one": "{{count}} question",
       "question": "Question",
       "type": "Type",
       "category": "Category",
@@ -155,11 +161,16 @@
     "title": "Users",
     "description": "The people of the organization with the role they hold and the site they work at.",
     "count": "{{count}} people",
+    "count_one": "{{count}} person",
     "countKind": {
       "STANDARD": "{{count}} people",
+      "STANDARD_one": "{{count}} person",
       "SERVICE": "{{count}} service accounts",
+      "SERVICE_one": "{{count}} service account",
       "GENERATED_INCUMBENT": "{{count}} placeholder incumbents",
-      "ALL": "{{count}} accounts"
+      "GENERATED_INCUMBENT_one": "{{count}} placeholder incumbent",
+      "ALL": "{{count}} accounts",
+      "ALL_one": "{{count}} account"
     },
     "filters": {
       "kind": "Show",
@@ -348,7 +359,8 @@
   "tenants": {
     "title": "Tenants",
     "description": "Tenant registry with code, country and status.",
-    "count": "{{count}} total",
+    "count_one": "{{count}} total",
+    "count_other": "{{count}} total",
     "errorMessage": "Access denied or loading error.",
     "emptyTitle": "No tenants",
     "emptyDescription": "There are no registered tenants.",
@@ -447,6 +459,7 @@
     "title": "Organization units",
     "description": "Hierarchy of the tenant's organizational units.",
     "count": "{{count}} units",
+    "count_one": "{{count}} unit",
     "errorMessage": "Unable to load the organizational units.",
     "emptyTitle": "No units",
     "emptyDescription": "There are no organizational units.",
@@ -461,6 +474,11 @@
     "dash": "—",
     "activeYes": "Active",
     "activeNo": "Inactive",
+    "filters": {
+      "active": "Active only",
+      "inactive": "Inactive only",
+      "all": "All"
+    },
     "form": {
       "createTitle": "New organization unit",
       "editTitle": "Organization unit — edit",
@@ -494,6 +512,7 @@
     "title": "Positions",
     "description": "Tenant positions: who holds them, in which unit and site, how much they matter.",
     "count": "{{count}} positions",
+    "count_one": "{{count}} position",
     "errorMessage": "Unable to load the positions.",
     "emptyTitle": "No positions",
     "emptyDescription": "There are no positions in the tenant.",
@@ -555,6 +574,7 @@
       "title": "Required KPIs",
       "back": "← Position",
       "count": "{{count}} KPI linked",
+      "count_one": "{{count}} KPI linked",
       "cardTitle": "Requirements",
       "empty": "No required KPI declared.",
       "caption": "KPIs required by the position",
@@ -569,6 +589,7 @@
       "title": "Position learning",
       "back": "← Position",
       "count": "{{count}} paths · {{modules}} modules",
+      "count_one": "{{count}} path · {{modules}} modules",
       "dash": "—",
       "requirements": {
         "cardTitle": "Required paths",
@@ -587,6 +608,7 @@
         "caption": "Learning modules covering the position's required skills",
         "empty": "No module mapped to the required skills.",
         "minutes": "{{count}} min",
+        "minutes_one": "{{count}} min",
         "columns": {
           "skill": "Skill",
           "required": "Required",
@@ -611,6 +633,7 @@
       "title": "Required skills",
       "back": "← Position",
       "count": "{{count}} skill linked",
+      "count_one": "{{count}} skill linked",
       "cardTitle": "Requirements",
       "empty": "No required skill declared.",
       "caption": "Skills required by the position",
@@ -623,8 +646,11 @@
     },
     "countKind": {
       "ALL": "{{count}} positions",
+      "ALL_one": "{{count}} position",
       "ACTIVE": "{{count}} active positions",
-      "INACTIVE": "{{count}} inactive positions"
+      "ACTIVE_one": "{{count}} active position",
+      "INACTIVE": "{{count}} inactive positions",
+      "INACTIVE_one": "{{count}} inactive position"
     },
     "vacant": "Vacant",
     "filters": {
@@ -746,7 +772,16 @@
       "user_profile": "User profiles",
       "visualization": "Visualizations",
       "vocabulary": "Vocabulary",
-      "whistleblowing": "Whistleblowing"
+      "whistleblowing": "Whistleblowing",
+      "career": "Career",
+      "certification": "Certifications",
+      "consent": "Consents",
+      "document": "Documents",
+      "insight": "Insights",
+      "job_requisition": "Staffing requests",
+      "me": "Personal area",
+      "performance_review": "Performance reviews",
+      "review_cycle": "Review cycles"
     },
     "actions": {
       "activate": "activate",
@@ -777,7 +812,21 @@
       "update_layout": "update the layout",
       "use": "use",
       "view": "view",
-      "write": "write"
+      "write": "write",
+      "content_read": "read content",
+      "enroll_self": "enroll oneself",
+      "export_self": "export own data",
+      "manage_self": "manage own data",
+      "mark_read_self": "mark as read",
+      "preferences_read": "read preferences",
+      "preferences_update": "update preferences",
+      "read_self": "read own data",
+      "request_self": "request for oneself",
+      "request_target_self": "name the target of one's own request",
+      "respond_self": "respond for oneself",
+      "sessions_manage": "manage sessions",
+      "update_self": "update own data",
+      "upload_self": "upload own files"
     }
   },
   "dashboard": {
@@ -787,13 +836,13 @@
     "scope": "Scope {{kind}} · {{role}}",
     "trendDesc": "vs previous week",
     "counters": {
-      "users": "Users",
-      "positions": "Positions",
+      "users": "People",
+      "positions": "Active positions",
       "organizationUnits": "Org Units",
       "learningPaths": "Learning Paths",
       "learningGaps": "Learning Gaps",
-      "tenants": "Tenants",
-      "blueprints": "Blueprints",
+      "tenants": "Companies",
+      "blueprints": "Setup templates",
       "recommendations": "Proposed rewards"
     },
     "gapsTitle": "Recent critical/high gaps",
@@ -807,13 +856,17 @@
     "famiglie": {
       "badge": "dashboard",
       "vistePlurale": "{{count}} views",
+      "vistePlurale_one": "{{count}} view",
       "visteConTrattenute": "{{count}} views, {{masked}} with withheld values",
+      "visteConTrattenute_one": "{{count}} view, {{masked}} with withheld values",
       "colonnaVoce": "Item",
       "colonnaDettaglio": "Detail",
       "colonnaValore": "Value",
       "vuotoValori": "No values in your perimeter",
       "vuotoAndamento": "No trend in your perimeter",
       "vuotoRighe": "No rows in your perimeter",
+      "vuotoFiliali": "No branch to show",
+      "vuotoFilialiMotivo": "This dashboard is about branches: your unit is not a branch and you do not run any.",
       "senzaValori": "Values not available",
       "catalogoIrraggiungibile": "Dashboard catalogue unreachable",
       "datiIrraggiungibili": "Dashboard data unreachable",
@@ -856,12 +909,14 @@
       "diagramTitle": "Diagram",
       "diagramAria": "Diagram of graph {{name}}",
       "nodesTitle": "Nodes ({{count}})",
-      "edgesTitle": "Edges ({{count}})",
+      "nodesTitle_one": "Node ({{count}})",
+      "edgesTitle": "Links ({{count}})",
+      "edgesTitle_one": "Link ({{count}})",
       "dash": "—",
       "nodesEmpty": "No nodes.",
-      "edgesEmpty": "No edges.",
+      "edgesEmpty": "No links.",
       "edgeArrow": " → ",
-      "note": "Mermaid renderer active (max 50 nodes · 200 edges). Full node/edge lists above (max 20 + 20 visible).",
+      "note": "Simplified drawing (at most 50 nodes and 200 links). The full lists are above, up to 20 items per list.",
       "versionBadge": "version {{version}}",
       "versionsTitle": "Versions",
       "versionSelectLabel": "Version to view",
@@ -899,6 +954,7 @@
     "title": "Content",
     "description": "Knowledge base, policies, handbooks and announcements for the tenant.",
     "count": "{{count}} documents",
+    "count_one": "{{count}} document",
     "errorMessage": "Unable to load content.",
     "emptyTitle": "No documents",
     "emptyDescription": "There is no content yet. Create one with the form above.",
@@ -955,6 +1011,7 @@
       "hint": "Type at least 2 characters.",
       "loading": "Searching…",
       "resultsCount": "{{count}} results",
+      "resultsCount_one": "{{count}} result",
       "emptyTitle": "No results",
       "emptyDescription": "No content matches “{{q}}”.",
       "errorMessage": "Search failed."
@@ -981,6 +1038,7 @@
     "categories": {
       "cardTitle": "Categories",
       "count": "{{count}} categories",
+      "count_one": "{{count}} category",
       "nameLabel": "Name",
       "descriptionLabel": "Description",
       "submit": "Add category",
@@ -1007,6 +1065,7 @@
       "noCategory": "— None —",
       "versionsTitle": "Version history",
       "versionsCount": "{{count}} versions",
+      "versionsCount_one": "{{count}} version",
       "versionsEmpty": "No versions.",
       "versionsCaption": "Document versions",
       "currentBadge": "Current",
@@ -1047,14 +1106,15 @@
     }
   },
   "insights": {
-    "title": "Insights — flight risk",
-    "description": "Per-person attrition-risk score, derived in-platform with a transparent rule.",
-    "descriptionScoped": "{{kind}} scope · per-person flight-risk score, explainable per feature.",
+    "title": "Flight risk",
+    "description": "A score from 0 to 100 for each person: the higher it is, the more likely they are to leave. It is computed with a transparent rule that can be read item by item.",
+    "descriptionScoped": "Scope {{kind}} · flight-risk score per person, explained item by item.",
     "count": "{{count}} people scored",
-    "errorMessage": "Unable to load insights.",
+    "count_one": "{{count}} person scored",
+    "errorMessage": "Unable to load the flight risk.",
     "emptyTitle": "No scores",
     "emptyDescription": "No score computed yet. Run a recompute.",
-    "caption": "Flight-risk scores (highest risk first)",
+    "caption": "Flight risk (highest first)",
     "colSubject": "Person",
     "colScore": "Score",
     "colBand": "Band",
@@ -1066,25 +1126,26 @@
     },
     "feature": {
       "tenure": "Tenure",
-      "attendance": "Attendance / overtime",
-      "kpi": "KPI performance",
+      "attendance": "Attendance and overtime",
+      "kpi": "Indicator results",
       "engagement": "Engagement",
       "comp": "Compensation positioning",
-      "promotion": "Promotion recency"
+      "promotion": "Time since last promotion"
     },
     "recompute": "Recompute",
     "recomputing": "Recomputing…",
     "recomputeSuccess": "Recompute done: {{scored}} people scored.",
     "recomputeError": "Recompute failed.",
     "explainTitle": "Score breakdown — {{name}}",
-    "explainDesc": "Score {{score}} ({{band}}) · model {{model}}. Each feature contributes weight × normalized value.",
-    "featureDetail": "norm {{normalized}} · weight {{weight}}% · contrib {{contribution}}"
+    "explainDesc": "Score {{score}} ({{band}}) · model {{model}}. Each item contributes its weight times its value.",
+    "featureDetail": "value {{normalized}} · weight {{weight}}% · contribution {{contribution}}"
   },
   "insightsReadiness": {
-    "title": "Insights — succession readiness",
-    "description": "Per-person readiness toward best-fit target positions, derived in-platform with a transparent rule.",
-    "descriptionScoped": "{{kind}} scope · per-person, per-target-position succession readiness, explainable per feature.",
+    "title": "Succession readiness (model computation)",
+    "description": "How ready each person is to take the positions that suit them best, computed with a transparent rule. A person appears once per position: the number counts person-position assessments, not people. Candidates named by hand in the succession pools are in «Careers and succession».",
+    "descriptionScoped": "Scope {{kind}} · succession readiness per person and position, explained item by item.",
     "count": "{{count}} person-position assessments",
+    "count_one": "{{count}} person-position assessment",
     "errorMessage": "Unable to load succession readiness.",
     "emptyTitle": "No scores",
     "emptyDescription": "No readiness computed yet. Run a recompute.",
@@ -1110,14 +1171,15 @@
     "recomputeSuccess": "Recompute done: {{scored}} assessments.",
     "recomputeError": "Recompute failed.",
     "explainTitle": "Breakdown — {{name}} → {{position}}",
-    "explainDesc": "Readiness {{value}} ({{horizon}}) · model {{model}}. Each feature contributes weight × normalized value.",
-    "featureDetail": "norm {{normalized}} · weight {{weight}}% · contrib {{contribution}}"
+    "explainDesc": "Readiness {{value}} ({{horizon}}) · model {{model}}. Each item contributes its weight times its value.",
+    "featureDetail": "value {{normalized}} · weight {{weight}}% · contribution {{contribution}}"
   },
   "insightsSkillGap": {
-    "title": "Insights — skill gap",
+    "title": "Skill gaps",
     "description": "Per-person skill gap vs the current role, derived in-platform with a transparent rule.",
-    "descriptionScoped": "{{kind}} scope · per-person skill gap vs current role, explainable per feature.",
+    "descriptionScoped": "Scope {{kind}} · skill gaps per person against the current role, explained item by item.",
     "count": "{{count}} people scored",
+    "count_one": "{{count}} person scored",
     "errorMessage": "Unable to load skill gaps.",
     "emptyTitle": "No scores",
     "emptyDescription": "No gap computed yet. Run a recompute.",
@@ -1128,9 +1190,9 @@
     "colSegment": "Segment",
     "segment": {
       "ALIGNED": "Aligned",
-      "MINOR_GAP": "Minor gap",
+      "MINOR_GAP": "Small gap",
       "MODERATE_GAP": "Moderate gap",
-      "MAJOR_GAP": "Major gap"
+      "MAJOR_GAP": "Large gap"
     },
     "feature": {
       "role_fit_gap": "Role distance",
@@ -1141,8 +1203,8 @@
     "recomputeSuccess": "Recompute done: {{scored}} people scored.",
     "recomputeError": "Recompute failed.",
     "explainTitle": "Breakdown — {{name}} ({{position}})",
-    "explainDesc": "Gap {{value}} ({{segment}}) · model {{model}}. Each feature contributes weight × normalized value.",
-    "featureDetail": "norm {{normalized}} · weight {{weight}}% · contrib {{contribution}}",
+    "explainDesc": "Gap {{value}} ({{segment}}) · model {{model}}. Each item contributes its weight times its value.",
+    "featureDetail": "value {{normalized}} · weight {{weight}}% · contribution {{contribution}}",
     "evidenceOpen": "View evidence"
   },
   "mfaPolicy": {
@@ -1166,7 +1228,10 @@
     "exemptions": {
       "title": "Second-factor exemptions",
       "description": "Who may sign in without the second factor, why, who decided it and until when. An expired exemption no longer opens anything; mandate holders cannot have one.",
-      "empty": "No exemptions.",
+      "empty": "No active exemptions.",
+      "showInactive": "Also show expired and disabled ({{count}})",
+      "showInactive_one": "Also show expired or disabled ({{count}})",
+      "hideInactive": "Hide expired and disabled",
       "state": {
         "ACTIVE": "Active",
         "EXPIRED": "Expired",
@@ -1382,16 +1447,17 @@
       "TIME_OFF_REQUEST": "Time-off request",
       "SYSTEM": "System",
       "MANUAL": "Manual entry",
-      "ACCRUAL": "Automatic accrual"
+      "ACCRUAL": "Automatic accrual",
+      "leave_request": "Time-off request"
     }
   },
   "talentReview": {
     "title": "Talent review",
-    "description": "Board-ready 9-box talent grid plus position-fit, readiness, succession and critical-role coverage. Read-only consultation.",
+    "description": "The grid that crosses each person's performance and potential, plus position fit, readiness, succession and coverage of critical positions. Read-only. The readiness scores here are the imported ones; the model computation is in Insights.",
     "error": "Failed to load.",
     "empty": "No records.",
     "nineBox": {
-      "title": "9-box grid",
+      "title": "Performance and potential grid",
       "axisPotential": "Potential",
       "axisPerformance": "Performance",
       "band": {
@@ -1399,7 +1465,8 @@
         "MEDIUM": "Medium",
         "HIGH": "High"
       },
-      "maskedRows": "{{count}} people cannot be placed on the grid: the rating is withheld for your profile."
+      "maskedRows": "{{count}} people cannot be placed on the grid: the rating is withheld for your profile.",
+      "maskedRows_one": "{{count}} person cannot be placed on the grid: the rating is withheld for your profile."
     },
     "kpi": {
       "assessed": "Assessed",
@@ -1413,7 +1480,7 @@
       "readiness": "Readiness",
       "succession": "Succession",
       "criticalPositions": "Critical positions",
-      "criticalCoverage": "Critical-role coverage"
+      "criticalCoverage": "Coverage of critical positions"
     },
     "cols": {
       "employee": "Employee",
@@ -1430,7 +1497,9 @@
       "ready1y": "Ready 1y",
       "coverage": "Coverage",
       "computedAt": "Computed"
-    }
+    },
+    "coverageNotComputed": "not computed",
+    "rationaleImported": "Flagged with the data import"
   },
   "compReward": {
     "evaluation": {
@@ -1477,6 +1546,7 @@
     "title": "Whistleblowing reports",
     "description": "Area reserved to the designated custodian (Italian Legislative Decree 24/2023). No other role can read these reports.",
     "count": "{{count}} reports",
+    "count_one": "{{count}} report",
     "errorMessage": "Failed to load reports.",
     "forbiddenMessage": "You do not have access to this area: reports are readable only by the designated custodian (Legislative Decree 24/2023).",
     "emptyTitle": "No reports",
@@ -1547,7 +1617,9 @@
   "timeline": {
     "title": "History",
     "range": "{{count}} recorded facts, from {{from}} to {{to}}",
+    "range_one": "{{count}} recorded fact, from {{from}} to {{to}}",
     "all": "All ({{count}})",
+    "all_one": "All ({{count}})",
     "empty": "No recorded facts.",
     "error": "Could not load the history.",
     "more": "Show more ({{shown}} of {{total}})"
@@ -1556,6 +1628,7 @@
     "title": "Contact requests",
     "description": "Requests submitted from the public website. The status follows the sales workflow; the person's own details are what they declared and are not editable here.",
     "count": "{{count}} requests",
+    "count_one": "{{count}} request",
     "caption": "Contact requests, most recent first.",
     "emptyTitle": "No requests",
     "emptyDescription": "No request has arrived matching these criteria yet.",

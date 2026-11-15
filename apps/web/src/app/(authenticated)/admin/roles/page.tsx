@@ -22,6 +22,10 @@ interface RolePermItem {
  * e il codice tecnico (`user:read`) resta solo nel suggerimento al passaggio del mouse (R4).
  * Le righe sono in ordine alfabetico delle parole, così i permessi di una stessa area stanno insieme.
  */
+// D3-20: i due punti e il trattino dei codici (`read:self`, `job-requisition`) non sono chiavi valide
+// per i18next (il due punti separa lo spazio di nomi): le voci del dizionario usano il trattino basso.
+const chiave = (codice: string) => codice.replace(/[:.-]/g, "_");
+
 export default function AdminRolesPage() {
   const { t } = useTranslation("admin");
   const rp = useQuery({
@@ -36,8 +40,8 @@ export default function AdminRolesPage() {
     for (const r of rp.data?.items ?? []) {
       rolesSet.add(r.roleCode);
       if (!permsMap.has(r.permissionCode)) {
-        const area = t(`roles.resources.${r.permissionResource}`, { defaultValue: r.permissionResource });
-        const azione = t(`roles.actions.${r.permissionAction}`, { defaultValue: r.permissionAction });
+        const area = t(`roles.resources.${chiave(r.permissionResource)}`, { defaultValue: r.permissionResource });
+        const azione = t(`roles.actions.${chiave(r.permissionAction)}`, { defaultValue: r.permissionAction });
         permsMap.set(r.permissionCode, { label: `${area} · ${azione}` });
       }
       let s = mat.get(r.roleCode);

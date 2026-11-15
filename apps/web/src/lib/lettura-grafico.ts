@@ -2,6 +2,8 @@
  * apps/web/src/lib/lettura-grafico.ts — la lettura in parole e la tabella di un grafico ECharts
  * (classe C8), ricavate dalla sua opzione. Separata dal componente perché si prova senza browser.
  */
+import { testo as tr } from "./testi";
+
 export interface ChartTable {
   titolo: string;
   colonne: string[];
@@ -39,24 +41,24 @@ export function letturaDelGrafico(option: unknown, locale: string): { frase: str
       const x = (Array.isArray(a) ? a[0] : a) as Record<string, unknown> | undefined;
       return typeof x?.name === "string" && x.name ? x.name : null;
     };
-    const ax = nomeAsse(o.xAxis) ?? "Asse orizzontale";
-    const ay = nomeAsse(o.yAxis) ?? "Asse verticale";
+    const ax = nomeAsse(o.xAxis) ?? tr(locale, "lettura.asseX");
+    const ay = nomeAsse(o.yAxis) ?? tr(locale, "lettura.asseY");
     const gruppi = serie.map((g, i) => {
       const pt = ((Array.isArray(g.data) ? g.data : []) as unknown[])
         .map((d) => (Array.isArray(d) ? d : (d as Record<string, unknown>)?.value) as unknown[] | undefined)
         .filter((d): d is unknown[] => Array.isArray(d) && d.length >= 2 && Number.isFinite(Number(d[0])) && Number.isFinite(Number(d[1])))
         .map((d) => [Number(d[0]), Number(d[1])] as const);
       const media = (k: 0 | 1) => (pt.length ? pt.reduce((a, b) => a + b[k], 0) / pt.length : 0);
-      return { nome: typeof g.name === "string" && g.name ? g.name : `Gruppo ${i + 1}`, n: pt.length, mx: media(0), my: media(1) };
+      return { nome: typeof g.name === "string" && g.name ? g.name : tr(locale, "lettura.gruppo", { n: i + 1 }), n: pt.length, mx: media(0), my: media(1) };
     }).filter((g) => g.n > 0);
     if (gruppi.length === 0) return null;
     const punti = gruppi.reduce((a, g) => a + g.n, 0);
     const alto = gruppi.reduce((a, b) => (b.my > a.my ? b : a));
     return {
-      frase: `${nfS.format(punti)} punti in ${nfS.format(gruppi.length)} gruppi; la media più alta di «${ay}» è ${nfS.format(alto.my)} (${alto.nome}).`,
+      frase: tr(locale, "lettura.scatter", { punti: nfS.format(punti), gruppi: nfS.format(gruppi.length), asse: ay, valore: nfS.format(alto.my), nome: alto.nome }),
       tabella: {
-        titolo: "Vedi i numeri del grafico",
-        colonne: ["Voce", "Punti", `${ax} (media)`, `${ay} (media)`],
+        titolo: tr(locale, "lettura.vediNumeri"),
+        colonne: [tr(locale, "lettura.voce"), tr(locale, "lettura.punti"), tr(locale, "lettura.media", { asse: ax }), tr(locale, "lettura.media", { asse: ay })],
         righe: gruppi.map((g) => [g.nome, g.n, Math.round(g.mx), Math.round(g.my)]),
       },
     };
@@ -82,8 +84,8 @@ export function letturaDelGrafico(option: unknown, locale: string): { frase: str
       return c ? (c[2] as number) : "—";
     })]);
     return {
-      frase: `Il valore più alto è ${nf0.format(alto[2] as number)} (${nome(alto)}), il più basso ${nf0.format(basso[2] as number)} (${nome(basso)}), su ${celle.length} celle.`,
-      tabella: { titolo: "Vedi i numeri del grafico", colonne: ["Voce", ...x], righe: righeH },
+      frase: tr(locale, "lettura.heatmap", { alto: nf0.format(alto[2] as number), nomeAlto: nome(alto), basso: nf0.format(basso[2] as number), nomeBasso: nome(basso), celle: celle.length }),
+      tabella: { titolo: tr(locale, "lettura.vediNumeri"), colonne: [tr(locale, "lettura.voce"), ...x], righe: righeH },
     };
   }
   // Scatola e baffi: per categoria minimo, mediana, massimo (le serie di punti accanto non contano).
@@ -100,9 +102,9 @@ export function letturaDelGrafico(option: unknown, locale: string): { frase: str
     const bassa = scatole.reduce((a, b) => (b.med < a.med ? b : a));
     return {
       frase: scatole.length === 1
-        ? `Mediana ${nf0.format(alta.med)}, da ${nf0.format(alta.min)} a ${nf0.format(alta.max)}.`
-        : `La mediana più alta è ${nf0.format(alta.med)} (${alta.nome}), la più bassa ${nf0.format(bassa.med)} (${bassa.nome}).`,
-      tabella: { titolo: "Vedi i numeri del grafico", colonne: ["Voce", "Minimo", "Mediana", "Massimo"], righe: scatole.map((b) => [b.nome, b.min, b.med, b.max]) },
+        ? tr(locale, "lettura.boxSolo", { med: nf0.format(alta.med), min: nf0.format(alta.min), max: nf0.format(alta.max) })
+        : tr(locale, "lettura.boxPiu", { alta: nf0.format(alta.med), nomeAlta: alta.nome, bassa: nf0.format(bassa.med), nomeBassa: bassa.nome }),
+      tabella: { titolo: tr(locale, "lettura.vediNumeri"), colonne: [tr(locale, "lettura.voce"), tr(locale, "lettura.minimo"), tr(locale, "lettura.mediana"), tr(locale, "lettura.massimo")], righe: scatole.map((b) => [b.nome, b.min, b.med, b.max]) },
     };
   }
   // Albero, mappa ad albero, grafo: quanti elementi e quali in testa.
@@ -123,10 +125,10 @@ export function letturaDelGrafico(option: unknown, locale: string): { frase: str
     // nomi diversi: cinque «Specialista» di fila non dicono niente di più di uno
     const primi = [...new Set((conValore.length > 0 ? conValore : nodi).map((n) => String(n.name ?? "")).filter(Boolean))].slice(0, 5);
     return {
-      frase: `${nf0.format(nodi.length)} elementi${collegamenti !== null ? ` e ${nf0.format(collegamenti)} collegamenti` : ""}${primi.length ? `; in testa: ${primi.join(", ")}` : ""}.`,
+      frase: `${tr(locale, "lettura.alberoElementi", { n: nf0.format(nodi.length) })}${collegamenti !== null ? tr(locale, "lettura.alberoCollegamenti", { n: nf0.format(collegamenti) }) : ""}${primi.length ? tr(locale, "lettura.alberoInTesta", { lista: primi.join(", ") }) : ""}.`,
       tabella: {
-        titolo: "Vedi gli elementi del grafico",
-        colonne: conValore.length > 0 ? ["Voce", "Valore"] : ["Voce"],
+        titolo: tr(locale, "lettura.vediElementi"),
+        colonne: conValore.length > 0 ? [tr(locale, "lettura.voce"), tr(locale, "lettura.valore")] : [tr(locale, "lettura.voce")],
         righe: (conValore.length > 0 ? conValore : nodi).slice(0, 200).map((n) => (conValore.length > 0 ? [String(n.name ?? "—"), n.value as number] : [String(n.name ?? "—")])),
       },
     };
@@ -147,23 +149,51 @@ export function letturaDelGrafico(option: unknown, locale: string): { frase: str
     if (punti.length === 0) return;
     if (punti.length === 1) {
       // un solo valore è comunque una lettura: si scrive, invece di lasciare il disegno muto
-      frasi.push(`${typeof s.name === "string" && s.name && serie.length > 1 ? `${s.name}: ` : ""}un solo valore, ${nf.format(punti[0]!.v)} (${punti[0]!.nome}).`);
+      frasi.push(`${typeof s.name === "string" && s.name && serie.length > 1 ? `${s.name}: ` : ""}${tr(locale, "lettura.unico", { valore: nf.format(punti[0]!.v), nome: punti[0]!.nome })}`);
       return;
     }
     const alto = punti.reduce((a, b) => (b.v > a.v ? b : a));
     const basso = punti.reduce((a, b) => (b.v < a.v ? b : a));
     const nome = typeof s.name === "string" && s.name && serie.length > 1 ? `${s.name}: ` : "";
     const totale = punti.reduce((a, b) => a + b.v, 0);
-    frasi.push(`${nome}il valore più alto è ${nf.format(alto.v)} (${alto.nome}), il più basso ${nf.format(basso.v)} (${basso.nome})${serie.length === 1 ? `; totale ${nf.format(totale)} su ${punti.length} voci` : ""}.`);
+    frasi.push(`${nome}${tr(locale, "lettura.altoBasso", { alto: nf.format(alto.v), nomeAlto: alto.nome, basso: nf.format(basso.v), nomeBasso: basso.nome, totale: serie.length === 1 ? tr(locale, "lettura.totale", { totale: nf.format(totale), voci: punti.length }) : "" })}`);
   });
   if (frasi.length === 0) return null;
   const testo = frasi.join(" ");
-  const colonne = ["Voce", ...serie.map((s, i) => (typeof s.name === "string" && s.name ? s.name : serie.length === 1 ? "Valore" : `Serie ${i + 1}`))];
+  const colonne = [tr(locale, "lettura.voce"), ...serie.map((s, i) => (typeof s.name === "string" && s.name ? s.name : serie.length === 1 ? tr(locale, "lettura.valore") : tr(locale, "lettura.serie", { n: i + 1 })))];
   const tutte = [...righe.values()];
   // C9: una serie senza nessun valore è una colonna di soli trattini; non si mostra
   const tenute = colonne.map((_c, j) => j === 0 || tutte.some((r) => r[j] !== "—"));
   return {
     frase: testo.charAt(0).toUpperCase() + testo.slice(1),
-    tabella: { titolo: "Vedi i numeri del grafico", colonne: colonne.filter((_c, j) => tenute[j]), righe: tutte.map((r) => r.filter((_v, j) => tenute[j])) },
+    tabella: { titolo: tr(locale, "lettura.vediNumeri"), colonne: colonne.filter((_c, j) => tenute[j]), righe: tutte.map((r) => r.filter((_v, j) => tenute[j])) },
   };
+}
+
+/**
+ * S-10 (forense 15/11/2026): 19 grafici su 26 non dicevano che cosa misura l'asse dei valori. Il nome
+ * che la pagina non dichiara si ricava dall'opzione stessa: l'asse dei valori prende il nome delle
+ * serie (al massimo tre, distinte), che è già il nome del dato che il disegno misura. Un nome
+ * dichiarato dalla pagina (`assi`) o scritto nell'opzione vince sempre; l'asse delle categorie non
+ * si deriva (le sue etichette sono il nome di ciò che si conta) e gli assi di mappe, torte e alberi
+ * non esistono.
+ */
+export function assiDerivati(option: unknown, assi: { x?: string; y?: string } | undefined): { x?: string; y?: string } {
+  const o = option as Record<string, unknown>;
+  const serie = (Array.isArray(o.series) ? o.series : o.series ? [o.series] : []) as Array<{ name?: unknown; type?: unknown }>;
+  const cartesiane = serie.length > 0 && serie.every((s) => s.type === "bar" || s.type === "line" || s.type === "scatter" || s.type === "boxplot");
+  const nomi = [...new Set(serie.map((s) => (typeof s.name === "string" ? s.name.trim() : "")).filter(Boolean))];
+  const derivato = cartesiane && nomi.length > 0 && nomi.length <= 3 ? nomi.join(" / ") : undefined;
+  const per = (k: "xAxis" | "yAxis", dichiarato: string | undefined) => {
+    if (dichiarato) return dichiarato;
+    const a = o[k];
+    if (!a || typeof a !== "object" || Array.isArray(a)) return undefined;
+    const ax = a as Record<string, unknown>;
+    if (typeof ax.name === "string" && ax.name) return undefined;
+    const tipo = ax.type ?? "value";
+    return tipo === "value" || tipo === "log" ? derivato : undefined;
+  };
+  const x = per("xAxis", assi?.x);
+  const y = per("yAxis", assi?.y);
+  return { ...(x !== undefined ? { x } : {}), ...(y !== undefined ? { y } : {}) };
 }

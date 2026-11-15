@@ -128,6 +128,7 @@ export const analyticsService = {
       scope: { kind: s.kind, tenantId: s.tenantId },
       totalProfiles: c.totalProfiles,
       ouCount: c.ouCount,
+      topUnitsExcluded: unitaEscluse.length > 0,
       generatedAt: new Date().toISOString(),
     };
 

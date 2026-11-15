@@ -13,6 +13,7 @@
     "title": "Skill Catalogue",
     "description": "Skills visible in the catalogue, both global and tenant-scoped.",
     "count": "{{count}} skills visible",
+    "count_one": "{{count}} skill visible",
     "errorMessage": "Unable to load the skills.",
     "emptyTitle": "No skills",
     "emptyDescription": "There are no skills in the catalogue.",
@@ -70,18 +71,19 @@
   },
   "kpis": {
     "title": "KPI Catalogue",
-    "description": "Defined KPIs, with unit, polarity and scope.",
+    "description": "Defined indicators, with unit of measure, reading direction (higher is better, or lower is better) and scope.",
     "count": "{{count}} KPIs defined — {{piattaforma}} platform, {{azienda}} company",
+    "count_one": "{{count}} KPI defined — {{piattaforma}} platform, {{azienda}} company",
     "errorMessage": "Unable to load the KPIs.",
     "emptyTitle": "No KPIs",
     "emptyDescription": "There are no KPIs defined.",
     "caption": "KPI list",
     "cols": {
       "unit": "Unit",
-      "polarity": "Polarity"
+      "polarity": "Reading direction"
     },
     "metrology": {
-      "title": "Metrology",
+      "title": "How it is measured",
       "description2": "How KPIs are measured and weighted.",
       "methods": "Assessment methods",
       "rules": "Weighting rules",
@@ -118,6 +120,7 @@
     "title": "Goals",
     "description": "Objectives and goals across the tenant",
     "count": "{{count}} goals",
+    "count_one": "{{count}} goal",
     "errorMessage": "Failed to load goals",
     "emptyTitle": "No goals",
     "emptyDescription": "No goals found for this tenant",
@@ -146,8 +149,9 @@
   },
   "okrs": {
     "title": "OKRs",
-    "description": "Objectives and Key Results across the tenant",
+    "description": "Objectives and key results (OKRs) across the whole company",
     "count": "{{count}} OKRs",
+    "count_one": "{{count}} OKRs",
     "errorMessage": "Failed to load OKRs",
     "emptyTitle": "No OKRs",
     "emptyDescription": "No OKRs found for this tenant",
@@ -159,20 +163,22 @@
       "progress": "Progress"
     },
     "checkIns": {
-      "open": "Check-ins",
-      "title": "OKR check-ins",
-      "empty": "No check-ins recorded yet.",
+      "open": "Updates",
+      "title": "Progress updates",
+      "empty": "No update registered.",
       "scopeAggregate": "OKR aggregate",
       "scopeKeyResult": "Key result",
       "progress": "Progress",
       "overall": "Overall",
       "error": "Failed to load."
-    }
+    },
+    "periodEnded": "period ended"
   },
   "orgDirector": {
     "title": "Organisation design",
     "description": "Capability and maturity per org unit, from the MLCE and Maturity engines.",
     "count": "{{count}} units",
+    "count_one": "{{count}} unit",
     "errorMessage": "Failed to load capability/maturity",
     "emptyTitle": "No capability data",
     "emptyDescription": "The engines have not been computed for this tenant yet.",
@@ -222,12 +228,21 @@
     "tabs": {
       "units": "Organisational units",
       "essential": "Essential capabilities"
+    },
+    "maturityLevels": {
+      "L0": "Ad hoc",
+      "L1": "Initial",
+      "L2": "Repeatable",
+      "L3": "Defined",
+      "L4": "Managed",
+      "L5": "Optimizing"
     }
   },
   "processOwner": {
     "title": "Process owner",
     "description": "Blueprint process catalog (graph navigation, not BPM runtime).",
     "count": "{{count}} processes",
+    "count_one": "{{count}} process",
     "errorMessage": "Failed to load processes",
     "emptyTitle": "No processes",
     "emptyDescription": "There are no processes in the blueprint.",
@@ -248,6 +263,7 @@
       "subtitle": "Organization units assigned to the process and their RACI role.",
       "hint": "Select a process to see the assigned organization units and their RACI role.",
       "count": "{{count}} units",
+      "count_one": "{{count}} unit",
       "caption": "Process RACI assignments",
       "errorMessage": "Failed to load RACI assignments",
       "empty": "No organization unit is assigned to this process.",
@@ -267,6 +283,7 @@
   "consolidationRuns": {
     "title": "Model runs",
     "count": "{{count}} runs in the register",
+    "count_one": "{{count}} run in the register",
     "pick": "Run to work with",
     "option": "{{model}} · loaded on {{date}} · {{status}}",
     "empty": "The run register is empty: no datastore run has been loaded as a model yet.",
@@ -361,14 +378,17 @@
     "done": "Done",
     "waiting": "Waiting",
     "pending": "{{count}} to decide",
+    "pending_one": "{{count}} to decide",
     "lastRunOk": "Last run on {{group}}: {{proposals}} proposals in {{rounds}} rounds, {{seconds}} s.",
     "lastRunFailed": "The last run on {{group}} failed: {{error}}",
     "run": "Run the rounds on {{group}}",
     "confirmCertain": "Confirm the certain matches: {{count}} (confidence ≥ {{threshold}})",
+    "confirmCertain_one": "Confirm the certain match: {{count}} (confidence ≥ {{threshold}})",
     "closeGroup": "Move to the next section",
     "proposalsTitle": "Proposals: {{group}}",
     "proposalsDescription": "One row per item. Confidence goes from 0 to 100; the reason is the agent's.",
     "count": "{{count}} proposals",
+    "count_one": "{{count}} proposal",
     "proposalsEmptyTitle": "No proposals in this group",
     "proposalsEmptyDescription": "Proposals appear once the agent has run the group's rounds.",
     "caption": "Consolidation agent proposals for the selected group",
@@ -433,15 +453,18 @@
       "sameHint": "You can reconfirm the same choice. The decision goes into the draft: the data change only with «Approve the changes for good»."
     },
     "applyChanges": "Preview changes ({{count}})",
+    "applyChanges_one": "Preview change ({{count}})",
     "applying": "Trying the changes in the draft…",
     "applyResult": {
       "title": "Changes applied: {{count}} decisions applied to the data",
+      "title_one": "Change applied: {{count}} decision applied to the data",
       "detail": "Values changed {{changed}}, items created {{created}}, earlier effects withdrawn {{reverted}}."
     },
     "nextTitle": "What to do now",
     "nextRunning": "The {{group}} round is running. Nothing to do: the page refreshes itself when it finishes.",
     "nextRun": "This group has no proposals yet. Press «Run the rounds on {{group}}»: the agent compares your company's data with the prototype and prepares proposals.",
     "nextDecide": "{{count}} proposals still need a decision in the table below. Open each row and choose, or use «Confirm the certain matches» for the safe ones. The group cannot be closed while any remain.",
+    "nextDecide_one": "{{count}} proposal still needs a decision in the table below. Open the row and choose, or use «Confirm the certain matches» if it is safe. The group cannot be closed while any remain.",
     "nextClose": "Everything is decided. Next step: press «Move to the next section». The {{next}} group opens. Decisions stay in the draft until the final approval.",
     "nextCloseLast": "Everything is decided. Next step: press «Move to the next section»: it is the last group. Then «Approve the changes for good» puts the draft into the data.",
     "nextOther": "The open group is {{group}}. You can read this group, but the steps to take are in the open group: select it in the row above.",
@@ -499,24 +522,31 @@
       "maxConfidence": "Confidence up to",
       "shown": "{{shown}} proposals of {{total}} with these filters",
       "selectAll": "Pick the {{count}} filtered",
+      "selectAll_one": "Pick the {{count}} filtered",
       "clear": "Clear the picks",
       "selected_one": "One proposal picked",
       "selected_other": "{{count}} proposals picked",
       "withCascade": "Also update each one's cascade",
       "revise": "Also revise those already decided",
       "recommended": "Apply the agent's recommendation ({{count}})",
+      "recommended_one": "Apply the agent's recommendation ({{count}})",
       "reject": "Reject / do not adopt ({{count}})",
+      "reject_one": "Reject / do not adopt ({{count}})",
       "cascade": "Update the cascade of the decided ({{count}})",
+      "cascade_one": "Update the cascade of the decided ({{count}})",
       "undo": "Back to undecided ({{count}})",
+      "undo_one": "Back to undecided ({{count}})",
       "hint": "Bulk choices go into the draft like single ones: «Preview changes» shows what would change, and only the red button writes the data.",
       "result": "Done in the draft: {{decided}} decisions, {{cascaded}} in cascade, {{skipped}} skipped.",
-      "resultUndo": "Back to undecided: {{count}}."
+      "resultUndo": "Back to undecided: {{count}}.",
+      "resultUndo_one": "Back to undecided: {{count}}."
     }
   },
   "gaps": {
     "title": "Gap analysis",
     "description": "Competency gaps by severity, across the whole tenant.",
     "count": "{{count}} gaps recorded",
+    "count_one": "{{count}} gap recorded",
     "error": "Unable to load the gaps.",
     "emptyTitle": "No gaps recorded",
     "emptyDescription": "There are no competency gaps at the moment.",
@@ -555,7 +585,7 @@
   },
   "career": {
     "title": "Career & Succession",
-    "description": "Career paths, succession pools and candidates.",
+    "description": "Career paths, succession pools and candidates. Candidates are the people named by hand for each pool; the automatic readiness computation is in Insights.",
     "tabs": {
       "paths": "Career paths",
       "pools": "Succession pools",
@@ -577,27 +607,29 @@
       "readiness": "Readiness",
       "status": "Status"
     },
-    "pipelineTitle": "Readiness pipeline",
-    "pipelineAria": "Candidate distribution by readiness level",
+    "pipelineTitle": "Candidate readiness",
+    "pipelineAria": "Candidates by readiness horizon",
     "pipelineEmpty": "No candidates to display.",
     "pathsEmpty": "No career path defined",
     "pathsCaption": "Career paths",
-    "poolsEmpty": "No pool recorded",
+    "poolsEmpty": "No pool registered",
     "poolsCaption": "Succession pools",
     "candidatesEmpty": "No candidate recorded",
-    "candidatesCaption": "Succession candidates"
+    "candidatesCaption": "Succession candidates",
+    "nomeInterno": "(name not assigned)"
   },
   "compensation": {
     "title": "Compensation intelligence",
-    "description": "Reward gates by evaluation status, across the whole tenant.",
-    "count": "{{count}} reward gates recorded",
+    "description": "Reward proposals by assessment status, across the whole company.",
+    "count": "{{count}} proposals registered",
+    "count_one": "{{count}} proposal registered",
     "distributionTitle": "Status distribution",
-    "distributionAria": "Reward gate distribution by evaluation status",
+    "distributionAria": "Distribution of reward proposals by assessment status",
     "distributionEmpty": "No distribution data.",
     "seriesName": "Reward gate",
     "error": "Access denied or error.",
-    "emptyTitle": "No reward gate",
-    "emptyDescription": "There are no reward gates recorded.",
+    "emptyTitle": "No reward proposal",
+    "emptyDescription": "There are no reward proposals registered.",
     "caption": "Reward gate",
     "blockingYes": "Yes",
     "blockingNo": "No",
@@ -614,18 +646,21 @@
       "empty": "No band has defined amounts.",
       "error": "The salary bands could not be loaded.",
       "count": "{{count}} bands",
+      "count_one": "{{count}} band",
       "colBand": "Band",
       "colMin": "Minimum",
       "colMid": "Midpoint",
       "colMax": "Maximum",
       "colSpread": "Spread",
-      "valuelessNote": "{{count}} of the tenant's bands have no defined amounts and are not shown here."
+      "valuelessNote": "{{count}} of the tenant's bands have no defined amounts and are not shown here.",
+      "valuelessNote_one": "{{count}} of the tenant's bands has no defined amounts and is not shown here."
     }
   },
   "learning": {
     "title": "Module Catalogue",
     "description": "Available learning modules, both global and tenant-scoped.",
     "count": "{{count}} modules — {{piattaforma}} platform, {{azienda}} company",
+    "count_one": "{{count}} module — {{piattaforma}} platform, {{azienda}} company",
     "errorMessage": "Unable to load the modules.",
     "emptyTitle": "No modules",
     "emptyDescription": "There are no learning modules.",
@@ -671,7 +706,8 @@
       "forbidden": "You do not have permission for this operation.",
       "duplicate": "A path with this code already exists.",
       "tenantRequired": "As a platform administrator you can only create global paths: tick “Global path”.",
-      "count": "{{count}} — {{piattaforma}} platform, {{azienda}} company"
+      "count": "{{count}} — {{piattaforma}} platform, {{azienda}} company",
+      "count_one": "{{count}} — {{piattaforma}} platform, {{azienda}} company"
     },
     "steps": {
       "title": "Path steps",
@@ -694,7 +730,8 @@
   "training": {
     "title": "Training initiatives",
     "description": "Planned delivery sessions.",
-    "count": "{{count}} planned",
+    "count": "{{count}} initiatives",
+    "count_one": "{{count}} initiative",
     "errorMessage": "Unable to load the initiatives.",
     "emptyTitle": "No initiatives",
     "emptyDescription": "No initiative scheduled.",
@@ -773,6 +810,7 @@
     "description": "The capabilities the organization actually uses, classified with the VRIO frame across {{headcount}} people. Value = {{value}}% economic weight + {{crit}}% criticality; a dimension counts as present from the {{threshold}}th percentile of our own capabilities.",
     "descriptionIdle": "The capabilities the organization actually uses, classified with the VRIO frame.",
     "count": "{{count}} capabilities",
+    "count_one": "{{count}} capability",
     "errorMessage": "Could not load the VRIO scorecard",
     "emptyTitle": "No capability in play",
     "emptyDescription": "No skill group is required by a position or held by a person in this tenant.",
@@ -781,7 +819,9 @@
     "cols": {
       "capability": "Capability",
       "skillCount": "{{count}} skills",
+      "skillCount_one": "{{count}} skill",
       "skillExamples": "{{count}} skills, including {{esempi}}",
+      "skillExamples_one": "{{count}} skill, including {{esempi}}",
       "value": "Value",
       "rarity": "Rarity",
       "inimitability": "Inimitability",
@@ -803,6 +843,7 @@
     "title": "Organizational health",
     "description": "Health index per org-unit, computed from engagement, goals, flight risk, attendance, reviews and capability maturity.",
     "count": "{{count}} units",
+    "count_one": "{{count}} unit",
     "organizationIndex": "Organization index",
     "errorMessage": "Could not load the health index",
     "emptyTitle": "No unit to score",
@@ -842,12 +883,14 @@
       "LAGGING": "Lagging",
       "UNRANKED": "Unranked"
     },
-    "sample": "n={{count}}"
+    "sample": "n={{count}}",
+    "sample_one": "n={{count}}"
   },
   "advisor": {
     "title": "Operational advice",
     "description": "Recommendations derived from the capability, VRIO and organizational-health scorecards. Every piece of advice starts from real data and carries its source: nothing here is generated by a language model.",
     "count": "{{count}} recommendations",
+    "count_one": "{{count}} recommendation",
     "caption": "Recommendations by priority, each with the sources it derives from.",
     "emptyTitle": "No recommendations",
     "emptyDescription": "On the current data no rule found a situation to act on. This is not an error: it is the absence of cases.",
@@ -883,6 +926,7 @@
       "ORG_HEALTH": "Organizational health"
     },
     "method": "{{count}} recommendations from {{rules}} rules. Discarded by the source check: {{discarded}}. Model {{model}}.",
+    "method_one": "{{count}} recommendation from {{rules}} rules. Discarded by the source check: {{discarded}}. Model {{model}}.",
     "methodIdle": "No derivation available."
   },
   "performance": {
@@ -946,8 +990,11 @@
     "emptyTitle": "No projects",
     "emptyDesc": "You are not taking part in any ongoing project.",
     "count": "{{count}} projects in total",
+    "count_one": "{{count}} project in total",
     "members": "{{count}} members",
+    "members_one": "{{count}} member",
     "membersTitle": "Who works on it ({{count}})",
+    "membersTitle_one": "Who works on it ({{count}})",
     "progress": "{{pct}}% complete",
     "progressLabel": "Progress",
     "progressUnset": "not declared",

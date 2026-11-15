@@ -9,7 +9,13 @@ import { useEnumLabel } from "@/lib/enum-labels";
 import { useFormat } from "@/lib/format";
 
 interface MeKpi {
-  positionKpiRequirementId: string;
+  positionKpiRequirementId: string | null;
+  kpiDefinitionId: string;
+  /** Bersaglio assegnato alla persona (D2-04): periodo, obiettivo, soglia minima e massima. */
+  assignedTarget: {
+    periodStart: string; periodEnd: string;
+    targetValue: string | null; minimumValue: string | null; stretchValue: string | null; unit: string | null;
+  } | null;
   kpiCode: string;
   kpiName: string;
   unit: string | null;
@@ -40,7 +46,25 @@ export default function MeKpisPage() {
       // R2/C1: il codice resta nel dettaglio della riga
       { header: t("kpis.colCode"), secondaria: true, cell: (k) => <span className="font-mono text-xs" data-grezzo="">{k.kpiCode}</span> },
       { header: t("kpis.colDirection"), cell: (k) => <span className="text-xs text-muted-foreground">{enumLabel("kpiPolarity", k.polarity)}</span> },
-      { header: t("kpis.colWeight"), align: "right", cell: (k) => <span className="text-xs tabular-nums text-muted-foreground">{fmt.numero(k.weight, 2)}</span> },
+      { header: t("kpis.colWeight"), align: "right", cell: (k) => <span className="text-xs tabular-nums text-muted-foreground">{k.positionKpiRequirementId ? fmt.numero(k.weight, 2) : "—"}</span> },
+      {
+        header: t("kpis.colTarget"),
+        cell: (k) => {
+          const g = k.assignedTarget;
+          if (!g || g.targetValue === null) return <span className="text-xs text-muted-foreground">—</span>;
+          const u = g.unit ? ` ${g.unit}` : "";
+          const soglie = [g.minimumValue, g.stretchValue].some((v) => v !== null)
+            ? ` (${g.minimumValue !== null ? fmt.numero(g.minimumValue, 2) : "—"} – ${g.stretchValue !== null ? fmt.numero(g.stretchValue, 2) : "—"})`
+            : "";
+          return (
+            <span className="text-xs text-muted-foreground">
+              <span className="tabular-nums text-foreground">{fmt.numero(g.targetValue, 2)}{u}</span>
+              {soglie}
+              {` · ${fmt.data(g.periodStart)} – ${fmt.data(g.periodEnd)}`}
+            </span>
+          );
+        },
+      },
       // C9: misura, obiettivo e data in una cella sola; un indicatore mai misurato lo dice in parole,
       // invece di tre trattini
       {
@@ -75,7 +99,7 @@ export default function MeKpisPage() {
       error={kpis.error}
       errorMessage={t("kpis.errorMessage")}
       rows={kpis.data?.items ?? []}
-      rowKey={(k) => k.positionKpiRequirementId}
+      rowKey={(k) => k.kpiDefinitionId}
       rowTestId="me-kpi-row"
       columns={columns}
       emptyTestId="me-kpis-empty"

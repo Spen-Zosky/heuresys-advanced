@@ -15,6 +15,7 @@ import type {
 import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
+import { NomeOppure } from "@/components/senza-nome";
 import { useFormat, type Formati } from "@/lib/format";
 
 // Gap#1 Porta 2 — Org-Director console. Live capability/maturity per org-unit,
@@ -55,11 +56,11 @@ function radarValues(criteria: MaturityCriterion[]): number[] {
 
 function buildColumns(t: TFunction, onSelect: (o: SelectedOu) => void, selectedId: string | null, fmt: Formati): DataColumn<OrgRow>[] {
   return [
-    { header: t("orgDirector.cols.unit"), cell: (r) => <span className="font-medium text-foreground">{r.name}</span> },
+    { header: t("orgDirector.cols.unit"), cell: (r) => <span className="font-medium text-foreground"><NomeOppure nome={r.name} id={r.ouId} /></span> },
     { header: t("orgDirector.cols.capability"), cell: (r) => <span className="text-xs text-muted-foreground">{fmt.percento(r.capability, "0-100")}</span> },
     { header: t("orgDirector.cols.coverage"), cell: (r) => <span className="text-xs text-muted-foreground">{fmt.percento(r.coverage, "0-100")}</span> },
     { header: t("orgDirector.cols.positions"), cell: (r) => <span className="text-xs text-muted-foreground">{r.positions}</span> },
-    { header: t("orgDirector.cols.maturity"), cell: (r) => (r.level ? <StatusPill tone={toneForLevel(r.level)}>{`${r.level} · ${r.levelLabel ?? ""}`}</StatusPill> : <span className="text-xs text-muted-foreground">—</span>) },
+    { header: t("orgDirector.cols.maturity"), cell: (r) => (r.level ? <StatusPill tone={toneForLevel(r.level)}>{`${r.level} · ${t(`orgDirector.maturityLevels.${r.level}`, { defaultValue: r.levelLabel ?? "" })}`}</StatusPill> : <span className="text-xs text-muted-foreground">—</span>) },
     {
       header: t("orgDirector.cols.actions"), align: "right",
       cell: (r) => (
@@ -100,7 +101,7 @@ export default function OrgDirectorPage() {
       .map((c) => {
         const m = matByOu.get(c.subjectId);
         return {
-          ouId: c.subjectId, name: c.label ?? c.subjectId, capability: c.value, coverage: c.coverage,
+          ouId: c.subjectId, name: c.label ?? "", capability: c.value, coverage: c.coverage,
           positions: c.childCount, level: m?.level ?? null, levelLabel: m?.levelLabel ?? null,
           criteria: m?.criteria ?? null,
         };

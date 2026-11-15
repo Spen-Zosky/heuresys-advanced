@@ -76,7 +76,8 @@ export default function ContentPage() {
   const fmt = useFormat();
   const qc = useQueryClient();
   const [kind, setKind] = useState("");
-  const [status, setStatus] = useState("");
+  // D3-13: la pagina parte da «non archiviati»: i ritirati si chiedono, non ingombrano.
+  const [status, setStatus] = useState("active");
   const [categoryId, setCategoryId] = useState("");
   const [q, setQ] = useState("");
   const [searchQ, setSearchQ] = useState("");
@@ -87,7 +88,8 @@ export default function ContentPage() {
   const queryString = useMemo(() => {
     const p = new URLSearchParams();
     if (kind) p.set("kind", kind);
-    if (status) p.set("status", status);
+    if (status === "active") p.set("excludeStatus", "archived");
+    else if (status !== "all") p.set("status", status);
     if (categoryId) p.set("categoryId", categoryId);
     if (q) p.set("q", q);
     p.set("limit", "200");
@@ -401,7 +403,8 @@ export default function ContentPage() {
             {t("content.columns.status")}
           </label>
           <select id="content-filter-status" data-testid="content-filter-status" className={SELECT_CLASS} value={status} onChange={(e) => setStatus(e.target.value)}>
-            <option value="">{t("content.filters.statusAll")}</option>
+            <option value="active">{t("content.filters.statusActive")}</option>
+            <option value="all">{t("content.filters.statusAll")}</option>
             {CONTENT_STATUSES.map((s) => (
               <option key={s} value={s}>
                 {t(`content.status.${s}`)}

@@ -4,10 +4,10 @@ import { i18n } from "@/lib/i18n";
 import { formati, VUOTO } from "@/lib/format";
 
 /** A single read-only label/value pair inside a profile section. Empty -> em-dash. */
-export function Field({ label, value, testId }: { label: string; value: ReactNode; testId?: string }) {
+export function Field({ label, value, testId, emailAmmessa }: { label: string; value: ReactNode; testId?: string; emailAmmessa?: boolean }) {
   const empty = value == null || value === "";
   return (
-    <div className="space-y-0.5">
+    <div className="space-y-0.5" {...(emailAmmessa ? { "data-giro-email-ammessa": "" } : {})}>
       <dt className="text-xs uppercase tracking-wide text-muted-foreground">{label}</dt>
       {/* Un testo del profilo (CAP, matricola, IBAN, telefono) è un identificativo: la rete di
           leggibilità non lo tocca, altrimenti «24122» diventerebbe «24.122». I numeri veri

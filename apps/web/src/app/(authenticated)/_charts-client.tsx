@@ -128,6 +128,10 @@ function rendiLeggibile(option: RawProps["option"], locale: string): RawProps["o
   if (o.tooltip && typeof o.tooltip === "object" && !Array.isArray(o.tooltip)) {
     const tt = o.tooltip as Record<string, unknown>;
     if (tt.valueFormatter === undefined && tt.formatter === undefined) o.tooltip = { ...tt, valueFormatter: num };
+  } else if (o.tooltip === undefined && serie > 0) {
+    // Un grafico senza `tooltip` non dice niente al passaggio del mouse (C-DINAMICO del giro
+    // del 15/11): il suggerimento per elemento, con i numeri nella forma della lingua, è il minimo.
+    o.tooltip = { trigger: "item", valueFormatter: num };
   }
   return o as RawProps["option"];
 }

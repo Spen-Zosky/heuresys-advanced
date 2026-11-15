@@ -149,6 +149,10 @@ export const MeResponseSchema = z.object({
   email: z.email(),
   roles: z.array(RoleCodeSchema),
   tenantId: z.uuid().nullable(),
+  /** Nome della persona, per l'intestazione: il web lo scrive «Cognome, Nome». */
+  firstName: z.string().nullable(),
+  lastName: z.string().nullable(),
+  displayName: z.string().nullable(),
 });
 export type MeResponse = z.infer<typeof MeResponseSchema>;
 

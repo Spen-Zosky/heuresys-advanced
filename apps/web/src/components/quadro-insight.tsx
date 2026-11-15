@@ -10,6 +10,7 @@
  * Si monta da `PageHeader`, quindi ogni pagina che ha un titolo lo riceve; le aree vengono dalla
  * rotta (`lib/quadro-aree.ts`). Al massimo quattro voci in vista, il resto a un clic.
  */
+import { useFormat } from "@/lib/format";
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -27,6 +28,7 @@ const STILE: Record<Insight["tono"], { icona: typeof Info; classe: string }> = {
 };
 
 function Voce({ i }: { i: Insight }) {
+  const fmt = useFormat();
   const s = STILE[i.tono];
   const Icona = s.icona;
   return (
@@ -37,7 +39,7 @@ function Voce({ i }: { i: Insight }) {
         {i.andamento !== null ? (
           <span className="ml-auto flex shrink-0 items-center gap-0.5 text-xs font-medium">
             {i.andamento >= 0 ? <TrendingUp className="h-3.5 w-3.5" aria-hidden /> : <TrendingDown className="h-3.5 w-3.5" aria-hidden />}
-            {`${i.andamento > 0 ? "+" : ""}${i.andamento.toLocaleString("it-IT")}%`}
+            {`${i.andamento > 0 ? "+" : ""}${fmt.numero(i.andamento, 1)}%`}
           </span>
         ) : null}
       </div>

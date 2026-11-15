@@ -24,6 +24,7 @@
  * Nessun dato inventato: ogni numero arriva da `/v1/dashboard/catalog/:code/data`.
  */
 
+import { formati } from "@/lib/format";
 import { useMemo } from "react";
 import { useParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
@@ -146,7 +147,7 @@ function Vista({ v, t }: { v: DashboardBlockData; t: (k: string) => string }) {
               // R2: le intestazioni le dà la vista; le generiche restano solo come ripiego.
               { header: v.content.columns?.label ?? t("dashboard.famiglie.colonnaVoce"), cell: (r) => testoLeggibile(r.label) },
               { header: v.content.columns?.detail ?? t("dashboard.famiglie.colonnaDettaglio"), cell: (r) => (r.detail ? testoLeggibile(r.detail) : "—") },
-              { header: v.content.columns?.value ?? t("dashboard.famiglie.colonnaValore"), align: "right", cell: (r) => (r.value === null ? "—" : r.value.toLocaleString(lingua)) },
+              { header: v.content.columns?.value ?? t("dashboard.famiglie.colonnaValore"), align: "right", cell: (r) => (r.value === null ? "—" : formati(lingua).numero(r.value, 2)) },
             ]}
           />
         )}

@@ -32,7 +32,7 @@ export function MePerformanceTab() {
           testId={i === 0 ? "perf-primary" : undefined}
         >
           <Field label={t("landing.perf.status")} value={enumLabel("perfReviewStatus", r.status)} />
-          <Field label={t("landing.perf.overall")} value={r.overallRating != null ? r.overallRating.toFixed(1) : null} testId={i === 0 ? "perf-overall" : undefined} />
+          <Field label={t("landing.perf.overall")} value={r.overallRating != null ? fmt.numeroFisso(r.overallRating, 1) : null} testId={i === 0 ? "perf-overall" : undefined} />
           <Field label={t("landing.perf.goal")} value={r.goalRating != null ? fmt.numeroFisso(r.goalRating, 1) : null} />
           <Field label={t("landing.perf.competency")} value={r.competencyRating != null ? fmt.numeroFisso(r.competencyRating, 1) : null} />
           <Field label={t("landing.perf.perfBox")} value={r.performanceBox != null ? String(r.performanceBox) : null} />

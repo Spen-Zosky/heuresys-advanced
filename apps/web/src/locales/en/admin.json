@@ -109,7 +109,7 @@
       "title": "Title",
       "status": "Status",
       "type": "Type",
-      "responses": "Responses",
+      "responses": "Respondents",
       "questions": "Questions",
       "invitations": "Invitations"
     },
@@ -130,7 +130,7 @@
       "axisScore": "Average score",
       "tableTitle": "Show the data as a table",
       "colCount": "Check-ins",
-      "weekShort": "Wk {{n}}"
+      "weekShort": "Wk of {{n}}"
     },
     "results": {
       "back": "Back to Engagement",
@@ -1380,7 +1380,8 @@
       "TIME_OFF_REQUEST": "Time-off request",
       "SYSTEM": "System",
       "MANUAL": "Manual entry",
-      "ACCRUAL": "Automatic accrual"
+      "ACCRUAL": "Automatic accrual",
+      "leave_request": "Time-off request"
     }
   },
   "talentReview": {

@@ -37,17 +37,17 @@ function buildRequestColumns(t: TFunction, f: Formati, enumLabel: EnumLabelFn): 
     { header: t("timeOff.cols.employee"), cell: (r) => <span>{r.subjectUserName ?? "—"}</span> },
     { header: t("timeOff.cols.leaveType"), cell: (r) => <span className="text-xs">{enumLabel("leaveType", r.leaveType)}</span> },
     { header: t("timeOff.cols.period"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.startDate)} → {f.data(r.endDate)}</span> },
-    { header: t("timeOff.cols.days"), align: "right", cell: (r) => <span className="tabular-nums">{r.daysRequested}</span> },
+    { header: t("timeOff.cols.days"), align: "right", cell: (r) => <span className="tabular-nums">{f.numero(r.daysRequested, 2)}</span> },
     { header: t("timeOff.cols.status"), cell: (r) => <EnumStatusPill domain="timeOffStatus" value={r.status} tone={toneForRequestStatus(r.status)} /> },
   ];
 }
 
-function buildRuleColumns(t: TFunction, enumLabel: EnumLabelFn): DataColumn<LeaveAccrualRule>[] {
+function buildRuleColumns(t: TFunction, enumLabel: EnumLabelFn, f: Formati): DataColumn<LeaveAccrualRule>[] {
   return [
     { header: t("timeOff.cols.leaveType"), cell: (r) => <span className="text-xs">{enumLabel("leaveType", r.leaveType)}</span> },
     { header: t("timeOff.cols.ruleName"), cell: (r) => <span>{r.name}</span> },
     { header: t("timeOff.cols.method"), cell: (r) => <span className="text-xs text-muted-foreground">{enumLabel("accrualMethod", r.method)}</span> },
-    { header: t("timeOff.cols.amount"), align: "right", cell: (r) => <span className="tabular-nums">{r.amount}</span> },
+    { header: t("timeOff.cols.amount"), align: "right", cell: (r) => <span className="tabular-nums">{f.numero(r.amount, 2)}</span> },
     { header: t("timeOff.cols.ccnl"), cell: (r) => <span className="text-xs">{r.ccnlType ?? "—"}</span> },
     { header: t("timeOff.cols.active"), cell: (r) => <StatusPill tone={r.isActive ? "success" : "neutral"}>{r.isActive ? t("timeOff.active") : t("timeOff.inactive")}</StatusPill> },
   ];
@@ -56,7 +56,7 @@ function buildRuleColumns(t: TFunction, enumLabel: EnumLabelFn): DataColumn<Leav
 function buildTxnColumns(t: TFunction, enumLabel: EnumLabelFn, f: Formati): DataColumn<LeaveBalanceTransaction>[] {
   return [
     { header: t("timeOff.cols.txnType"), cell: (r) => <span className="text-xs">{enumLabel("timeOffTxnType", r.type)}</span> },
-    { header: t("timeOff.cols.days"), align: "right", cell: (r) => <span className="tabular-nums">{r.daysAmount}</span> },
+    { header: t("timeOff.cols.days"), align: "right", cell: (r) => <span className="tabular-nums">{f.numero(r.daysAmount, 2)}</span> },
     { header: t("timeOff.cols.description"), cell: (r) => <span className="text-xs text-muted-foreground">{r.description ?? "—"}</span> },
     { header: t("timeOff.cols.reference"), cell: (r) => <span className="text-xs">{r.referenceType ? t(`timeOff.referenceType.${r.referenceType}`, { defaultValue: r.referenceType }) : "—"}</span> },
     { header: t("timeOff.cols.date"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.createdAt)}</span> },
@@ -86,7 +86,7 @@ export default function TimeOffPage() {
   });
 
   const requestColumns = useMemo(() => buildRequestColumns(t, f, enumLabel), [t, f, enumLabel]);
-  const ruleColumns = useMemo(() => buildRuleColumns(t, enumLabel), [t, enumLabel]);
+  const ruleColumns = useMemo(() => buildRuleColumns(t, enumLabel, f), [t, enumLabel, f]);
   const txnColumns = useMemo(() => buildTxnColumns(t, enumLabel, f), [t, enumLabel, f]);
 
   const kpis: KpiCardData[] = useMemo(() => [

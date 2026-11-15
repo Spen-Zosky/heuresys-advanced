@@ -1,4 +1,5 @@
 "use client";
+import { useFormat, type Formati } from "@/lib/format";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -33,7 +34,18 @@ function Citation({ c, t }: { c: AdvisorCitation; t: ReturnType<typeof useTransl
   );
 }
 
-function buildColumns(t: ReturnType<typeof useTranslation>["t"]): DataColumn<AdvisorSuggestion>[] {
+// D3-07 (forense 15/11): i parametri della frase arrivano dal motore come codici e numeri grezzi
+// («performance», «36.5»): la dimensione si traduce, i numeri passano dal formattatore.
+function paroleDi(p: Record<string, unknown> | undefined, t: ReturnType<typeof useTranslation>["t"], fmt: Formati): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(p ?? {}).map(([k, v]) => [
+      k,
+      k === "dimension" && typeof v === "string" ? t(`orgHealth.dims.${v}`, { defaultValue: v }) : typeof v === "number" ? fmt.numero(v, 1) : v,
+    ]),
+  );
+}
+
+function buildColumns(t: ReturnType<typeof useTranslation>["t"], fmt: Formati): DataColumn<AdvisorSuggestion>[] {
   return [
     {
       header: t("advisor.cols.subject"),
@@ -52,7 +64,7 @@ function buildColumns(t: ReturnType<typeof useTranslation>["t"]): DataColumn<Adv
       header: t("advisor.cols.action"),
       cell: (r) => (
         <span data-testid="advisor-headline" className="block max-w-xl text-sm text-foreground">
-          {t(`advisor.rule.${r.headlineKey.replace("advisor.rule.", "")}`, r.headlineParams)}
+          {t(`advisor.rule.${r.headlineKey.replace("advisor.rule.", "")}`, paroleDi(r.headlineParams, t, fmt))}
         </span>
       ),
     },
@@ -87,7 +99,8 @@ export default function AdvisorPage() {
     queryFn: () => apiFetch<AdvisorSuggestionsResponse>("/v1/advisor/suggestions"),
   });
 
-  const columns = useMemo(() => buildColumns(t), [t]);
+  const fmt = useFormat();
+  const columns = useMemo(() => buildColumns(t, fmt), [t, fmt]);
   const data = advisor.data;
 
   return (

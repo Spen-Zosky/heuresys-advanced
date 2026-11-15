@@ -48,8 +48,10 @@ export function SkillAliasesPanel({ skillId }: { skillId: string }) {
   const { t } = useTranslation("hr");
   const qc = useQueryClient();
   const perms = new Set(useCurrentUserPermissions().data?.permissions ?? []);
-  const canWrite = perms.has("skill:update");
-  const canDelete = perms.has("skill:delete");
+  // S-03 (forense 15/11): aggiungere e togliere sinonimi chiede skill_alias:manage all'API
+  // (skill-aliases/routes.ts); con skill:update chi non lo ha vedeva il comando e riceveva 403.
+  const canWrite = perms.has("skill_alias:manage");
+  const canDelete = perms.has("skill_alias:manage");
 
   const [label, setLabel] = useState("");
   const [locale, setLocale] = useState("");

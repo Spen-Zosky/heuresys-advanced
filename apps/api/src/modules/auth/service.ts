@@ -658,7 +658,16 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
       const roles = [...new Set(grants.map((g) => g.roleCode))];
       const platformGrant = grants.find((g) => g.isPlatform && g.tenantId === null);
       const tenantId = platformGrant ? null : me.userTenantId;
-      return { userId: me.userId, email: me.email, roles, tenantId };
+      // F-forense S-01: il nome della persona per l'intestazione («Cognome, Nome» lo compone il web).
+      return {
+        userId: me.userId,
+        email: me.email,
+        roles,
+        tenantId,
+        firstName: me.firstName,
+        lastName: me.lastName,
+        displayName: me.displayName,
+      };
     },
 
     /* --- password reset request -------------------------------------- */

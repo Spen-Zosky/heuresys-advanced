@@ -19,10 +19,11 @@ import { FRESCHEZZA_MS, leggiCopia, scriviCopia, svuotaCopiaDiSessione } from ".
 export interface AuthMeUser {
   userId: string;
   email: string;
-  displayName: string | null;
+  /** S-01 (forense 15/11): /v1/auth/me restituisce il nome; il login no, quindi sono facoltativi. */
+  firstName?: string | null;
+  lastName?: string | null;
+  displayName?: string | null;
   tenantId: string | null;
-  locale: string | null;
-  timezone: string | null;
   roles: string[];
 }
 
@@ -218,6 +219,9 @@ export function useLogin() {
       // /v1/auth/me endpoint returns them merged — mirror that shape so the
       // layout's hasAdminRole check sees the roles immediately, no refetch.
       qc.setQueryData(AUTH_ME_QUERY_KEY, { ...res.user, roles: res.roles });
+      // S-01: il login non porta il nome della persona; /v1/auth/me sì. Si rilegge subito,
+      // così l'intestazione scrive «Cognome, Nome» e non l'email.
+      void qc.invalidateQueries({ queryKey: AUTH_ME_QUERY_KEY });
     },
   });
 }

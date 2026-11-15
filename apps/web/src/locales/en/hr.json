@@ -222,6 +222,14 @@
     "tabs": {
       "units": "Organisational units",
       "essential": "Essential capabilities"
+    },
+    "maturityLevels": {
+      "L0": "Ad hoc",
+      "L1": "Initial",
+      "L2": "Repeatable",
+      "L3": "Defined",
+      "L4": "Managed",
+      "L5": "Optimizing"
     }
   },
   "processOwner": {
@@ -669,7 +677,7 @@
   "training": {
     "title": "Training initiatives",
     "description": "Planned delivery sessions.",
-    "count": "{{count}} planned",
+    "count": "{{count}} initiatives",
     "errorMessage": "Unable to load the initiatives.",
     "emptyTitle": "No initiatives",
     "emptyDescription": "No initiative scheduled.",

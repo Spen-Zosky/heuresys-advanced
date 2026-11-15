@@ -222,6 +222,14 @@
     "tabs": {
       "units": "Unità organizzative",
       "essential": "Capacità essenziali"
+    },
+    "maturityLevels": {
+      "L0": "Improvvisato",
+      "L1": "Iniziale",
+      "L2": "Ripetibile",
+      "L3": "Definito",
+      "L4": "Gestito",
+      "L5": "Ottimizzato"
     }
   },
   "processOwner": {
@@ -669,7 +677,7 @@
   "training": {
     "title": "Iniziative formative",
     "description": "Sessioni di erogazione pianificate.",
-    "count": "{{count}} pianificate",
+    "count": "{{count}} iniziative",
     "errorMessage": "Impossibile caricare le iniziative.",
     "emptyTitle": "Nessuna iniziativa",
     "emptyDescription": "Nessuna iniziativa schedulata.",

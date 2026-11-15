@@ -59,7 +59,7 @@ function buildColumns(t: TFunction, onSelect: (o: SelectedOu) => void, selectedI
     { header: t("orgDirector.cols.capability"), cell: (r) => <span className="text-xs text-muted-foreground">{fmt.percento(r.capability, "0-100")}</span> },
     { header: t("orgDirector.cols.coverage"), cell: (r) => <span className="text-xs text-muted-foreground">{fmt.percento(r.coverage, "0-100")}</span> },
     { header: t("orgDirector.cols.positions"), cell: (r) => <span className="text-xs text-muted-foreground">{r.positions}</span> },
-    { header: t("orgDirector.cols.maturity"), cell: (r) => (r.level ? <StatusPill tone={toneForLevel(r.level)}>{`${r.level} · ${r.levelLabel ?? ""}`}</StatusPill> : <span className="text-xs text-muted-foreground">—</span>) },
+    { header: t("orgDirector.cols.maturity"), cell: (r) => (r.level ? <StatusPill tone={toneForLevel(r.level)}>{`${r.level} · ${t(`orgDirector.maturityLevels.${r.level}`, { defaultValue: r.levelLabel ?? "" })}`}</StatusPill> : <span className="text-xs text-muted-foreground">—</span>) },
     {
       header: t("orgDirector.cols.actions"), align: "right",
       cell: (r) => (

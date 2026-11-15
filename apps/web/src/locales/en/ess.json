@@ -558,7 +558,7 @@
     }
   },
   "security": {
-    "title": "Sicurezza account",
+    "title": "Account security",
     "description": "MFA factor management for two-factor authentication.",
     "count": "{{count}} total",
     "codeRequired": "6-digit TOTP code required",
@@ -675,7 +675,7 @@
     }
   },
   "team": {
-    "title": "Il mio team",
+    "title": "My team",
     "description": "The teams you belong to or lead, with their members.",
     "error": "Unable to load your teams.",
     "emptyTitle": "No team",

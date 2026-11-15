@@ -93,6 +93,7 @@ import { useCurrentUser, useLogout, useMyInterfaces, useUpdateMyPreferences } fr
 import { isApiError, SessionExpiredError } from "../../lib/api/errors";
 import { setLocale } from "../../lib/i18n";
 import { primaryRoleOf } from "../../lib/role-precedence";
+import { cognomeNome } from "../../lib/person-label";
 import { PreferencesApplier } from "../../components/preferences-applier";
 import { StepUpDialog } from "../../components/step-up-dialog";
 import { SectionTabs, SECTION_TAB_GROUPS } from "../../components/section-tabs";
@@ -297,11 +298,19 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
   // qui (che non conosceva i ruoli nati col mandato K), ma dal dato: chi ha nel menu almeno
   // una voce fuori dall'area personale ha un lavoro che va oltre il proprio record.
   const hasAdminRole = sections.some((s) => s.code !== "PERSONAL" && s.interfaces.length > 0);
-  const displayName = user.displayName?.trim() || user.email;
+  // S-01 (forense 15/11): la persona si scrive «Cognome, Nome» (R1); l'email solo se il nome manca.
+  const nomeCompleto = cognomeNome({
+    displayName: user.displayName?.trim() || null,
+    firstName: user.firstName ?? null,
+    lastName: user.lastName ?? null,
+  }).trim();
+  const displayName = nomeCompleto || user.email;
   const initials = (
-    user.displayName?.trim()
-      ? user.displayName.trim().split(/\s+/).map((w) => w.charAt(0)).join("").slice(0, 2)
-      : user.email.slice(0, 2)
+    user.firstName?.trim() && user.lastName?.trim()
+      ? `${user.firstName.trim().charAt(0)}${user.lastName.trim().charAt(0)}`
+      : nomeCompleto
+        ? nomeCompleto.split(/[\s,]+/).filter(Boolean).map((w) => w.charAt(0)).join("").slice(0, 2)
+        : user.email.slice(0, 2)
   ).toUpperCase();
   // Non `roles[0]`: l'ordine con cui l'API restituisce i ruoli e' arbitrario, e
   // con l'invariante I17 (chiunque e' almeno USER) un'amministratrice di tenant

@@ -29,7 +29,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState, type ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
-import { localeDi } from "@/lib/format";
+import { formati, localeDi } from "@/lib/format";
 import { letturaDelGrafico, type ChartTable } from "@/lib/lettura-grafico";
 
 const RawEChartsCard = dynamic(
@@ -85,7 +85,8 @@ type RawProps = ComponentProps<typeof RawEChartsCard>;
  * Una pagina che ha già un `formatter` suo lo tiene.
  */
 function numeroLocale(locale: string) {
-  const nf = new Intl.NumberFormat(locale, { maximumFractionDigits: 2 });
+  // S-08 (forense 15/11): il separatore delle migliaia sempre, come lib/format.ts («4.069», non «4069»).
+  const nf = new Intl.NumberFormat(locale, { maximumFractionDigits: 2, useGrouping: "always" } as unknown as Intl.NumberFormatOptions);
   return (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? nf.format(v) : String(v ?? ""));
 }
 
@@ -171,7 +172,8 @@ function conNomiDegliAssi(option: RawProps["option"], assi: { x?: string; y?: st
 }
 
 function TabellaEquivalente({ tabella, lingua }: { tabella: ChartTable; lingua: string | undefined }) {
-  const fmt = (v: string | number) => (typeof v === "number" ? v.toLocaleString(lingua, { maximumFractionDigits: 2 }) : v);
+  const f = formati(lingua);
+  const fmt = (v: string | number) => (typeof v === "number" ? f.numero(v, 2) : v);
   return (
     <details className="mt-3 text-sm" data-testid="chart-table">
       <summary className="cursor-pointer text-xs text-muted-foreground">{tabella.titolo}</summary>

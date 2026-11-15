@@ -70,7 +70,9 @@ function Voce({ v, attiva, icona, livello }: { v: VoceMenu; attiva: boolean; ico
         style={{ paddingLeft: `${0.5 + livello * 0.75}rem`, ...(attiva ? { boxShadow: "inset 2px 0 0 var(--primary)" } : {}) }}
       >
         <span className="shrink-0">{icona}</span>
-        <span className="nav-label truncate">{v.testId ? <span data-testid={v.testId}>{v.label}</span> : v.label}</span>
+        {/* Forense 15/11 (Enzo): nessuna voce si tronca: «Consolidamento con il pro…» non si
+            riconosceva. L'etichetta va a capo; il suggerimento resta per la barra a sole icone. */}
+        <span className="nav-label min-w-0 whitespace-normal break-words leading-snug">{v.testId ? <span data-testid={v.testId}>{v.label}</span> : v.label}</span>
       </Link>
     </li>
   );
@@ -110,7 +112,7 @@ function RamoMenu({
         style={{ paddingLeft: `${0.5 + livello * 0.75}rem` }}
       >
         <ChevronRight className={`h-3 w-3 shrink-0 transition-transform ${visibile ? "rotate-90" : ""}`} aria-hidden />
-        <span className="truncate">{t(`shell:nav.rami.${ramo.chiave}`, { defaultValue: ramo.chiave })}</span>
+        <span className="min-w-0 whitespace-normal break-words leading-snug">{t(`shell:nav.rami.${ramo.chiave}`, { defaultValue: ramo.chiave })}</span>
       </button>
       {visibile ? <ContenutoRamo ramo={ramo} idPadre={id} attiva={attiva} icone={icone} livello={livello + 1} /> : null}
     </li>

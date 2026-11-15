@@ -55,7 +55,7 @@ export function DecisioneDialog({
 
   return (
     <Dialog open onOpenChange={(aperta) => { if (!aperta) onChiudi(); }}>
-      <DialogContent className={MODALE.piccola} data-testid="consolidation-decision-dialog">
+      <DialogContent className={MODALE.media} data-testid="consolidation-decision-dialog">
         <DialogHeader>
           <DialogTitle>{t("consolidation.modal.title")}</DialogTitle>
           <DialogDescription>
@@ -136,7 +136,7 @@ export function DecisioneDialog({
               <p className="text-xs text-muted-foreground">{t("consolidation.modal.sameHint")}</p>
             </fieldset>
             {errore ? <p role="alert" className="text-sm text-destructive">{errore}</p> : null}
-            <DialogFooter>
+            <DialogFooter className="flex-wrap gap-2">
               <Button type="button" variant="outline" onClick={onChiudi} disabled={occupato}>{t("consolidation.modal.close")}</Button>
               <Button
                 type="button" data-testid="consolidation-decide-confirm" disabled={occupato}

@@ -522,18 +522,24 @@
       "maxConfidence": "Fiducia fino a",
       "shown": "{{shown}} proposte su {{total}} con questi filtri",
       "selectAll": "Scegli le {{count}} filtrate",
+      "selectAll_one": "Scegli l'unica filtrata ({{count}})",
       "clear": "Togli la scelta",
       "selected_one": "Una proposta scelta",
       "selected_other": "{{count}} proposte scelte",
       "withCascade": "Aggiorna anche la cascata di ognuna",
       "revise": "Rivedi anche quelle già decise",
       "recommended": "Applica la raccomandazione dell'agente ({{count}})",
+      "recommended_one": "Applica la raccomandazione dell'agente ({{count}})",
       "reject": "Rifiuta / non adottare ({{count}})",
+      "reject_one": "Rifiuta / non adottare ({{count}})",
       "cascade": "Aggiorna la cascata delle decise ({{count}})",
+      "cascade_one": "Aggiorna la cascata della decisa ({{count}})",
       "undo": "Rimetti da decidere ({{count}})",
+      "undo_one": "Rimetti da decidere ({{count}})",
       "hint": "Le scelte in blocco vanno nella bozza come quelle singole: «Apporta modifiche» mostra che cosa cambierebbe, e solo il pulsante rosso scrive i dati.",
       "result": "Fatto nella bozza: {{decided}} decisioni, {{cascaded}} in cascata, {{skipped}} saltate.",
-      "resultUndo": "Tornate da decidere: {{count}}."
+      "resultUndo": "Tornate da decidere: {{count}}.",
+      "resultUndo_one": "Tornata da decidere: {{count}}."
     }
   },
   "gaps": {

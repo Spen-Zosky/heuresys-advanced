@@ -147,9 +147,13 @@ describe("#124 D4 — talent-review è mascherato al solo mandato piattaforma", 
   // La copertura conta i candidati per orizzonte di prontezza: sono persone valutate (EVALUATION).
   const K = 5; // K_ANONIMATO_MINIMO di engagement
   const CONTEGGI = ["readyNowCount", "ready6moCount", "ready1yCount"];
-  async function candidatiPerPosizione(permessi: string[] | null): Promise<Map<string, number>> {
-    const r = await pool.query<{ position_id: string; n: string }>(
-      `SELECT sp.succession_pool_position_id AS position_id, count(DISTINCT sc.successor_candidate_user_id)::text AS n
+  // [totale, pronti ora, a 6 mesi, a 1 anno]: la soglia vale per il totale e per ogni orizzonte.
+  async function candidatiPerPosizione(permessi: string[] | null): Promise<Map<string, number[]>> {
+    const r = await pool.query<{ position_id: string; n: string; a: string; b: string; c: string }>(
+      `SELECT sp.succession_pool_position_id AS position_id, count(DISTINCT sc.successor_candidate_user_id)::text AS n,
+              count(DISTINCT sc.successor_candidate_user_id) FILTER (WHERE sc.successor_candidate_readiness_level = 'READY_NOW')::text AS a,
+              count(DISTINCT sc.successor_candidate_user_id) FILTER (WHERE sc.successor_candidate_readiness_level = 'READY_6_MONTHS')::text AS b,
+              count(DISTINCT sc.successor_candidate_user_id) FILTER (WHERE sc.successor_candidate_readiness_level = 'READY_1_YEAR')::text AS c
          FROM sys.sys_succession_pools sp
          JOIN sys.sys_successor_candidates sc ON sc.successor_candidate_pool_id = sp.succession_pool_id
          JOIN sys.sys_users su ON su.user_id = sc.successor_candidate_user_id AND su.user_type <> 'SERVICE'
@@ -158,7 +162,7 @@ describe("#124 D4 — talent-review è mascherato al solo mandato piattaforma", 
         GROUP BY 1`,
       [permessi],
     );
-    return new Map(r.rows.map((x) => [x.position_id, Number(x.n)]));
+    return new Map(r.rows.map((x) => [x.position_id, [Number(x.n), Number(x.a), Number(x.b), Number(x.c)]]));
   }
 
   it("la copertura dei ruoli critici: al mandato piattaforma i conteggi sono mascherati", async () => {
@@ -174,8 +178,9 @@ describe("#124 D4 — talent-review è mascherato al solo mandato piattaforma", 
     const atteso = await candidatiPerPosizione(null);
     const h = await listAs(hrMandate, "/v1/talent-review/critical-coverage?limit=50");
     for (const row of h.items) {
-      const n = atteso.get(row["positionId"] as string) ?? 0;
-      const nascosta = n > 0 && n < K;
+      const celle = atteso.get(row["positionId"] as string) ?? [0];
+      const n = celle[0]!;
+      const nascosta = celle.some((x) => x > 0 && x < K);
       expect(Object.hasOwn(row, "readyNowCount"), `posizione con ${n} candidati`).toBe(!nascosta);
       expect(row["masked"] !== undefined).toBe(nascosta);
     }
@@ -194,8 +199,9 @@ describe("#124 D4 — talent-review è mascherato al solo mandato piattaforma", 
     expect(res.statusCode).toBe(200);
     const items = (res.json() as { items: Record<string, unknown>[] }).items;
     for (const row of items) {
-      const n = atteso.get(row["positionId"] as string) ?? 0;
-      const nascosta = n > 0 && n < K;
+      const celle = atteso.get(row["positionId"] as string) ?? [0];
+      const n = celle[0]!;
+      const nascosta = celle.some((x) => x > 0 && x < K);
       expect(Object.hasOwn(row, "readyNowCount")).toBe(!nascosta);
       if (!nascosta) {
         const somma = CONTEGGI.reduce((a, f) => a + Number(row[f] ?? 0), 0);

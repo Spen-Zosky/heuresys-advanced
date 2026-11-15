@@ -441,9 +441,13 @@ function toCriticalCoverage(r: CriticalCoverageDbRow): CriticalCoverage {
     // di anonimato (come engagement) una cella con 1..K-1 candidati identificherebbe chi e' pronto,
     // quindi i conteggi si tolgono e i loro nomi si dichiarano in `masked`. Zero candidati non
     // identifica nessuno e resta.
+    // La soglia vale anche per ogni orizzonte: una cella con 1..K-1 persone toglie tutti e tre i
+    // conteggi (soppressione complementare), così una cella nascosta non si ricava dalle altre.
     ...(() => {
       const n = Number(r.candidati);
-      if (n > 0 && n < K_ANONIMATO_MINIMO) return { masked: ["ready1yCount", "ready6moCount", "readyNowCount"] };
+      const celle = [Number(r.ready_now), Number(r.ready_6mo), Number(r.ready_1y)];
+      const piccola = (c: number) => c > 0 && c < K_ANONIMATO_MINIMO;
+      if (piccola(n) || celle.some(piccola)) return { masked: ["ready1yCount", "ready6moCount", "readyNowCount"] };
       return {
         readyNowCount: Number(r.ready_now),
         ready6moCount: Number(r.ready_6mo),

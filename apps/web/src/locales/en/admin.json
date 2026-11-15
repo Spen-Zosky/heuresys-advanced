@@ -834,6 +834,7 @@
       "code": "Code",
       "name": "Name",
       "type": "Type",
+      "version": "Current version",
       "status": "Status"
     },
     "chartSeries": "Graphs",

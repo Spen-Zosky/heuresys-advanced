@@ -7,7 +7,7 @@
  * Hits the live OCI VM DB through the tunnel (no mocks). DATA-DERIVED doctrine
  * (S1025, D-74): no pinned live counts — every expected scalar is derived from
  * the same source tables the endpoint aggregates, and the rest is asserted as
- * INVARIANTS (rollups reconcile, ordering, scope semantics, no '(unassigned)'
+ * INVARIANTS (rollups reconcile, ordering, scope semantics, no '(senza unità)'
  * fallthrough). TENANT-scope tests compare against the PLATFORM body fetched in
  * the same test, gated on live-derived single-tenancy of the source.
  */
@@ -113,7 +113,7 @@ describe("GET /v1/analytics/* integration", () => {
     expect(body.byOrgUnit.length).toBeGreaterThan(0);
     expect(body.byJobRole.length).toBeGreaterThan(0);
     // The OU rollup must sum to the total: position-less users fall into the
-    // COALESCE '(unassigned)' bucket, so total == ouSum still holds.
+    // COALESCE '(senza unità)' bucket, so total == ouSum still holds.
     const ouSum = body.byOrgUnit.reduce((acc, r2) => acc + r2.headcount, 0);
     expect(ouSum).toBe(body.totalHeadcount);
     expect(new Date(body.generatedAt).getTime()).toBeGreaterThan(0);
@@ -212,9 +212,9 @@ describe("GET /v1/analytics/* integration", () => {
     );
     const monthlySum = body.monthly.reduce((acc, m) => acc + m.totalHours, 0);
     expect(monthlySum).toBeCloseTo(body.totalHours, 0);
-    // Every attendance row resolves to a real OU (no '(unassigned)') and the OU
+    // Every attendance row resolves to a real OU (no '(senza unità)') and the OU
     // dimension count matches the live chain.
-    expect(body.byOrgUnit.some((o) => o.dimension === "(unassigned)")).toBe(false);
+    expect(body.byOrgUnit.some((o) => o.dimension === "(senza unità)")).toBe(false);
     const ouCount = await num(
       `SELECT count(DISTINCT ou.organization_unit_id)::text AS n
          FROM (SELECT DISTINCT attendance_subject_user_id AS u_id FROM sys.sys_attendance) att
@@ -426,8 +426,8 @@ describe("GET /v1/analytics/* integration", () => {
     );
     const expectedLevels = PROFICIENCY_RANK.filter((l) => lvlRows.some((r2) => r2.p === l));
     expect(body.proficiencyLevels).toEqual(expectedLevels);
-    // No '(unassigned)' fallthrough in the heatmap.
-    expect(body.cells.some((c) => c.orgUnit === "(unassigned)")).toBe(false);
+    // No '(senza unità)' fallthrough in the heatmap.
+    expect(body.cells.some((c) => c.orgUnit === "(senza unità)")).toBe(false);
     expect(body.cells.length).toBeGreaterThan(0);
     // Per-proficiency column rollup derived live from the single source table.
     const { rows: bypRows } = await pool.query<{ p: string; ev: string; us: string }>(
@@ -569,11 +569,12 @@ describe("GET /v1/analytics/* integration", () => {
     totalPositions: number;
     rootPositions: number;
     managersCount: number;
+    vacantPositions: number;
     avgSpanOfControl: number | null;
     maxDepth: number;
     byDepth: Array<{ depth: number; positionCount: number }>;
-    topSpan: Array<{ positionTitle: string; orgUnit: string; directReports: number }>;
-    topReach: Array<{ positionTitle: string; orgUnit: string; reach: number }>;
+    topSpan: Array<{ positionTitle: string; orgUnit: string; holder: string | null; directReports: number }>;
+    topReach: Array<{ positionTitle: string; orgUnit: string; holder: string | null; reach: number }>;
     generatedAt: string;
   }
 
@@ -648,6 +649,44 @@ describe("GET /v1/analytics/* integration", () => {
     expect(body.scope.kind).toBe("TENANT");
     expect(body.scope.tenantId).not.toBeNull();
     expect(body.totalPositions).toBeGreaterThan(0);
+  });
+
+  // Piano docs/piani/PIANO_organigrammi-navigazione_20261115.md (N7). Il 15/11/2026 la pagina
+  // mostrava per RTL 316 posizioni (162 attive + 154 disattivate), 16 riporti diretti del Direttore
+  // Generale e un raggio di 315: la query non filtrava `position_is_active`. Ogni numero qui si
+  // ricava dalle sole posizioni attive del tenant, con una query scritta a parte.
+  it("org-network: TENANT conta solo le posizioni attive, e ogni numero torna con il database", async () => {
+    const body = await getJson<OrgNetworkBody>("/v1/analytics/org-network", tenantS);
+    const t = body.scope.tenantId!;
+    const attive = `SELECT position_id, position_reports_to_position_id AS rt FROM sys.sys_positions
+                     WHERE position_tenant_id = '${t}' AND position_is_active`;
+    expect(body.totalPositions).toBe(await num(`SELECT count(*)::text AS n FROM (${attive}) s`));
+    expect(body.rootPositions).toBe(
+      await num(`WITH s AS (${attive}) SELECT count(*)::text AS n FROM s WHERE rt IS NULL OR rt NOT IN (SELECT position_id FROM s)`),
+    );
+    expect(body.managersCount).toBe(
+      await num(`WITH s AS (${attive}) SELECT count(DISTINCT rt)::text AS n FROM s WHERE rt IN (SELECT position_id FROM s)`),
+    );
+    expect(body.vacantPositions).toBe(
+      await num(`WITH s AS (${attive}) SELECT count(*)::text AS n FROM s WHERE NOT EXISTS (
+                   SELECT 1 FROM sys.sys_user_position_assignments a
+                    WHERE a.user_position_assignment_position_id = s.position_id AND a.user_position_assignment_status = 'ACTIVE')`),
+    );
+    // Il primo per riporti diretti ne ha quanti ne conta il database.
+    const primo = body.topSpan[0]!;
+    expect(primo.directReports).toBe(
+      await num(`WITH s AS (${attive}) SELECT max(c)::text AS n FROM (SELECT count(*) c FROM s WHERE rt IN (SELECT position_id FROM s) GROUP BY rt) x`),
+    );
+    // Il raggio più grande non supera le posizioni attive meno il vertice stesso.
+    expect(body.topReach[0]!.reach).toBeLessThanOrEqual(body.totalPositions - 1);
+    // Nessuna posizione disattivata fra i responsabili mostrati.
+    const titoliDisattivi = await pool.query<{ v: string }>(
+      `SELECT DISTINCT position_title AS v FROM sys.sys_positions p WHERE position_tenant_id = $1 AND NOT position_is_active
+        AND NOT EXISTS (SELECT 1 FROM sys.sys_positions q WHERE q.position_tenant_id = $1 AND q.position_is_active AND q.position_title = p.position_title)`,
+      [t],
+    );
+    const soloDisattivi = new Set(titoliDisattivi.rows.map((r) => r.v));
+    for (const r of [...body.topSpan, ...body.topReach]) expect(soloDisattivi.has(r.positionTitle)).toBe(false);
   });
 
   // --- Overtime requests — anchors derived live from sys.sys_overtime
@@ -727,9 +766,9 @@ describe("GET /v1/analytics/* integration", () => {
     );
     const monthlyCountSum = body.monthly.reduce((acc, m) => acc + m.count, 0);
     expect(monthlyCountSum).toBe(body.totalRequests);
-    // byOrgUnit: every request resolves (no '(unassigned)'), hours-desc ordered,
+    // byOrgUnit: every request resolves (no '(senza unità)'), hours-desc ordered,
     // and the OU dimension count matches the live chain.
-    expect(body.byOrgUnit.some((o) => o.dimension === "(unassigned)")).toBe(false);
+    expect(body.byOrgUnit.some((o) => o.dimension === "(senza unità)")).toBe(false);
     const ouCount = await num(
       `SELECT count(DISTINCT ou.organization_unit_id)::text AS n
          FROM (SELECT DISTINCT overtime_subject_user_id AS u_id FROM sys.sys_overtime) ot

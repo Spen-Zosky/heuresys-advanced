@@ -1,18 +1,18 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `9ba6fe9d` (2026-11-15T01:19:58+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `39702fa3` (2026-11-15T10:26:45+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
 | Layer | Valore |
 |---|---|
 | Moduli API | 121 |
-| Route API | 718 |
+| Route API | 722 |
 | Pagine web | 132 |
 | Schemi shared | 134 |
 | Tabelle DB | 414 (vuote: 44) |
 | Viste / matview | 88 / 0 |
-| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 364 |
+| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 375 |
 
 ## Moduli API
 
@@ -120,7 +120,7 @@
 | talent-review | /v1/talent-review | 6 | 1 | 8 | 2 |
 | teams | /v1/teams | 6 | 3 | 3 | 2 |
 | tenant-blueprints | /v1/tenant-blueprints | 20 | 2 | 15 | 1 |
-| tenant-consolidation | /v1/consolidation-runs, /v1/consolidation-vocabulary, /v1/tenant-consolidations | 18 | 3 | 35 | 2 |
+| tenant-consolidation | /v1/consolidation-runs, /v1/consolidation-vocabulary, /v1/tenant-consolidations | 22 | 3 | 37 | 2 |
 | tenant-import-runs | /v1/tenant-import-runs | 5 | 2 | 15 | 1 |
 | tenant-materialization | /v1/tenant-materialization | 2 | 1 | 18 | 1 |
 | tenants | /v1/tenants | 7 | 4 | 3 | 1 |
@@ -133,7 +133,7 @@
 | users | /v1/users | 10 | 5 | 8 | 1 |
 | visualization-edges | /v1/visualization-edges | 4 | 3 | 3 | 1 |
 | visualization-exports | /v1/visualization-exports | 4 | 2 | 2 | 1 |
-| visualization-graphs | /v1/visualization-graphs | 10 | 4 | 7 | 1 |
+| visualization-graphs | /v1/visualization-graphs | 10 | 4 | 8 | 1 |
 | visualization-layouts | /v1/visualization-layouts | 5 | 4 | 2 | 1 |
 | visualization-node-layouts | /v1/visualization-node-layouts | 4 | 3 | 4 | 1 |
 | visualization-nodes | /v1/visualization-nodes | 5 | 4 | 2 | 1 |

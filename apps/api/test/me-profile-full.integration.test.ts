@@ -116,6 +116,31 @@ describe("GET /v1/me/profile/full", () => {
     expect(b.leaveBalances.length).toBeGreaterThanOrEqual(1);
   });
 
+  // Rilievo forense D2-01 (15/11/2026): il responsabile si leggeva dal PROPRIETARIO della posizione
+  // superiore, nullo su 124 posizioni: 126 persone su 161 vedevano «Responsabile: —». Ora è il
+  // titolare di quella posizione, «Cognome, Nome»; l'atteso si ricava dal database a parte.
+  it("organization.managerName è il titolare della posizione a cui si riporta", async () => {
+    const r = await suite.app.inject({
+      method: "GET", url: "/v1/me/profile/full", headers: { cookie: ch(tommaso.cookies) },
+    });
+    const b = r.json() as MeProfileFull;
+    const atteso = await pool.query<{ nome: string | null }>(
+      `SELECT concat_ws(', ', u.user_last_name, u.user_first_name) AS nome
+         FROM sys.sys_user_position_assignments a
+         JOIN sys.sys_positions p ON p.position_id = a.user_position_assignment_position_id
+         JOIN sys.sys_user_position_assignments ma ON ma.user_position_assignment_position_id = p.position_reports_to_position_id
+                                                  AND ma.user_position_assignment_status = 'ACTIVE'
+         JOIN sys.sys_users u ON u.user_id = ma.user_position_assignment_user_id
+        WHERE a.user_position_assignment_user_id = $1 AND a.user_position_assignment_kind = 'PRIMARY'
+          AND a.user_position_assignment_status = 'ACTIVE'
+        ORDER BY a.user_position_assignment_start_date DESC NULLS LAST, (ma.user_position_assignment_kind = 'PRIMARY') DESC,
+                 ma.user_position_assignment_start_date DESC NULLS LAST, ma.user_position_assignment_user_id
+        LIMIT 1`,
+      [tommaso.userId],
+    );
+    expect(b.organization.managerName).toBe(atteso.rows[0]?.nome ?? null);
+  });
+
   it("rejects an unauthenticated request", async () => {
     const r = await suite.app.inject({ method: "GET", url: "/v1/me/profile/full" });
     expect(r.statusCode).toBe(401);

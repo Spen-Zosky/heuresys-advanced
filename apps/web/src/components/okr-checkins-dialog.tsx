@@ -1,5 +1,6 @@
 "use client";
 
+import { MODALE } from "@/lib/modale";
 import { useTranslation } from "react-i18next";
 import type { OkrCheckIn } from "@heuresys/shared";
 import {
@@ -32,7 +33,7 @@ export function OkrCheckInsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto">
+      <DialogContent className={MODALE.media}>
         <DialogHeader>
           <DialogTitle>{t("okrs.checkIns.title")}</DialogTitle>
           <DialogDescription>{okrTitle}</DialogDescription>

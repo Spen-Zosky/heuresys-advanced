@@ -58,9 +58,9 @@ export interface OrgHealthUnitRow {
 const num = (v: string | null): number | null => (v === null ? null : Number(v));
 
 /**
- * Loads every org-unit that has at least one PRIMARY-ACTIVE incumbent, with its six
- * health dimensions. Units with no people are not organizational units in any meaningful
- * sense here — they would score nothing and only pad the scorecard.
+ * Loads every ACTIVE org-unit of the tenant with its six health dimensions. A unit with no
+ * PRIMARY-ACTIVE incumbent comes back with headcount 0 and no samples (the service marks it
+ * INSUFFICIENT_DATA): the scorecard shows the same structure as the org chart (15/11/2026).
  */
 export async function loadOrgHealthInputs(
   tenantId: string | null,
@@ -161,8 +161,16 @@ export async function loadOrgHealthInputs(
          FROM sys.sys_capability_maturity_scores
         ORDER BY capability_maturity_score_org_unit_id, capability_maturity_score_computed_at DESC
      ),
+     -- Tutte le unità attive del cliente, anche senza persone (15/11/2026): la struttura deve
+     -- coincidere con l'organigramma. Prima la Direzione Generale, attiva e al vertice ma con 0
+     -- persone, spariva e l'elenco contava 37 unità invece di 38. Un'unità senza persone esce con
+     -- organico 0 e «dati insufficienti», non con un punteggio inventato.
      units AS (
-       SELECT ou_id, count(*) AS headcount FROM ou_people GROUP BY ou_id
+       SELECT o.organization_unit_id AS ou_id,
+              (SELECT count(*) FROM ou_people op WHERE op.ou_id = o.organization_unit_id) AS headcount
+         FROM sys.sys_organization_units o
+        WHERE o.organization_unit_is_active
+          AND ($1::uuid IS NULL OR o.organization_unit_tenant_id = $1::uuid)
      )
      SELECT u.ou_id AS org_unit_id, o.organization_unit_name AS org_unit_name,
             u.headcount::text,

@@ -9,6 +9,7 @@
  * (app, email, SMS o codice di recupero) oppure la passkey. Confermato, la richiesta si
  * ripete da sola; annullato, resta l'errore dell'API.
  */
+import { MODALE } from "@/lib/modale";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { startAuthentication } from "@simplewebauthn/browser";
@@ -131,7 +132,7 @@ export function StepUpDialog() {
 
   return (
     <Dialog open={aperta} onOpenChange={(o) => { if (!o) chiudi(false); }}>
-      <DialogContent data-testid="step-up-dialog">
+      <DialogContent className={MODALE.piccola} data-testid="step-up-dialog">
         <DialogHeader>
           <DialogTitle>{t("stepUp.title")}</DialogTitle>
           <DialogDescription>{t("stepUp.description")}</DialogDescription>

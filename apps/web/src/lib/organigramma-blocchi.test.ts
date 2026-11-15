@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { disponi, gruppi, sottoalbero, NW, MAX_NOMI, type UnitaBlocco } from "./organigramma-blocchi";
+import { conVertice, disponi, gruppi, sottoalbero, NW, MAX_NOMI, type UnitaBlocco } from "./organigramma-blocchi";
 
 const u = (id: string, padreId: string | null, n = 0, filiale = false): UnitaBlocco => ({
   id, nome: `Unità ${id}`, padreId, filiale, addettiTotali: n,
@@ -98,6 +98,55 @@ describe("gruppi (sede centrale e filiali, come il banco)", () => {
     const g = gruppi([u("R", null), u("A", "R"), u("B", "R"), u("F1", "A", 1, true), u("F2", "B", 1, true)], "Filiali");
     expect(g[1]!.vertice!.id).toBe("__filiali");
     expect(g[1]!.vertice!.nome).toBe("Filiali");
+  });
+});
+
+describe("conVertice (il Direttore Generale al vertice, la società come etichetta)", () => {
+  // Forma di RTL: società (HEADQUARTERS) con il Direttore Generale, due direzioni di staff e la
+  // direzione generale vuota che contiene le divisioni.
+  const t = (x: UnitaBlocco, tipo: string) => ({ ...x, tipo });
+  const rtl = [
+    t(u("SOC", null, 1), "HEADQUARTERS"),
+    t(u("STAFF1", "SOC", 2), "DEPARTMENT"),
+    t(u("DG", "SOC", 0), "GENERAL_MANAGEMENT"),
+    t(u("STAFF2", "SOC", 3), "DEPARTMENT"),
+    t(u("DIV1", "DG", 4), "DIVISION"),
+    t(u("DIV2", "DG", 5), "DIVISION"),
+    t(u("UFF", "DIV1", 6), "OFFICE"),
+  ].map((x) => (x.id === "SOC" ? { ...x, nome: "Banca S.p.A.", addettiTotali: 21 } : x));
+
+  it("la società diventa l'etichetta; il vertice è la direzione generale con il Direttore Generale", () => {
+    const { unita, etichetta } = conVertice(rtl);
+    expect(etichetta).toBe("Banca S.p.A.");
+    expect(unita.find((x) => x.id === "SOC")).toBeUndefined();
+    const v = unita.find((x) => x.id === "DG")!;
+    expect(v.padreId).toBeNull();
+    expect(v.persone).toHaveLength(1); // la persona della società: il Direttore Generale
+    expect(v.addettiTotali).toBe(21);
+    expect(v.apri).toBe("SOC");
+    expect(unita).toHaveLength(rtl.length - 1);
+  });
+
+  it("sotto il vertice prima le divisioni, poi le direzioni di staff", () => {
+    const { unita } = conVertice(rtl);
+    const figlie = unita.filter((x) => x.padreId === "DG").map((x) => x.id);
+    expect(figlie).toEqual(["DIV1", "DIV2", "STAFF1", "STAFF2"]);
+    expect(unita.find((x) => x.id === "UFF")!.padreId).toBe("DIV1");
+  });
+
+  it("nel disegno c'è un solo vertice e nessun riquadro per la società", () => {
+    const d = disponi(rtl, { conPersone: true });
+    expect(d.etichetta).toBe("Banca S.p.A.");
+    expect(d.nodi.filter((n) => n.radice).map((n) => n.u.id)).toEqual(["DG"]);
+    expect(d.nodi.some((n) => n.u.id === "SOC")).toBe(false);
+    expect(sovrapposti(d)).toBe(false);
+  });
+
+  it("senza una direzione generale sotto l'unica radice non cambia niente", () => {
+    const albero = [u("R", null), u("A", "R"), u("B", "R")];
+    expect(conVertice(albero)).toEqual({ unita: albero, etichetta: null });
+    const dueRadici = [t(u("R1", null), "HEADQUARTERS"), t(u("G", "R1"), "GENERAL_MANAGEMENT"), u("R2", null)];
+    expect(conVertice(dueRadici).etichetta).toBeNull();
   });
 });
 

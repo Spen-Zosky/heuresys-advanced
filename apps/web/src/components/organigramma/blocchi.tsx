@@ -13,6 +13,7 @@ import { useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Minus, Plus, Download } from "lucide-react";
 import { disponi, taglia, type UnitaBlocco } from "@/lib/organigramma-blocchi";
+import { codiceInParole } from "@/lib/enum-labels";
 
 const C = {
   vertice: "var(--foreground)",
@@ -133,6 +134,9 @@ export function OrganigrammaBlocchi({
                 <text x={cx} y={n.y + n.h - 6} textAnchor="middle" fontSize={9.5} style={{ fill: tenue }}>
                   {t("organigramma.persone", { count: n.u.persone.length })}
                   {n.u.addettiTotali > n.u.persone.length ? ` · ${t("organigramma.conSotto", { count: n.u.addettiTotali })}` : ""}
+                  {/* Come il banco: organico previsto e sede di una filiale, solo quando il consolidamento li ha portati. */}
+                  {n.u.organicoPrevisto != null ? ` · ${t("organigramma.previste", { count: n.u.organicoPrevisto })}` : ""}
+                  {n.u.filiale && n.u.sede ? ` · ${codiceInParole(n.u.sede)}` : ""}
                 </text>
               </g>
             );

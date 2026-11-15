@@ -9,7 +9,10 @@
     "save": "Error while saving.",
     "boundaryTitle": "Something went wrong",
     "boundaryBody": "An unexpected error occurred while loading this section. Try again; if the problem persists, reload the page.",
-    "boundaryRef": "Reference:"
+    "boundaryRef": "Reference:",
+    "notFoundTitle": "Page not found",
+    "notFoundBody": "The address you opened does not exist or is no longer available.",
+    "notFoundHome": "Back to the home page"
   },
   "actions": {
     "cancel": "Cancel",
@@ -1013,6 +1016,10 @@
       "infrastruttura": "technical"
     },
     "perRiga": "origin per row",
+    "conteggio_one": "{{stato}}: {{count}} table",
+    "conteggio_other": "{{stato}}: {{count}} tables",
+    "conteggioPerRiga_one": "{{count}} table with per-row origin",
+    "conteggioPerRiga_other": "{{count}} tables with per-row origin",
     "colonna": "Origin",
     "riga": {
       "IMPORT": "Imported",

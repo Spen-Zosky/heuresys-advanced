@@ -889,7 +889,7 @@ export default function MeSecurityPage() {
                           {isCurrent && <Badge variant="outline" className="border-success text-success" data-testid="me-security-session-current-badge">{t("security.sessions.thisDevice")}</Badge>}
                         </div>
                         <div className="font-mono text-xs text-muted-foreground">
-                          <span title={s.userAgent ?? undefined}>{dispositivoLeggibile(s.userAgent) ?? t("security.sessions.unknownDevice")}</span> · {t("security.sessions.lastSeen", { date: fmt.dataOra(s.lastIssuedAt) })}
+                          <span>{dispositivoLeggibile(s.userAgent, (browser, sistema) => t("security.sessions.deviceOn", { browser, sistema })) ?? t("security.sessions.unknownDevice")}</span> · {t("security.sessions.lastSeen", { date: fmt.dataOra(s.lastIssuedAt) })}
                         </div>
                       </div>
                       <Button

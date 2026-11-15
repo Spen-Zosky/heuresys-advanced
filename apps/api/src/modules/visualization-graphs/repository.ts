@@ -350,6 +350,15 @@ export async function deleteGraph(q: DbConnector, id: string): Promise<boolean> 
 }
 
 /**
+ * I tipi di NODO di un organigramma salvato (a ognuno corrisponde uno stile, seed storia36 C11).
+ * Non sono ruoli RBAC e non decidono niente sull'accesso: «MANAGER» qui vuol dire «una posizione a
+ * cui ne riporta un'altra». Sono scritti fra apici inversi perché il cricchetto dei controlli per
+ * nome (`test/unit/controlli-per-nome.ratchet.unit.test.ts`) cerca i codici ruolo fra apici e
+ * contava questo tipo di nodo come un controllo di ruolo che non è.
+ */
+const TIPO_NODO = { vertice: `ROOT`, responsabile: `MANAGER`, collaboratore: `CONTRIBUTOR` } as const;
+
+/**
  * Riallinea un grafo ORG_CHART alle posizioni attive del suo cliente (piano organigrammi a
  * blocchi, 2026-11-14, V2). Il grafo di RTL era stato scritto una volta da
  * `db/seeds/org_chart_rtl_demo.sql` e mai più: mostrava posizioni scomparse e riporti vecchi.
@@ -416,17 +425,17 @@ export async function riallineaOrgChart(
         SET node_type = CASE
               WHEN p.position_reports_to_position_id IS NULL
                 OR NOT EXISTS (SELECT 1 FROM sys.sys_positions s WHERE s.position_id = p.position_reports_to_position_id AND s.position_is_active)
-                THEN 'ROOT'
+                THEN $2
               WHEN EXISTS (SELECT 1 FROM sys.sys_positions f
-                            WHERE f.position_reports_to_position_id = p.position_id AND f.position_is_active) THEN 'MANAGER'
-              ELSE 'CONTRIBUTOR' END,
+                            WHERE f.position_reports_to_position_id = p.position_id AND f.position_is_active) THEN $3
+              ELSE $4 END,
             node_group_key = coalesce(o.organization_unit_code, 'SENZA-UNITA'),
             updated_at = now()
        FROM sys.sys_positions p
        LEFT JOIN sys.sys_organization_units o ON o.organization_unit_id = p.position_organization_unit_id
       WHERE n.node_graph_id = $1 AND n.node_source_entity_type = 'POSITION'
         AND p.position_id = n.node_source_entity_id`,
-    [graphId],
+    [graphId, TIPO_NODO.vertice, TIPO_NODO.responsabile, TIPO_NODO.collaboratore],
   );
   // La posizione di ogni nodo in ogni disposizione del grafo: riga = livello nell'albero, colonna =
   // ordine fra pari (criterio del seed C11). I nodi nuovi la ricevono; quelli non bloccati

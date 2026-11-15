@@ -824,7 +824,8 @@
   "visualizations": {
     "title": "Visualizzazioni",
     "description": "Grafici registrati con tipo e stato.",
-    "count": "{{count}} grafici",
+    "count_one": "{{count}} grafico",
+    "count_other": "{{count}} grafici",
     "countLoading": "…",
     "errorMessage": "Impossibile caricare i grafici.",
     "emptyTitle": "Nessun grafico",

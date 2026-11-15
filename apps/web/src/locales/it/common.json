@@ -112,6 +112,15 @@
     "emptyDesc": "Nessun risultato per questa query — prova una formulazione diversa."
   },
   "enums": {
+    "dataClass": {
+      "PERSONAL": "Dati anagrafici",
+      "COMPENSATION": "Retribuzioni",
+      "SKILL": "Competenze",
+      "EVALUATION": "Valutazioni",
+      "ACTIVITY": "Attività",
+      "CREDENTIAL": "Credenziali di accesso",
+      "SPECIAL_CATEGORY": "Dati di categoria particolare"
+    },
     "goalStatus": {
       "NOT_STARTED": "Non avviato",
       "IN_PROGRESS": "In corso",

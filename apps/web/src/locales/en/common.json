@@ -112,6 +112,15 @@
     "emptyDesc": "No results for this query — try different wording."
   },
   "enums": {
+    "dataClass": {
+      "PERSONAL": "Personal details",
+      "COMPENSATION": "Compensation",
+      "SKILL": "Skills",
+      "EVALUATION": "Assessments",
+      "ACTIVITY": "Activity",
+      "CREDENTIAL": "Access credentials",
+      "SPECIAL_CATEGORY": "Special-category data"
+    },
     "goalStatus": {
       "NOT_STARTED": "Not started",
       "IN_PROGRESS": "In progress",

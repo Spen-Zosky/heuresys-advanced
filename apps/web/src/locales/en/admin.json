@@ -787,13 +787,13 @@
     "scope": "Scope {{kind}} · {{role}}",
     "trendDesc": "vs previous week",
     "counters": {
-      "users": "Users",
-      "positions": "Positions",
+      "users": "People",
+      "positions": "Active positions",
       "organizationUnits": "Org Units",
       "learningPaths": "Learning Paths",
       "learningGaps": "Learning Gaps",
-      "tenants": "Tenants",
-      "blueprints": "Blueprints",
+      "tenants": "Companies",
+      "blueprints": "Setup templates",
       "recommendations": "Proposed rewards"
     },
     "gapsTitle": "Recent critical/high gaps",
@@ -814,6 +814,8 @@
       "vuotoValori": "No values in your perimeter",
       "vuotoAndamento": "No trend in your perimeter",
       "vuotoRighe": "No rows in your perimeter",
+      "vuotoFiliali": "No branch to show",
+      "vuotoFilialiMotivo": "This dashboard is about branches: your unit is not a branch and you do not run any.",
       "senzaValori": "Values not available",
       "catalogoIrraggiungibile": "Dashboard catalogue unreachable",
       "datiIrraggiungibili": "Dashboard data unreachable",
@@ -854,12 +856,12 @@
       "diagramTitle": "Diagram",
       "diagramAria": "Diagram of graph {{name}}",
       "nodesTitle": "Nodes ({{count}})",
-      "edgesTitle": "Edges ({{count}})",
+      "edgesTitle": "Links ({{count}})",
       "dash": "—",
       "nodesEmpty": "No nodes.",
-      "edgesEmpty": "No edges.",
+      "edgesEmpty": "No links.",
       "edgeArrow": " → ",
-      "note": "Mermaid renderer active (max 50 nodes · 200 edges). Full node/edge lists above (max 20 + 20 visible).",
+      "note": "Simplified drawing (at most 50 nodes and 200 links). The full lists are above, up to 20 items per list.",
       "versionBadge": "version {{version}}",
       "versionsTitle": "Versions",
       "versionSelectLabel": "Version to view",
@@ -1045,14 +1047,14 @@
     }
   },
   "insights": {
-    "title": "Insights — flight risk",
-    "description": "Per-person attrition-risk score, derived in-platform with a transparent rule.",
-    "descriptionScoped": "{{kind}} scope · per-person flight-risk score, explainable per feature.",
+    "title": "Flight risk",
+    "description": "A score from 0 to 100 for each person: the higher it is, the more likely they are to leave. It is computed with a transparent rule that can be read item by item.",
+    "descriptionScoped": "Scope {{kind}} · flight-risk score per person, explained item by item.",
     "count": "{{count}} people scored",
-    "errorMessage": "Unable to load insights.",
+    "errorMessage": "Unable to load the flight risk.",
     "emptyTitle": "No scores",
     "emptyDescription": "No score computed yet. Run a recompute.",
-    "caption": "Flight-risk scores (highest risk first)",
+    "caption": "Flight risk (highest first)",
     "colSubject": "Person",
     "colScore": "Score",
     "colBand": "Band",
@@ -1064,24 +1066,24 @@
     },
     "feature": {
       "tenure": "Tenure",
-      "attendance": "Attendance / overtime",
-      "kpi": "KPI performance",
+      "attendance": "Attendance and overtime",
+      "kpi": "Indicator results",
       "engagement": "Engagement",
       "comp": "Compensation positioning",
-      "promotion": "Promotion recency"
+      "promotion": "Time since last promotion"
     },
     "recompute": "Recompute",
     "recomputing": "Recomputing…",
     "recomputeSuccess": "Recompute done: {{scored}} people scored.",
     "recomputeError": "Recompute failed.",
     "explainTitle": "Score breakdown — {{name}}",
-    "explainDesc": "Score {{score}} ({{band}}) · model {{model}}. Each feature contributes weight × normalized value.",
-    "featureDetail": "norm {{normalized}} · weight {{weight}}% · contrib {{contribution}}"
+    "explainDesc": "Score {{score}} ({{band}}) · model {{model}}. Each item contributes its weight times its value.",
+    "featureDetail": "value {{normalized}} · weight {{weight}}% · contribution {{contribution}}"
   },
   "insightsReadiness": {
-    "title": "Insights — succession readiness",
-    "description": "Per-person readiness toward best-fit target positions, derived in-platform with a transparent rule.",
-    "descriptionScoped": "{{kind}} scope · per-person, per-target-position succession readiness, explainable per feature.",
+    "title": "Succession readiness (model computation)",
+    "description": "How ready each person is to take the positions that suit them best, computed with a transparent rule. A person appears once per position: the number counts person-position assessments, not people. Candidates named by hand in the succession pools are in «Careers and succession».",
+    "descriptionScoped": "Scope {{kind}} · succession readiness per person and position, explained item by item.",
     "count": "{{count}} person-position assessments",
     "errorMessage": "Unable to load succession readiness.",
     "emptyTitle": "No scores",
@@ -1108,13 +1110,13 @@
     "recomputeSuccess": "Recompute done: {{scored}} assessments.",
     "recomputeError": "Recompute failed.",
     "explainTitle": "Breakdown — {{name}} → {{position}}",
-    "explainDesc": "Readiness {{value}} ({{horizon}}) · model {{model}}. Each feature contributes weight × normalized value.",
-    "featureDetail": "norm {{normalized}} · weight {{weight}}% · contrib {{contribution}}"
+    "explainDesc": "Readiness {{value}} ({{horizon}}) · model {{model}}. Each item contributes its weight times its value.",
+    "featureDetail": "value {{normalized}} · weight {{weight}}% · contribution {{contribution}}"
   },
   "insightsSkillGap": {
-    "title": "Insights — skill gap",
+    "title": "Skill gaps",
     "description": "Per-person skill gap vs the current role, derived in-platform with a transparent rule.",
-    "descriptionScoped": "{{kind}} scope · per-person skill gap vs current role, explainable per feature.",
+    "descriptionScoped": "Scope {{kind}} · skill gaps per person against the current role, explained item by item.",
     "count": "{{count}} people scored",
     "errorMessage": "Unable to load skill gaps.",
     "emptyTitle": "No scores",
@@ -1126,9 +1128,9 @@
     "colSegment": "Segment",
     "segment": {
       "ALIGNED": "Aligned",
-      "MINOR_GAP": "Minor gap",
+      "MINOR_GAP": "Small gap",
       "MODERATE_GAP": "Moderate gap",
-      "MAJOR_GAP": "Major gap"
+      "MAJOR_GAP": "Large gap"
     },
     "feature": {
       "role_fit_gap": "Role distance",
@@ -1139,8 +1141,8 @@
     "recomputeSuccess": "Recompute done: {{scored}} people scored.",
     "recomputeError": "Recompute failed.",
     "explainTitle": "Breakdown — {{name}} ({{position}})",
-    "explainDesc": "Gap {{value}} ({{segment}}) · model {{model}}. Each feature contributes weight × normalized value.",
-    "featureDetail": "norm {{normalized}} · weight {{weight}}% · contrib {{contribution}}",
+    "explainDesc": "Gap {{value}} ({{segment}}) · model {{model}}. Each item contributes its weight times its value.",
+    "featureDetail": "value {{normalized}} · weight {{weight}}% · contribution {{contribution}}",
     "evidenceOpen": "View evidence"
   },
   "mfaPolicy": {
@@ -1386,11 +1388,11 @@
   },
   "talentReview": {
     "title": "Talent review",
-    "description": "Board-ready 9-box talent grid plus position-fit, readiness, succession and critical-role coverage. Read-only consultation.",
+    "description": "The grid that crosses each person's performance and potential, plus position fit, readiness, succession and coverage of critical positions. Read-only. The readiness scores here are the imported ones; the model computation is in Insights.",
     "error": "Failed to load.",
     "empty": "No records.",
     "nineBox": {
-      "title": "9-box grid",
+      "title": "Performance and potential grid",
       "axisPotential": "Potential",
       "axisPerformance": "Performance",
       "band": {
@@ -1412,7 +1414,7 @@
       "readiness": "Readiness",
       "succession": "Succession",
       "criticalPositions": "Critical positions",
-      "criticalCoverage": "Critical-role coverage"
+      "criticalCoverage": "Coverage of critical positions"
     },
     "cols": {
       "employee": "Employee",
@@ -1429,7 +1431,9 @@
       "ready1y": "Ready 1y",
       "coverage": "Coverage",
       "computedAt": "Computed"
-    }
+    },
+    "coverageNotComputed": "not computed",
+    "rationaleImported": "Flagged with the data import"
   },
   "compReward": {
     "evaluation": {

@@ -70,7 +70,7 @@
   },
   "kpis": {
     "title": "Catalogo KPI",
-    "description": "KPI definiti, con unità, polarità e scope.",
+    "description": "Indicatori definiti, con unità di misura, verso di lettura (più alto è meglio, o più basso è meglio) e ambito.",
     "count": "{{count}} KPI definiti — {{piattaforma}} di piattaforma, {{azienda}} dell'azienda",
     "errorMessage": "Impossibile caricare i KPI.",
     "emptyTitle": "Nessun KPI",
@@ -78,10 +78,10 @@
     "caption": "Elenco KPI",
     "cols": {
       "unit": "Unità",
-      "polarity": "Polarità"
+      "polarity": "Verso di lettura"
     },
     "metrology": {
-      "title": "Metrologia",
+      "title": "Come si misura",
       "description2": "Come i KPI vengono misurati e ponderati.",
       "methods": "Metodi di valutazione",
       "rules": "Regole di ponderazione",
@@ -146,7 +146,7 @@
   },
   "okrs": {
     "title": "OKR",
-    "description": "Obiettivi e risultati chiave sull'intero tenant",
+    "description": "Obiettivi e risultati chiave (OKR) sull'intera azienda",
     "count": "{{count}} OKR",
     "errorMessage": "Impossibile caricare gli OKR",
     "emptyTitle": "Nessun OKR",
@@ -159,15 +159,16 @@
       "progress": "Avanzamento"
     },
     "checkIns": {
-      "open": "Check-in",
-      "title": "Check-in OKR",
-      "empty": "Nessun check-in registrato.",
+      "open": "Aggiornamenti",
+      "title": "Aggiornamenti di avanzamento",
+      "empty": "Nessun aggiornamento registrato.",
       "scopeAggregate": "Aggregato OKR",
       "scopeKeyResult": "Risultato chiave",
       "progress": "Avanzamento",
       "overall": "Complessivo",
       "error": "Errore di caricamento."
-    }
+    },
+    "periodEnded": "periodo concluso"
   },
   "orgDirector": {
     "title": "Direzione organizzativa",
@@ -538,7 +539,7 @@
   },
   "career": {
     "title": "Carriere e successione",
-    "description": "Percorsi di carriera, pool di successione e candidati.",
+    "description": "Percorsi di carriera, bacini di successione e candidati. I candidati sono le persone indicate a mano per ciascun bacino; il calcolo automatico della prontezza è in Approfondimenti.",
     "tabs": {
       "paths": "Percorsi di carriera",
       "pools": "Bacini di successione",
@@ -560,27 +561,28 @@
       "readiness": "Prontezza",
       "status": "Stato"
     },
-    "pipelineTitle": "Pipeline readiness",
-    "pipelineAria": "Distribuzione candidati per livello di readiness",
+    "pipelineTitle": "Prontezza dei candidati",
+    "pipelineAria": "Candidati per orizzonte di prontezza",
     "pipelineEmpty": "Nessun candidato da rappresentare.",
     "pathsEmpty": "Nessun percorso di carriera definito",
     "pathsCaption": "Percorsi di carriera",
-    "poolsEmpty": "Nessuna pool registrata",
+    "poolsEmpty": "Nessun bacino registrato",
     "poolsCaption": "Bacini di successione",
     "candidatesEmpty": "Nessun candidato registrato",
-    "candidatesCaption": "Candidati alla succession"
+    "candidatesCaption": "Candidati alla successione",
+    "nomeInterno": "(nome non assegnato)"
   },
   "compensation": {
     "title": "Retribuzioni",
-    "description": "Reward gate per stato di valutazione, sull'intero tenant.",
-    "count": "{{count}} reward gate registrati",
+    "description": "Le proposte di premio per stato di valutazione, su tutta l'azienda.",
+    "count": "{{count}} proposte registrate",
     "distributionTitle": "Distribuzione stati",
-    "distributionAria": "Distribuzione reward gate per stato di valutazione",
+    "distributionAria": "Distribuzione delle proposte di premio per stato di valutazione",
     "distributionEmpty": "Nessun dato di distribuzione.",
     "seriesName": "Cancello di premio",
     "error": "Accesso negato o errore.",
-    "emptyTitle": "Nessun reward gate",
-    "emptyDescription": "Non ci sono reward gate registrati.",
+    "emptyTitle": "Nessuna proposta di premio",
+    "emptyDescription": "Non ci sono proposte di premio registrate.",
     "caption": "Cancello di premio",
     "blockingYes": "Sì",
     "blockingNo": "No",

@@ -42,10 +42,12 @@ import type {
 import { apiFetch } from "../../../../lib/api/fetch";
 import { EntityTable } from "../../../../components/data-table-panel";
 import { testoLeggibile } from "../../../../lib/i18n";
+import { useEnumLabel } from "../../../../lib/enum-labels";
 
 /** Le viste con valori si disegnano per forma; le altre dicono perché non li hanno. */
-function Vista({ v, t }: { v: DashboardBlockData; t: (k: string) => string }) {
+function Vista({ v, t, famiglia }: { v: DashboardBlockData; t: (k: string) => string; famiglia: string }) {
   const { i18n } = useTranslation();
+  const enumLabel = useEnumLabel();
   const lingua = i18n.language;
   if (v.content === null) {
     const negata = v.access === "denied";
@@ -70,7 +72,7 @@ function Vista({ v, t }: { v: DashboardBlockData; t: (k: string) => string }) {
             <div className="mt-3 flex flex-wrap gap-1.5">
               {v.dataClasses.map((c) => (
                 <Badge key={c} variant="outline">
-                  {c}
+                  {enumLabel("dataClass", c)}
                 </Badge>
               ))}
             </div>
@@ -133,7 +135,12 @@ function Vista({ v, t }: { v: DashboardBlockData; t: (k: string) => string }) {
       </CardHeader>
       <CardContent>
         {righe.length === 0 ? (
-          <StatoVuoto titolo={t("dashboard.famiglie.vuotoRighe")} />
+          // D9: la dashboard delle filiali, per chi non governa nessuna filiale, non e' «senza dati»:
+          // riguarda un'altra cosa, e lo dice.
+          <StatoVuoto
+            titolo={famiglia === "branch" ? t("dashboard.famiglie.vuotoFiliali") : t("dashboard.famiglie.vuotoRighe")}
+            {...(famiglia === "branch" ? { motivo: t("dashboard.famiglie.vuotoFilialiMotivo") } : {})}
+          />
         ) : (
           // V-9: la tabella del pacchetto UI scrive la paginazione in inglese; EntityTable la
           // scrive nella lingua della persona.
@@ -230,7 +237,7 @@ export default function CruscottoDiFamigliaPage() {
       {dati.data && (
         <div className="grid gap-4 lg:grid-cols-2">
           {dati.data.blocks.map((v) => (
-            <Vista key={v.code} v={v} t={t} />
+            <Vista key={v.code} v={v} t={t} famiglia={famiglia.code} />
           ))}
         </div>
       )}

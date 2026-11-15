@@ -6,33 +6,34 @@
   },
   "workforce": {
     "title": "Analisi Forza Lavoro",
-    "description": "Distribuzione dell'headcount per unità organizzativa e ruolo nel tuo ambito.",
+    "description": "Quante persone ci sono in ogni unità organizzativa e per ogni titolo di posizione, nel tuo ambito.",
     "stats": {
-      "totalLabel": "Headcount totale",
-      "totalDesc": "Persone nel tuo ambito",
+      "totalLabel": "Organico totale",
+      "totalDesc": "Persone nel tuo ambito. Le utenze tecniche (agenti, collaudo) non contano.",
       "ouLabel": "Unità organizzative",
-      "ouDesc": "OU con headcount",
-      "rolesLabel": "Ruoli",
-      "rolesDesc": "Ruoli distinti coperti"
+      "ouDesc": "Unità con almeno una persona",
+      "rolesLabel": "Titoli di posizione",
+      "rolesDesc": "Titoli diversi fra le persone dell'organico (non sono i ruoli di accesso)"
     },
-    "byOu": "Headcount per unità organizzativa",
-    "byRole": "Headcount per ruolo",
-    "roleEmptyTitle": "Nessun dato sui ruoli",
-    "roleEmptyDesc": "Non ci sono ruoli con headcount nel tuo ambito.",
+    "byOu": "Persone per unità organizzativa",
+    "byRole": "Persone per titolo di posizione",
+    "roleEmptyTitle": "Nessun dato sui titoli",
+    "roleEmptyDesc": "Non ci sono persone con una posizione nel tuo ambito.",
     "emptyDesc": "Non ci sono dati sulla forza lavoro nel tuo ambito al momento."
   },
   "kpi": {
-    "title": "Analisi KPI",
-    "description": "Raggiungimento medio dei target KPI nel tuo ambito.",
+    "title": "Analisi degli indicatori",
+    "description": "Quanto i risultati ottenuti si avvicinano agli obiettivi fissati, per gli indicatori (KPI) che hanno un risultato misurato, nel tuo ambito.",
     "stats": {
-      "targetsLabel": "Target totali",
-      "distinctLabel": "KPI distinti"
+      "targetsLabel": "Obiettivi fissati",
+      "distinctLabel": "Indicatori diversi"
     },
-    "gaugeLabel": "Raggiungimento medio",
-    "chartTitle": "Raggiungimento medio per KPI",
+    "gaugeLabel": "Raggiungimento medio degli indicatori misurati",
+    "chartTitle": "Raggiungimento medio per indicatore",
     "series": "Raggiungimento medio %",
-    "nullNote": "{{count}} KPI senza valore consuntivo mostrati a 0% (n/d).",
-    "emptyDesc": "Non ci sono target KPI nel tuo ambito al momento."
+    "nullNote": "{{count}} indicatori non hanno ancora un risultato misurato: non sono nel grafico e non entrano nella media.",
+    "emptyDesc": "Non ci sono target KPI nel tuo ambito al momento.",
+    "measuredNote": "La media riguarda {{measured}} indicatori su {{total}}: sono i soli con un risultato misurato."
   },
   "attendance": {
     "title": "Analisi presenze",
@@ -62,19 +63,20 @@
       "profilesLabel": "Profili retributivi",
       "profilesDesc": "Posizioni con banda assegnata",
       "ouLabel": "Unità organizzative",
-      "ouDesc": "OU con profili retributivi",
-      "medianLabel": "Mediana banda"
+      "ouDesc": "Unità con profili retributivi",
+      "medianLabel": "Punto medio mediano delle bande"
     },
     "range": "Min {{min}} € · Max {{max}} €",
     "rangeEmpty": "Nessuna banda nell'ambito",
-    "boxplotTitle": "Distribuzione bande retributive per unità (mid €)",
+    "boxplotTitle": "Distribuzione delle bande retributive per unità (punto medio, €)",
     "boxplotAria": "Distribuzione bande retributive per unità organizzativa",
-    "scatterTitle": "Posizionamento: mid banda vs ampiezza banda",
-    "scatterAria": "Posizionamento retributivo: mid banda vs ampiezza banda",
+    "scatterTitle": "Posizionamento: punto medio e ampiezza della banda",
+    "scatterAria": "Posizionamento retributivo: punto medio e ampiezza della banda",
     "scatterNote": "Ogni punto è una posizione con banda; il colore indica l'unità organizzativa.",
-    "axisMid": "€ mid banda",
-    "axisSpread": "€ ampiezza banda",
-    "emptyDesc": "Non ci sono profili retributivi con banda nel tuo ambito al momento."
+    "axisMid": "€ punto medio della banda",
+    "axisSpread": "€ ampiezza della banda",
+    "emptyDesc": "Non ci sono profili retributivi con banda nel tuo ambito al momento.",
+    "scopeNote": "Sono escluse le unità di vertice che il tuo livello di accesso non può leggere: per questo il numero di unità e le cifre possono essere più piccoli di quelli dell'organico."
   },
   "skills": {
     "title": "Copertura competenze",
@@ -85,7 +87,7 @@
       "usersLabel": "Persone con evidenze",
       "usersDesc": "Persone con almeno un'evidenza",
       "ouLabel": "Unità organizzative",
-      "ouDesc": "OU coperte da evidenze"
+      "ouDesc": "Unità con evidenze di competenza"
     },
     "heatmapTitle": "Copertura per unità e livello di padronanza",
     "heatmapAria": "Copertura competenze per unità organizzativa e livello di padronanza",
@@ -113,13 +115,13 @@
     "emptyDesc": "Non ci sono evidenze di competenza nel tuo ambito al momento."
   },
   "skillsGroupShare": {
-    "title": "Quote competenze per gruppo ESCO",
-    "description": "Come si distribuiscono fra i gruppi ESCO le competenze che le persone dell'azienda possiedono. Chi gestisce la piattaforma vede il catalogo intero.",
+    "title": "Quote delle competenze per gruppo (classificazione ESCO)",
+    "description": "Come si distribuiscono, nei gruppi della classificazione europea delle competenze (ESCO), quelle che le persone dell'azienda possiedono. Chi gestisce la piattaforma vede il catalogo intero.",
     "stats": {
       "groupedLabel": "Competenze raggruppate",
-      "groupedDesc": "Competenze con un gruppo ESCO assegnato",
+      "groupedDesc": "Competenze con un gruppo assegnato",
       "groupsLabel": "Gruppi distinti",
-      "groupsDesc": "Cluster ESCO presenti nel catalogo",
+      "groupsDesc": "Gruppi presenti nel catalogo",
       "ungroupedLabel": "Senza gruppo",
       "ungroupedDesc": "Competenze non ancora mappate a un gruppo"
     },
@@ -133,7 +135,7 @@
     "colCount": "Competenze",
     "colShare": "Quota",
     "emptyDesc": "Il catalogo competenze non ha ancora gruppi ESCO popolati.",
-    "colCode": "Codice ESCO"
+    "colCode": "Codice del gruppo"
   },
   "orgNetwork": {
     "title": "Rete organizzativa",
@@ -172,7 +174,7 @@
       "hoursLabel": "Ore richieste",
       "hoursDesc": "Ore di straordinario richieste",
       "compLabel": "Compenso totale",
-      "compDesc": "Compenso stimato delle richieste",
+      "compDesc": "Compenso stimato delle richieste, escluse quelle respinte o annullate",
       "compUnavailable": "Non disponibile",
       "compUnavailableDesc": "Nessuna richiesta nel tuo ambito porta un importo."
     },
@@ -182,7 +184,7 @@
     "typeAria": "Distribuzione delle richieste di straordinario per tipo",
     "monthlyTitle": "Ore richieste per mese",
     "monthlyAria": "Ore di straordinario richieste per mese",
-    "monthlyNote": "Le richieste di straordinario sono distinte dalle ore di straordinario già lavorate (vedi Analisi presenze): le due fonti sono in larga parte disgiunte e non vanno sommate.",
+    "monthlyNote": "Le richieste di straordinario e le ore registrate nelle presenze (vedi Analisi presenze) sono le stesse ore viste da due fonti: non vanno sommate.",
     "ouTitle": "Ore richieste per unità organizzativa",
     "ouAria": "Ore di straordinario richieste per unità organizzativa",
     "seriesRequests": "Richieste",

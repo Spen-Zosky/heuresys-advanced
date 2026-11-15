@@ -178,6 +178,12 @@ export default function CompensationAnalyticsPage() {
         </div>
       </section>
 
+      {d.topUnitsExcluded ? (
+        <p className="text-sm text-muted-foreground" data-testid="analytics-compensation-scope-note">
+          {t("compensation.scopeNote")}
+        </p>
+      ) : null}
+
       {mascherato ? (
         <section
           data-testid="analytics-compensation-masked"

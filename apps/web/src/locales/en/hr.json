@@ -70,7 +70,7 @@
   },
   "kpis": {
     "title": "KPI Catalogue",
-    "description": "Defined KPIs, with unit, polarity and scope.",
+    "description": "Defined indicators, with unit of measure, reading direction (higher is better, or lower is better) and scope.",
     "count": "{{count}} KPIs defined — {{piattaforma}} platform, {{azienda}} company",
     "errorMessage": "Unable to load the KPIs.",
     "emptyTitle": "No KPIs",
@@ -78,10 +78,10 @@
     "caption": "KPI list",
     "cols": {
       "unit": "Unit",
-      "polarity": "Polarity"
+      "polarity": "Reading direction"
     },
     "metrology": {
-      "title": "Metrology",
+      "title": "How it is measured",
       "description2": "How KPIs are measured and weighted.",
       "methods": "Assessment methods",
       "rules": "Weighting rules",
@@ -146,7 +146,7 @@
   },
   "okrs": {
     "title": "OKRs",
-    "description": "Objectives and Key Results across the tenant",
+    "description": "Objectives and key results (OKRs) across the whole company",
     "count": "{{count}} OKRs",
     "errorMessage": "Failed to load OKRs",
     "emptyTitle": "No OKRs",
@@ -159,15 +159,16 @@
       "progress": "Progress"
     },
     "checkIns": {
-      "open": "Check-ins",
-      "title": "OKR check-ins",
-      "empty": "No check-ins recorded yet.",
+      "open": "Updates",
+      "title": "Progress updates",
+      "empty": "No update registered.",
       "scopeAggregate": "OKR aggregate",
       "scopeKeyResult": "Key result",
       "progress": "Progress",
       "overall": "Overall",
       "error": "Failed to load."
-    }
+    },
+    "periodEnded": "period ended"
   },
   "orgDirector": {
     "title": "Organisation design",
@@ -538,7 +539,7 @@
   },
   "career": {
     "title": "Career & Succession",
-    "description": "Career paths, succession pools and candidates.",
+    "description": "Career paths, succession pools and candidates. Candidates are the people named by hand for each pool; the automatic readiness computation is in Insights.",
     "tabs": {
       "paths": "Career paths",
       "pools": "Succession pools",
@@ -560,27 +561,28 @@
       "readiness": "Readiness",
       "status": "Status"
     },
-    "pipelineTitle": "Readiness pipeline",
-    "pipelineAria": "Candidate distribution by readiness level",
+    "pipelineTitle": "Candidate readiness",
+    "pipelineAria": "Candidates by readiness horizon",
     "pipelineEmpty": "No candidates to display.",
     "pathsEmpty": "No career path defined",
     "pathsCaption": "Career paths",
-    "poolsEmpty": "No pool recorded",
+    "poolsEmpty": "No pool registered",
     "poolsCaption": "Succession pools",
     "candidatesEmpty": "No candidate recorded",
-    "candidatesCaption": "Succession candidates"
+    "candidatesCaption": "Succession candidates",
+    "nomeInterno": "(name not assigned)"
   },
   "compensation": {
     "title": "Compensation intelligence",
-    "description": "Reward gates by evaluation status, across the whole tenant.",
-    "count": "{{count}} reward gates recorded",
+    "description": "Reward proposals by assessment status, across the whole company.",
+    "count": "{{count}} proposals registered",
     "distributionTitle": "Status distribution",
-    "distributionAria": "Reward gate distribution by evaluation status",
+    "distributionAria": "Distribution of reward proposals by assessment status",
     "distributionEmpty": "No distribution data.",
     "seriesName": "Reward gate",
     "error": "Access denied or error.",
-    "emptyTitle": "No reward gate",
-    "emptyDescription": "There are no reward gates recorded.",
+    "emptyTitle": "No reward proposal",
+    "emptyDescription": "There are no reward proposals registered.",
     "caption": "Reward gate",
     "blockingYes": "Yes",
     "blockingNo": "No",

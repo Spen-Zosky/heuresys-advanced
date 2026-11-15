@@ -44,11 +44,11 @@ export default function AnalyticsKpiPage() {
   const overallTone: "success" | "warning" | "destructive" =
     overallAvg === null ? "warning" : overallAvg >= 100 ? "success" : overallAvg >= 70 ? "warning" : "destructive";
 
-  // Bar option: per-KPI average achievement; null achievements rendered as 0
-  // (annotated by the "n/d" note below the chart), so the bar set stays complete.
+  // D14: il grafico mostra SOLO gli indicatori con un risultato misurato. Un indicatore senza
+  // dato non e' a 0%: non ha ancora un numero, e disegnarlo a zero sarebbe un numero falso.
   const barOption = echartsPresets.bar({
-    x: d.byKpi.map((k) => k.kpiName),
-    series: [{ name: t("kpi.series"), values: d.byKpi.map((k) => k.avgAchievementPct ?? 0) }],
+    x: scored.map((k) => k.kpiName),
+    series: [{ name: t("kpi.series"), values: scored.map((k) => k.avgAchievementPct) }],
   });
 
   const nullCount = d.byKpi.length - scored.length;
@@ -107,9 +107,14 @@ export default function AnalyticsKpiPage() {
           />
         ) : (
           <>
-            <div data-testid="analytics-kpi-chart">
-              <EChartsCard option={barOption} height={360} ariaLabel={t("kpi.chartTitle")} />
-            </div>
+            {scored.length > 0 ? (
+              <div data-testid="analytics-kpi-chart">
+                <EChartsCard option={barOption} height={Math.max(240, scored.length * 28)} ariaLabel={t("kpi.chartTitle")} />
+              </div>
+            ) : null}
+            <p className="text-xs text-muted-foreground" data-testid="analytics-kpi-measured">
+              {t("kpi.measuredNote", { measured: scored.length, total: d.byKpi.length })}
+            </p>
             {nullCount > 0 ? (
               <p className="text-xs text-muted-foreground">
                 {t("kpi.nullNote", { count: nullCount })}

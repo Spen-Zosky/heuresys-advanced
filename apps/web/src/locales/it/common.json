@@ -892,7 +892,9 @@
     "selected": "Persone scelte",
     "remove": "Togli {{name}}",
     "placeholder": "Scrivi almeno {{count}} lettere del nome o dell'email",
+    "placeholder_one": "Scrivi almeno {{count}} lettera del nome o dell'email",
     "typeMore": "Scrivi almeno {{count}} lettere per cercare.",
+    "typeMore_one": "Scrivi almeno {{count}} lettera per cercare.",
     "error": "Ricerca non riuscita.",
     "found_one": "{{count}} persona trovata",
     "found_other": "{{count}} persone trovate"
@@ -963,6 +965,7 @@
       "unavailableTitle": "Matrice dei permessi non disponibile",
       "unavailableDesc": "Non è stato possibile leggere l'associazione fra ruoli e permessi.",
       "moved": "I {{count}} permessi per ruolo si leggono e si governano nella pagina dei ruoli.",
+      "moved_one": "Il {{count}} permesso per ruolo si legge e si governa nella pagina dei ruoli.",
       "open": "Apri Ruoli e permessi"
     },
     "audit": {
@@ -1130,6 +1133,7 @@
       "tipo": "Tipo",
       "persone": "Persone",
       "struttura": "Struttura sotto di sé ({{count}} unità)",
+      "struttura_one": "Struttura sotto di sé ({{count}} unità)",
       "addetti": "Persone",
       "addettiConSotto": "{{diretti}} nell'unità, {{totali}} con le unità sotto",
       "sede": "Sede",
@@ -1706,6 +1710,7 @@
     "daGuardare": "Da guardare",
     "mostraMeno": "Mostra meno",
     "altre": "Altre {{count}} cose da guardare",
+    "altre_one": "Un'altra cosa da guardare",
     "nessunaAnomalia_one": "Nessuna anomalia: {{count}} verifica fatta su questa pagina.",
     "nessunaAnomalia_other": "Nessuna anomalia: {{count}} verifiche fatte su questa pagina."
   },

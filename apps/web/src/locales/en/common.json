@@ -892,7 +892,9 @@
     "selected": "Selected people",
     "remove": "Remove {{name}}",
     "placeholder": "Type at least {{count}} letters of the name or email",
+    "placeholder_one": "Type at least {{count}} letter of the name or email",
     "typeMore": "Type at least {{count}} letters to search.",
+    "typeMore_one": "Type at least {{count}} letter to search.",
     "error": "Search failed.",
     "found_one": "{{count}} person found",
     "found_other": "{{count}} people found"
@@ -963,6 +965,7 @@
       "unavailableTitle": "Permission matrix unavailable",
       "unavailableDesc": "The role-permission map could not be loaded.",
       "moved": "The {{count}} permissions by role are read and managed on the roles page.",
+      "moved_one": "The {{count}} permission by role is read and managed on the roles page.",
       "open": "Open Roles and permissions"
     },
     "audit": {
@@ -1130,6 +1133,7 @@
       "tipo": "Type",
       "persone": "People",
       "struttura": "Structure below ({{count}} units)",
+      "struttura_one": "Structure below ({{count}} unit)",
       "addetti": "People",
       "addettiConSotto": "{{diretti}} in the unit, {{totali}} including units below",
       "sede": "Site",
@@ -1706,6 +1710,7 @@
     "daGuardare": "To look at",
     "mostraMeno": "Show fewer",
     "altre": "{{count}} more to look at",
+    "altre_one": "{{count}} more to look at",
     "nessunaAnomalia_one": "No anomalies: {{count}} check done on this page.",
     "nessunaAnomalia_other": "No anomalies: {{count}} checks done on this page."
   },

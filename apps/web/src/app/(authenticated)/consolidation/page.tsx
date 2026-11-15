@@ -28,12 +28,13 @@ import {
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { ApiError } from "@/lib/api/errors";
-import { EntityTable, type DataColumn } from "@/components/data-table-panel";
+import { type DataColumn } from "@/components/data-table-panel";
 import { StatusPill, type StatusTone } from "@/components/status-pill";
 import { useFormat } from "@/lib/format";
 import { StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { DecisioneDialog } from "./decisione-dialog";
 import { RegistroCorse } from "./registro-corse";
+import { DecisioniInBlocco } from "./decisioni-in-blocco";
 import { OrganigrammaCliente } from "./organigramma-cliente";
 
 // AC-10 — La pagina del Direttore HR per il consolidamento del tenant col prototipo
@@ -465,12 +466,12 @@ export default function ConsolidationPage() {
               ? <Badge variant="secondary" data-testid="consolidation-proposals-count">{t("consolidation.count", { count: righe.length })}</Badge>
               : undefined}
           />
-          <EntityTable<ConsolidationProposal> originPath={"/v1/tenant-consolidations"}
-            isLoading={proposals.isLoading} isError={proposals.isError} error={proposals.error} errorMessage={t("consolidation.loadError")}
-            rows={righe} pageSize={10} rowKey={(p) => p.proposalId} rowTestId="consolidation-proposal-row" columns={columns}
-            emptyTestId="consolidation-proposals-empty"
-            emptyTitle={t("consolidation.proposalsEmptyTitle")} emptyDescription={t("consolidation.proposalsEmptyDescription")}
-            caption={t("consolidation.caption")}
+          <DecisioniInBlocco
+            key={`${corrente.consolidationId}-${gruppo}`}
+            righe={righe} colonne={columns} consolidationId={corrente.consolidationId}
+            canDecide={canDecide} isDirector={isDirector} occupato={occupato}
+            onFatto={rinfresca} onErrore={fallita}
+            isLoading={proposals.isLoading} isError={proposals.isError} error={proposals.error}
           />
         </section>
       ) : null}

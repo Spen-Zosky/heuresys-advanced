@@ -91,7 +91,7 @@ export default function AgentDevConsolePage() {
   if (!AGENT_DEV_ENABLED) return <DisabledNotice />;
 
   return (
-    <div className="mx-auto max-w-4xl px-6 pb-8">
+    <main className="mx-auto max-w-4xl px-6 pb-8">
       {/* C7: la pagina ha il suo titolo, come le altre; il pannello porta il nome della conversazione */}
       <PageHeader title={t("agentDev.title")} description={t("agentDev.description")} />
       <AgentPanel
@@ -139,6 +139,6 @@ export default function AgentDevConsolePage() {
         onApproval={(d, reason) => void resolveApproval(d, reason)}
         notice={notice === null || noticeText === null ? null : { kind: notice.kind, text: noticeText }}
       />
-    </div>
+    </main>
   );
 }

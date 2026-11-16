@@ -233,7 +233,8 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
           <tr className="border-b border-border bg-muted text-left text-[11px] uppercase tracking-wider text-muted-foreground">
             {inTabella.map((c, i) => (
               <th key={i} className={`px-4 py-2 ${c.align === "right" ? "text-right" : ""} ${c.headClassName ?? ""}`}>
-                <ConSpiegazione>{c.header}</ConSpiegazione>
+                {/* colonna di comandi senza titolo: il nome c'è per i lettori di schermo (axe: empty-table-header) */}
+                {c.header === "" ? <span className="sr-only">{t("table.actions")}</span> : <ConSpiegazione>{c.header}</ConSpiegazione>}
               </th>
             ))}
           </tr>

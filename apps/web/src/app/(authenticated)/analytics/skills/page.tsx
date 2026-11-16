@@ -53,7 +53,8 @@ function coverageHeatmapOption(d: SkillsCoverageAnalyticsResponse, etichetta: (p
       {
         type: "heatmap" as const,
         data: values,
-        label: { show: false },
+        // il valore scritto in ogni cella: il colore da solo non dice «quanto»
+        label: { show: true, color: AXIS_COLOR, fontSize: 11 },
         emphasis: { itemStyle: { shadowBlur: 6, shadowColor: "rgba(0,0,0,0.2)" } },
       },
     ],

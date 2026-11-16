@@ -25,6 +25,8 @@ permissions:
 
 jobs:
   censimento:
+    # Come state-lint (D-08): il runner sta sull'host di produzione, niente PR da fork.
+    if: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && !contains(github.event.pull_request.labels.*.name, 'defer-major') }}
     runs-on: [self-hosted, oci-vm]
     timeout-minutes: 5
     steps:

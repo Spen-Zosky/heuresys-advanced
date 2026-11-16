@@ -11,6 +11,7 @@
  * decisione; l'applicazione ai dati del tenant è AC-8 e passa dalle strade che già esistono.
  */
 import { pool, withTransaction } from "../../db/client.js";
+import { misuraDistanza, type MisuraDistanza } from "./distanza.js";
 import type { ActorContext } from "../../lib/actor.js";
 import { userHasPermission } from "../../middleware/rbac.js";
 import {
@@ -705,6 +706,32 @@ export const tenantConsolidationService = {
   /** Accoglie una consegna come versione di modello e la mette nel registro (idempotente). */
   async receive(actor: ActorContext, body: ReceiveDeliveryBody): Promise<BlueprintRun> {
     return accogliConsegna(tenantDi(actor), actor.userId, body.code, body.packageVersion);
+  },
+
+  /**
+   * La distanza fra il tenant e la versione di modello della corsa (ADR-0059 D7), in sola lettura: una
+   * transazione READ ONLY che si chiude con ROLLBACK. La misura copre tutti i domini del tenant, quindi la
+   * legge solo chi ha la lettura piena del consolidamento: un delegato limitato ad alcuni gruppi no.
+   */
+  async distance(actor: ActorContext, runId: string, opts: { dettaglio: boolean; dominio?: string }): Promise<MisuraDistanza> {
+    if ((await gruppiLeggibili(actor)) !== null) {
+      throw new ForbiddenError("La distanza copre tutto il tenant: serve la lettura piena del consolidamento", "PERMISSION_DENIED");
+    }
+    const tenantId = tenantDi(actor);
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN READ ONLY");
+      const { rows } = await client.query<{ v: string | null }>(
+        `SELECT blueprint_run_variant_version_id AS v FROM sys.sys_blueprint_runs
+          WHERE blueprint_run_id = $1 AND blueprint_run_tenant_id = $2`, [runId, tenantId]);
+      if (!rows[0]) throw new NotFoundError("Corsa non trovata", "BLUEPRINT_RUN_NOT_FOUND");
+      if (!rows[0].v) throw new ConflictError("La corsa non ha una versione di modello", "BLUEPRINT_RUN_WITHOUT_VERSION");
+      const m = await misuraDistanza(client, tenantId, rows[0].v, { conDettaglio: opts.dettaglio });
+      return opts.dominio ? { ...m, domini: m.domini.filter((x) => x.dominio === opts.dominio) } : m;
+    } finally {
+      await client.query("ROLLBACK").catch(() => undefined);
+      client.release();
+    }
   },
 
   /** La corsa diventa il modello in uso del tenant. Solo il Direttore HR: è una scelta sul modello, non su una voce. */

@@ -1,18 +1,18 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `f1e1bee3` (2026-11-15T23:53:53+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `a9310d81` (2026-11-16T07:48:18+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
 | Layer | Valore |
 |---|---|
 | Moduli API | 121 |
-| Route API | 723 |
+| Route API | 724 |
 | Pagine web | 132 |
 | Schemi shared | 134 |
-| Tabelle DB | 414 (vuote: 38) |
+| Tabelle DB | 415 (vuote: 38) |
 | Viste / matview | 88 / 0 |
-| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 376 |
+| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 379 |
 
 ## Moduli API
 
@@ -98,7 +98,7 @@
 | provenance | /v1/provenance | 2 | 1 | 1 | 1 |
 | public-job-postings | /v1/public | 2 | 0 | 2 | 1 |
 | public-stats | /v1/public | 1 | 0 | 11 | 1 |
-| quadro | — | 0 | 0 | 23 | 2 |
+| quadro | — | 0 | 0 | 23 | 3 |
 | reference-sync | /v1/reference-sync | 4 | 2 | 3 | 2 |
 | research | — | 0 | 0 | 20 | 1 |
 | review-cycles | /v1/review-cycles | 4 | 2 | 1 | 2 |
@@ -120,7 +120,7 @@
 | talent-review | /v1/talent-review | 6 | 1 | 9 | 2 |
 | teams | /v1/teams | 6 | 3 | 3 | 2 |
 | tenant-blueprints | /v1/tenant-blueprints | 20 | 2 | 15 | 1 |
-| tenant-consolidation | /v1/consolidation-runs, /v1/consolidation-vocabulary, /v1/tenant-consolidations | 23 | 3 | 37 | 2 |
+| tenant-consolidation | /v1/consolidation-runs, /v1/consolidation-vocabulary, /v1/tenant-consolidations | 24 | 3 | 64 | 2 |
 | tenant-import-runs | /v1/tenant-import-runs | 5 | 2 | 15 | 1 |
 | tenant-materialization | /v1/tenant-materialization | 2 | 1 | 18 | 1 |
 | tenants | /v1/tenants | 7 | 4 | 3 | 1 |
@@ -196,7 +196,7 @@
 - org_units: **45**
 - roles: **24**
 - permissions: **250**
-- role_permission_mappings: **1317**
+- role_permission_mappings: **1323**
 - ui_interfaces_active: **78**
 - skills: **14032**
 

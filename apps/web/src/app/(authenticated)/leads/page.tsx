@@ -86,7 +86,7 @@ export default function LeadsPage() {
           <span className="flex flex-col leading-tight">
             <span className="text-xs text-foreground">{dateFmt.format(new Date(r.createdAt))}</span>
             <span
-              className="text-[10px] text-muted-foreground"
+              className="text-xs text-muted-foreground"
               title={t("leads.consentNote", {
                 date: dateFmt.format(new Date(r.consentAt)),
                 version: r.consentVersion,

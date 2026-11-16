@@ -89,7 +89,7 @@ export default function MeSkillsPage() {
                 cell: (s) => (
                   <span className="font-medium text-foreground">
                     {s.skillName}
-                    {s.isPrimary && <span className="ml-2 text-[10px] uppercase text-muted-foreground">{t("skills.primaryTag")}</span>}
+                    {s.isPrimary && <span className="ml-2 text-xs uppercase text-muted-foreground">{t("skills.primaryTag")}</span>}
                   </span>
                 ),
               },

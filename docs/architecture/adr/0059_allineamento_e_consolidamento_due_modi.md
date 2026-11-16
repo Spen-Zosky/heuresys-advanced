@@ -1,7 +1,8 @@
-# ADR-0057 — Allineamento e Consolidamento: due modi dello stesso motore
+# ADR-0059 — Allineamento e Consolidamento: due modi dello stesso motore
 
-- **Status**: ACCETTATO il 2026-11-16 da Enzo Spenuso, alle 01:35 UTC (02:35 ora di Roma), nel thread «Heuresys PaaS/SaaS management»: «accetto l'ADR-005[7]» (il messaggio si chiude a «ADR-005», risposta alla richiesta di accettazione dell'ADR-0057, l'unico in attesa)
+- **Status**: ACCETTATO il 2026-11-16 da Enzo Spenuso, alle 01:35 UTC (02:35 ora di Roma), nel thread «Heuresys PaaS/SaaS management»: «accetto l'ADR-005[7]» (il messaggio si chiude a «ADR-005», risposta alla richiesta di accettazione di questo ADR, allora numerato 0057 e l'unico in attesa)
 - **Decided by**: Enzo Spenuso, 2026-11-16
+- **Numero**: proposto e accettato come ADR-0057; rinumerato 0059 il 2026-11-16 perché 0057 è della PR 225 (il modello dei ruoli, aperta prima) e 0058 della PR 272. Il testo accettato non cambia.
 - **Date**: 2026-11-16
 - **Redatto da**: Claude Code, thread «Heuresys PaaS/SaaS management», voce A1 del piano `docs/piani/PIANO_allineamento-consolidamento_20261116.md`
 - **Richiesta**: Enzo Spenuso, decisione D1 del 2026-11-16 (messaggio delle 00:44 UTC, «ti dico sì a tutte») e approvazione del piano alle 01:16 UTC («Concordo sul piano»)

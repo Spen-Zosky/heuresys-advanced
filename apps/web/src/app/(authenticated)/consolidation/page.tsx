@@ -36,6 +36,7 @@ import { DecisioneDialog } from "./decisione-dialog";
 import { RegistroCorse } from "./registro-corse";
 import { DecisioniInBlocco } from "./decisioni-in-blocco";
 import { OrganigrammaCliente } from "./organigramma-cliente";
+import { LavoroInCorso } from "@/components/lavoro-in-corso";
 
 // AC-10 — La pagina del Direttore HR per il consolidamento del tenant col prototipo
 // (`.programmi/consolidamento/agente/`). L'agente propone, una persona decide: qui si avviano
@@ -321,6 +322,11 @@ export default function ConsolidationPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <LavoroInCorso
+              attivo={inCorso !== null || prova.isPending}
+              titolo={inCorso ? t("consolidation.running", { group: t(`consolidation.groups.${inCorso}`) }) : t("consolidation.applying")}
+              dettaglio={t("common:attesa.giroInSottofondo")}
+            />
             {esito ? (
               <div role="status" data-testid="consolidation-apply-result" className="rounded-card border bg-card px-4 py-3 text-sm space-y-1">
                 <p className="font-medium">{t("consolidation.applyResult.title", { count: esito.applied })}</p>

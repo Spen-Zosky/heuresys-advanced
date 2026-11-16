@@ -42,7 +42,7 @@ LUNGO = re.compile(
     r"propose|recompute|refresh|rebuild|materializ|sync|esegui)[^'\"`]*['\"`]",
     re.I,
 )
-RIQUADRO = re.compile(r"\bWorkInProgress\b")
+RIQUADRO = re.compile(r"\b(WorkInProgress|LavoroInCorso)\b")
 
 
 def rotta(p: Path) -> str:

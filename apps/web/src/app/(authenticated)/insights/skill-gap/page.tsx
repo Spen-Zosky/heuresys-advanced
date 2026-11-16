@@ -17,6 +17,7 @@ import { MaskedCell, isMasked } from "@/components/masked-cell";
 import { EvidenceDrawer } from "@/components/evidence-drawer";
 import { useFormat } from "@/lib/format";
 import { NomeOppure } from "@/components/senza-nome";
+import { LavoroInCorso } from "@/components/lavoro-in-corso";
 
 // Higher value = larger gap = worse: ALIGNED → success, MAJOR_GAP → destructive.
 // Only confirmed @heuresys/ui Badge variants + registered text tokens.
@@ -116,6 +117,8 @@ export default function SkillGapPage() {
         emptyDescription={t("insightsSkillGap.emptyDescription")}
         caption={t("insightsSkillGap.caption")}
       />
+
+      <LavoroInCorso attivo={recompute.isPending} titolo={t("insightsSkillGap.recomputing")} dettaglio={t("common:attesa.siSbloccaAllaFine")} />
 
       {feedback && (
         <p

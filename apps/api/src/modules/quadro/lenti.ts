@@ -263,6 +263,7 @@ export const LENTI: Lente[] = [
     sql: `WITH ${PP} SELECT count(DISTINCT b.balance_subject_user_id)::int AS valore, NULL::int AS prima
             FROM sys.sys_time_off_balances b JOIN pp ON pp.user_id = b.balance_subject_user_id
            WHERE b.balance_year = extract(year FROM current_date)::int
+             AND b.balance_leave_type IN ('VACATION', 'PERSONAL')
              AND coalesce(b.balance_total_days,0) + coalesce(b.balance_carryover_days,0)
                  + coalesce(b.balance_adjustment_days,0) - coalesce(b.balance_used_days,0) > 20`,
     leggi: (v, _p, L) =>
@@ -555,7 +556,9 @@ export const LENTI: Lente[] = [
     sql: `SELECT coalesce(sum(coalesce(b.balance_total_days,0) + coalesce(b.balance_carryover_days,0)
                  + coalesce(b.balance_adjustment_days,0) - coalesce(b.balance_used_days,0)), 0)::int AS valore, NULL::int AS prima
             FROM sys.sys_time_off_balances b
-           WHERE b.balance_subject_user_id = ($1::uuid[])[1] AND b.balance_year = extract(year FROM current_date)::int`,
+           WHERE b.balance_subject_user_id = ($1::uuid[])[1] AND b.balance_year = extract(year FROM current_date)::int
+             -- forense 16/11: ferie e permessi, non la malattia (175 giorni «da godere» di media)
+             AND b.balance_leave_type IN ('VACATION', 'PERSONAL')`,
     leggi: (v, _p, L) => ({
       tono: v > 20 ? "attenzione" : "informazione",
       titolo: L.t(`Hai ${L.n(v)} giorni di ferie e permessi da godere quest'anno`, `You have ${L.n(v)} days of leave and time off still to take this year`),

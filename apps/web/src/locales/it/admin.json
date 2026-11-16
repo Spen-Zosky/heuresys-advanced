@@ -399,6 +399,7 @@
       "typingAssessed": "Valutato il {{date}}",
       "typingRegulatory": "Intensità regolatoria: {{value}}",
       "typingEmployees": "{{n}} dipendenti",
+      "typingEmployees_one": "{{n}} dipendente",
       "typingEmpty": "Nessun profilo di tipizzazione registrato.",
       "usersHint": "La lista utenti completa è gestita nella pagina dedicata.",
       "usersLink": "Apri /users →"
@@ -1000,6 +1001,7 @@
     "filters": {
       "kindAll": "Tutti i tipi",
       "statusAll": "Tutti gli stati",
+      "statusActive": "Non archiviati",
       "categoryAll": "Tutte le categorie",
       "searchLabel": "Cerca",
       "searchPlaceholder": "Cerca per titolo…"

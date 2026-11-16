@@ -399,6 +399,7 @@
       "typingAssessed": "Assessed on {{date}}",
       "typingRegulatory": "Regulatory intensity: {{value}}",
       "typingEmployees": "{{n}} employees",
+      "typingEmployees_one": "{{n}} employee",
       "typingEmpty": "No typing profile registered.",
       "usersHint": "The full user list is managed on its dedicated page.",
       "usersLink": "Open /users →"
@@ -1000,6 +1001,7 @@
     "filters": {
       "kindAll": "All kinds",
       "statusAll": "All statuses",
+      "statusActive": "Not archived",
       "categoryAll": "All categories",
       "searchLabel": "Search",
       "searchPlaceholder": "Search by title…"

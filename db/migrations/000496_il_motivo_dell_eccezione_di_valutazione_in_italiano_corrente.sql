@@ -1,5 +1,5 @@
 -- ============================================================================================
--- 000495 — Il motivo e la condizione dell'eccezione di condivisione si leggono in italiano corrente
+-- 000496 — Il motivo e la condizione dell'eccezione di condivisione si leggono in italiano corrente
 --          (giudizio qa-web del 16/11, A4, F1676).
 --
 -- PERCHÉ. La 000396 ha scritto nel registro `sys_valutazione_condivisione_eccezioni` un motivo con
@@ -85,7 +85,7 @@ BEGIN
       ON (t.colonna = 'eccezione_motivo' AND e.eccezione_motivo = t.vecchio)
       OR (t.colonna = 'eccezione_condizione_chiusura' AND e.eccezione_condizione_chiusura = t.vecchio);
   IF n_residue <> 0 THEN
-    RAISE EXCEPTION '000495: % righe di eccezione conservano ancora il testo di prima', n_residue;
+    RAISE EXCEPTION '000496: % righe di eccezione conservano ancora il testo di prima', n_residue;
   END IF;
 END $$;
 

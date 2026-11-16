@@ -46,7 +46,7 @@ INSERT INTO sys.sys_valutazione_condivisione_eccezioni
   (review_id, eccezione_motivo, eccezione_decisa_da, eccezione_decisa_il, eccezione_condizione_chiusura)
 SELECT review_id,
   -- Il motivo si legge in una pagina (/performance): italiano corrente, con gli accenti e senza nomi di
-  -- colonna (giudizio qa-web 16/11, A4). Le righe già scritte con il testo vecchio le riallinea la 000495.
+  -- colonna (giudizio qa-web 16/11, A4). Le righe già scritte con il testo vecchio le riallinea la 000496.
   'Valutazione completata e già presa in visione dalla persona, ma mai condivisa formalmente: '
   'il passo di condivisione del flusso di valutazione non è mai stato realizzato '
   '(istruttoria del 9 settembre 2026, punto C2). Non è un dato da correggere: '

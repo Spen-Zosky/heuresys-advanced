@@ -828,7 +828,8 @@
       "organization": "Organization",
       "verdict": "Verdict",
       "evidence": "Evidence",
-      "evidenceValue": "{{positions}} positions · {{holders}}/{{headcount}} people · {{covered}}/{{required}} covered"
+      "evidenceValue": "{{count}} positions · {{holders}}/{{headcount}} people · {{covered}}/{{required}} covered",
+      "evidenceValue_one": "{{count}} position · {{holders}}/{{headcount}} people · {{covered}}/{{required}} covered"
     },
     "verdicts": {
       "SUSTAINED_ADVANTAGE": "Sustained advantage",
@@ -902,6 +903,28 @@
       "action": "What to do",
       "citations": "Where it comes from"
     },
+    "conteggi": {
+      "positions": "{{count}} positions",
+      "positions_one": "{{count}} position",
+      "critical": "{{count}} critical",
+      "critical_one": "{{count}} critical"
+    },
+    "fields": {
+      "verdict": "Verdict",
+      "evidence_holders": "People who hold it",
+      "evidence_positionsRequiring": "Positions requiring it",
+      "evidence_coveredRequirements": "Requirements covered",
+      "evidence_totalRequirements": "Total requirements",
+      "evidence_avgHeldRank": "Average level held (out of 6)",
+      "evidence_verifiedShare": "Verified share",
+      "coverage": "Data coverage",
+      "headcount": "People",
+      "index": "Health index",
+      "standing": "Standing",
+      "dimensionScore": "{{dimension}} score",
+      "essentialityScore": "Essentiality score",
+      "holders": "Holders"
+    },
     "subjectTypes": {
       "CAPABILITY": "Capability",
       "ORG_UNIT": "Org unit"
@@ -914,9 +937,9 @@
       "INSUFFICIENT_COVERAGE_INSTRUMENT": "Insufficient data"
     },
     "rule": {
-      "capabilityGapAcquire": "“{{capability}}” is required by {{positions}} positions ({{critical}} critical) and nobody holds it: acquire it through hiring or training.",
-      "unusedAdvantageDeploy": "“{{capability}}” is an advantage the organization is not exploiting: {{holders}} people hold it, yet only {{covered}} of {{required}} requirements are covered. This is an assignment problem, not a hiring one.",
-      "essentialMasteryFragile": "“{{capability}}” is essential but mastery is fragile: {{holders}} holders, average level {{heldRank}} of 6, verified on {{verifiedShare}}%. It needs consolidating and testing.",
+      "capabilityGapAcquire": "“{{capability}}” is required by {{positions}} ({{critical}} critical) and nobody holds it: acquire it through hiring or training.",
+      "unusedAdvantageDeploy": "“{{capability}}” is an advantage the organization is not exploiting: people holding it: {{holders}}; requirements covered: {{covered}} of {{required}}. This is an assignment problem, not a hiring one.",
+      "essentialMasteryFragile": "“{{capability}}” is essential but mastery is fragile: holders: {{holders}}, average level {{heldRank}} of 6, verified on {{verifiedShare}}%. It needs consolidating and testing.",
       "laggingUnitIntervene": "“{{unit}}” is among the lagging units (index {{index}}): the dimension holding it back is {{dimension}}, at {{dimensionScore}} of 100.",
       "insufficientCoverageInstrument": "For “{{unit}}” the model only has {{coverage}}% of the data ({{missing}} missing): the index is not a diagnosis, it is a missing measurement."
     },

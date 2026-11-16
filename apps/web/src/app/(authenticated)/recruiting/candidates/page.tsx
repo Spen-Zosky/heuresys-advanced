@@ -126,7 +126,7 @@ export default function CandidatesPage() {
                       <p className="font-medium" data-testid="candidate-row-name">{candidateName(c)}</p>
                       {/* C2: l'email non sta a video; resta il comando per scrivere */}
                       <p className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <a href={`mailto:${c.email}`} aria-label={t("recruiting.fields.email")} title={t("recruiting.fields.email")} className="inline-flex items-center gap-1 text-primary hover:underline">
+                        <a href={`mailto:${c.email}`} className="inline-flex items-center gap-1 text-primary hover:underline">
                           <Mail className="h-3.5 w-3.5" aria-hidden />
                           {t("recruiting.candidates.write")}
                         </a>

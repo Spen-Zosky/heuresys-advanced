@@ -45,7 +45,7 @@ export default function InvestorsPage() {
               <CardContent className="p-5">
                 <div className="flex items-baseline justify-between gap-2">
                   <span className="text-2xl font-semibold tabular-nums">{data ? fmt.numero(data[k]) : t("proof.loading")}</span>
-                  <span className="rounded-control bg-card px-2 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">{t("proof.liveLabel")}</span>
+                  <span className="rounded-control bg-card px-2 py-0.5 text-xs uppercase tracking-wide text-muted-foreground">{t("proof.liveLabel")}</span>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">{t(`proof.live.${k}`)}</p>
               </CardContent>

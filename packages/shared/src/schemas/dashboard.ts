@@ -43,7 +43,11 @@ export type DashboardLearningDeadline = z.infer<typeof DashboardLearningDeadline
 export const DashboardRecentActivitySchema = z.object({
   kind: z.enum(["USER_CREATED", "POSITION_CREATED", "ASSIGNMENT_CHANGED"]),
   occurredAt: z.iso.datetime(),
-  summary: z.string(),
+  /**
+   * Il soggetto dell'evento (la persona «Cognome, Nome» o il titolo della posizione), senza frase:
+   * la frase («Nuova persona: …») la compone il web con i18n nella lingua di chi guarda.
+   */
+  subject: z.string(),
   resourceId: z.uuid(),
 });
 export type DashboardRecentActivity = z.infer<typeof DashboardRecentActivitySchema>;

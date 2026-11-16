@@ -53,7 +53,7 @@ function buildColumns(t: ReturnType<typeof useTranslation>["t"], fmt: Formati): 
       return (
         <span className="inline-flex flex-col items-end leading-tight">
           <span className="tabular-nums text-foreground">{Math.round(d.score * 100)}</span>
-          <span className="tabular-nums text-[10px] text-muted-foreground">
+          <span className="tabular-nums text-xs text-muted-foreground">
             {t("orgHealth.sample", { count: d.sampleSize })}
           </span>
         </span>
@@ -67,7 +67,7 @@ function buildColumns(t: ReturnType<typeof useTranslation>["t"], fmt: Formati): 
       cell: (r) => (
         <span className="flex flex-col leading-tight">
           <span className="font-medium text-foreground">{r.orgUnitName}</span>
-          <span className="text-[10px] text-muted-foreground">
+          <span className="text-xs text-muted-foreground">
             {t("orgHealth.cols.headcount", { count: r.headcount })}
           </span>
         </span>

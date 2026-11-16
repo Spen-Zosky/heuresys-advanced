@@ -34,7 +34,8 @@ function escoUriTail(uri: string): string {
 }
 
 export function SemanticSearchPanel() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lingua = i18n.language === "en" ? "en" : "it";
   const fmt = useFormat();
   const [term, setTerm] = useState("");
   const [submitted, setSubmitted] = useState("");
@@ -44,10 +45,10 @@ export function SemanticSearchPanel() {
   const canSearch = useCan("matching:read");
 
   const search = useQuery({
-    queryKey: ["matching", "search", submitted],
+    queryKey: ["matching", "search", submitted, lingua],
     queryFn: () =>
       apiFetch<FreeTextSearchResponse>(
-        `/v1/matching/search?q=${encodeURIComponent(submitted)}&limit=20`,
+        `/v1/matching/search?q=${encodeURIComponent(submitted)}&limit=20&lingua=${lingua}`,
       ),
     enabled: canSearch && submitted.length >= 2,
     retry: false, // 404 flag-off / 429 throttle must surface, never auto-re-bill

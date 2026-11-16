@@ -7,6 +7,8 @@ import { z } from "zod";
 
 export const MatchQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(50).optional().default(10),
+  /** la lingua dell'etichetta delle professioni (italiano se manca) */
+  lingua: z.enum(["it", "en"]).optional(),
 });
 export type MatchQuery = z.infer<typeof MatchQuerySchema>;
 
@@ -104,6 +106,7 @@ export const SimilarUserMatchListResponseSchema = z.object({
 export const FreeTextQuerySchema = z.object({
   q: z.string().trim().min(1).max(512),
   limit: z.coerce.number().int().min(1).max(50).optional().default(10),
+  lingua: z.enum(["it", "en"]).optional(),
 });
 export type FreeTextQuery = z.infer<typeof FreeTextQuerySchema>;
 

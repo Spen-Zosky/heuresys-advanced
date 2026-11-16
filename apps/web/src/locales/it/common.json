@@ -1701,7 +1701,8 @@
     "faParteDi": "Fa parte di",
     "vertice": "vertice",
     "posizioni": "Posizioni",
-    "posizioniScoperte": ", di cui {{n}} scoperte",
+    "posizioniScoperte": ", di cui {{count}} scoperte",
+    "posizioniScoperte_one": ", di cui {{count}} scoperta",
     "unitaSotto": "Unità sotto",
     "scopertaMin": "scoperta",
     "caricamento": "Caricamento…"

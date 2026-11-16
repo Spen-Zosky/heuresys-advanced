@@ -828,7 +828,8 @@
       "organization": "Organizzazione",
       "verdict": "Verdetto",
       "evidence": "Evidenza",
-      "evidenceValue": "{{positions}} posizioni · {{holders}}/{{headcount}} persone · {{covered}}/{{required}} coperte"
+      "evidenceValue": "{{count}} posizioni · {{holders}}/{{headcount}} persone · {{covered}}/{{required}} coperte",
+      "evidenceValue_one": "{{count}} posizione · {{holders}}/{{headcount}} persone · {{covered}}/{{required}} coperte"
     },
     "verdicts": {
       "SUSTAINED_ADVANTAGE": "Vantaggio sostenibile",
@@ -902,6 +903,28 @@
       "action": "Cosa fare",
       "citations": "Da dove viene"
     },
+    "conteggi": {
+      "positions": "{{count}} posizioni",
+      "positions_one": "{{count}} posizione",
+      "critical": "{{count}} critiche",
+      "critical_one": "{{count}} critica"
+    },
+    "fields": {
+      "verdict": "Verdetto",
+      "evidence_holders": "Persone che la possiedono",
+      "evidence_positionsRequiring": "Posizioni che la richiedono",
+      "evidence_coveredRequirements": "Requisiti coperti",
+      "evidence_totalRequirements": "Requisiti totali",
+      "evidence_avgHeldRank": "Livello medio posseduto (su 6)",
+      "evidence_verifiedShare": "Quota verificata",
+      "coverage": "Copertura dei dati",
+      "headcount": "Persone",
+      "index": "Indice di salute",
+      "standing": "Posizione in classifica",
+      "dimensionScore": "Punteggio di {{dimension}}",
+      "essentialityScore": "Punteggio di essenzialità",
+      "holders": "Possessori"
+    },
     "subjectTypes": {
       "CAPABILITY": "Competenza",
       "ORG_UNIT": "Unità organizzativa"
@@ -914,9 +937,9 @@
       "INSUFFICIENT_COVERAGE_INSTRUMENT": "Dati insufficienti"
     },
     "rule": {
-      "capabilityGapAcquire": "«{{capability}}» è richiesta da {{positions}} posizioni ({{critical}} critiche) e non la possiede nessuno: va acquisita con selezione o formazione.",
-      "unusedAdvantageDeploy": "«{{capability}}» è un vantaggio che l'organizzazione non sta sfruttando: {{holders}} persone la possiedono, ma solo {{covered}} requisiti su {{required}} sono coperti. È un problema di assegnazione, non di reclutamento.",
-      "essentialMasteryFragile": "«{{capability}}» è essenziale ma la padronanza è fragile: {{holders}} possessori, livello medio {{heldRank}} su 6, verificata sul {{verifiedShare}}%. Va consolidata e messa alla prova.",
+      "capabilityGapAcquire": "«{{capability}}» è richiesta da {{positions}} ({{critical}}) e non la possiede nessuno: va acquisita con selezione o formazione.",
+      "unusedAdvantageDeploy": "«{{capability}}» è un vantaggio che l'organizzazione non sta sfruttando: persone che la possiedono: {{holders}}; requisiti coperti: {{covered}} su {{required}}. È un problema di assegnazione, non di reclutamento.",
+      "essentialMasteryFragile": "«{{capability}}» è essenziale ma la padronanza è fragile: possessori: {{holders}}, livello medio {{heldRank}} su 6, verificata sul {{verifiedShare}}%. Va consolidata e messa alla prova.",
       "laggingUnitIntervene": "«{{unit}}» è fra le unità in coda (indice {{index}}): la dimensione che la tiene indietro è {{dimension}}, a {{dimensionScore}} su 100.",
       "insufficientCoverageInstrument": "Su «{{unit}}» il modello dispone solo del {{coverage}}% dei dati ({{missing}} assenti): l'indice non è una diagnosi, è una misura mancante."
     },

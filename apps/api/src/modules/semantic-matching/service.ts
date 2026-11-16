@@ -71,7 +71,7 @@ export const defaultDeps: SemanticMatchingDeps = {
 export const semanticMatchingService = {
   /** Caller's own person-profile → top-N ESCO occupations. */
   async myOccupations(a: ActorContext, q: MatchQuery) {
-    return repo.knnOccupationsForUser(pool, a.userId, q.limit);
+    return repo.knnOccupationsForUser(pool, a.userId, q.limit, q.lingua);
   },
 
   /**
@@ -85,7 +85,7 @@ export const semanticMatchingService = {
     if (tenant === null) throw new NotFoundError("User");
     if (!isPlatform(a) && (a.tenantId === null || tenant !== a.tenantId)) throw new NotFoundError("User");
     if (!(await canReadOrgTarget(pool, a, userId, tenant))) throw new NotFoundError("User");
-    return repo.knnOccupationsForUser(pool, userId, q.limit);
+    return repo.knnOccupationsForUser(pool, userId, q.limit, q.lingua);
   },
 
   /** A skill → top-N similar skills (catalog dedup/discovery), tenant-scoped (I5). */
@@ -184,7 +184,7 @@ export const semanticMatchingService = {
     if (!vec) throw new FreeTextDisabledError();
     const skillTenant = isPlatform(a) ? undefined : (a.tenantId ?? ZERO_UUID);
     const [occupations, skills] = await Promise.all([
-      repo.knnOccupationsByVector(pool, vec, q.limit),
+      repo.knnOccupationsByVector(pool, vec, q.limit, q.lingua),
       repo.knnSkillsByVector(pool, vec, skillTenant, q.limit),
     ]);
     return { occupations, skills };

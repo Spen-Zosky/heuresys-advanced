@@ -181,7 +181,7 @@ export default function PerformancePage() {
   );
 
   return (
-    <div className="space-y-8">
+    <main className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       <PageHeader title={t("performance.title")} description={t("performance.description")} />
 
       <KPIStrip items={kpi} />
@@ -244,6 +244,6 @@ export default function PerformancePage() {
           caption={t("performance.calib.caption")}
         />
       </section>
-    </div>
+    </main>
   );
 }

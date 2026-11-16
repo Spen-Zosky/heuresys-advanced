@@ -45,14 +45,16 @@ COMMENT ON TABLE sys.sys_valutazione_condivisione_eccezioni IS
 INSERT INTO sys.sys_valutazione_condivisione_eccezioni
   (review_id, eccezione_motivo, eccezione_decisa_da, eccezione_decisa_il, eccezione_condizione_chiusura)
 SELECT review_id,
-  'Valutazione COMPLETED con review_acknowledged_at valorizzato ma review_shared_at mai '
-  'scritto: il passo di condivisione del workflow di valutazione non e'' mai stato costruito '
-  '(istruttoria SINTESI_catene_e_peso_persona_20260909.md, C2). Non e'' un dato da correggere: '
-  'e'' funzionalita'' mancante.',
+  -- Il motivo si legge in una pagina (/performance): italiano corrente, con gli accenti e senza nomi di
+  -- colonna (giudizio qa-web 16/11, A4). Le righe già scritte con il testo vecchio le riallinea la 000496.
+  'Valutazione completata e già presa in visione dalla persona, ma mai condivisa formalmente: '
+  'il passo di condivisione del flusso di valutazione non è mai stato realizzato '
+  '(istruttoria del 9 settembre 2026, punto C2). Non è un dato da correggere: '
+  'è una funzionalità che manca.',
   'Enzo (2026-09-09, risposta diretta durante la chiusura di sessione S1095)',
   DATE '2026-09-09',
-  'Questa riga smette di essere coperta quando: (a) review_shared_at viene valorizzato '
-  'davvero dal passo 4 del workflow, applicato a questa valutazione; oppure (b) Enzo decide '
+  'Questa riga smette di essere coperta quando: (a) la condivisione viene registrata '
+  'davvero dal passo 4 del flusso di valutazione, applicato a questa valutazione; oppure (b) Enzo decide '
   'diversamente per le 14 calibrazioni modificate mai riportate sulla persona (stessa '
   'istruttoria, C2) e la riga va ricalcolata invece che semplicemente condivisa.'
   FROM sys.v_valutazione_completata_non_condivisa

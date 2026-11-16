@@ -220,7 +220,7 @@ function CorpoUnita({ id, ix, blocchi, rif }: {
         {vivo?.ragioneOrganico ? (
           <Riga etichetta={t("organigramma.scheda.ragioneOrganico")}>{vivo.ragioneOrganico}</Riga>
         ) : null}
-        <Riga etichetta={t("schedaRapida.posizioni")}>{`${posizioni.length}${scoperte ? t("schedaRapida.posizioniScoperte", { n: scoperte }) : ""}`}</Riga>
+        <Riga etichetta={t("schedaRapida.posizioni")}>{`${posizioni.length}${scoperte ? t("schedaRapida.posizioniScoperte", { count: scoperte }) : ""}`}</Riga>
       </dl>
       {sotto.length > 1 ? (
         <section className="mt-4" data-testid="scheda-struttura">

@@ -1,6 +1,6 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `2902c5c7` (2026-11-16T21:36:54+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `b3600575` (2026-11-16T23:09:44+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
@@ -10,8 +10,8 @@
 | Route API | 724 |
 | Pagine web | 132 |
 | Schemi shared | 134 |
-| Tabelle DB | 415 (vuote: 38) |
-| Viste / matview | 88 / 0 |
+| Tabelle DB | 418 (vuote: 38) |
+| Viste / matview | 90 / 0 |
 | Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 379 |
 
 ## Moduli API
@@ -24,7 +24,7 @@
 | agent-capabilities | /v1/agent-capabilities | 7 | 0 | 5 | 1 |
 | agent-conversations | /v1/agent-conversations | 10 | 0 | 4 | 1 |
 | agent-tokens | /v1/auth/agent-tokens | 1 | 0 | 2 | 0 |
-| analytics | /v1/analytics | 10 | 1 | 15 | 5 |
+| analytics | /v1/analytics | 10 | 1 | 15 | 6 |
 | approvals | /v1/approvals | 5 | 3 | 6 | 5 |
 | assessment-methods | /v1/assessment-methods | 1 | 1 | 1 | 1 |
 | assessment-results | /v1/assessment-results | 3 | 2 | 2 | 2 |
@@ -46,7 +46,7 @@
 | compensation | /v1/compensation | 14 | 2 | 15 | 5 |
 | content | /v1/content | 20 | 5 | 5 | 5 |
 | content-blueprint-links | /v1/content-blueprint-links | 5 | 4 | 4 | 1 |
-| dashboard | /v1/dashboard | 4 | 1 | 26 | 4 |
+| dashboard | /v1/dashboard | 4 | 1 | 26 | 5 |
 | data-classification | /v1/data-classification | 1 | 1 | 1 | 1 |
 | delegations | /v1/delegations | 4 | 2 | 12 | 2 |
 | engagement | /v1/engagement | 4 | 1 | 5 | 2 |
@@ -73,7 +73,7 @@
 | learning-path-steps | /v1/learning-path-steps | 5 | 4 | 3 | 1 |
 | learning-paths | /v1/learning-paths | 5 | 4 | 2 | 1 |
 | mandate-acts | /v1/mandate-acts | 6 | 1 | 5 | 0 |
-| me | /v1/me | 76 | 32 | 64 | 50 |
+| me | /v1/me | 76 | 32 | 64 | 52 |
 | mentorship | /v1/mentorship | 17 | 4 | 4 | 3 |
 | mfa-policy | /v1/mfa-policy | 4 | 2 | 4 | 1 |
 | notifications | /v1/notifications | 2 | 2 | 2 | 0 |
@@ -196,7 +196,7 @@
 - org_units: **45**
 - roles: **24**
 - permissions: **250**
-- role_permission_mappings: **1323**
+- role_permission_mappings: **1339**
 - ui_interfaces_active: **78**
 - skills: **14032**
 

@@ -43,7 +43,7 @@ function DimensionCell({ percentile, raw, present }: { percentile: number; raw: 
       <span className={present ? "font-semibold tabular-nums text-foreground" : "tabular-nums text-muted-foreground"}>
         {fmt.percento(percentile, "0-1")}
       </span>
-      <span className="tabular-nums text-[10px] text-muted-foreground">{fmt.numeroFisso(raw, 2)}</span>
+      <span className="tabular-nums text-xs text-muted-foreground">{fmt.numeroFisso(raw, 2)}</span>
     </span>
   );
 }
@@ -57,7 +57,7 @@ function buildColumns(
       cell: (r) => (
         <span className="flex flex-col leading-tight">
           <span className="font-medium text-foreground">{r.skillGroupName}</span>
-          <span className="max-w-sm text-[10px] text-muted-foreground">
+          <span className="max-w-sm text-xs text-muted-foreground">
             {/* il gruppo ESCO da solo può ingannare (la sicurezza informatica sta fra i servizi
                 della difesa): si dice quali competenze dell'azienda lo compongono davvero */}
             {r.skillExamples.length > 0
@@ -98,7 +98,7 @@ function buildColumns(
       cell: (r) => (
         <span className="tabular-nums text-[11px] text-muted-foreground">
           {t("vrio.cols.evidenceValue", {
-            positions: r.evidence.positionsRequiring,
+            count: r.evidence.positionsRequiring,
             holders: r.evidence.holders,
             headcount: r.evidence.headcount,
             covered: r.evidence.coveredRequirements,

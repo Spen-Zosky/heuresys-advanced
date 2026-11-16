@@ -102,17 +102,21 @@ function RamoMenu({
     ascoltatori.forEach((f) => f());
   }, [id, aperto]);
   const visibile = aperto || dentro;
+  const titolo = t(`shell:nav.rami.${ramo.chiave}`, { defaultValue: ramo.chiave });
   return (
     <li>
       <button
         type="button"
         aria-expanded={visibile}
         onClick={cambia}
-        className="flex w-full items-center gap-1.5 rounded-control py-1.5 pr-2 text-left text-xs font-medium text-muted-foreground transition hover:text-foreground"
+        // `nav-link`: con la barra ridotta alle sole icone il pulsante si centra e l'etichetta
+        // (`nav-label`) sparisce, invece di andare a capo lettera per lettera («Str utt ura»).
+        title={titolo}
+        className="nav-link flex w-full items-center gap-1.5 rounded-control py-1.5 pr-2 text-left text-xs font-medium text-muted-foreground transition hover:text-foreground"
         style={{ paddingLeft: `${0.5 + livello * 0.75}rem` }}
       >
         <ChevronRight className={`h-3 w-3 shrink-0 transition-transform ${visibile ? "rotate-90" : ""}`} aria-hidden />
-        <span className="min-w-0 whitespace-normal break-words leading-snug">{t(`shell:nav.rami.${ramo.chiave}`, { defaultValue: ramo.chiave })}</span>
+        <span className="nav-label min-w-0 whitespace-normal break-words leading-snug">{titolo}</span>
       </button>
       {visibile ? <ContenutoRamo ramo={ramo} idPadre={id} attiva={attiva} icone={icone} livello={livello + 1} /> : null}
     </li>

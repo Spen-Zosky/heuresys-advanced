@@ -235,7 +235,8 @@
   },
   "noAccess": {
     "title": "You do not have access to this page",
-    "body": "The page “{{route}}” is not part of your profile, so we do not show it half-loaded. If you need it for your work, ask whoever manages roles in your company.",
+    "body": "The page “{{pagina}}” is not part of your profile, so we do not show it half-loaded. If you need it for your work, ask whoever manages roles in your company.",
+    "bodyGenerico": "This page is not part of your profile, so we do not show it half-loaded. If you need it for your work, ask whoever manages roles in your company.",
     "home": "Back to your home page"
   }
 }

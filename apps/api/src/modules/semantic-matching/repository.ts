@@ -6,6 +6,7 @@
 import type { Pool, PoolClient } from "pg";
 import type { OccupationMatch, SkillMatch, PositionMatch, JobRoleMatch, SimilarUserMatch } from "@heuresys/shared";
 import type { PerimetroDiCatalogo } from "../../lib/scope/profilo.js";
+import { etichettaOccupazioneSql, type LinguaMatching } from "./etichetta.js";
 
 export type DbConnector = Pool | PoolClient;
 
@@ -156,15 +157,7 @@ export async function deriveUserProfiles(q: DbConnector, modelId: string): Promi
 }
 
 // ── kNN queries (cosine; ORDER BY <=> ASC = nearest) ──
-// Il nome della professione si mostra in italiano quando il catalogo lo porta
-// (esco_occupation_mapping_esco_label_it, caricata dal datastore), altrimenti quello del vettore.
-// Si legge per chiave JSON così la query regge anche su uno schema dove la colonna non c'è ancora.
-const ETICHETTA_ITALIANA = `coalesce((
-         SELECT nullif(btrim(to_jsonb(m) ->> 'esco_occupation_mapping_esco_label_it'), '')
-           FROM sys.sys_esco_occupation_mappings m
-          WHERE m.esco_occupation_mapping_esco_uri = v.esco_uri
-          ORDER BY 1 NULLS LAST LIMIT 1), v.label_text)`;
-export async function knnOccupationsForUser(q: DbConnector, userId: string, limit: number): Promise<{ items: OccupationMatch[]; evidenceCount: number }> {
+export async function knnOccupationsForUser(q: DbConnector, userId: string, limit: number, lingua?: LinguaMatching): Promise<{ items: OccupationMatch[]; evidenceCount: number }> {
   const prof = await q.query<{ derived_from_evidence_count: number }>(
     `SELECT derived_from_evidence_count FROM sys.sys_user_profile_embeddings WHERE user_id = $1`, [userId]);
   if (prof.rowCount === 0) return { items: [], evidenceCount: 0 };
@@ -176,7 +169,7 @@ export async function knnOccupationsForUser(q: DbConnector, userId: string, limi
        FROM sys.sys_esco_occupation_embeddings oe
        ORDER BY oe.embedding <=> (SELECT embedding FROM me)
        LIMIT $2)
-     SELECT v.esco_uri, ${ETICHETTA_ITALIANA} AS label_text, v.isco_code, v.s::text AS score
+     SELECT v.esco_uri, ${etichettaOccupazioneSql(lingua)} AS label_text, v.isco_code, v.s::text AS score
        FROM vicine v ORDER BY v.s DESC`, [userId, limit]);
   return {
     items: r.rows.map((x) => ({ escoUri: x.esco_uri, label: x.label_text, iscoCode: x.isco_code, score: num(x.score) })),
@@ -364,14 +357,14 @@ export async function knnSimilarUsers(
  * Free-text kNN (AI ②·Fase 2): rank occupations by an externally-supplied query VECTOR
  * (embedded at request time). No tenant filter — the ESCO occupation corpus is global.
  */
-export async function knnOccupationsByVector(q: DbConnector, vec: number[], limit: number): Promise<OccupationMatch[]> {
+export async function knnOccupationsByVector(q: DbConnector, vec: number[], limit: number, lingua?: LinguaMatching): Promise<OccupationMatch[]> {
   const r = await q.query<{ esco_uri: string; label_text: string | null; isco_code: string | null; score: string }>(
     `WITH vicine AS (
        SELECT oe.esco_uri, oe.label_text, oe.isco_code, (1 - (oe.embedding <=> $1::vector)) AS s
        FROM sys.sys_esco_occupation_embeddings oe
        ORDER BY oe.embedding <=> $1::vector
        LIMIT $2)
-     SELECT v.esco_uri, ${ETICHETTA_ITALIANA} AS label_text, v.isco_code, v.s::text AS score
+     SELECT v.esco_uri, ${etichettaOccupazioneSql(lingua)} AS label_text, v.isco_code, v.s::text AS score
        FROM vicine v ORDER BY v.s DESC`, [toVectorLiteral(vec), limit]);
   return r.rows.map((x) => ({ escoUri: x.esco_uri, label: x.label_text, iscoCode: x.isco_code, score: num(x.score) }));
 }

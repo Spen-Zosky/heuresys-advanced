@@ -96,7 +96,7 @@ export default function DashboardPage() {
 
   const activityEvents: AuditEvent[] = w.recentActivity.map((a) => {
     const v = activityVisual(a.kind);
-    return { icon: v.icon, tone: v.tone, title: a.summary, meta: formatRelativeTime(a.occurredAt) };
+    return { icon: v.icon, tone: v.tone, title: t(`dashboard.activityKind.${a.kind}`, { subject: a.subject }), meta: formatRelativeTime(a.occurredAt) };
   });
 
   return (
@@ -156,7 +156,7 @@ export default function DashboardPage() {
                   <span className="truncate">
                     {d.userDisplayName} — {d.skillName ?? t("dashboard.gapGeneral")}
                   </span>
-                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium uppercase ${SEVERITY_CLASS[d.severity] ?? "bg-muted text-muted-foreground"}`}>
+                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium uppercase ${SEVERITY_CLASS[d.severity] ?? "bg-muted text-muted-foreground"}`}>
                     {enumLabel("severity", d.severity)}
                   </span>
                 </li>

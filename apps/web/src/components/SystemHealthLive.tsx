@@ -240,7 +240,7 @@ export function SystemHealthLive() {
                   <span className="text-muted-foreground">{t("health.kpi.rolesLoaded", { count: d.rbac.rolesLoaded })}</span>
                   <span className="text-success">{d.rbac.loadedAt ? t("health.kpi.loaded") : t("health.kpi.notLoaded")}</span>
                 </div>
-                <div className="mt-1 text-[10px] text-muted-foreground">
+                <div className="mt-1 text-xs text-muted-foreground">
                   {d.rbac.loadedAt ? t("health.kpi.lastLoad", { when: rel(d.rbac.loadedAt) }) : t("health.kpi.notLoaded")}
                 </div>
               </>

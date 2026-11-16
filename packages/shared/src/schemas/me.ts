@@ -746,6 +746,17 @@ export const MeInboxNotificationSchema = z.object({
   type: z.string(),
   subject: z.string(),
   body: z.string().nullable(),
+  /**
+   * Il significato dell'avviso, ricavato in lettura dal testo salvato (niente riscrittura del dato): un codice
+   * e i parametri, con cui il web compone la frase nella lingua di chi guarda. Null per gli avvisi che l'API
+   * non scrive da se' (restano col testo salvato).
+   */
+  message: z
+    .object({
+      code: z.enum(["APPROVAL_REMINDER", "APPROVAL_OVERDUE", "GAP_CLOSURE_DUE"]),
+      params: z.record(z.string(), z.union([z.string(), z.number()])),
+    })
+    .nullable(),
   actionUrl: z.string().nullable(),
   resourceType: z.string().nullable(),
   resourceId: z.uuid().nullable(),

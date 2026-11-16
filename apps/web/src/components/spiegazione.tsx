@@ -14,16 +14,33 @@ import { spiegazioneDi, type Voce } from "@/lib/glossario";
 export function Spiegazione({ voce, termine }: { voce: Voce; termine: string }) {
   const { t } = useTranslation("common");
   const [aperta, setAperta] = useState(false);
+  // Il clic (o il tocco) la tiene aperta anche quando il mouse esce; si chiude con Esc o un
+  // clic fuori (Radix, via onOpenChange).
+  const [fissata, setFissata] = useState(false);
   return (
-    <Popover open={aperta} onOpenChange={setAperta}>
+    <Popover
+      open={aperta}
+      onOpenChange={(o) => {
+        setAperta(o);
+        if (!o) setFissata(false);
+      }}
+    >
       <PopoverTrigger asChild>
         <button
           type="button"
           aria-label={t("glossario.cosaVuolDire", { termine })}
           data-spiegazione=""
           onMouseEnter={() => setAperta(true)}
-          onMouseLeave={() => setAperta(false)}
-          onClick={(e) => e.stopPropagation()}
+          onMouseLeave={() => {
+            if (!fissata) setAperta(false);
+          }}
+          onClick={(e) => {
+            // Radix farebbe il suo toggle (apre al passaggio, il clic richiude): lo si ferma.
+            e.preventDefault();
+            e.stopPropagation();
+            setAperta(true);
+            setFissata(true);
+          }}
           className="ml-1 inline-flex align-middle text-muted-foreground/70 hover:text-primary focus-visible:text-primary"
         >
           <Info className="h-3.5 w-3.5" aria-hidden />

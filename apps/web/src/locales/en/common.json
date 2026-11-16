@@ -1701,7 +1701,8 @@
     "faParteDi": "Part of",
     "vertice": "top level",
     "posizioni": "Positions",
-    "posizioniScoperte": ", of which {{n}} vacant",
+    "posizioniScoperte": ", of which {{count}} vacant",
+    "posizioniScoperte_one": ", of which {{count}} vacant",
     "unitaSotto": "Units below",
     "scopertaMin": "vacant",
     "caricamento": "Loading…"

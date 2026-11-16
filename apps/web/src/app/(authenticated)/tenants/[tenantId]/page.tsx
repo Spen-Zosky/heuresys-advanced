@@ -173,7 +173,7 @@ export default function TenantDetailPage() {
                     </span>
                     {p.employeeCount !== null && (
                       <span className="text-xs text-muted-foreground">
-                        {t("tenants.detail.typingEmployees", { n: fmt.numero(p.employeeCount) })}
+                        {t("tenants.detail.typingEmployees", { n: fmt.numero(p.employeeCount), count: p.employeeCount })}
                       </span>
                     )}
                   </li>

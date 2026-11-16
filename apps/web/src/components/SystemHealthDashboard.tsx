@@ -63,7 +63,7 @@ export function SystemHealthDashboard() {
               label: "Platform",
               items: [
                 { id: "health", label: "System Health", href: "#", active: true, icon: <Activity className="h-4 w-4 shrink-0 text-primary" />, aux: <span className="inline-flex h-1.5 w-1.5 rounded-full bg-success pulse-dot" /> },
-                { id: "tenants", label: "Tenant Fleet", href: "#", icon: <Layers className="h-4 w-4 shrink-0" />, aux: <span className="font-mono text-[10px] text-muted-foreground">4</span> },
+                { id: "tenants", label: "Tenant Fleet", href: "#", icon: <Layers className="h-4 w-4 shrink-0" />, aux: <span className="font-mono text-xs text-muted-foreground">4</span> },
                 { id: "logs", label: "Live Logs", href: "#", icon: <ScrollText className="h-4 w-4 shrink-0" />, aux: <span className="inline-flex h-1.5 w-1.5 rounded-full bg-info pulse-dot" /> },
                 { id: "audit", label: "Audit Feed", href: "#", icon: <ShieldCheck className="h-4 w-4 shrink-0" /> },
               ],
@@ -72,7 +72,7 @@ export function SystemHealthDashboard() {
               label: (
                 <span className="flex items-baseline gap-1.5">
                   <span>Database</span>
-                  <span className="font-mono text-[9px] normal-case tracking-normal text-muted-foreground/60">pg 16</span>
+                  <span className="font-mono text-xs normal-case tracking-normal text-muted-foreground/60">pg 16</span>
                 </span>
               ),
               customContent: <DBSupervisorSidebar />
@@ -91,7 +91,7 @@ export function SystemHealthDashboard() {
               id: "diagnostics",
               label: "Diagnostics",
               items: [
-                { id: "incidents", label: "Incidents", href: "#", icon: <AlertCircle className="h-4 w-4 shrink-0" />, aux: <span className="rounded-full bg-warning/15 px-1.5 py-0.5 font-mono text-[10px] font-medium text-warning">2</span> },
+                { id: "incidents", label: "Incidents", href: "#", icon: <AlertCircle className="h-4 w-4 shrink-0" />, aux: <span className="rounded-full bg-warning/15 px-1.5 py-0.5 font-mono text-xs font-medium text-warning">2</span> },
                 { id: "sql", label: "SQL Console", href: "#", icon: <Code2 className="h-4 w-4 shrink-0" /> },
               ],
             },
@@ -123,7 +123,7 @@ export function SystemHealthDashboard() {
           title="1 active incident · GENESIS_DEMO"
           meta={
             <>
-              <span className="rounded-full bg-warning/15 px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-warning">P2 · degraded</span>
+              <span className="rounded-full bg-warning/15 px-2 py-0.5 font-mono text-xs font-medium uppercase tracking-wider text-warning">P2 · degraded</span>
               <span className="text-xs text-muted-foreground">slow query rate <span className="font-mono text-warning">+340%</span> · pool util <span className="font-mono">78%</span> · error rate <span className="font-mono">4.1%</span></span>
             </>
           }
@@ -186,7 +186,7 @@ export function SystemHealthDashboard() {
             body: (
               <>
                 <div className="mt-3 flex items-baseline justify-between text-[11px]"><span className="text-muted-foreground">8 roles loaded</span><span className="font-mono text-success">LOADED</span></div>
-                <div className="mt-1 font-mono text-[10px] text-muted-foreground">last refresh · 14:38:12</div>
+                <div className="mt-1 font-mono text-xs text-muted-foreground">last refresh · 14:38:12</div>
               </>
             ),
           },

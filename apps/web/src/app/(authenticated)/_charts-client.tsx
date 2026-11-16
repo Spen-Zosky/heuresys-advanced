@@ -30,6 +30,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState, type ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import { formati, localeDi } from "@/lib/format";
+import { esadecimaleConAlfa } from "@/lib/colori-grafico";
 import { assiDerivati, letturaDelGrafico, type ChartTable } from "@/lib/lettura-grafico";
 
 const RawEChartsCard = dynamic(
@@ -53,6 +54,12 @@ function resolveCssVars<T>(value: T, root: HTMLElement): T {
     let out = value.replace(
       /(?:hsla?|rgba?)\(\s*var\((--[a-zA-Z0-9_-]+)\)\s*\)/g,
       (_m, name: string) => get(name),
+    );
+    // 1b) `hsl(var(--x) / 0.12)`: tinta chiara della scala di una mappa di calore. Il canvas non
+    //    la legge (`hsl(#2563EB / 0.12)` è invalido): si converte l'esadecimale in rgba.
+    out = out.replace(
+      /(?:hsla?|rgba?)\(\s*var\((--[a-zA-Z0-9_-]+)\)\s*\/\s*([0-9.]+%?)\s*\)/g,
+      (_m, name: string, alfa: string) => esadecimaleConAlfa(get(name), alfa) ?? get(name),
     );
     // 2) Any remaining bare var(--x).
     out = out.replace(/var\((--[a-zA-Z0-9_-]+)\)/g, (_m, name: string) => get(name));

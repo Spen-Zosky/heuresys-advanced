@@ -1739,5 +1739,12 @@
     "tipoFascicolo": "tenant model file",
     "comeModello": "as the model says",
     "limiteContratto": "the contract does not declare a maximum for «{{nome}}»: the form cannot derive it"
+  },
+  "attesa": {
+    "inCorso": "Work in progress",
+    "suonoAllaFine": "Sound when finished",
+    "siSbloccaAllaFine": "The page unlocks when the work is done.",
+    "applicazione": "Applying…",
+    "giroInSottofondo": "The run continues even if you close the page; the result arrives here."
   }
 }

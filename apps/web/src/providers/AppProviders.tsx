@@ -7,6 +7,7 @@ import { ThemeProvider } from "@heuresys/ui";
 import { i18n } from "../lib/i18n";
 import { suPermessoNegato } from "../lib/api/session-cache";
 import { ME_INTERFACES_QUERY_KEY, ME_PERMISSIONS_QUERY_KEY } from "../lib/api/auth";
+import { AttesaGlobale } from "../components/attesa-globale";
 
 export function AppProviders({ children }: { children: ReactNode }) {
   // One QueryClient per browser session; lazy-initialised so HMR / RSC don't
@@ -41,7 +42,10 @@ export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider defaultTheme="dark">
       <QueryClientProvider client={qc}>
-        <I18nextProvider i18n={i18n}>{children}</I18nextProvider>
+        <I18nextProvider i18n={i18n}>
+          <AttesaGlobale />
+          {children}
+        </I18nextProvider>
       </QueryClientProvider>
     </ThemeProvider>
   );

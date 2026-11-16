@@ -13,6 +13,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { useCan, useCurrentUser } from "@/lib/api/auth";
 import { useContestoAgente } from "@/lib/agente/contesto";
 import { useFormat } from "@/lib/format";
+import { LavoroInCorso } from "@/components/lavoro-in-corso";
 
 function reqStatusVariant(s: ApprovalStatus): "success" | "secondary" | "destructive" {
   if (s === "APPROVED" || s === "APPLIED") return "success";
@@ -95,6 +96,8 @@ export default function ApprovalDetailPage() {
           ← {t("approvals.detail.back")}
         </Link>
       </div>
+
+      <LavoroInCorso attivo={apply.isPending} titolo={t("common:attesa.applicazione")} dettaglio={t("common:attesa.siSbloccaAllaFine")} />
 
       {detail.isLoading ? (
         <StatoCaricamento testId="approval-detail-loading" />

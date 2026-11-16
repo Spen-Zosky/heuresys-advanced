@@ -1739,5 +1739,12 @@
     "tipoFascicolo": "fascicolo del modello del tenant",
     "comeModello": "come dice il modello",
     "limiteContratto": "il contratto non dichiara un massimo per «{{nome}}»: il form non puo' derivarlo"
+  },
+  "attesa": {
+    "inCorso": "Lavoro in corso",
+    "suonoAllaFine": "Segnale sonoro alla fine",
+    "siSbloccaAllaFine": "La pagina si sblocca quando il lavoro è finito.",
+    "applicazione": "Applicazione in corso…",
+    "giroInSottofondo": "Il giro continua anche se chiudi la pagina; l'esito arriva qui."
   }
 }

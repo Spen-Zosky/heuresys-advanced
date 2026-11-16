@@ -458,3 +458,46 @@ export const ReceiveDeliveryBodySchema = z
   .strict();
 export type ReceiveDeliveryBody = z.infer<typeof ReceiveDeliveryBodySchema>;
 export const BlueprintRunIdParamSchema = z.object({ runId: z.uuid() });
+
+/**
+ * La distanza fra il tenant e la versione di modello di una corsa (ADR-0059 D7, voce A2 del piano di
+ * allineamento): per dominio, uguali, parziali, diversi, solo nel modello, solo nel tenant e ricchezza persa.
+ */
+export const DISTANCE_DOMAIN_VALUES = [
+  "ateco", "classe", "ccnl", "processi", "unita", "organigramma", "obblighi", "ruoli", "copertura",
+  "inquadramento", "fasi", "skill", "obiettivi", "metriche", "derivati", "bersagli", "formazione",
+  "carriere", "incentivi", "commesse", "criticita", "condizioni", "ruoli_funzionali", "utenti",
+] as const;
+export const DistanceDomainSchema = z.enum(DISTANCE_DOMAIN_VALUES);
+const DistanceCountsSchema = z.object({
+  righe: z.number().int(),
+  uguali: z.number().int(),
+  parziali: z.number().int(),
+  diversi: z.number().int(),
+  solo_modello: z.number().int(),
+  solo_tenant: z.number().int(),
+  ricchezza_persa: z.number().int(),
+});
+export const DistanceRowSchema = z.object({
+  esito: z.enum(["uguale", "parziale", "diverso", "solo_modello", "solo_tenant"]),
+  modello: z.string().nullable(),
+  tenant: z.string().nullable(),
+  nota: z.string().optional(),
+});
+export const DistanceDomainResultSchema = DistanceCountsSchema.extend({
+  dominio: DistanceDomainSchema,
+  nota: z.string(),
+  dettaglio: z.array(DistanceRowSchema).optional(),
+});
+export const RunDistanceResponseSchema = z.object({
+  tenantId: z.uuid(),
+  variantVersionId: z.uuid(),
+  misurataIl: z.iso.datetime(),
+  domini: z.array(DistanceDomainResultSchema),
+  totale: DistanceCountsSchema,
+});
+export type RunDistanceResponse = z.infer<typeof RunDistanceResponseSchema>;
+export const RunDistanceQuerySchema = z.object({
+  dettaglio: z.enum(["true", "false"]).optional(),
+  dominio: DistanceDomainSchema.optional(),
+});

@@ -32,6 +32,8 @@ import {
   ApplyChangesResultSchema,
   AvailableDeliveryListResponseSchema,
   BlueprintRunIdParamSchema,
+  RunDistanceQuerySchema,
+  RunDistanceResponseSchema,
   BlueprintRunListResponseSchema,
   BlueprintRunSchema,
   ReceiveDeliveryBodySchema,
@@ -234,6 +236,16 @@ export const consolidationRunRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [app.verifyCsrf, requirePermission("consolidation:run")],
     schema: { body: ReceiveDeliveryBodySchema, response: { 200: BlueprintRunSchema } },
   }, async (req) => svc.receive(actor(req), req.body));
+
+  // La distanza fra il tenant e il modello della corsa (ADR-0059 D7): sola lettura, la legge chi legge.
+  app.get("/:runId/distance", {
+    config: conf,
+    preHandler: [LEGGE],
+    schema: { params: BlueprintRunIdParamSchema, querystring: RunDistanceQuerySchema, response: { 200: RunDistanceResponseSchema } },
+  }, async (req) => svc.distance(actor(req), req.params.runId, {
+    dettaglio: req.query.dettaglio === "true",
+    ...(req.query.dominio ? { dominio: req.query.dominio } : {}),
+  }));
 
   app.post("/:runId/definitive", {
     config: conf,

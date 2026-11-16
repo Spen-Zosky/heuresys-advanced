@@ -27,11 +27,8 @@ export interface LavoroInCorsoProps {
 export function LavoroInCorso({ attivo, titolo, dettaglio, valore, massimo }: LavoroInCorsoProps) {
   const { t } = useTranslation();
   const inizio = useRef<number | null>(null);
-  const [suono, setSuono] = useState(true);
-
-  useEffect(() => {
-    setSuono(isEndSignalEnabled());
-  }, []);
+  // Lettura pigra: il riquadro compare solo dopo un gesto, quando il browser c'è già.
+  const [suono, setSuono] = useState(() => isEndSignalEnabled());
 
   useEffect(() => {
     if (attivo) {

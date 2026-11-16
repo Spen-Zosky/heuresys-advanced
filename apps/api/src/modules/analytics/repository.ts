@@ -1190,10 +1190,22 @@ export async function getSkillsGroupShare(q: DbConnector, tenantId: string | nul
   );
 
   // C1/C3: il gruppo si legge per nome (sys.sys_skill_groups), il codice ESCO resta accanto.
-  const nomi = await q.query<{ uri: string; name: string }>(
-    `SELECT skill_group_esco_uri AS uri, skill_group_name AS name FROM sys.sys_skill_groups`,
+  // Le competenze portano l'URI del gruppo a CODICE (skill/S4.3.1), mentre la tassonomia ESCO del
+  // database ha l'URI a UUID (skill/<uuid>) e il codice in una colonna a parte: il nome si cerca
+  // per entrambe le chiavi, cosi' un gruppo con nome in tassonomia non resta mai col solo codice.
+  const nomi = await q.query<{ uri: string; name: string; code: string | null }>(
+    `SELECT skill_group_esco_uri AS uri, skill_group_name AS name, skill_group_code AS code
+       FROM sys.sys_skill_groups`,
   );
-  const nomePerCodice = new Map(nomi.rows.map((r) => [escoGroupCode(r.uri), r.name]));
+  const nomePerCodice = new Map<string, string>();
+  for (const r of nomi.rows) {
+    const chiaveUri = escoGroupCode(r.uri);
+    nomePerCodice.set(chiaveUri, r.name);
+    const famiglia = chiaveUri.split("/")[0];
+    if (r.code && famiglia && !nomePerCodice.has(`${famiglia}/${r.code}`)) {
+      nomePerCodice.set(`${famiglia}/${r.code}`, r.name);
+    }
+  }
 
   const t = totals.rows[0];
   const totalSkills = Number(t?.total ?? 0);

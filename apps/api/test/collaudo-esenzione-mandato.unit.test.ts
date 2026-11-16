@@ -18,7 +18,7 @@ describe("esenzioneAmmessa", () => {
     expect(esenzioneAmmessa("SALES", MANDATI)).toBe(true);
   });
   it("le utenze di collaudo con mfaExempt:false sono esattamente quelle con mandato forte", () => {
-    for (const c of COLLAUDO_IDENTITIES as { roleCode: string; mfaExempt?: boolean }[]) {
+    for (const c of COLLAUDO_IDENTITIES) {
       if (c.mfaExempt === false) expect(esenzioneAmmessa(c.roleCode, MANDATI)).toBe(false);
     }
   });

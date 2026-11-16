@@ -6,7 +6,7 @@ Voce A2 del piano `docs/piani/PIANO_allineamento-consolidamento_20261116.md`. Cr
 
 - Codice: `apps/api/src/modules/tenant-consolidation/distanza.ts` (sola lettura, 24 domini).
 - Comando: `pnpm --filter @heuresys/api consolidation:distance -- --tenant RTL_BANK --run p20261010010521tjb [--dettaglio] [--dominio <d>]`. Tutte le query girano in una transazione `READ ONLY` chiusa con ROLLBACK.
-- Rotta: `GET /v1/consolidation-runs/:runId/distance?dettaglio=true&dominio=<d>` (la legge chi legge il consolidamento).
+- Rotta: `GET /v1/consolidation-runs/:runId/distance?dettaglio=true&dominio=<d>` (la legge solo chi ha la lettura piena del consolidamento; un delegato limitato ad alcuni gruppi riceve `PERMISSION_DENIED`).
 - Misura dal vivo: produzione, 2026-11-16 01:50:40 UTC, versione di modello `dc246c24-d3d0-498c-a853-47f9b48b4180` (la corsa nel registro `sys_blueprint_runs`, stato `IN_CONSOLIDAMENTO`). Esito completo con il dettaglio di ogni riga: `A2_distanza_RTL_tjb_20261116.json` nei file del progetto (cartella `consolidamento/`), non nel repository perché contiene i nomi di unità e posizioni di produzione; si rigenera con il comando e `--dettaglio`.
 
 Totale: 2.167 righe, 508 uguali, 310 parziali, 81 diverse, 918 solo nel modello, 350 solo in RTL; ricchezza persa 16 (8 attributi di unità, 8 di indicatori).

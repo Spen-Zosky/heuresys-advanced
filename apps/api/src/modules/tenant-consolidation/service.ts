@@ -710,10 +710,13 @@ export const tenantConsolidationService = {
 
   /**
    * La distanza fra il tenant e la versione di modello della corsa (ADR-0059 D7), in sola lettura: una
-   * transazione READ ONLY che si chiude con ROLLBACK. La legge chi legge il consolidamento.
+   * transazione READ ONLY che si chiude con ROLLBACK. La misura copre tutti i domini del tenant, quindi la
+   * legge solo chi ha la lettura piena del consolidamento: un delegato limitato ad alcuni gruppi no.
    */
   async distance(actor: ActorContext, runId: string, opts: { dettaglio: boolean; dominio?: string }): Promise<MisuraDistanza> {
-    await gruppiLeggibili(actor);
+    if ((await gruppiLeggibili(actor)) !== null) {
+      throw new ForbiddenError("La distanza copre tutto il tenant: serve la lettura piena del consolidamento", "PERMISSION_DENIED");
+    }
     const tenantId = tenantDi(actor);
     const client = await pool.connect();
     try {

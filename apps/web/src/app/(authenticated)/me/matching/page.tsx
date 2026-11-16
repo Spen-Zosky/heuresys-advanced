@@ -40,12 +40,13 @@ function escoUriTail(uri: string): string {
 }
 
 export default function MeMatchingPage() {
-  const { t } = useTranslation("ess");
+  const { t, i18n } = useTranslation("ess");
+  const lingua = i18n.language === "en" ? "en" : "it";
   const fmt = useFormat();
 
   const occupations = useQuery({
-    queryKey: ["me", "matching", "occupations"],
-    queryFn: () => apiFetch<OccupationMatchListResponse>("/v1/matching/me/occupations"),
+    queryKey: ["me", "matching", "occupations", lingua],
+    queryFn: () => apiFetch<OccupationMatchListResponse>(`/v1/matching/me/occupations?lingua=${lingua}`),
   });
   const positions = useQuery({
     queryKey: ["me", "matching", "positions"],

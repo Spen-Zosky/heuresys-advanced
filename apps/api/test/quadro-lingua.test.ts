@@ -42,3 +42,17 @@ describe("quadro: lingua delle frasi", () => {
     expect(testoPer("en").n(12345)).toBe("12,345");
   });
 });
+
+describe("quadro: il singolare con uno (giudizio qa-web 16/11, A2)", () => {
+  const lente = LENTI.find((l) => l.chiave === "posizioni-scoperte")!;
+
+  it("«1 posizione su 4 è senza titolare», non «1 posizioni … sono»", () => {
+    expect(lente.leggi(1, 4, testoPer("it"))!.titolo).toMatch(/^1 posizione su 4 è senza titolare/);
+    expect(lente.leggi(1, 4, testoPer("en"))!.titolo).toMatch(/^1 of 4 position has no holder/);
+  });
+
+  it("con più di una resta il plurale", () => {
+    expect(lente.leggi(3, 4, testoPer("it"))!.titolo).toMatch(/^3 posizioni su 4 sono senza titolare/);
+    expect(lente.leggi(3, 4, testoPer("en"))!.titolo).toMatch(/^3 of 4 positions have no holder/);
+  });
+});

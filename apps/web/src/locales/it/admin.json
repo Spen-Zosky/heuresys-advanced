@@ -851,6 +851,11 @@
     "gapsEmptyDesc": "Non ci sono gap critici o alti aperti al momento.",
     "gapGeneral": "Generale",
     "activityTitle": "Attività recente",
+    "activityKind": {
+      "USER_CREATED": "Nuova persona: {{subject}}",
+      "POSITION_CREATED": "Nuova posizione: {{subject}}",
+      "ASSIGNMENT_CHANGED": "Assegnazione modificata: {{subject}}"
+    },
     "activityEmptyTitle": "Nessuna attività recente",
     "activityEmptyDesc": "Le azioni recenti del tuo ambito appariranno qui.",
     "activitySubtitle": "Ambito {{kind}}",

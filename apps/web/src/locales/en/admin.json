@@ -851,6 +851,11 @@
     "gapsEmptyDesc": "There are no critical or high gaps open at the moment.",
     "gapGeneral": "General",
     "activityTitle": "Recent activity",
+    "activityKind": {
+      "USER_CREATED": "New person: {{subject}}",
+      "POSITION_CREATED": "New position: {{subject}}",
+      "ASSIGNMENT_CHANGED": "Assignment changed: {{subject}}"
+    },
     "activityEmptyTitle": "No recent activity",
     "activityEmptyDesc": "Recent actions in your scope will appear here.",
     "activitySubtitle": "Scope {{kind}}",

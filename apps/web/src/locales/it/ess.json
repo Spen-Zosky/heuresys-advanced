@@ -295,6 +295,15 @@
     "emptyTitle": "Nessuna notifica",
     "emptyDesc": "Non hai notifiche al momento.",
     "feedTitle": "Notifiche",
+    "messages": {
+      "APPROVAL_REMINDER": { "subject": "Approvazione in attesa: {{title}}", "body": "Una richiesta di approvazione assegnata a te ha superato la scadenza. Aprila per decidere." },
+      "APPROVAL_OVERDUE": { "subject": "Approvazione scaduta: {{title}}", "body": "Una richiesta che hai aperto è ferma da {{cycles}} cicli senza decisione dell'approvatore." },
+      "GAP_CLOSURE_DUE": {
+        "subject": "Gap di competenze da colmare",
+        "body": "È stato rilevato un gap di competenze per la tua posizione ({{segment}}).",
+        "segment": { "MAJOR_GAP": "gap rilevante", "MODERATE_GAP": "gap moderato", "MINOR_GAP": "gap lieve", "ALIGNED": "allineato", "UNKNOWN": "gap da valutare" }
+      }
+    },
     "approvals": {
       "title": "Approvazioni in attesa",
       "approve": "Approva",

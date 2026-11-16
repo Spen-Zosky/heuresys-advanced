@@ -17,6 +17,7 @@
  */
 import type { Pool, PoolClient } from "pg";
 import { emitNotification } from "../../lib/notifications/emit.js";
+import { testoPromemoriaApprovazione, testoScadenzaApprovazione } from "../../lib/notifications/messaggi.js";
 
 export type DbConnector = Pool | PoolClient;
 
@@ -106,8 +107,7 @@ export async function runApprovalSla(db: DbConnector): Promise<SlaRunResult> {
         tenantId: step.tenantId,
         userId: step.approverUserId,
         type: "APPROVAL_REMINDER",
-        subject: `Approvazione in attesa: ${step.requestTitle}`,
-        body: "Una richiesta di approvazione assegnata a te ha superato la scadenza. Aprila per decidere.",
+        ...testoPromemoriaApprovazione(step.requestTitle),
         priority: "HIGH",
         resourceType: "APPROVAL_STEP",
         resourceId: step.stepId,
@@ -122,8 +122,7 @@ export async function runApprovalSla(db: DbConnector): Promise<SlaRunResult> {
           tenantId: step.tenantId,
           userId: step.createdBy,
           type: "APPROVAL_OVERDUE",
-          subject: `Approvazione scaduta: ${step.requestTitle}`,
-          body: `Una richiesta che hai aperto è ferma da ${newCount} cicli senza decisione dell'approvatore.`,
+          ...testoScadenzaApprovazione(step.requestTitle, newCount),
           priority: "CRITICAL",
           resourceType: "APPROVAL_STEP",
           resourceId: step.stepId,

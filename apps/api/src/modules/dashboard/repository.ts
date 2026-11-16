@@ -274,14 +274,14 @@ export async function getRecentActivity(
   const r = await q.query<{
     kind: string;
     occurred_at: Date;
-    summary: string;
+    subject: string;
     resource_id: string;
   }>(
     `WITH events AS (
        SELECT 'USER_CREATED'::text AS kind,
               created_at AS occurred_at,
-              -- C1: il riepilogo si legge in italiano e la persona «Cognome, Nome» (R1).
-              'Nuova persona: ' || coalesce(nullif(concat_ws(', ', nullif(user_last_name, ''), nullif(user_first_name, '')), ''), user_display_name) AS summary,
+              -- Solo il soggetto, la persona «Cognome, Nome» (R1): la frase la compone il web nella lingua di chi guarda.
+              coalesce(nullif(concat_ws(', ', nullif(user_last_name, ''), nullif(user_first_name, '')), ''), user_display_name) AS subject,
               user_id AS resource_id,
               user_tenant_id AS tenant_id
          FROM sys.sys_users u
@@ -289,13 +289,13 @@ export async function getRecentActivity(
        UNION ALL
        SELECT 'POSITION_CREATED'::text AS kind,
               created_at AS occurred_at,
-              'Nuova posizione: ' || position_title AS summary,
+              position_title AS subject,
               position_id AS resource_id,
               position_tenant_id AS tenant_id
          FROM sys.sys_positions p
         WHERE TRUE ${positionScope}
      )
-     SELECT kind, occurred_at, summary, resource_id
+     SELECT kind, occurred_at, subject, resource_id
        FROM events
        ${whereSql}
        ORDER BY occurred_at DESC
@@ -306,7 +306,7 @@ export async function getRecentActivity(
   return r.rows.map((row) => ({
     kind: row.kind as DashboardRecentActivity["kind"],
     occurredAt: row.occurred_at.toISOString(),
-    summary: row.summary,
+    subject: row.subject,
     resourceId: row.resource_id,
   }));
 }

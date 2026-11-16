@@ -110,7 +110,10 @@ export const LENTI: Lente[] = [
         ? null
         : {
             tono: v / tot > 0.1 ? "attenzione" : "informazione",
-            titolo: L.t(`${L.n(v)} posizioni su ${L.n(tot)} sono senza titolare (${Math.round((v / tot) * 100)}%)`, `${L.n(v)} of ${L.n(tot)} positions have no holder (${Math.round((v / tot) * 100)}%)`),
+            titolo: L.t(
+              `${L.n(v)} ${L.p(v, "posizione", "posizioni", "", "")} su ${L.n(tot)} ${L.p(v, "è", "sono", "", "")} senza titolare (${Math.round((v / tot) * 100)}%)`,
+              `${L.n(v)} of ${L.n(tot)} ${L.p(v, "", "", "position has", "positions have")} no holder (${Math.round((v / tot) * 100)}%)`,
+            ),
             dettaglio: L.t("Una posizione scoperta è lavoro che qualcun altro sta facendo in più, o che non si fa.", "An unfilled position is work that someone else is doing on top of their own, or that is not being done."),
             azione: { etichetta: L.t("Apri l'organigramma", "Open the org chart"), href: "/organization/org-chart" },
           },

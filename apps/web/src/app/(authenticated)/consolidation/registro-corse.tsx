@@ -128,7 +128,7 @@ export function RegistroCorse({
   return (
     <Card data-testid="consolidation-runs">
       <CardHeader>
-        <CardTitle className="flex flex-wrap items-center gap-3">
+        <CardTitle as="h2" className="flex flex-wrap items-center gap-3">
           <span>{t("consolidationRuns.title")}</span>
           {runs.data ? <Badge variant="secondary">{t("consolidationRuns.count", { count: elenco.length })}</Badge> : null}
         </CardTitle>

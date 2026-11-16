@@ -311,7 +311,7 @@ export default function ConsolidationPage() {
       {corrente ? (
         <Card data-testid="consolidation-session">
           <CardHeader>
-            <CardTitle className="flex flex-wrap items-center gap-3">
+            <CardTitle as="h2" className="flex flex-wrap items-center gap-3">
               <span>{t("consolidation.session", { date: fmt.data(corrente.startedAt) })}</span>
               <StatusPill tone="info">{t(`consolidation.statuses.${corrente.status}`)}</StatusPill>
               {inCorso ? (
@@ -483,7 +483,7 @@ export default function ConsolidationPage() {
       ) : null}
       {conferma ? (
         <Dialog open onOpenChange={(o) => { if (!o) setConferma(null); }}>
-          <DialogContent className={MODALE.piccola} data-testid="consolidation-approval-dialog">
+          <DialogContent className={MODALE.piccola} data-testid="consolidation-approval-dialog" closeLabel={t("shell:ui.close")}>
             <DialogHeader>
               <DialogTitle>{t(`consolidation.approval.${conferma}Title`)}</DialogTitle>
               <DialogDescription>{t(`consolidation.approval.${conferma}Body`, { count: nBozza })}</DialogDescription>

@@ -63,7 +63,7 @@ export function MandateActsQueue() {
   return (
     <Card data-testid="mandate-acts-queue">
       <CardHeader>
-        <CardTitle>
+        <CardTitle as="h2">
           {t("roles.mandateActs.title")}
           <span className="ml-2 text-sm font-normal text-muted-foreground">{items.length}</span>
         </CardTitle>

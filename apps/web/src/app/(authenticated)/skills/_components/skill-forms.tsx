@@ -120,7 +120,7 @@ export function SkillCreator() {
   return (
     <Card data-testid="skill-creator">
       <CardHeader>
-        <CardTitle className="flex items-center justify-between gap-3">
+        <CardTitle as="h2" className="flex items-center justify-between gap-3">
           <span>{t("skills.form.createTitle")}</span>
           <Button type="button" variant="outline" data-testid="skill-create-toggle" onClick={() => setAperto((v) => !v)}>
             {aperto ? t("skills.form.close") : t("skills.form.create")}
@@ -249,7 +249,7 @@ export function SkillEditor({ skillId, onClose }: { skillId: string; onClose: ()
   return (
     <Card data-testid="skill-editor">
       <CardHeader>
-        <CardTitle>
+        <CardTitle as="h2">
           {t("skills.form.editTitle")}
           <span className="ml-2 font-mono text-sm font-normal text-muted-foreground">{skill.data!.code}</span>
         </CardTitle>

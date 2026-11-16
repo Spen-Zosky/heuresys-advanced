@@ -132,7 +132,7 @@ export function StepUpDialog() {
 
   return (
     <Dialog open={aperta} onOpenChange={(o) => { if (!o) chiudi(false); }}>
-      <DialogContent className={MODALE.piccola} data-testid="step-up-dialog">
+      <DialogContent className={MODALE.piccola} data-testid="step-up-dialog" closeLabel={t("shell:ui.close")}>
         <DialogHeader>
           <DialogTitle>{t("stepUp.title")}</DialogTitle>
           <DialogDescription>{t("stepUp.description")}</DialogDescription>

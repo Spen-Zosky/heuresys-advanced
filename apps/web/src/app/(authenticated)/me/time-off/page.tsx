@@ -124,7 +124,7 @@ export default function MeTimeOffPage() {
 
       {/* Balances — live rows from /v1/me/attendance */}
       <Card>
-        <CardHeader><CardTitle>{t("timeOff.balancesTitle")}</CardTitle></CardHeader>
+        <CardHeader><CardTitle as="h2">{t("timeOff.balancesTitle")}</CardTitle></CardHeader>
         <CardContent>
           {attendance.isLoading ? (
             <StatoCaricamento />
@@ -155,7 +155,7 @@ export default function MeTimeOffPage() {
 
       {/* Submission form */}
       <Card>
-        <CardHeader><CardTitle>{t("timeOff.formTitle")}</CardTitle></CardHeader>
+        <CardHeader><CardTitle as="h2">{t("timeOff.formTitle")}</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={(e) => { void onSubmit(e); }} className="space-y-4" data-testid="me-time-off-form">
             <div className="grid gap-4 sm:grid-cols-3">
@@ -217,7 +217,7 @@ export default function MeTimeOffPage() {
 
       {/* Own request history (approved ones materialize here; pending live in /me/approvals) */}
       <Card>
-        <CardHeader><CardTitle>{t("timeOff.historyTitle")}</CardTitle></CardHeader>
+        <CardHeader><CardTitle as="h2">{t("timeOff.historyTitle")}</CardTitle></CardHeader>
         <CardContent className="p-0">
           <EntityTable<TimeOffRequest> originPath={"/v1/me/time-off/requests"}
             isLoading={requests.isLoading}

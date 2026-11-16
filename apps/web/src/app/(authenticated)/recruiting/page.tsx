@@ -188,7 +188,7 @@ export default function RecruitingPipelinePage() {
       ) : (
         /* C5: la tavola scorre dentro il suo riquadro, la pagina resta corta */
         <div data-testid="pipeline-board" className="max-h-[calc(100vh-16rem)] overflow-auto">
-          <KanbanBoard key={`${impronta}#${annullati}`} columns={columns} onChange={onChange} />
+          <KanbanBoard key={`${impronta}#${annullati}`} columns={columns} onChange={onChange} dragCardLabel={(title) => t("shell:ui.dragCard", { title })} />
         </div>
       )}
     </main>

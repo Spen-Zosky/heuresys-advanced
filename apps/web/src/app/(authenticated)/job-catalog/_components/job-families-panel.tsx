@@ -117,7 +117,7 @@ export function JobFamiliesPanel() {
   return (
     <Card data-testid="job-families-panel">
       <CardHeader>
-        <CardTitle>
+        <CardTitle as="h2">
           {t("jobCatalog.family.title")}
           <span className="ml-2 text-sm font-normal text-muted-foreground" data-testid="job-families-count">
             {conteggio(families.data, t)}

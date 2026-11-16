@@ -231,7 +231,7 @@ export default function ContentPage() {
       {canCreate && (
       <Card>
         <CardHeader>
-          <CardTitle>{t("content.create.cardTitle")}</CardTitle>
+          <CardTitle as="h2">{t("content.create.cardTitle")}</CardTitle>
         </CardHeader>
         <CardContent>
           <form
@@ -325,7 +325,7 @@ export default function ContentPage() {
       {/* Full-text search (ranked, body-aware, snippet) */}
       <Card data-testid="content-search">
         <CardHeader>
-          <CardTitle>{t("content.search.cardTitle")}</CardTitle>
+          <CardTitle as="h2">{t("content.search.cardTitle")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div>
@@ -461,7 +461,7 @@ export default function ContentPage() {
           { id: "categorie", titolo: t("content.tabs.categories"), contenuto: (
       <Card data-testid="content-categories">
         <CardHeader>
-          <CardTitle>{t("content.categories.cardTitle")}</CardTitle>
+          <CardTitle as="h2">{t("content.categories.cardTitle")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {canCreate && (

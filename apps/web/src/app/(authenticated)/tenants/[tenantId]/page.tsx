@@ -122,7 +122,7 @@ export default function TenantDetailPage() {
 
       {tab === "overview" && (
         <Card data-testid="tenant-tab-content-overview">
-          <CardHeader><CardTitle>{t("tenants.detail.overviewTitle")}</CardTitle></CardHeader>
+          <CardHeader><CardTitle as="h2">{t("tenants.detail.overviewTitle")}</CardTitle></CardHeader>
           <CardContent>
             <FieldGrid
               fields={[
@@ -149,7 +149,7 @@ export default function TenantDetailPage() {
 
       {tab === "typing" && (
         <Card data-testid="tenant-tab-content-typing">
-          <CardHeader><CardTitle>{t("tenants.detail.typingTitle")}</CardTitle></CardHeader>
+          <CardHeader><CardTitle as="h2">{t("tenants.detail.typingTitle")}</CardTitle></CardHeader>
           <CardContent>
             {typing.isLoading ? (
               <StatoCaricamento />
@@ -186,7 +186,7 @@ export default function TenantDetailPage() {
 
       {tab === "users" && (
         <Card data-testid="tenant-tab-content-users">
-          <CardHeader><CardTitle>{t("tenants.detail.usersTitle")}</CardTitle></CardHeader>
+          <CardHeader><CardTitle as="h2">{t("tenants.detail.usersTitle")}</CardTitle></CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
               {t("tenants.detail.usersHint")}{" "}

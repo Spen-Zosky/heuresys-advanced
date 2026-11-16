@@ -33,7 +33,7 @@ export function OkrCheckInsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={MODALE.media}>
+      <DialogContent className={MODALE.media} closeLabel={t("shell:ui.close")}>
         <DialogHeader>
           <DialogTitle>{t("okrs.checkIns.title")}</DialogTitle>
           <DialogDescription>{okrTitle}</DialogDescription>

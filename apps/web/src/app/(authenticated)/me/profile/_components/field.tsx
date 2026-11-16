@@ -35,7 +35,7 @@ export function ProfileSection({
 }) {
   return (
     <Card data-testid={testId}>
-      <CardHeader><CardTitle>{title}</CardTitle></CardHeader>
+      <CardHeader><CardTitle as="h2">{title}</CardTitle></CardHeader>
       <CardContent>
         <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">{children}</dl>
         {footer ? <div className="pt-2">{footer}</div> : null}

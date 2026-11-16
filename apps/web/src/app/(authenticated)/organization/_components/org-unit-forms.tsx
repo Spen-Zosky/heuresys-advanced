@@ -137,7 +137,7 @@ export function OrgUnitCreator() {
   return (
     <Card data-testid="orgunit-creator">
       <CardHeader>
-        <CardTitle>{t("organization.form.createTitle")}</CardTitle>
+        <CardTitle as="h2">{t("organization.form.createTitle")}</CardTitle>
       </CardHeader>
       <CardContent>
         <form
@@ -288,7 +288,7 @@ export function OrgUnitEditor({ ouId, onClose }: { ouId: string; onClose: () => 
   return (
     <Card data-testid="orgunit-editor">
       <CardHeader>
-        <CardTitle>
+        <CardTitle as="h2">
           {t("organization.form.editTitle")}
           <span className="ml-2 text-sm font-normal text-muted-foreground">{ou.data!.code}</span>
         </CardTitle>

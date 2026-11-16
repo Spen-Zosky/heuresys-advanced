@@ -262,7 +262,7 @@ export default function ContentEditPage() {
       {doc && (
         <Card data-testid="content-workflow">
           <CardHeader>
-            <CardTitle>{t("content.detail.workflowTitle")}</CardTitle>
+            <CardTitle as="h2">{t("content.detail.workflowTitle")}</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-wrap items-center gap-3">
             <span className="text-sm text-muted-foreground">{t("content.detail.statusLabel")}</span>
@@ -295,7 +295,7 @@ export default function ContentEditPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t("content.detail.editCardTitle")}</CardTitle>
+          <CardTitle as="h2">{t("content.detail.editCardTitle")}</CardTitle>
         </CardHeader>
         <CardContent>
           <form
@@ -393,7 +393,7 @@ export default function ContentEditPage() {
 
       <Card data-testid="content-links">
         <CardHeader>
-          <CardTitle>{t("content.links.title")}</CardTitle>
+          <CardTitle as="h2">{t("content.links.title")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {can.update && (
@@ -455,7 +455,7 @@ export default function ContentEditPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t("content.detail.versionsTitle")}</CardTitle>
+          <CardTitle as="h2">{t("content.detail.versionsTitle")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div data-testid="content-versions-table">

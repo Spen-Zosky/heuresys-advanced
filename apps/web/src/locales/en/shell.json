@@ -238,5 +238,24 @@
     "body": "The page “{{pagina}}” is not part of your profile, so we do not show it half-loaded. If you need it for your work, ask whoever manages roles in your company.",
     "bodyGenerico": "This page is not part of your profile, so we do not show it half-loaded. If you need it for your work, ask whoever manages roles in your company.",
     "home": "Back to your home page"
+  },
+  "ui": {
+    "loading": "Loading",
+    "close": "Close",
+    "dragCard": "Drag card: {{title}}",
+    "navigation": "Navigation",
+    "navigationAria": "Main navigation",
+    "toggleSidebar": "Collapse or expand the sidebar",
+    "content": "Page content",
+    "menuOpen": "Open the global context menu",
+    "breadcrumb": "Breadcrumb",
+    "theme": "Toggle light and dark theme",
+    "userMenu": "User menu: {{username}}",
+    "languageSwitch": "{{lang}} — switch language between Italian and English",
+    "paletteSearch": "Search tenants, logs, audit…",
+    "paletteEmpty": "No commands configured",
+    "drawerTitle": "Navigation menu",
+    "drawerClose": "Close",
+    "website": "heuresys.com — open the Heuresys public website (new tab)"
   }
 }

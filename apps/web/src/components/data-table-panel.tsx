@@ -276,7 +276,7 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
       </DataTableWithCrossHair>
       <Dialog open={rigaAperta !== null} onOpenChange={(o) => { if (!o) setRigaAperta(null); }}>
         {rigaAperta !== null ? (
-          <DialogContent className={MODALE.media} data-testid="scheda-riga">
+          <DialogContent className={MODALE.media} data-testid="scheda-riga" closeLabel={t("shell:ui.close")}>
             <DialogTitle className="text-lg font-bold leading-tight">{leggi.nodo(titoloRiga?.cell(rigaAperta))}</DialogTitle>
             <DialogDescription className="text-xs">{caption ?? t("dettaglio.riga")}</DialogDescription>
             <dl className="mt-3 divide-y divide-border">

@@ -35,7 +35,7 @@ export function DocumentsTab() {
 
   return (
     <Card data-testid="profile-documents">
-      <CardHeader><CardTitle>{t("profile.full.documentsTab.title")}</CardTitle></CardHeader>
+      <CardHeader><CardTitle as="h2">{t("profile.full.documentsTab.title")}</CardTitle></CardHeader>
       <CardContent>
         {items.length === 0 ? (
           <p className="text-sm text-muted-foreground" data-testid="profile-documents-empty">

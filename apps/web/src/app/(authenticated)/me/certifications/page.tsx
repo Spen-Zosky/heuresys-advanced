@@ -173,7 +173,7 @@ export default function MeCertificationsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t("certifications.addCardTitle")}</CardTitle>
+          <CardTitle as="h2">{t("certifications.addCardTitle")}</CardTitle>
         </CardHeader>
         <CardContent>
           <form

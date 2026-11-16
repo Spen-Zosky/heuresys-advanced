@@ -125,7 +125,7 @@ export default function InsightsPage() {
         <div className="mx-auto max-w-7xl px-6">
           <Card data-testid="insights-explain">
             <CardHeader>
-              <CardTitle>{t("insights.explainTitle", { name: selected.displayName ?? t("common:unnamed") })}</CardTitle>
+              <CardTitle as="h2">{t("insights.explainTitle", { name: selected.displayName ?? t("common:unnamed") })}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <p className="text-sm text-muted-foreground">

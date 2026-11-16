@@ -99,7 +99,7 @@ export default function PostingsPage() {
 
       {canWrite && (
       <Card>
-        <CardHeader><CardTitle>{t("recruiting.postings.newTitle")}</CardTitle></CardHeader>
+        <CardHeader><CardTitle as="h2">{t("recruiting.postings.newTitle")}</CardTitle></CardHeader>
         <CardContent>
           <form className="grid gap-4 md:grid-cols-3" data-testid="posting-form" onSubmit={handleSubmit((v) => create.mutate(v))}>
             <label className="space-y-1 text-sm">

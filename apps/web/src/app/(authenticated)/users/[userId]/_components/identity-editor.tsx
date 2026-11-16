@@ -122,7 +122,7 @@ export function IdentityEditor({ userId }: { userId: string }) {
   return (
     <Card data-testid="user-identity-editor">
       <CardHeader>
-        <CardTitle>{t("users.detail.edit.cardTitle")}</CardTitle>
+        <CardTitle as="h2">{t("users.detail.edit.cardTitle")}</CardTitle>
       </CardHeader>
       <CardContent>
         {!canUpdate && (

@@ -21,7 +21,16 @@ function buildColumns(t: TFunction, enumLabel: EnumLabelFn, onCheckIns: (o: Okr)
   return [
     { header: t("okrs.cols.objective"), cell: (o) => <span className="font-medium text-foreground">{o.objective}</span> },
     { header: t("okrs.cols.type"), cell: (o) => <span className="text-xs text-muted-foreground">{enumLabel("okrType", o.okrType)}</span> },
-    { header: t("okrs.cols.period"), cell: (o) => <span className="text-xs text-muted-foreground">{fmt.data(o.periodStart)} → {fmt.data(o.periodEnd)}</span> },
+    {
+      header: t("okrs.cols.period"),
+      cell: (o) => (
+        <span className="text-xs text-muted-foreground">
+          {fmt.data(o.periodStart)} → {fmt.data(o.periodEnd)}
+          {/* D15: un obiettivo segnato «attivo» con il periodo gia' finito si dice, non si lascia credere in corso. */}
+          {o.status === "ACTIVE" && new Date(o.periodEnd).getTime() < Date.now() ? ` · ${t("okrs.periodEnded")}` : ""}
+        </span>
+      ),
+    },
     { header: t("okrs.cols.progress"), cell: (o) => <span className="text-xs text-muted-foreground">{fmt.percento(o.overallProgress, "0-100")}</span> },
     { header: t("shared.status"), cell: (o) => <EnumStatusPill domain="okrStatus" value={o.status} tone={toneForStatus(o.status)} /> },
     {

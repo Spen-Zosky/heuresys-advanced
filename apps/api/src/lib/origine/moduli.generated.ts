@@ -1163,11 +1163,12 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
     ],
     "tabelle": [
       "sys_critical_positions",
-      "sys_critical_role_coverage_status",
       "sys_employee_position_fit_scores",
       "sys_positions",
       "sys_readiness_scores",
+      "sys_succession_pools",
       "sys_succession_scores",
+      "sys_successor_candidates",
       "sys_talent_scores",
       "sys_users"
     ]

@@ -19,7 +19,8 @@ export const DashboardCountersSchema = z.object({
   users: z.number().int().min(0),
   positions: z.number().int().min(0),
   organizationUnits: z.number().int().min(0),
-  learningPaths: z.number().int().min(0),
+  /** Assente (null) per chi governa una catena: i percorsi non hanno un legame con le posizioni (D7). */
+  learningPaths: z.number().int().min(0).nullable(),
   learningGaps: z.number().int().min(0),
   blueprints: z.number().int().min(0).nullable(),
   pendingRecommendations: z.number().int().min(0).nullable(),

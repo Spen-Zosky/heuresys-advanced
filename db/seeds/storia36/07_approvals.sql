@@ -89,7 +89,7 @@ BEGIN
     approval_request_sla_hours, created_at, created_by, updated_at)
   SELECT uuid_generate_v5(c_ns, 'STORIA36::C7::REQ::TIMEOFF::' || f.request_id),
          c_rtl,
-         'Richiesta di ferie — ' || f.giorni || ' giorni dal ' || to_char(f.request_start_date, 'DD/MM/YYYY'),
+         'Richiesta di ferie — ' || rtrim(replace(to_char(f.giorni, 'FM999990.99'), '.', ','), ',') || ' giorni dal ' || to_char(f.request_start_date, 'DD/MM/YYYY'),
          'Assenza per ferie dal ' || to_char(f.request_start_date, 'DD/MM/YYYY') ||
            ' al ' || to_char(f.request_end_date, 'DD/MM/YYYY') ||
            '. Copertura del servizio da concordare con il responsabile.',
@@ -172,7 +172,7 @@ BEGIN
     created_at, created_by, updated_at)
   SELECT uuid_generate_v5(c_ns, 'STORIA36::C7::REQ::COMP::' || c.rid),
          c_rtl,
-         'Adeguamento retributivo — ' || to_char(COALESCE(c.importo, 0), 'FM999G999') || ' EUR',
+         'Adeguamento retributivo — ' || replace(to_char(COALESCE(c.importo, 0), 'FM999,999'), ',', '.') || ' EUR',
          'Proposta di adeguamento della retribuzione, da sottoporre al responsabile e alla direzione del personale.',
          'COMPENSATION_RECOMMENDATION', c.rid,
          c.esito, 'ALL_OF',

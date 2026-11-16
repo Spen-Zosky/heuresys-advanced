@@ -275,8 +275,18 @@ export async function loadProfileFull(q: DbConnector, userId: string, roles: str
     q.query<{ position_code: string | null; position_title: string | null; org_unit_name: string | null; manager_name: string | null }>(
       `SELECT p.position_code, p.position_title,
               ou.organization_unit_name AS org_unit_name,
-              coalesce(nullif(concat_ws(', ', nullif(trim(mu.user_last_name), ''), nullif(trim(mu.user_first_name), '')), ''),
-                       mu.user_display_name) AS manager_name
+              COALESCE(
+                -- il responsabile e' chi TIENE la posizione di destinazione (I1: titolare e
+                -- proprietario sono distinti); il proprietario resta come ripiego.
+                (SELECT (tu.user_last_name || ', ' || tu.user_first_name)
+                   FROM sys.sys_user_position_assignments ta
+                   JOIN sys.sys_users tu ON tu.user_id = ta.user_position_assignment_user_id
+                  WHERE ta.user_position_assignment_position_id = p.position_reports_to_position_id
+                    AND ta.user_position_assignment_kind = 'PRIMARY'
+                    AND ta.user_position_assignment_status = 'ACTIVE'
+                  ORDER BY ta.user_position_assignment_start_date DESC NULLS LAST
+                  LIMIT 1),
+                mu.user_last_name || ', ' || mu.user_first_name) AS manager_name
          FROM sys.sys_user_position_assignments a
          JOIN sys.sys_positions p ON p.position_id = a.user_position_assignment_position_id
          LEFT JOIN sys.sys_organization_units ou ON ou.organization_unit_id = p.position_organization_unit_id
@@ -660,13 +670,17 @@ export async function loadMyAnalytics(q: DbConnector, userId: string): Promise<M
          FROM sys.sys_attendance WHERE attendance_subject_user_id = $1
         GROUP BY 1 ORDER BY 1`, [userId]),
     q.query<{ n: string }>(`SELECT count(*) AS n FROM sys.sys_goals WHERE goal_subject_user_id = $1`, [userId]),
-    q.query<{ n: string }>(`SELECT count(*) AS n FROM sys.sys_user_skill_evidence WHERE user_skill_evidence_user_id = $1`, [userId]),
+    q.query<{ n: string }>(`SELECT count(*) AS n FROM sys.sys_user_skills WHERE user_skill_user_id = $1`, [userId]),
     q.query<{ rating: string | null }>(
       `SELECT review_overall_rating AS rating FROM sys.sys_performance_reviews
         WHERE review_subject_user_id = $1 ORDER BY review_period_end DESC NULLS LAST LIMIT 1`, [userId]),
     q.query<{ days: string | null }>(
-      `SELECT sum(balance_total_days - COALESCE(balance_used_days, 0)) AS days
-         FROM sys.sys_time_off_balances WHERE balance_subject_user_id = $1`, [userId]),
+      `SELECT sum(balance_total_days + COALESCE(balance_carryover_days, 0) - COALESCE(balance_used_days, 0)) AS days
+         FROM sys.sys_time_off_balances
+        WHERE balance_subject_user_id = $1
+          -- ferie dell'anno in corso: sommare tutti gli anni e tutti i tipi (malattia
+          -- compresa, 180 giorni l'anno) dava 773 giorni "disponibili" (D2-03).
+          AND balance_leave_type = 'VACATION' AND balance_year = EXTRACT(year FROM CURRENT_DATE)::int`, [userId]),
   ]);
   return {
     attendanceTrend: trend.rows.map((r) => ({
@@ -915,6 +929,9 @@ export interface SurveyListItem {
   questionCount: number; assignedAt: string | null; completedAt: string | null;
   /** How many answers of MINE this survey holds. 0 = assigned but not answered yet. */
   answerCount: number;
+  /** Compilato = assegnazione completata OPPURE almeno una risposta propria (D2-05): la
+   *  riga di assegnazione puo' mancare o non essere chiusa anche per chi ha risposto. */
+  completed: boolean;
 }
 
 /** Surveys the caller can open: the ones ASSIGNED and still active (to answer), plus every
@@ -986,6 +1003,7 @@ export async function listMyAssignedSurveys(
     completedAt: r.survey_assignment_completed_at
       ? r.survey_assignment_completed_at.toISOString() : null,
     answerCount: Number(r.answer_count),
+    completed: r.survey_assignment_completed_at != null || Number(r.answer_count) > 0,
   }));
 }
 
@@ -1506,15 +1524,15 @@ export async function listMyKpis(
   userId: string,
 ): Promise<{ items: MeKpiTarget[]; total: number }> {
   const r = await q.query<{
-    position_kpi_requirement_id: string;
-    position_id: string;
+    position_kpi_requirement_id: string | null;
+    position_id: string | null;
     kpi_definition_id: string;
     kpi_code: string;
     kpi_name: string;
     kpi_unit: string | null;
     kpi_polarity: string;
-    target_template: Record<string, unknown>;
-    weight: string;
+    target_template: Record<string, unknown> | null;
+    weight: string | null;
     latest_measured_value: string | null;
     latest_target_value: string | null;
     latest_recorded_at: Date | null;
@@ -1530,7 +1548,7 @@ export async function listMyKpis(
     `SELECT
        pkr.position_kpi_requirement_id,
        pkr.position_id,
-       pkr.kpi_definition_id,
+       ids.kpi_definition_id,
        k.kpi_definition_code      AS kpi_code,
        k.kpi_definition_name      AS kpi_name,
        k.kpi_definition_unit      AS kpi_unit,
@@ -1547,15 +1565,38 @@ export async function listMyKpis(
        tg.kpi_target_minimum_value::text  AS kpi_target_minimum_value,
        tg.kpi_target_stretch_value::text  AS kpi_target_stretch_value,
        tg.kpi_target_unit
-     FROM sys.sys_user_position_assignments a
-     JOIN sys.sys_position_kpi_requirements pkr
-       ON pkr.position_id = a.user_position_assignment_position_id
+     -- D2-04: l'insieme dei KPI e' l'UNIONE fra i requisiti della posizione corrente e i
+     -- bersagli assegnati alla persona. Partire solo dai requisiti nascondeva il bersaglio
+     -- reale (158 persone su 158 con bersagli) quando il KPI non e' tra quelli richiesti.
+     FROM (
+       SELECT pk.kpi_definition_id
+         FROM sys.sys_user_position_assignments pa
+         JOIN sys.sys_position_kpi_requirements pk
+           ON pk.position_id = pa.user_position_assignment_position_id
+        WHERE pa.user_position_assignment_user_id = $1
+          AND pa.user_position_assignment_status  = 'ACTIVE'
+          AND pa.user_position_assignment_kind    = 'PRIMARY'
+       UNION
+       SELECT t0.kpi_target_kpi_id FROM sys.sys_kpi_targets t0
+        WHERE t0.kpi_target_user_id = $1
+     ) ids
      JOIN sys.sys_kpi_definitions k
-       ON k.kpi_definition_id = pkr.kpi_definition_id
+       ON k.kpi_definition_id = ids.kpi_definition_id
+     LEFT JOIN LATERAL (
+       SELECT r.position_kpi_requirement_id, r.position_id, r.target_template, r.weight
+         FROM sys.sys_user_position_assignments a
+         JOIN sys.sys_position_kpi_requirements r
+           ON r.position_id = a.user_position_assignment_position_id
+        WHERE a.user_position_assignment_user_id = $1
+          AND a.user_position_assignment_status  = 'ACTIVE'
+          AND a.user_position_assignment_kind    = 'PRIMARY'
+          AND r.kpi_definition_id = ids.kpi_definition_id
+        LIMIT 1
+     ) pkr ON true
      LEFT JOIN LATERAL (
        SELECT * FROM sys.sys_user_kpi_evidence e
         WHERE e.user_kpi_evidence_user_id = $1
-          AND e.user_kpi_evidence_kpi_id  = pkr.kpi_definition_id
+          AND e.user_kpi_evidence_kpi_id  = ids.kpi_definition_id
         ORDER BY e.user_kpi_evidence_recorded_at DESC
         LIMIT 1
      ) ev ON true
@@ -1564,13 +1605,10 @@ export async function listMyKpis(
      LEFT JOIN LATERAL (
        SELECT * FROM sys.sys_kpi_targets t
         WHERE t.kpi_target_user_id = $1
-          AND t.kpi_target_kpi_id  = pkr.kpi_definition_id
+          AND t.kpi_target_kpi_id  = ids.kpi_definition_id
         ORDER BY t.kpi_target_period_end DESC NULLS LAST
         LIMIT 1
      ) tg ON true
-     WHERE a.user_position_assignment_user_id = $1
-       AND a.user_position_assignment_status  = 'ACTIVE'
-       AND a.user_position_assignment_kind    = 'PRIMARY'
      ORDER BY k.kpi_definition_name`,
     [userId],
   );
@@ -1582,8 +1620,8 @@ export async function listMyKpis(
     kpiName: row.kpi_name,
     unit: row.kpi_unit,
     polarity: row.kpi_polarity,
-    targetTemplate: row.target_template,
-    weight: row.weight,
+    targetTemplate: row.target_template ?? {},
+    weight: row.weight ?? "0",
     latestMeasuredValue: row.latest_measured_value,
     latestTargetValue: row.latest_target_value,
     latestRecordedAt: row.latest_recorded_at ? row.latest_recorded_at.toISOString() : null,

@@ -9,12 +9,14 @@ import { apiFetch } from "@/lib/api/fetch";
 import { Field, ProfileSection, fmtDate } from "../../profile/_components/field";
 import { GoalTimelineDialog } from "@/components/goal-timeline-dialog";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { useFormat } from "@/lib/format";
 
 /** Obiettivi — the caller's own goals (read-only), lazy on tab open. */
 export function GoalsTab() {
   const { t } = useTranslation("ess");
   const { t: tHr } = useTranslation("hr");
   const enumLabel = useEnumLabel();
+  const fmt = useFormat();
   const [active, setActive] = useState<{ goalId: string; title: string } | null>(null);
   const q = useQuery({
     queryKey: ["me", "goals"],
@@ -44,9 +46,9 @@ export function GoalsTab() {
             <Field label={t("career.goals.status")} value={enumLabel("goalStatus", g.status)} testId={i === 0 ? "career-goal-status" : undefined} />
             <Field label={t("career.goals.progress")} value={g.progressPercent != null ? `${g.progressPercent}%` : null} />
             <Field label={t("career.goals.priority")} value={enumLabel("goalPriority", g.priority)} />
-            <Field label={t("career.goals.weight")} value={g.weight != null ? String(g.weight) : null} />
+            <Field label={t("career.goals.weight")} value={g.weight != null ? fmt.numero(g.weight, 2) : null} />
             <Field label={t("career.goals.type")} value={g.type ? enumLabel("goalType", g.type) : g.category} />
-            <Field label={t("career.goals.due")} value={fmtDate(g.dueDate)} />
+            <Field label={t("career.goals.due")} value={g.dueDate && g.dueDate < new Date().toISOString().slice(0, 10) && g.status !== "COMPLETED" && g.status !== "CANCELLED" ? `${fmtDate(g.dueDate)} · ${t("career.goals.overdue")}` : fmtDate(g.dueDate)} />
           </ProfileSection>
         ))}
       </div>

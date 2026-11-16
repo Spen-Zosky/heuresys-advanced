@@ -182,3 +182,51 @@ describe("bozza, cascata e approvazione definitiva", () => {
     expect(c.items.find((x) => x.proposalId === propPosizione)?.decision).toBe("ADOTTATA");
   });
 });
+
+describe("decisioni in blocco nella bozza (Enzo, 2026-11-15)", () => {
+  let pU = "";
+  let pP = "";
+  let pX = "";
+  const decisione = async (id: string) => (await svc.cascade(direttore, propUnita)).items.find((x) => x.proposalId === id)?.decision ?? null;
+
+  beforeAll(async () => {
+    pU = await proposta("ORGANIZATION", "CORRISPONDENZA", [unitaModello], [unitaTenant]);
+    pP = await proposta("POSITIONS_ROLES", "LACUNA", [posizioneModello], []);
+    pX = await proposta("ORGANIZATION", "PERSONALIZZAZIONE", [], [unitaTenant]);
+  });
+
+  it("«Applica la raccomandazione» decide ogni proposta secondo il suo esito, senza toccare i dati vivi", async () => {
+    const prima = await datiUnita();
+    const r = await svc.bulkDecide(direttore, { proposalIds: [pU, pX], mode: "RACCOMANDATA" });
+    expect(r).toMatchObject({ decided: 2, cascaded: 0, skipped: [] });
+    expect(await decisione(pP)).toBeNull(); // senza «cascade» la posizione resta da decidere
+    expect(await datiUnita()).toEqual(prima);
+  });
+
+  it("«Aggiorna cascata» trasversale propaga le decisioni già prese", async () => {
+    const r = await svc.bulkDecide(direttore, { proposalIds: [pU], mode: "CASCATA" });
+    expect(r.cascaded).toBeGreaterThanOrEqual(1);
+    expect(await decisione(pP)).toBe("ADOTTATA");
+    const r2 = await svc.bulkDecide(direttore, { proposalIds: [pX], mode: "CASCATA" });
+    expect(r2.cascaded).toBe(0); // una personalizzazione non ha cascata nel modello
+  });
+
+  it("una decisione già presa si rivede in blocco solo se lo si chiede, e solo il Direttore HR", async () => {
+    expect((await svc.bulkDecide(direttore, { proposalIds: [pU], mode: "RIFIUTO" })).skipped)
+      .toEqual([{ proposalId: pU, reason: "ALREADY_DECIDED" }]);
+    expect(await codiceDi(svc.bulkDecide(lettore, { proposalIds: [pU], mode: "RIFIUTO", onlyUndecided: false }))).toBe("PERMISSION_DENIED");
+    expect((await svc.bulkDecide(lettore, { proposalIds: [pU], mode: "RIFIUTO" })).skipped)
+      .toEqual([{ proposalId: pU, reason: "OUT_OF_MANDATE" }]);
+    expect(await svc.bulkDecide(direttore, { proposalIds: [pU], mode: "RIFIUTO", onlyUndecided: false }))
+      .toMatchObject({ decided: 1, skipped: [] });
+  });
+
+  it("«Rimetti da decidere» sulle proposte scelte toglie solo quelle dalla bozza", async () => {
+    const prima = (await svc.pendingApproval(direttore)).pending;
+    expect(await svc.discardChanges(direttore, sessione, [pX])).toEqual({ discarded: 1 });
+    expect((await svc.pendingApproval(direttore)).pending).toBe(prima - 1);
+    const p = await pool.query<{ n: number }>(
+      `SELECT count(*)::int AS n FROM sys.sys_tenant_consolidation_decisions WHERE tenant_consolidation_decision_proposal_id = $1`, [pU]);
+    expect(p.rows[0]!.n).toBeGreaterThan(0);
+  });
+});

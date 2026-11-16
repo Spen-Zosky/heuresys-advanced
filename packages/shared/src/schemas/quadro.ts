@@ -51,6 +51,8 @@ export type Insight = z.infer<typeof InsightSchema>;
 export const QuadroQuerySchema = z.object({
   /** elenco separato da virgole; vuoto = tutte le aree */
   aree: z.string().max(400).optional(),
+  /** la lingua delle frasi (italiano se manca) */
+  lingua: z.enum(["it", "en"]).optional(),
 });
 
 export const QuadroResponseSchema = z.object({

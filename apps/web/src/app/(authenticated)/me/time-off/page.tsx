@@ -73,6 +73,30 @@ export default function MeTimeOffPage() {
   });
 
   const balances = attendance.data?.leaveBalances ?? [];
+  const annoInCorso = new Date().getFullYear();
+
+  type Saldo = MeAttendanceResponse["leaveBalances"][number];
+  /** Scheda di un saldo: ferie e permessi mostrano i giorni disponibili, la malattia solo i giorni usati
+   *  (un «disponibile» per la malattia non ha senso), gli anni chiusi solo il consuntivo. */
+  const SchedaSaldo = ({ b, storico = false }: { b: Saldo; storico?: boolean }) => {
+    const soloUsati = storico || b.leaveType === "SICK";
+    return (
+      <div className="rounded-control border border-border bg-muted/40 p-3">
+        <p className="text-xs uppercase tracking-wide text-muted-foreground">{enumLabel("leaveType", b.leaveType)} · {b.year}</p>
+        <p className="mt-1 text-lg font-semibold text-foreground tabular-nums">
+          {soloUsati
+            ? (b.usedDays !== null ? fmt.numeroFisso(b.usedDays, 1) : "—")
+            : (b.totalDays !== null && b.usedDays !== null ? fmt.numeroFisso(b.totalDays + (b.carryoverDays ?? 0) - b.usedDays, 1) : "—")}
+          <span className="ml-1 text-xs font-normal text-muted-foreground">{soloUsati ? t("timeOff.daysUsedLabel") : t("timeOff.daysAvailable")}</span>
+        </p>
+        {!soloUsati && (
+          <p className="text-xs text-muted-foreground tabular-nums">
+            {t("timeOff.balanceDetail", { total: fmt.numero(b.totalDays ?? 0, 1), used: fmt.numero(b.usedDays ?? 0, 1) })}
+          </p>
+        )}
+      </div>
+    );
+  };
   const submitError = submit.error;
   const submitErrorText = submitError
     ? isApiError(submitError)
@@ -84,7 +108,7 @@ export default function MeTimeOffPage() {
     () => [
       { header: t("timeOff.colType"), cell: (r: TimeOffRequest) => <span className="text-sm">{enumLabel("leaveType", r.leaveType)}</span> },
       { header: t("timeOff.colPeriod"), cell: (r: TimeOffRequest) => <span className="tabular-nums text-xs">{fmt.data(r.startDate)} → {fmt.data(r.endDate)}</span> },
-      { header: t("timeOff.colDays"), align: "right" as const, cell: (r: TimeOffRequest) => <span className="tabular-nums">{r.daysRequested}</span> },
+      { header: t("timeOff.colDays"), align: "right" as const, cell: (r: TimeOffRequest) => <span className="tabular-nums">{fmt.numero(r.daysRequested, 1)}</span> },
       { header: t("timeOff.colStatus"), cell: (r: TimeOffRequest) => <EnumStatusBadge domain="timeOffStatus" value={r.status} /> },
     ],
     [t, enumLabel, fmt],
@@ -107,19 +131,23 @@ export default function MeTimeOffPage() {
           ) : balances.length === 0 ? (
             <StatoVuoto titolo={t("timeOff.balancesEmpty")} testId="me-time-off-balances-empty" />
           ) : (
-            <div className="grid gap-3 sm:grid-cols-3" data-testid="me-time-off-balances">
-              {balances.map((b) => (
-                <div key={`${b.leaveType}-${b.year}`} className="rounded-control border border-border bg-muted/40 p-3">
-                  <p className="text-xs uppercase tracking-wide text-muted-foreground">{enumLabel("leaveType", b.leaveType)} · {b.year}</p>
-                  <p className="mt-1 text-lg font-semibold text-foreground tabular-nums">
-                    {b.totalDays !== null && b.usedDays !== null ? fmt.numeroFisso(b.totalDays + (b.carryoverDays ?? 0) - b.usedDays, 1) : "—"}
-                    <span className="ml-1 text-xs font-normal text-muted-foreground">{t("timeOff.daysAvailable")}</span>
-                  </p>
-                  <p className="text-xs text-muted-foreground tabular-nums">
-                    {t("timeOff.balanceDetail", { total: b.totalDays ?? 0, used: b.usedDays ?? 0 })}
-                  </p>
-                </div>
-              ))}
+            <div className="space-y-4">
+              {/* D2-15: in primo piano l'anno in corso; gli anni chiusi non hanno «giorni disponibili» e vanno nello storico */}
+              <div className="grid gap-3 sm:grid-cols-3" data-testid="me-time-off-balances">
+                {balances.filter((b) => b.year === annoInCorso).map((b) => (
+                  <SchedaSaldo key={`${b.leaveType}-${b.year}`} b={b} />
+                ))}
+              </div>
+              {balances.some((b) => b.year !== annoInCorso) && (
+                <details data-testid="me-time-off-history">
+                  <summary className="cursor-pointer text-sm text-muted-foreground">{t("timeOff.historyTitle")}</summary>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                    {balances.filter((b) => b.year !== annoInCorso).map((b) => (
+                      <SchedaSaldo key={`${b.leaveType}-${b.year}`} b={b} storico />
+                    ))}
+                  </div>
+                </details>
+              )}
             </div>
           )}
         </CardContent>

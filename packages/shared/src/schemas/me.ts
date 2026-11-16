@@ -465,6 +465,8 @@ export const MeSurveyListItemSchema = z.object({
   completedAt: z.iso.datetime().nullable(),
   /** How many answers of MINE this survey holds — 0 means assigned but not answered yet. */
   answerCount: z.number().int().min(0),
+  /** Compilato: assegnazione completata oppure almeno una risposta propria (D2-05). */
+  completed: z.boolean(),
 });
 export type MeSurveyListItem = z.infer<typeof MeSurveyListItemSchema>;
 export const MeSurveysResponseSchema = z.object({
@@ -773,8 +775,8 @@ export const NotificationIdParamSchema = z.object({ notificationId: z.uuid() });
 /* --- kpis (ESS-8) ---------------------------------------------------- */
 
 export const MeKpiTargetSchema = z.object({
-  positionKpiRequirementId: z.uuid(),
-  positionId: z.uuid(),
+  positionKpiRequirementId: z.uuid().nullable(),
+  positionId: z.uuid().nullable(),
   kpiDefinitionId: z.uuid(),
   kpiCode: z.string(),
   kpiName: z.string(),

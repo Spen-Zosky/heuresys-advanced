@@ -13,6 +13,14 @@ import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { EChartsCard } from "../_charts-client";
 import { NomeOppure } from "@/components/senza-nome";
+import { useEnumLabel } from "@/lib/enum-labels";
+
+/** L'orizzonte di prontezza va dal piu' vicino al piu' lontano, non in ordine alfabetico (D11). */
+const ORDINE_PRONTEZZA = ["READY_NOW", "READY_6_MONTHS", "READY_1_YEAR", "READY_2_YEARS", "NOT_READY"];
+const posto = (livello: string) => {
+  const i = ORDINE_PRONTEZZA.indexOf(livello);
+  return i === -1 ? ORDINE_PRONTEZZA.length : i;
+};
 
 interface ReadinessDistItem {
   readinessLevel: string;
@@ -29,15 +37,19 @@ function buildTabs(t: TFunction): ReadonlyArray<{ key: Tab; label: string }> {
   ];
 }
 
+/** D12: un nome che e' un codice interno («LEGACY_SPLAN::uuid», «CAR-TJB-001») non si mostra (R4). */
+const eCodiceInterno = (nome: string) => /::|^[A-Z0-9]+(?:[-_][A-Z0-9]+)+$/.test(nome);
+const nomeLeggibile = (nome: string, t: TFunction) => (eCodiceInterno(nome) ? t("career.nomeInterno") : nome);
+
 function buildPathsCols(t: TFunction): DataColumn<CareerPath>[] {
   return [
-    { header: t("career.pathsCols.name"), cell: (p) => <span className="font-medium text-foreground">{p.name}</span> },
+    { header: t("career.pathsCols.name"), cell: (p) => <span className="font-medium text-foreground">{nomeLeggibile(p.name, t)}</span> },
     { header: t("career.pathsCols.kind"), cell: (p) => <EnumStatusBadge domain="careerPathKind" value={p.kind} /> },
   ];
 }
 function buildPoolsCols(t: TFunction): DataColumn<SuccessionPool>[] {
   return [
-    { header: t("career.poolsCols.name"), cell: (p) => <span className="font-medium text-foreground">{p.name}</span> },
+    { header: t("career.poolsCols.name"), cell: (p) => <span className="font-medium text-foreground">{nomeLeggibile(p.name, t)}</span> },
     { header: t("career.poolsCols.status"), cell: (p) => <EnumStatusBadge domain="successionPoolStatus" value={p.status} /> },
   ];
 }
@@ -84,12 +96,14 @@ export default function CareerSuccessionPage() {
     enabled: tab === "candidates",
   });
 
+  const enumLabel = useEnumLabel();
+  const prontezza = [...(readinessDist.data?.items ?? [])].sort((a, b) => posto(a.readinessLevel) - posto(b.readinessLevel));
   const readinessOption = {
     tooltip: { trigger: "axis" as const, axisPointer: { type: "shadow" as const } },
     grid: { left: 8, right: 16, top: 16, bottom: 8, containLabel: true },
     xAxis: {
       type: "category" as const,
-      data: (readinessDist.data?.items ?? []).map((i) => i.readinessLevel.replace(/_/g, " ")),
+      data: prontezza.map((i) => enumLabel("readinessLevel", i.readinessLevel)),
       axisLabel: { color: "hsl(var(--muted-foreground))", fontSize: 11, interval: 0, rotate: 20 },
       axisLine: { lineStyle: { color: "#334155" } },
     },
@@ -102,7 +116,7 @@ export default function CareerSuccessionPage() {
     series: [
       {
         type: "bar" as const,
-        data: (readinessDist.data?.items ?? []).map((i) => i.count),
+        data: prontezza.map((i) => i.count),
         itemStyle: { color: "hsl(var(--palette-1))", borderRadius: [4, 4, 0, 0] as [number, number, number, number] },
         barMaxWidth: 48,
       },

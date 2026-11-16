@@ -12,6 +12,7 @@ import {
   Info,
 } from "lucide-react";
 import { apiFetch } from "@/lib/api/fetch";
+import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { useInboxStream } from "@/lib/use-inbox-stream";
 import { testoLeggibile } from "@/lib/i18n";
 import { useEnumLabel } from "@/lib/enum-labels";
@@ -92,6 +93,9 @@ export default function MeInboxPage() {
     onSuccess: () => void qc.invalidateQueries({ queryKey: ["me", "inbox"] }),
   });
 
+  // S-04 (forense 15/11): decidere chiede approval:decide all'API; senza, i pulsanti non si offrono.
+  const puoDecidere = (useCurrentUserPermissions().data?.permissions ?? []).includes("approval:decide");
+
   const pendingApprovals = (inbox.data?.items ?? []).filter(
     (n) => n.resourceType === "APPROVAL_STEP" && n.status === "UNREAD" && approvalRequestId(n.actionUrl) && n.resourceId,
   );
@@ -155,7 +159,7 @@ export default function MeInboxPage() {
                 return (
                   <li key={n.notificationId} data-testid="me-inbox-approval-row" className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
                     <span className="font-medium text-foreground">{n.subject}</span>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2" hidden={!puoDecidere}>
                       <Button type="button" size="sm" data-testid="me-inbox-approval-approve" disabled={decide.isPending} onClick={() => decide.mutate({ reqId, stepId: n.resourceId!, decision: "APPROVE" })}>
                         {t("inbox.approvals.approve")}
                       </Button>

@@ -11,6 +11,8 @@ import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { apiFetch } from "@/lib/api/fetch";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
+import { useFormat } from "@/lib/format";
+import { useEnumLabel } from "@/lib/enum-labels";
 
 // #45 C3 — creazione e archiviazione delle aziende clienti dall'interfaccia.
 // Le API esistevano da MVP-1 e nessuna pagina le chiamava: aprire un'azienda voleva dire
@@ -21,6 +23,8 @@ import { useCurrentUserPermissions } from "@/lib/api/auth";
 export default function TenantsListPage() {
   const { t } = useTranslation("admin");
   const qc = useQueryClient();
+  const fmt = useFormat();
+  const enumLabel = useEnumLabel();
   const perms = useCurrentUserPermissions();
   const canCreate = perms.data?.permissions.includes("tenant:create") ?? false;
   const canArchive = perms.data?.permissions.includes("tenant:delete") ?? false;
@@ -86,11 +90,11 @@ export default function TenantsListPage() {
       },
       {
         header: t("tenants.columns.country"),
-        cell: (row) => <span className="text-xs text-muted-foreground">{row.tenantCountryCode ?? t("tenants.dash")}</span>,
+        cell: (row) => <span className="text-xs text-muted-foreground">{row.tenantCountryCode ? fmt.paese(row.tenantCountryCode) : t("tenants.dash")}</span>,
       },
       {
         header: t("tenants.columns.size"),
-        cell: (row) => <span className="text-xs text-muted-foreground">{row.tenantSizeBand ?? t("tenants.dash")}</span>,
+        cell: (row) => <span className="text-xs text-muted-foreground">{row.tenantSizeBand ? enumLabel("sizeBand", row.tenantSizeBand) : t("tenants.dash")}</span>,
       },
       { header: t("tenants.columns.status"), cell: (row) => <EnumStatusBadge domain="tenantStatus" value={row.tenantStatus} /> },
       ...(canArchive
@@ -118,7 +122,7 @@ export default function TenantsListPage() {
           ]
         : []),
     ],
-    [t, canArchive, archive],
+    [t, canArchive, archive, fmt, enumLabel],
   );
 
   return (

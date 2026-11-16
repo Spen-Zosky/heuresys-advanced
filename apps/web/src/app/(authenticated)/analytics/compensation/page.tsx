@@ -1,5 +1,6 @@
 "use client";
 
+import { formati } from "@/lib/format";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -95,7 +96,7 @@ export default function CompensationAnalyticsPage() {
   const { t, i18n } = useTranslation("analytics");
   // €-grouping follows the active UI locale (en-US vs it-IT); the currency itself stays € (data region).
   const EUR = useMemo(
-    () => new Intl.NumberFormat(i18n.language === "en" ? "en-US" : "it-IT"),
+    () => ({ format: (n: number) => formati(i18n.language).numero(n) }),
     [i18n.language],
   );
   const q = useQuery({
@@ -176,6 +177,12 @@ export default function CompensationAnalyticsPage() {
           />
         </div>
       </section>
+
+      {d.topUnitsExcluded ? (
+        <p className="text-sm text-muted-foreground" data-testid="analytics-compensation-scope-note">
+          {t("compensation.scopeNote")}
+        </p>
+      ) : null}
 
       {mascherato ? (
         <section

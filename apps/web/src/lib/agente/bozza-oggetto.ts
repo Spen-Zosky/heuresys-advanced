@@ -14,6 +14,7 @@
  * «rifiutata» con la ragione, e lo stato non cambia.
  */
 import type { EsitoPagina } from "./vista-tabella";
+import { testo } from "../testi";
 
 export const COMANDI_FASCICOLO = ["fascicolo.decidi", "fascicolo.annulla"] as const;
 
@@ -65,28 +66,29 @@ export function eseguiSulFascicolo(
   s: StatoBozza,
   nome: string,
   argomenti: Record<string, unknown>,
-  ctx: { processi: readonly ProcessoDelFascicolo[]; modificabile: boolean },
+  ctx: { processi: readonly ProcessoDelFascicolo[]; modificabile: boolean; lingua?: string },
 ): { stato: StatoBozza | null; esito: EsitoPagina } {
+  const tr = (chiave: string, parametri?: Record<string, string | number>) => testo(ctx.lingua, chiave, parametri);
   if (nome === "fascicolo.annulla") {
     const prima = s.passi.at(-1);
-    if (prima === undefined) return rifiuta("Non c'è un passo dell'assistente da annullare.");
+    if (prima === undefined) return rifiuta(tr("esitoAgente.nessunPasso"));
     const restanti = Object.keys(prima).length;
     return {
       stato: { bozze: prima, passi: s.passi.slice(0, -1) },
-      esito: { stato: "ok", dettaglio: `Annullato l'ultimo passo. Decisioni preparate e non salvate: ${restanti}.` },
+      esito: { stato: "ok", dettaglio: tr("esitoAgente.annullato", { n: restanti }) },
     };
   }
-  if (nome !== "fascicolo.decidi") return rifiuta("Questa pagina non accetta il comando.");
-  if (!ctx.modificabile) return rifiuta("Il fascicolo non si può modificare: la versione è già firmata o la persona non ha il permesso.");
+  if (nome !== "fascicolo.decidi") return rifiuta(tr("esitoAgente.comandoPagina"));
+  if (!ctx.modificabile) return rifiuta(tr("esitoAgente.nonModificabile"));
 
   const processo = typeof argomenti.processo === "string" ? trova(ctx.processi, argomenti.processo) : undefined;
-  if (!processo) return rifiuta(`Il fascicolo non ha il processo «${String(argomenti.processo ?? "")}».`);
+  if (!processo) return rifiuta(tr("esitoAgente.processoAssente", { processo: String(argomenti.processo ?? "") }));
   const inclusion = argomenti.inclusione;
   if (typeof inclusion !== "string" || !(INCLUSIONI_FASCICOLO as readonly string[]).includes(inclusion))
-    return rifiuta("La decisione dev'essere IN, PARTIAL oppure OUT.");
+    return rifiuta(tr("esitoAgente.decisioneNo"));
   const rationale = typeof argomenti.motivazione === "string" ? argomenti.motivazione.trim() : "";
-  if (!rationale) return rifiuta("Senza motivazione una decisione non si prepara: la regola del fascicolo la chiede.");
-  if (rationale.length > MAX_MOTIVAZIONE) return rifiuta(`La motivazione supera ${MAX_MOTIVAZIONE} caratteri.`);
+  if (!rationale) return rifiuta(tr("esitoAgente.senzaMotivazione"));
+  if (rationale.length > MAX_MOTIVAZIONE) return rifiuta(tr("esitoAgente.motivazioneLunga", { max: MAX_MOTIVAZIONE }));
 
   const bozze = { ...s.bozze, [processo.processId]: { inclusion: inclusion as InclusioneFascicolo, rationale } };
   const passi = [...s.passi, s.bozze].slice(-MAX_PASSI);
@@ -94,7 +96,7 @@ export function eseguiSulFascicolo(
     stato: { bozze, passi },
     esito: {
       stato: "ok",
-      dettaglio: `Preparata sulla pagina la decisione ${inclusion} per «${processo.processName}», da salvare dalla persona. Decisioni preparate e non salvate: ${Object.keys(bozze).length}.`,
+      dettaglio: tr("esitoAgente.preparata", { inclusione: inclusion, processo: processo.processName, n: Object.keys(bozze).length }),
     },
   };
 }
@@ -120,15 +122,16 @@ export function vistaDelFascicolo(
   s: StatoBozza,
   modificabile: boolean,
   max = 60,
+  lingua?: string,
 ): Record<string, unknown> {
   return {
-    tipo: "fascicolo del modello del tenant",
+    tipo: testo(lingua, "esitoAgente.tipoFascicolo"),
     modificabile,
     processiTotali: processi.length,
     processi: processi.slice(0, max).map((p) => ({
       codice: p.processCode,
       nome: p.processName.slice(0, 60),
-      decisione: p.inclusion ?? "come dice il modello",
+      decisione: p.inclusion ?? testo(lingua, "esitoAgente.comeModello"),
       ...(Object.hasOwn(s.bozze, p.processId) ? { preparata: s.bozze[p.processId]!.inclusion } : {}),
     })),
     ...(processi.length > max ? { altriProcessi: processi.length - max } : {}),

@@ -62,12 +62,56 @@ export async function persone(profilo) {
   return solo.length ? out.filter((p) => solo.includes(p.sigla)) : out;
 }
 
+// Una sessione per persona, riusata fra le unità del giro (forense 15/11). Il login di produzione
+// ammette AUTH_LOGIN_RATELIMIT_MAX richieste ogni 5 minuti per indirizzo (10): un login per unità
+// faceva rispondere 429 dopo pochi minuti, e le unità finivano «fatte» senza essere entrate.
+// I cookie della persona restano in memoria del processo (mai su disco) e si aggiornano a ogni
+// risposta di login o di rinnovo: il refresh token è monouso, e riusarne uno vecchio revocherebbe
+// la famiglia. Le unità sono in sequenza, quindi la rotazione resta lineare.
+const sessioni = new Map();
+const attesa = (ms) => new Promise((r) => setTimeout(r, ms));
+
+function seguiRotazione(ctx, sigla) {
+  ctx.on('response', async (r) => {
+    if (!/\/v1\/auth\/(login|refresh)$/.test(new URL(r.url()).pathname) || r.status() !== 200) return;
+    try { sessioni.set(sigla, await ctx.cookies()); } catch { /* contesto chiuso */ }
+  });
+}
+
+async function postConPazienza(ctx, url, data) {
+  // Su 429 si aspetta che la finestra di 5 minuti si liberi, invece di dare l'unità per persa.
+  for (let i = 0; ; i++) {
+    const r = await ctx.request.post(url, { data });
+    if (r.status() !== 429 || i >= 6) return r;
+    await attesa(60_000);
+  }
+}
+
 export async function entra(ctx, p, profilo) {
   if (!p.email) return 'persona senza email nel giro';
   const base = profilo.base.replace(/\/$/, '');
+  const salvati = sessioni.get(p.sigla);
+  if (salvati) {
+    await ctx.addCookies(salvati);
+    seguiRotazione(ctx, p.sigla);
+    if ((await ctx.request.get(`${base}/api/v1/auth/me`)).status() === 200) return 'ok (sessione riusata)';
+    const rinnovo = await ctx.request.post(`${base}/api/v1/auth/refresh`);
+    if (rinnovo.status() === 200) {
+      sessioni.set(p.sigla, await ctx.cookies());
+      if ((await ctx.request.get(`${base}/api/v1/auth/me`)).status() === 200) return 'ok (sessione rinnovata)';
+    }
+    sessioni.delete(p.sigla);
+    await ctx.clearCookies();
+  }
+  const esito = await accedi(ctx, p, profilo, base);
+  if (esito.startsWith('ok')) { sessioni.set(p.sigla, await ctx.cookies()); seguiRotazione(ctx, p.sigla); }
+  return esito;
+}
+
+async function accedi(ctx, p, profilo, base) {
   const { readMaster, derivePassword } = await import(pathToFileURL(join(radice(profilo), 'apps/api/scripts/derive-access.mjs')).href);
   const password = derivePassword(readMaster(), p.email);
-  const r1 = await ctx.request.post(`${base}/api/v1/auth/login`, { data: { email: p.email, password } });
+  const r1 = await postConPazienza(ctx, `${base}/api/v1/auth/login`, { email: p.email, password });
   if (r1.status() !== 200) return `rifiutato al primo passo (${r1.status()})`;
   const b1 = await r1.json();
   if (b1.status === 'success' || b1.status === undefined) return 'ok';
@@ -79,7 +123,7 @@ export async function entra(ctx, p, profilo) {
   const { decryptSecret } = await import(pathToFileURL(join(radice(profilo), 'apps/api/src/modules/auth/secret-crypto.ts')).href);
   const otp = createRequire(join(radice(profilo), 'apps/api/package.json'))('otpauth');
   const codice = new otp.TOTP({ algorithm: 'SHA1', digits: 6, period: 30, secret: otp.Secret.fromBase32(decryptSecret(f.s)) }).generate();
-  const r2 = await ctx.request.post(`${base}/api/v1/auth/login`, { data: { email: p.email, password, challengeToken: b1.challengeToken, mfaCode: codice } });
+  const r2 = await postConPazienza(ctx, `${base}/api/v1/auth/login`, { email: p.email, password, challengeToken: b1.challengeToken, mfaCode: codice });
   const b2 = await r2.json().catch(() => ({}));
   return r2.status() === 200 && b2.status === 'success' ? 'ok (secondo fattore)' : `rifiutato al secondo passo (${r2.status()})`;
 }
@@ -91,9 +135,15 @@ export async function impostaLingua(ctx, lingua, profilo) {
   await ctx.addCookies([{ name: 'NEXT_LOCALE', value: lingua, domain: host, path: '/' }]);
   await ctx.route('**/v1/me/preferences', async (route) => {
     if (route.request().method() !== 'GET') return route.fallback();
-    const r = await route.fetch();
-    let corpo = await r.text();
-    try { const j = JSON.parse(corpo); const giu = (o) => { if (o && typeof o === 'object') for (const k of Object.keys(o)) { if (k === 'locale') o[k] = lingua; else giu(o[k]); } }; giu(j); corpo = JSON.stringify(j); } catch {}
-    return route.fulfill({ response: r, body: corpo });
+    // Forense 15/11: se la pagina si chiude mentre la richiesta è in volo, route.fetch lancia
+    // «Request context disposed»; non rilanciato, abbatteva il giro e stampava i cookie nel log.
+    try {
+      const r = await route.fetch();
+      let corpo = await r.text();
+      try { const j = JSON.parse(corpo); const giu = (o) => { if (o && typeof o === 'object') for (const k of Object.keys(o)) { if (k === 'locale') o[k] = lingua; else giu(o[k]); } }; giu(j); corpo = JSON.stringify(j); } catch {}
+      return await route.fulfill({ response: r, body: corpo });
+    } catch {
+      return route.abort().catch(() => {});
+    }
   });
 }

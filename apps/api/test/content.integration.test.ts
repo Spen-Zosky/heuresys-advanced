@@ -45,6 +45,24 @@ function jhdr(s: S) { return { cookie: ch(s.cookies), "x-csrf-token": s.csrfToke
 function chdr(s: S) { return { cookie: ch(s.cookies), "x-csrf-token": s.csrfToken }; }
 
 describe("content API (cap④ CMS)", () => {
+  it("D3-13: excludeStatus=archived toglie gli archiviati dall'elenco e dal totale", async () => {
+    const c = await suite.app.inject({
+      method: "POST", url: "/v1/content", headers: jhdr(author),
+      payload: { title: `${PFX} da archiviare`, body: "x" },
+    });
+    expect(c.statusCode, c.body.slice(0, 200)).toBe(200);
+    const id = (c.json() as { documentId: string }).documentId;
+    await pool.query("UPDATE sys.sys_content_documents SET document_status = 'archived' WHERE document_id = $1", [id]);
+    type Lista = { items: Array<{ documentId: string; status: string }>; total: number };
+    const q = encodeURIComponent(PFX);
+    const tutti = (await suite.app.inject({ method: "GET", url: `/v1/content?q=${q}&limit=200`, headers: { cookie: ch(author.cookies) } })).json() as Lista;
+    const vivi = (await suite.app.inject({ method: "GET", url: `/v1/content?q=${q}&excludeStatus=archived&limit=200`, headers: { cookie: ch(author.cookies) } })).json() as Lista;
+    expect(tutti.items.some((d) => d.documentId === id)).toBe(true);
+    expect(vivi.items.some((d) => d.documentId === id)).toBe(false);
+    expect(vivi.items.every((d) => d.status !== "archived")).toBe(true);
+    expect(tutti.total).toBe(vivi.total + 1);
+  });
+
   it("RBAC: plain USER lacks content:read → 403", async () => {
     expect((await suite.app.inject({ method: "GET", url: "/v1/content", headers: { cookie: ch(plainUser.cookies) } })).statusCode).toBe(403);
   });

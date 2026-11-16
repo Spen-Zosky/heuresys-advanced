@@ -3,10 +3,12 @@
 import { useTranslation } from "react-i18next";
 import type { MeProfileFull } from "@heuresys/shared";
 import { Field, ProfileSection, fmtDate, fmtDateTime, fmtMoney } from "./field";
+import { useEnumLabel } from "@/lib/enum-labels";
 
 /** Organizzazione — role/position, lifecycle, compensation, SAP keys, auth summary. */
 export function OrganizationTab({ data }: { data: MeProfileFull }) {
   const { t } = useTranslation("ess");
+  const enumLabel = useEnumLabel();
   const o = data.organization;
   const e = data.employment;
 
@@ -17,8 +19,6 @@ export function OrganizationTab({ data }: { data: MeProfileFull }) {
         <Field label={t("profile.full.role.positionCode")} value={o.positionCode} />
         <Field label={t("profile.full.role.orgUnit")} value={o.orgUnit} />
         <Field label={t("profile.full.role.department")} value={o.department} />
-        <Field label={t("profile.full.role.location")} value={o.location} />
-        <Field label={t("profile.full.role.costCenter")} value={o.costCenter} />
         <Field label={t("profile.full.role.manager")} value={o.managerName} />
       </ProfileSection>
 
@@ -26,8 +26,8 @@ export function OrganizationTab({ data }: { data: MeProfileFull }) {
         <Field label={t("profile.full.lifecycle.hireDate")} value={fmtDate(e?.hireDate ?? null)} />
         <Field label={t("profile.full.lifecycle.seniorityDate")} value={fmtDate(e?.seniorityDate ?? null)} />
         <Field label={t("profile.full.lifecycle.probationEnd")} value={fmtDate(e?.probationEndDate ?? null)} />
-        <Field label={t("profile.full.lifecycle.contractEnd")} value={fmtDate(e?.contractEndDate ?? null)} />
-        <Field label={t("profile.full.lifecycle.status")} value={e?.status ?? null} />
+        <Field label={t("profile.full.lifecycle.contractEnd")} value={e?.contractEndDate && e.status === "ACTIVE" && e.contractEndDate < new Date().toISOString().slice(0, 10) ? null : fmtDate(e?.contractEndDate ?? null)} />
+        <Field label={t("profile.full.lifecycle.status")} value={e?.status ? enumLabel("employeeStatus", e.status) : null} />
         <Field label={t("profile.full.lifecycle.terminationDate")} value={fmtDate(e?.terminationDate ?? null)} />
       </ProfileSection>
 
@@ -60,7 +60,7 @@ export function OrganizationTab({ data }: { data: MeProfileFull }) {
 
       <ProfileSection title={t("profile.full.auth.title")} testId="section-auth">
         <Field label={t("profile.full.auth.username")} value={data.auth.username} />
-        <Field label={t("profile.full.auth.roles")} value={data.auth.roles.join(", ")} />
+        <Field label={t("profile.full.auth.roles")} value={data.auth.roles.map((r) => t(`shell:roles.${r}`, { defaultValue: r })).join(", ")} />
         <Field label={t("profile.full.auth.lastLogin")} value={fmtDateTime(data.auth.lastLogin)} />
       </ProfileSection>
     </div>

@@ -43,8 +43,8 @@ export default function MeAnalyticsPage() {
   const kpis = [
     { key: "goals", value: s?.goalsCount },
     { key: "skills", value: s?.skillsCount },
-    { key: "performance", value: s?.latestPerformanceRating != null ? fmt.numeroFisso(s.latestPerformanceRating, 1) : "—" },
-    { key: "leave", value: s?.leaveBalanceDays != null ? s.leaveBalanceDays.toString() : "—" },
+    { key: "performance", value: s?.latestPerformanceRating != null ? fmt.numeroFisso(s.latestPerformanceRating, 2) : "—" },
+    { key: "leave", value: s?.leaveBalanceDays != null ? fmt.numero(s.leaveBalanceDays, 1) : "—" },
   ];
 
   return (

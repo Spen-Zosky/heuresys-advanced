@@ -119,6 +119,22 @@ describe("GET /v1/analytics/* integration", () => {
     expect(new Date(body.generatedAt).getTime()).toBeGreaterThan(0);
   });
 
+  it("D4: l'organico per titolo non e' troncato: la somma torna al totale e i titoli sono tutti", async () => {
+    const body = await getJson<WorkforceBody>("/v1/analytics/workforce", platformS);
+    const somma = body.byJobRole.reduce((acc, r2) => acc + r2.headcount, 0);
+    expect(somma).toBe(body.totalHeadcount);
+    const titoli = await num(
+      `SELECT count(DISTINCT coalesce(p.position_title, 'Senza posizione'))::text AS n
+         FROM sys.sys_users u
+         LEFT JOIN sys.sys_user_position_assignments a
+           ON a.user_position_assignment_user_id = u.user_id
+          AND a.user_position_assignment_kind = 'PRIMARY' AND a.user_position_assignment_status = 'ACTIVE'
+         LEFT JOIN sys.sys_positions p ON p.position_id = a.user_position_assignment_position_id
+        WHERE u.user_type <> 'SERVICE'`,
+    );
+    expect(body.byJobRole.length).toBe(titoli);
+  });
+
   it("workforce: TENANT_ADMIN sees TENANT scope filtered to own tenant", async () => {
     const body = await getJson<WorkforceBody>("/v1/analytics/workforce", tenantS);
     expect(body.scope.kind).toBe("TENANT");
@@ -717,6 +733,15 @@ describe("GET /v1/analytics/* integration", () => {
     });
     expect(r.statusCode).toBe(403);
     expect((r.json() as { error: { code: string } }).error.code).toBe("FORBIDDEN");
+  });
+
+  it("D6: il compenso totale dello straordinario non somma le richieste respinte o annullate", async () => {
+    const body = await getJson<OvertimeBody>("/v1/analytics/overtime", platformS);
+    const atteso = await num(
+      `SELECT coalesce(round(sum(overtime_total_compensation), 2), 0)::text AS n
+         FROM sys.sys_overtime WHERE overtime_status NOT IN ('REJECTED', 'CANCELLED')`,
+    );
+    expect(body.totalCompensationEur ?? 0).toBeCloseTo(atteso, 1);
   });
 
   it("overtime: PLATFORM_ADMIN sees the request rollup (derived live)", async () => {

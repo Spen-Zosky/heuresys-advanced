@@ -10,6 +10,8 @@
  * Si monta da `PageHeader`, quindi ogni pagina che ha un titolo lo riceve; le aree vengono dalla
  * rotta (`lib/quadro-aree.ts`). Al massimo quattro voci in vista, il resto a un clic.
  */
+import { useFormat } from "@/lib/format";
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -27,6 +29,7 @@ const STILE: Record<Insight["tono"], { icona: typeof Info; classe: string }> = {
 };
 
 function Voce({ i }: { i: Insight }) {
+  const fmt = useFormat();
   const s = STILE[i.tono];
   const Icona = s.icona;
   return (
@@ -37,7 +40,7 @@ function Voce({ i }: { i: Insight }) {
         {i.andamento !== null ? (
           <span className="ml-auto flex shrink-0 items-center gap-0.5 text-xs font-medium">
             {i.andamento >= 0 ? <TrendingUp className="h-3.5 w-3.5" aria-hidden /> : <TrendingDown className="h-3.5 w-3.5" aria-hidden />}
-            {`${i.andamento > 0 ? "+" : ""}${i.andamento.toLocaleString("it-IT")}%`}
+            {`${i.andamento > 0 ? "+" : ""}${fmt.numero(i.andamento, 1)}%`}
           </span>
         ) : null}
       </div>
@@ -53,12 +56,14 @@ function Voce({ i }: { i: Insight }) {
 }
 
 export function QuadroInsight() {
+  const { t, i18n } = useTranslation("common");
+  const lingua = i18n.language === "en" ? "en" : "it";
   const pathname = usePathname();
   const aree = areeDellaRotta(pathname);
   const [tutte, setTutte] = useState(false);
   const q = useQuery({
-    queryKey: ["me", "quadro", aree.join(",")],
-    queryFn: ({ signal }) => apiFetch<QuadroResponse>(`/v1/me/quadro?aree=${aree.join(",")}`, { signal }),
+    queryKey: ["me", "quadro", aree.join(","), lingua],
+    queryFn: ({ signal }) => apiFetch<QuadroResponse>(`/v1/me/quadro?aree=${aree.join(",")}&lingua=${lingua}`, { signal }),
     enabled: aree.length > 0,
     staleTime: 5 * 60_000,
     retry: 0,
@@ -69,13 +74,13 @@ export function QuadroInsight() {
     // C15: anche «niente da segnalare» è un'informazione, se le verifiche sono state fatte
     return q.data.verifiche > 0 ? (
       <p data-testid="quadro-insight" className="mt-1 pl-4 text-xs text-success">
-        {`Nessuna anomalia: ${q.data.verifiche} ${q.data.verifiche === 1 ? "verifica fatta" : "verifiche fatte"} su questa pagina.`}
+        {t("quadroInsight.nessunaAnomalia", { count: q.data.verifiche })}
       </p>
     ) : null;
   }
   const visibili = tutte ? voci : voci.slice(0, 4);
   return (
-    <section aria-label="Da guardare" data-testid="quadro-insight" className="mt-1">
+    <section aria-label={t("quadroInsight.daGuardare")} data-testid="quadro-insight" className="mt-1">
       <ul className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
         {visibili.map((i) => (
           <Voce key={i.chiave} i={i} />
@@ -83,7 +88,7 @@ export function QuadroInsight() {
       </ul>
       {voci.length > 4 ? (
         <button type="button" onClick={() => setTutte((x) => !x)} className="mt-1 text-xs font-medium text-primary hover:underline">
-          {tutte ? "Mostra meno" : `Altre ${voci.length - 4} cose da guardare`}
+          {tutte ? t("quadroInsight.mostraMeno") : t("quadroInsight.altre", { count: voci.length - 4 })}
         </button>
       ) : null}
     </section>

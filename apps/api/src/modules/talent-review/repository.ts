@@ -6,6 +6,8 @@
  * tables (critical positions / coverage) carry no person rows → tenant filter only.
  */
 import type { Pool, PoolClient } from "pg";
+import { soloPersone } from "../../lib/scope/persone.js";
+import { K_ANONIMATO_MINIMO } from "../engagement/repository.js";
 import type {
   NineBoxRow, NineBoxListQuery,
   FitScore, FitScoreListQuery,
@@ -407,41 +409,54 @@ export async function listCriticalPositions(
   return { total: Number(totalRow.rows[0]?.total ?? 0), items: res.rows.map(toCriticalPosition) };
 }
 
-// ── Critical-role coverage (sys_critical_role_coverage_status — catalog) ─────
+// ── Critical-role coverage (derivata dal vivo sulle posizioni critiche) ───────
+//
+// D3 (forense frontend 2026-11-15): `sys_critical_role_coverage_status` era un rollup scritto da uno
+// script su posizioni DIVERSE da `sys_critical_positions` (intersezione vuota, 5 righe su 8 senza
+// punteggio). Una copertura dei ruoli critici si calcola sui ruoli critici: una riga per posizione
+// critica, con i candidati dei suoi bacini di successione per orizzonte di prontezza. La tabella
+// vecchia resta com'e' (ritirare non e' cancellare, ADR-0035) ma non e' piu' la fonte.
+// `overallScore` resta nullo: nessun modello lo calcola oggi, e la pagina dice «non calcolata».
 
 interface CriticalCoverageDbRow {
-  critical_role_coverage_status_id: string;
-  critical_role_coverage_status_tenant_id: string;
-  critical_role_coverage_status_position_id: string;
+  critical_position_id: string;
+  critical_position_tenant_id: string;
+  critical_position_position_id: string;
   position_title: string | null;
-  critical_role_coverage_ready_now_count: number;
-  critical_role_coverage_ready_6mo_count: number;
-  critical_role_coverage_ready_1y_count: number;
-  critical_role_coverage_overall_score: string | null;
-  critical_role_coverage_payload: Record<string, unknown>;
-  critical_role_coverage_computed_at: Date;
+  ready_now: string;
+  ready_6mo: string;
+  ready_1y: string;
+  ready_2y: string;
+  candidati: string;
   created_at: Date;
 }
 
-const CRITICAL_COVERAGE_COLS = `(SELECT p.position_title FROM sys.sys_positions p WHERE p.position_id = critical_role_coverage_status_position_id) AS position_title,
-  critical_role_coverage_status_id, critical_role_coverage_status_tenant_id,
-  critical_role_coverage_status_position_id, critical_role_coverage_ready_now_count,
-  critical_role_coverage_ready_6mo_count, critical_role_coverage_ready_1y_count,
-  critical_role_coverage_overall_score, critical_role_coverage_payload,
-  critical_role_coverage_computed_at, created_at`;
-
 function toCriticalCoverage(r: CriticalCoverageDbRow): CriticalCoverage {
   return {
-    criticalRoleCoverageStatusId: r.critical_role_coverage_status_id,
-    tenantId: r.critical_role_coverage_status_tenant_id,
-    positionId: r.critical_role_coverage_status_position_id,
+    criticalRoleCoverageStatusId: r.critical_position_id,
+    tenantId: r.critical_position_tenant_id,
+    positionId: r.critical_position_position_id,
     positionTitle: r.position_title ?? null,
-    readyNowCount: r.critical_role_coverage_ready_now_count,
-    ready6moCount: r.critical_role_coverage_ready_6mo_count,
-    ready1yCount: r.critical_role_coverage_ready_1y_count,
-    overallScore: numOrNull(r.critical_role_coverage_overall_score),
-    payload: r.critical_role_coverage_payload ?? {},
-    computedAt: r.critical_role_coverage_computed_at.toISOString(),
+    // I conteggi per orizzonte sono dati di valutazione di persone (EVALUATION): sotto la soglia
+    // di anonimato (come engagement) una cella con 1..K-1 candidati identificherebbe chi e' pronto,
+    // quindi i conteggi si tolgono e i loro nomi si dichiarano in `masked`. Zero candidati non
+    // identifica nessuno e resta.
+    // La soglia vale anche per ogni orizzonte: una cella con 1..K-1 persone toglie tutti e tre i
+    // conteggi (soppressione complementare), così una cella nascosta non si ricava dalle altre.
+    ...(() => {
+      const n = Number(r.candidati);
+      const celle = [Number(r.ready_now), Number(r.ready_6mo), Number(r.ready_1y)];
+      const piccola = (c: number) => c > 0 && c < K_ANONIMATO_MINIMO;
+      if (piccola(n) || celle.some(piccola)) return { masked: ["ready1yCount", "ready6moCount", "readyNowCount"] };
+      return {
+        readyNowCount: Number(r.ready_now),
+        ready6moCount: Number(r.ready_6mo),
+        ready1yCount: Number(r.ready_1y),
+      };
+    })(),
+    overallScore: null,
+    payload: { source: "successor_candidates" },
+    computedAt: new Date().toISOString(),
     createdAt: r.created_at.toISOString(),
   };
 }
@@ -450,26 +465,48 @@ export async function listCriticalCoverage(
   q: DbConnector,
   tenantId: string | undefined,
   query: CriticalCoverageListQuery,
+  /** Il perimetro di chi guarda (sottoalbero o se' stesso): vuoto/assente = tutti i candidati del tenant. */
+  userIdAllowList?: string[],
 ): Promise<{ items: CriticalCoverage[]; total: number }> {
   const where: string[] = [];
   const params: unknown[] = [];
   if (tenantId) {
     params.push(tenantId);
-    where.push(`critical_role_coverage_status_tenant_id = $${params.length}`);
+    where.push(`cp.critical_position_tenant_id = $${params.length}`);
   }
   const wc = where.length ? `WHERE ${where.join(" AND ")}` : "";
 
   const totalRow = await q.query<{ total: string }>(
-    `SELECT count(*)::text AS total FROM sys.sys_critical_role_coverage_status ${wc}`,
+    `SELECT count(*)::text AS total FROM sys.sys_critical_positions cp ${wc}`,
     params,
   );
+  params.push(userIdAllowList ?? null);
+  const allow = params.length;
   params.push(query.limit);
   const lim = params.length;
   params.push(query.offset);
   const off = params.length;
   const res = await q.query<CriticalCoverageDbRow>(
-    `SELECT ${CRITICAL_COVERAGE_COLS} FROM sys.sys_critical_role_coverage_status ${wc}
-      ORDER BY critical_role_coverage_overall_score DESC NULLS LAST, critical_role_coverage_status_id
+    `SELECT cp.critical_position_id, cp.critical_position_tenant_id, cp.critical_position_position_id,
+            (SELECT p.position_title FROM sys.sys_positions p WHERE p.position_id = cp.critical_position_position_id) AS position_title,
+            count(DISTINCT sc.successor_candidate_user_id) FILTER (WHERE sc.successor_candidate_readiness_level = 'READY_NOW')::text AS ready_now,
+            count(DISTINCT sc.successor_candidate_user_id) FILTER (WHERE sc.successor_candidate_readiness_level = 'READY_6_MONTHS')::text AS ready_6mo,
+            count(DISTINCT sc.successor_candidate_user_id) FILTER (WHERE sc.successor_candidate_readiness_level = 'READY_1_YEAR')::text AS ready_1y,
+            count(DISTINCT sc.successor_candidate_user_id) FILTER (WHERE sc.successor_candidate_readiness_level = 'READY_2_YEARS')::text AS ready_2y,
+            count(DISTINCT sc.successor_candidate_user_id)::text AS candidati,
+            cp.created_at
+       FROM sys.sys_critical_positions cp
+       LEFT JOIN sys.sys_succession_pools sp
+              ON sp.succession_pool_position_id = cp.critical_position_position_id
+             AND sp.succession_pool_tenant_id = cp.critical_position_tenant_id
+       LEFT JOIN sys.sys_successor_candidates sc
+              ON sc.successor_candidate_pool_id = sp.succession_pool_id
+             AND ($${allow}::uuid[] IS NULL OR sc.successor_candidate_user_id = ANY($${allow}::uuid[]))
+             AND EXISTS (SELECT 1 FROM sys.sys_users su
+                          WHERE su.user_id = sc.successor_candidate_user_id AND ${soloPersone("su")})
+       ${wc}
+      GROUP BY cp.critical_position_id, cp.critical_position_tenant_id, cp.critical_position_position_id, cp.created_at
+      ORDER BY count(DISTINCT sc.successor_candidate_user_id) DESC, 4, cp.critical_position_id
       LIMIT $${lim} OFFSET $${off}`,
     params,
   );

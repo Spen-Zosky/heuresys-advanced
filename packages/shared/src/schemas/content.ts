@@ -125,6 +125,8 @@ export const ContentDocumentUpdateSchema = z.object({
 export const ContentDocumentFilterSchema = z.object({
   kind: ContentKindEnum.optional(),
   status: ContentStatusEnum.optional(),
+  /** D3-13: lo stato da escludere (la pagina parte da «non archiviati»). */
+  excludeStatus: ContentStatusEnum.optional(),
   categoryId: z.uuid().optional(),
   q: z.string().min(1).max(255).optional(),
   ...paginationFields(200, 50),

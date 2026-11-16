@@ -18,6 +18,7 @@
  */
 
 import type { Pool, PoolClient } from "pg";
+import { soloPersone } from "../../lib/scope/persone.js";
 
 export type DbConnector = Pool | PoolClient;
 
@@ -63,7 +64,7 @@ export interface KpiAchievement {
 // L'organico conta persone, non utenze tecniche: le utenze di servizio (agenti, collaudo)
 // restano fuori. Senza questo filtro /analytics/workforce mostrava 167 invece di 158 su RTL
 // (analisi interfacce del 2026-10-31, V6).
-const ONLY_PEOPLE = `u.user_type <> 'SERVICE'`;
+const ONLY_PEOPLE = soloPersone("u");
 
 function userScopeClause(scope: ScopeFilter): { sql: string; params: unknown[] } {
   if (scope.isPlatformScope) {
@@ -118,14 +119,14 @@ export async function getWorkforceTotals(
   );
 
   const byRole = await q.query<{ dimension: string; headcount: string }>(
-    `SELECT COALESCE(p.position_title, '(no position)') AS dimension,
+    `SELECT COALESCE(p.position_title, 'Senza posizione') AS dimension,
             count(DISTINCT u.user_id)::text AS headcount
        FROM sys.sys_users u
        ${PRIMARY_ASSIGNMENT_JOIN}
       WHERE ${sc.sql}
       GROUP BY 1
       ORDER BY 2 DESC
-      LIMIT 50`,
+`,
     sc.params,
   );
 
@@ -191,9 +192,9 @@ export async function getKpiAchievement(
 
 // --- Attendance / overtime (P2) ---------------------------------------------
 // Worked-hours rollups over sys.sys_attendance. Overtime = attendance_hours_overtime
-// (recorded worked overtime that already rolls into attendance_hours_total) — NOT
-// sys_overtime (a separate PENDING request/approval table, largely disjoint; summing
-// would double-count). Hours are fractional numeric → ::text cast then Number() in JS.
+// (recorded worked overtime that already rolls into attendance_hours_total). sys_overtime holds
+// the REQUESTS for the same hours (forense D6: month by month they coincide), so the two views
+// are two sources of one quantity and must never be summed. Hours are fractional numeric → ::text.
 
 export interface AttendanceHoursRow {
   /** 'YYYY-MM' for monthly rows, OU name for by-OU rows. */
@@ -1031,7 +1032,7 @@ export async function getOvertimeRollups(
   const totals = await q.query<{ requests: string; hours: string; comp: string | null }>(
     `SELECT count(*)::text AS requests,
             COALESCE(round(sum(ot.overtime_hours), 2), 0)::text AS hours,
-            round(sum(ot.overtime_total_compensation), 2)::text AS comp
+            round(sum(ot.overtime_total_compensation) FILTER (WHERE ot.overtime_status NOT IN ('REJECTED', 'CANCELLED')), 2)::text AS comp
        FROM sys.sys_overtime ot
       WHERE ${sc.sql}`,
     sc.params,

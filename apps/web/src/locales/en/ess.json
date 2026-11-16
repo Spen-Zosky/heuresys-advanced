@@ -271,6 +271,15 @@
     "emptyTitle": "No notifications",
     "emptyDesc": "You have no notifications at the moment.",
     "feedTitle": "Notifications",
+    "messages": {
+      "APPROVAL_REMINDER": { "subject": "Approval pending: {{title}}", "body": "An approval request assigned to you is overdue. Open it to decide." },
+      "APPROVAL_OVERDUE": { "subject": "Approval overdue: {{title}}", "body": "A request you opened has been waiting for {{cycles}} cycles without a decision from the approver." },
+      "GAP_CLOSURE_DUE": {
+        "subject": "Skill gap to close",
+        "body": "A skill gap was detected for your position ({{segment}}).",
+        "segment": { "MAJOR_GAP": "major gap", "MODERATE_GAP": "moderate gap", "MINOR_GAP": "minor gap", "ALIGNED": "aligned", "UNKNOWN": "gap to assess" }
+      }
+    },
     "approvals": {
       "title": "Pending approvals",
       "approve": "Approve",

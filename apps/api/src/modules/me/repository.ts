@@ -21,6 +21,7 @@ import { toDateOnly } from "../../lib/date-only.js";
 import type { DataClass } from "../../lib/scope/data-classes.js";
 import { normalizzaCompetenze } from "../learning-gaps/repository.js";
 import { PARTECIPANTI_OGGI_SQL } from "../../lib/scope/functional.js";
+import { messaggioDellAvviso } from "../../lib/notifications/messaggi.js";
 
 export type DbConnector = Pool | PoolClient;
 type SkillEvidence = z.infer<typeof MeSkillEvidenceSchema>;
@@ -1417,7 +1418,8 @@ function toNotif(r: NotificationRow) {
   return {
     notificationId: r.notification_id,
     type: r.notification_type, subject: r.notification_subject,
-    body: r.notification_body, actionUrl: r.notification_action_url,
+    body: r.notification_body, message: messaggioDellAvviso(r.notification_type, r.notification_subject, r.notification_body),
+    actionUrl: r.notification_action_url,
     resourceType: r.notification_resource_type, resourceId: r.notification_resource_id,
     priority: r.notification_priority, status: r.notification_status,
     readAt: r.notification_read_at ? r.notification_read_at.toISOString() : null,

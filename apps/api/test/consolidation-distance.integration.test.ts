@@ -68,7 +68,7 @@ beforeAll(async () => {
   const vv = await pool.query<{ id: string }>(
     `INSERT INTO sys.sys_blueprint_variant_versions
        (blueprint_variant_version_variant_id, blueprint_variant_version_number, blueprint_variant_version_status)
-     VALUES ($1, 1, 'DRAFT') RETURNING blueprint_variant_version_id AS id`, [v.rows[0]!.id]);
+     VALUES ($1, 2, 'DRAFT') RETURNING blueprint_variant_version_id AS id`, [v.rows[0]!.id]);
   const versione = vv.rows[0]!.id;
   await pool.query(
     `INSERT INTO sys.sys_blueprint_content_units

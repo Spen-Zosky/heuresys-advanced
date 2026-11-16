@@ -346,6 +346,45 @@
       "CONSOLIDATION_ALREADY_OPEN": "A consolidation is already open.",
       "CONSOLIDATION_VERSION_INVALID": "This run's model no longer exists.",
       "PERMISSION_DENIED": "You do not have the mandate for this operation."
+    },
+    "distance": {
+      "loading": "Measuring the distance from the model…",
+      "error": "The distance from the model could not be measured.",
+      "title": "Distance from the model",
+      "summary": "{{rows}} rows compared: {{same}} the same, {{partial}} partial, {{different}} different, {{onlyModel}} only in the model, {{onlyTenant}} only in your company.",
+      "domain": "Domain",
+      "same": "Same",
+      "partial": "Partial",
+      "different": "Different",
+      "onlyModel": "Model only",
+      "onlyTenant": "Company only",
+      "lost": "{{count}} tenant items at risk of being lost",
+      "domains": {
+        "ateco": "ATECO classification",
+        "classe": "Company class",
+        "ccnl": "Collective agreements",
+        "processi": "Processes",
+        "unita": "Organisation units",
+        "organigramma": "Org chart",
+        "obblighi": "Obligations",
+        "ruoli": "Roles",
+        "copertura": "Coverage",
+        "inquadramento": "Grading",
+        "fasi": "Process phases",
+        "skill": "Skills",
+        "obiettivi": "Objectives",
+        "metriche": "Metrics",
+        "derivati": "Derived data",
+        "bersagli": "Targets",
+        "formazione": "Training",
+        "carriere": "Careers",
+        "incentivi": "Incentives",
+        "commesse": "Engagements",
+        "criticita": "Critical points",
+        "condizioni": "Conditions",
+        "ruoli_funzionali": "Functional roles",
+        "utenti": "Users"
+      }
     }
   },
   "consolidation": {
@@ -1233,5 +1272,17 @@
       "noOffers": "No offers.",
       "salaryMasked": "amount not visible with your mandate"
     }
+  },
+  "consolidationVocabulary": {
+    "title": "Common vocabulary",
+    "hint": "The equivalences between your company's term and the model's. The platform approves them.",
+    "row": "{{group}}: “{{tenant}}” matches “{{model}}”",
+    "statuses": {
+      "PROPOSTA": "Proposed",
+      "APPROVATA": "Approved",
+      "RITIRATA": "Withdrawn"
+    },
+    "approve": "Approve",
+    "withdraw": "Withdraw"
   }
 }

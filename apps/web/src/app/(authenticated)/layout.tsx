@@ -297,6 +297,11 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
     }));
 
   const verdict = pageVerdict(pathname, ifaces.data?.routes ?? [], SECTION_TAB_GROUPS);
+  // La pagina negata si nomina a parole (la voce di menu), mai col percorso tecnico.
+  const nomePaginaNegata =
+    verdict.kind === "denied"
+      ? t(`shell:nav.voci.${verdict.route.replace(/^\//, "").replace(/\//g, "_")}`, { defaultValue: "" })
+      : "";
 
   const roles = user.roles ?? [];
   // S-22 (INC-16): il tono dell'etichetta non viene più da una lista di sette ruoli scritta
@@ -365,7 +370,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
           groups={groups}
           footerSlot={
             <div className="space-y-2 border-t border-border px-3 py-3">
-              <p data-testid="app-user-email" className="truncate text-xs text-muted-foreground">
+              <p data-testid="app-user-email" title={user.email} className="truncate text-xs text-muted-foreground">
                 {user.email}
               </p>
               <Button
@@ -383,13 +388,12 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
       }
       footer={
         <DashboardFooter
-          socials={(["linkedin", "github", "discord", "facebook", "x"] as const).map((id) => ({
-            id,
-            href: "#",
-            label: t(`shell:brand.social.${id}`),
-          }))}
+          // Nessun indirizzo reale dei profili social di Heuresys esiste nel repo: finché Enzo non li
+          // fornisce non si passa nessuna icona (mai `href="#"`, che apriva una scheda sulla stessa
+          // pagina). Per riaccenderle: elenco di { id, href, label } con l'indirizzo vero.
+          socials={[]}
           rightSlot={
-            <>
+            <span className="inline-flex items-center gap-3 text-xs">
               <span>{t("shell:brand.version")}</span>
               <span aria-hidden className="text-border">·</span>
               <span>{identity.role}</span>
@@ -397,7 +401,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
               <Link href="/accessibilita" data-testid="app-footer-accessibility" className="underline-offset-2 hover:underline">
                 {t("shell:brand.accessibility")}
               </Link>
-            </>
+            </span>
           }
         />
       }
@@ -411,7 +415,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
         <main data-testid="page-no-access" className="mx-auto max-w-2xl space-y-4 px-6 py-10">
           <header className="space-y-1">
             <h1 className="text-2xl font-bold tracking-tight">{t("shell:noAccess.title")}</h1>
-            <p className="text-sm text-muted-foreground">{t("shell:noAccess.body", { route: verdict.route })}</p>
+            <p className="text-sm text-muted-foreground">{nomePaginaNegata ? t("shell:noAccess.body", { pagina: nomePaginaNegata }) : t("shell:noAccess.bodyGenerico")}</p>
           </header>
           <Button variant="outline" size="sm" onClick={() => router.push("/me")}>
             {t("shell:noAccess.home")}

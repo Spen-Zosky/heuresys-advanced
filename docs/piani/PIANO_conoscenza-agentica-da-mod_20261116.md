@@ -8,7 +8,7 @@ Fonti lette in sola lettura il 2026-11-16: mod-platform `d8a8397d` (l'API di mod
 
 ## Che cosa non si chiude con questo piano
 
-Questo documento è il piano: in questa sessione si chiude solo la voce K0. Ogni altra voce parte dopo il sì di Enzo sulle decisioni della sezione «Decisioni di Enzo» e sull'ADR della voce K1, una PR per voce, con la dimostrazione dal vivo dopo un rilascio che decide Enzo (ADR-0026). Le voci del datastore (tappa 6) si fanno in una sessione del datastore, con le sue regole.
+Questo documento è il piano: in questa sessione si chiudono le voci K0 e K1 (decisioni accettate il 2026-11-16, ADR-0058). Le altre voci si fanno una PR per voce, con la dimostrazione dal vivo dopo un rilascio che decide Enzo (ADR-0026). Le voci del datastore (tappa 6) si fanno in una sessione del datastore, con le sue regole.
 
 ## 1. Che cosa c'è in mod-platform (accertato sul codice)
 
@@ -55,7 +55,9 @@ Verdetto: **porta** (manca in Heuresys), **migliora** (c'è, mod fa meglio), **s
 | C17 | Vault in file per persona con git | `vault/LEGGIMI.md` | — | — | scarta la forma, tiene l'idea (C7): in Heuresys i dati del cliente stanno nel database con il tenant (I5, I13) | — |
 | C18 | Il coordinatore che chiama gli specialisti (P7) | mod non lo fa (`processo.ts:46-47`) | non lo fa | — | scarta: niente da portare | — |
 
-## 4. Decisioni di Enzo, con la raccomandazione
+## 4. Decisioni di Enzo (accettate)
+
+Decise il 2026-11-16 alle 01:44 UTC: Enzo ha accettato tutte le raccomandazioni («decisioni: accetto tutte le tue raccomandazioni»), scritte come D1-D5 in [ADR-0058](../architecture/adr/0058_la_conoscenza_della_piattaforma_consultabile_dall_assistente.md).
 
 | id | domanda | raccomandazione | costo e rischio |
 |---|---|---|---|
@@ -72,8 +74,8 @@ Tappe: 0 dottrina; 1 documentazione catalogata; 2 indice e ricerca; 3 pagina e a
 | id | cosa | file e comandi | chi | fatta quando (misura dal vivo) | tappa | stato |
 |---|---|---|---|---|---|---|
 | K0 | Questo piano | `docs/piani/PIANO_conoscenza-agentica-da-mod_20261116.md`, copia nei file del progetto | Claude | PR in bozza aperta | 0 | fatta |
-| K1 | ADR-0057 «La conoscenza della piattaforma consultabile dall'assistente»: documenti come dati della piattaforma (tenant Heuresys System) letti da persone di un tenant cliente con un perimetro proprio; memoria personale (D5); embedding locale (D3); riti con tetto (D4); estende ADR-0056 | `docs/architecture/adr/0057_*.md`, `python docs/kb/tools/build_adr_index.py` | Claude scrive, Enzo accetta | stato ACCETTATO scritto nell'ADR | 0 | blocked-on-Enzo: D1-D5 e sì sull'ADR |
-| K2 | Catalogo della documentazione dei due repo: per ogni file la raccolta, il pubblico (`enzo` o `apicali`), lo stato (vivo, chiuso, superato) ricavato da regole come in mod (cartella, «CICLO CHIUSO», «Superato da», `stato:` nell'intestazione se c'è); il predefinito di un file non classificato è `enzo`. Nessun file spostato: si riorganizza la vista, non le cartelle, così non si rompono i percorsi usati dagli strumenti | `docs/kb/conoscenza/catalogo.yaml` (regole per cartella), `docs/kb/tools/catalogo_documenti.py` (applica le regole e stampa i conteggi), stesse regole sul datastore | Claude | lo script stampa per pubblico e stato i conteggi veri dei due repo, e ogni file `.md` ha una classe (zero non classificati) | 1 | da fare, dopo K1 |
+| K1 | ADR-0058 «La conoscenza della piattaforma consultabile dall'assistente»: documenti come dati della piattaforma (tenant Heuresys System) letti da persone di un tenant cliente con un perimetro proprio; memoria personale (D5); embedding locale (D3); riti con tetto (D4); estende ADR-0056 | `docs/architecture/adr/0058_*.md`, `python docs/kb/tools/build_adr_index.py` | Claude scrive, Enzo accetta | stato ACCETTATO scritto nell'ADR | 0 | fatta (ADR-0058 ACCETTATO il 2026-11-16, 01:44 UTC) |
+| K2 | Catalogo della documentazione dei due repo: per ogni file la raccolta, il pubblico (`enzo` o `apicali`), lo stato (vivo, chiuso, superato) ricavato da regole come in mod (cartella, «CICLO CHIUSO», «Superato da», `stato:` nell'intestazione se c'è); il predefinito di un file non classificato è `enzo`. Nessun file spostato: si riorganizza la vista, non le cartelle, così non si rompono i percorsi usati dagli strumenti | `docs/kb/conoscenza/catalogo.yaml` (regole per cartella), `docs/kb/tools/catalogo_documenti.py` (applica le regole e stampa i conteggi), stesse regole sul datastore | Claude | lo script stampa per pubblico e stato i conteggi veri dei due repo, e ogni file `.md` ha una classe (zero non classificati) | 1 | da fare |
 | K2b | Controllo di pubblicazione: nessun file `apicali` contiene un segreto, un percorso di macchina o un dato personale di una persona diversa da chi lo può leggere; i file che falliscono restano `enzo` | `docs/kb/tools/check_documenti_pubblicabili.py`, nel cancello `verify_gate.py` | Claude | visto rosso su un file di prova con un finto segreto, poi verde sul catalogo reale | 1 | da fare |
 | K3 | Tabelle dell'indice: `sys.sys_knowledge_documents` (percorso, repo, raccolta, pubblico, stato, impronta, data) e `sys.sys_knowledge_chunks` (sezione, testo, `vector(384)` facoltativo, HNSW coseno, GIN `pg_trgm` sul testo); campi categorici `varchar + CHECK` (RD-08); appartengono al tenant della piattaforma | `db/migrations/000495_*.sql` (numero da verificare al momento), `python docs/kb/tools/chi_sorveglia.py sys_knowledge_documents` prima di scrivere | Claude | catena applicata due volte su copia con `ci-rehearsal.sh` sul gemello, sentinelle a zero | 2 | da fare |
 | K4 | Indicizzatore: legge i due repo dalla copia rilasciata (`~/heuresys-servizio/advanced-produzione`, e la copia rilasciata del datastore), applica il catalogo (K2), spezza per `##`/`###` con tetto 2.000 caratteri, rifà solo i file con impronta cambiata, toglie i pezzi dei file spariti; vettori con `multilingual-e5-small` locale (D3); senza modello scrive i pezzi lo stesso (ricerca per parole). Gira come timer systemd dopo ogni rilascio e ogni notte | `apps/api/src/modules/knowledge/indexer.ts`, `scripts/conoscenza-indicizza.sh`, `deploy/systemd/heuresys-advanced-conoscenza.{service,timer}` | Claude | sulla VM, conteggi dell'indice uguali a quelli dello script K2 per i file `vivi`; un file cambiato viene rifatto e uno invariato no (misura dei pezzi riscritti) | 2 | da fare |
@@ -103,3 +105,4 @@ Tappe: 0 dottrina; 1 documentazione catalogata; 2 indice e ricerca; 3 pagina e a
 ## Registro
 
 - 2026-11-16: letti in sola lettura mod-platform `d8a8397d`, heuresys-advanced `921df8d2`, heuresys-datastore `4ae203cd`; scritti l'inventario, il confronto e questo piano (K0).
+- 2026-11-16, 01:44 UTC: Enzo accetta D1-D5; scritto ADR-0058 (K1). Il numero 0057 è occupato due volte nelle PR aperte (#225 e #271), quindi 0058.

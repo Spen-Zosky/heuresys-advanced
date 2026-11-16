@@ -20,6 +20,11 @@
 -- Resilient (joins by role_code, no hard-coded UUIDs) + idempotent (NOT-EXISTS
 -- guard on the active (user,role,tenant) grant; fixed granted_at for an empty
 -- twice-run diff). Authored: 2026-06-23 (audit S1006 fix B-03).
+--
+-- EMENDATA il 2026-11-10 (ADR-0057, modello dei ruoli approvato da Enzo): quando il modello
+-- e' stato applicato (sys.f_modello_ruoli_applicato(), registro staging.modello_ruoli_corse)
+-- questo file non concede piu' ruoli: le concessioni le governa db/scripts/modello-ruoli.sql.
+-- Su un database nuovo il comportamento non cambia.
 -- ============================================================================
 
 INSERT INTO sys.sys_user_auth_roles
@@ -46,7 +51,8 @@ WHERE EXISTS (
         WHERE ex.user_auth_role_user_id = u.user_id
           AND ex.user_auth_role_role_id = ur.auth_role_id
           AND ex.user_auth_role_revoked_at IS NULL
-      );
+      )
+  AND NOT sys.f_modello_ruoli_applicato();
 
 DO $$
 DECLARE missing int;

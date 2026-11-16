@@ -588,7 +588,7 @@ BEGIN
       (SELECT ur.user_auth_role_user_id
          FROM sys.sys_user_auth_roles ur
          JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
-        WHERE r.auth_role_code = 'HRMS_MANAGER'
+        WHERE r.auth_role_code IN ('HRMS_MANAGER','TENANT_ADMIN')  -- ADR-0057: il vertice HR tiene TENANT_ADMIN
           AND ur.user_auth_role_tenant_id = a.attendance_tenant_id
           AND ur.user_auth_role_revoked_at IS NULL
           AND ur.user_auth_role_user_id <> a.attendance_subject_user_id

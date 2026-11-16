@@ -49,6 +49,11 @@
 -- IDEMPOTENTE + twice-run safe.
 -- ============================================================================
 
+--
+-- EMENDATA il 2026-11-10 (ADR-0057, modello dei ruoli approvato da Enzo): quando il modello
+-- e' stato applicato (sys.f_modello_ruoli_applicato(), registro staging.modello_ruoli_corse)
+-- questo file non concede piu' ruoli: le concessioni le governa db/scripts/modello-ruoli.sql.
+-- Su un database nuovo il comportamento non cambia.
 BEGIN;
 
 -- 1. Il ruolo. `ON CONFLICT DO NOTHING`: la seconda esecuzione non tocca nulla.
@@ -82,7 +87,8 @@ SELECT DISTINCT ou.organization_unit_manager_user_id, r.auth_role_id
      SELECT 1 FROM sys.sys_user_auth_roles x
       WHERE x.user_auth_role_user_id = ou.organization_unit_manager_user_id
         AND x.user_auth_role_role_id = r.auth_role_id
-        AND x.user_auth_role_revoked_at IS NULL);
+        AND x.user_auth_role_revoked_at IS NULL)
+   AND NOT sys.f_modello_ruoli_applicato();
 
 -- 4. La traduzione inglese. NON un dettaglio: `sys.v_reference_translation_coverage`
 --    e' cablata in una guardia della catena di migrazioni, che si ferma se una

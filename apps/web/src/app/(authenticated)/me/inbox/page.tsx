@@ -2,7 +2,8 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { AuditFeed, type AuditEvent, type AuditTone, Badge, Button, Card, CardContent, CardHeader, CardTitle, formatRelativeTime } from "@heuresys/ui";
+import { AuditFeed, type AuditEvent, type AuditTone, Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { useFormat } from "@/lib/format";
 import { PageHeader } from "@/components/intestazione-pagina";
 import {
   AlertTriangle,
@@ -71,6 +72,7 @@ function approvalRequestId(actionUrl: string | null): string | null {
 export default function MeInboxPage() {
   const { t } = useTranslation("ess");
   const enumLabel = useEnumLabel();
+  const formato = useFormat();
   // L'oggetto e il testo di certi avvisi li scrive l'API in italiano: se porta il messaggio strutturato, la frase
   // si compone qui nella lingua di chi guarda; altrimenti resta il testo salvato.
   const oggettoAvviso = (n: MeNotification): string =>
@@ -123,7 +125,7 @@ export default function MeInboxPage() {
       title: oggettoAvviso(n),
       // C1: i testi già scritti dal servizio possono contenere un codice («priorità MODERATE_GAP»)
       description: testoAvviso(n) ? testoLeggibile(testoAvviso(n)!) : undefined,
-      meta: `${formatRelativeTime(n.createdAt)} · ${enumLabel("notificationPriority", n.priority)} · ${enumLabel("notificationStatus", n.status)}`,
+      meta: `${formato.relativo(n.createdAt)} · ${enumLabel("notificationPriority", n.priority)} · ${enumLabel("notificationStatus", n.status)}`,
     };
   });
 

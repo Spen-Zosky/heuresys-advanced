@@ -4,7 +4,8 @@ import type { ReactNode } from "react";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { AuditFeed, type AuditEvent, type AuditTone, Badge, formatRelativeTime } from "@heuresys/ui";
+import { AuditFeed, type AuditEvent, type AuditTone, Badge } from "@heuresys/ui";
+import { useFormat } from "@/lib/format";
 import { PageHeader } from "@/components/intestazione-pagina";
 import { StatsCard } from "@/components/indicatori-leggibili";
 import {
@@ -46,6 +47,7 @@ const ICON_CLS = "h-4 w-4";
 export default function DashboardPage() {
   const { t } = useTranslation("admin");
   const enumLabel = useEnumLabel();
+  const formato = useFormat();
   const widgets = useQuery({
     queryKey: ["dashboard", "widgets"],
     queryFn: () => apiFetch<DashboardWidgetsResponse>("/v1/dashboard/widgets"),
@@ -96,7 +98,7 @@ export default function DashboardPage() {
 
   const activityEvents: AuditEvent[] = w.recentActivity.map((a) => {
     const v = activityVisual(a.kind);
-    return { icon: v.icon, tone: v.tone, title: t(`dashboard.activityKind.${a.kind}`, { subject: a.subject }), meta: formatRelativeTime(a.occurredAt) };
+    return { icon: v.icon, tone: v.tone, title: t(`dashboard.activityKind.${a.kind}`, { subject: a.subject }), meta: formato.relativo(a.occurredAt) };
   });
 
   return (

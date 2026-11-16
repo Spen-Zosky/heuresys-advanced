@@ -96,7 +96,7 @@ export default function DashboardPage() {
 
   const activityEvents: AuditEvent[] = w.recentActivity.map((a) => {
     const v = activityVisual(a.kind);
-    return { icon: v.icon, tone: v.tone, title: a.summary, meta: formatRelativeTime(a.occurredAt) };
+    return { icon: v.icon, tone: v.tone, title: t(`dashboard.activityKind.${a.kind}`, { subject: a.subject }), meta: formatRelativeTime(a.occurredAt) };
   });
 
   return (

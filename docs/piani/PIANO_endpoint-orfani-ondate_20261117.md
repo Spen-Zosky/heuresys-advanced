@@ -30,10 +30,37 @@ Come si rimisura: `awk -F'\t' 'NR>1{print $10" "$5}' docs/kb/analisi/endpoint-or
 
 Simulazione: tutte le rotte esistono con il loro permesso (`requirePermission`), i comandi compaiono solo a chi ha quel permesso, i dati vengono dalle `/v1/*` vive; nessun tocco al database né all'API. La prova E2E cambia e rimette com'era (reversibile).
 
+## Ondata 3a — schede esistenti
+
+| endpoint | dove | file |
+|---|---|---|
+| `career-paths`, `career-path-steps`, `position-career-paths`, `succession-pools`, `position-succession-relevance`, `successor-candidates`, `successor-readiness` (scritture) | `/career-succession` | `career-succession/gestione.tsx` |
+| `POST /v1/review-cycles/:id/transition` | `/performance` | `performance/avanza-ciclo.tsx` |
+| `PATCH /v1/skill-aliases/:id` | `/skills/[id]` | `skills/_components/skill-relations.tsx` |
+| `POST/DELETE /v1/organization-unit-processes` | `/process-owner` | `process-owner/assegna-unita.tsx` |
+| `PATCH /v1/tenants/:id`, `POST /v1/platform-tenant-assignments`, `/:id/revoke` | `/tenants/[id]` | `tenants/[tenantId]/gestione-tenant.tsx` |
+| `GET/POST /v1/auth/mfa/recovery-codes` | `/me/security` | `components/sicurezza-accessi.tsx` |
+| `GET /v1/auth/admin/users/:id/sessions`, `POST /v1/auth/admin/revoke-user/:id` | `/users/[id]` | stesso componente |
+| `POST /v1/compensation/recommendations` | `/compensation-intelligence` | `compensation-intelligence/nuova-raccomandazione.tsx` |
+| `POST /v1/capability/composition/recompute`, `/maturity/recompute` | `/org-director` | `org-director/ricalcola.tsx` (lavoro lungo con `LavoroInCorso`) |
+
+Prova: `apps/web/tests/e2e/ondata3-schede-esistenti.spec.ts`. I gesti che non si disfano (fase di un ciclo, stato di un tenant, rigenerazione dei codici) si provano fino al comando visibile, senza premerlo.
+
+## Ondata 3b — pagine nuove (PR a sé)
+
+Team (`/teams`), mentoring (`/mentorship`), sondaggi (`/surveys`), clima (`/engagement`), valutazioni delle competenze (`/learning/assessments`), GDPR dell'amministrazione (`/admin/gdpr`), capacità dell'agente (`/admin/agent-capabilities`). Ognuna chiede la sua voce di menu con una migrazione (modello `000385`, barra di `000484`) e il passaggio dei cancelli delle pagine raggiungibili.
+
 ## Fuori da questa sessione
 
 Le ondate 3-5 non si chiudono stanotte: ognuna è una PR e un rilascio a sé, e il turno di rilascio è conteso.
 
 ## Registro delle scoperte
+
+Da proporre a Enzo una volta sola, come «fuori da questo ciclo»:
+
+- `POST /v1/organization-unit-history`: scrivere a mano una riga di storia con valori vecchi e nuovi inventati non ha senso; la storia la scrive il sistema. Proposta: classe c (ritiro) nell'ondata 5.
+- `POST /v1/compensation/handoff-records`: il passaggio alla paghe è un evento d'integrazione, non un modulo da compilare. Proposta: classe b (agente o integrazione) nell'ondata 4.
+- `POST /v1/tenants/provision`: è spento da un interruttore (`FEATURE_DISABLED`) e il suo lavoro lo fa il costruttore di tenant. Proposta: classe c nell'ondata 5.
+- `GET /v1/capability/composition/:tipo/:id`, `GET /v1/capability/maturity/org-units/:id`, `GET /v1/mandate-acts/:id`: letture puntuali di dati che le pagine già mostrano dagli elenchi. Proposta: letture dell'agente (ondata 4).
 
 - L'estrattore di #280 conta come orfani i percorsi composti a runtime (`/v1/content/${id}/${action}`): `return-to-draft` e `unpublish` hanno già un chiamante.

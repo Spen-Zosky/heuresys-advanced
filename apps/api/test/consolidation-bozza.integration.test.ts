@@ -211,6 +211,14 @@ describe("decisioni in blocco nella bozza (Enzo, 2026-11-15)", () => {
     expect(r2.cascaded).toBe(0); // una personalizzazione non ha cascata nel modello
   });
 
+  it("le competenze non hanno cascata e si decidono in blocco senza errore (errore 500 del 2026-11-16)", async () => {
+    const pS = await proposta("SKILLS", "LACUNA", ["SKILL-PROVA-CASCATA"], []);
+    expect((await svc.cascade(direttore, pS)).items).toEqual([]);
+    expect(await svc.bulkDecide(direttore, { proposalIds: [pS], mode: "RACCOMANDATA", cascade: true }))
+      .toMatchObject({ decided: 1, cascaded: 0, skipped: [] });
+    expect((await svc.bulkDecide(direttore, { proposalIds: [pS], mode: "CASCATA" })).cascaded).toBe(0);
+  });
+
   it("una decisione già presa si rivede in blocco solo se lo si chiede, e solo il Direttore HR", async () => {
     expect((await svc.bulkDecide(direttore, { proposalIds: [pU], mode: "RIFIUTO" })).skipped)
       .toEqual([{ proposalId: pU, reason: "ALREADY_DECIDED" }]);

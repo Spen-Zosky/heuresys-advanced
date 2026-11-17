@@ -19,7 +19,7 @@ interface Legame { relation: Relazione; group: ConsolidationGroup; key: string }
  * I legami di una voce del modello, per gruppo. Le chiavi sono quelle di sorgenti.ts: il codice della voce
  * (indicatori e obiettivi con il prefisso KPI:/GOAL:). Parametri: $1 versione, $2 chiavi della proposta.
  */
-const LEGAMI: Record<ConsolidationGroup, string> = {
+const LEGAMI: Partial<Record<ConsolidationGroup, string>> = {
   ORGANIZATION: `
     SELECT 'PREREQUISITO' AS relation, 'ORGANIZATION' AS grp, u.blueprint_content_unit_parent_code AS key
       FROM sys.sys_blueprint_content_units u
@@ -46,7 +46,6 @@ const LEGAMI: Record<ConsolidationGroup, string> = {
     SELECT 'CONSEGUENZA', 'INDICATORS_GOALS', 'KPI:' || k.blueprint_content_kpi_code
       FROM sys.sys_blueprint_content_kpis k
      WHERE k.blueprint_content_kpi_version_id = $1 AND k.blueprint_content_kpi_owner_position_code = ANY($2)`,
-  SKILLS: `SELECT NULL::text AS relation, NULL::text AS grp, NULL::text AS key WHERE false`,
   PROCESSES: `
     SELECT 'CONSEGUENZA' AS relation, 'INDICATORS_GOALS' AS grp, 'GOAL:' || g.blueprint_content_goal_code AS key
       FROM sys.sys_blueprint_content_goals g
@@ -94,9 +93,12 @@ export async function cascataDi(
   variantVersionId: string,
   p: Pick<ConsolidationProposal, "proposalId" | "consolidationId" | "group" | "prototypeKeys">,
 ): Promise<CascadeItem[]> {
-  if (p.prototypeKeys.length === 0) return [];
+  // Un gruppo senza legami nel modello (le competenze) non ha cascata e non interroga il database: un testo
+  // senza $1/$2 con due parametri è rifiutato da PostgreSQL (errore 500 del 2026-11-16 sulle competenze).
+  const sql = LEGAMI[p.group];
+  if (!sql || p.prototypeKeys.length === 0) return [];
   const { rows: legami } = await db.query<{ relation: Relazione; grp: ConsolidationGroup; key: string }>(
-    LEGAMI[p.group], [variantVersionId, p.prototypeKeys],
+    sql, [variantVersionId, p.prototypeKeys],
   );
   const validi: Legame[] = legami.filter((l) => l.key).map((l) => ({ relation: l.relation, group: l.grp, key: l.key }));
   if (validi.length === 0) return [];

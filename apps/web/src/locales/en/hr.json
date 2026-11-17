@@ -240,6 +240,17 @@
       "L3": "Defined",
       "L4": "Managed",
       "L5": "Optimizing"
+    },
+    "ricalcolo": {
+      "avvia": "Recompute capability and maturity",
+      "inCorso": "Recomputing…",
+      "conferma": "Recompute capability and maturity of all units? It may take a few minutes.",
+      "titolo": "Capability recompute",
+      "passo1": "Step 1 of 2: capability composition of people, positions and units.",
+      "passo2": "Step 2 of 2: unit maturity, which reads the composition just computed.",
+      "fatto": "Recompute done: {{count}} units scored.",
+      "fatto_one": "Recompute done: {{count}} unit scored.",
+      "errore": "Recompute failed. Try again."
     }
   },
   "processOwner": {

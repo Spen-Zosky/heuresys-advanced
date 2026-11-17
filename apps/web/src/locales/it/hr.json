@@ -240,6 +240,17 @@
       "L3": "Definito",
       "L4": "Gestito",
       "L5": "Ottimizzato"
+    },
+    "ricalcolo": {
+      "avvia": "Ricalcola capacità e maturità",
+      "inCorso": "Ricalcolo in corso…",
+      "conferma": "Ricalcolare capacità e maturità di tutte le unità? Può durare qualche minuto.",
+      "titolo": "Ricalcolo delle capacità",
+      "passo1": "Passo 1 di 2: composizione delle capacità di persone, posizioni e unità.",
+      "passo2": "Passo 2 di 2: maturità delle unità, che legge la composizione appena calcolata.",
+      "fatto": "Ricalcolo finito: {{count}} unità valutate.",
+      "fatto_one": "Ricalcolo finito: {{count}} unità valutata.",
+      "errore": "Ricalcolo non riuscito. Riprova."
     }
   },
   "processOwner": {

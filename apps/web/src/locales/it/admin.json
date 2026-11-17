@@ -155,7 +155,54 @@
     "emptyTitle": "Nessun sondaggio",
     "emptyDescription": "Non ci sono sondaggi.",
     "caption": "Sondaggi",
-    "errorMessage": "Impossibile caricare i sondaggi."
+    "errorMessage": "Impossibile caricare i sondaggi.",
+    "riscontri": {
+      "titolo": "Riscontri sul clima e piani d'azione",
+      "mostra": "Mostra",
+      "tutti": "Tutti",
+      "conteggio": "{{mostrati}} di {{totale}}",
+      "nessuno": "Nessun riscontro in questo stato.",
+      "statoDi": "Stato del riscontro",
+      "categoriaLabel": "Tipo di riscontro",
+      "messaggio": "Riscontro ricevuto",
+      "registra": "Registra",
+      "errore": "Operazione non riuscita. Riprova.",
+      "stato": {
+        "new": "Nuovo",
+        "reviewed": "Letto",
+        "actioned": "Preso in carico",
+        "archived": "Archiviato"
+      },
+      "categoria": {
+        "concern": "Preoccupazione",
+        "recognition": "Riconoscimento",
+        "suggestion": "Proposta",
+        "other": "Altro"
+      }
+    },
+    "piani": {
+      "titolo": "Piani d'azione",
+      "nessuno": "Nessun piano d'azione.",
+      "statoDi": "Stato del piano",
+      "entro": "entro il {{data}}",
+      "titoloLabel": "Titolo del piano",
+      "prioritaLabel": "Priorità",
+      "scadenza": "Scadenza",
+      "daRiscontro": "Nasce dal riscontro",
+      "nessunRiscontro": "Nessuno",
+      "crea": "Crea il piano",
+      "stato": {
+        "planned": "Pianificato",
+        "in_progress": "In corso",
+        "completed": "Concluso"
+      },
+      "priorita": {
+        "low": "Bassa",
+        "medium": "Media",
+        "high": "Alta",
+        "critical": "Critica"
+      }
+    }
   },
   "users": {
     "title": "Utenti",

@@ -155,7 +155,54 @@
     "emptyTitle": "No surveys",
     "emptyDescription": "There are no surveys.",
     "caption": "Surveys",
-    "errorMessage": "Could not load surveys."
+    "errorMessage": "Could not load surveys.",
+    "riscontri": {
+      "titolo": "Climate feedback and action plans",
+      "mostra": "Show",
+      "tutti": "All",
+      "conteggio": "{{mostrati}} of {{totale}}",
+      "nessuno": "No feedback in this state.",
+      "statoDi": "Feedback status",
+      "categoriaLabel": "Feedback type",
+      "messaggio": "Feedback received",
+      "registra": "Record",
+      "errore": "Operation failed. Try again.",
+      "stato": {
+        "new": "New",
+        "reviewed": "Read",
+        "actioned": "Taken in charge",
+        "archived": "Archived"
+      },
+      "categoria": {
+        "concern": "Concern",
+        "recognition": "Recognition",
+        "suggestion": "Suggestion",
+        "other": "Other"
+      }
+    },
+    "piani": {
+      "titolo": "Action plans",
+      "nessuno": "No action plan.",
+      "statoDi": "Plan status",
+      "entro": "by {{data}}",
+      "titoloLabel": "Plan title",
+      "prioritaLabel": "Priority",
+      "scadenza": "Due date",
+      "daRiscontro": "Comes from feedback",
+      "nessunRiscontro": "None",
+      "crea": "Create the plan",
+      "stato": {
+        "planned": "Planned",
+        "in_progress": "In progress",
+        "completed": "Completed"
+      },
+      "priorita": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+        "critical": "Critical"
+      }
+    }
   },
   "users": {
     "title": "Users",

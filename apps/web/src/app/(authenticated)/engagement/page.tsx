@@ -13,6 +13,7 @@ import type {
   EngagementPulseResponse,
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { RiscontriEPiani } from "./riscontri-piani";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { useEnumLabel } from "@/lib/enum-labels";
@@ -156,6 +157,7 @@ export default function EngagementPage() {
           )}
         </CardContent>
       </Card>
+      <RiscontriEPiani />
     </main>
   );
 }

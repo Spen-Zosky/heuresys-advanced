@@ -33,7 +33,7 @@ describe("i due script applicano la regola", () => {
   it("provision-collaudo spegne l'esenzione PRIMA di concedere il ruolo", () => {
     const s = leggi("../../../db/scripts/provision-collaudo-access.ts");
     const spegne = s.indexOf("PRIMA di concedere un mandato forte");
-    const concede = s.indexOf("INSERT INTO sys.sys_user_auth_roles");
+    const concede = s.indexOf("user_auth_role_role_id, user_auth_role_tenant_id");
     expect(spegne).toBeGreaterThan(0);
     expect(spegne).toBeLessThan(concede);
   });

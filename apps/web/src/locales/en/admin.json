@@ -1656,7 +1656,20 @@
       "status": "Status",
       "handedOff": "Handed off"
     },
-    "rewardGates": "Reward gates"
+    "rewardGates": "Reward gates",
+    "nuova": {
+      "titolo": "New pay recommendation",
+      "apri": "New",
+      "chiudi": "Close",
+      "persona": "Person",
+      "dal": "Period from",
+      "al": "Period to",
+      "importo": "Amount (euro)",
+      "motivazione": "Rationale",
+      "registra": "Record the proposal",
+      "vietato": "You are not allowed to record recommendations.",
+      "errore": "Recording failed. Try again."
+    }
   },
   "whistleblowingConsole": {
     "title": "Whistleblowing reports",

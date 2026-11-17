@@ -1656,7 +1656,20 @@
       "status": "Stato",
       "handedOff": "Consegnato"
     },
-    "rewardGates": "Cancelli di premio"
+    "rewardGates": "Cancelli di premio",
+    "nuova": {
+      "titolo": "Nuova raccomandazione retributiva",
+      "apri": "Nuova",
+      "chiudi": "Chiudi",
+      "persona": "Persona",
+      "dal": "Periodo dal",
+      "al": "Periodo al",
+      "importo": "Importo (euro)",
+      "motivazione": "Motivazione",
+      "registra": "Registra la proposta",
+      "vietato": "Non hai il permesso di registrare raccomandazioni.",
+      "errore": "Registrazione non riuscita. Riprova."
+    }
   },
   "whistleblowingConsole": {
     "title": "Segnalazioni whistleblowing",

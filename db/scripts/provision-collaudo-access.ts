@@ -37,6 +37,7 @@ import {
   readCollaudoKey,
   deriveCollaudoPassword,
   COLLAUDO_IDENTITIES,
+  esenzioneAmmessa,
 } from "../../apps/api/scripts/collaudo-access.mjs";
 import { segretoTotpCasuale } from "../../apps/api/scripts/derive-access.mjs";
 import { eDiCollaudoDa } from "../../apps/api/scripts/collaudo-guard.mjs";
@@ -315,6 +316,7 @@ async function main(): Promise<void> {
         'alla loro chiave propria. Ogni riga rende ricostruibile lo stato precedente. Non e'' '
         'una tabella di lavoro: non si svuota per fare spazio.'`);
     }
+    const mandatiForti = (await db.query<{ c: string }>("SELECT * FROM sys.f_ruoli_mandato() AS m(c)")).rows.map((x) => x.c);
     for (const c of COLLAUDO_IDENTITIES) {
       let touched = false;
 
@@ -355,6 +357,27 @@ async function main(): Promise<void> {
       // "isPlatform" → jwtTenantId=null). `platformGrant: true` e' l'unica identita' che lo
       // chiede oggi; le altre restano tenant-scoped su HEURESYS come sempre.
       const grantTenantId = c.platformGrant ? null : tenantId;
+      // ADR-0050 D2: PRIMA di concedere un mandato forte l'esenzione MFA si spegne. Il trigger
+      // della 000473 rifiuta il ruolo a chi ha un'esenzione attiva, e una riattivazione del
+      // collaudo (`sospendi-collaudo --riattiva`) può averla lasciata accesa. Si scrive nel giornale.
+      if (!esenzioneAmmessa(c.roleCode, mandatiForti)) {
+        const accesa = await db.query(
+          `SELECT 1 FROM sys.sys_auth_mfa_exemptions WHERE auth_mfa_exemption_user_id = $1
+             AND auth_mfa_exemption_enabled`, [userId]);
+        if ((accesa.rowCount ?? 0) > 0) {
+          stats.esenzioniSpente++; touched = true;
+          if (!DRY) {
+            await db.query(
+              `INSERT INTO staging.collaudo_riallineo_undo (undo_email, undo_specie, undo_valore, undo_ragione)
+               VALUES ($1, 'esenzione-mfa', 'enabled=true', $2)`,
+              [c.email, ADR0050_REASON]);
+            await db.query(
+              `UPDATE sys.sys_auth_mfa_exemptions SET auth_mfa_exemption_enabled = false
+                WHERE auth_mfa_exemption_user_id = $1 AND auth_mfa_exemption_enabled`,
+              [userId]);
+          }
+        }
+      }
       const hasRole = await db.query<{ user_auth_role_tenant_id: string | null }>(
         `SELECT user_auth_role_tenant_id FROM sys.sys_user_auth_roles
           WHERE user_auth_role_user_id = $1 AND user_auth_role_role_id = $2

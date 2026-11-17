@@ -37,7 +37,7 @@ import { Client } from "pg";
 import { config as dotenvConfig } from "dotenv";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { COLLAUDO_IDENTITIES } from "../../apps/api/scripts/collaudo-access.mjs";
+import { COLLAUDO_IDENTITIES, esenzioneAmmessa } from "../../apps/api/scripts/collaudo-access.mjs";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 dotenvConfig({ path: resolve(repoRoot, ".env"), quiet: true });
@@ -203,6 +203,10 @@ async function main(): Promise<void> {
       'di collaudo scrive qui, PRIMA di cambiare, lo stato che trova: accesso e esenzione dal '
       'secondo fattore. --riattiva ripristina lo stato dell''ultima sospensione. Non si svuota.'`);
 
+    // ADR-0050 D2: il ruolo dichiarato di ogni utenza decide se l'esenzione si può riaccendere.
+    const mandati = (await db.query<{ c: string }>("SELECT * FROM sys.f_ruoli_mandato() AS m(c)")).rows.map((x) => x.c);
+    const ruoloDichiarato = new Map<string, string>(
+      COLLAUDO_IDENTITIES.map((c: { email: string; roleCode: string }) => [c.email.toLowerCase(), c.roleCode]));
     let cambiate = 0;
     let sessioniRevocate = 0;
     // ADR-0050 D3 (mig 000474): un'esenzione che si riaccende ha un autore, una persona, e
@@ -263,7 +267,7 @@ async function main(): Promise<void> {
             [r.user_id],
           );
         }
-        if (ultima.esenzione) {
+        if (ultima.esenzione && esenzioneAmmessa(ruoloDichiarato.get(r.user_email.toLowerCase()) ?? "", mandati)) {
           await db.query(
             // ADR-0050 D2: a chi porta un mandato forte l'esenzione non si riaccende (il
             // database la rifiuterebbe, migrazione 000473): entra con il suo fattore.

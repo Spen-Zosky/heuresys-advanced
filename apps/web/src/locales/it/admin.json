@@ -843,6 +843,43 @@
       "sessions_manage": "gestire le sessioni",
       "update_self": "modificare i propri dati",
       "upload_self": "caricare i propri file"
+    },
+    "deleghe": {
+      "titolo": "Deleghe del tenant",
+      "delegante": "Chi delega",
+      "delegato": "A chi",
+      "oggetto": "Che cosa",
+      "gruppi": "Gruppi del consolidamento",
+      "dal": "Dal",
+      "al": "Al (facoltativo)",
+      "motivo": "Motivo",
+      "registra": "Registra la delega",
+      "vuoto": "Nessuna delega registrata.",
+      "periodo": "Periodo",
+      "senzaFine": "senza fine",
+      "revoca": "Revoca",
+      "confermaRevoca": "Revocare questa delega?",
+      "stato": "Stato",
+      "revocata": "Revocata",
+      "inVigore": "In vigore",
+      "nonInVigore": "Non in vigore",
+      "vietato": "Non hai il permesso di gestire le deleghe.",
+      "conflitto": "Esiste già una delega uguale in vigore.",
+      "nonValida": "La delega non è valida: controlla persone, oggetto e date.",
+      "errore": "Salvataggio non riuscito. Riprova.",
+      "ambito": {
+        "APPROVALS": "Tutte le approvazioni",
+        "FULL": "Mandato pieno",
+        "CONSOLIDATION": "Consolidamento con il prototipo",
+        "PROCESS_STEP": "Passo di processo"
+      },
+      "gruppo": {
+        "ORGANIZATION": "Organizzazione",
+        "POSITIONS_ROLES": "Posizioni e ruoli",
+        "SKILLS": "Competenze",
+        "PROCESSES": "Processi",
+        "INDICATORS_GOALS": "Indicatori e obiettivi"
+      }
     }
   },
   "dashboard": {

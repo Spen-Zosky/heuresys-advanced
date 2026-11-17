@@ -843,6 +843,43 @@
       "sessions_manage": "manage sessions",
       "update_self": "update own data",
       "upload_self": "upload own files"
+    },
+    "deleghe": {
+      "titolo": "Tenant delegations",
+      "delegante": "Delegator",
+      "delegato": "Delegate",
+      "oggetto": "What",
+      "gruppi": "Consolidation groups",
+      "dal": "From",
+      "al": "To (optional)",
+      "motivo": "Reason",
+      "registra": "Record the delegation",
+      "vuoto": "No delegation recorded.",
+      "periodo": "Period",
+      "senzaFine": "open-ended",
+      "revoca": "Revoke",
+      "confermaRevoca": "Revoke this delegation?",
+      "stato": "Status",
+      "revocata": "Revoked",
+      "inVigore": "In force",
+      "nonInVigore": "Not in force",
+      "vietato": "You are not allowed to manage delegations.",
+      "conflitto": "An identical delegation is already in force.",
+      "nonValida": "The delegation is not valid: check people, object and dates.",
+      "errore": "Save failed. Try again.",
+      "ambito": {
+        "APPROVALS": "All approvals",
+        "FULL": "Full mandate",
+        "CONSOLIDATION": "Prototype consolidation",
+        "PROCESS_STEP": "Process step"
+      },
+      "gruppo": {
+        "ORGANIZATION": "Organisation",
+        "POSITIONS_ROLES": "Positions and roles",
+        "SKILLS": "Skills",
+        "PROCESSES": "Processes",
+        "INDICATORS_GOALS": "Indicators and goals"
+      }
     }
   },
   "dashboard": {

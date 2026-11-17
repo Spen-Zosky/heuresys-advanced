@@ -76,7 +76,10 @@ echo "[rilascio] G3 ok — CI $VERDI/$TOT verde su $SHORT"
 
 # G4 — backup verificato < 24 ore
 MARK="${RILASCIO_BACKUP_MARK:-$HOME/.claude/state/backup-verificato.heuresys_advanced}"
-fresco() { [ -f "$MARK" ] && [ "$(( $(date +%s) - $(stat -c %Y "$MARK") ))" -lt 86400 ]; }
+# Fresco = verificato da meno di 24 ore E il dump verificato (prima riga del marcatore) ha
+# meno di 24 ore: un marcatore recente su un dump vecchio non e' un backup recente (17/11/2026).
+giovane() { [ -f "$1" ] && [ "$(( $(date +%s) - $(stat -c %Y "$1") ))" -lt 86400 ]; }
+fresco() { giovane "$MARK" && giovane "$(sed -n 1p "$MARK" 2>/dev/null)"; }
 if ! fresco && [ -z "${RILASCIO_NO_RINNOVO:-}" ] && [ -f "$HOME/.claude/tools/backup-verificato.sh" ]; then
   bash "$HOME/.claude/tools/backup-verificato.sh" heuresys_advanced >/dev/null 2>&1 || true
 fi

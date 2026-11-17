@@ -1041,7 +1041,11 @@
         "type": "Tipo",
         "period": "Periodo",
         "status": "Stato"
-      }
+      },
+      "confermaFase": "Portare il ciclo alla fase «{{fase}}»? Le persone coinvolte vedranno il cambiamento.",
+      "annulla": "Annulla il ciclo",
+      "passaA": "Passa a: {{fase}}",
+      "erroreFase": "Cambio di fase non riuscito."
     },
     "reviews": {
       "title": "Valutazioni",

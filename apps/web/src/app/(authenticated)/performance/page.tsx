@@ -38,6 +38,7 @@ import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { MaskedCell, isMasked } from "@/components/masked-cell";
+import { AvanzaCiclo, usePuoGestireCicli } from "./avanza-ciclo";
 import { useFormat, type Formati } from "@/lib/format";
 import { useEnumLabel } from "@/lib/enum-labels";
 
@@ -95,6 +96,7 @@ export default function PerformancePage() {
     },
   ];
 
+  const puoGestireCicli = usePuoGestireCicli();
   const colonneCicli = useMemo<DataColumn<ReviewCycle>[]>(
     () => [
       // Repertorio interfacce (B5): il nome del ciclo apre la riga, il codice non va a video (R2, R4).
@@ -104,9 +106,10 @@ export default function PerformancePage() {
         header: t("performance.cycles.cols.period"),
         cell: (c) => <span className="text-xs text-muted-foreground">{periodo(c.periodStart, c.periodEnd, fmt)}</span>,
       },
+      ...(puoGestireCicli ? [{ header: "", cell: (c: ReviewCycle) => <AvanzaCiclo ciclo={c} /> }] : []),
       { header: t("performance.cycles.cols.status"), cell: (c) => <EnumStatusBadge domain="perfCycleStatus" value={c.status} /> },
     ],
-    [t, enumLabel, fmt],
+    [t, enumLabel, fmt, puoGestireCicli],
   );
 
   const colonneValutazioni = useMemo<DataColumn<PerformanceReview>[]>(

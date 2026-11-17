@@ -717,6 +717,19 @@
         "INTERNAL_PHOTO_USE": "Internal use of the photo",
         "THIRD_PARTY_SHARING": "Sharing with third parties"
       }
+    },
+    "recupero": {
+      "titolo": "Recovery codes",
+      "restano": "You have {{count}} recovery codes left.",
+      "restano_one": "You have {{count}} recovery code left.",
+      "erroreCarica": "Recovery codes could not be read.",
+      "spiega": "They let you sign in if you lose your second-factor device. Regenerating them cancels the old ones.",
+      "conferma": "Generate new codes? The ones you have now will stop working.",
+      "generando": "Generating…",
+      "genera": "Generate new codes",
+      "errore": "Generation failed. Try again.",
+      "unaVolta": "Keep them now: they will not be shown again.",
+      "salvati": "I have kept them"
     }
   },
   "skills": {

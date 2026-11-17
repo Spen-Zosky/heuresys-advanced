@@ -717,6 +717,19 @@
         "INTERNAL_PHOTO_USE": "Uso interno della fotografia",
         "THIRD_PARTY_SHARING": "Condivisione con terzi"
       }
+    },
+    "recupero": {
+      "titolo": "Codici di recupero",
+      "restano": "Ti restano {{count}} codici di recupero.",
+      "restano_one": "Ti resta {{count}} codice di recupero.",
+      "erroreCarica": "Non è stato possibile leggere i codici di recupero.",
+      "spiega": "Servono per entrare se perdi il dispositivo del secondo fattore. Rigenerarli annulla quelli vecchi.",
+      "conferma": "Generare nuovi codici? Quelli che hai ora smetteranno di funzionare.",
+      "generando": "Generazione…",
+      "genera": "Genera nuovi codici",
+      "errore": "Generazione non riuscita. Riprova.",
+      "unaVolta": "Conservali adesso: non verranno mostrati di nuovo.",
+      "salvati": "Li ho conservati"
     }
   },
   "skills": {

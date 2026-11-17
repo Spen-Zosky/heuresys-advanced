@@ -354,6 +354,17 @@
         "history": "History",
         "manage": "Management"
       }
+    },
+    "sessioni": {
+      "titolo": "Open sessions ({{count}})",
+      "nessuna": "No open session.",
+      "dispositivo": "{{browser}} on {{sistema}}",
+      "ultimo": "last access {{data}}",
+      "scade": "expires {{data}}",
+      "conferma": "Close all sessions of this person? They will have to sign in again.",
+      "chiudiTutte": "Close all sessions",
+      "chiuse": "Sessions closed.",
+      "errore": "Operation failed. Try again."
     }
   },
   "tenants": {

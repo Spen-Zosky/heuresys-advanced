@@ -35,6 +35,7 @@ import { dispositivoLeggibile } from "@/lib/person-label";
 import { useFormat } from "@/lib/format";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { ConsensiEDati, PreferenzeNotifiche } from "./privacy-notifiche";
+import { CodiciDiRecupero } from "@/components/sicurezza-accessi";
 
 // Stable no-op subscribe for useSyncExternalStore reads of immutable browser capabilities.
 const subscribeNever = () => () => {};
@@ -923,6 +924,7 @@ export default function MeSecurityPage() {
         </CardContent>
       </Card>
 
+      <CodiciDiRecupero />
       <PreferenzeNotifiche />
       <ConsensiEDati />
     </main>

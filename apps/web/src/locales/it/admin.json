@@ -354,6 +354,17 @@
         "history": "Storia",
         "manage": "Gestione"
       }
+    },
+    "sessioni": {
+      "titolo": "Sessioni aperte ({{count}})",
+      "nessuna": "Nessuna sessione aperta.",
+      "dispositivo": "{{browser}} su {{sistema}}",
+      "ultimo": "ultimo accesso {{data}}",
+      "scade": "scade {{data}}",
+      "conferma": "Chiudere tutte le sessioni di questa persona? Dovrà accedere di nuovo.",
+      "chiudiTutte": "Chiudi tutte le sessioni",
+      "chiuse": "Sessioni chiuse.",
+      "errore": "Operazione non riuscita. Riprova."
     }
   },
   "tenants": {

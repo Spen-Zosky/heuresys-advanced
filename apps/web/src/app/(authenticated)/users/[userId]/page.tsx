@@ -27,6 +27,7 @@ import { TimelinePanel } from "@/components/timeline-panel";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import type { UserDossier } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { SessioniUtente } from "@/components/sicurezza-accessi";
 import { useCan } from "@/lib/api/auth";
 import { isApiError } from "@/lib/api/errors";
 import { FieldGrid } from "@/components/detail-panel";
@@ -386,6 +387,7 @@ export default function UserDetailPage() {
           ) },
         ]}
       />
+      <SessioniUtente userId={userId} />
     </main>
   );
 }

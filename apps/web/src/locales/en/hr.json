@@ -1266,6 +1266,17 @@
       "offerError": "Offer rejected by the server.",
       "noOffers": "No offers.",
       "salaryMasked": "amount not visible with your mandate"
+    },
+    "correzioni": {
+      "candidato": "Candidate details",
+      "assunto": "Hired person (required for «Hired»)",
+      "salva": "Save",
+      "salvato": "Saved.",
+      "errore": "Save failed. Try again.",
+      "correggi": "Correct",
+      "raccomandazione": "Recommendation",
+      "voto": "Score (0-10)",
+      "annulla": "Cancel"
     }
   }
 }

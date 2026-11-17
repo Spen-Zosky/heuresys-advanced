@@ -1266,6 +1266,17 @@
       "offerError": "Offerta rifiutata dal server.",
       "noOffers": "Nessuna offerta.",
       "salaryMasked": "importo non visibile con il tuo mandato"
+    },
+    "correzioni": {
+      "candidato": "Dati del candidato",
+      "assunto": "Persona assunta (obbligatoria per «Assunto»)",
+      "salva": "Salva",
+      "salvato": "Salvato.",
+      "errore": "Salvataggio non riuscito. Riprova.",
+      "correggi": "Correggi",
+      "raccomandazione": "Raccomandazione",
+      "voto": "Voto (0-10)",
+      "annulla": "Annulla"
     }
   }
 }

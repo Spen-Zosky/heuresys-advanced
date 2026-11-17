@@ -23,6 +23,7 @@ import { useEnumLabel } from "@/lib/enum-labels";
 import { cognomeNome, etichettaPersona } from "@/lib/person-label";
 import { NomeOppure } from "@/components/senza-nome";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
+import { CorreggiValutazione, DatiCandidato } from "./correzioni";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -182,6 +183,8 @@ export default function ApplicationDetailPage() {
       {feedback && (
         <p data-testid="application-feedback" role="status" className={`text-sm ${feedback.kind === "ok" ? "text-success" : "text-danger"}`}>{feedback.msg}</p>
       )}
+
+      {candidate && <DatiCandidato key={candidate.updatedAt} candidato={candidate} puoScrivere={canMoveStage} />}
 
       <Card>
         <CardHeader><CardTitle>{t("recruiting.application.stageTitle")}</CardTitle></CardHeader>
@@ -369,6 +372,7 @@ function FeedbackBlock({
               <span className="font-medium"><NomeOppure nome={byId.get(f.interviewerUserId)} id={f.interviewerUserId} /></span>
               {" · "}<Badge variant="outline" data-testid="feedback-row-recommendation">{t(`recruiting.recommendation.${f.recommendation}`)}</Badge>
               {f.score !== null ? ` · ${f.score}/10` : ""}{f.notes ? ` · ${f.notes}` : ""}
+              {canWrite && <>{" "}<CorreggiValutazione key={f.updatedAt} valutazione={f} interviewId={interviewId} /></>}
             </li>
           ))}
         </ul>

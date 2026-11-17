@@ -48,7 +48,7 @@ Prova: `apps/web/tests/e2e/ondata3-schede-esistenti.spec.ts`. I gesti che non si
 
 ## Ondata 3b — pagine nuove (PR a sé)
 
-Team (`/teams`), mentoring (`/mentorship`), sondaggi (`/surveys`), clima (`/engagement`), valutazioni delle competenze (`/learning/assessments`), GDPR dell'amministrazione (`/admin/gdpr`), capacità dell'agente (`/admin/agent-capabilities`). Ognuna chiede la sua voce di menu con una migrazione (modello `000385`, barra di `000484`) e il passaggio dei cancelli delle pagine raggiungibili.
+Mentoring (`/mentorship`), riscontri e piani d'azione sul clima (nella pagina esistente `/engagement`), valutazioni delle competenze (`/learning/assessments`), GDPR dell'amministrazione (`/admin/gdpr`), capacità dell'agente (`/admin/agent-capabilities`). Ognuna chiede la sua voce di menu con una migrazione (modello `000385`, barra di `000484`) e il passaggio dei cancelli delle pagine raggiungibili.
 
 ## Fuori da questa sessione
 
@@ -63,4 +63,6 @@ Da proporre a Enzo una volta sola, come «fuori da questo ciclo»:
 - `POST /v1/tenants/provision`: è spento da un interruttore (`FEATURE_DISABLED`) e il suo lavoro lo fa il costruttore di tenant. Proposta: classe c nell'ondata 5.
 - `GET /v1/capability/composition/:tipo/:id`, `GET /v1/capability/maturity/org-units/:id`, `GET /v1/mandate-acts/:id`: letture puntuali di dati che le pagine già mostrano dagli elenchi. Proposta: letture dell'agente (ondata 4).
 
+- I team (`POST/PATCH /v1/teams`, membri): la `000363` ha deciso che una squadra è un progetto, e i 26 team sono diventati i 26 progetti (misura del 17/11: `sys_teams` 26, `sys_projects` 26). Una pagina `/teams` riaprirebbe il doppione che quella decisione ha chiuso. Proposta: classe c (ritiro) nell'ondata 5, non una pagina nuova.
+- Due modelli di sondaggio convivono e sono entrambi popolati (misura del 17/11): il modulo `engagement` legge `sys_surveys` (14 sondaggi, 8.288 risposte) ed è la pagina `/engagement`; il modulo `surveys` scrive `sys_engagement_surveys` (6 sondaggi, 862 risposte) e non ha pagina. Costruire `/surveys` darebbe due pagine per la stessa cosa: prima si sceglie quale modello resta (decisione di architettura, di Enzo), poi si migra l'altro. Fino ad allora `/surveys` resta fuori dall'ondata 3b.
 - L'estrattore di #280 conta come orfani i percorsi composti a runtime (`/v1/content/${id}/${action}`): `return-to-draft` e `unpublish` hanno già un chiamante.

@@ -782,7 +782,23 @@
       "end": "Fine",
       "seats": "Posti"
     },
-    "cohortNd": "ND"
+    "cohortNd": "ND",
+    "form": {
+      "nuova": "Nuova iniziativa di formazione",
+      "crea": "Crea",
+      "chiudi": "Chiudi",
+      "cercaCorso": "Cerca il corso",
+      "corso": "Corso",
+      "scegliCorso": "Scegli il corso",
+      "codice": "Codice dell'edizione",
+      "modifica": "Modifica: {{nome}}",
+      "modificaBreve": "Modifica",
+      "salva": "Salva",
+      "annulla": "Annulla",
+      "vietato": "Non hai il permesso di gestire le iniziative di formazione.",
+      "duplicato": "Esiste già un'iniziativa con questo codice.",
+      "errore": "Salvataggio non riuscito. Riprova."
+    }
   },
   "evidence": {
     "title": "Evidenze sottostanti",
@@ -1076,6 +1092,24 @@
       "MEMBER": "Membro",
       "CONTRIBUTOR": "Collaboratore",
       "OBSERVER": "Osservatore"
+    },
+    "gestione": {
+      "nuovo": "Nuovo progetto",
+      "crea": "Crea",
+      "chiudi": "Chiudi",
+      "nome": "Nome",
+      "codice": "Codice",
+      "titolo": "Gestione del progetto",
+      "salva": "Salva",
+      "avanzamento": "Avanzamento (%)",
+      "aggiungiPersone": "Aggiungi persone al progetto",
+      "ruolo": "Ruolo nel progetto",
+      "aggiungi": "Aggiungi",
+      "togli": "Togli",
+      "confermaTogli": "Togliere questa persona dal progetto?",
+      "vietato": "Non hai il permesso di gestire i progetti.",
+      "duplicato": "Esiste già un progetto con questo codice.",
+      "errore": "Salvataggio non riuscito. Riprova."
     }
   },
   "recruiting": {
@@ -1271,6 +1305,17 @@
       "offerError": "Offerta rifiutata dal server.",
       "noOffers": "Nessuna offerta.",
       "salaryMasked": "importo non visibile con il tuo mandato"
+    },
+    "correzioni": {
+      "candidato": "Dati del candidato",
+      "assunto": "Persona assunta (obbligatoria per «Assunto»)",
+      "salva": "Salva",
+      "salvato": "Salvato.",
+      "errore": "Salvataggio non riuscito. Riprova.",
+      "correggi": "Correggi",
+      "raccomandazione": "Raccomandazione",
+      "voto": "Voto (0-10)",
+      "annulla": "Annulla"
     }
   },
   "consolidationVocabulary": {

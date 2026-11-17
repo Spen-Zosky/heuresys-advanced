@@ -661,6 +661,45 @@
       "INACTIVE": "Inactive",
       "tenant": "Tenant",
       "allTenants": "All"
+    },
+    "requisiti": {
+      "nuovaCompetenza": "Add a required skill",
+      "nuovoIndicatore": "Add a required KPI",
+      "aggiungi": "Add",
+      "chiudi": "Close",
+      "cerca": "Search the catalogue",
+      "voce": "Catalogue item",
+      "scegli": "Choose an item",
+      "salva": "Save",
+      "togli": "Remove",
+      "confermaTogli": "Remove this requirement from the position?",
+      "vietato": "You are not allowed to change the position.",
+      "giaPresente": "This item is already a requirement of the position.",
+      "errore": "Save failed. Try again."
+    },
+    "titolari": {
+      "titolo": "Who holds the position",
+      "spiegazione": "Assigning, ending or transferring an assignment creates an approval request: the assignment changes only once it is approved.",
+      "vuoto": "No active assignment on this position.",
+      "fte": "FTE {{fte}}",
+      "dal": "since {{data}}",
+      "termina": "End",
+      "trasferisci": "Transfer",
+      "cercaPosizione": "Search the position",
+      "nuovaPosizione": "New position",
+      "scegliPosizione": "Choose the position",
+      "dataFine": "Last day",
+      "dataInizio": "From",
+      "proponi": "Propose",
+      "annulla": "Cancel",
+      "nuovoTitolare": "Propose a new holder",
+      "tipo": "Assignment type",
+      "quota": "Time share (0-1)",
+      "inviata": "Proposal sent: you will find it among the approvals.",
+      "avviso": "Level hierarchy warning in unit {{unita}}: {{posto}}. It does not block the proposal.",
+      "vietato": "You are not allowed to propose this change.",
+      "conflitto": "Another proposal or assignment prevents it.",
+      "errore": "Sending failed. Try again."
     }
   },
   "roles": {
@@ -828,6 +867,43 @@
       "sessions_manage": "manage sessions",
       "update_self": "update own data",
       "upload_self": "upload own files"
+    },
+    "deleghe": {
+      "titolo": "Tenant delegations",
+      "delegante": "Delegator",
+      "delegato": "Delegate",
+      "oggetto": "What",
+      "gruppi": "Consolidation groups",
+      "dal": "From",
+      "al": "To (optional)",
+      "motivo": "Reason",
+      "registra": "Record the delegation",
+      "vuoto": "No delegation recorded.",
+      "periodo": "Period",
+      "senzaFine": "open-ended",
+      "revoca": "Revoke",
+      "confermaRevoca": "Revoke this delegation?",
+      "stato": "Status",
+      "revocata": "Revoked",
+      "inVigore": "In force",
+      "nonInVigore": "Not in force",
+      "vietato": "You are not allowed to manage delegations.",
+      "conflitto": "An identical delegation is already in force.",
+      "nonValida": "The delegation is not valid: check people, object and dates.",
+      "errore": "Save failed. Try again.",
+      "ambito": {
+        "APPROVALS": "All approvals",
+        "FULL": "Full mandate",
+        "CONSOLIDATION": "Prototype consolidation",
+        "PROCESS_STEP": "Process step"
+      },
+      "gruppo": {
+        "ORGANIZATION": "Organisation",
+        "POSITIONS_ROLES": "Positions and roles",
+        "SKILLS": "Skills",
+        "PROCESSES": "Processes",
+        "INDICATORS_GOALS": "Indicators and goals"
+      }
     }
   },
   "dashboard": {
@@ -1055,7 +1131,11 @@
       "colName": "Name",
       "colSlug": "Slug",
       "colActions": "Actions",
-      "delete": "Delete"
+      "delete": "Delete",
+      "modifica": "Edit",
+      "salva": "Save",
+      "annulla": "Cancel",
+      "erroreModifica": "Edit failed."
     },
     "detail": {
       "back": "← Content",

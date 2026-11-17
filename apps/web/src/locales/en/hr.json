@@ -782,7 +782,23 @@
       "end": "End",
       "seats": "Seats"
     },
-    "cohortNd": "N/A"
+    "cohortNd": "N/A",
+    "form": {
+      "nuova": "New training initiative",
+      "crea": "Create",
+      "chiudi": "Close",
+      "cercaCorso": "Search the course",
+      "corso": "Course",
+      "scegliCorso": "Choose the course",
+      "codice": "Edition code",
+      "modifica": "Edit: {{nome}}",
+      "modificaBreve": "Edit",
+      "salva": "Save",
+      "annulla": "Cancel",
+      "vietato": "You are not allowed to manage training initiatives.",
+      "duplicato": "An initiative with this code already exists.",
+      "errore": "Save failed. Try again."
+    }
   },
   "evidence": {
     "title": "Underlying evidence",
@@ -1076,6 +1092,24 @@
       "MEMBER": "Member",
       "CONTRIBUTOR": "Contributor",
       "OBSERVER": "Observer"
+    },
+    "gestione": {
+      "nuovo": "New project",
+      "crea": "Create",
+      "chiudi": "Close",
+      "nome": "Name",
+      "codice": "Code",
+      "titolo": "Project management",
+      "salva": "Save",
+      "avanzamento": "Progress (%)",
+      "aggiungiPersone": "Add people to the project",
+      "ruolo": "Role in the project",
+      "aggiungi": "Add",
+      "togli": "Remove",
+      "confermaTogli": "Remove this person from the project?",
+      "vietato": "You are not allowed to manage projects.",
+      "duplicato": "A project with this code already exists.",
+      "errore": "Save failed. Try again."
     }
   },
   "recruiting": {
@@ -1271,6 +1305,17 @@
       "offerError": "Offer rejected by the server.",
       "noOffers": "No offers.",
       "salaryMasked": "amount not visible with your mandate"
+    },
+    "correzioni": {
+      "candidato": "Candidate details",
+      "assunto": "Hired person (required for «Hired»)",
+      "salva": "Save",
+      "salvato": "Saved.",
+      "errore": "Save failed. Try again.",
+      "correggi": "Correct",
+      "raccomandazione": "Recommendation",
+      "voto": "Score (0-10)",
+      "annulla": "Cancel"
     }
   },
   "consolidationVocabulary": {

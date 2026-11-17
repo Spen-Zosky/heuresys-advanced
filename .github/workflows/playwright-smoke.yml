@@ -57,6 +57,9 @@ jobs:
       # limit (10/5min) would starve the 5-persona setup + retries. CI-only;
       # PROD keeps its own value.
       AUTH_LOGIN_RATELIMIT_MAX: "200"
+      # Le spec della PR scrivono (PATCH/POST): il controllo d'origine del CSRF le rifiuta con
+      # ORIGIN_MISMATCH se l'origine del web di prova non e' dichiarata, come nella integrale.
+      ADMIN_ORIGIN: "http://localhost:3187"
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -220,6 +223,22 @@ jobs:
         # found" → exit 1. Target the file directly; the `setup` project
         # (auth.setup.ts → storageState) still runs as a project dependency.
         run: pnpm exec playwright test smoke-5-personas.spec.ts --reporter=list,html
+
+      # Le spec che la PR aggiunge o cambia girano QUI, sulla PR (2026-11-17): la suite
+      # integrale e' solo a mano e cade spesso al preflight per carico della macchina, quindi
+      # una spec nuova poteva entrare in main senza aver girato mai. Si confrontano gli alberi
+      # della base e della PR (checkout shallow: niente merge-base, basta il diff fra alberi).
+      - name: Run the E2E specs this PR adds or changes
+        if: github.event_name == 'pull_request'
+        working-directory: apps/web
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          git fetch --no-tags --depth=1 origin "$BASE_REF"
+          specs=$(git diff --name-only --diff-filter=AM FETCH_HEAD HEAD -- tests/e2e | grep -E '\.spec\.ts$' | grep -v 'smoke-5-personas' | sed 's|^apps/web/||' || true)
+          if [ -z "$specs" ]; then echo "nessuna spec E2E nuova o cambiata"; exit 0; fi
+          echo "spec della PR:"; echo "$specs"
+          pnpm exec playwright test $specs --reporter=list,html
 
       - name: Upload Playwright report on failure
         if: failure()

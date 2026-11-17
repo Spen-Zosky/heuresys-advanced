@@ -11,6 +11,7 @@ import { NomeOppure } from "@/components/senza-nome";
 import { apiFetch } from "@/lib/api/fetch";
 import { useFormat } from "@/lib/format";
 import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
+import { GestioneProgetto, TogliMembro } from "../gestione-progetto";
 
 /**
  * `#143` F5 — il dettaglio di un progetto: il lavoro e chi lo fa.
@@ -90,6 +91,8 @@ export default function ProjectDetailPage() {
         </CardContent>
       </Card>
 
+      <GestioneProgetto key={`${p.status}-${p.progressPct}`} progetto={p} />
+
       <Card>
         <CardHeader>
           <CardTitle as="h2">{t("projects.membersTitle", { count: correnti.length })}</CardTitle>
@@ -107,10 +110,13 @@ export default function ProjectDetailPage() {
                     {t("projects.since", { date: fmt.data(m.startsOn) })}
                   </p>
                 </div>
-                <Badge data-testid="member-role">
-                  {m.role === "LEAD" && <Crown className="mr-1 size-3" aria-hidden />}
-                  {t(`projects.role.${m.role}`)}
-                </Badge>
+                <span className="flex items-center gap-2">
+                  <Badge data-testid="member-role">
+                    {m.role === "LEAD" && <Crown className="mr-1 size-3" aria-hidden />}
+                    {t(`projects.role.${m.role}`)}
+                  </Badge>
+                  <TogliMembro projectId={p.projectId} userId={m.userId} />
+                </span>
               </li>
             ))}
           </ul>

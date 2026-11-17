@@ -572,18 +572,18 @@
       }
     },
     "kpis": {
-      "title": "KPI richiesti",
+      "title": "Indicatori richiesti",
       "back": "← Posizione",
-      "count": "{{count}} KPI associati",
-      "count_one": "{{count}} KPI associato",
+      "count": "{{count}} indicatori associati",
+      "count_one": "{{count}} indicatore associato",
       "cardTitle": "Requisiti",
-      "empty": "Nessun KPI richiesto dichiarato.",
-      "caption": "KPI richiesti dalla posizione",
+      "empty": "Nessun indicatore richiesto dichiarato.",
+      "caption": "Indicatori richiesti dalla posizione",
       "columns": {
         "code": "Codice",
-        "kpi": "KPI",
+        "kpi": "Indicatore",
         "weight": "Peso",
-        "template": "Template"
+        "template": "Obiettivo di riferimento"
       }
     },
     "learning": {
@@ -631,17 +631,17 @@
       }
     },
     "skills": {
-      "title": "Skill richieste",
+      "title": "Competenze richieste",
       "back": "← Posizione",
-      "count": "{{count}} skill associate",
-      "count_one": "{{count}} skill associata",
+      "count": "{{count}} competenze associate",
+      "count_one": "{{count}} competenza associata",
       "cardTitle": "Requisiti",
-      "empty": "Nessuna skill richiesta dichiarata.",
-      "caption": "Skill richieste dalla posizione",
+      "empty": "Nessuna competenza richiesta dichiarata.",
+      "caption": "Competenze richieste dalla posizione",
       "columns": {
         "code": "Codice",
-        "skill": "Skill",
-        "proficiency": "Proficiency",
+        "skill": "Competenza",
+        "proficiency": "Livello richiesto",
         "weight": "Peso"
       }
     },
@@ -661,6 +661,45 @@
       "INACTIVE": "Non attive",
       "tenant": "Tenant",
       "allTenants": "Tutti"
+    },
+    "requisiti": {
+      "nuovaCompetenza": "Aggiungi una competenza richiesta",
+      "nuovoIndicatore": "Aggiungi un indicatore richiesto",
+      "aggiungi": "Aggiungi",
+      "chiudi": "Chiudi",
+      "cerca": "Cerca nel catalogo",
+      "voce": "Voce del catalogo",
+      "scegli": "Scegli una voce",
+      "salva": "Salva",
+      "togli": "Togli",
+      "confermaTogli": "Togliere questo requisito dalla posizione?",
+      "vietato": "Non hai il permesso di modificare la posizione.",
+      "giaPresente": "Questa voce è già un requisito della posizione.",
+      "errore": "Salvataggio non riuscito. Riprova."
+    },
+    "titolari": {
+      "titolo": "Chi occupa la posizione",
+      "spiegazione": "Assegnare, terminare o trasferire un incarico crea una richiesta di approvazione: l'incarico cambia solo quando è approvata.",
+      "vuoto": "Nessun incarico attivo su questa posizione.",
+      "fte": "quota {{fte}}",
+      "dal": "dal {{data}}",
+      "termina": "Termina",
+      "trasferisci": "Trasferisci",
+      "cercaPosizione": "Cerca la posizione",
+      "nuovaPosizione": "Nuova posizione",
+      "scegliPosizione": "Scegli la posizione",
+      "dataFine": "Ultimo giorno",
+      "dataInizio": "Dal giorno",
+      "proponi": "Proponi",
+      "annulla": "Annulla",
+      "nuovoTitolare": "Proponi un nuovo titolare",
+      "tipo": "Tipo di incarico",
+      "quota": "Quota di tempo (0-1)",
+      "inviata": "Proposta inviata: la trovi tra le approvazioni.",
+      "avviso": "Avviso sulla gerarchia dei livelli nell'unità {{unita}}: {{posto}}. Non blocca la proposta.",
+      "vietato": "Non hai il permesso di proporre questo cambiamento.",
+      "conflitto": "C'è già una proposta o un incarico che lo impedisce.",
+      "errore": "Invio non riuscito. Riprova."
     }
   },
   "roles": {
@@ -828,6 +867,43 @@
       "sessions_manage": "gestire le sessioni",
       "update_self": "modificare i propri dati",
       "upload_self": "caricare i propri file"
+    },
+    "deleghe": {
+      "titolo": "Deleghe del tenant",
+      "delegante": "Chi delega",
+      "delegato": "A chi",
+      "oggetto": "Che cosa",
+      "gruppi": "Gruppi del consolidamento",
+      "dal": "Dal",
+      "al": "Al (facoltativo)",
+      "motivo": "Motivo",
+      "registra": "Registra la delega",
+      "vuoto": "Nessuna delega registrata.",
+      "periodo": "Periodo",
+      "senzaFine": "senza fine",
+      "revoca": "Revoca",
+      "confermaRevoca": "Revocare questa delega?",
+      "stato": "Stato",
+      "revocata": "Revocata",
+      "inVigore": "In vigore",
+      "nonInVigore": "Non in vigore",
+      "vietato": "Non hai il permesso di gestire le deleghe.",
+      "conflitto": "Esiste già una delega uguale in vigore.",
+      "nonValida": "La delega non è valida: controlla persone, oggetto e date.",
+      "errore": "Salvataggio non riuscito. Riprova.",
+      "ambito": {
+        "APPROVALS": "Tutte le approvazioni",
+        "FULL": "Mandato pieno",
+        "CONSOLIDATION": "Consolidamento con il prototipo",
+        "PROCESS_STEP": "Passo di processo"
+      },
+      "gruppo": {
+        "ORGANIZATION": "Organizzazione",
+        "POSITIONS_ROLES": "Posizioni e ruoli",
+        "SKILLS": "Competenze",
+        "PROCESSES": "Processi",
+        "INDICATORS_GOALS": "Indicatori e obiettivi"
+      }
     }
   },
   "dashboard": {
@@ -1055,7 +1131,11 @@
       "colName": "Nome",
       "colSlug": "Indirizzo breve",
       "colActions": "Azioni",
-      "delete": "Elimina"
+      "delete": "Elimina",
+      "modifica": "Modifica",
+      "salva": "Salva",
+      "annulla": "Annulla",
+      "erroreModifica": "Modifica non riuscita."
     },
     "detail": {
       "back": "← Contenuti",

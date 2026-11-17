@@ -676,6 +676,30 @@
       "vietato": "Non hai il permesso di modificare la posizione.",
       "giaPresente": "Questa voce è già un requisito della posizione.",
       "errore": "Salvataggio non riuscito. Riprova."
+    },
+    "titolari": {
+      "titolo": "Chi occupa la posizione",
+      "spiegazione": "Assegnare, terminare o trasferire un incarico crea una richiesta di approvazione: l'incarico cambia solo quando è approvata.",
+      "vuoto": "Nessun incarico attivo su questa posizione.",
+      "fte": "quota {{fte}}",
+      "dal": "dal {{data}}",
+      "termina": "Termina",
+      "trasferisci": "Trasferisci",
+      "cercaPosizione": "Cerca la posizione",
+      "nuovaPosizione": "Nuova posizione",
+      "scegliPosizione": "Scegli la posizione",
+      "dataFine": "Ultimo giorno",
+      "dataInizio": "Dal giorno",
+      "proponi": "Proponi",
+      "annulla": "Annulla",
+      "nuovoTitolare": "Proponi un nuovo titolare",
+      "tipo": "Tipo di incarico",
+      "quota": "Quota di tempo (0-1)",
+      "inviata": "Proposta inviata: la trovi tra le approvazioni.",
+      "avviso": "Attenzione: nell'unità {{unita}} la proposta metterebbe {{posto}} sopra il suo responsabile nella gerarchia dei livelli.",
+      "vietato": "Non hai il permesso di proporre questo cambiamento.",
+      "conflitto": "C'è già una proposta o un incarico che lo impedisce.",
+      "errore": "Invio non riuscito. Riprova."
     }
   },
   "roles": {

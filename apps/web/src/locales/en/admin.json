@@ -676,6 +676,30 @@
       "vietato": "You are not allowed to change the position.",
       "giaPresente": "This item is already a requirement of the position.",
       "errore": "Save failed. Try again."
+    },
+    "titolari": {
+      "titolo": "Who holds the position",
+      "spiegazione": "Assigning, ending or transferring an assignment creates an approval request: the assignment changes only once it is approved.",
+      "vuoto": "No active assignment on this position.",
+      "fte": "FTE {{fte}}",
+      "dal": "since {{data}}",
+      "termina": "End",
+      "trasferisci": "Transfer",
+      "cercaPosizione": "Search the position",
+      "nuovaPosizione": "New position",
+      "scegliPosizione": "Choose the position",
+      "dataFine": "Last day",
+      "dataInizio": "From",
+      "proponi": "Propose",
+      "annulla": "Cancel",
+      "nuovoTitolare": "Propose a new holder",
+      "tipo": "Assignment type",
+      "quota": "Time share (0-1)",
+      "inviata": "Proposal sent: you will find it among the approvals.",
+      "avviso": "Warning: in unit {{unita}} the proposal would place {{posto}} above its manager in the level hierarchy.",
+      "vietato": "You are not allowed to propose this change.",
+      "conflitto": "Another proposal or assignment prevents it.",
+      "errore": "Sending failed. Try again."
     }
   },
   "roles": {

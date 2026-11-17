@@ -696,7 +696,7 @@
       "tipo": "Tipo di incarico",
       "quota": "Quota di tempo (0-1)",
       "inviata": "Proposta inviata: la trovi tra le approvazioni.",
-      "avviso": "Attenzione: nell'unità {{unita}} la proposta metterebbe {{posto}} sopra il suo responsabile nella gerarchia dei livelli.",
+      "avviso": "Avviso sulla gerarchia dei livelli nell'unità {{unita}}: {{posto}}. Non blocca la proposta.",
       "vietato": "Non hai il permesso di proporre questo cambiamento.",
       "conflitto": "C'è già una proposta o un incarico che lo impedisce.",
       "errore": "Invio non riuscito. Riprova."

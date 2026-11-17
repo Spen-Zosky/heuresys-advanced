@@ -696,7 +696,7 @@
       "tipo": "Assignment type",
       "quota": "Time share (0-1)",
       "inviata": "Proposal sent: you will find it among the approvals.",
-      "avviso": "Warning: in unit {{unita}} the proposal would place {{posto}} above its manager in the level hierarchy.",
+      "avviso": "Level hierarchy warning in unit {{unita}}: {{posto}}. It does not block the proposal.",
       "vietato": "You are not allowed to propose this change.",
       "conflitto": "Another proposal or assignment prevents it.",
       "errore": "Sending failed. Try again."

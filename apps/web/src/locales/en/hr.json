@@ -1427,5 +1427,42 @@
       "NO_SHOW": "No show",
       "RESCHEDULED": "Rescheduled"
     }
+  },
+  "assessments": {
+    "titolo": "People assessments",
+    "descrizione": "Manager, 360°, peer, self and external assessments, with results by dimension.",
+    "elenco": "Assessments ({{mostrati}} of {{totale}})",
+    "stato": "Status",
+    "tutti": "All",
+    "erroreCarica": "Assessments could not be loaded.",
+    "nessuna": "No assessment.",
+    "senzaPeriodo": "no period",
+    "chiudi": "Close",
+    "risultati": "Results",
+    "nessunRisultato": "No result recorded.",
+    "dimensione": "Dimension",
+    "punteggio": "Score (0-100)",
+    "commento": "Comment",
+    "registraRisultato": "Record the result",
+    "errore": "Operation failed. Try again.",
+    "nuova": "Open an assessment",
+    "persona": "Person assessed",
+    "tipo": "Type",
+    "dal": "Period from",
+    "al": "Period to",
+    "apri": "Open the assessment",
+    "tipi": {
+      "MANAGER": "By the manager",
+      "THREE_SIXTY": "360°",
+      "PEER": "Peer",
+      "SELF": "Self",
+      "EXTERNAL": "External"
+    },
+    "stati": {
+      "OPEN": "Open",
+      "IN_PROGRESS": "In progress",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    }
   }
 }

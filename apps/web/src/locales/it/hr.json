@@ -1427,5 +1427,42 @@
       "NO_SHOW": "Assente",
       "RESCHEDULED": "Spostato"
     }
+  },
+  "assessments": {
+    "titolo": "Valutazioni delle persone",
+    "descrizione": "Valutazioni del responsabile, a 360°, tra pari, di sé ed esterne, con i risultati per dimensione.",
+    "elenco": "Valutazioni ({{mostrati}} di {{totale}})",
+    "stato": "Stato",
+    "tutti": "Tutti",
+    "erroreCarica": "Non è stato possibile caricare le valutazioni.",
+    "nessuna": "Nessuna valutazione.",
+    "senzaPeriodo": "senza periodo",
+    "chiudi": "Chiudi",
+    "risultati": "Risultati",
+    "nessunRisultato": "Nessun risultato registrato.",
+    "dimensione": "Dimensione",
+    "punteggio": "Punteggio (0-100)",
+    "commento": "Commento",
+    "registraRisultato": "Registra il risultato",
+    "errore": "Operazione non riuscita. Riprova.",
+    "nuova": "Apri una valutazione",
+    "persona": "Persona valutata",
+    "tipo": "Tipo",
+    "dal": "Periodo dal",
+    "al": "Periodo al",
+    "apri": "Apri la valutazione",
+    "tipi": {
+      "MANAGER": "Del responsabile",
+      "THREE_SIXTY": "A 360°",
+      "PEER": "Tra pari",
+      "SELF": "Di sé",
+      "EXTERNAL": "Esterna"
+    },
+    "stati": {
+      "OPEN": "Aperta",
+      "IN_PROGRESS": "In corso",
+      "COMPLETED": "Conclusa",
+      "CANCELLED": "Annullata"
+    }
   }
 }

@@ -56,6 +56,11 @@ const MERGE_GROUPS: ReadonlyArray<Group> = [
     { href: "/analytics/kpi", key: "kpi.analytics" },
     { href: "/kpis", key: "kpi.catalog" },
   ] },
+  // Ondata 3 (2026-11-17): le valutazioni delle persone entrano come scheda di /performance.
+  { id: "performance", tabs: [
+    { href: "/performance", key: "performance.cycles" },
+    { href: "/assessments", key: "performance.assessments" },
+  ] },
   { id: "career", tabs: [
     { href: "/career-succession", key: "career.main" },
     { href: "/insights/succession-readiness", key: "career.readiness" },
@@ -100,6 +105,7 @@ export function permessoDellaScheda(href: string): string | null {
 
 const PERMESSI_SCHEDE: Readonly<Record<string, string>> = {
   "/mentorship": "mentorship:read",
+  "/assessments": "assessment:read",
 };
 
 export function SectionTabs() {

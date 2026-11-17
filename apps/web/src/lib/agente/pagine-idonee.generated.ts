@@ -14,6 +14,7 @@ export const PAGINE_IDONEE_AGENTE: readonly string[] = [
   "/analytics/workforce",
   "/approvals",
   "/approvals/[id]",
+  "/assessments",
   "/blueprints",
   "/blueprints/[variantId]",
   "/career-succession",

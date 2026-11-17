@@ -127,3 +127,15 @@ export function deriveCollaudoPassword(key, email) {
   const h = createHmac("sha256", key).update(`collaudo-pwd:v1:${email.toLowerCase()}`).digest();
   return (toBase32(h.subarray(0, 13)).slice(0, 20).match(/.{1,4}/g) ?? []).join("-");
 }
+
+/**
+ * ADR-0050 D2: un'utenza di collaudo che porta (o per dichiarazione porterà) un mandato forte
+ * non ha mai l'esenzione dal secondo fattore. Si guarda il ruolo DICHIARATO in
+ * COLLAUDO_IDENTITIES e non solo le concessioni vive: una concessione revocata o non ancora
+ * data farebbe passare la riaccensione, e poi la concessione del ruolo verrebbe fermata dal
+ * trigger della migrazione 000473 («mandate role refused ... active MFA exemption»).
+ * `mandati` è l'insieme D1 (sys.f_ruoli_mandato()).
+ */
+export function esenzioneAmmessa(roleCode, mandati) {
+  return !new Set(mandati).has(roleCode);
+}

@@ -154,7 +154,7 @@ export function SkillFamiliesPanel() {
   return (
     <Card data-testid="skill-families-panel">
       <CardHeader>
-        <CardTitle className="flex items-center justify-between gap-3">
+        <CardTitle as="h2" className="flex items-center justify-between gap-3">
           <span>
             {t("taxonomy.families.title")}
             <span className="ml-2 text-sm font-normal text-muted-foreground">{families.data?.items.length ?? 0}</span>
@@ -393,7 +393,7 @@ export function SkillCategoriesPanel() {
   return (
     <Card data-testid="skill-categories-panel">
       <CardHeader>
-        <CardTitle className="flex items-center justify-between gap-3">
+        <CardTitle as="h2" className="flex items-center justify-between gap-3">
           <span>
             {t("taxonomy.categories.title")}
             <span className="ml-2 text-sm font-normal text-muted-foreground">{categories.data?.items.length ?? 0}</span>
@@ -580,7 +580,7 @@ export function ProficiencyLevelsPanel() {
   return (
     <Card data-testid="proficiency-levels-panel">
       <CardHeader>
-        <CardTitle>
+        <CardTitle as="h2">
           {t("taxonomy.levels.title")}
           <span className="ml-2 text-sm font-normal text-muted-foreground">{levels.data?.items.length ?? 0}</span>
         </CardTitle>

@@ -351,11 +351,23 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
 
   return (
     <DashboardShell
+      contentLabel={t("shell:ui.content")}
       header={
         <DashboardHeader
           user={identity}
           language={i18n.language === "en" ? "EN" : "IT"}
           onToggleLanguage={handleToggleLanguage}
+          labels={{
+            menu: t("shell:ui.menuOpen"),
+            breadcrumb: t("shell:ui.breadcrumb"),
+            theme: t("shell:ui.theme"),
+            language: (lang) => t("shell:ui.languageSwitch", { lang }),
+            userMenu: (username) => t("shell:ui.userMenu", { username }),
+            commandPalettePlaceholder: t("shell:ui.paletteSearch"),
+            commandPaletteEmpty: t("shell:ui.paletteEmpty"),
+            drawerTitle: t("shell:ui.drawerTitle"),
+            drawerClose: t("shell:ui.drawerClose"),
+          }}
           logo={<HeuresysWordmark variant="brand" size={24} />}
           // F-6 (L7): il collegamento del marchio ha già il suo nome accessibile («Heuresys —
           // pagina iniziale autenticata»); il distintivo «advanced» visibile ma fuori da quel
@@ -368,6 +380,9 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
       sidebar={
         <DashboardSidebar
           groups={groups}
+          title={t("shell:ui.navigation")}
+          ariaLabel={t("shell:ui.navigationAria")}
+          toggleLabel={t("shell:ui.toggleSidebar")}
           footerSlot={
             <div className="space-y-2 border-t border-border px-3 py-3">
               <p data-testid="app-user-email" title={user.email} className="truncate text-xs text-muted-foreground">
@@ -392,6 +407,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
           // fornisce non si passa nessuna icona (mai `href="#"`, che apriva una scheda sulla stessa
           // pagina). Per riaccenderle: elenco di { id, href, label } con l'indirizzo vero.
           socials={[]}
+          websiteLabel={t("shell:ui.website")}
           rightSlot={
             <span className="inline-flex items-center gap-3 text-xs">
               <span>{t("shell:brand.version")}</span>

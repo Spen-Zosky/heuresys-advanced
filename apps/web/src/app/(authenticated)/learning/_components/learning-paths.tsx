@@ -164,7 +164,7 @@ export function LearningPathsPanel() {
     <>
       <Card data-testid="learning-paths-panel">
         <CardHeader>
-          <CardTitle className="flex items-center justify-between gap-3">
+          <CardTitle as="h2" className="flex items-center justify-between gap-3">
             <span>
               {t("learning.paths.title")}
               <span className="ml-2 text-sm font-normal text-muted-foreground" data-testid="learning-paths-count">
@@ -437,7 +437,7 @@ function LearningPathStepsPanel({ path }: { path: LearningPath }) {
   return (
     <Card data-testid="learning-path-steps-panel">
       <CardHeader>
-        <CardTitle>
+        <CardTitle as="h2">
           {t("learning.steps.title")}
           <span className="ml-2 text-sm font-normal text-muted-foreground">
             {path.name} · {items.length}

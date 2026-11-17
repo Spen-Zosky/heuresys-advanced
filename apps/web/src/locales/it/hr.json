@@ -371,6 +371,45 @@
       "CONSOLIDATION_ALREADY_OPEN": "C'è già un consolidamento aperto.",
       "CONSOLIDATION_VERSION_INVALID": "Il modello di questa corsa non c'è più.",
       "PERMISSION_DENIED": "Non hai il mandato per questa operazione."
+    },
+    "distance": {
+      "loading": "Sto misurando la distanza dal modello…",
+      "error": "Non riesco a misurare la distanza dal modello.",
+      "title": "Distanza dal modello",
+      "summary": "{{rows}} righe confrontate: {{same}} uguali, {{partial}} parziali, {{different}} diverse, {{onlyModel}} solo nel modello, {{onlyTenant}} solo nella tua azienda.",
+      "domain": "Dominio",
+      "same": "Uguali",
+      "partial": "Parziali",
+      "different": "Diverse",
+      "onlyModel": "Solo modello",
+      "onlyTenant": "Solo azienda",
+      "lost": "{{count}} elementi del tenant rischiano di perdersi",
+      "domains": {
+        "ateco": "Classificazione ATECO",
+        "classe": "Classe d'impresa",
+        "ccnl": "Contratti collettivi",
+        "processi": "Processi",
+        "unita": "Unità organizzative",
+        "organigramma": "Organigramma",
+        "obblighi": "Obblighi",
+        "ruoli": "Ruoli",
+        "copertura": "Copertura",
+        "inquadramento": "Inquadramento",
+        "fasi": "Fasi dei processi",
+        "skill": "Competenze",
+        "obiettivi": "Obiettivi",
+        "metriche": "Metriche",
+        "derivati": "Dati derivati",
+        "bersagli": "Bersagli",
+        "formazione": "Formazione",
+        "carriere": "Carriere",
+        "incentivi": "Incentivi",
+        "commesse": "Commesse",
+        "criticita": "Criticità",
+        "condizioni": "Condizioni",
+        "ruoli_funzionali": "Ruoli funzionali",
+        "utenti": "Utenti"
+      }
     }
   },
   "consolidation": {
@@ -1464,5 +1503,17 @@
       "COMPLETED": "Conclusa",
       "CANCELLED": "Annullata"
     }
+  },
+  "consolidationVocabulary": {
+    "title": "Vocabolario comune",
+    "hint": "Le equivalenze fra il termine della tua azienda e quello del modello. Le approva la piattaforma.",
+    "row": "{{group}}: «{{tenant}}» corrisponde a «{{model}}»",
+    "statuses": {
+      "PROPOSTA": "Proposta",
+      "APPROVATA": "Approvata",
+      "RITIRATA": "Ritirata"
+    },
+    "approve": "Approva",
+    "withdraw": "Ritira"
   }
 }

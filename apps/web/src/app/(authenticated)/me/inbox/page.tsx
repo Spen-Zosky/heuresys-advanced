@@ -161,7 +161,7 @@ export default function MeInboxPage() {
       {pendingApprovals.length > 0 && (
         <Card data-testid="me-inbox-approvals">
           <CardHeader>
-            <CardTitle>{t("inbox.approvals.title")}</CardTitle>
+            <CardTitle as="h2">{t("inbox.approvals.title")}</CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="divide-y divide-border rounded-card border border-border">

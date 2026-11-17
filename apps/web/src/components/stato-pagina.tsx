@@ -32,7 +32,7 @@ export function StatoCaricamento({ etichetta, testId = "stato-caricamento" }: { 
       aria-busy="true"
       className="flex items-center gap-2 py-6 text-sm text-muted-foreground"
     >
-      <Spinner className="h-4 w-4" />
+      <Spinner className="h-4 w-4" label={etichetta ?? t("common:loading")} />
       <span>{etichetta ?? t("common:loading")}</span>
     </div>
   );

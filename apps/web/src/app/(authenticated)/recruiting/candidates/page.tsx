@@ -206,7 +206,7 @@ export default function CandidatesPage() {
           { id: "nuovo", titolo: t("recruiting.candidates.newTitle"), nascosta: !canWrite, contenuto: (
             <>
         <Card>
-          <CardHeader><CardTitle>{t("recruiting.candidates.newTitle")}</CardTitle></CardHeader>
+          <CardHeader><CardTitle as="h2">{t("recruiting.candidates.newTitle")}</CardTitle></CardHeader>
           <CardContent>
             <form className="grid gap-4 md:grid-cols-3" data-testid="candidate-form" onSubmit={handleSubmit((v) => create.mutate(v))}>
               <label className="space-y-1 text-sm">

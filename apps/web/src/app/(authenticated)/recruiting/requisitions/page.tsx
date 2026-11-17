@@ -90,7 +90,7 @@ export default function RequisitionsPage() {
 
       {canWrite && (
       <Card>
-        <CardHeader><CardTitle>{t("recruiting.requisitions.newTitle")}</CardTitle></CardHeader>
+        <CardHeader><CardTitle as="h2">{t("recruiting.requisitions.newTitle")}</CardTitle></CardHeader>
         <CardContent>
           <form
             className="grid gap-4 md:grid-cols-3"

@@ -40,7 +40,7 @@ export function MeAttendanceTab() {
       </ProfileSection>
 
       <Card data-testid="att-recent">
-        <CardHeader><CardTitle>{t("landing.att.recentTitle")}</CardTitle></CardHeader>
+        <CardHeader><CardTitle as="h2">{t("landing.att.recentTitle")}</CardTitle></CardHeader>
         <CardContent>
           {d.recent.length === 0 ? (
             <p className="text-sm text-muted-foreground">{t("landing.att.none")}</p>
@@ -61,7 +61,7 @@ export function MeAttendanceTab() {
 
       {d.overtime.length > 0 && (
         <Card data-testid="att-overtime">
-          <CardHeader><CardTitle>{t("landing.att.overtimeTitle")}</CardTitle></CardHeader>
+          <CardHeader><CardTitle as="h2">{t("landing.att.overtimeTitle")}</CardTitle></CardHeader>
           <CardContent>
             <ul className="divide-y divide-border text-sm">
               {d.overtime.map((o, i) => (

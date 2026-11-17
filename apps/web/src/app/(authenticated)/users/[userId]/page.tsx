@@ -52,7 +52,7 @@ function Section({
   return (
     <Card data-testid={testId}>
       <CardHeader>
-        <CardTitle>
+        <CardTitle as="h2">
           {title}
           {count !== undefined && (
             <span className="ml-2 text-sm font-normal text-muted-foreground">{count}</span>
@@ -372,7 +372,7 @@ export default function UserDetailPage() {
           {/* L'anagrafica tecnica resta, ma in fondo: serve a chi la cerca, non è
               il modo di presentare una persona. */}
           <Card data-testid="dossier-technical">
-            <CardHeader><CardTitle>{t("users.detail.cardTitle")}</CardTitle></CardHeader>
+            <CardHeader><CardTitle as="h2">{t("users.detail.cardTitle")}</CardTitle></CardHeader>
             <CardContent>
               <FieldGrid
                 testId="user-fields"

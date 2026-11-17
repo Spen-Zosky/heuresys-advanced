@@ -148,7 +148,7 @@ export function PositionEditor({ positionId }: { positionId: string }) {
   return (
     <Card data-testid="position-editor">
       <CardHeader>
-        <CardTitle>{t("positions.detail.edit.cardTitle")}</CardTitle>
+        <CardTitle as="h2">{t("positions.detail.edit.cardTitle")}</CardTitle>
       </CardHeader>
       <CardContent>
         {!canUpdate && (

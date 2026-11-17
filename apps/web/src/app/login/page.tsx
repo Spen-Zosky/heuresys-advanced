@@ -457,7 +457,7 @@ export default function LoginPage() {
           <div className="mb-4 flex items-center justify-center">
             <HeuresysWordmark variant="brand" size="hero" as="h1" aria-label="Heuresys" />
           </div>
-          <CardTitle data-testid="login-title" className="text-center">
+          <CardTitle as="h2" data-testid="login-title" className="text-center">
             {title}
           </CardTitle>
           <p className="text-sm opacity-70 mt-1 text-center">{subtitle}</p>

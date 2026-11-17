@@ -87,7 +87,7 @@ export function SkillAliasesPanel({ skillId }: { skillId: string }) {
   return (
     <Card data-testid="skill-aliases-panel">
       <CardHeader>
-        <CardTitle>
+        <CardTitle as="h2">
           {t("skills.relations.aliasesTitle")}
           <span className="ml-2 text-sm font-normal text-muted-foreground">{items.length}</span>
         </CardTitle>
@@ -225,7 +225,7 @@ export function SkillEdgesPanel({ skillId }: { skillId: string }) {
   return (
     <Card data-testid="skill-edges-panel">
       <CardHeader>
-        <CardTitle>
+        <CardTitle as="h2">
           {t("skills.relations.edgesTitle")}
           <span className="ml-2 text-sm font-normal text-muted-foreground">{righe.length}</span>
         </CardTitle>

@@ -124,7 +124,7 @@ export default function BlueprintVariantDetailPage() {
 
       {tab === "processes" && (
         <Card data-testid="blueprint-tab-content-processes">
-          <CardHeader><CardTitle>{t("detail.processesTitle")}</CardTitle></CardHeader>
+          <CardHeader><CardTitle as="h2">{t("detail.processesTitle")}</CardTitle></CardHeader>
           <CardContent className="p-0">
             <EntityTable<BlueprintProcess>
               isLoading={processes.query.isLoading}
@@ -157,7 +157,7 @@ export default function BlueprintVariantDetailPage() {
 
       {tab === "activations" && (
         <Card data-testid="blueprint-tab-content-activations">
-          <CardHeader><CardTitle>{t("detail.activationsTitle")}</CardTitle></CardHeader>
+          <CardHeader><CardTitle as="h2">{t("detail.activationsTitle")}</CardTitle></CardHeader>
           <CardContent className="p-0">
             <EntityTable<BlueprintActivation>
               isLoading={activations.query.isLoading}
@@ -182,7 +182,7 @@ export default function BlueprintVariantDetailPage() {
 
       {tab === "documentation" && (
         <Card data-testid="blueprint-tab-content-documentation">
-          <CardHeader><CardTitle>{t("detail.documentationTitle")}</CardTitle></CardHeader>
+          <CardHeader><CardTitle as="h2">{t("detail.documentationTitle")}</CardTitle></CardHeader>
           <CardContent className="p-0">
             <EntityTable<LinkedDoc> originPath={"/v1/content-blueprint-links"}
               isLoading={documentation.isLoading}

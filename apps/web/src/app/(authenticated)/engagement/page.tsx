@@ -116,7 +116,7 @@ export default function EngagementPage() {
       {/* Pulse trend */}
       <Card data-testid="engagement-pulse">
         <CardHeader>
-          <CardTitle>{t("engagement.pulse.cardTitle")}</CardTitle>
+          <CardTitle as="h2">{t("engagement.pulse.cardTitle")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {pulse.isLoading ? (

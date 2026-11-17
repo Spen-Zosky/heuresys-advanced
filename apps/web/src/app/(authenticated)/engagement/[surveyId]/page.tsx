@@ -94,7 +94,7 @@ export default function EngagementResultsPage() {
           {hasRated && (
             <Card data-testid="engagement-results-chart">
               <CardHeader>
-                <CardTitle>{t("engagement.results.chartTitle")}</CardTitle>
+                <CardTitle as="h2">{t("engagement.results.chartTitle")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <EChartsCard option={ratingsBarOption(d.questions, t("engagement.results.avg"))} height={360} ariaLabel={t("engagement.results.chartTitle")} />

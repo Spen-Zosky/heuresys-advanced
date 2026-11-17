@@ -127,7 +127,7 @@ export function GoalTimelineDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={MODALE.media}>
+      <DialogContent className={MODALE.media} closeLabel={t("shell:ui.close")}>
         <DialogHeader>
           <DialogTitle>{t("goals.timeline.title")}</DialogTitle>
           <DialogDescription>{goalTitle}</DialogDescription>

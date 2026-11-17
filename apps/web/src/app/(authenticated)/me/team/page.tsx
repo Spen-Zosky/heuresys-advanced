@@ -49,7 +49,7 @@ export default function MeTeamPage() {
             <Card key={team.teamId} data-testid="me-team-card">
               <CardHeader>
                 <div className="flex flex-wrap items-center gap-3">
-                  <CardTitle data-testid="me-team-name">{team.name}</CardTitle>
+                  <CardTitle as="h2" data-testid="me-team-name">{team.name}</CardTitle>
                   <span className="ml-auto inline-flex items-center gap-1 text-sm text-muted-foreground">
                     <Users className="h-4 w-4" />
                     {team.memberCount}

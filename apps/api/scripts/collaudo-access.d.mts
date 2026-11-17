@@ -10,9 +10,12 @@ export interface CollaudoIdentity {
   displayName: string;
   tenantCode: string;
   roleCode: string;
+  mfaExempt?: boolean;
+  platformGrant?: boolean;
 }
 export declare const COLLAUDO_PATH: string;
 export declare const COLLAUDO_IDENTITIES: readonly CollaudoIdentity[];
 export declare function isCollaudoIdentity(email: string): boolean;
 export declare function readCollaudoKey(): Buffer;
 export declare function deriveCollaudoPassword(key: Buffer, email: string): string;
+export declare function esenzioneAmmessa(roleCode: string, mandati: Iterable<string>): boolean;

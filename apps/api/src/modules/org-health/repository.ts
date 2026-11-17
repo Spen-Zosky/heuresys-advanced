@@ -97,13 +97,17 @@ export async function loadOrgHealthInputs(
         ORDER BY s.survey_tenant_id, s.survey_end_date DESC NULLS LAST, s.created_at DESC
      ),
      engagement AS (
-       -- scala 1..10 (misurata, vedi testata); testo e scelta non sono misurazioni
+       -- scala 1..10 (misurata, vedi testata) salvo che la domanda dichiari la sua: i sondaggi
+       -- trasferiti dal modello vecchio votano su 5 (000497) e si riportano qui, in lettura;
+       -- testo e scelta non sono misurazioni
        SELECT op.ou_id,
               avg(CASE
                     WHEN q.survey_question_type = 'nps'
-                      THEN r.survey_response_rating_value::numeric / 10.0
+                      THEN r.survey_response_rating_value::numeric
+                           / COALESCE((q.survey_question_options->>'scale')::numeric, 10.0)
                     WHEN q.survey_question_type = 'rating'
-                      THEN (r.survey_response_rating_value::numeric - 1) / 9.0
+                      THEN (r.survey_response_rating_value::numeric - 1)
+                           / (COALESCE((q.survey_question_options->>'scale')::numeric, 10.0) - 1)
                   END) AS score,
               count(*) FILTER (
                 WHERE q.survey_question_type IN ('rating', 'nps')

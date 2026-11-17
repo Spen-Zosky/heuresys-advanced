@@ -57,6 +57,31 @@ export function personeAmmesse(env: Record<string, string | undefined> = process
   );
 }
 
+/**
+ * I tenant le cui persone sono ammesse all'assistente, in `AGENT_GATEWAY_ALLOWED_TENANT_IDS`
+ * (identificativi separati da virgola; vuoto o assente = nessuno). Serve al caso che D3 nomina:
+ * Enzo che entra con l'utenza di una persona del tenant per una dimostrazione. Ammettere un tenant
+ * non allarga niente oltre la persona: il gettone dell'agente porta solo i suoi permessi, senza
+ * mandati (ADR-0050 D6), e l'API filtra per tenant (I5).
+ */
+export function tenantAmmessi(env: Record<string, string | undefined> = process.env): ReadonlySet<string> {
+  return new Set(
+    (env.AGENT_GATEWAY_ALLOWED_TENANT_IDS ?? "")
+      .split(",")
+      .map((x) => x.trim())
+      .filter((x) => x.length > 0),
+  );
+}
+
+/** Ammesso chi è nominato per persona, oppure chi appartiene a un tenant ammesso. Fail-closed. */
+export function ammessoAllAssistente(
+  chi: { userId: string; tenantId: string | null },
+  env: Record<string, string | undefined> = process.env,
+): boolean {
+  if (personeAmmesse(env).has(chi.userId)) return true;
+  return chi.tenantId !== null && tenantAmmessi(env).has(chi.tenantId);
+}
+
 export interface Limiti {
   /** Conversazioni contemporanee della stessa persona. */
   perPersona: number;

@@ -9,6 +9,7 @@ import { Building2, GraduationCap, Users } from "lucide-react";
 import { EChartsCard } from "../../_charts-client";
 import type { SkillsCoverageAnalyticsResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { useEnumLabel } from "@/lib/enum-labels";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 const AXIS_COLOR = "hsl(var(--muted-foreground))";
@@ -16,7 +17,7 @@ const GRID_COLOR = "hsl(var(--border))";
 
 /** Coverage heatmap: OU (rows) × proficiency (cols) → evidence count. Sparse by
  *  design — missing [x,y] pairs render blank (no zero triples emitted). */
-function coverageHeatmapOption(d: SkillsCoverageAnalyticsResponse) {
+function coverageHeatmapOption(d: SkillsCoverageAnalyticsResponse, etichetta: (p: string) => string) {
   const x = d.proficiencyLevels;
   const y = d.orgUnits;
   const values = d.cells.map((c) => [x.indexOf(c.proficiency), y.indexOf(c.orgUnit), c.evidenceCount]);
@@ -26,7 +27,7 @@ function coverageHeatmapOption(d: SkillsCoverageAnalyticsResponse) {
     tooltip: { position: "top" as const },
     xAxis: {
       type: "category" as const,
-      data: x,
+      data: x.map(etichetta),
       axisLabel: { color: AXIS_COLOR },
       axisLine: { lineStyle: { color: GRID_COLOR } },
       splitArea: { show: true },
@@ -52,7 +53,8 @@ function coverageHeatmapOption(d: SkillsCoverageAnalyticsResponse) {
       {
         type: "heatmap" as const,
         data: values,
-        label: { show: false },
+        // il valore scritto in ogni cella: il colore da solo non dice «quanto»
+        label: { show: true, color: AXIS_COLOR, fontSize: 11 },
         emphasis: { itemStyle: { shadowBlur: 6, shadowColor: "rgba(0,0,0,0.2)" } },
       },
     ],
@@ -61,6 +63,7 @@ function coverageHeatmapOption(d: SkillsCoverageAnalyticsResponse) {
 
 export default function SkillsCoverageAnalyticsPage() {
   const { t } = useTranslation("analytics");
+  const enumLabel = useEnumLabel();
   const q = useQuery({
     queryKey: ["analytics", "skills"],
     queryFn: () => apiFetch<SkillsCoverageAnalyticsResponse>("/v1/analytics/skills"),
@@ -84,7 +87,7 @@ export default function SkillsCoverageAnalyticsPage() {
   const d = q.data!;
   const hasData = d.cells.length > 0;
   const proficiencyBarOption = echartsPresets.bar({
-    x: d.proficiencyLevels,
+    x: d.proficiencyLevels.map((p) => enumLabel("proficiency", p)),
     series: [
       {
         name: t("skills.seriesEvidence"),
@@ -146,7 +149,7 @@ export default function SkillsCoverageAnalyticsPage() {
               className="rounded-card border border-border bg-card p-4"
             >
               <EChartsCard
-                option={coverageHeatmapOption(d)}
+                option={coverageHeatmapOption(d, (p) => enumLabel("proficiency", p))}
                 height={Math.max(360, d.orgUnits.length * 26)}
                 ariaLabel={t("skills.heatmapAria")}
               />

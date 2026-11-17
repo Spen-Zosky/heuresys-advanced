@@ -93,6 +93,7 @@ import { useCurrentUser, useLogout, useMyInterfaces, useUpdateMyPreferences } fr
 import { isApiError, SessionExpiredError } from "../../lib/api/errors";
 import { setLocale } from "../../lib/i18n";
 import { primaryRoleOf } from "../../lib/role-precedence";
+import { cognomeNome } from "../../lib/person-label";
 import { PreferencesApplier } from "../../components/preferences-applier";
 import { StepUpDialog } from "../../components/step-up-dialog";
 import { SectionTabs, SECTION_TAB_GROUPS } from "../../components/section-tabs";
@@ -274,7 +275,12 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
   for (const section of sections) {
     for (const i of section.interfaces) {
       const { gruppo, ramo } = ramoDi(i.route, i.sidebarGroup);
-      const voce = { id: i.code, label: i.label, href: i.route, icona: i.icon ?? null, ordine: i.order, ramo, ...(NAV_TESTID[i.code] ? { testId: NAV_TESTID[i.code] } : {}) };
+      // Il registro delle interfacce porta le etichette in italiano: in inglese si traducono per
+      // rotta (`shell:nav.voci.<rotta>`); una rotta senza traduzione tiene l'etichetta del registro.
+      const etichetta = i18n.language === "en"
+        ? t(`shell:nav.voci.${i.route.replace(/^\//, "").replace(/\//g, "_")}`, { defaultValue: i.label })
+        : i.label;
+      const voce = { id: i.code, label: etichetta, href: i.route, icona: i.icon ?? null, ordine: i.order, ramo, ...(NAV_TESTID[i.code] ? { testId: NAV_TESTID[i.code] } : {}) };
       const arr = byGroup.get(gruppo);
       if (arr) arr.push(voce);
       else byGroup.set(gruppo, [voce]);
@@ -291,17 +297,30 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
     }));
 
   const verdict = pageVerdict(pathname, ifaces.data?.routes ?? [], SECTION_TAB_GROUPS);
+  // La pagina negata si nomina a parole (la voce di menu), mai col percorso tecnico.
+  const nomePaginaNegata =
+    verdict.kind === "denied"
+      ? t(`shell:nav.voci.${verdict.route.replace(/^\//, "").replace(/\//g, "_")}`, { defaultValue: "" })
+      : "";
 
   const roles = user.roles ?? [];
   // S-22 (INC-16): il tono dell'etichetta non viene più da una lista di sette ruoli scritta
   // qui (che non conosceva i ruoli nati col mandato K), ma dal dato: chi ha nel menu almeno
   // una voce fuori dall'area personale ha un lavoro che va oltre il proprio record.
   const hasAdminRole = sections.some((s) => s.code !== "PERSONAL" && s.interfaces.length > 0);
-  const displayName = user.displayName?.trim() || user.email;
+  // S-01 (forense 15/11): la persona si scrive «Cognome, Nome» (R1); l'email solo se il nome manca.
+  const nomeCompleto = cognomeNome({
+    displayName: user.displayName?.trim() || null,
+    firstName: user.firstName ?? null,
+    lastName: user.lastName ?? null,
+  }).trim();
+  const displayName = nomeCompleto || user.email;
   const initials = (
-    user.displayName?.trim()
-      ? user.displayName.trim().split(/\s+/).map((w) => w.charAt(0)).join("").slice(0, 2)
-      : user.email.slice(0, 2)
+    user.firstName?.trim() && user.lastName?.trim()
+      ? `${user.firstName.trim().charAt(0)}${user.lastName.trim().charAt(0)}`
+      : nomeCompleto
+        ? nomeCompleto.split(/[\s,]+/).filter(Boolean).map((w) => w.charAt(0)).join("").slice(0, 2)
+        : user.email.slice(0, 2)
   ).toUpperCase();
   // Non `roles[0]`: l'ordine con cui l'API restituisce i ruoli e' arbitrario, e
   // con l'invariante I17 (chiunque e' almeno USER) un'amministratrice di tenant
@@ -351,7 +370,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
           groups={groups}
           footerSlot={
             <div className="space-y-2 border-t border-border px-3 py-3">
-              <p data-testid="app-user-email" className="truncate text-xs text-muted-foreground">
+              <p data-testid="app-user-email" title={user.email} className="truncate text-xs text-muted-foreground">
                 {user.email}
               </p>
               <Button
@@ -369,8 +388,12 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
       }
       footer={
         <DashboardFooter
+          // Nessun indirizzo reale dei profili social di Heuresys esiste nel repo: finché Enzo non li
+          // fornisce non si passa nessuna icona (mai `href="#"`, che apriva una scheda sulla stessa
+          // pagina). Per riaccenderle: elenco di { id, href, label } con l'indirizzo vero.
+          socials={[]}
           rightSlot={
-            <>
+            <span className="inline-flex items-center gap-3 text-xs">
               <span>{t("shell:brand.version")}</span>
               <span aria-hidden className="text-border">·</span>
               <span>{identity.role}</span>
@@ -378,7 +401,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
               <Link href="/accessibilita" data-testid="app-footer-accessibility" className="underline-offset-2 hover:underline">
                 {t("shell:brand.accessibility")}
               </Link>
-            </>
+            </span>
           }
         />
       }
@@ -392,7 +415,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
         <main data-testid="page-no-access" className="mx-auto max-w-2xl space-y-4 px-6 py-10">
           <header className="space-y-1">
             <h1 className="text-2xl font-bold tracking-tight">{t("shell:noAccess.title")}</h1>
-            <p className="text-sm text-muted-foreground">{t("shell:noAccess.body", { route: verdict.route })}</p>
+            <p className="text-sm text-muted-foreground">{nomePaginaNegata ? t("shell:noAccess.body", { pagina: nomePaginaNegata }) : t("shell:noAccess.bodyGenerico")}</p>
           </header>
           <Button variant="outline" size="sm" onClick={() => router.push("/me")}>
             {t("shell:noAccess.home")}

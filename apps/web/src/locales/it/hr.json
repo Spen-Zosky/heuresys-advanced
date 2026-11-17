@@ -13,6 +13,7 @@
     "title": "Catalogo skill",
     "description": "Skill visibili nel catalogo, globali e di tenant.",
     "count": "{{count}} skill visibili",
+    "count_one": "{{count}} skill visibile",
     "errorMessage": "Impossibile caricare le skill.",
     "emptyTitle": "Nessuna skill",
     "emptyDescription": "Non ci sono skill nel catalogo.",
@@ -70,18 +71,19 @@
   },
   "kpis": {
     "title": "Catalogo KPI",
-    "description": "KPI definiti, con unità, polarità e scope.",
+    "description": "Indicatori definiti, con unità di misura, verso di lettura (più alto è meglio, o più basso è meglio) e ambito.",
     "count": "{{count}} KPI definiti — {{piattaforma}} di piattaforma, {{azienda}} dell'azienda",
+    "count_one": "{{count}} KPI definito — {{piattaforma}} di piattaforma, {{azienda}} dell'azienda",
     "errorMessage": "Impossibile caricare i KPI.",
     "emptyTitle": "Nessun KPI",
     "emptyDescription": "Non ci sono KPI definiti.",
     "caption": "Elenco KPI",
     "cols": {
       "unit": "Unità",
-      "polarity": "Polarità"
+      "polarity": "Verso di lettura"
     },
     "metrology": {
-      "title": "Metrologia",
+      "title": "Come si misura",
       "description2": "Come i KPI vengono misurati e ponderati.",
       "methods": "Metodi di valutazione",
       "rules": "Regole di ponderazione",
@@ -118,6 +120,7 @@
     "title": "Obiettivi",
     "description": "Obiettivi e goal sull'intero tenant",
     "count": "{{count}} obiettivi",
+    "count_one": "{{count}} obiettivo",
     "errorMessage": "Impossibile caricare gli obiettivi",
     "emptyTitle": "Nessun obiettivo",
     "emptyDescription": "Non ci sono obiettivi per questo tenant",
@@ -146,8 +149,9 @@
   },
   "okrs": {
     "title": "OKR",
-    "description": "Obiettivi e risultati chiave sull'intero tenant",
+    "description": "Obiettivi e risultati chiave (OKR) sull'intera azienda",
     "count": "{{count}} OKR",
+    "count_one": "{{count}} OKR",
     "errorMessage": "Impossibile caricare gli OKR",
     "emptyTitle": "Nessun OKR",
     "emptyDescription": "Non ci sono OKR per questo tenant",
@@ -159,20 +163,22 @@
       "progress": "Avanzamento"
     },
     "checkIns": {
-      "open": "Check-in",
-      "title": "Check-in OKR",
-      "empty": "Nessun check-in registrato.",
+      "open": "Aggiornamenti",
+      "title": "Aggiornamenti di avanzamento",
+      "empty": "Nessun aggiornamento registrato.",
       "scopeAggregate": "Aggregato OKR",
       "scopeKeyResult": "Risultato chiave",
       "progress": "Avanzamento",
       "overall": "Complessivo",
       "error": "Errore di caricamento."
-    }
+    },
+    "periodEnded": "periodo concluso"
   },
   "orgDirector": {
     "title": "Direzione organizzativa",
     "description": "Capability e maturità per unità organizzativa, dai motori MLCE e Maturity.",
     "count": "{{count}} unità",
+    "count_one": "{{count}} unità",
     "errorMessage": "Impossibile caricare la capability/maturità",
     "emptyTitle": "Nessun dato di capability",
     "emptyDescription": "I motori non sono ancora stati calcolati per questo tenant.",
@@ -222,12 +228,21 @@
     "tabs": {
       "units": "Unità organizzative",
       "essential": "Capacità essenziali"
+    },
+    "maturityLevels": {
+      "L0": "Improvvisato",
+      "L1": "Iniziale",
+      "L2": "Ripetibile",
+      "L3": "Definito",
+      "L4": "Gestito",
+      "L5": "Ottimizzato"
     }
   },
   "processOwner": {
     "title": "Responsabile di processo",
     "description": "Catalogo dei processi del blueprint (navigazione del grafo, non runtime BPM).",
     "count": "{{count}} processi",
+    "count_one": "{{count}} processo",
     "errorMessage": "Impossibile caricare i processi",
     "emptyTitle": "Nessun processo",
     "emptyDescription": "Non ci sono processi nel blueprint.",
@@ -248,6 +263,7 @@
       "subtitle": "Unità organizzative assegnate al processo e relativo ruolo RACI.",
       "hint": "Seleziona un processo per vedere le unità organizzative assegnate e il loro ruolo RACI.",
       "count": "{{count}} unità",
+      "count_one": "{{count}} unità",
       "caption": "Assegnazioni RACI del processo",
       "errorMessage": "Impossibile caricare le assegnazioni RACI",
       "empty": "Nessuna unità organizzativa assegnata a questo processo.",
@@ -267,6 +283,7 @@
   "consolidationRuns": {
     "title": "Corse del modello",
     "count": "{{count}} corse nel registro",
+    "count_one": "{{count}} corsa nel registro",
     "pick": "Corsa con cui lavorare",
     "option": "{{model}} · caricata il {{date}} · {{status}}",
     "empty": "Il registro delle corse è vuoto: nessuna corsa del datastore è stata ancora caricata come modello.",
@@ -361,14 +378,17 @@
     "done": "Concluso",
     "waiting": "In attesa",
     "pending": "{{count}} da decidere",
+    "pending_one": "{{count}} da decidere",
     "lastRunOk": "Ultimo giro su {{group}}: {{proposals}} proposte in {{rounds}} giri, {{seconds}} s.",
     "lastRunFailed": "L'ultimo giro su {{group}} non è riuscito: {{error}}",
     "run": "Avvia i giri su {{group}}",
     "confirmCertain": "Conferma gli abbinamenti certi: {{count}} (fiducia ≥ {{threshold}})",
+    "confirmCertain_one": "Conferma l'abbinamento certo: {{count}} (fiducia ≥ {{threshold}})",
     "closeGroup": "Passa alla sezione successiva",
     "proposalsTitle": "Proposte: {{group}}",
     "proposalsDescription": "Una riga per voce. La fiducia va da 0 a 100; la motivazione è dell'agente.",
     "count": "{{count}} proposte",
+    "count_one": "{{count}} proposta",
     "proposalsEmptyTitle": "Nessuna proposta in questo gruppo",
     "proposalsEmptyDescription": "Le proposte compaiono quando l'agente ha fatto i giri del gruppo.",
     "caption": "Proposte dell'agente di consolidamento per il gruppo selezionato",
@@ -430,18 +450,21 @@
       "confirm": "Conferma la decisione",
       "confirming": "Registro…",
       "close": "Chiudi",
-      "sameHint": "Puoi riconfermare anche la stessa scelta. La decisione viene registrata: i dati cambiano solo quando premi «Esegui modifiche»."
+      "sameHint": "Puoi riconfermare anche la stessa scelta. La decisione va nella bozza: i dati cambiano solo con «Approva definitivamente le modifiche»."
     },
     "applyChanges": "Apporta modifiche ({{count}})",
+    "applyChanges_one": "Apporta la modifica ({{count}})",
     "applying": "Provo le modifiche nella bozza…",
     "applyResult": {
       "title": "Modifiche eseguite: {{count}} decisioni applicate ai dati",
+      "title_one": "Modifica eseguita: {{count}} decisione applicata ai dati",
       "detail": "Valori cambiati {{changed}}, voci create {{created}}, effetti precedenti ritirati {{reverted}}."
     },
     "nextTitle": "Cosa fare adesso",
     "nextRunning": "Il giro su {{group}} è in corso. Non devi fare niente: la pagina si aggiorna da sola quando ha finito.",
     "nextRun": "Per questo gruppo non ci sono ancora proposte. Premi «Avvia i giri su {{group}}»: l'agente confronta i dati della tua azienda con il prototipo e prepara le proposte.",
     "nextDecide": "Restano {{count}} proposte da decidere nella tabella qui sotto. Apri ogni riga e scegli, oppure usa «Conferma gli abbinamenti certi» per quelle sicure. Finché ne resta una, il gruppo non si può chiudere.",
+    "nextDecide_one": "Resta {{count}} proposta da decidere nella tabella qui sotto. Apri la riga e scegli, oppure usa «Conferma gli abbinamenti certi» se è sicura. Finché ne resta una, il gruppo non si può chiudere.",
     "nextClose": "Tutto è deciso. Passo successivo: premi «Passa alla sezione successiva». Si apre il gruppo {{next}}. Le decisioni restano nella bozza fino all'approvazione definitiva.",
     "nextCloseLast": "Tutto è deciso. Passo successivo: premi «Passa alla sezione successiva»: è l'ultimo gruppo. Poi «Approva definitivamente le modifiche» porta la bozza nei dati.",
     "nextOther": "Il gruppo aperto è {{group}}. Puoi consultare questo gruppo, ma i passi da fare sono nel gruppo aperto: selezionalo nella fila qui sopra.",
@@ -486,12 +509,44 @@
       },
       "update_one": "Aggiorna cascata (una voce)",
       "update_other": "Aggiorna cascata ({{count}} voci)"
+    },
+    "bulk": {
+      "select": "Scegli",
+      "selectRow": "Scegli questa proposta",
+      "outcome": "Esito",
+      "state": "Stato",
+      "all": "Tutti",
+      "undecided": "Da decidere",
+      "decided": "Decise",
+      "minConfidence": "Fiducia da",
+      "maxConfidence": "Fiducia fino a",
+      "shown": "{{shown}} proposte su {{total}} con questi filtri",
+      "selectAll": "Scegli le {{count}} filtrate",
+      "selectAll_one": "Scegli l'unica filtrata ({{count}})",
+      "clear": "Togli la scelta",
+      "selected_one": "Una proposta scelta",
+      "selected_other": "{{count}} proposte scelte",
+      "withCascade": "Aggiorna anche la cascata di ognuna",
+      "revise": "Rivedi anche quelle già decise",
+      "recommended": "Applica la raccomandazione dell'agente ({{count}})",
+      "recommended_one": "Applica la raccomandazione dell'agente ({{count}})",
+      "reject": "Rifiuta / non adottare ({{count}})",
+      "reject_one": "Rifiuta / non adottare ({{count}})",
+      "cascade": "Aggiorna la cascata delle decise ({{count}})",
+      "cascade_one": "Aggiorna la cascata della decisa ({{count}})",
+      "undo": "Rimetti da decidere ({{count}})",
+      "undo_one": "Rimetti da decidere ({{count}})",
+      "hint": "Le scelte in blocco vanno nella bozza come quelle singole: «Apporta modifiche» mostra che cosa cambierebbe, e solo il pulsante rosso scrive i dati.",
+      "result": "Fatto nella bozza: {{decided}} decisioni, {{cascaded}} in cascata, {{skipped}} saltate.",
+      "resultUndo": "Tornate da decidere: {{count}}.",
+      "resultUndo_one": "Tornata da decidere: {{count}}."
     }
   },
   "gaps": {
     "title": "Analisi dei divari",
     "description": "Gap di competenza per severità, sull'intero tenant.",
     "count": "{{count}} gap registrati",
+    "count_one": "{{count}} gap registrato",
     "error": "Impossibile caricare i gap.",
     "emptyTitle": "Nessun gap registrato",
     "emptyDescription": "Non ci sono gap di competenza al momento.",
@@ -530,7 +585,7 @@
   },
   "career": {
     "title": "Carriere e successione",
-    "description": "Percorsi di carriera, pool di successione e candidati.",
+    "description": "Percorsi di carriera, bacini di successione e candidati. I candidati sono le persone indicate a mano per ciascun bacino; il calcolo automatico della prontezza è in Approfondimenti.",
     "tabs": {
       "paths": "Percorsi di carriera",
       "pools": "Bacini di successione",
@@ -552,27 +607,29 @@
       "readiness": "Prontezza",
       "status": "Stato"
     },
-    "pipelineTitle": "Pipeline readiness",
-    "pipelineAria": "Distribuzione candidati per livello di readiness",
+    "pipelineTitle": "Prontezza dei candidati",
+    "pipelineAria": "Candidati per orizzonte di prontezza",
     "pipelineEmpty": "Nessun candidato da rappresentare.",
     "pathsEmpty": "Nessun percorso di carriera definito",
     "pathsCaption": "Percorsi di carriera",
-    "poolsEmpty": "Nessuna pool registrata",
+    "poolsEmpty": "Nessun bacino registrato",
     "poolsCaption": "Bacini di successione",
     "candidatesEmpty": "Nessun candidato registrato",
-    "candidatesCaption": "Candidati alla succession"
+    "candidatesCaption": "Candidati alla successione",
+    "nomeInterno": "(nome non assegnato)"
   },
   "compensation": {
     "title": "Retribuzioni",
-    "description": "Reward gate per stato di valutazione, sull'intero tenant.",
-    "count": "{{count}} reward gate registrati",
+    "description": "Le proposte di premio per stato di valutazione, su tutta l'azienda.",
+    "count": "{{count}} proposte registrate",
+    "count_one": "{{count}} proposta registrata",
     "distributionTitle": "Distribuzione stati",
-    "distributionAria": "Distribuzione reward gate per stato di valutazione",
+    "distributionAria": "Distribuzione delle proposte di premio per stato di valutazione",
     "distributionEmpty": "Nessun dato di distribuzione.",
     "seriesName": "Cancello di premio",
     "error": "Accesso negato o errore.",
-    "emptyTitle": "Nessun reward gate",
-    "emptyDescription": "Non ci sono reward gate registrati.",
+    "emptyTitle": "Nessuna proposta di premio",
+    "emptyDescription": "Non ci sono proposte di premio registrate.",
     "caption": "Cancello di premio",
     "blockingYes": "Sì",
     "blockingNo": "No",
@@ -589,18 +646,21 @@
       "empty": "Nessuna fascia con importi definiti.",
       "error": "Non è stato possibile leggere le fasce retributive.",
       "count": "{{count}} fasce",
+      "count_one": "{{count}} fascia",
       "colBand": "Fascia",
       "colMin": "Minimo",
       "colMid": "Centro",
       "colMax": "Massimo",
       "colSpread": "Ampiezza",
-      "valuelessNote": "{{count}} fasce del tenant non hanno importi definiti e non compaiono qui."
+      "valuelessNote": "{{count}} fasce del tenant non hanno importi definiti e non compaiono qui.",
+      "valuelessNote_one": "{{count}} fascia del tenant non ha importi definiti e non compare qui."
     }
   },
   "learning": {
     "title": "Catalogo moduli",
     "description": "Moduli formativi disponibili, globali e di tenant.",
     "count": "{{count}} moduli — {{piattaforma}} di piattaforma, {{azienda}} dell'azienda",
+    "count_one": "{{count}} modulo — {{piattaforma}} di piattaforma, {{azienda}} dell'azienda",
     "errorMessage": "Impossibile caricare i moduli.",
     "emptyTitle": "Nessun modulo",
     "emptyDescription": "Non ci sono moduli formativi.",
@@ -646,7 +706,8 @@
       "forbidden": "Non hai i permessi per questa operazione.",
       "duplicate": "Esiste già un percorso con questo codice.",
       "tenantRequired": "Come amministratore di piattaforma puoi creare solo percorsi globali: spunta «Percorso globale».",
-      "count": "{{count}} — {{piattaforma}} di piattaforma, {{azienda}} dell'azienda"
+      "count": "{{count}} — {{piattaforma}} di piattaforma, {{azienda}} dell'azienda",
+      "count_one": "{{count}} — {{piattaforma}} di piattaforma, {{azienda}} dell'azienda"
     },
     "steps": {
       "title": "Passi del percorso",
@@ -669,7 +730,8 @@
   "training": {
     "title": "Iniziative formative",
     "description": "Sessioni di erogazione pianificate.",
-    "count": "{{count}} pianificate",
+    "count": "{{count}} iniziative",
+    "count_one": "{{count}} iniziativa",
     "errorMessage": "Impossibile caricare le iniziative.",
     "emptyTitle": "Nessuna iniziativa",
     "emptyDescription": "Nessuna iniziativa schedulata.",
@@ -748,6 +810,7 @@
     "description": "Le capability che l'organizzazione usa davvero, classificate con il modello VRIO su {{headcount}} persone. Valore = {{value}}% peso economico + {{crit}}% criticità; una dimensione conta come presente dal {{threshold}}° percentile delle nostre capability.",
     "descriptionIdle": "Le capability che l'organizzazione usa davvero, classificate con il modello VRIO.",
     "count": "{{count}} capability",
+    "count_one": "{{count}} capability",
     "errorMessage": "Impossibile caricare la scorecard VRIO",
     "emptyTitle": "Nessuna capability in gioco",
     "emptyDescription": "Nessun gruppo di competenze risulta richiesto da una posizione o posseduto da una persona in questo tenant.",
@@ -756,14 +819,17 @@
     "cols": {
       "capability": "Capacità",
       "skillCount": "{{count}} competenze",
+      "skillCount_one": "{{count}} competenza",
       "skillExamples": "{{count}} competenze, tra cui {{esempi}}",
+      "skillExamples_one": "{{count}} competenza, tra cui {{esempi}}",
       "value": "Valore",
       "rarity": "Rarità",
       "inimitability": "Inimitabilità",
       "organization": "Organizzazione",
       "verdict": "Verdetto",
       "evidence": "Evidenza",
-      "evidenceValue": "{{positions}} posizioni · {{holders}}/{{headcount}} persone · {{covered}}/{{required}} coperte"
+      "evidenceValue": "{{count}} posizioni · {{holders}}/{{headcount}} persone · {{covered}}/{{required}} coperte",
+      "evidenceValue_one": "{{count}} posizione · {{holders}}/{{headcount}} persone · {{covered}}/{{required}} coperte"
     },
     "verdicts": {
       "SUSTAINED_ADVANTAGE": "Vantaggio sostenibile",
@@ -778,6 +844,7 @@
     "title": "Salute organizzativa",
     "description": "Indice di salute per unità organizzativa, calcolato su engagement, obiettivi, rischio di uscita, presenze, valutazioni e maturità delle competenze.",
     "count": "{{count}} unità",
+    "count_one": "{{count}} unità",
     "organizationIndex": "Indice dell'organizzazione",
     "errorMessage": "Impossibile caricare l'indice di salute",
     "emptyTitle": "Nessuna unità valutabile",
@@ -788,6 +855,7 @@
     "methodIdle": "Lo stato dice se l'unità è sana in assoluto, la posizione dice dove guardare per prima rispetto alle altre. Una dimensione senza dati esce dal calcolo e abbassa la copertura, non il punteggio.",
     "cols": {
       "unit": "Unità organizzativa",
+      "headcount_zero": "Nessuna persona assegnata direttamente all'unità",
       "headcount_one": "{{count}} persona",
       "headcount_other": "{{count}} persone",
       "index": "Indice",
@@ -816,12 +884,14 @@
       "LAGGING": "In coda",
       "UNRANKED": "Non in classifica"
     },
-    "sample": "campione di {{count}}"
+    "sample": "campione di {{count}}",
+    "sample_one": "campione di {{count}}"
   },
   "advisor": {
     "title": "Consigli operativi",
     "description": "Raccomandazioni derivate dalle scorecard di capability, VRIO e salute organizzativa. Ogni consiglio nasce da un dato reale e ne porta la fonte: niente è generato da un modello linguistico.",
     "count": "{{count}} raccomandazioni",
+    "count_one": "{{count}} raccomandazione",
     "caption": "Raccomandazioni in ordine di priorità, con le fonti da cui ciascuna deriva.",
     "emptyTitle": "Nessuna raccomandazione",
     "emptyDescription": "Sui dati attuali nessuna regola ha trovato una situazione su cui intervenire. Non è un errore: è l'assenza di casi.",
@@ -832,6 +902,28 @@
       "subject": "Riguarda",
       "action": "Cosa fare",
       "citations": "Da dove viene"
+    },
+    "conteggi": {
+      "positions": "{{count}} posizioni",
+      "positions_one": "{{count}} posizione",
+      "critical": "{{count}} critiche",
+      "critical_one": "{{count}} critica"
+    },
+    "fields": {
+      "verdict": "Verdetto",
+      "evidence_holders": "Persone che la possiedono",
+      "evidence_positionsRequiring": "Posizioni che la richiedono",
+      "evidence_coveredRequirements": "Requisiti coperti",
+      "evidence_totalRequirements": "Requisiti totali",
+      "evidence_avgHeldRank": "Livello medio posseduto (su 6)",
+      "evidence_verifiedShare": "Quota verificata",
+      "coverage": "Copertura dei dati",
+      "headcount": "Persone",
+      "index": "Indice di salute",
+      "standing": "Posizione in classifica",
+      "dimensionScore": "Punteggio di {{dimension}}",
+      "essentialityScore": "Punteggio di essenzialità",
+      "holders": "Possessori"
     },
     "subjectTypes": {
       "CAPABILITY": "Competenza",
@@ -845,9 +937,9 @@
       "INSUFFICIENT_COVERAGE_INSTRUMENT": "Dati insufficienti"
     },
     "rule": {
-      "capabilityGapAcquire": "«{{capability}}» è richiesta da {{positions}} posizioni ({{critical}} critiche) e non la possiede nessuno: va acquisita con selezione o formazione.",
-      "unusedAdvantageDeploy": "«{{capability}}» è un vantaggio che l'organizzazione non sta sfruttando: {{holders}} persone la possiedono, ma solo {{covered}} requisiti su {{required}} sono coperti. È un problema di assegnazione, non di reclutamento.",
-      "essentialMasteryFragile": "«{{capability}}» è essenziale ma la padronanza è fragile: {{holders}} possessori, livello medio {{heldRank}} su 6, verificata sul {{verifiedShare}}%. Va consolidata e messa alla prova.",
+      "capabilityGapAcquire": "«{{capability}}» è richiesta da {{positions}} ({{critical}}) e non la possiede nessuno: va acquisita con selezione o formazione.",
+      "unusedAdvantageDeploy": "«{{capability}}» è un vantaggio che l'organizzazione non sta sfruttando: persone che la possiedono: {{holders}}; requisiti coperti: {{covered}} su {{required}}. È un problema di assegnazione, non di reclutamento.",
+      "essentialMasteryFragile": "«{{capability}}» è essenziale ma la padronanza è fragile: possessori: {{holders}}, livello medio {{heldRank}} su 6, verificata sul {{verifiedShare}}%. Va consolidata e messa alla prova.",
       "laggingUnitIntervene": "«{{unit}}» è fra le unità in coda (indice {{index}}): la dimensione che la tiene indietro è {{dimension}}, a {{dimensionScore}} su 100.",
       "insufficientCoverageInstrument": "Su «{{unit}}» il modello dispone solo del {{coverage}}% dei dati ({{missing}} assenti): l'indice non è una diagnosi, è una misura mancante."
     },
@@ -857,6 +949,7 @@
       "ORG_HEALTH": "Salute organizzativa"
     },
     "method": "{{count}} raccomandazioni da {{rules}} regole. Scartate dal controllo delle fonti: {{discarded}}. Modello {{model}}.",
+    "method_one": "{{count}} raccomandazione da {{rules}} regole. Scartate dal controllo delle fonti: {{discarded}}. Modello {{model}}.",
     "methodIdle": "Nessuna derivazione disponibile."
   },
   "performance": {
@@ -920,8 +1013,11 @@
     "emptyTitle": "Nessun progetto",
     "emptyDesc": "Non partecipi ad alcun progetto in corso.",
     "count": "{{count}} progetti totali",
+    "count_one": "{{count}} progetto totale",
     "members": "{{count}} membri",
+    "members_one": "{{count}} membro",
     "membersTitle": "Chi ci lavora ({{count}})",
+    "membersTitle_one": "Chi ci lavora ({{count}})",
     "progress": "{{pct}}% completato",
     "progressLabel": "Avanzamento",
     "progressUnset": "non dichiarato",

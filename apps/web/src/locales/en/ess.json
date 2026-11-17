@@ -3,6 +3,7 @@
     "title": "Employee handbook",
     "description": "Knowledge base, policies and announcements published for your tenant.",
     "count": "{{count}} documents",
+    "count_one": "{{count}} document",
     "errorMessage": "Unable to load the handbook.",
     "emptyTitle": "No documents",
     "emptyDescription": "No published content yet.",
@@ -32,9 +33,11 @@
     "learningLabel": "Learning paths",
     "learningUnit": "assigned",
     "learningCount": "{{count}} assigned",
+    "learningCount_one": "{{count}} assigned",
     "gapsLabel": "Development gaps",
     "gapsUnit": "open",
     "gapsCount": "{{count}} open",
+    "gapsCount_one": "{{count}} open",
     "tabs": {
       "summary": "Summary",
       "performance": "Performance",
@@ -62,12 +65,15 @@
       "pending": "pending",
       "recentTitle": "Recent attendance",
       "overtimeTitle": "Overtime"
-    }
+    },
+    "learningDone": "{{count}} completed",
+    "learningDone_one": "{{count}} completed"
   },
   "career": {
     "title": "My career",
     "description": "Goals, career paths, and succession readiness.",
     "count": "{{count}} goals",
+    "count_one": "{{count}} goal",
     "error": "Could not load your career goals.",
     "emptyTitle": "No career goals",
     "emptyDesc": "No career goal declared.",
@@ -90,7 +96,8 @@
       "priority": "Priority",
       "weight": "Weight",
       "type": "Type",
-      "due": "Due"
+      "due": "Due",
+      "overdue": "overdue"
     },
     "risk": {
       "none": "No data",
@@ -112,7 +119,8 @@
       "from": "Paths from position: {{position}}",
       "kind": "Kind",
       "steps": "Steps",
-      "months": "{{n}} months",
+      "months": "{{count}} months",
+      "months_one": "{{count}} month",
       "plansTitle": "My career plans",
       "noPlans": "No personal career plan.",
       "planStatus": "Status",
@@ -147,6 +155,7 @@
     "title": "My certifications",
     "description": "Your registered professional certifications.",
     "count": "{{count}} certifications",
+    "count_one": "{{count}} certification",
     "addCardTitle": "Add certification",
     "nameLabel": "Name",
     "issuerLabel": "Issuer",
@@ -172,12 +181,20 @@
     "errorMessage": "Unable to load the certifications.",
     "emptyTitle": "No certifications",
     "emptyDesc": "You haven't uploaded any certifications yet.",
-    "caption": "Certifications list"
+    "caption": "Certifications list",
+    "colState": "Status",
+    "state": {
+      "expired": "Expired",
+      "expiring": "Expiring soon",
+      "valid": "Valid",
+      "noExpiry": "No expiry"
+    }
   },
   "documents": {
     "title": "My documents",
     "description": "Documents uploaded to your profile.",
     "count": "{{count}} documents",
+    "count_one": "{{count}} document",
     "colKind": "Type",
     "colTitle": "Title",
     "colUri": "URI",
@@ -191,6 +208,7 @@
     "title": "My gaps",
     "description": "Open development gaps on your skills.",
     "count": "{{count}} open",
+    "count_one": "{{count}} open",
     "skillFallback": "General",
     "colSkill": "Skill",
     "colSeverity": "Severity",
@@ -199,7 +217,9 @@
     "errorMessage": "Unable to load the gaps.",
     "emptyTitle": "No open gaps",
     "emptyDesc": "You have no open development gaps.",
-    "caption": "Development gaps"
+    "caption": "Development gaps",
+    "levels": "level {{current}} of {{target}}",
+    "gapSize": "gap {{value}}"
   },
   "timeOff": {
     "title": "Time off",
@@ -228,7 +248,7 @@
       "NO_APPROVER_RESOLVABLE": "No direct manager found: contact HR.",
       "VALIDATION_FAILED": "Check the dates: invalid range."
     },
-    "historyTitle": "Request history",
+    "historyTitle": "Previous years",
     "historyError": "Unable to load the history.",
     "historyEmptyTitle": "No request recorded",
     "historyEmptyDesc": "Approved requests appear here; pending ones live in Approvals.",
@@ -236,18 +256,31 @@
     "colType": "Type",
     "colPeriod": "Period",
     "colDays": "Days",
-    "colStatus": "Status"
+    "colStatus": "Status",
+    "daysUsedLabel": "days used"
   },
   "inbox": {
     "title": "Inbox",
     "description": "Your recent notifications and messages.",
     "count": "{{count}} notifications",
+    "count_one": "{{count}} notification",
     "unreadAria": "{{count}} unread notifications",
+    "unreadAria_one": "{{count}} unread notification",
     "unreadBadge": "{{count}} unread",
+    "unreadBadge_one": "{{count}} unread",
     "error": "Could not load your inbox.",
     "emptyTitle": "No notifications",
     "emptyDesc": "You have no notifications at the moment.",
     "feedTitle": "Notifications",
+    "messages": {
+      "APPROVAL_REMINDER": { "subject": "Approval pending: {{title}}", "body": "An approval request assigned to you is overdue. Open it to decide." },
+      "APPROVAL_OVERDUE": { "subject": "Approval overdue: {{title}}", "body": "A request you opened has been waiting for {{cycles}} cycles without a decision from the approver." },
+      "GAP_CLOSURE_DUE": {
+        "subject": "Skill gap to close",
+        "body": "A skill gap was detected for your position ({{segment}}).",
+        "segment": { "MAJOR_GAP": "major gap", "MODERATE_GAP": "moderate gap", "MINOR_GAP": "minor gap", "ALIGNED": "aligned", "UNKNOWN": "gap to assess" }
+      }
+    },
     "approvals": {
       "title": "Pending approvals",
       "approve": "Approve",
@@ -258,10 +291,12 @@
     "title": "Surveys",
     "description": "Surveys assigned to you.",
     "count": "{{count}} surveys",
+    "count_one": "{{count}} survey",
     "error": "Could not load surveys.",
     "emptyTitle": "No surveys",
     "emptyDesc": "You have no assigned surveys at the moment.",
     "questionCount": "{{count}} questions",
+    "questionCount_one": "{{count}} question",
     "completed": "Completed",
     "pending": "To answer",
     "review": "Review",
@@ -279,6 +314,7 @@
     "title": "My KPIs",
     "description": "Active KPI targets on your positions.",
     "count": "{{count}} goals",
+    "count_one": "{{count}} goal",
     "colKpi": "KPI",
     "colCode": "Code",
     "colDirection": "Direction",
@@ -297,6 +333,7 @@
     "title": "My learning",
     "description": "The courses, classroom editions and learning paths assigned to you.",
     "count": "{{count}} assignments",
+    "count_one": "{{count}} assignment",
     "colTitle": "Course or path",
     "colStatus": "Status",
     "colMandatory": "Mandatory",
@@ -314,12 +351,13 @@
     "title": "Path catalogue",
     "description": "Browse the available learning paths and enroll.",
     "count": "{{count}} available paths",
+    "count_one": "{{count}} available path",
     "filterPlaceholder": "Search by name or code…",
     "colPath": "Path",
     "colCode": "Code",
     "colScope": "Scope",
-    "global": "GLOBAL",
-    "tenant": "TENANT",
+    "global": "Global",
+    "tenant": "Tenant",
     "colAction": "Action",
     "enroll": "Enroll",
     "enrolling": "…",
@@ -328,12 +366,14 @@
     "emptyDesc": "No path matches the filter.",
     "caption": "Learning paths catalogue",
     "errorEnroll": "Error during enrollment.",
-    "enrolledConfirm": "Enrollment confirmed for {{path}}."
+    "enrolledConfirm": "Enrollment confirmed for {{path}}.",
+    "alreadyAssigned": "Already assigned"
   },
   "matching": {
     "title": "Compatible occupations",
     "description": "The ESCO occupations most aligned with your skill profile.",
     "count": "{{count}} occupations",
+    "count_one": "{{count}} occupation",
     "colOccupation": "Occupation",
     "colIsco": "ISCO code",
     "colScore": "Affinity",
@@ -361,11 +401,12 @@
     "title": "My positions",
     "description": "History of your position assignments.",
     "count": "{{count}} assignments",
+    "count_one": "{{count}} assignment",
     "colCode": "Code",
     "colTitle": "Title",
     "colType": "Type",
-    "primary": "PRIMARY",
-    "alt": "ALT",
+    "primary": "Primary",
+    "alt": "Alternative",
     "colStatus": "Status",
     "colStart": "Start",
     "colEnd": "End",
@@ -553,14 +594,17 @@
         "to": "To",
         "duration": "Duration",
         "years": "{{count}} years",
-        "months": "{{count}} months"
+        "years_one": "{{count}} year",
+        "months": "{{count}} months",
+        "months_one": "{{count}} month"
       }
     }
   },
   "security": {
-    "title": "Sicurezza account",
+    "title": "Account security",
     "description": "MFA factor management for two-factor authentication.",
-    "count": "{{count}} total",
+    "count_one": "{{count}} total",
+    "count_other": "{{count}} total",
     "codeRequired": "6-digit TOTP code required",
     "factorsCardTitle": "Active factors",
     "factorsEmpty": "No factor configured. Add a TOTP authenticator to enable two-factor protection.",
@@ -598,6 +642,7 @@
       "empty": "No active sessions.",
       "thisDevice": "This device",
       "unknownDevice": "Unknown device",
+      "deviceOn": "{{browser}} on {{sistema}}",
       "lastSeen": "Last seen {{date}}",
       "revoke": "Revoke",
       "revokeOthers": "Log out everywhere else",
@@ -630,6 +675,7 @@
     "title": "My skills",
     "description": "Your current skill portfolio and the evidence history.",
     "count": "{{count}} skills",
+    "count_one": "{{count}} skill",
     "error": "Could not load your skills.",
     "emptyTitle": "No skill recorded yet",
     "emptyDesc": "Your skills will appear here once declared or imported.",
@@ -642,6 +688,7 @@
     "colDate": "Date",
     "primaryTag": "primary",
     "years": "{{count}} years",
+    "years_one": "{{count}} year",
     "verifiedYes": "Yes",
     "verifiedNo": "No",
     "evidenceTitle": "Evidence history",
@@ -675,7 +722,7 @@
     }
   },
   "team": {
-    "title": "Il mio team",
+    "title": "My team",
     "description": "The teams you belong to or lead, with their members.",
     "error": "Unable to load your teams.",
     "emptyTitle": "No team",
@@ -754,6 +801,7 @@
     "title": "My performance reviews",
     "description": "The reviews that have been shared with you.",
     "count": "{{count}} reviews",
+    "count_one": "{{count}} review",
     "errorMessage": "Unable to load your performance reviews.",
     "emptyTitle": "No review shared yet",
     "emptyDescription": "No review has been shared with you yet. Reviews that have not been shared do not appear here: you will see them after the conversation.",

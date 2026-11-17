@@ -9,6 +9,7 @@ import { GraduationCap, Layers, Users } from "lucide-react";
 import { EChartsCard } from "../../_charts-client";
 import type { SkillsByCategoryAnalyticsResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { useEnumLabel } from "@/lib/enum-labels";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 const AXIS_COLOR = "hsl(var(--muted-foreground))";
@@ -17,7 +18,7 @@ const GRID_COLOR = "hsl(var(--border))";
 /** Coverage heatmap: skill_category (rows) × proficiency (cols) → evidence count.
  *  Dense by design (every evidence resolves to a category) — missing [x,y] pairs
  *  (a category with no evidence at a given level) still render blank. */
-function categoryHeatmapOption(d: SkillsByCategoryAnalyticsResponse) {
+function categoryHeatmapOption(d: SkillsByCategoryAnalyticsResponse, etichetta: (p: string) => string) {
   const x = d.proficiencyLevels;
   const y = d.categories;
   const values = d.cells.map((c) => [x.indexOf(c.proficiency), y.indexOf(c.category), c.evidenceCount]);
@@ -27,7 +28,7 @@ function categoryHeatmapOption(d: SkillsByCategoryAnalyticsResponse) {
     tooltip: { position: "top" as const },
     xAxis: {
       type: "category" as const,
-      data: x,
+      data: x.map(etichetta),
       axisLabel: { color: AXIS_COLOR },
       axisLine: { lineStyle: { color: GRID_COLOR } },
       splitArea: { show: true },
@@ -53,7 +54,8 @@ function categoryHeatmapOption(d: SkillsByCategoryAnalyticsResponse) {
       {
         type: "heatmap" as const,
         data: values,
-        label: { show: false },
+        // il valore scritto in ogni cella: il colore da solo non dice «quanto»
+        label: { show: true, color: AXIS_COLOR, fontSize: 11 },
         emphasis: { itemStyle: { shadowBlur: 6, shadowColor: "rgba(0,0,0,0.2)" } },
       },
     ],
@@ -62,6 +64,7 @@ function categoryHeatmapOption(d: SkillsByCategoryAnalyticsResponse) {
 
 export default function SkillsByCategoryAnalyticsPage() {
   const { t } = useTranslation("analytics");
+  const enumLabel = useEnumLabel();
   const q = useQuery({
     queryKey: ["analytics", "skills-by-category"],
     queryFn: () => apiFetch<SkillsByCategoryAnalyticsResponse>("/v1/analytics/skills-by-category"),
@@ -147,7 +150,7 @@ export default function SkillsByCategoryAnalyticsPage() {
               className="rounded-card border border-border bg-card p-4"
             >
               <EChartsCard
-                option={categoryHeatmapOption(d)}
+                option={categoryHeatmapOption(d, (p) => enumLabel("proficiency", p))}
                 height={Math.max(360, d.categories.length * 26)}
                 ariaLabel={t("skillsByCategory.heatmapAria")}
               />

@@ -12,6 +12,7 @@ import {
   Info,
 } from "lucide-react";
 import { apiFetch } from "@/lib/api/fetch";
+import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { useInboxStream } from "@/lib/use-inbox-stream";
 import { testoLeggibile } from "@/lib/i18n";
 import { useEnumLabel } from "@/lib/enum-labels";
@@ -22,6 +23,7 @@ interface MeNotification {
   type: string;
   subject: string;
   body: string | null;
+  message?: { code: "APPROVAL_REMINDER" | "APPROVAL_OVERDUE" | "GAP_CLOSURE_DUE"; params: Record<string, string | number> } | null;
   status: string;
   priority: string;
   createdAt: string;
@@ -69,6 +71,16 @@ function approvalRequestId(actionUrl: string | null): string | null {
 export default function MeInboxPage() {
   const { t } = useTranslation("ess");
   const enumLabel = useEnumLabel();
+  // L'oggetto e il testo di certi avvisi li scrive l'API in italiano: se porta il messaggio strutturato, la frase
+  // si compone qui nella lingua di chi guarda; altrimenti resta il testo salvato.
+  const oggettoAvviso = (n: MeNotification): string =>
+    n.message ? t(`inbox.messages.${n.message.code}.subject`, n.message.params) : n.subject;
+  const testoAvviso = (n: MeNotification): string | null => {
+    if (!n.message) return n.body;
+    const p = n.message.params;
+    const segmento = typeof p["segment"] === "string" ? { segment: t(`inbox.messages.GAP_CLOSURE_DUE.segment.${p["segment"]}`) } : {};
+    return t(`inbox.messages.${n.message.code}.body`, { ...p, ...segmento });
+  };
   const qc = useQueryClient();
   const { connected: streaming } = useInboxStream(() => {
     void qc.invalidateQueries({ queryKey: ["me", "inbox"] });
@@ -92,6 +104,9 @@ export default function MeInboxPage() {
     onSuccess: () => void qc.invalidateQueries({ queryKey: ["me", "inbox"] }),
   });
 
+  // S-04 (forense 15/11): decidere chiede approval:decide all'API; senza, i pulsanti non si offrono.
+  const puoDecidere = (useCurrentUserPermissions().data?.permissions ?? []).includes("approval:decide");
+
   const pendingApprovals = (inbox.data?.items ?? []).filter(
     (n) => n.resourceType === "APPROVAL_STEP" && n.status === "UNREAD" && approvalRequestId(n.actionUrl) && n.resourceId,
   );
@@ -105,9 +120,9 @@ export default function MeInboxPage() {
     return {
       icon: v.icon,
       tone: v.tone,
-      title: n.subject,
+      title: oggettoAvviso(n),
       // C1: i testi già scritti dal servizio possono contenere un codice («priorità MODERATE_GAP»)
-      description: n.body ? testoLeggibile(n.body) : undefined,
+      description: testoAvviso(n) ? testoLeggibile(testoAvviso(n)!) : undefined,
       meta: `${formatRelativeTime(n.createdAt)} · ${enumLabel("notificationPriority", n.priority)} · ${enumLabel("notificationStatus", n.status)}`,
     };
   });
@@ -154,8 +169,8 @@ export default function MeInboxPage() {
                 const reqId = approvalRequestId(n.actionUrl)!;
                 return (
                   <li key={n.notificationId} data-testid="me-inbox-approval-row" className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
-                    <span className="font-medium text-foreground">{n.subject}</span>
-                    <div className="flex items-center gap-2">
+                    <span className="font-medium text-foreground">{oggettoAvviso(n)}</span>
+                    <div className="flex items-center gap-2" hidden={!puoDecidere}>
                       <Button type="button" size="sm" data-testid="me-inbox-approval-approve" disabled={decide.isPending} onClick={() => decide.mutate({ reqId, stepId: n.resourceId!, decision: "APPROVE" })}>
                         {t("inbox.approvals.approve")}
                       </Button>

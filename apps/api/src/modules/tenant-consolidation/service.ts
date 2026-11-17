@@ -11,6 +11,7 @@
  * decisione; l'applicazione ai dati del tenant è AC-8 e passa dalle strade che già esistono.
  */
 import { pool, withTransaction } from "../../db/client.js";
+import { misuraDistanza, type MisuraDistanza } from "./distanza.js";
 import type { ActorContext } from "../../lib/actor.js";
 import { userHasPermission } from "../../middleware/rbac.js";
 import {
@@ -26,6 +27,8 @@ import {
   CONSOLIDATION_GROUP_VALUES,
   nextConsolidationGroup,
   type ApplyChangesResult,
+  type BulkDecideBody,
+  type BulkDecideResult,
   type ApprovalPreview,
   type CascadeResponse,
   type PendingApproval,
@@ -99,6 +102,45 @@ function statoAdr48(d: Decision, form: LinkForm | null): "EREDITATA" | "CONSERVA
   if (d === "CONFERMATA") return form === "FORMA_TENANT" ? "CONSERVATA" : "EREDITATA";
   if (d === "ADOTTATA") return "EREDITATA";
   if (d === "PERSONALIZZAZIONE") return "PROPRIA";
+  return null;
+}
+
+type ClientTx = Parameters<Parameters<typeof withTransaction>[0]>[0];
+type PropostaConStato = Awaited<ReturnType<typeof repo.getProposals>>[number];
+
+/**
+ * «Aggiorna cascata»: la scelta `decisione` presa su `p` si registra anche sulle proposte legate a lei
+ * nel modello, ancora senza decisione e dentro il mandato. Restituisce quante ne ha registrate.
+ */
+async function propagaCascata(
+  client: ClientTx, tenantId: string, actor: ActorContext, m: Mandato, p: PropostaConStato, decisione: Decision,
+): Promise<number> {
+  const s = await repo.getConsolidation(client, tenantId, p.consolidationId);
+  let n = 0;
+  for (const c of s ? await cascataDi(client, s.variantVersionId, p) : []) {
+    if (c.decision !== null || !m.gruppi.has(c.group)) continue;
+    const scelta = sceltaInCascata(decisione, c.outcome);
+    if (!scelta) continue;
+    const formaC: LinkForm | null = scelta === "CONFERMATA" ? "NORMALIZZATA" : null;
+    await repo.insertDecision(client, tenantId, {
+      proposalId: c.proposalId,
+      decision: scelta,
+      form: formaC,
+      adr48State: statoAdr48(scelta, formaC),
+      reason: `In cascata dalla decisione sulla proposta ${p.proposalId}`,
+      userId: actor.userId,
+      delegationId: m.gruppi.get(c.group) ?? null,
+      supersedesId: null,
+    });
+    n++;
+  }
+  return n;
+}
+
+/** La scelta che un modo «in blocco» dà a una proposta, o null se il modo non decide niente di nuovo. */
+function sceltaInBlocco(mode: BulkDecideBody["mode"], outcome: ConsolidationProposal["outcome"]): Decision | null {
+  if (mode === "RACCOMANDATA") return outcome === "CORRISPONDENZA" ? "CONFERMATA" : outcome === "LACUNA" ? "ADOTTATA" : "PERSONALIZZAZIONE";
+  if (mode === "RIFIUTO") return outcome === "LACUNA" ? "NON_ADOTTATA" : "RIFIUTATA";
   return null;
 }
 
@@ -201,7 +243,9 @@ async function riversa(
 ): Promise<ApprovalPreview> {
   const client = await pool.connect();
   try {
-    await client.query("BEGIN");
+    // REPEATABLE READ: le due misure delle sentinelle vedono la stessa fotografia del database più le
+    // sole scritture di questa approvazione, così ciò che scrive un altro tenant nel frattempo non la ferma.
+    await client.query("BEGIN ISOLATION LEVEL REPEATABLE READ");
     const s = await repo.getConsolidation(client, tenantId, id, true);
     if (!s) throw new NotFoundError("Sessione di consolidamento non trovata", "CONSOLIDATION_NOT_FOUND");
     if (s.runningGroup) {
@@ -401,25 +445,7 @@ export const tenantConsolidationService = {
         supersedesId: p.decisionId,
       });
       // «Aggiorna cascata»: la stessa scelta sulle proposte legate a questa nel modello e ancora senza decisione.
-      if (body.cascade) {
-        const s = await repo.getConsolidation(client, tenantId, p.consolidationId);
-        for (const c of s ? await cascataDi(client, s.variantVersionId, p) : []) {
-          if (c.decision !== null || !m.gruppi.has(c.group)) continue;
-          const scelta = sceltaInCascata(body.decision, c.outcome);
-          if (!scelta) continue;
-          const formaC: LinkForm | null = scelta === "CONFERMATA" ? "NORMALIZZATA" : null;
-          await repo.insertDecision(client, tenantId, {
-            proposalId: c.proposalId,
-            decision: scelta,
-            form: formaC,
-            adr48State: statoAdr48(scelta, formaC),
-            reason: `In cascata dalla decisione sulla proposta ${proposalId}`,
-            userId: actor.userId,
-            delegationId: m.gruppi.get(c.group) ?? null,
-            supersedesId: null,
-          });
-        }
-      }
+      if (body.cascade) await propagaCascata(client, tenantId, actor, m, p, body.decision);
       // Decidere registra soltanto, nella bozza: i dati cambiano con «Approva definitivamente le modifiche».
       const [dopo] = await repo.getProposals(client, tenantId, [proposalId]);
       const { decisionId: _d, status: _s, ...proposta } = dopo!;
@@ -465,6 +491,55 @@ export const tenantConsolidationService = {
     });
   },
 
+  /**
+   * Le decisioni in blocco, nella bozza (Enzo, 2026-11-15). Una transazione sola: le proposte si
+   * prendono nell'ordine dato e ciascuna passa le stesse regole della decisione singola (sessione
+   * aperta, gruppo nel mandato, scelta ammessa per l'esito, una decisione già presa la rivede solo il
+   * Direttore HR). Ciò che non passa si salta e si dice perché. I dati vivi non cambiano.
+   */
+  async bulkDecide(actor: ActorContext, body: BulkDecideBody): Promise<BulkDecideResult> {
+    const tenantId = tenantDi(actor);
+    const m = await mandatoDi(actor);
+    const soloNuove = body.onlyUndecided ?? true;
+    if (!soloNuove && !m.direttore) {
+      throw new ForbiddenError("Solo il Direttore HR rivede in blocco decisioni già prese", "PERMISSION_DENIED");
+    }
+    return withTransaction(async (client) => {
+      const out: BulkDecideResult = { decided: 0, cascaded: 0, skipped: [] };
+      for (const id of new Set(body.proposalIds)) {
+        // si rilegge ogni volta: una cascata precedente può aver già deciso questa proposta
+        const [p] = await repo.getProposals(client, tenantId, [id]);
+        const salta = (reason: string) => out.skipped.push({ proposalId: id, reason });
+        if (!p) { salta("NOT_FOUND"); continue; }
+        if (p.status !== "GIRI" && p.status !== "IN_CONFERMA") { salta("CLOSED"); continue; }
+        if (!m.gruppi.has(p.group)) { salta("OUT_OF_MANDATE"); continue; }
+        if (body.mode === "CASCATA") {
+          if (!p.decision) { salta("UNDECIDED"); continue; }
+          out.cascaded += await propagaCascata(client, tenantId, actor, m, p, p.decision);
+          continue;
+        }
+        if (p.decisionId && (soloNuove || !m.direttore)) { salta("ALREADY_DECIDED"); continue; }
+        const scelta = sceltaInBlocco(body.mode, p.outcome);
+        if (!scelta || !DECISIONI_AMMESSE[p.outcome].includes(scelta)) { salta("NOT_ALLOWED"); continue; }
+        if (p.decision === scelta) { salta("SAME"); continue; }
+        const form: LinkForm | null = scelta === "CONFERMATA" ? "NORMALIZZATA" : null;
+        await repo.insertDecision(client, tenantId, {
+          proposalId: p.proposalId,
+          decision: scelta,
+          form,
+          adr48State: statoAdr48(scelta, form),
+          reason: body.mode === "RACCOMANDATA" ? "Raccomandazione dell'agente, decisa in blocco" : "Rifiuto deciso in blocco",
+          userId: actor.userId,
+          delegationId: m.gruppi.get(p.group) ?? null,
+          supersedesId: p.decisionId,
+        });
+        out.decided++;
+        if (body.cascade) out.cascaded += await propagaCascata(client, tenantId, actor, m, p, scelta);
+      }
+      return out;
+    });
+  },
+
   /** Quante decisioni aspettano di essere applicate ai dati (registrate, non ancora eseguite). */
   async pendingChanges(actor: ActorContext, id: string): Promise<{ pending: number }> {
     const tenantId = tenantDi(actor);
@@ -500,7 +575,7 @@ export const tenantConsolidationService = {
   },
 
   /** «Scarta modifiche»: toglie dalla bozza le decisioni non ancora approvate; restano quelle già riversate. */
-  async discardChanges(actor: ActorContext, id: string): Promise<{ discarded: number }> {
+  async discardChanges(actor: ActorContext, id: string, proposalIds?: readonly string[]): Promise<{ discarded: number }> {
     const tenantId = tenantDi(actor);
     await soloDirettore(actor);
     return withTransaction(async (client) => {
@@ -512,13 +587,14 @@ export const tenantConsolidationService = {
           WHERE p.tenant_consolidation_proposal_id = d.tenant_consolidation_decision_proposal_id
             AND p.tenant_consolidation_proposal_consolidation_id = $1
             AND d.tenant_consolidation_decision_tenant_id = $2
+            AND ($3::uuid[] IS NULL OR p.tenant_consolidation_proposal_id = ANY($3::uuid[]))
             AND NOT EXISTS (SELECT 1 FROM sys.sys_tenant_consolidation_links l
                              WHERE l.tenant_consolidation_link_decision_id = d.tenant_consolidation_decision_id)
             AND NOT EXISTS (SELECT 1 FROM sys.sys_tenant_consolidation_decisions x
                               JOIN sys.sys_tenant_consolidation_links l2
                                 ON l2.tenant_consolidation_link_decision_id = x.tenant_consolidation_decision_id
                              WHERE x.tenant_consolidation_decision_supersedes_id = d.tenant_consolidation_decision_id)`,
-        [id, tenantId],
+        [id, tenantId, proposalIds ? [...proposalIds] : null],
       );
       return { discarded: r.rowCount ?? 0 };
     });
@@ -630,6 +706,32 @@ export const tenantConsolidationService = {
   /** Accoglie una consegna come versione di modello e la mette nel registro (idempotente). */
   async receive(actor: ActorContext, body: ReceiveDeliveryBody): Promise<BlueprintRun> {
     return accogliConsegna(tenantDi(actor), actor.userId, body.code, body.packageVersion);
+  },
+
+  /**
+   * La distanza fra il tenant e la versione di modello della corsa (ADR-0059 D7), in sola lettura: una
+   * transazione READ ONLY che si chiude con ROLLBACK. La misura copre tutti i domini del tenant, quindi la
+   * legge solo chi ha la lettura piena del consolidamento: un delegato limitato ad alcuni gruppi no.
+   */
+  async distance(actor: ActorContext, runId: string, opts: { dettaglio: boolean; dominio?: string }): Promise<MisuraDistanza> {
+    if ((await gruppiLeggibili(actor)) !== null) {
+      throw new ForbiddenError("La distanza copre tutto il tenant: serve la lettura piena del consolidamento", "PERMISSION_DENIED");
+    }
+    const tenantId = tenantDi(actor);
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN READ ONLY");
+      const { rows } = await client.query<{ v: string | null }>(
+        `SELECT blueprint_run_variant_version_id AS v FROM sys.sys_blueprint_runs
+          WHERE blueprint_run_id = $1 AND blueprint_run_tenant_id = $2`, [runId, tenantId]);
+      if (!rows[0]) throw new NotFoundError("Corsa non trovata", "BLUEPRINT_RUN_NOT_FOUND");
+      if (!rows[0].v) throw new ConflictError("La corsa non ha una versione di modello", "BLUEPRINT_RUN_WITHOUT_VERSION");
+      const m = await misuraDistanza(client, tenantId, rows[0].v, { conDettaglio: opts.dettaglio });
+      return opts.dominio ? { ...m, domini: m.domini.filter((x) => x.dominio === opts.dominio) } : m;
+    } finally {
+      await client.query("ROLLBACK").catch(() => undefined);
+      client.release();
+    }
   },
 
   /** La corsa diventa il modello in uso del tenant. Solo il Direttore HR: è una scelta sul modello, non su una voce. */

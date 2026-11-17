@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { Badge, Button, Input } from "@heuresys/ui";
 import { PageHeader } from "@/components/intestazione-pagina";
-import type { LearningPath } from "@heuresys/shared";
+import type { LearningPath, MeLearningResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
@@ -28,6 +28,10 @@ export default function MeLearningCataloguePage() {
     path: "/v1/learning-paths",
     params: { search: debouncedFilter },
   });
+
+  // D2-21: un percorso gia' assegnato (anche completato) non si offre come «Iscriviti»
+  const mine = useQuery({ queryKey: ["me", "learning"], queryFn: () => apiFetch<MeLearningResponse>("/v1/me/learning") });
+  const assignedPathIds = new Set((mine.data?.items ?? []).map((a) => a.pathId).filter((x): x is string => !!x));
 
   const enroll = useMutation({
     mutationFn: (learningPathId: string) =>
@@ -53,7 +57,7 @@ export default function MeLearningCataloguePage() {
         </div>
       ),
     },
-    { header: t("catalogue.colCode"), cell: (p) => <span className="font-mono text-xs text-muted-foreground">{p.code}</span> },
+    { header: t("catalogue.colCode"), secondaria: true, cell: (p) => <span className="font-mono text-xs text-muted-foreground" data-grezzo="">{p.code}</span> },
     {
       // Was a MANDATORY/OPTIONAL pill driven by `isMandatoryDefault` — a field the
       // API never returns, so it read `undefined` and rendered "OPTIONAL" on every
@@ -70,7 +74,9 @@ export default function MeLearningCataloguePage() {
     {
       header: t("catalogue.colAction"),
       align: "right",
-      cell: (p) => (
+      cell: (p) => assignedPathIds.has(p.learningPathId) ? (
+        <Badge variant="outline" data-testid="learning-catalogue-assigned">{t("catalogue.alreadyAssigned")}</Badge>
+      ) : (
         <Button
           type="button"
           variant="outline"

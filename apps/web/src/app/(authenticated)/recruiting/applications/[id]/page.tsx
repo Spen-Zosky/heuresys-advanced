@@ -20,6 +20,7 @@ import {
 } from "@/lib/recruiting";
 import { useFormat } from "@/lib/format";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { cognomeNome, etichettaPersona } from "@/lib/person-label";
 import { NomeOppure } from "@/components/senza-nome";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
@@ -315,6 +316,7 @@ function FeedbackBlock({
   onOk: () => void;
 }) {
   const { t } = useTranslation("hr");
+  const enumLabel = useEnumLabel();
   const qc = useQueryClient();
   const q = useQuery({
     queryKey: KEY.feedback(interviewId),
@@ -342,14 +344,14 @@ function FeedbackBlock({
     },
     onError,
   });
-  const byId = new Map(interviewers.map((u) => [u.userId, u.displayName]));
+  const byId = new Map(interviewers.map((u) => [u.userId, cognomeNome(u)]));
 
   return (
     <div className="space-y-2 rounded-card bg-muted/30 p-3" data-testid="feedback-block">
       {canWrite && (<div className="grid gap-2 md:grid-cols-5" data-testid="feedback-form">
         <select data-testid="feedback-interviewer" className={SELECT_CLASS} value={fb.interviewerUserId} onChange={(e) => setFb({ ...fb, interviewerUserId: e.target.value })}>
           <option value="">{t("recruiting.fields.chooseInterviewer")}</option>
-          {interviewers.map((u) => <option key={u.userId} value={u.userId}>{u.displayName}</option>)}
+          {interviewers.map((u) => <option key={u.userId} value={u.userId}>{etichettaPersona(u, enumLabel)}</option>)}
         </select>
         <select data-testid="feedback-recommendation" className={SELECT_CLASS} value={fb.recommendation} onChange={(e) => setFb({ ...fb, recommendation: e.target.value })}>
           {FEEDBACK_RECOMMENDATIONS.map((r) => <option key={r} value={r}>{t(`recruiting.recommendation.${r}`)}</option>)}

@@ -228,6 +228,7 @@ function mapVersion(r: Record<string, unknown>): VersionRow {
 export interface DocumentFilter {
   kind?: string | undefined;
   status?: string | undefined;
+  excludeStatus?: string | undefined;
   categoryId?: string | undefined;
   q?: string | undefined;
   limit: number;
@@ -244,6 +245,7 @@ export async function listDocuments(
   if (!scope.isPlatform) { params.push(scope.tenantId); clauses.push(`document_tenant_id = $${params.length}`); }
   if (f.kind) { params.push(f.kind); clauses.push(`document_kind = $${params.length}`); }
   if (f.status) { params.push(f.status); clauses.push(`document_status = $${params.length}`); }
+  if (f.excludeStatus) { params.push(f.excludeStatus); clauses.push(`document_status <> $${params.length}`); }
   if (f.categoryId) { params.push(f.categoryId); clauses.push(`document_category_id = $${params.length}`); }
   if (f.q) { params.push(`%${f.q}%`); clauses.push(`document_title ILIKE $${params.length}`); }
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";

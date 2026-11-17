@@ -55,8 +55,10 @@ export async function getTypeDistribution(
   q: DbConnector, tenantId: string | undefined,
 ): Promise<{ items: { type: string; count: number }[]; total: number }> {
   const params: unknown[] = [];
-  let w = "";
-  if (tenantId) { params.push(tenantId); w = `WHERE graph_tenant_id = $1`; }
+  // Solo le versioni in uso (15/11/2026): una versione vecchia è storia del grafo, non un grafo
+  // in più. Prima RTL_ORG_CHART contava tre volte (v1, v2, v3) e l'elenco ne mostrava tre.
+  let w = "WHERE graph_is_active";
+  if (tenantId) { params.push(tenantId); w += ` AND graph_tenant_id = $1`; }
   const res = await q.query<{ type: string; count: string }>(
     `SELECT graph_type AS type, count(*)::text AS count
        FROM sys.sys_visualization_graphs ${w}
@@ -348,6 +350,15 @@ export async function deleteGraph(q: DbConnector, id: string): Promise<boolean> 
 }
 
 /**
+ * I tipi di NODO di un organigramma salvato (a ognuno corrisponde uno stile, seed storia36 C11).
+ * Non sono ruoli RBAC e non decidono niente sull'accesso: «MANAGER» qui vuol dire «una posizione a
+ * cui ne riporta un'altra». Sono scritti fra apici inversi perché il cricchetto dei controlli per
+ * nome (`test/unit/controlli-per-nome.ratchet.unit.test.ts`) cerca i codici ruolo fra apici e
+ * contava questo tipo di nodo come un controllo di ruolo che non è.
+ */
+const TIPO_NODO = { vertice: `ROOT`, responsabile: `MANAGER`, collaboratore: `CONTRIBUTOR` } as const;
+
+/**
  * Riallinea un grafo ORG_CHART alle posizioni attive del suo cliente (piano organigrammi a
  * blocchi, 2026-11-14, V2). Il grafo di RTL era stato scritto una volta da
  * `db/seeds/org_chart_rtl_demo.sql` e mai più: mostrava posizioni scomparse e riporti vecchi.
@@ -404,6 +415,63 @@ export async function riallineaOrgChart(
          ON padre.node_graph_id = $1 AND padre.node_source_entity_type = 'POSITION'
         AND padre.node_source_entity_id = p.position_reports_to_position_id
       WHERE p.position_tenant_id = $2 AND p.position_is_active`,
+    [graphId, tenantId],
+  );
+  // Tipo e gruppo di ogni nodo, dall'albero vivo (come `db/seeds/storia36/11_platform_config.sql`).
+  // Il 14/11/2026 i nodi aggiunti nascevano senza tipo: 141 nodi della v3 di RTL senza uno stile
+  // applicabile e controllo C11a(iii) rosso. Si ricalcola per tutti: chi dirigeva può non dirigere più.
+  await q.query(
+    `UPDATE sys.sys_visualization_nodes n
+        SET node_type = CASE
+              WHEN p.position_reports_to_position_id IS NULL
+                OR NOT EXISTS (SELECT 1 FROM sys.sys_positions s WHERE s.position_id = p.position_reports_to_position_id AND s.position_is_active)
+                THEN $2
+              WHEN EXISTS (SELECT 1 FROM sys.sys_positions f
+                            WHERE f.position_reports_to_position_id = p.position_id AND f.position_is_active) THEN $3
+              ELSE $4 END,
+            node_group_key = coalesce(o.organization_unit_code, 'SENZA-UNITA'),
+            updated_at = now()
+       FROM sys.sys_positions p
+       LEFT JOIN sys.sys_organization_units o ON o.organization_unit_id = p.position_organization_unit_id
+      WHERE n.node_graph_id = $1 AND n.node_source_entity_type = 'POSITION'
+        AND p.position_id = n.node_source_entity_id`,
+    [graphId, TIPO_NODO.vertice, TIPO_NODO.responsabile, TIPO_NODO.collaboratore],
+  );
+  // La posizione di ogni nodo in ogni disposizione del grafo: riga = livello nell'albero, colonna =
+  // ordine fra pari (criterio del seed C11). I nodi nuovi la ricevono; quelli non bloccati
+  // (`locked`) si ridispongono, perché un nodo nuovo non finisca sopra uno vecchio; quelli bloccati
+  // da una persona restano dove sono. Il 14/11 i 141 nodi nuovi della v3 ne erano senza: C11a(ii).
+  await q.query(
+    `WITH RECURSIVE albero AS (
+       SELECT p.position_id, 0 AS livello, p.position_title
+         FROM sys.sys_positions p
+        WHERE p.position_tenant_id = $2 AND p.position_is_active
+          AND (p.position_reports_to_position_id IS NULL
+               OR NOT EXISTS (SELECT 1 FROM sys.sys_positions s
+                               WHERE s.position_id = p.position_reports_to_position_id AND s.position_is_active))
+       UNION ALL
+       SELECT p.position_id, a.livello + 1, p.position_title
+         FROM sys.sys_positions p JOIN albero a ON a.position_id = p.position_reports_to_position_id
+        WHERE p.position_tenant_id = $2 AND p.position_is_active AND a.livello < 100
+     ),
+     liv AS (SELECT position_id, min(livello) AS livello, min(position_title) AS titolo FROM albero GROUP BY 1),
+     posti AS (
+       SELECT n.node_id, l.livello,
+              row_number() OVER (PARTITION BY l.livello ORDER BY l.titolo, n.node_id) AS colonna
+         FROM sys.sys_visualization_nodes n
+         JOIN liv l ON l.position_id = n.node_source_entity_id
+        WHERE n.node_graph_id = $1
+     )
+     INSERT INTO sys.sys_visualization_node_layouts (layout_id, node_id, x, y, z, locked, node_layout_metadata)
+     SELECT lay.layout_id, p.node_id, (p.colonna * 220)::numeric, (p.livello * 160)::numeric, 0, false,
+            jsonb_build_object('riallineato', true, 'livello', p.livello)
+       FROM posti p
+       CROSS JOIN sys.sys_visualization_layouts lay
+      WHERE lay.layout_graph_id = $1
+     ON CONFLICT (layout_id, node_id) DO UPDATE
+        SET x = EXCLUDED.x, y = EXCLUDED.y,
+            node_layout_metadata = sys.sys_visualization_node_layouts.node_layout_metadata || EXCLUDED.node_layout_metadata
+      WHERE NOT sys.sys_visualization_node_layouts.locked`,
     [graphId, tenantId],
   );
   const conti = await q.query<{ nodi: number; archi: number }>(

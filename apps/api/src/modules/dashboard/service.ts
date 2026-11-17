@@ -221,7 +221,9 @@ export const dashboardService = {
             ...v,
             content: null,
             withheldReason:
-              `Valori trattenuti: ${v.dataClasses.join(", ")} ti è accessibile in forma mascherata. ` +
+              // D8: niente codici di classe nel testo (le classi si leggono nei contrassegni sotto,
+              // tradotte): la frase dice in italiano che cosa succede e perche'.
+              "Valori trattenuti: i dati di questa vista ti sono accessibili solo in forma mascherata. " +
               "La vista esiste e ti riguarda; i valori richiedono un mandato che non hai.",
           };
         }
@@ -266,6 +268,7 @@ export const dashboardService = {
       tenantId: scopeTenantId,
       teamPositionIds,
       isPlatformScope: isPlatform,
+      puoVedereRetribuzioni: userPermissionCodes(actor).includes("compensation_intelligence:read"),
     };
 
     const [counters, trends, upcomingLearningDeadlines, recentActivity] = await Promise.all([

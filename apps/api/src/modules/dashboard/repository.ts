@@ -5,6 +5,7 @@
  */
 
 import type { Pool, PoolClient } from "pg";
+import { soloPersone } from "../../lib/scope/persone.js";
 import type {
   DashboardCounters,
   DashboardLearningDeadline,
@@ -22,6 +23,11 @@ export interface ScopeFilter {
   teamPositionIds: string[];
   /** Include cross-tenant counters (tenants/blueprints) only for PLATFORM. */
   isPlatformScope: boolean;
+  /**
+   * Chi guarda puo' aprire le analisi retributive (`compensation_intelligence:read`)? Senza,
+   * le proposte retributive non entrano nei contatori (D7).
+   */
+  puoVedereRetribuzioni?: boolean;
 }
 
 export async function getDashboardCounters(
@@ -33,7 +39,7 @@ export async function getDashboardCounters(
   let userCount: number;
   let positionCount: number;
   let ouCount: number;
-  let learningPathCount: number;
+  let learningPathCount: number | null;
   let learningGapCount: number;
 
   if (scope.teamPositionIds.length > 0) {
@@ -41,8 +47,10 @@ export async function getDashboardCounters(
     const r1 = await q.query<{ c: string }>(
       `SELECT count(DISTINCT a.user_position_assignment_user_id)::text AS c
          FROM sys.sys_user_position_assignments a
+         JOIN sys.sys_users u ON u.user_id = a.user_position_assignment_user_id
         WHERE a.user_position_assignment_position_id = ANY($1::uuid[])
-          AND a.user_position_assignment_status = 'ACTIVE'`,
+          AND a.user_position_assignment_status = 'ACTIVE'
+          AND ${soloPersone("u")}`,
       [scope.teamPositionIds],
     );
     userCount = Number(r1.rows[0]?.c ?? 0);
@@ -58,12 +66,10 @@ export async function getDashboardCounters(
     );
     ouCount = Number(r3.rows[0]?.c ?? 0);
 
-    const r4 = await q.query<{ c: string }>(
-      `SELECT count(*)::text AS c FROM sys.sys_learning_paths
-        WHERE learning_path_tenant_id = $1`,
-      [scope.tenantId],
-    );
-    learningPathCount = Number(r4.rows[0]?.c ?? 0);
+    // D7: i percorsi formativi non hanno un legame con le posizioni: per una catena non c'e'
+    // un numero onesto, e mostrare quello dell'intero tenant accanto a «4 persone» e' una
+    // scala diversa. Resta assente.
+    learningPathCount = null;
 
     const r5 = await q.query<{ c: string }>(
       `SELECT count(*)::text AS c FROM sys.sys_learning_gaps lg
@@ -84,7 +90,7 @@ export async function getDashboardCounters(
       learning_gaps: string;
     }>(
       `SELECT
-         (SELECT count(*) FROM sys.sys_users WHERE user_tenant_id = $1)::text AS users,
+         (SELECT count(*) FROM sys.sys_users u WHERE u.user_tenant_id = $1 AND ${soloPersone("u")})::text AS users,
          (SELECT count(*) FROM sys.sys_positions WHERE position_tenant_id = $1 AND position_is_active = true)::text AS positions,
          (SELECT count(*) FROM sys.sys_organization_units WHERE organization_unit_tenant_id = $1)::text AS ous,
          (SELECT count(*) FROM sys.sys_learning_paths WHERE learning_path_tenant_id = $1)::text AS learning_paths,
@@ -107,7 +113,7 @@ export async function getDashboardCounters(
       learning_gaps: string;
     }>(
       `SELECT
-         (SELECT count(*) FROM sys.sys_users)::text AS users,
+         (SELECT count(*) FROM sys.sys_users u WHERE ${soloPersone("u")})::text AS users,
          (SELECT count(*) FROM sys.sys_positions WHERE position_is_active = true)::text AS positions,
          (SELECT count(*) FROM sys.sys_organization_units)::text AS ous,
          (SELECT count(*) FROM sys.sys_learning_paths)::text AS learning_paths,
@@ -132,8 +138,8 @@ export async function getDashboardCounters(
     );
     tenantsCount = Number(r.rows[0]?.tenants ?? 0);
     blueprintsCount = Number(r.rows[0]?.blueprints ?? 0);
-  } else if (scope.tenantId) {
-    // Tenant-scoped blueprints: count active blueprint activations for this tenant.
+  } else if (scope.tenantId && scope.teamPositionIds.length === 0) {
+    // D7: non per una catena, il numero e' dell'intero tenant. Tenant-scoped blueprints: count active blueprint activations for this tenant.
     const r = await q.query<{ c: string }>(
       `SELECT count(*)::text AS c FROM sys.sys_blueprint_activations
         WHERE blueprint_activation_tenant_id = $1`,
@@ -144,7 +150,7 @@ export async function getDashboardCounters(
 
   // HRMS_MANAGER+ tenant-scoped: pending compensation recommendations.
   let pendingRecommendations: number | null = null;
-  if (scope.tenantId) {
+  if (scope.tenantId && scope.teamPositionIds.length === 0 && scope.puoVedereRetribuzioni !== false) {
     const r = await q.query<{ c: string }>(
       `SELECT count(*)::text AS c FROM sys.sys_compensation_recommendations
         WHERE compensation_recommendation_tenant_id = $1
@@ -247,6 +253,19 @@ export async function getRecentActivity(
     params.push(scope.tenantId);
     where.push(`tenant_id = $${params.length}`);
   }
+  // D2: nel perimetro di chi guarda (I19: niente delle catene sorelle). Per una catena, le
+  // sole posizioni governate e le persone che le occupano oggi.
+  let userScope = "";
+  let positionScope = "";
+  if (scope.teamPositionIds.length > 0) {
+    params.push(scope.teamPositionIds);
+    const idx = params.length;
+    userScope = `AND EXISTS (SELECT 1 FROM sys.sys_user_position_assignments a
+                              WHERE a.user_position_assignment_user_id = u.user_id
+                                AND a.user_position_assignment_status = 'ACTIVE'
+                                AND a.user_position_assignment_position_id = ANY($${idx}::uuid[]))`;
+    positionScope = `AND p.position_id = ANY($${idx}::uuid[])`;
+  }
   const whereSql = where.length > 0 ? `WHERE ${where.join(" AND ")}` : "";
 
   params.push(limit);
@@ -255,26 +274,28 @@ export async function getRecentActivity(
   const r = await q.query<{
     kind: string;
     occurred_at: Date;
-    summary: string;
+    subject: string;
     resource_id: string;
   }>(
     `WITH events AS (
        SELECT 'USER_CREATED'::text AS kind,
               created_at AS occurred_at,
-              -- C1: il riepilogo si legge in italiano e la persona «Cognome, Nome» (R1).
-              'Nuova persona: ' || coalesce(nullif(concat_ws(', ', nullif(user_last_name, ''), nullif(user_first_name, '')), ''), user_display_name) AS summary,
+              -- Solo il soggetto, la persona «Cognome, Nome» (R1): la frase la compone il web nella lingua di chi guarda.
+              coalesce(nullif(concat_ws(', ', nullif(user_last_name, ''), nullif(user_first_name, '')), ''), user_display_name) AS subject,
               user_id AS resource_id,
               user_tenant_id AS tenant_id
-         FROM sys.sys_users
+         FROM sys.sys_users u
+        WHERE ${soloPersone("u")} ${userScope}
        UNION ALL
        SELECT 'POSITION_CREATED'::text AS kind,
               created_at AS occurred_at,
-              'Nuova posizione: ' || position_title AS summary,
+              position_title AS subject,
               position_id AS resource_id,
               position_tenant_id AS tenant_id
-         FROM sys.sys_positions
+         FROM sys.sys_positions p
+        WHERE TRUE ${positionScope}
      )
-     SELECT kind, occurred_at, summary, resource_id
+     SELECT kind, occurred_at, subject, resource_id
        FROM events
        ${whereSql}
        ORDER BY occurred_at DESC
@@ -285,7 +306,7 @@ export async function getRecentActivity(
   return r.rows.map((row) => ({
     kind: row.kind as DashboardRecentActivity["kind"],
     occurredAt: row.occurred_at.toISOString(),
-    summary: row.summary,
+    subject: row.subject,
     resourceId: row.resource_id,
   }));
 }
@@ -444,7 +465,7 @@ const TREND_ENTITIES: ReadonlyArray<{
   /** Additional row filter (columns prefixed with the `t` alias). */
   extraWhere: string;
 }> = [
-  { key: "users", table: "sys.sys_users", tsColumn: "created_at", tenantColumn: "user_tenant_id", extraWhere: "" },
+  { key: "users", table: "sys.sys_users", tsColumn: "created_at", tenantColumn: "user_tenant_id", extraWhere: `AND ${soloPersone("t")}` },
   { key: "positions", table: "sys.sys_positions", tsColumn: "created_at", tenantColumn: "position_tenant_id", extraWhere: "AND t.position_is_active = true" },
   { key: "organizationUnits", table: "sys.sys_organization_units", tsColumn: "created_at", tenantColumn: "organization_unit_tenant_id", extraWhere: "" },
   { key: "learningPaths", table: "sys.sys_learning_paths", tsColumn: "created_at", tenantColumn: "learning_path_tenant_id", extraWhere: "" },

@@ -18,7 +18,7 @@
  *    diverse, e confonderle è il difetto che #188 ha chiuso sulle lacune formative.
  */
 
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "@/lib/api/fetch";
@@ -41,8 +41,9 @@ export default function MePerformancePage() {
   });
 
   /** Il voto, o la dichiarazione che è stato ritirato — mai una cella vuota muta. */
-  const voto = (r: MePerformanceReview, campo: string, valore: number | null | undefined) =>
-    isMasked(r, campo) ? <MaskedCell /> : <span className="text-xs">{valore ?? "—"}</span>;
+  const voto = useCallback((r: MePerformanceReview, campo: string, valore: number | null | undefined) =>
+    isMasked(r, campo) ? <MaskedCell /> : <span className="text-xs">{valore != null ? fmt.numeroFisso(valore, 2) : "—"}</span>,
+    [fmt]);
 
   const columns = useMemo<DataColumn<MePerformanceReview>[]>(
     () => [
@@ -67,11 +68,11 @@ export default function MePerformancePage() {
         cell: (r) =>
           isMasked(r, "potentialRating")
             ? <MaskedCell />
-            : <span className="text-xs">{r.potentialRating ?? "—"}</span>,
+            : <span className="text-xs">{typeof r.potentialRating === "string" ? enumLabel("potential", r.potentialRating) : r.potentialRating != null ? fmt.numeroFisso(r.potentialRating, 2) : "—"}</span>,
       },
     ],
     // `voto` è una closure stabile sui soli argomenti: la dipendenza vera è `t`.
-    [t, enumLabel, fmt],
+    [t, enumLabel, fmt, voto],
   );
 
   return (

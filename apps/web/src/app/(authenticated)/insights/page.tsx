@@ -11,6 +11,7 @@ import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { MaskedCell, isMasked } from "@/components/masked-cell";
 import { useFormat } from "@/lib/format";
 import { NomeOppure } from "@/components/senza-nome";
+import { LavoroInCorso } from "@/components/lavoro-in-corso";
 
 // Band → @heuresys/ui Badge variant (only confirmed variants) + registered text token.
 const BAND_BADGE: Record<FlightRiskBand, "success" | "secondary" | "destructive"> = {
@@ -107,6 +108,8 @@ export default function InsightsPage() {
         emptyDescription={t("insights.emptyDescription")}
         caption={t("insights.caption")}
       />
+
+      <LavoroInCorso attivo={recompute.isPending} titolo={t("insights.recomputing")} dettaglio={t("common:attesa.siSbloccaAllaFine")} />
 
       {feedback && (
         <p

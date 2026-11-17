@@ -36,7 +36,7 @@ function cellKey(pot: TalentBand, perf: TalentBand): string {
 function buildFitColumns(t: TFunction, f: Formati, enumLabel: EnumLabelFn): DataColumn<FitScore>[] {
   return [
     { header: t("talentReview.cols.employee"), cell: (r) => <span>{r.subjectUserName ?? "—"}</span> },
-    { header: t("talentReview.cols.position"), cell: (r) => <span title={r.positionId}><NomeOppure nome={r.positionTitle} id={r.positionId} /></span> },
+    { header: t("talentReview.cols.position"), cell: (r) => <NomeOppure nome={r.positionTitle} id={r.positionId} /> },
     { header: t("talentReview.cols.dimension"), cell: (r) => <span className="text-xs text-muted-foreground">{enumLabel("fitDimension", r.dimension)}</span> },
     { header: t("talentReview.cols.score"), align: "right", cell: (r) => <span className="tabular-nums">{r.score}</span> },
     { header: t("talentReview.cols.computedAt"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.computedAt)}</span> },
@@ -46,7 +46,7 @@ function buildFitColumns(t: TFunction, f: Formati, enumLabel: EnumLabelFn): Data
 function buildReadinessColumns(t: TFunction, enumLabel: EnumLabelFn, f: Formati): DataColumn<ReadinessScore>[] {
   return [
     { header: t("talentReview.cols.employee"), cell: (r) => <span>{r.subjectUserName ?? "—"}</span> },
-    { header: t("talentReview.cols.position"), cell: (r) => <span title={r.positionId}><NomeOppure nome={r.positionTitle} id={r.positionId} /></span> },
+    { header: t("talentReview.cols.position"), cell: (r) => <NomeOppure nome={r.positionTitle} id={r.positionId} /> },
     { header: t("talentReview.cols.horizon"), cell: (r) => <span className="text-xs text-muted-foreground">{enumLabel("horizon", r.horizon)}</span> },
     { header: t("talentReview.cols.value"), align: "right", cell: (r) => <span className="tabular-nums">{r.value ?? "—"}</span> },
     { header: t("talentReview.cols.computedAt"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.computedAt)}</span> },
@@ -56,17 +56,21 @@ function buildReadinessColumns(t: TFunction, enumLabel: EnumLabelFn, f: Formati)
 function buildSuccessionColumns(t: TFunction, enumLabel: EnumLabelFn, f: Formati): DataColumn<SuccessionScore>[] {
   return [
     { header: t("talentReview.cols.employee"), cell: (r) => <span>{r.subjectUserName ?? "—"}</span> },
-    { header: t("talentReview.cols.position"), cell: (r) => <span title={r.positionId}><NomeOppure nome={r.positionTitle} id={r.positionId} /></span> },
+    { header: t("talentReview.cols.position"), cell: (r) => <NomeOppure nome={r.positionTitle} id={r.positionId} /> },
     { header: t("talentReview.cols.value"), align: "right", cell: (r) => <span className="tabular-nums">{r.value ?? "—"}</span> },
     { header: t("talentReview.cols.horizon"), cell: (r) => <span className="text-xs text-muted-foreground">{enumLabel("horizon", r.horizon)}</span> },
     { header: t("talentReview.cols.computedAt"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.computedAt)}</span> },
   ];
 }
 
+/** D12: il codice interno della corsa di importazione non si mostra (R4): resta la frase generica. */
+const CODICE_CORSA = /corsa\s+p\d{6,}\w*/i;
+const motivazioneLeggibile = (m: string | null, t: TFunction) => (m === null || m === "" ? "—" : CODICE_CORSA.test(m) ? t("talentReview.rationaleImported") : m);
+
 function buildCriticalPositionColumns(t: TFunction, f: Formati): DataColumn<CriticalPosition>[] {
   return [
-    { header: t("talentReview.cols.position"), cell: (r) => <span title={r.positionId}><NomeOppure nome={r.positionTitle} id={r.positionId} /></span> },
-    { header: t("talentReview.cols.rationale"), cell: (r) => <span className="text-xs text-muted-foreground">{r.rationale ?? "—"}</span> },
+    { header: t("talentReview.cols.position"), cell: (r) => <NomeOppure nome={r.positionTitle} id={r.positionId} /> },
+    { header: t("talentReview.cols.rationale"), cell: (r) => <span className="text-xs text-muted-foreground">{motivazioneLeggibile(r.rationale, t)}</span> },
     { header: t("talentReview.cols.businessImpact"), align: "right", cell: (r) => <span className="tabular-nums">{r.businessImpactScore ?? "—"}</span> },
     { header: t("talentReview.cols.flaggedAt"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.flaggedAt)}</span> },
   ];
@@ -74,11 +78,11 @@ function buildCriticalPositionColumns(t: TFunction, f: Formati): DataColumn<Crit
 
 function buildCoverageColumns(t: TFunction): DataColumn<CriticalCoverage>[] {
   return [
-    { header: t("talentReview.cols.position"), cell: (r) => <span title={r.positionId}><NomeOppure nome={r.positionTitle} id={r.positionId} /></span> },
-    { header: t("talentReview.cols.readyNow"), align: "right", cell: (r) => <span className="tabular-nums">{r.readyNowCount}</span> },
-    { header: t("talentReview.cols.ready6mo"), align: "right", cell: (r) => <span className="tabular-nums">{r.ready6moCount}</span> },
-    { header: t("talentReview.cols.ready1y"), align: "right", cell: (r) => <span className="tabular-nums">{r.ready1yCount}</span> },
-    { header: t("talentReview.cols.coverage"), align: "right", cell: (r) => <span className="tabular-nums">{r.overallScore ?? "—"}</span> },
+    { header: t("talentReview.cols.position"), cell: (r) => <NomeOppure nome={r.positionTitle} id={r.positionId} /> },
+    { header: t("talentReview.cols.readyNow"), align: "right", cell: (r) => <span className="tabular-nums">{r.readyNowCount ?? "—"}</span> },
+    { header: t("talentReview.cols.ready6mo"), align: "right", cell: (r) => <span className="tabular-nums">{r.ready6moCount ?? "—"}</span> },
+    { header: t("talentReview.cols.ready1y"), align: "right", cell: (r) => <span className="tabular-nums">{r.ready1yCount ?? "—"}</span> },
+    { header: t("talentReview.cols.coverage"), align: "right", cell: (r) => <span className="tabular-nums">{r.overallScore ?? t("talentReview.coverageNotComputed")}</span> },
   ];
 }
 
@@ -182,7 +186,7 @@ export default function TalentReviewPage() {
                         className="flex min-h-32 flex-col gap-2 rounded-card border border-border bg-card p-3"
                       >
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                          <span className="text-xs uppercase tracking-wider text-muted-foreground">
                             {t(`talentReview.nineBox.band.${pot}`)} / {t(`talentReview.nineBox.band.${perf}`)}
                           </span>
                           <Badge variant="secondary">{rows.length}</Badge>

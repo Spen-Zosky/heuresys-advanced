@@ -20,6 +20,7 @@ import { StatusPill } from "@/components/status-pill";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { useFormat } from "@/lib/format";
 import { Leggibile } from "@/lib/leggibile";
+import { LavoroInCorso } from "@/components/lavoro-in-corso";
 
 /**
  * #198 Tenant Builder P3, T7 — LA COSTRUZIONE: il piano prima, e la firma dopo.
@@ -267,6 +268,8 @@ export default function TenantBlueprintBuildPage({
         >
           {firma.isPending ? t("dossier.build.applying") : t("dossier.build.applyAction")}
         </Button>
+
+        <LavoroInCorso attivo={firma.isPending} titolo={t("dossier.build.applying")} dettaglio={t("common:attesa.siSbloccaAllaFine")} />
 
         {firma.isError ? (
           <p className="mt-2 text-sm text-destructive" data-testid="build-apply-error">

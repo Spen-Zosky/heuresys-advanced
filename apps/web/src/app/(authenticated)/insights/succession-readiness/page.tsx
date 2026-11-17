@@ -16,6 +16,7 @@ import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { MaskedCell, isMasked } from "@/components/masked-cell";
 import { useFormat } from "@/lib/format";
 import { NomeOppure } from "@/components/senza-nome";
+import { LavoroInCorso } from "@/components/lavoro-in-corso";
 
 // Higher readiness = better: READY_NOW → success, NOT_READY → destructive.
 // Only confirmed @heuresys/ui Badge variants + registered text tokens.
@@ -116,6 +117,8 @@ export default function SuccessionReadinessPage() {
         emptyDescription={t("insightsReadiness.emptyDescription")}
         caption={t("insightsReadiness.caption")}
       />
+
+      <LavoroInCorso attivo={recompute.isPending} titolo={t("insightsReadiness.recomputing")} dettaglio={t("common:attesa.siSbloccaAllaFine")} />
 
       {feedback && (
         <p

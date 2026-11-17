@@ -51,6 +51,8 @@ export type EngagementSurveyResultsResponse = z.infer<typeof EngagementSurveyRes
 // Pulse-check aggregation bucketed by ISO week.
 export const EngagementPulseWeekSchema = z.object({
   weekNumber: z.number().int().nullable(),
+  /** Lunedì della settimana (YYYY-MM-DD): distingue la stessa settimana di anni diversi. */
+  weekStart: z.string().nullable(),
   count: z.number().int(),
   avgMood: z.number().nullable(),
   avgWorkload: z.number().nullable(),

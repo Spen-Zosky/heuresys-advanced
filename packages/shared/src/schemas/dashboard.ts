@@ -19,7 +19,8 @@ export const DashboardCountersSchema = z.object({
   users: z.number().int().min(0),
   positions: z.number().int().min(0),
   organizationUnits: z.number().int().min(0),
-  learningPaths: z.number().int().min(0),
+  /** Assente (null) per chi governa una catena: i percorsi non hanno un legame con le posizioni (D7). */
+  learningPaths: z.number().int().min(0).nullable(),
   learningGaps: z.number().int().min(0),
   blueprints: z.number().int().min(0).nullable(),
   pendingRecommendations: z.number().int().min(0).nullable(),
@@ -42,7 +43,11 @@ export type DashboardLearningDeadline = z.infer<typeof DashboardLearningDeadline
 export const DashboardRecentActivitySchema = z.object({
   kind: z.enum(["USER_CREATED", "POSITION_CREATED", "ASSIGNMENT_CHANGED"]),
   occurredAt: z.iso.datetime(),
-  summary: z.string(),
+  /**
+   * Il soggetto dell'evento (la persona «Cognome, Nome» o il titolo della posizione), senza frase:
+   * la frase («Nuova persona: …») la compone il web con i18n nella lingua di chi guarda.
+   */
+  subject: z.string(),
   resourceId: z.uuid(),
 });
 export type DashboardRecentActivity = z.infer<typeof DashboardRecentActivitySchema>;

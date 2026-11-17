@@ -3,8 +3,10 @@
     "title": "Approvazioni",
     "description": "Crea e traccia le richieste di approvazione.",
     "count": "{{count}} richieste",
+    "count_one": "{{count}} richiesta",
     "columns": {
       "title": "Titolo",
+      "requester": "Richiedente",
       "status": "Stato",
       "policy": "Regola di approvazione",
       "priority": "Priorità",
@@ -50,6 +52,7 @@
     },
     "filters": {
       "statusAll": "Tutti gli stati",
+      "statusActive": "Non archiviati",
       "processAll": "Tutti i processi",
       "process": "Processo",
       "stepAll": "Tutte le attività",
@@ -105,11 +108,12 @@
     "title": "Clima e sondaggi",
     "description": "Risultati dei sondaggi e andamento delle rilevazioni rapide.",
     "count": "{{count}} sondaggi",
+    "count_one": "{{count}} sondaggio",
     "columns": {
       "title": "Titolo",
       "status": "Stato",
       "type": "Tipo",
-      "responses": "Risposte",
+      "responses": "Persone che hanno risposto",
       "questions": "Domande",
       "invitations": "Inviti"
     },
@@ -125,17 +129,19 @@
       "workload": "Carico",
       "satisfaction": "Soddisfazione",
       "totalChecks": "{{count}} rilevazioni in tutto",
+      "totalChecks_one": "{{count}} rilevazione in tutto",
       "empty": "Nessuna rilevazione rapida.",
       "axisWeek": "Settimana",
       "axisScore": "Punteggio medio",
       "tableTitle": "Mostra i dati in tabella",
       "colCount": "Rilevazioni",
-      "weekShort": "Sett. {{n}}"
+      "weekShort": "Sett. dal {{n}}"
     },
     "results": {
       "back": "Torna a Engagement",
       "notFound": "Sondaggio non trovato.",
       "subtitle": "{{count}} domande",
+      "subtitle_one": "{{count}} domanda",
       "question": "Domanda",
       "type": "Tipo",
       "category": "Categoria",
@@ -155,11 +161,16 @@
     "title": "Utenti",
     "description": "Le persone dell'organizzazione con il ruolo che ricoprono e la sede in cui operano.",
     "count": "{{count}} persone",
+    "count_one": "{{count}} persona",
     "countKind": {
       "STANDARD": "{{count}} persone",
+      "STANDARD_one": "{{count}} persona",
       "SERVICE": "{{count}} utenze di servizio",
+      "SERVICE_one": "{{count}} utenza di servizio",
       "GENERATED_INCUMBENT": "{{count}} titolari segnaposto",
-      "ALL": "{{count}} utenze"
+      "GENERATED_INCUMBENT_one": "{{count}} titolare segnaposto",
+      "ALL": "{{count}} utenze",
+      "ALL_one": "{{count}} utenza"
     },
     "filters": {
       "kind": "Mostra",
@@ -348,7 +359,8 @@
   "tenants": {
     "title": "Tenant",
     "description": "Registry dei tenant con codice, country e stato.",
-    "count": "{{count}} totali",
+    "count_one": "{{count}} totale",
+    "count_other": "{{count}} totali",
     "errorMessage": "Accesso negato o errore di caricamento.",
     "emptyTitle": "Nessun tenant",
     "emptyDescription": "Non ci sono tenant registrati.",
@@ -387,6 +399,7 @@
       "typingAssessed": "Valutato il {{date}}",
       "typingRegulatory": "Intensità regolatoria: {{value}}",
       "typingEmployees": "{{n}} dipendenti",
+      "typingEmployees_one": "{{n}} dipendente",
       "typingEmpty": "Nessun profilo di tipizzazione registrato.",
       "usersHint": "La lista utenti completa è gestita nella pagina dedicata.",
       "usersLink": "Apri /users →"
@@ -447,6 +460,7 @@
     "title": "Unità organizzative",
     "description": "Gerarchia delle unità organizzative del tenant.",
     "count": "{{count}} unità",
+    "count_one": "{{count}} unità",
     "errorMessage": "Impossibile caricare le unità organizzative.",
     "emptyTitle": "Nessuna unità",
     "emptyDescription": "Non ci sono unità organizzative.",
@@ -461,6 +475,11 @@
     "dash": "—",
     "activeYes": "Attiva",
     "activeNo": "Non attiva",
+    "filters": {
+      "active": "Solo attive",
+      "inactive": "Solo non attive",
+      "all": "Tutte"
+    },
     "form": {
       "createTitle": "Nuova unità organizzativa",
       "editTitle": "Unità organizzativa — modifica",
@@ -494,6 +513,7 @@
     "title": "Posizioni",
     "description": "Posti del tenant: chi li occupa, in quale unità e sede, quanto contano.",
     "count": "{{count}} posizioni",
+    "count_one": "{{count}} posizione",
     "errorMessage": "Impossibile caricare le posizioni.",
     "emptyTitle": "Nessuna posizione",
     "emptyDescription": "Non ci sono posizioni nel tenant.",
@@ -555,6 +575,7 @@
       "title": "KPI richiesti",
       "back": "← Posizione",
       "count": "{{count}} KPI associati",
+      "count_one": "{{count}} KPI associato",
       "cardTitle": "Requisiti",
       "empty": "Nessun KPI richiesto dichiarato.",
       "caption": "KPI richiesti dalla posizione",
@@ -569,6 +590,7 @@
       "title": "Formazione della posizione",
       "back": "← Posizione",
       "count": "{{count}} percorsi · {{modules}} moduli",
+      "count_one": "{{count}} percorso · {{modules}} moduli",
       "dash": "—",
       "requirements": {
         "cardTitle": "Percorsi richiesti",
@@ -587,6 +609,7 @@
         "caption": "Moduli formativi che coprono le skill richieste dalla posizione",
         "empty": "Nessun modulo mappato sulle skill richieste.",
         "minutes": "{{count}} min",
+        "minutes_one": "{{count}} min",
         "columns": {
           "skill": "Skill",
           "required": "Richiesta",
@@ -611,6 +634,7 @@
       "title": "Skill richieste",
       "back": "← Posizione",
       "count": "{{count}} skill associate",
+      "count_one": "{{count}} skill associata",
       "cardTitle": "Requisiti",
       "empty": "Nessuna skill richiesta dichiarata.",
       "caption": "Skill richieste dalla posizione",
@@ -623,8 +647,11 @@
     },
     "countKind": {
       "ALL": "{{count}} posizioni",
+      "ALL_one": "{{count}} posizione",
       "ACTIVE": "{{count}} posizioni attive",
-      "INACTIVE": "{{count}} posizioni non attive"
+      "ACTIVE_one": "{{count}} posizione attiva",
+      "INACTIVE": "{{count}} posizioni non attive",
+      "INACTIVE_one": "{{count}} posizione non attiva"
     },
     "vacant": "Scoperta",
     "filters": {
@@ -746,7 +773,16 @@
       "user_profile": "Profili delle persone",
       "visualization": "Visualizzazioni",
       "vocabulary": "Vocabolario",
-      "whistleblowing": "Segnalazioni"
+      "whistleblowing": "Segnalazioni",
+      "career": "Carriera",
+      "certification": "Certificazioni",
+      "consent": "Consensi",
+      "document": "Documenti",
+      "insight": "Approfondimenti",
+      "job_requisition": "Richieste di personale",
+      "me": "Area personale",
+      "performance_review": "Valutazioni delle prestazioni",
+      "review_cycle": "Cicli di valutazione"
     },
     "actions": {
       "activate": "attivare",
@@ -777,7 +813,21 @@
       "update_layout": "modificare la disposizione",
       "use": "usare",
       "view": "vedere",
-      "write": "scrivere"
+      "write": "scrivere",
+      "content_read": "leggere i contenuti",
+      "enroll_self": "iscriversi",
+      "export_self": "esportare i propri dati",
+      "manage_self": "gestire i propri dati",
+      "mark_read_self": "segnare come letto",
+      "preferences_read": "leggere le preferenze",
+      "preferences_update": "modificare le preferenze",
+      "read_self": "leggere i propri dati",
+      "request_self": "fare richiesta per sé",
+      "request_target_self": "indicare il destinatario della propria richiesta",
+      "respond_self": "rispondere per sé",
+      "sessions_manage": "gestire le sessioni",
+      "update_self": "modificare i propri dati",
+      "upload_self": "caricare i propri file"
     }
   },
   "dashboard": {
@@ -787,33 +837,42 @@
     "scope": "Ambito {{kind}} · {{role}}",
     "trendDesc": "vs settimana prec.",
     "counters": {
-      "users": "Utenti",
-      "positions": "Posizioni",
+      "users": "Persone",
+      "positions": "Posizioni attive",
       "organizationUnits": "Unità organizzative",
       "learningPaths": "Percorsi formativi",
       "learningGaps": "Lacune formative",
-      "tenants": "Tenant",
-      "blueprints": "Blueprint",
-      "recommendations": "Reward proposte"
+      "tenants": "Aziende",
+      "blueprints": "Modelli di impianto",
+      "recommendations": "Proposte retributive"
     },
-    "gapsTitle": "Gap critici/alti recenti",
+    "gapsTitle": "Lacune formative gravi recenti",
     "gapsEmptyTitle": "Nessun gap critico",
     "gapsEmptyDesc": "Non ci sono gap critici o alti aperti al momento.",
     "gapGeneral": "Generale",
     "activityTitle": "Attività recente",
+    "activityKind": {
+      "USER_CREATED": "Nuova persona: {{subject}}",
+      "POSITION_CREATED": "Nuova posizione: {{subject}}",
+      "ASSIGNMENT_CHANGED": "Assegnazione modificata: {{subject}}"
+    },
     "activityEmptyTitle": "Nessuna attività recente",
     "activityEmptyDesc": "Le azioni recenti del tuo ambito appariranno qui.",
     "activitySubtitle": "Ambito {{kind}}",
     "famiglie": {
       "badge": "cruscotto",
       "vistePlurale": "{{count}} viste",
+      "vistePlurale_one": "{{count}} vista",
       "visteConTrattenute": "{{count}} viste, di cui {{masked}} con valori trattenuti",
+      "visteConTrattenute_one": "{{count}} vista, di cui {{masked}} con valori trattenuti",
       "colonnaVoce": "Voce",
       "colonnaDettaglio": "Dettaglio",
       "colonnaValore": "Valore",
       "vuotoValori": "Nessun valore nel tuo perimetro",
       "vuotoAndamento": "Nessun andamento nel tuo perimetro",
       "vuotoRighe": "Nessuna riga nel tuo perimetro",
+      "vuotoFiliali": "Nessuna filiale da mostrare",
+      "vuotoFilialiMotivo": "Questa dashboard riguarda le filiali: la tua unità non è una filiale e non ne governi nessuna.",
       "senzaValori": "Valori non disponibili",
       "catalogoIrraggiungibile": "Catalogo delle dashboard non raggiungibile",
       "datiIrraggiungibili": "Dati della dashboard non raggiungibili",
@@ -824,7 +883,8 @@
   "visualizations": {
     "title": "Visualizzazioni",
     "description": "Grafici registrati con tipo e stato.",
-    "count": "{{count}} grafici",
+    "count_one": "{{count}} grafico",
+    "count_other": "{{count}} grafici",
     "countLoading": "…",
     "errorMessage": "Impossibile caricare i grafici.",
     "emptyTitle": "Nessun grafico",
@@ -834,6 +894,7 @@
       "code": "Codice",
       "name": "Nome",
       "type": "Tipo",
+      "version": "Versione in uso",
       "status": "Stato"
     },
     "chartSeries": "Grafici",
@@ -854,12 +915,14 @@
       "diagramTitle": "Diagramma",
       "diagramAria": "Diagramma del grafo {{name}}",
       "nodesTitle": "Nodi ({{count}})",
-      "edgesTitle": "Edge ({{count}})",
+      "nodesTitle_one": "Nodo ({{count}})",
+      "edgesTitle": "Legami ({{count}})",
+      "edgesTitle_one": "Legame ({{count}})",
       "dash": "—",
       "nodesEmpty": "Nessun nodo.",
-      "edgesEmpty": "Nessun edge.",
+      "edgesEmpty": "Nessun legame.",
       "edgeArrow": " → ",
-      "note": "Renderer Mermaid attivato (max 50 nodi · 200 edge). Liste nodi/edge complete sopra (max 20 + 20 visibili).",
+      "note": "Disegno semplificato (al massimo 50 nodi e 200 legami). Gli elenchi completi sono sopra, fino a 20 voci per elenco.",
       "versionBadge": "versione {{version}}",
       "versionsTitle": "Versioni",
       "versionSelectLabel": "Versione da consultare",
@@ -897,6 +960,7 @@
     "title": "Contenuti",
     "description": "Knowledge base, policy, manuali e annunci del tenant.",
     "count": "{{count}} documenti",
+    "count_one": "{{count}} documento",
     "errorMessage": "Impossibile caricare i contenuti.",
     "emptyTitle": "Nessun documento",
     "emptyDescription": "Non ci sono contenuti. Creane uno con il modulo qui sopra.",
@@ -942,6 +1006,7 @@
     "filters": {
       "kindAll": "Tutti i tipi",
       "statusAll": "Tutti gli stati",
+      "statusActive": "Non archiviati",
       "categoryAll": "Tutte le categorie",
       "searchLabel": "Cerca",
       "searchPlaceholder": "Cerca per titolo…"
@@ -953,6 +1018,7 @@
       "hint": "Digita almeno 2 caratteri.",
       "loading": "Ricerca in corso…",
       "resultsCount": "{{count}} risultati",
+      "resultsCount_one": "{{count}} risultato",
       "emptyTitle": "Nessun risultato",
       "emptyDescription": "Nessun contenuto corrisponde a «{{q}}».",
       "errorMessage": "Errore durante la ricerca."
@@ -979,6 +1045,7 @@
     "categories": {
       "cardTitle": "Categorie",
       "count": "{{count}} categorie",
+      "count_one": "{{count}} categoria",
       "nameLabel": "Nome",
       "descriptionLabel": "Descrizione",
       "submit": "Aggiungi categoria",
@@ -1005,6 +1072,7 @@
       "noCategory": "— Nessuna —",
       "versionsTitle": "Cronologia versioni",
       "versionsCount": "{{count}} versioni",
+      "versionsCount_one": "{{count}} versione",
       "versionsEmpty": "Nessuna versione.",
       "versionsCaption": "Versioni del documento",
       "currentBadge": "Corrente",
@@ -1045,14 +1113,15 @@
     }
   },
   "insights": {
-    "title": "Insights — rischio di abbandono",
-    "description": "Punteggio di flight-risk per persona, derivato in-piattaforma con regola trasparente.",
-    "descriptionScoped": "Ambito {{kind}} · punteggio di flight-risk per persona, esplicabile per feature.",
+    "title": "Rischio di uscita",
+    "description": "Un punteggio da 0 a 100 per ogni persona: più è alto, più è probabile che lasci l'azienda. È calcolato con una regola trasparente, leggibile voce per voce.",
+    "descriptionScoped": "Ambito {{kind}} · punteggio di rischio di uscita per persona, spiegato voce per voce.",
     "count": "{{count}} persone valutate",
-    "errorMessage": "Impossibile caricare gli insights.",
+    "count_one": "{{count}} persona valutata",
+    "errorMessage": "Impossibile caricare il rischio di uscita.",
     "emptyTitle": "Nessun punteggio",
     "emptyDescription": "Nessun punteggio calcolato. Esegui un ricalcolo.",
-    "caption": "Punteggi di flight-risk (rischio più alto in cima)",
+    "caption": "Rischio di uscita (il più alto in cima)",
     "colSubject": "Persona",
     "colScore": "Punteggio",
     "colBand": "Fascia",
@@ -1064,25 +1133,26 @@
     },
     "feature": {
       "tenure": "Anzianità",
-      "attendance": "Presenze / straordinari",
-      "kpi": "Performance KPI",
+      "attendance": "Presenze e straordinari",
+      "kpi": "Risultati sugli indicatori",
       "engagement": "Coinvolgimento",
       "comp": "Posizionamento retributivo",
-      "promotion": "Recenza promozione"
+      "promotion": "Tempo dall'ultima promozione"
     },
     "recompute": "Ricalcola",
     "recomputing": "Ricalcolo…",
     "recomputeSuccess": "Ricalcolo completato: {{scored}} persone valutate.",
     "recomputeError": "Errore nel ricalcolo.",
     "explainTitle": "Scomposizione del punteggio — {{name}}",
-    "explainDesc": "Punteggio {{score}} ({{band}}) · modello {{model}}. Ogni feature contribuisce per peso × valore normalizzato.",
-    "featureDetail": "norm {{normalized}} · peso {{weight}}% · contrib {{contribution}}"
+    "explainDesc": "Punteggio {{score}} ({{band}}) · modello {{model}}. Ogni voce contribuisce per il suo peso moltiplicato per il suo valore.",
+    "featureDetail": "valore {{normalized}} · peso {{weight}}% · contributo {{contribution}}"
   },
   "insightsReadiness": {
-    "title": "Insights — prontezza alla successione",
-    "description": "Prontezza per persona verso le posizioni-obiettivo best-fit, derivata in-piattaforma con regola trasparente.",
-    "descriptionScoped": "Ambito {{kind}} · prontezza alla successione per persona e posizione-obiettivo, esplicabile per feature.",
+    "title": "Prontezza alla successione (calcolo del modello)",
+    "description": "Quanto ogni persona è pronta a ricoprire le posizioni più adatte a lei, calcolato con una regola trasparente. Una persona compare una volta per ogni posizione: il numero è quello delle valutazioni persona-posizione, non delle persone. I candidati indicati a mano nei bacini di successione sono in «Carriere e successione».",
+    "descriptionScoped": "Ambito {{kind}} · prontezza alla successione per persona e posizione, spiegata voce per voce.",
     "count": "{{count}} valutazioni persona-posizione",
+    "count_one": "{{count}} valutazione persona-posizione",
     "errorMessage": "Impossibile caricare la prontezza alla successione.",
     "emptyTitle": "Nessun punteggio",
     "emptyDescription": "Nessuna prontezza calcolata. Esegui un ricalcolo.",
@@ -1108,14 +1178,15 @@
     "recomputeSuccess": "Ricalcolo completato: {{scored}} valutazioni.",
     "recomputeError": "Errore nel ricalcolo.",
     "explainTitle": "Scomposizione — {{name}} → {{position}}",
-    "explainDesc": "Prontezza {{value}} ({{horizon}}) · modello {{model}}. Ogni feature contribuisce per peso × valore normalizzato.",
-    "featureDetail": "norm {{normalized}} · peso {{weight}}% · contrib {{contribution}}"
+    "explainDesc": "Prontezza {{value}} ({{horizon}}) · modello {{model}}. Ogni voce contribuisce per il suo peso moltiplicato per il suo valore.",
+    "featureDetail": "valore {{normalized}} · peso {{weight}}% · contributo {{contribution}}"
   },
   "insightsSkillGap": {
-    "title": "Insights — gap di competenze",
+    "title": "Lacune di competenze",
     "description": "Gap di competenze per persona rispetto al ruolo attuale, derivato in-piattaforma con regola trasparente.",
-    "descriptionScoped": "Ambito {{kind}} · gap di competenze per persona vs ruolo attuale, esplicabile per feature.",
+    "descriptionScoped": "Ambito {{kind}} · lacune di competenze per persona rispetto al ruolo attuale, spiegate voce per voce.",
     "count": "{{count}} persone valutate",
+    "count_one": "{{count}} persona valutata",
     "errorMessage": "Impossibile caricare i gap di competenze.",
     "emptyTitle": "Nessun punteggio",
     "emptyDescription": "Nessun gap calcolato. Esegui un ricalcolo.",
@@ -1126,9 +1197,9 @@
     "colSegment": "Segmento",
     "segment": {
       "ALIGNED": "Allineato",
-      "MINOR_GAP": "Gap minore",
-      "MODERATE_GAP": "Gap moderato",
-      "MAJOR_GAP": "Gap rilevante"
+      "MINOR_GAP": "Divario piccolo",
+      "MODERATE_GAP": "Divario medio",
+      "MAJOR_GAP": "Divario grande"
     },
     "feature": {
       "role_fit_gap": "Distanza dal ruolo",
@@ -1139,8 +1210,8 @@
     "recomputeSuccess": "Ricalcolo completato: {{scored}} persone valutate.",
     "recomputeError": "Errore nel ricalcolo.",
     "explainTitle": "Scomposizione — {{name}} ({{position}})",
-    "explainDesc": "Gap {{value}} ({{segment}}) · modello {{model}}. Ogni feature contribuisce per peso × valore normalizzato.",
-    "featureDetail": "norm {{normalized}} · peso {{weight}}% · contrib {{contribution}}",
+    "explainDesc": "Divario {{value}} ({{segment}}) · modello {{model}}. Ogni voce contribuisce per il suo peso moltiplicato per il suo valore.",
+    "featureDetail": "valore {{normalized}} · peso {{weight}}% · contributo {{contribution}}",
     "evidenceOpen": "Vedi evidenze"
   },
   "mfaPolicy": {
@@ -1164,7 +1235,10 @@
     "exemptions": {
       "title": "Esenzioni dal secondo fattore",
       "description": "Chi può entrare senza il secondo fattore, perché, chi l'ha deciso e fino a quando. Un'esenzione scaduta non apre più niente; chi porta un mandato non può averne.",
-      "empty": "Nessuna esenzione.",
+      "empty": "Nessuna esenzione attiva.",
+      "showInactive": "Mostra anche scadute e spente ({{count}})",
+      "showInactive_one": "Mostra anche scaduta o spenta ({{count}})",
+      "hideInactive": "Nascondi scadute e spente",
       "state": {
         "ACTIVE": "Attiva",
         "EXPIRED": "Scaduta",
@@ -1380,16 +1454,17 @@
       "TIME_OFF_REQUEST": "Richiesta di assenza",
       "SYSTEM": "Sistema",
       "MANUAL": "Inserimento a mano",
-      "ACCRUAL": "Maturazione automatica"
+      "ACCRUAL": "Maturazione automatica",
+      "leave_request": "Richiesta di assenza"
     }
   },
   "talentReview": {
     "title": "Revisione talenti",
-    "description": "Griglia 9-box dei talenti, più fit di posizione, prontezza, successione e copertura dei ruoli critici. Consultazione in sola lettura.",
+    "description": "La griglia che incrocia prestazione e potenziale di ogni persona, più l'adeguatezza alla posizione, la prontezza, la successione e la copertura delle posizioni critiche. Sola consultazione. I punteggi di prontezza qui sono quelli importati; il calcolo del modello è in Approfondimenti.",
     "error": "Errore di caricamento.",
     "empty": "Nessun record.",
     "nineBox": {
-      "title": "Griglia 9-box",
+      "title": "Griglia prestazione e potenziale",
       "axisPotential": "Potenziale",
       "axisPerformance": "Prestazione",
       "band": {
@@ -1397,21 +1472,22 @@
         "MEDIUM": "Medio",
         "HIGH": "Alto"
       },
-      "maskedRows": "{{count}} persone non sono collocabili nella griglia: il giudizio è nascosto per il tuo profilo."
+      "maskedRows": "{{count}} persone non sono collocabili nella griglia: il giudizio è nascosto per il tuo profilo.",
+      "maskedRows_one": "{{count}} persona non è collocabile nella griglia: il giudizio è nascosto per il tuo profilo."
     },
     "kpi": {
       "assessed": "Valutati",
-      "fit": "Fit di posizione",
+      "fit": "Adeguatezza alla posizione",
       "readiness": "Prontezza",
       "succession": "Successione",
       "criticalPositions": "Posizioni critiche"
     },
     "sections": {
-      "fit": "Fit di posizione",
+      "fit": "Adeguatezza alla posizione",
       "readiness": "Prontezza",
       "succession": "Successione",
       "criticalPositions": "Posizioni critiche",
-      "criticalCoverage": "Copertura ruoli critici"
+      "criticalCoverage": "Copertura delle posizioni critiche"
     },
     "cols": {
       "employee": "Dipendente",
@@ -1428,7 +1504,9 @@
       "ready1y": "Pronti 1 anno",
       "coverage": "Copertura",
       "computedAt": "Calcolato"
-    }
+    },
+    "coverageNotComputed": "non calcolata",
+    "rationaleImported": "Segnalata con l'importazione dei dati"
   },
   "compReward": {
     "evaluation": {
@@ -1475,6 +1553,7 @@
     "title": "Segnalazioni whistleblowing",
     "description": "Area riservata al custode designato (D.Lgs 24/2023). Nessun altro ruolo può leggere queste segnalazioni.",
     "count": "{{count}} segnalazioni",
+    "count_one": "{{count}} segnalazione",
     "errorMessage": "Errore di caricamento delle segnalazioni.",
     "forbiddenMessage": "Non hai accesso a questa area: le segnalazioni sono leggibili dal solo custode designato (D.Lgs 24/2023).",
     "emptyTitle": "Nessuna segnalazione",
@@ -1545,7 +1624,9 @@
   "timeline": {
     "title": "Storia",
     "range": "{{count}} fatti registrati, dal {{from}} al {{to}}",
+    "range_one": "{{count}} fatto registrato, dal {{from}} al {{to}}",
     "all": "Tutti ({{count}})",
+    "all_one": "Tutti ({{count}})",
     "empty": "Nessun fatto registrato.",
     "error": "Impossibile caricare la storia.",
     "more": "Mostra altri ({{shown}} di {{total}})"
@@ -1554,6 +1635,7 @@
     "title": "Richieste di contatto",
     "description": "Le richieste arrivate dal sito pubblico. Lo stato segue la lavorazione commerciale; i dati della persona sono quelli che ha dichiarato e non si modificano da qui.",
     "count": "{{count}} richieste",
+    "count_one": "{{count}} richiesta",
     "caption": "Richieste di contatto, dalla più recente.",
     "emptyTitle": "Nessuna richiesta",
     "emptyDescription": "Non è ancora arrivata nessuna richiesta con questi criteri.",

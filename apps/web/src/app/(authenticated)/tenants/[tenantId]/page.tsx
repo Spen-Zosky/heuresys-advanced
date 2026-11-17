@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
 import { PageHeader } from "@/components/intestazione-pagina";
-import type { EnterpriseTypingProfile, Tenant } from "@heuresys/shared";
+import type { EnterpriseTypingProfile, IndustryCode, Tenant } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
 import { FieldGrid } from "@/components/detail-panel";
@@ -39,6 +39,12 @@ export default function TenantDetailPage() {
     queryKey: ["tenants", tenantId],
     queryFn: () => apiFetch<Tenant>(`/v1/tenants/${tenantId}`),
     enabled: !!tenantId,
+  });
+
+  // D3-21: il settore si legge dal catalogo dei settori, non come codice («FIN_BANKING»).
+  const settori = useQuery({
+    queryKey: ["tenants", "industry-codes"],
+    queryFn: () => apiFetch<{ items: IndustryCode[] }>("/v1/tenants/industry-codes"),
   });
 
   const typing = useQuery({
@@ -121,11 +127,11 @@ export default function TenantDetailPage() {
             <FieldGrid
               fields={[
                 { label: t("tenants.detail.fields.legalName"), value: tn.tenantLegalName ?? t("tenants.detail.dash"), testId: "tenant-legal-name" },
-                { label: t("tenants.detail.fields.country"), value: tn.tenantCountryCode ?? t("tenants.detail.dash") },
-                { label: t("tenants.detail.fields.industry"), value: tn.tenantIndustryCode ?? t("tenants.detail.dash") },
-                { label: t("tenants.detail.fields.sizeBand"), value: tn.tenantSizeBand ?? t("tenants.detail.dash") },
+                { label: t("tenants.detail.fields.country"), value: tn.tenantCountryCode ? fmt.paese(tn.tenantCountryCode) : t("tenants.detail.dash") },
+                { label: t("tenants.detail.fields.industry"), value: tn.tenantIndustryCode ? (settori.data?.items.find((s) => s.industryCode === tn.tenantIndustryCode)?.industryName ?? enumLabel("industryCode", tn.tenantIndustryCode)) : t("tenants.detail.dash") },
+                { label: t("tenants.detail.fields.sizeBand"), value: tn.tenantSizeBand ? enumLabel("sizeBand", tn.tenantSizeBand) : t("tenants.detail.dash") },
                 { label: t("tenants.detail.fields.status"), value: <EnumStatusBadge domain="tenantStatus" value={tn.tenantStatus} /> },
-                { label: t("tenants.detail.fields.createdAt"), value: tn.createdAt, mono: true },
+                { label: t("tenants.detail.fields.createdAt"), value: fmt.dataOra(tn.createdAt), mono: true },
               ]}
             />
             <p className="mt-4">
@@ -167,7 +173,7 @@ export default function TenantDetailPage() {
                     </span>
                     {p.employeeCount !== null && (
                       <span className="text-xs text-muted-foreground">
-                        {t("tenants.detail.typingEmployees", { n: fmt.numero(p.employeeCount) })}
+                        {t("tenants.detail.typingEmployees", { n: fmt.numero(p.employeeCount), count: p.employeeCount })}
                       </span>
                     )}
                   </li>

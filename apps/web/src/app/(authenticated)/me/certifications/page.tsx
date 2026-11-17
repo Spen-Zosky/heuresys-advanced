@@ -13,6 +13,7 @@ import { PageHeader } from "@/components/intestazione-pagina";
 import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { useFormat, type Formati } from "@/lib/format";
+import { StatusPill } from "@/components/status-pill";
 
 interface MeCertification {
   userCertificationId: string;
@@ -71,12 +72,33 @@ function cleanPayload(v: CertificationFormValues): Record<string, unknown> {
   };
 }
 
+/** Stato di validita' di un attestato (D2-23): scaduto, in scadenza entro 60 giorni, valido, senza scadenza. */
+type StatoAttestato = "expired" | "expiring" | "valid" | "noExpiry";
+function statoAttestato(expiresDate: string | null, oggi: string = new Date().toISOString().slice(0, 10)): StatoAttestato {
+  if (!expiresDate) return "noExpiry";
+  if (expiresDate < oggi) return "expired";
+  const limite = new Date(oggi);
+  limite.setDate(limite.getDate() + 60);
+  return expiresDate <= limite.toISOString().slice(0, 10) ? "expiring" : "valid";
+}
+const ORDINE_STATO: Record<StatoAttestato, number> = { expiring: 0, valid: 1, noExpiry: 2, expired: 3 };
+const TONO_STATO: Record<StatoAttestato, "danger" | "warning" | "success" | "neutral"> = {
+  expired: "danger", expiring: "warning", valid: "success", noExpiry: "neutral",
+};
+
 function buildColumns(t: CertI18n, fmt: Formati): DataColumn<MeCertification>[] {
   return [
     { header: t("certifications.colName"), cell: (c) => <span className="font-medium text-foreground">{c.name}</span> },
     { header: t("certifications.colIssuer"), cell: (c) => <span className="text-muted-foreground">{c.issuer}</span> },
     { header: t("certifications.colIssued"), cell: (c) => <span className="text-xs text-muted-foreground">{fmt.data(c.issuedDate)}</span> },
     { header: t("certifications.colExpires"), cell: (c) => <span className="text-xs text-muted-foreground">{fmt.data(c.expiresDate)}</span> },
+    {
+      header: t("certifications.colState"),
+      cell: (c) => {
+        const st = statoAttestato(c.expiresDate);
+        return <StatusPill tone={TONO_STATO[st]}>{t(`certifications.state.${st}`)}</StatusPill>;
+      },
+    },
     {
       header: t("certifications.colCredential"), secondaria: true,
       cell: (c) => <span className="font-mono text-xs text-muted-foreground">{c.credentialId ?? "—"}</span>,
@@ -277,7 +299,10 @@ export default function MeCertificationsPage() {
           isError={certs.isError}
           error={certs.error}
           errorMessage={t("certifications.errorMessage")}
-          rows={certs.data?.items ?? []}
+          rows={[...(certs.data?.items ?? [])].sort(
+            (a, b) => ORDINE_STATO[statoAttestato(a.expiresDate)] - ORDINE_STATO[statoAttestato(b.expiresDate)]
+              || (a.expiresDate ?? "").localeCompare(b.expiresDate ?? ""),
+          )}
           rowKey={(c) => c.userCertificationId}
           rowTestId="me-certification-row"
           columns={columns}

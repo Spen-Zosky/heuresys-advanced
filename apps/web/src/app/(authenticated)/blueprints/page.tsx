@@ -15,6 +15,7 @@ import type { BlueprintActivation, TenantListResponse } from "@heuresys/shared";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { NomeOppure } from "@/components/senza-nome";
 import { useFormat } from "@/lib/format";
 
 interface VariantRow extends BlueprintVariant {
@@ -118,7 +119,7 @@ export default function BlueprintsPage() {
           const v = variants.rows.find((x) => x.blueprintVariantId === a.variantId);
           // Il nome della variante, non il suo identificativo: un elenco di UUID non è
           // consultabile da nessuno.
-          return <span className="text-foreground">{v?.name ?? a.variantId}</span>;
+          return <span className="text-foreground"><NomeOppure nome={v?.name} id={a.variantId} /></span>;
         },
       },
       { header: t("activations.colStatus"), cell: (a) => <StatusPill tone="info">{enumLabel("blueprintActivationStatus", a.status)}</StatusPill> },

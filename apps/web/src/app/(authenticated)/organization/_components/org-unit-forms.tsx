@@ -25,6 +25,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { etichettaPersona } from "@/lib/person-label";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -209,7 +210,7 @@ export function OrgUnitCreator() {
               <option value="">{t("organization.form.none")}</option>
               {(users.data?.items ?? []).map((u) => (
                 <option key={u.userId} value={u.userId}>
-                  {u.displayName}
+                  {etichettaPersona(u, enumLabel)}
                 </option>
               ))}
             </select>
@@ -359,7 +360,7 @@ export function OrgUnitEditor({ ouId, onClose }: { ouId: string; onClose: () => 
                 <option value="">{t("organization.form.none")}</option>
                 {(users.data?.items ?? []).map((u) => (
                   <option key={u.userId} value={u.userId}>
-                    {u.displayName}
+                    {etichettaPersona(u, enumLabel)}
                   </option>
                 ))}
               </select>

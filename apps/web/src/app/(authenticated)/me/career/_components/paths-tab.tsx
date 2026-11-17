@@ -41,7 +41,7 @@ export function PathsTab() {
                   p.steps.length === 0
                     ? null
                     : p.steps
-                        .map((s) => `${s.ordinal}. ${s.targetPositionTitle ?? "—"}${s.typicalDurationMonths != null ? ` (${t("career.paths.months", { n: s.typicalDurationMonths })})` : ""}`)
+                        .map((s) => `${s.ordinal}. ${s.targetPositionTitle ?? "—"}${s.typicalDurationMonths != null ? ` (${t("career.paths.months", { count: s.typicalDurationMonths })})` : ""}`)
                         .join("  →  ")
                 }
               />
@@ -69,7 +69,7 @@ export function PathsTab() {
                   <Field label={t("career.paths.planTarget")} value={pl.targetPositionTitle} />
                 ) : null}
                 {pl.horizonMonths != null ? (
-                  <Field label={t("career.paths.planHorizon")} value={t("career.paths.months", { n: pl.horizonMonths })} />
+                  <Field label={t("career.paths.planHorizon")} value={t("career.paths.months", { count: pl.horizonMonths })} />
                 ) : null}
               </ProfileSection>
             ))}

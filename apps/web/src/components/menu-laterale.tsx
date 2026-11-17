@@ -59,6 +59,10 @@ function Voce({ v, attiva, icona, livello }: { v: VoceMenu; attiva: boolean; ico
         href={v.href}
         prefetch={false}
         aria-current={attiva ? "page" : undefined}
+        // Con la barra ridotta alle sole icone l'etichetta visibile sparisce: il nome accessibile e
+        // il suggerimento restano (axe: link-name; E-SENZA-NOME del giro del 15/11).
+        aria-label={v.label}
+        title={v.label}
         data-menu-attiva={attiva ? "" : undefined}
         className={`nav-link flex items-center gap-2 rounded-control py-1.5 pr-2 text-sm transition ${
           attiva ? "bg-accent font-medium text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground"
@@ -66,7 +70,9 @@ function Voce({ v, attiva, icona, livello }: { v: VoceMenu; attiva: boolean; ico
         style={{ paddingLeft: `${0.5 + livello * 0.75}rem`, ...(attiva ? { boxShadow: "inset 2px 0 0 var(--primary)" } : {}) }}
       >
         <span className="shrink-0">{icona}</span>
-        <span className="nav-label truncate">{v.testId ? <span data-testid={v.testId}>{v.label}</span> : v.label}</span>
+        {/* Forense 15/11 (Enzo): nessuna voce si tronca: «Consolidamento con il pro…» non si
+            riconosceva. L'etichetta va a capo; il suggerimento resta per la barra a sole icone. */}
+        <span className="nav-label min-w-0 whitespace-normal break-words leading-snug">{v.testId ? <span data-testid={v.testId}>{v.label}</span> : v.label}</span>
       </Link>
     </li>
   );
@@ -96,17 +102,21 @@ function RamoMenu({
     ascoltatori.forEach((f) => f());
   }, [id, aperto]);
   const visibile = aperto || dentro;
+  const titolo = t(`shell:nav.rami.${ramo.chiave}`, { defaultValue: ramo.chiave });
   return (
     <li>
       <button
         type="button"
         aria-expanded={visibile}
         onClick={cambia}
-        className="flex w-full items-center gap-1.5 rounded-control py-1.5 pr-2 text-left text-xs font-medium text-muted-foreground transition hover:text-foreground"
+        // `nav-link`: con la barra ridotta alle sole icone il pulsante si centra e l'etichetta
+        // (`nav-label`) sparisce, invece di andare a capo lettera per lettera («Str utt ura»).
+        title={titolo}
+        className="nav-link flex w-full items-center gap-1.5 rounded-control py-1.5 pr-2 text-left text-xs font-medium text-muted-foreground transition hover:text-foreground"
         style={{ paddingLeft: `${0.5 + livello * 0.75}rem` }}
       >
         <ChevronRight className={`h-3 w-3 shrink-0 transition-transform ${visibile ? "rotate-90" : ""}`} aria-hidden />
-        <span className="truncate">{t(`shell:nav.rami.${ramo.chiave}`, { defaultValue: ramo.chiave })}</span>
+        <span className="nav-label min-w-0 whitespace-normal break-words leading-snug">{titolo}</span>
       </button>
       {visibile ? <ContenutoRamo ramo={ramo} idPadre={id} attiva={attiva} icone={icone} livello={livello + 1} /> : null}
     </li>

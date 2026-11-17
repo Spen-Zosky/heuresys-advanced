@@ -158,6 +158,13 @@ describe("/v1/auth/* integration", () => {
     expect(body.email).toBe(ADMIN_EMAIL);
     expect(body.roles).toContain("PLATFORM_ADMIN");
     expect(body.tenantId).toBeNull();
+    // S-01 (forense 15/11): /me porta il nome della persona, come lo tiene sys_users.
+    const { rows } = await pool.query<{ f: string | null; l: string | null; d: string | null }>(
+      "SELECT user_first_name f, user_last_name l, user_display_name d FROM sys.sys_users WHERE lower(user_email) = lower($1)",
+      [ADMIN_EMAIL],
+    );
+    const full = resp.json() as { firstName: string | null; lastName: string | null; displayName: string | null };
+    expect({ f: full.firstName, l: full.lastName, d: full.displayName }).toEqual(rows[0]);
   });
 
   /* -------------------------------------------------- refresh */

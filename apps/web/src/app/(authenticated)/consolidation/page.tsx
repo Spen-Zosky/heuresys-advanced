@@ -1,4 +1,5 @@
 "use client";
+import { MODALE } from "@/lib/modale";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -27,13 +28,15 @@ import {
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { ApiError } from "@/lib/api/errors";
-import { EntityTable, type DataColumn } from "@/components/data-table-panel";
+import { type DataColumn } from "@/components/data-table-panel";
 import { StatusPill, type StatusTone } from "@/components/status-pill";
 import { useFormat } from "@/lib/format";
 import { StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { DecisioneDialog } from "./decisione-dialog";
 import { RegistroCorse } from "./registro-corse";
+import { DecisioniInBlocco } from "./decisioni-in-blocco";
 import { OrganigrammaCliente } from "./organigramma-cliente";
+import { LavoroInCorso } from "@/components/lavoro-in-corso";
 
 // AC-10 — La pagina del Direttore HR per il consolidamento del tenant col prototipo
 // (`.programmi/consolidamento/agente/`). L'agente propone, una persona decide: qui si avviano
@@ -319,6 +322,11 @@ export default function ConsolidationPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <LavoroInCorso
+              attivo={inCorso !== null || prova.isPending}
+              titolo={inCorso ? t("consolidation.running", { group: t(`consolidation.groups.${inCorso}`) }) : t("consolidation.applying")}
+              dettaglio={t("common:attesa.giroInSottofondo")}
+            />
             {esito ? (
               <div role="status" data-testid="consolidation-apply-result" className="rounded-card border bg-card px-4 py-3 text-sm space-y-1">
                 <p className="font-medium">{t("consolidation.applyResult.title", { count: esito.applied })}</p>
@@ -464,18 +472,18 @@ export default function ConsolidationPage() {
               ? <Badge variant="secondary" data-testid="consolidation-proposals-count">{t("consolidation.count", { count: righe.length })}</Badge>
               : undefined}
           />
-          <EntityTable<ConsolidationProposal> originPath={"/v1/tenant-consolidations"}
-            isLoading={proposals.isLoading} isError={proposals.isError} error={proposals.error} errorMessage={t("consolidation.loadError")}
-            rows={righe} pageSize={10} rowKey={(p) => p.proposalId} rowTestId="consolidation-proposal-row" columns={columns}
-            emptyTestId="consolidation-proposals-empty"
-            emptyTitle={t("consolidation.proposalsEmptyTitle")} emptyDescription={t("consolidation.proposalsEmptyDescription")}
-            caption={t("consolidation.caption")}
+          <DecisioniInBlocco
+            key={`${corrente.consolidationId}-${gruppo}`}
+            righe={righe} colonne={columns} consolidationId={corrente.consolidationId}
+            canDecide={canDecide} isDirector={isDirector} occupato={occupato}
+            onFatto={rinfresca} onErrore={fallita}
+            isLoading={proposals.isLoading} isError={proposals.isError} error={proposals.error}
           />
         </section>
       ) : null}
       {conferma ? (
         <Dialog open onOpenChange={(o) => { if (!o) setConferma(null); }}>
-          <DialogContent data-testid="consolidation-approval-dialog">
+          <DialogContent className={MODALE.piccola} data-testid="consolidation-approval-dialog">
             <DialogHeader>
               <DialogTitle>{t(`consolidation.approval.${conferma}Title`)}</DialogTitle>
               <DialogDescription>{t(`consolidation.approval.${conferma}Body`, { count: nBozza })}</DialogDescription>

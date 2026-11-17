@@ -468,7 +468,7 @@ function PassoProcessi({
   versione: TenantBlueprintVersion;
   modificabile: boolean;
 }) {
-  const { t } = useTranslation("blueprints");
+  const { t, i18n } = useTranslation("blueprints");
   const qc = useQueryClient();
 
   const processi = useQuery({
@@ -498,10 +498,10 @@ function PassoProcessi({
     () =>
       versione.variantVersionId && processi.data
         ? {
-            vista: vistaDelFascicolo(elenco, bozza, modificabile),
+            vista: vistaDelFascicolo(elenco, bozza, modificabile, undefined, i18n.language),
             comandi: COMANDI_FASCICOLO,
             esegui: (nome, argomenti) => {
-              const r = eseguiSulFascicolo(bozzaRef.current, nome, argomenti, { processi: elenco, modificabile });
+              const r = eseguiSulFascicolo(bozzaRef.current, nome, argomenti, { processi: elenco, modificabile, lingua: i18n.language });
               if (r.stato) {
                 bozzaRef.current = r.stato;
                 setBozza(r.stato);
@@ -510,7 +510,7 @@ function PassoProcessi({
             },
           }
         : null,
-    [versione.variantVersionId, processi.data, elenco, bozza, modificabile],
+    [versione.variantVersionId, processi.data, elenco, bozza, modificabile, i18n.language],
   );
   useVistaAgente(dichiarata);
   const preparate = Object.keys(bozza.bozze).length;
@@ -534,7 +534,7 @@ function PassoProcessi({
                   size="sm"
                   data-testid="bozza-agente-annulla"
                   onClick={() => {
-                    const r = eseguiSulFascicolo(bozzaRef.current, "fascicolo.annulla", {}, { processi: elenco, modificabile });
+                    const r = eseguiSulFascicolo(bozzaRef.current, "fascicolo.annulla", {}, { processi: elenco, modificabile, lingua: i18n.language });
                     if (r.stato) setBozza(r.stato);
                   }}
                 >

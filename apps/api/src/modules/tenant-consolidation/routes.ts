@@ -19,6 +19,9 @@ import { requirePermission, userHasPermission } from "../../middleware/rbac.js";
 import { ForbiddenError, UnauthorizedError } from "../../errors/index.js";
 import {
   ConfirmCertainBodySchema,
+  BulkDecideBodySchema,
+  BulkDecideResultSchema,
+  DiscardChangesBodySchema,
   ApprovalPreviewSchema,
   CascadeResponseSchema,
   DiscardResultSchema,
@@ -29,6 +32,8 @@ import {
   ApplyChangesResultSchema,
   AvailableDeliveryListResponseSchema,
   BlueprintRunIdParamSchema,
+  RunDistanceQuerySchema,
+  RunDistanceResponseSchema,
   BlueprintRunListResponseSchema,
   BlueprintRunSchema,
   ReceiveDeliveryBodySchema,
@@ -156,8 +161,8 @@ export const tenantConsolidationRoutes: FastifyPluginAsyncZod = async (app) => {
   app.post("/:id/discard-changes", {
     config: conf,
     preHandler: [app.verifyCsrf, DECIDE],
-    schema: { params: ConsolidationIdParamSchema, response: { 200: DiscardResultSchema } },
-  }, async (req) => svc.discardChanges(actor(req), req.params.id));
+    schema: { params: ConsolidationIdParamSchema, body: DiscardChangesBodySchema.optional(), response: { 200: DiscardResultSchema } },
+  }, async (req) => svc.discardChanges(actor(req), req.params.id, req.body?.proposalIds));
 
   // L'avviso nell'intestazione: ci sono modifiche nella bozza non ancora approvate?
   app.get("/pending-approval", {
@@ -171,6 +176,13 @@ export const tenantConsolidationRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [LEGGE],
     schema: { params: PROPOSTA, response: { 200: CascadeResponseSchema } },
   }, async (req) => svc.cascade(actor(req), req.params.proposalId));
+
+  // Le decisioni in blocco, nella bozza: raccomandazione, rifiuto o cascata sulle proposte scelte.
+  app.post("/proposals/bulk-decision", {
+    config: conf,
+    preHandler: [app.verifyCsrf, DECIDE],
+    schema: { body: BulkDecideBodySchema, response: { 200: BulkDecideResultSchema } },
+  }, async (req) => svc.bulkDecide(actor(req), req.body));
 
   app.post("/proposals/confirm-certain", {
     config: conf,
@@ -224,6 +236,16 @@ export const consolidationRunRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [app.verifyCsrf, requirePermission("consolidation:run")],
     schema: { body: ReceiveDeliveryBodySchema, response: { 200: BlueprintRunSchema } },
   }, async (req) => svc.receive(actor(req), req.body));
+
+  // La distanza fra il tenant e il modello della corsa (ADR-0059 D7): sola lettura, la legge chi legge.
+  app.get("/:runId/distance", {
+    config: conf,
+    preHandler: [LEGGE],
+    schema: { params: BlueprintRunIdParamSchema, querystring: RunDistanceQuerySchema, response: { 200: RunDistanceResponseSchema } },
+  }, async (req) => svc.distance(actor(req), req.params.runId, {
+    dettaglio: req.query.dettaglio === "true",
+    ...(req.query.dominio ? { dominio: req.query.dominio } : {}),
+  }));
 
   app.post("/:runId/definitive", {
     config: conf,

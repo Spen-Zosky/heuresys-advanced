@@ -25,7 +25,8 @@ export async function listSurveys(pool: Pool, tenantId: string | undefined): Pro
             s.survey_status, s.survey_start_date, s.survey_end_date, s.survey_is_anonymous,
             s.survey_total_invitations,
             (SELECT count(*) FROM sys.sys_survey_questions q WHERE q.survey_question_survey_id = s.survey_id) AS question_count,
-            (SELECT count(*) FROM sys.sys_survey_responses r WHERE r.survey_response_survey_id = s.survey_id) AS response_count
+            -- forense 15/11 (D3-06): le persone che hanno risposto, non le righe domanda per persona.
+            (SELECT count(DISTINCT r.survey_response_subject_user_id) FROM sys.sys_survey_responses r WHERE r.survey_response_survey_id = s.survey_id) AS response_count
        FROM sys.sys_surveys s
       WHERE ($1::uuid IS NULL OR s.survey_tenant_id = $1)
       ORDER BY s.survey_start_date DESC NULLS LAST, s.survey_title
@@ -138,15 +139,18 @@ export async function pulseAggregation(
   tenantId: string | undefined,
 ): Promise<{ items: EngagementPulseWeek[]; totalChecks: number }> {
   const res = await pool.query(
-    `SELECT pulse_check_week_number AS week,
+    // forense 15/11 (D3-06b): la settimana si raggruppa per data d'inizio, non per numero:
+    // il numero da solo mescolava la settimana 4 di anni diversi.
+    `SELECT date_trunc('week', pulse_check_date)::date AS week_start,
+            extract(week FROM pulse_check_date)::int AS week,
             count(*) AS n,
             avg(pulse_check_mood_score)          AS avg_mood,
             avg(pulse_check_workload_score)      AS avg_workload,
             avg(pulse_check_satisfaction_score)  AS avg_satisfaction
        FROM sys.sys_pulse_checks
       WHERE ($1::uuid IS NULL OR pulse_check_tenant_id = $1)
-      GROUP BY pulse_check_week_number
-      ORDER BY pulse_check_week_number NULLS LAST`,
+      GROUP BY 1, 2
+      ORDER BY 1 NULLS LAST`,
     [tenantId ?? null],
   );
   const r2 = (v: unknown): number | null => (v == null ? null : Math.round(Number(v) * 100) / 100);
@@ -158,6 +162,7 @@ export async function pulseAggregation(
     const raro = n < K_ANONIMATO_MINIMO;
     return {
       weekNumber: numOrNull(r.week),
+      weekStart: toDate(r.week_start),
       count: n,
       avgMood: raro ? null : r2(r.avg_mood),
       avgWorkload: raro ? null : r2(r.avg_workload),

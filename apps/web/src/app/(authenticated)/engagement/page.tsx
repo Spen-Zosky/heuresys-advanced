@@ -1,5 +1,6 @@
 "use client";
 
+import { useFormat } from "@/lib/format";
 import { useMemo } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
@@ -22,12 +23,12 @@ function statusVariant(s: string): "success" | "secondary" {
 }
 
 /** Multi-series pulse trend over weeks (mood / workload / satisfaction). */
-function pulseOption(items: EngagementPulseResponse["items"], lbl: { mood: string; workload: string; satisfaction: string; week: (n: number | null) => string }) {
+function pulseOption(items: EngagementPulseResponse["items"], lbl: { mood: string; workload: string; satisfaction: string; week: (i: EngagementPulseResponse["items"][number]) => string }) {
   return {
     tooltip: { trigger: "axis" as const },
     legend: { data: [lbl.mood, lbl.workload, lbl.satisfaction] },
     grid: { left: 56, right: 20, top: 40, bottom: 48 },
-    xAxis: { type: "category" as const, data: items.map((i) => lbl.week(i.weekNumber)) },
+    xAxis: { type: "category" as const, data: items.map((i) => lbl.week(i)) },
     yAxis: { type: "value" as const },
     series: [
       { name: lbl.mood, type: "line" as const, smooth: true, data: items.map((i) => i.avgMood) },
@@ -39,6 +40,7 @@ function pulseOption(items: EngagementPulseResponse["items"], lbl: { mood: strin
 
 export default function EngagementPage() {
   const { t, i18n } = useTranslation("admin");
+  const fmt = useFormat();
   const enumLabel = useEnumLabel();
 
   const surveys = useQuery({
@@ -74,7 +76,9 @@ export default function EngagementPage() {
     mood: t("engagement.pulse.mood"),
     workload: t("engagement.pulse.workload"),
     satisfaction: t("engagement.pulse.satisfaction"),
-    week: (n: number | null) => (n === null ? "—" : t("engagement.pulse.weekShort", { n })),
+    // D3-06b (forense 15/11): la settimana si scrive con il suo lunedì, così due anni non si confondono.
+    week: (i: EngagementPulseResponse["items"][number]) =>
+      i.weekStart ? t("engagement.pulse.weekShort", { n: fmt.data(i.weekStart) }) : i.weekNumber === null ? "—" : t("engagement.pulse.weekShort", { n: i.weekNumber }),
   };
 
   return (
@@ -140,7 +144,7 @@ export default function EngagementPage() {
                   titolo: t("engagement.pulse.tableTitle"),
                   colonne: [t("engagement.pulse.axisWeek"), pulseLabels.mood, pulseLabels.workload, pulseLabels.satisfaction, t("engagement.pulse.colCount")],
                   righe: pulse.data!.items.map((i) => [
-                    pulseLabels.week(i.weekNumber),
+                    pulseLabels.week(i),
                     i.avgMood ?? "—",
                     i.avgWorkload ?? "—",
                     i.avgSatisfaction ?? "—",

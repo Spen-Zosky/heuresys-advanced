@@ -465,6 +465,8 @@ export const MeSurveyListItemSchema = z.object({
   completedAt: z.iso.datetime().nullable(),
   /** How many answers of MINE this survey holds — 0 means assigned but not answered yet. */
   answerCount: z.number().int().min(0),
+  /** Compilato: assegnazione completata oppure almeno una risposta propria (D2-05). */
+  completed: z.boolean(),
 });
 export type MeSurveyListItem = z.infer<typeof MeSurveyListItemSchema>;
 export const MeSurveysResponseSchema = z.object({
@@ -744,6 +746,17 @@ export const MeInboxNotificationSchema = z.object({
   type: z.string(),
   subject: z.string(),
   body: z.string().nullable(),
+  /**
+   * Il significato dell'avviso, ricavato in lettura dal testo salvato (niente riscrittura del dato): un codice
+   * e i parametri, con cui il web compone la frase nella lingua di chi guarda. Null per gli avvisi che l'API
+   * non scrive da se' (restano col testo salvato).
+   */
+  message: z
+    .object({
+      code: z.enum(["APPROVAL_REMINDER", "APPROVAL_OVERDUE", "GAP_CLOSURE_DUE"]),
+      params: z.record(z.string(), z.union([z.string(), z.number()])),
+    })
+    .nullable(),
   actionUrl: z.string().nullable(),
   resourceType: z.string().nullable(),
   resourceId: z.uuid().nullable(),
@@ -773,8 +786,8 @@ export const NotificationIdParamSchema = z.object({ notificationId: z.uuid() });
 /* --- kpis (ESS-8) ---------------------------------------------------- */
 
 export const MeKpiTargetSchema = z.object({
-  positionKpiRequirementId: z.uuid(),
-  positionId: z.uuid(),
+  positionKpiRequirementId: z.uuid().nullable(),
+  positionId: z.uuid().nullable(),
   kpiDefinitionId: z.uuid(),
   kpiCode: z.string(),
   kpiName: z.string(),

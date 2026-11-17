@@ -1,18 +1,18 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `8e763537` (2026-11-15T04:16:55+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `aa31c89c` (2026-11-17T01:46:00+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
 | Layer | Valore |
 |---|---|
 | Moduli API | 121 |
-| Route API | 722 |
+| Route API | 724 |
 | Pagine web | 132 |
 | Schemi shared | 134 |
-| Tabelle DB | 414 (vuote: 44) |
-| Viste / matview | 88 / 0 |
-| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 375 |
+| Tabelle DB | 419 (vuote: 38) |
+| Viste / matview | 90 / 0 |
+| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 379 |
 
 ## Moduli API
 
@@ -24,7 +24,7 @@
 | agent-capabilities | /v1/agent-capabilities | 7 | 0 | 5 | 1 |
 | agent-conversations | /v1/agent-conversations | 10 | 0 | 4 | 1 |
 | agent-tokens | /v1/auth/agent-tokens | 1 | 0 | 2 | 0 |
-| analytics | /v1/analytics | 10 | 1 | 15 | 5 |
+| analytics | /v1/analytics | 10 | 1 | 15 | 6 |
 | approvals | /v1/approvals | 5 | 3 | 6 | 5 |
 | assessment-methods | /v1/assessment-methods | 1 | 1 | 1 | 1 |
 | assessment-results | /v1/assessment-results | 3 | 2 | 2 | 2 |
@@ -46,7 +46,7 @@
 | compensation | /v1/compensation | 14 | 2 | 15 | 5 |
 | content | /v1/content | 20 | 5 | 5 | 5 |
 | content-blueprint-links | /v1/content-blueprint-links | 5 | 4 | 4 | 1 |
-| dashboard | /v1/dashboard | 4 | 1 | 26 | 4 |
+| dashboard | /v1/dashboard | 4 | 1 | 26 | 5 |
 | data-classification | /v1/data-classification | 1 | 1 | 1 | 1 |
 | delegations | /v1/delegations | 4 | 2 | 12 | 2 |
 | engagement | /v1/engagement | 4 | 1 | 5 | 2 |
@@ -73,7 +73,7 @@
 | learning-path-steps | /v1/learning-path-steps | 5 | 4 | 3 | 1 |
 | learning-paths | /v1/learning-paths | 5 | 4 | 2 | 1 |
 | mandate-acts | /v1/mandate-acts | 6 | 1 | 5 | 0 |
-| me | /v1/me | 76 | 32 | 64 | 49 |
+| me | /v1/me | 76 | 32 | 64 | 52 |
 | mentorship | /v1/mentorship | 17 | 4 | 4 | 3 |
 | mfa-policy | /v1/mfa-policy | 4 | 2 | 4 | 1 |
 | notifications | /v1/notifications | 2 | 2 | 2 | 0 |
@@ -98,7 +98,7 @@
 | provenance | /v1/provenance | 2 | 1 | 1 | 1 |
 | public-job-postings | /v1/public | 2 | 0 | 2 | 1 |
 | public-stats | /v1/public | 1 | 0 | 11 | 1 |
-| quadro | — | 0 | 0 | 23 | 1 |
+| quadro | — | 0 | 0 | 23 | 3 |
 | reference-sync | /v1/reference-sync | 4 | 2 | 3 | 2 |
 | research | — | 0 | 0 | 20 | 1 |
 | review-cycles | /v1/review-cycles | 4 | 2 | 1 | 2 |
@@ -117,10 +117,10 @@
 | successor-candidates | /v1/successor-candidates | 6 | 4 | 3 | 2 |
 | successor-readiness | /v1/successor-readiness | 3 | 2 | 2 | 2 |
 | surveys | /v1/surveys | 12 | 4 | 3 | 4 |
-| talent-review | /v1/talent-review | 6 | 1 | 8 | 2 |
+| talent-review | /v1/talent-review | 6 | 1 | 9 | 2 |
 | teams | /v1/teams | 6 | 3 | 3 | 2 |
 | tenant-blueprints | /v1/tenant-blueprints | 20 | 2 | 15 | 1 |
-| tenant-consolidation | /v1/consolidation-runs, /v1/consolidation-vocabulary, /v1/tenant-consolidations | 22 | 3 | 37 | 2 |
+| tenant-consolidation | /v1/consolidation-runs, /v1/consolidation-vocabulary, /v1/tenant-consolidations | 24 | 3 | 64 | 2 |
 | tenant-import-runs | /v1/tenant-import-runs | 5 | 2 | 15 | 1 |
 | tenant-materialization | /v1/tenant-materialization | 2 | 1 | 18 | 1 |
 | tenants | /v1/tenants | 7 | 4 | 3 | 1 |
@@ -133,7 +133,7 @@
 | users | /v1/users | 10 | 5 | 8 | 1 |
 | visualization-edges | /v1/visualization-edges | 4 | 3 | 3 | 1 |
 | visualization-exports | /v1/visualization-exports | 4 | 2 | 2 | 1 |
-| visualization-graphs | /v1/visualization-graphs | 10 | 4 | 7 | 1 |
+| visualization-graphs | /v1/visualization-graphs | 10 | 4 | 8 | 1 |
 | visualization-layouts | /v1/visualization-layouts | 5 | 4 | 2 | 1 |
 | visualization-node-layouts | /v1/visualization-node-layouts | 4 | 3 | 4 | 1 |
 | visualization-nodes | /v1/visualization-nodes | 5 | 4 | 2 | 1 |
@@ -187,12 +187,6 @@
 - `sys.sys_occupation_classification_mappings`
 - `sys.sys_platform_user_tenant_assignments`
 - `sys.sys_platform_vocabulary_equivalences`
-- `sys.sys_tenant_consolidation_decisions`
-- `sys.sys_tenant_consolidation_links`
-- `sys.sys_tenant_consolidation_proposals`
-- `sys.sys_tenant_consolidation_rounds`
-- `sys.sys_tenant_consolidation_working_items`
-- `sys.sys_tenant_consolidations`
 
 ## Key counts live
 
@@ -202,7 +196,7 @@
 - org_units: **45**
 - roles: **24**
 - permissions: **250**
-- role_permission_mappings: **1317**
+- role_permission_mappings: **1339**
 - ui_interfaces_active: **78**
 - skills: **14032**
 

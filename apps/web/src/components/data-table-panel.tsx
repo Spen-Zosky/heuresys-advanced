@@ -1,5 +1,6 @@
 "use client";
 
+import { MODALE } from "@/lib/modale";
 import type { KeyboardEvent, ReactNode } from "react";
 import { useState } from "react";
 import { Badge, Button, DataTableWithCrossHair, Dialog, DialogContent, DialogDescription, DialogTitle } from "@heuresys/ui";
@@ -107,7 +108,7 @@ const INTESTAZIONE_STATO = /^(stato|status|attiv[ao]|stato del dato)$/i;
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
 
 export function EntityTable<T>(props: EntityTableProps<T>) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   // C1, C2, C4 del piano interfaccia sistematica: ogni cella passa per la rete di leggibilità
   // (numeri it-IT, codici e frasi inglesi in italiano, email e identificativi in nomi).
   const leggi = useLeggibile();
@@ -216,7 +217,7 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
     <div className="overflow-hidden rounded-card border border-border bg-card shadow-card">
       {agente.stato.testo !== undefined || agente.stato.filtro !== undefined || agente.stato.ordine !== undefined ? (
         <div data-testid="vista-assistente" className="flex items-center justify-between gap-3 border-b border-border bg-muted px-3 py-1.5 text-xs">
-          <span>{t("agente.vistaCambiata", { cosa: descrivi(agente.stato, agente.nomiColonne), righe: rows.length })}</span>
+          <span>{t("agente.vistaCambiata", { cosa: descrivi(agente.stato, agente.nomiColonne, i18n.language), righe: rows.length })}</span>
           <Button variant="ghost" size="sm" data-testid="vista-assistente-azzera" onClick={agente.azzera}>
             {t("agente.vistaAzzera")}
           </Button>
@@ -232,7 +233,8 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
           <tr className="border-b border-border bg-muted text-left text-[11px] uppercase tracking-wider text-muted-foreground">
             {inTabella.map((c, i) => (
               <th key={i} className={`px-4 py-2 ${c.align === "right" ? "text-right" : ""} ${c.headClassName ?? ""}`}>
-                <ConSpiegazione>{c.header}</ConSpiegazione>
+                {/* colonna di comandi senza titolo: il nome c'è per i lettori di schermo (axe: empty-table-header) */}
+                {c.header === "" ? <span className="sr-only">{t("table.actions")}</span> : <ConSpiegazione>{c.header}</ConSpiegazione>}
               </th>
             ))}
           </tr>
@@ -244,7 +246,9 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
               data-testid={rowTestId}
               className="cursor-pointer transition-colors hover:bg-muted/60"
               tabIndex={0}
-              role="button"
+              // niente role="button": la riga contiene collegamenti e pulsanti, e un controllo
+              // dentro un controllo è la violazione axe `nested-interactive`. La riga resta una
+              // riga di tabella, apribile con Invio o Spazio.
               {...(onRowClick ? {} : { "data-scheda-riga": "" })}
               onClick={(e) => {
                 // un comando dentro la cella (collegamento, pulsante, campo) fa il suo lavoro
@@ -272,7 +276,7 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
       </DataTableWithCrossHair>
       <Dialog open={rigaAperta !== null} onOpenChange={(o) => { if (!o) setRigaAperta(null); }}>
         {rigaAperta !== null ? (
-          <DialogContent className="max-h-[85vh] max-w-xl overflow-y-auto" data-testid="scheda-riga">
+          <DialogContent className={MODALE.media} data-testid="scheda-riga">
             <DialogTitle className="text-lg font-bold leading-tight">{leggi.nodo(titoloRiga?.cell(rigaAperta))}</DialogTitle>
             <DialogDescription className="text-xs">{caption ?? t("dettaglio.riga")}</DialogDescription>
             <dl className="mt-3 divide-y divide-border">

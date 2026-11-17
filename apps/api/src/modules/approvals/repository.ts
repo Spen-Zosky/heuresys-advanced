@@ -302,6 +302,8 @@ export interface ApprovalRequestListRow extends ApprovalRequestRow {
   processStepId: string | null;
   processStepName: string | null;
   delegatedStepCount: number;
+  /** D3-02: chi ha chiesto, «Cognome, Nome»; null se l'autore non c'è più. */
+  requesterName: string | null;
 }
 
 export interface ApprovalProcessFacetRow {
@@ -341,12 +343,14 @@ export async function listRequests(
     `SELECT ${REQ_COLS.split(",").map((c) => "r." + c.trim()).join(", ")},
        r.approval_request_tenant_process_id AS process_id, tp.tenant_process_name AS process_name,
        r.approval_request_tenant_process_step_id AS process_step_id, st.tenant_process_step_name AS process_step_name,
+       COALESCE(NULLIF(concat_ws(', ', NULLIF(trim(cu.user_last_name), ''), NULLIF(trim(cu.user_first_name), '')), ''), cu.user_display_name) AS requester_name,
        (SELECT count(*) FROM sys.sys_approval_steps s WHERE s.approval_step_request_id = r.approval_request_id) AS step_count,
        (SELECT count(*) FROM sys.sys_approval_steps s WHERE s.approval_step_request_id = r.approval_request_id AND s.approval_step_status = 'PENDING') AS pending_step_count,
        (SELECT count(*) FROM sys.sys_approval_steps s WHERE s.approval_step_request_id = r.approval_request_id AND s.approval_step_acting_delegation_id IS NOT NULL) AS delegated_step_count
      FROM sys.sys_approval_requests r
      LEFT JOIN sys.sys_tenant_processes tp ON tp.tenant_process_id = r.approval_request_tenant_process_id
      LEFT JOIN sys.sys_tenant_process_steps st ON st.tenant_process_step_id = r.approval_request_tenant_process_step_id
+     LEFT JOIN sys.sys_users cu ON cu.user_id = r.created_by
      ${where}
      ORDER BY r.created_at DESC, r.approval_request_id DESC
      LIMIT $${limitPos} OFFSET $${offsetPos}`,
@@ -364,6 +368,7 @@ export async function listRequests(
     processStepId: (r.process_step_id as string | null) ?? null,
     processStepName: (r.process_step_name as string | null) ?? null,
     delegatedStepCount: Number(r.delegated_step_count),
+    requesterName: (r.requester_name as string | null) ?? null,
   }));
   return { rows, total: Number(c.rows[0]?.n ?? 0) };
 }
@@ -459,7 +464,25 @@ export async function decideStepGuarded(
       RETURNING ${STEP_COLS}`,
     [stepId, newStatus, comment, deciderUserId, actingDelegationId, agente ? JSON.stringify(agente) : null],
   );
+  if (res.rows[0]) await chiudiAvvisiDeiPassi(client, [stepId]);
   return res.rows[0] ? mapStep(res.rows[0]) : null;
+}
+
+/** D2-07: un passo deciso (o saltato) non e' piu' «in attesa»: i suoi avvisi di sollecito e di
+ *  scadenza non devono restare nell'inbox dell'approvatore e del richiedente. Si chiudono
+ *  (DISMISSED) alla decisione, senza cancellarli. */
+export async function chiudiAvvisiDeiPassi(client: PoolClient, stepIds: string[]): Promise<void> {
+  if (stepIds.length === 0) return;
+  await client.query(
+    `UPDATE sys.sys_inbox_notifications
+        SET notification_status = 'DISMISSED',
+            notification_dismissed_at = COALESCE(notification_dismissed_at, now())
+      WHERE notification_resource_type = 'APPROVAL_STEP'
+        AND notification_resource_id = ANY($1::uuid[])
+        AND notification_type IN ('APPROVAL_REMINDER', 'APPROVAL_OVERDUE')
+        AND notification_status <> 'DISMISSED'`,
+    [stepIds],
+  );
 }
 
 /** All steps of a request (to re-derive request status). */
@@ -471,20 +494,24 @@ export async function loadSteps(client: PoolClient, requestId: string): Promise<
 /** Skip PENDING steps at ordinal >= `ordinal` (reject cascade: the failed level + all higher;
  *  ordinal=1 → skip every PENDING step, used when the request reaches APPROVED). */
 export async function skipPendingGte(client: PoolClient, requestId: string, ordinal: number): Promise<void> {
-  await client.query(
+  const r = await client.query<{ id: string }>(
     `UPDATE sys.sys_approval_steps SET approval_step_status = 'SKIPPED'
-      WHERE approval_step_request_id = $1 AND approval_step_status = 'PENDING' AND approval_step_ordinal >= $2`,
+      WHERE approval_step_request_id = $1 AND approval_step_status = 'PENDING' AND approval_step_ordinal >= $2
+      RETURNING approval_step_id AS id`,
     [requestId, ordinal],
   );
+  await chiudiAvvisiDeiPassi(client, r.rows.map((x) => x.id));
 }
 
 /** Skip PENDING steps at ordinal < `ordinal` (satisfied lower ANY_OF siblings once a higher level opens). */
 export async function skipPendingLt(client: PoolClient, requestId: string, ordinal: number): Promise<void> {
-  await client.query(
+  const r = await client.query<{ id: string }>(
     `UPDATE sys.sys_approval_steps SET approval_step_status = 'SKIPPED'
-      WHERE approval_step_request_id = $1 AND approval_step_status = 'PENDING' AND approval_step_ordinal < $2`,
+      WHERE approval_step_request_id = $1 AND approval_step_status = 'PENDING' AND approval_step_ordinal < $2
+      RETURNING approval_step_id AS id`,
     [requestId, ordinal],
   );
+  await chiudiAvvisiDeiPassi(client, r.rows.map((x) => x.id));
 }
 
 /** The active level = MIN ordinal among PENDING steps (null = none pending → request is terminal). */

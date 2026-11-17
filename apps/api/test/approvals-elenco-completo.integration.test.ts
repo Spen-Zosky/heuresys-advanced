@@ -26,7 +26,7 @@ const ATTORI = await attoriDiScena();
 const TAG = `V1-${randomUUID().slice(0, 8).toUpperCase()}`;
 const AGGIUNTE = 210;
 
-interface Riga { approvalRequestId: string; title: string; processId: string | null; processName: string | null; processStepId: string | null; processStepName: string | null }
+interface Riga { approvalRequestId: string; title: string; requesterName: string | null; processId: string | null; processName: string | null; processStepId: string | null; processStepName: string | null }
 interface Lista { items: Riga[]; total: number; processes: Array<{ processId: string; processName: string; count: number; steps: Array<{ processStepId: string; count: number }> }> }
 
 let t: TestApp;
@@ -91,6 +91,19 @@ describe("V-1, V-3 — la lista delle approvazioni e' intera, e dice processo e 
     expect(l.items.length).toBe(200);
     expect(l.total).toBe(Number(atteso.rows[0]!.n));
     expect(l.total).toBeGreaterThan(200);
+  });
+
+  it("D3-02: ogni richiesta dice chi l'ha chiesta, scritto «Cognome, Nome»", async () => {
+    const u = await pool.query<{ n: string }>(
+      `SELECT COALESCE(NULLIF(concat_ws(', ', NULLIF(trim(user_last_name), ''), NULLIF(trim(user_first_name), '')), ''), user_display_name) AS n
+         FROM sys.sys_users WHERE user_id = $1`,
+      [ATTORI.hr.userId],
+    );
+    const l = await lista("limit=200");
+    const nostra = l.items.find((r) => r.title.startsWith(TAG));
+    expect(nostra, "una richiesta del file non torna dalla lista").toBeTruthy();
+    expect(nostra!.requesterName).toBe(u.rows[0]!.n);
+    expect(nostra!.requesterName).toContain(", ");
   });
 
   it("sfogliando si arriva all'ultima riga, senza buchi ne' doppioni", async () => {

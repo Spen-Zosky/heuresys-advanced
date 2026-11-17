@@ -36,6 +36,7 @@ import type {
 import * as repo from "./repository.js";
 import { posizioniNelPerimetroOrganizzativo } from "../dashboard/repository.js";
 import { emitNotificationsBulk } from "../../lib/notifications/emit.js";
+import { OGGETTO_GAP, testoGapCompetenze } from "../../lib/notifications/messaggi.js";
 import { resolveOrgReadScope, canReadOrgTarget, type OrgReadScope } from "../../lib/scope/resolver.js";
 import { masksUnderPlatformMandate, maskFields } from "../../lib/scope/mask.js";
 
@@ -117,11 +118,11 @@ async function notifySkillGaps(toStore: repo.SubjectPositionScoreToStore[]): Pro
       top.map((t) => ({
         userId: t.userId,
         tenantId: t.tenantId,
-        body: `È stato rilevato un gap di competenze per la tua posizione (${GAP_IN_PAROLE[t.category] ?? "gap da valutare"}).`,
+        body: testoGapCompetenze(t.category).body,
       })),
       {
         type: "GAP_CLOSURE_DUE",
-        subject: "Gap di competenze da colmare",
+        subject: OGGETTO_GAP,
         priority: "MEDIUM",
         resourceType: "SKILL",
         actionUrl: "/me/gaps",
@@ -352,11 +353,6 @@ const EVIDENCE_CAP = 12; // ≥12 distinct skills with evidence → no sparsity 
 const cosineGapNorm = (cos: number | null): number | null => (cos === null ? null : clamp((1 - cos) * 100));
 const sparsityGapNorm = (count: number | null): number | null =>
   count === null ? null : clamp((1 - Math.min(count, EVIDENCE_CAP) / EVIDENCE_CAP) * 100);
-
-/** C1: la notifica si legge; il codice del segmento resta nel dato, non nella frase. */
-const GAP_IN_PAROLE: Record<string, string> = {
-  MAJOR_GAP: "gap rilevante", MODERATE_GAP: "gap moderato", MINOR_GAP: "gap lieve", ALIGNED: "allineato",
-};
 
 function segmentOf(v: number): SkillGapSegment {
   if (v >= 65) return "MAJOR_GAP";

@@ -70,6 +70,9 @@ describe("S-14 — esenzioni dal secondo fattore con autore e scadenza", () => {
     const mia = items.find((e) => e.exemptionId === esenzioneId);
     expect(mia).toMatchObject({ state: "ACTIVE", userEmail: "esenzione.s14@prova.invalid", authorDisplayName: expect.any(String) });
     expect(new Date(mia!.expiresAt!).getTime()).toBeGreaterThan(Date.now());
+    // S-09: le persone si scrivono «Cognome, Nome» (l'utenza di prova è Prova Esenzione).
+    expect(mia!.userDisplayName).toBe("Esenzione, Prova");
+    expect(mia!.authorDisplayName).toContain(", ");
   });
 
   it("spegnere chiude l'esenzione, con chi l'ha spenta, ed è idempotente", async () => {

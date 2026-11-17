@@ -190,6 +190,12 @@ function ExemptionsCard({ canManage }: { canManage: boolean }) {
   });
   const variante = (s: MfaExemption["state"]) =>
     s === "ACTIVE" ? "default" : s === "EXPIRED" ? "destructive" : "secondary";
+  // D3-12: un'esenzione scaduta o spenta non apre più niente: di default si vedono solo le attive,
+  // e le altre (storia) si chiedono con il pulsante, con il loro numero.
+  const [tutte, setTutte] = useState(false);
+  const tutteLeRighe = q.data?.items ?? [];
+  const righe = tutte ? tutteLeRighe : tutteLeRighe.filter((e) => e.state === "ACTIVE");
+  const nascoste = tutteLeRighe.length - tutteLeRighe.filter((e) => e.state === "ACTIVE").length;
 
   return (
     <Card data-testid="mfa-exemptions-card">
@@ -204,11 +210,11 @@ function ExemptionsCard({ canManage }: { canManage: boolean }) {
           <div className="p-6">
             <StatoErrore errore={q.error} testId="mfa-exemptions-error" onRiprova={() => void q.refetch()} />
           </div>
-        ) : (q.data?.items.length ?? 0) === 0 ? (
+        ) : righe.length === 0 ? (
           <div className="p-6"><StatoVuoto titolo={t("mfaPolicy.exemptions.empty")} testId="mfa-exemptions-empty" /></div>
         ) : (
           <ul className="divide-y divide-border" data-testid="mfa-exemptions-list">
-            {q.data!.items.map((e) => (
+            {righe.map((e) => (
               <li key={e.exemptionId} className="flex flex-wrap items-start justify-between gap-3 px-6 py-4" data-testid="mfa-exemption-row">
                 <div className="min-w-0 space-y-1">
                   <div className="flex flex-wrap items-center gap-2">
@@ -217,7 +223,6 @@ function ExemptionsCard({ canManage }: { canManage: boolean }) {
                       {t(`mfaPolicy.exemptions.state.${e.state}`)}
                     </Badge>
                   </div>
-                  <p className="text-xs text-muted-foreground">{e.userEmail}</p>
                   <p className="text-sm">{e.reason}</p>
                   <p className="text-xs text-muted-foreground">
                     {t("mfaPolicy.exemptions.expires", { date: e.expiresAt ? f.dataOra(e.expiresAt) : "—" })}
@@ -242,6 +247,13 @@ function ExemptionsCard({ canManage }: { canManage: boolean }) {
               </li>
             ))}
           </ul>
+        )}
+        {!q.isLoading && !q.isError && (nascoste > 0 || tutte) && (
+          <div className="border-t border-border px-6 py-3">
+            <Button type="button" size="sm" variant="outline" data-testid="mfa-exemptions-toggle" onClick={() => setTutte((v) => !v)}>
+              {tutte ? t("mfaPolicy.exemptions.hideInactive") : t("mfaPolicy.exemptions.showInactive", { count: nascoste })}
+            </Button>
+          </div>
         )}
         {spegni.isError && (
           <p role="alert" className="px-6 pb-4 text-sm text-danger">{spegni.error.message}</p>

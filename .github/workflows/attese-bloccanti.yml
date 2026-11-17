@@ -1,0 +1,38 @@
+name: Attese che bloccano
+
+# Regola di piattaforma di Enzo del 2026-11-16 (`.claude/rules/attese-bloccanti.md`): ogni attesa che
+# blocca ha la barra globale, e ogni lavoro lungo ha il riquadro con l'animazione o un debito
+# registrato in `docs/kb/tools/attese_debiti.json`. Il censimento legge solo i sorgenti del frontend.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/web/src/**"
+      - "docs/kb/tools/censimento_attese.py"
+      - "docs/kb/tools/attese_debiti.json"
+      - ".github/workflows/attese-bloccanti.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/web/src/**"
+      - "docs/kb/tools/censimento_attese.py"
+      - "docs/kb/tools/attese_debiti.json"
+      - ".github/workflows/attese-bloccanti.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  censimento:
+    # Come state-lint (D-08): il runner sta sull'host di produzione, niente PR da fork.
+    if: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && !contains(github.event.pull_request.labels.*.name, 'defer-major') }}
+    runs-on: [self-hosted, oci-vm]
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 1
+
+      - name: Ogni lavoro lungo ha il riquadro, ogni attesa la barra globale
+        run: python3 docs/kb/tools/censimento_attese.py --check

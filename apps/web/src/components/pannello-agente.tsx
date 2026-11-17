@@ -26,6 +26,7 @@
  * così cambiare pagina o chiudere la finestra non interrompe lo stream; il simbolo si mostra
  * sulle pagine idonee e, altrove, solo mentre la finestra è aperta o un lavoro è in corso.
  */
+import { formati } from "@/lib/format";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
@@ -74,7 +75,8 @@ function PannelloAgenteAcceso({ pathname, idonea }: { pathname: string; idonea: 
     if (aperto) void refreshConversations();
   }, [aperto, refreshConversations]);
 
-  const quando = (iso: string) => new Date(iso).toLocaleString(i18n.language);
+  // S-08 (forense 15/11): la data e l'ora con il formattatore comune.
+  const quando = (iso: string) => formati(i18n.language).dataOra(iso);
   const stati: Record<AgentActivityStatus, string> = {
     IN_CORSO: t("agente.statoIN_CORSO"),
     IN_ATTESA: t("agente.statoIN_ATTESA"),

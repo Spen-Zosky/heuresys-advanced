@@ -437,6 +437,9 @@ export interface MeRecord {
   userId: string;
   email: string;
   userTenantId: string;
+  firstName: string | null;
+  lastName: string | null;
+  displayName: string | null;
 }
 
 export async function findUserForMe(
@@ -447,8 +450,11 @@ export async function findUserForMe(
     user_id: string;
     user_email: string;
     user_tenant_id: string;
+    user_first_name: string | null;
+    user_last_name: string | null;
+    user_display_name: string | null;
   }>(
-    `SELECT user_id, user_email, user_tenant_id
+    `SELECT user_id, user_email, user_tenant_id, user_first_name, user_last_name, user_display_name
        FROM sys.sys_users
       WHERE user_id = $1
         AND user_status = 'ACTIVE'`,
@@ -456,7 +462,14 @@ export async function findUserForMe(
   );
   if (rows.length === 0) return null;
   const r = rows[0]!;
-  return { userId: r.user_id, email: r.user_email, userTenantId: r.user_tenant_id };
+  return {
+    userId: r.user_id,
+    email: r.user_email,
+    userTenantId: r.user_tenant_id,
+    firstName: r.user_first_name,
+    lastName: r.user_last_name,
+    displayName: r.user_display_name,
+  };
 }
 
 /* === Password reset ====================================================== */

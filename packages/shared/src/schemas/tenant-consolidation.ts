@@ -294,12 +294,42 @@ export type PendingApproval = z.infer<typeof PendingApprovalSchema>;
 export const ApprovalPreviewSchema = z.object({
   result: ApplyChangesResultSchema,
   /** Le sentinelle del database che l'approvazione accenderebbe: se ce n'è una, l'approvazione si ferma. */
-  violations: z.array(z.object({ view: z.string(), before: z.number().int(), after: z.number().int() })),
+  violations: z.array(z.object({ view: z.string(), added: z.number().int() })),
   /** Dati derivati che l'approvazione rende vecchi (embedding): non la fermano, si ricalcolano dopo. */
-  toRecompute: z.array(z.object({ view: z.string(), before: z.number().int(), after: z.number().int() })),
+  toRecompute: z.array(z.object({ view: z.string(), added: z.number().int() })),
 });
 export type ApprovalPreview = z.infer<typeof ApprovalPreviewSchema>;
 export const DiscardResultSchema = z.object({ discarded: z.number().int() });
+/** «Rimetti da decidere»: senza elenco scarta tutta la bozza; con l'elenco, solo quelle proposte. */
+export const DiscardChangesBodySchema = z.object({ proposalIds: z.array(z.uuid()).min(1).max(1000).optional() }).strict();
+export type DiscardChangesBody = z.infer<typeof DiscardChangesBodySchema>;
+
+/**
+ * Le decisioni in blocco (Enzo, 2026-11-15), tutte nella bozza:
+ *   · RACCOMANDATA: a ogni proposta la scelta che l'esito raccomanda (corrispondenza → confermata,
+ *     lacuna → adottata, personalizzazione → personalizzazione);
+ *   · RIFIUTO: a ogni proposta il suo «no» (rifiutata, o non adottata per una lacuna);
+ *   · CASCATA: niente di nuovo sulle proposte scelte; la loro decisione attuale si propaga alla cascata.
+ * Con `cascade` anche RACCOMANDATA e RIFIUTO aggiornano la cascata di ogni proposta.
+ */
+export const BULK_DECISION_MODES = ["RACCOMANDATA", "RIFIUTO", "CASCATA"] as const;
+export const BulkDecideBodySchema = z
+  .object({
+    proposalIds: z.array(z.uuid()).min(1).max(1000),
+    mode: z.enum(BULK_DECISION_MODES),
+    cascade: z.boolean().optional(),
+    /** Con false si rivedono anche le proposte già decise (solo il Direttore HR). Predefinito: true. */
+    onlyUndecided: z.boolean().optional(),
+  })
+  .strict();
+export type BulkDecideBody = z.infer<typeof BulkDecideBodySchema>;
+export const BulkDecideResultSchema = z.object({
+  decided: z.number().int(),
+  /** Le decisioni registrate in più sulle voci della cascata. */
+  cascaded: z.number().int(),
+  skipped: z.array(z.object({ proposalId: z.uuid(), reason: z.string() })),
+});
+export type BulkDecideResult = z.infer<typeof BulkDecideResultSchema>;
 
 /** La conferma a gruppi degli abbinamenti certi (R-5): un gesto, più proposte. */
 export const ConfirmCertainBodySchema = z.object({
@@ -428,3 +458,46 @@ export const ReceiveDeliveryBodySchema = z
   .strict();
 export type ReceiveDeliveryBody = z.infer<typeof ReceiveDeliveryBodySchema>;
 export const BlueprintRunIdParamSchema = z.object({ runId: z.uuid() });
+
+/**
+ * La distanza fra il tenant e la versione di modello di una corsa (ADR-0059 D7, voce A2 del piano di
+ * allineamento): per dominio, uguali, parziali, diversi, solo nel modello, solo nel tenant e ricchezza persa.
+ */
+export const DISTANCE_DOMAIN_VALUES = [
+  "ateco", "classe", "ccnl", "processi", "unita", "organigramma", "obblighi", "ruoli", "copertura",
+  "inquadramento", "fasi", "skill", "obiettivi", "metriche", "derivati", "bersagli", "formazione",
+  "carriere", "incentivi", "commesse", "criticita", "condizioni", "ruoli_funzionali", "utenti",
+] as const;
+export const DistanceDomainSchema = z.enum(DISTANCE_DOMAIN_VALUES);
+const DistanceCountsSchema = z.object({
+  righe: z.number().int(),
+  uguali: z.number().int(),
+  parziali: z.number().int(),
+  diversi: z.number().int(),
+  solo_modello: z.number().int(),
+  solo_tenant: z.number().int(),
+  ricchezza_persa: z.number().int(),
+});
+export const DistanceRowSchema = z.object({
+  esito: z.enum(["uguale", "parziale", "diverso", "solo_modello", "solo_tenant"]),
+  modello: z.string().nullable(),
+  tenant: z.string().nullable(),
+  nota: z.string().optional(),
+});
+export const DistanceDomainResultSchema = DistanceCountsSchema.extend({
+  dominio: DistanceDomainSchema,
+  nota: z.string(),
+  dettaglio: z.array(DistanceRowSchema).optional(),
+});
+export const RunDistanceResponseSchema = z.object({
+  tenantId: z.uuid(),
+  variantVersionId: z.uuid(),
+  misurataIl: z.iso.datetime(),
+  domini: z.array(DistanceDomainResultSchema),
+  totale: DistanceCountsSchema,
+});
+export type RunDistanceResponse = z.infer<typeof RunDistanceResponseSchema>;
+export const RunDistanceQuerySchema = z.object({
+  dettaglio: z.enum(["true", "false"]).optional(),
+  dominio: DistanceDomainSchema.optional(),
+});

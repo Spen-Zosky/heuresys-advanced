@@ -89,7 +89,7 @@ export default function MeSkillsPage() {
                 cell: (s) => (
                   <span className="font-medium text-foreground">
                     {s.skillName}
-                    {s.isPrimary && <span className="ml-2 text-[10px] uppercase text-muted-foreground">{t("skills.primaryTag")}</span>}
+                    {s.isPrimary && <span className="ml-2 text-xs uppercase text-muted-foreground">{t("skills.primaryTag")}</span>}
                   </span>
                 ),
               },
@@ -130,7 +130,7 @@ export default function MeSkillsPage() {
                   { header: t("skills.colSkill"), cell: (s) => <span className="text-foreground">{s.skillName}</span> },
                   { header: t("skills.colLevel"), cell: (s) => <EnumStatusPill domain="proficiency" value={s.declaredProficiency} tone="info" /> },
                   { header: t("skills.colSource"), cell: (s) => <span className="text-xs text-muted-foreground">{enumLabel("skillEvidenceSource", s.source)}</span> },
-                  { header: t("skills.colScore"), cell: (s) => <span className="text-xs text-muted-foreground">{s.score ?? "—"}</span> },
+                  { header: t("skills.colScore"), cell: (s) => <span className="text-xs text-muted-foreground">{s.score != null ? fmt.numero(s.score, 2) : "—"}</span> },
                   { header: t("skills.colDate"), cell: (s) => <span className="text-xs text-muted-foreground">{fmt.data(s.assessedAt)}</span> },
                 ]}
               />

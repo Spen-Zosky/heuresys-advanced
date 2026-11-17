@@ -1,4 +1,5 @@
 "use client";
+import { useFormat, type Formati } from "@/lib/format";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -20,20 +21,62 @@ import { StatusPill } from "@/components/status-pill";
 const PRIORITY_TONE = (p: number): "danger" | "warning" | "info" =>
   p >= 75 ? "danger" : p >= 50 ? "warning" : "info";
 
-function Citation({ c, t }: { c: AdvisorCitation; t: ReturnType<typeof useTranslation>["t"] }) {
+type T = ReturnType<typeof useTranslation>["t"];
+
+/** Il campo tecnico della fonte («evidence.holders») in parole; un campo nuovo resta com'è. */
+function campoLeggibile(campo: string, t: T): string {
+  const dim = /^dimensions\.(\w+)\.score$/.exec(campo);
+  if (dim) return t("advisor.fields.dimensionScore", { dimension: t(`orgHealth.dims.${dim[1]}`, { defaultValue: dim[1] }) });
+  return t(`advisor.fields.${campo.replace(/\./g, "_")}`, { defaultValue: campo });
+}
+
+/** Campi la cui misura è una quota 0-1 (si scrive «85 %»). */
+const CAMPI_QUOTA = new Set(["evidence.verifiedShare", "coverage"]);
+/** Campi il cui valore è un codice di elenco chiuso (verdetto, posizione in classifica). */
+const CAMPI_CODICE: Record<string, string> = { verdict: "vrio.verdicts", standing: "orgHealth.standings" };
+
+function valoreLeggibile(c: AdvisorCitation, t: T, fmt: Formati): string {
+  const v = c.value;
+  const chiave = CAMPI_CODICE[c.field];
+  if (chiave && typeof v === "string") return t(`${chiave}.${v}`, { defaultValue: v });
+  if (typeof v === "number") {
+    if (CAMPI_QUOTA.has(c.field) || /^dimensions\.\w+\.score$/.test(c.field)) return fmt.percento(v, "0-1");
+    return fmt.numero(v, 2);
+  }
+  return String(v);
+}
+
+function Citation({ c, t, fmt }: { c: AdvisorCitation; t: T; fmt: Formati }) {
   return (
     <li data-testid="advisor-citation" className="flex flex-wrap items-baseline gap-x-1.5 leading-tight">
-      <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+      <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
         {t(`advisor.sources.${c.source}`)}
       </span>
       <span className="text-xs text-foreground">{c.subjectLabel}</span>
-      <span className="font-mono text-[10px] text-muted-foreground">{c.field}</span>
-      <span className="font-mono text-[10px] font-semibold tabular-nums text-foreground">= {String(c.value)}</span>
+      {/* il campo grezzo resta solo nel suggerimento, per chi deve ritrovarlo nella fonte */}
+      <span className="text-xs text-muted-foreground" title={c.field}>{campoLeggibile(c.field, t)}:</span>
+      <span className="text-xs font-semibold tabular-nums text-foreground">{valoreLeggibile(c, t, fmt)}</span>
     </li>
   );
 }
 
-function buildColumns(t: ReturnType<typeof useTranslation>["t"]): DataColumn<AdvisorSuggestion>[] {
+// D3-07 (forense 15/11): i parametri della frase arrivano dal motore come codici e numeri grezzi
+// («performance», «36.5»): la dimensione si traduce, i numeri passano dal formattatore.
+function paroleDi(p: Record<string, unknown> | undefined, t: ReturnType<typeof useTranslation>["t"], fmt: Formati): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(p ?? {}).map(([k, v]) => [
+      k,
+      k === "dimension" && typeof v === "string"
+        ? t(`orgHealth.dims.${v}`, { defaultValue: v })
+        // Conteggi con il nome accanto («1 posizione», «3 posizioni»): il plurale lo sceglie i18next.
+        : (k === "positions" || k === "critical") && typeof v === "number"
+          ? t(`advisor.conteggi.${k}`, { count: v })
+          : typeof v === "number" ? fmt.numero(v, 1) : v,
+    ]),
+  );
+}
+
+function buildColumns(t: ReturnType<typeof useTranslation>["t"], fmt: Formati): DataColumn<AdvisorSuggestion>[] {
   return [
     {
       header: t("advisor.cols.subject"),
@@ -44,7 +87,7 @@ function buildColumns(t: ReturnType<typeof useTranslation>["t"]): DataColumn<Adv
       cell: (r) => (
         <span className="flex flex-col leading-tight" data-testid={`advisor-rule-${r.ruleId}`}>
           <span className="text-xs font-medium text-foreground">{t(`advisor.rules.${r.ruleId}`)}</span>
-          <span className="text-[10px] text-muted-foreground">{t(`advisor.subjectTypes.${r.subjectType}`)}</span>
+          <span className="text-xs text-muted-foreground">{t(`advisor.subjectTypes.${r.subjectType}`)}</span>
         </span>
       ),
     },
@@ -52,7 +95,7 @@ function buildColumns(t: ReturnType<typeof useTranslation>["t"]): DataColumn<Adv
       header: t("advisor.cols.action"),
       cell: (r) => (
         <span data-testid="advisor-headline" className="block max-w-xl text-sm text-foreground">
-          {t(`advisor.rule.${r.headlineKey.replace("advisor.rule.", "")}`, r.headlineParams)}
+          {t(`advisor.rule.${r.headlineKey.replace("advisor.rule.", "")}`, paroleDi(r.headlineParams, t, fmt))}
         </span>
       ),
     },
@@ -61,7 +104,7 @@ function buildColumns(t: ReturnType<typeof useTranslation>["t"]): DataColumn<Adv
       cell: (r) => (
         <ul data-testid="advisor-citations" className="flex max-w-md flex-wrap gap-x-3 gap-y-0.5">
           {r.citations.map((c, i) => (
-            <Citation key={`${c.source}-${c.field}-${i}`} c={c} t={t} />
+            <Citation key={`${c.source}-${c.field}-${i}`} c={c} t={t} fmt={fmt} />
           ))}
         </ul>
       ),
@@ -87,7 +130,8 @@ export default function AdvisorPage() {
     queryFn: () => apiFetch<AdvisorSuggestionsResponse>("/v1/advisor/suggestions"),
   });
 
-  const columns = useMemo(() => buildColumns(t), [t]);
+  const fmt = useFormat();
+  const columns = useMemo(() => buildColumns(t, fmt), [t, fmt]);
   const data = advisor.data;
 
   return (

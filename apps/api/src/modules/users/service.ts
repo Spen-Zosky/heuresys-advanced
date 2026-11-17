@@ -187,7 +187,15 @@ export const usersService = {
     const skills = skillsRes.items;
     const learning = learningRes.items;
     const certifications = certificationsRes.items;
-    const careerTargets = careerTargetsRes.items;
+    // D3-23: il nome della posizione bersaglio, non il suo identificativo.
+    const nomiPosizione = careerTargetsRes.items.length
+      ? await pool.query<{ id: string; titolo: string | null }>(
+          `SELECT position_id AS id, position_title AS titolo FROM sys.sys_positions WHERE position_id = ANY($1::uuid[])`,
+          [careerTargetsRes.items.map((c) => c.positionId)],
+        )
+      : { rows: [] as Array<{ id: string; titolo: string | null }> };
+    const titoli = new Map(nomiPosizione.rows.map((r) => [r.id, r.titolo]));
+    const careerTargets = careerTargetsRes.items.map((c) => ({ ...c, positionName: titoli.get(c.positionId) ?? null }));
     if (!profile) throw new NotFoundError("User");
 
     // ADR-0032: il mandato piattaforma da solo non apre COMPENSATION/EVALUATION.

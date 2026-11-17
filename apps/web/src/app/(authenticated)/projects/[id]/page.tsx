@@ -7,6 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent, Badge } from "@heuresys/ui";
 import { PageHeader } from "@/components/intestazione-pagina";
 import { Crown } from "lucide-react";
 import type { ProjectDetail } from "@heuresys/shared";
+import { NomeOppure } from "@/components/senza-nome";
 import { apiFetch } from "@/lib/api/fetch";
 import { useFormat } from "@/lib/format";
 import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
@@ -100,7 +101,7 @@ export default function ProjectDetailPage() {
                   data-testid="project-member-row">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium" data-testid="member-name">
-                    {m.fullName ?? m.email ?? m.userId}
+                    <NomeOppure nome={m.fullName} id={m.userId} />
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {t("projects.since", { date: fmt.data(m.startsOn) })}

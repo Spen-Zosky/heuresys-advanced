@@ -99,6 +99,8 @@ export const ApprovalRequestListItemSchema = ApprovalRequestSchema.extend({
   processStepName: z.string().nullable(),
   /** V-3 (ADR-0051): quanti passi ha deciso un delegato «per conto di» l'approvatore. */
   delegatedStepCount: z.number().int(),
+  /** D3-02: chi ha chiesto, scritto «Cognome, Nome»; null se l'autore non c'è più. */
+  requesterName: z.string().nullable(),
 });
 export type ApprovalRequestListItem = z.infer<typeof ApprovalRequestListItemSchema>;
 

@@ -1947,6 +1947,8 @@ rl env RILASCIO_CI_STATO="6 6 0 0" bash scripts/rilascia.sh "$B"; e=$?
 git -C "$RT/origin.git" update-ref refs/heads/prod "$C"
 rl env RILASCIO_CI_STATO="6 6 0 0" bash scripts/rilascia.sh "$B"; e=$?
 [ $e = 1 ] && prod_e "$C" && ok "rilascia: servirebbe un force-push -> fermo" || fail "rilascia: non fast-forward non ferma (exit $e)"
+( cd "$ROOT" && RILASCIO_CI_STATO="6 6 0 0" ARMA_DRYRUN=1 bash scripts/rilascia.sh HEAD --dry-run ) >/dev/null 2>&1; e=$?
+[ $e = 1 ] && ok "rilascia: variabili di test su origin reale -> fermo" || fail "rilascia: variabili di test accettate su origin reale (exit $e)"
 rm -rf "$RT"
 # ---------------------------------------------------------------- summary
 printf '\n%d ok, %d failed\n' "$PASS" "$FAIL"

@@ -39,6 +39,14 @@ done
 
 ROOT="$(git rev-parse --show-toplevel)"; cd "$ROOT"
 rosso() { echo "[rilascio] FERMO — $*" >&2; exit 1; }
+# Le variabili per i test valgono solo in una fixture con origin locale: su un origin vero
+# (GitHub) la loro sola presenza ferma il rilascio, cosi' nessuno scavalca G3/G4 dall'ambiente.
+if [ -n "${RILASCIO_CI_STATO:-}${RILASCIO_BACKUP_MARK:-}${RILASCIO_NO_RINNOVO:-}" ]; then
+  case "$(git remote get-url origin 2>/dev/null)" in
+    /*|file://*) : ;;
+    *) rosso "variabili RILASCIO_* di test presenti su un origin reale" ;;
+  esac
+fi
 
 git fetch --quiet origin main prod 2>/dev/null || rosso "origin non risponde (fetch di main e prod)"
 SHA="$(git rev-parse --verify -q "${SHA_IN}^{commit}" 2>/dev/null)" || rosso "commit sconosciuto: $SHA_IN"

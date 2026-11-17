@@ -1857,5 +1857,50 @@
       "CONFIRMED": "Confermate",
       "SUPERSEDED": "Sostituite"
     }
+  },
+  "gdpr": {
+    "titolo": "Dati personali (GDPR)",
+    "descrizione": "Esportazione e cancellazione dei dati di una persona, corsa di conservazione, registro delle richieste e mappa dei dati.",
+    "persona": "I dati di una persona",
+    "scegliPersona": "Persona",
+    "esporta": "Esporta i suoi dati",
+    "esportando": "Esportazione…",
+    "provaCancellazione": "Prova la cancellazione",
+    "lavoro": "Operazione sui dati personali",
+    "lavoroCancella": "Conto delle righe che la cancellazione toccherebbe, tabella per tabella.",
+    "lavoroEsporta": "Raccolta di tutti i dati della persona in un file.",
+    "lavoroConserva": "Conto delle righe oltre il periodo di conservazione.",
+    "errore": "Operazione non riuscita. Riprova.",
+    "esitoProva": "Prova: la cancellazione toccherebbe {{count}} righe. Niente è stato cambiato.",
+    "esitoVero": "Cancellazione eseguita: {{count}} righe trattate.",
+    "parolaCancella": "CANCELLA",
+    "parolaConserva": "APPLICA",
+    "confermaScrivi": "Per eseguirla davvero scrivi {{parola}}",
+    "cancellaDavvero": "Cancella davvero (non si disfa)",
+    "conservazione": "Corsa di conservazione",
+    "conservazioneSpiega": "Toglie i dati oltre il periodo di conservazione dichiarato nella mappa. Prima si prova, poi si applica.",
+    "provaConservazione": "Prova la conservazione",
+    "esitoProvaConserva": "Prova: {{count}} righe sono oltre il periodo di conservazione. Niente è stato cambiato.",
+    "esitoVeroConserva": "Conservazione applicata: {{count}} righe trattate.",
+    "applicaDavvero": "Applica davvero (non si disfa)",
+    "giorni": "{{count}} giorni",
+    "giorni_one": "{{count}} giorno",
+    "registro": "Registro delle richieste ({{mostrati}} di {{totale}})",
+    "nessunaRichiesta": "Nessuna richiesta registrata.",
+    "mappa": "Mappa dei dati personali ({{count}} tabelle)",
+    "strategie": {
+      "DELETE": "si cancella",
+      "ANONYMIZE": "si rende anonimo",
+      "RETAIN": "si conserva"
+    },
+    "tipi": {
+      "EXPORT": "Esportazione",
+      "ERASURE": "Cancellazione",
+      "RETENTION_RUN": "Conservazione"
+    },
+    "statiRichiesta": {
+      "COMPLETED": "Eseguita",
+      "DRY_RUN": "Prova"
+    }
   }
 }

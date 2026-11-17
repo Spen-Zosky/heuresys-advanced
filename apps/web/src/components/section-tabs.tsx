@@ -57,6 +57,11 @@ const MERGE_GROUPS: ReadonlyArray<Group> = [
     { href: "/kpis", key: "kpi.catalog" },
   ] },
   // Ondata 3 (2026-11-17): le valutazioni delle persone entrano come scheda di /performance.
+  // Ondata 3 (2026-11-17): i diritti sui dati personali stanno accanto al registro di provenienza.
+  { id: "dati", tabs: [
+    { href: "/provenance", key: "dati.provenance" },
+    { href: "/admin/gdpr", key: "dati.gdpr" },
+  ] },
   { id: "performance", tabs: [
     { href: "/performance", key: "performance.cycles" },
     { href: "/assessments", key: "performance.assessments" },
@@ -106,6 +111,7 @@ export function permessoDellaScheda(href: string): string | null {
 const PERMESSI_SCHEDE: Readonly<Record<string, string>> = {
   "/mentorship": "mentorship:read",
   "/assessments": "assessment:read",
+  "/admin/gdpr": "gdpr:read",
 };
 
 export function SectionTabs() {

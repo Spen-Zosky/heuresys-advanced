@@ -178,6 +178,10 @@
     "performance": {
       "cycles": "Cicli e valutazioni",
       "assessments": "Valutazioni delle persone"
+    },
+    "dati": {
+      "provenance": "Registro di provenienza",
+      "gdpr": "Dati personali (GDPR)"
     }
   },
   "session": {

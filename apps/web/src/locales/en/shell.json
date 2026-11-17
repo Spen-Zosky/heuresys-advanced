@@ -178,6 +178,10 @@
     "performance": {
       "cycles": "Cycles and reviews",
       "assessments": "People assessments"
+    },
+    "dati": {
+      "provenance": "Provenance register",
+      "gdpr": "Personal data (GDPR)"
     }
   },
   "session": {

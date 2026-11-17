@@ -1857,5 +1857,50 @@
       "CONFIRMED": "Confirmed",
       "SUPERSEDED": "Superseded"
     }
+  },
+  "gdpr": {
+    "titolo": "Personal data (GDPR)",
+    "descrizione": "Export and erasure of a person's data, retention run, request register and data map.",
+    "persona": "A person's data",
+    "scegliPersona": "Person",
+    "esporta": "Export their data",
+    "esportando": "Exporting…",
+    "provaCancellazione": "Try the erasure",
+    "lavoro": "Personal data operation",
+    "lavoroCancella": "Counting the rows the erasure would touch, table by table.",
+    "lavoroEsporta": "Collecting all the person's data into a file.",
+    "lavoroConserva": "Counting the rows beyond the retention period.",
+    "errore": "Operation failed. Try again.",
+    "esitoProva": "Trial: the erasure would touch {{count}} rows. Nothing was changed.",
+    "esitoVero": "Erasure done: {{count}} rows processed.",
+    "parolaCancella": "ERASE",
+    "parolaConserva": "APPLY",
+    "confermaScrivi": "To run it for real type {{parola}}",
+    "cancellaDavvero": "Erase for real (cannot be undone)",
+    "conservazione": "Retention run",
+    "conservazioneSpiega": "Removes data beyond the retention period declared in the map. Try first, then apply.",
+    "provaConservazione": "Try the retention",
+    "esitoProvaConserva": "Trial: {{count}} rows are beyond the retention period. Nothing was changed.",
+    "esitoVeroConserva": "Retention applied: {{count}} rows processed.",
+    "applicaDavvero": "Apply for real (cannot be undone)",
+    "giorni": "{{count}} days",
+    "giorni_one": "{{count}} day",
+    "registro": "Request register ({{mostrati}} of {{totale}})",
+    "nessunaRichiesta": "No request recorded.",
+    "mappa": "Personal data map ({{count}} tables)",
+    "strategie": {
+      "DELETE": "deleted",
+      "ANONYMIZE": "anonymised",
+      "RETAIN": "retained"
+    },
+    "tipi": {
+      "EXPORT": "Export",
+      "ERASURE": "Erasure",
+      "RETENTION_RUN": "Retention"
+    },
+    "statiRichiesta": {
+      "COMPLETED": "Done",
+      "DRY_RUN": "Trial"
+    }
   }
 }

@@ -422,6 +422,24 @@
       "archived": "Company archived.",
       "archiveError": "The company could not be archived.",
       "noPermission": "You do not have permission to modify client companies."
+    },
+    "gestione": {
+      "modifica": "Edit the tenant details",
+      "nome": "Name",
+      "paese": "Country (two-letter code)",
+      "nonDichiarata": "Not declared",
+      "salva": "Save",
+      "salvato": "Saved.",
+      "errore": "Operation failed. Try again.",
+      "confermaStato": "Move the tenant to «{{stato}}»? It changes access for all its people.",
+      "assegnazioni": "Who on the platform follows this tenant",
+      "assegnazioniSpiega": "Revoking an assignment closes it with today's date: the history stays.",
+      "dal": "since {{data}}",
+      "ritira": "Revoke",
+      "confermaRitira": "Revoke this assignment?",
+      "nessunaAssegnazione": "No active assignment.",
+      "assegnaPersona": "Assign a platform person",
+      "assegna": "Assign"
     }
   },
   "enterpriseTyping": {

@@ -422,6 +422,24 @@
       "archived": "Azienda archiviata.",
       "archiveError": "Non è stato possibile archiviare l'azienda.",
       "noPermission": "Non hai i permessi per modificare le aziende clienti."
+    },
+    "gestione": {
+      "modifica": "Modifica i dati del tenant",
+      "nome": "Nome",
+      "paese": "Paese (codice di due lettere)",
+      "nonDichiarata": "Non dichiarata",
+      "salva": "Salva",
+      "salvato": "Salvato.",
+      "errore": "Operazione non riuscita. Riprova.",
+      "confermaStato": "Portare il tenant allo stato «{{stato}}»? Cambia l'accesso di tutte le sue persone.",
+      "assegnazioni": "Chi della piattaforma segue questo tenant",
+      "assegnazioniSpiega": "Ritirare un'assegnazione la chiude con la data di oggi: la storia resta.",
+      "dal": "dal {{data}}",
+      "ritira": "Ritira",
+      "confermaRitira": "Ritirare questa assegnazione?",
+      "nessunaAssegnazione": "Nessuna assegnazione attiva.",
+      "assegnaPersona": "Assegna una persona della piattaforma",
+      "assegna": "Assegna"
     }
   },
   "enterpriseTyping": {

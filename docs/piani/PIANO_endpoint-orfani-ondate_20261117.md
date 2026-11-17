@@ -50,6 +50,14 @@ Prova: `apps/web/tests/e2e/ondata3-schede-esistenti.spec.ts`. I gesti che non si
 
 Mentoring (`/mentorship`), riscontri e piani d'azione sul clima (nella pagina esistente `/engagement`), valutazioni delle competenze (`/learning/assessments`), GDPR dell'amministrazione (`/admin/gdpr`), capacità dell'agente (`/admin/agent-capabilities`). Nessuna migrazione di menu: ogni pagina entra come scheda di un gruppo di `section-tabs.tsx` (seconda porta ammessa da `check_pagine_raggiungibili.py`), e la scheda compare solo con il permesso di lettura del suo modulo (`PERMESSI_SCHEDE`). `/mentorship` nella Carriera, `/assessments` accanto a `/performance`, `/admin/gdpr` accanto a `/provenance`, `/admin/agent-capabilities` accanto a `/admin/roles`; riscontri e piani d'azione nella pagina `/engagement`. Prova: `apps/web/tests/e2e/ondata3-pagine-nuove.spec.ts`.
 
+## Voce 3c — un solo modello di sondaggio (deciso il 2026-11-17)
+
+Decisione (coordinatore per Enzo, delega sulle decisioni raccomandate): resta il modello della pagina `/engagement` (`sys_surveys`, `sys_survey_questions`, `sys_survey_responses`, `sys_survey_templates`); i dati di `sys_engagement_surveys`, `sys_engagement_survey_templates`, `sys_engagement_survey_responses` vi si trasferiscono; il modello vecchio si disattiva, non si cancella.
+
+Mappatura misurata il 2026-11-17 (`information_schema.columns` e campioni): nessuna sovrapposizione di chiavi naturali né di titoli fra i due modelli. Le domande vecchie stanno in `survey_questions` (jsonb `[{id,text,type,scale}]`) e vanno espanse in righe di `sys_survey_questions`; le risposte vecchie sono una riga per persona con `response_answers` jsonb in due forme (`{question_id,value,question_type}` e `{question_id,rating|nps|text}`) e vanno espanse in una riga per domanda con il valore nella colonna tipizzata (`rating_value`, `text_value`, `choice_value`). Stato e tipo vanno ricondotti ai CHECK del modello nuovo (da leggere nel file che crea le tabelle prima di scrivere).
+
+Esecuzione: migrazione `-- @migrate: once` con giornale `staging.*_undo`, conteggi prima/dopo come post-condizione (sondaggi, domande attese = somma delle domande jsonb, risposte attese = somma delle risposte jsonb), provata su copia usa-e-getta (`db/scripts/prova-idempotenza.sh`) e sulla prova generale della CI, backup verificato prima. Disattivazione: le rotte di scrittura di `/v1/surveys` rispondono 410 con il rimando a `/v1/engagement/surveys` (ondata 5), le tabelle restano.
+
 ## Fuori da questa sessione
 
 Le ondate 3-5 non si chiudono stanotte: ognuna è una PR e un rilascio a sé, e il turno di rilascio è conteso.

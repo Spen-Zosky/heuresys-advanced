@@ -182,6 +182,10 @@
     "dati": {
       "provenance": "Registro di provenienza",
       "gdpr": "Dati personali (GDPR)"
+    },
+    "permessi": {
+      "roles": "Ruoli e permessi",
+      "agent": "Capacità dell'agente"
     }
   },
   "session": {

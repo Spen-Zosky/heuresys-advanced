@@ -182,6 +182,10 @@
     "dati": {
       "provenance": "Provenance register",
       "gdpr": "Personal data (GDPR)"
+    },
+    "permessi": {
+      "roles": "Roles & permissions",
+      "agent": "Agent capabilities"
     }
   },
   "session": {

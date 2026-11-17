@@ -1902,5 +1902,54 @@
       "COMPLETED": "Done",
       "DRY_RUN": "Trial"
     }
+  },
+  "agentCaps": {
+    "titolo": "Agent capabilities",
+    "descrizione": "What the agent may do, on which data, with which limit and how it is undone; and whether it acts asking for confirmation or freely.",
+    "elenco": "Capabilities ({{count}})",
+    "erroreCarica": "Capabilities could not be loaded.",
+    "nessuna": "No capability recorded.",
+    "dettagli": "Details",
+    "chiudi": "Close",
+    "limiti": "At most {{volume}} rows per run · undone with {{annullamento}}",
+    "nessunaOperazione": "No operation declared.",
+    "classe": "class {{classe}}",
+    "classeLabel": "Class",
+    "concetto": "Concept",
+    "operazione": "Operation",
+    "metodo": "Method",
+    "aggiungiOperazione": "Add the operation",
+    "pubblica": "Publish",
+    "confermaPubblica": "Publish the capability? From then on the agent can use it, with confirmation.",
+    "ritira": "Retire",
+    "confermaRitira": "Retire the capability? The agent will no longer be able to use it.",
+    "modo": "Mode for this tenant",
+    "ragione": "Reason for the decision",
+    "decidi": "Decide",
+    "vietato": "You are not allowed to do this.",
+    "duplicata": "A capability with this code already exists.",
+    "rifiutata": "Refused by the API",
+    "errore": "Operation failed. Try again.",
+    "nuova": "New capability (draft)",
+    "codice": "Code",
+    "agente": "Agent",
+    "volume": "Row limit per run",
+    "descrizioneLabel": "Description",
+    "annullamento": "How it is undone",
+    "riferimentoAnnullamento": "Undo reference",
+    "creaBozza": "Create the draft",
+    "stati": {
+      "BOZZA": "Draft",
+      "PUBBLICATA": "Published",
+      "RITIRATA": "Retired"
+    },
+    "modi": {
+      "CONFERMA": "With confirmation",
+      "LIBERA": "Freely"
+    },
+    "annullamenti": {
+      "GIORNALE_UNDO": "undo journal",
+      "RIGA_SOSTITUTIVA": "replacement row"
+    }
   }
 }

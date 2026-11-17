@@ -58,6 +58,11 @@ const MERGE_GROUPS: ReadonlyArray<Group> = [
   ] },
   // Ondata 3 (2026-11-17): le valutazioni delle persone entrano come scheda di /performance.
   // Ondata 3 (2026-11-17): i diritti sui dati personali stanno accanto al registro di provenienza.
+  // Ondata 3 (2026-11-17): le capacità dell'agente sono i suoi permessi, accanto a quelli delle persone.
+  { id: "permessi", tabs: [
+    { href: "/admin/roles", key: "permessi.roles" },
+    { href: "/admin/agent-capabilities", key: "permessi.agent" },
+  ] },
   { id: "dati", tabs: [
     { href: "/provenance", key: "dati.provenance" },
     { href: "/admin/gdpr", key: "dati.gdpr" },
@@ -112,6 +117,7 @@ const PERMESSI_SCHEDE: Readonly<Record<string, string>> = {
   "/mentorship": "mentorship:read",
   "/assessments": "assessment:read",
   "/admin/gdpr": "gdpr:read",
+  "/admin/agent-capabilities": "agent_capability:read",
 };
 
 export function SectionTabs() {

@@ -1902,5 +1902,54 @@
       "COMPLETED": "Eseguita",
       "DRY_RUN": "Prova"
     }
+  },
+  "agentCaps": {
+    "titolo": "Capacità dell'agente",
+    "descrizione": "Che cosa l'agente può fare, su quali dati, con quale limite e come si annulla; e se agisce chiedendo conferma o in libertà.",
+    "elenco": "Capacità ({{count}})",
+    "erroreCarica": "Non è stato possibile caricare le capacità.",
+    "nessuna": "Nessuna capacità registrata.",
+    "dettagli": "Dettagli",
+    "chiudi": "Chiudi",
+    "limiti": "Al massimo {{volume}} righe per giro · si annulla con {{annullamento}}",
+    "nessunaOperazione": "Nessuna operazione dichiarata.",
+    "classe": "classe {{classe}}",
+    "classeLabel": "Classe",
+    "concetto": "Concetto",
+    "operazione": "Operazione",
+    "metodo": "Metodo",
+    "aggiungiOperazione": "Aggiungi l'operazione",
+    "pubblica": "Pubblica",
+    "confermaPubblica": "Pubblicare la capacità? Da quel momento l'agente la può usare, con conferma.",
+    "ritira": "Ritira",
+    "confermaRitira": "Ritirare la capacità? L'agente smette di poterla usare.",
+    "modo": "Modo per questo tenant",
+    "ragione": "Ragione della decisione",
+    "decidi": "Decidi",
+    "vietato": "Non hai il permesso per questa operazione.",
+    "duplicata": "Esiste già una capacità con questo codice.",
+    "rifiutata": "Rifiutata dall'API",
+    "errore": "Operazione non riuscita. Riprova.",
+    "nuova": "Nuova capacità (in bozza)",
+    "codice": "Codice",
+    "agente": "Agente",
+    "volume": "Limite di righe per giro",
+    "descrizioneLabel": "Descrizione",
+    "annullamento": "Come si annulla",
+    "riferimentoAnnullamento": "Riferimento dell'annullamento",
+    "creaBozza": "Crea la bozza",
+    "stati": {
+      "BOZZA": "Bozza",
+      "PUBBLICATA": "Pubblicata",
+      "RITIRATA": "Ritirata"
+    },
+    "modi": {
+      "CONFERMA": "Con conferma",
+      "LIBERA": "In libertà"
+    },
+    "annullamenti": {
+      "GIORNALE_UNDO": "giornale di annullamento",
+      "RIGA_SOSTITUTIVA": "riga sostitutiva"
+    }
   }
 }

@@ -166,7 +166,8 @@
     },
     "career": {
       "main": "Career",
-      "readiness": "Succession readiness"
+      "readiness": "Succession readiness",
+      "mentorship": "Mentoring"
     },
     "recruiting": {
       "pipeline": "Pipeline",

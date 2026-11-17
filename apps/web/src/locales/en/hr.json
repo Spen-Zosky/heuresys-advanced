@@ -1359,5 +1359,73 @@
       "voto": "Score (0-10)",
       "annulla": "Cancel"
     }
+  },
+  "mentorship": {
+    "titolo": "Mentoring",
+    "descrizione": "Mentoring programmes, mentor and mentee pairs and their meetings.",
+    "nessuno": "not set",
+    "programmi": "Programmes ({{count}})",
+    "erroreCarica": "Mentoring could not be loaded.",
+    "nessunProgramma": "No mentoring programme.",
+    "statoProgramma": "Programme status",
+    "nome": "Programme name",
+    "tipo": "Type",
+    "durataMesi": "Duration (months)",
+    "creaProgramma": "Create the programme (draft)",
+    "mesi": "{{count}} months",
+    "mesi_one": "{{count}} month",
+    "coppie": "Mentor and mentee pairs ({{count}})",
+    "filtraProgramma": "Programme",
+    "tuttiProgrammi": "All programmes",
+    "senzaProgramma": "no programme",
+    "statoCoppia": "Pair status",
+    "frequenza": "Meeting frequency",
+    "apriIncontri": "Meetings",
+    "chiudiIncontri": "Close",
+    "nessunaCoppia": "No pair.",
+    "statoIncontro": "Meeting status",
+    "voto": "Rating",
+    "senzaVoto": "—",
+    "minuti": "{{count}} minutes",
+    "minuti_one": "{{count}} minute",
+    "nessunIncontro": "No meeting.",
+    "quando": "When",
+    "durata": "Duration (minutes)",
+    "fissa": "Schedule the meeting",
+    "errore": "Operation failed. Try again.",
+    "tipi": {
+      "GENERAL": "General",
+      "LEADERSHIP": "Leadership",
+      "TECHNICAL": "Technical",
+      "MANAGEMENT": "Management",
+      "DEI": "Diversity and inclusion"
+    },
+    "statiProgramma": {
+      "DRAFT": "Draft",
+      "ACTIVE": "Active",
+      "INACTIVE": "Suspended",
+      "ARCHIVED": "Archived"
+    },
+    "statiCoppia": {
+      "PENDING": "To start",
+      "ACTIVE": "Active",
+      "ON_HOLD": "On hold",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    },
+    "frequenze": {
+      "WEEKLY": "Weekly",
+      "BI_WEEKLY": "Every two weeks",
+      "MONTHLY": "Monthly",
+      "QUARTERLY": "Quarterly",
+      "AD_HOC": "When needed"
+    },
+    "statiIncontro": {
+      "SCHEDULED": "Scheduled",
+      "COMPLETED": "Held",
+      "CANCELLED": "Cancelled",
+      "NO_SHOW": "No show",
+      "RESCHEDULED": "Rescheduled"
+    }
   }
 }

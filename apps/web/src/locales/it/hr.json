@@ -1359,5 +1359,73 @@
       "voto": "Voto (0-10)",
       "annulla": "Annulla"
     }
+  },
+  "mentorship": {
+    "titolo": "Mentoring",
+    "descrizione": "Programmi di mentoring, le coppie mentore e allievo e i loro incontri.",
+    "nessuno": "non indicato",
+    "programmi": "Programmi ({{count}})",
+    "erroreCarica": "Non è stato possibile caricare il mentoring.",
+    "nessunProgramma": "Nessun programma di mentoring.",
+    "statoProgramma": "Stato del programma",
+    "nome": "Nome del programma",
+    "tipo": "Tipo",
+    "durataMesi": "Durata (mesi)",
+    "creaProgramma": "Crea il programma (in bozza)",
+    "mesi": "{{count}} mesi",
+    "mesi_one": "{{count}} mese",
+    "coppie": "Coppie mentore e allievo ({{count}})",
+    "filtraProgramma": "Programma",
+    "tuttiProgrammi": "Tutti i programmi",
+    "senzaProgramma": "senza programma",
+    "statoCoppia": "Stato della coppia",
+    "frequenza": "Frequenza degli incontri",
+    "apriIncontri": "Incontri",
+    "chiudiIncontri": "Chiudi",
+    "nessunaCoppia": "Nessuna coppia.",
+    "statoIncontro": "Stato dell'incontro",
+    "voto": "Voto",
+    "senzaVoto": "—",
+    "minuti": "{{count}} minuti",
+    "minuti_one": "{{count}} minuto",
+    "nessunIncontro": "Nessun incontro.",
+    "quando": "Quando",
+    "durata": "Durata (minuti)",
+    "fissa": "Fissa l'incontro",
+    "errore": "Operazione non riuscita. Riprova.",
+    "tipi": {
+      "GENERAL": "Generale",
+      "LEADERSHIP": "Leadership",
+      "TECHNICAL": "Tecnico",
+      "MANAGEMENT": "Gestione",
+      "DEI": "Diversità e inclusione"
+    },
+    "statiProgramma": {
+      "DRAFT": "Bozza",
+      "ACTIVE": "Attivo",
+      "INACTIVE": "Sospeso",
+      "ARCHIVED": "Archiviato"
+    },
+    "statiCoppia": {
+      "PENDING": "Da avviare",
+      "ACTIVE": "Attiva",
+      "ON_HOLD": "In pausa",
+      "COMPLETED": "Conclusa",
+      "CANCELLED": "Annullata"
+    },
+    "frequenze": {
+      "WEEKLY": "Settimanale",
+      "BI_WEEKLY": "Ogni due settimane",
+      "MONTHLY": "Mensile",
+      "QUARTERLY": "Trimestrale",
+      "AD_HOC": "Quando serve"
+    },
+    "statiIncontro": {
+      "SCHEDULED": "Fissato",
+      "COMPLETED": "Svolto",
+      "CANCELLED": "Annullato",
+      "NO_SHOW": "Assente",
+      "RESCHEDULED": "Spostato"
+    }
   }
 }

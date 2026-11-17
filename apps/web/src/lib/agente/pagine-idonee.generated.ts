@@ -63,6 +63,7 @@ export const PAGINE_IDONEE_AGENTE: readonly string[] = [
   "/me/surveys/[surveyId]",
   "/me/team",
   "/me/time-off",
+  "/mentorship",
   "/okrs",
   "/org-director",
   "/org-director/advisor",

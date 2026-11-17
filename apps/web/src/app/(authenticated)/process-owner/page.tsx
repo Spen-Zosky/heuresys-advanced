@@ -9,6 +9,7 @@ import type { OrgUnitProcessForProcess, OrgUnitProcessesForProcessResponse, OrgU
 import { apiFetch } from "@/lib/api/fetch";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
+import { AssegnaUnitaAlProcesso, TogliUnitaDalProcesso, usePermessiRaci } from "./assegna-unita";
 import { StatusPill } from "@/components/status-pill";
 
 // Gap#1 Porta 1 — Process-Owner console. Live blueprint-process catalog
@@ -85,7 +86,13 @@ export default function ProcessOwnerPage() {
   const raciRows = useMemo<OrgUnitProcessForProcess[]>(() => raci.data?.items ?? [], [raci.data]);
 
   const processColumns = useMemo(() => buildProcessColumns(t, setSelected, selected?.id ?? null), [t, selected]);
-  const raciColumns = useMemo(() => buildRaciColumns(t), [t]);
+  const permRaci = usePermessiRaci();
+  const raciColumns = useMemo(() => {
+    const base = buildRaciColumns(t);
+    if (!permRaci.togli || !selected) return base;
+    const pid = selected.id;
+    return [...base, { header: "", cell: (r: OrgUnitProcessForProcess) => <TogliUnitaDalProcesso id={r.orgUnitProcessId} processId={pid} /> }];
+  }, [t, permRaci.togli, selected]);
 
   return (
     <main data-testid="process-owner-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
@@ -118,6 +125,9 @@ export default function ProcessOwnerPage() {
             rows={raciRows} rowKey={(r) => r.orgUnitProcessId} rowTestId="raci-drill-row" columns={raciColumns}
             emptyTestId="raci-drill-empty" emptyTitle={t("processOwner.raci.empty")} caption={t("processOwner.raci.caption")}
           />
+        )}
+        {selected !== null && permRaci.crea && (
+          <AssegnaUnitaAlProcesso processId={selected.id} giaAssegnate={raciRows.map((r) => r.orgUnitId)} />
         )}
       </section>
     </main>

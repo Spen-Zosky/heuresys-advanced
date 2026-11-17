@@ -281,6 +281,16 @@
         "CONTRIBUTOR": "Responsible · R",
         "CONSULTED": "Consulted · C",
         "INFORMED": "Informed · I"
+      },
+      "assegna": {
+        "filtro": "Filter the units",
+        "unita": "Unit",
+        "scegli": "Choose among {{count}} units",
+        "invia": "Assign",
+        "giaPresente": "This unit already has a role in the process.",
+        "errore": "Assignment failed. Try again.",
+        "togli": "Remove",
+        "confermaTogli": "Remove this unit from the process?"
       }
     }
   },

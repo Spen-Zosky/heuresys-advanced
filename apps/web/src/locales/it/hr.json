@@ -281,6 +281,16 @@
         "CONTRIBUTOR": "Esecutore · R",
         "CONSULTED": "Consultato · C",
         "INFORMED": "Informato · I"
+      },
+      "assegna": {
+        "filtro": "Filtra le unità",
+        "unita": "Unità",
+        "scegli": "Scegli fra {{count}} unità",
+        "invia": "Assegna",
+        "giaPresente": "Questa unità ha già un ruolo nel processo.",
+        "errore": "Assegnazione non riuscita. Riprova.",
+        "togli": "Togli",
+        "confermaTogli": "Togliere questa unità dal processo?"
       }
     }
   },

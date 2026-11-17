@@ -23,6 +23,7 @@ import { useCan } from "@/lib/api/auth";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { useFormat } from "@/lib/format";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
+import { NomeCategoria } from "./categoria-rinomina";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -129,6 +130,7 @@ export default function ContentPage() {
   // `content:delete`. Chi legge soltanto non vede moduli e pulsanti che finirebbero in 403.
   const canCreate = useCan("content:create");
   const canDelete = useCan("content:delete");
+  const canUpdate = useCan("content:update");
   const createDoc = useMutation({
     mutationFn: (v: CreateDocValues) => {
       const body: Record<string, unknown> = { title: v.title, kind: v.kind, bodyFormat: v.bodyFormat };
@@ -509,7 +511,7 @@ export default function ContentPage() {
             <ul className="divide-y divide-border rounded-card border border-border">
               {(cats.data?.items ?? []).map((c) => (
                 <li key={c.categoryId} data-testid="content-category-row" className="flex items-center justify-between gap-3 px-4 py-2 text-sm">
-                  <span className="font-medium text-foreground">{c.name}</span>
+                  <NomeCategoria categoria={c} puoModificare={canUpdate} />
                   <span className="font-mono text-xs text-muted-foreground">{c.slug ?? "—"}</span>
                   {canDelete && <Button
                     type="button"

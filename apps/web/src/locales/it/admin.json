@@ -1070,7 +1070,11 @@
       "colName": "Nome",
       "colSlug": "Indirizzo breve",
       "colActions": "Azioni",
-      "delete": "Elimina"
+      "delete": "Elimina",
+      "modifica": "Modifica",
+      "salva": "Salva",
+      "annulla": "Annulla",
+      "erroreModifica": "Modifica non riuscita."
     },
     "detail": {
       "back": "← Contenuti",

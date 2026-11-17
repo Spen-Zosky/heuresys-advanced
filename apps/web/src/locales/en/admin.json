@@ -1070,7 +1070,11 @@
       "colName": "Name",
       "colSlug": "Slug",
       "colActions": "Actions",
-      "delete": "Delete"
+      "delete": "Delete",
+      "modifica": "Edit",
+      "salva": "Save",
+      "annulla": "Cancel",
+      "erroreModifica": "Edit failed."
     },
     "detail": {
       "back": "← Content",

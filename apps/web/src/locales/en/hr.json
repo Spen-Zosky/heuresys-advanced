@@ -743,7 +743,23 @@
       "end": "End",
       "seats": "Seats"
     },
-    "cohortNd": "N/A"
+    "cohortNd": "N/A",
+    "form": {
+      "nuova": "New training initiative",
+      "crea": "Create",
+      "chiudi": "Close",
+      "cercaCorso": "Search the course",
+      "corso": "Course",
+      "scegliCorso": "Choose the course",
+      "codice": "Edition code",
+      "modifica": "Edit: {{nome}}",
+      "modificaBreve": "Edit",
+      "salva": "Save",
+      "annulla": "Cancel",
+      "vietato": "You are not allowed to manage training initiatives.",
+      "duplicato": "An initiative with this code already exists.",
+      "errore": "Save failed. Try again."
+    }
   },
   "evidence": {
     "title": "Underlying evidence",

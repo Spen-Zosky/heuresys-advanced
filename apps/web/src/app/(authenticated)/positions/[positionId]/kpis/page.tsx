@@ -9,6 +9,7 @@ import { PageHeader } from "@/components/intestazione-pagina";
 import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable } from "@/components/data-table-panel";
 import { NomeOppure } from "@/components/senza-nome";
+import { NuovoIndicatoreRichiesto, PesoIndicatore, TogliRequisito } from "../_components/requisiti-modifica";
 
 interface PositionKpiReq {
   requirementId: string;
@@ -52,6 +53,8 @@ export default function PositionKpisPage() {
         }
       />
 
+      <NuovoIndicatoreRichiesto positionId={positionId} />
+
       <Card>
         <CardHeader><CardTitle>{t("positions.kpis.cardTitle")}</CardTitle></CardHeader>
         <CardContent className="p-0">
@@ -66,10 +69,13 @@ export default function PositionKpisPage() {
             emptyTitle={t("positions.kpis.empty")}
             caption={t("positions.kpis.caption")}
             columns={[
-              { header: t("positions.kpis.columns.code"), cell: (k) => <span className="font-mono text-xs">{k.kpiCode ?? "—"}</span> },
               { header: t("positions.kpis.columns.kpi"), cell: (k) => <NomeOppure nome={k.kpiName} id={k.kpiDefinitionId} /> },
-              { header: t("positions.kpis.columns.weight"), cell: (k) => <span className="text-xs">{k.weight}</span> },
+              { header: t("positions.kpis.columns.code"), cell: (k) => <span className="font-mono text-xs">{k.kpiCode ?? "—"}</span> },
+              { header: t("positions.kpis.columns.weight"), cell: (k) => <PesoIndicatore key={`${k.kpiDefinitionId}-${k.weight}`} positionId={positionId} kpiId={k.kpiDefinitionId} peso={k.weight} /> },
               { header: t("positions.kpis.columns.template"), cell: (k) => <span className="font-mono text-xs">{JSON.stringify(k.targetTemplate)}</span> },
+              { header: "", cell: (k) => (
+                <TogliRequisito percorso={`/v1/positions/${positionId}/kpis/${k.kpiDefinitionId}`} chiave={["positions", positionId, "kpis"]} testId="position-kpi-remove" />
+              ) },
             ]}
           />
         </CardContent>

@@ -572,18 +572,18 @@
       }
     },
     "kpis": {
-      "title": "KPI richiesti",
+      "title": "Indicatori richiesti",
       "back": "← Posizione",
-      "count": "{{count}} KPI associati",
-      "count_one": "{{count}} KPI associato",
+      "count": "{{count}} indicatori associati",
+      "count_one": "{{count}} indicatore associato",
       "cardTitle": "Requisiti",
-      "empty": "Nessun KPI richiesto dichiarato.",
-      "caption": "KPI richiesti dalla posizione",
+      "empty": "Nessun indicatore richiesto dichiarato.",
+      "caption": "Indicatori richiesti dalla posizione",
       "columns": {
         "code": "Codice",
-        "kpi": "KPI",
+        "kpi": "Indicatore",
         "weight": "Peso",
-        "template": "Template"
+        "template": "Obiettivo di riferimento"
       }
     },
     "learning": {
@@ -631,17 +631,17 @@
       }
     },
     "skills": {
-      "title": "Skill richieste",
+      "title": "Competenze richieste",
       "back": "← Posizione",
-      "count": "{{count}} skill associate",
-      "count_one": "{{count}} skill associata",
+      "count": "{{count}} competenze associate",
+      "count_one": "{{count}} competenza associata",
       "cardTitle": "Requisiti",
-      "empty": "Nessuna skill richiesta dichiarata.",
-      "caption": "Skill richieste dalla posizione",
+      "empty": "Nessuna competenza richiesta dichiarata.",
+      "caption": "Competenze richieste dalla posizione",
       "columns": {
         "code": "Codice",
-        "skill": "Skill",
-        "proficiency": "Proficiency",
+        "skill": "Competenza",
+        "proficiency": "Livello richiesto",
         "weight": "Peso"
       }
     },
@@ -661,6 +661,21 @@
       "INACTIVE": "Non attive",
       "tenant": "Tenant",
       "allTenants": "Tutti"
+    },
+    "requisiti": {
+      "nuovaCompetenza": "Aggiungi una competenza richiesta",
+      "nuovoIndicatore": "Aggiungi un indicatore richiesto",
+      "aggiungi": "Aggiungi",
+      "chiudi": "Chiudi",
+      "cerca": "Cerca nel catalogo",
+      "voce": "Voce del catalogo",
+      "scegli": "Scegli una voce",
+      "salva": "Salva",
+      "togli": "Togli",
+      "confermaTogli": "Togliere questo requisito dalla posizione?",
+      "vietato": "Non hai il permesso di modificare la posizione.",
+      "giaPresente": "Questa voce è già un requisito della posizione.",
+      "errore": "Salvataggio non riuscito. Riprova."
     }
   },
   "roles": {

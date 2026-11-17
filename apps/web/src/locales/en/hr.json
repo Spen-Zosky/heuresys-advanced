@@ -1037,6 +1037,24 @@
       "MEMBER": "Member",
       "CONTRIBUTOR": "Contributor",
       "OBSERVER": "Observer"
+    },
+    "gestione": {
+      "nuovo": "New project",
+      "crea": "Create",
+      "chiudi": "Close",
+      "nome": "Name",
+      "codice": "Code",
+      "titolo": "Project management",
+      "salva": "Save",
+      "avanzamento": "Progress (%)",
+      "aggiungiPersone": "Add people to the project",
+      "ruolo": "Role in the project",
+      "aggiungi": "Add",
+      "togli": "Remove",
+      "confermaTogli": "Remove this person from the project?",
+      "vietato": "You are not allowed to manage projects.",
+      "duplicato": "A project with this code already exists.",
+      "errore": "Save failed. Try again."
     }
   },
   "recruiting": {

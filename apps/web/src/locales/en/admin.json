@@ -661,6 +661,21 @@
       "INACTIVE": "Inactive",
       "tenant": "Tenant",
       "allTenants": "All"
+    },
+    "requisiti": {
+      "nuovaCompetenza": "Add a required skill",
+      "nuovoIndicatore": "Add a required KPI",
+      "aggiungi": "Add",
+      "chiudi": "Close",
+      "cerca": "Search the catalogue",
+      "voce": "Catalogue item",
+      "scegli": "Choose an item",
+      "salva": "Save",
+      "togli": "Remove",
+      "confermaTogli": "Remove this requirement from the position?",
+      "vietato": "You are not allowed to change the position.",
+      "giaPresente": "This item is already a requirement of the position.",
+      "errore": "Save failed. Try again."
     }
   },
   "roles": {

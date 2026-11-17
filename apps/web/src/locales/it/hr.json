@@ -1037,6 +1037,24 @@
       "MEMBER": "Membro",
       "CONTRIBUTOR": "Collaboratore",
       "OBSERVER": "Osservatore"
+    },
+    "gestione": {
+      "nuovo": "Nuovo progetto",
+      "crea": "Crea",
+      "chiudi": "Chiudi",
+      "nome": "Nome",
+      "codice": "Codice",
+      "titolo": "Gestione del progetto",
+      "salva": "Salva",
+      "avanzamento": "Avanzamento (%)",
+      "aggiungiPersone": "Aggiungi persone al progetto",
+      "ruolo": "Ruolo nel progetto",
+      "aggiungi": "Aggiungi",
+      "togli": "Togli",
+      "confermaTogli": "Togliere questa persona dal progetto?",
+      "vietato": "Non hai il permesso di gestire i progetti.",
+      "duplicato": "Esiste già un progetto con questo codice.",
+      "errore": "Salvataggio non riuscito. Riprova."
     }
   },
   "recruiting": {

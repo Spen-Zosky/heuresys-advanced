@@ -34,6 +34,7 @@ import { useFormat } from "@/lib/format";
 import { StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { DecisioneDialog } from "./decisione-dialog";
 import { RegistroCorse } from "./registro-corse";
+import { VocabolarioComune } from "./vocabolario-comune";
 import { DecisioniInBlocco } from "./decisioni-in-blocco";
 import { OrganigrammaCliente } from "./organigramma-cliente";
 import { LavoroInCorso } from "@/components/lavoro-in-corso";
@@ -290,6 +291,8 @@ export default function ConsolidationPage() {
           onErrore={setErrore}
         />
       ) : null}
+
+      {access.data ? <VocabolarioComune onErrore={setErrore} /> : null}
 
       {access.data ? <OrganigrammaCliente /> : null}
 

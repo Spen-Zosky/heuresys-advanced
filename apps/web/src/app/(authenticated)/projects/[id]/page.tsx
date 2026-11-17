@@ -68,7 +68,7 @@ export default function ProjectDetailPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t("projects.overview")}</CardTitle>
+          <CardTitle as="h2">{t("projects.overview")}</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-3 sm:grid-cols-2">
           <div data-testid="field-status">
@@ -92,7 +92,7 @@ export default function ProjectDetailPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t("projects.membersTitle", { count: correnti.length })}</CardTitle>
+          <CardTitle as="h2">{t("projects.membersTitle", { count: correnti.length })}</CardTitle>
         </CardHeader>
         <CardContent>
           <ul className="divide-y" data-testid="project-members-list">

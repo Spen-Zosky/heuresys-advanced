@@ -134,7 +134,7 @@ export default function SkillGapPage() {
         <div className="mx-auto max-w-7xl px-6">
           <Card data-testid="skillgap-explain">
             <CardHeader>
-              <CardTitle>{t("insightsSkillGap.explainTitle", { name: selected.displayName ?? t("common:unnamed"), position: positionLabel(selected, t("common:unnamed")) })}</CardTitle>
+              <CardTitle as="h2">{t("insightsSkillGap.explainTitle", { name: selected.displayName ?? t("common:unnamed"), position: positionLabel(selected, t("common:unnamed")) })}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {/* #219 F2/B — QUI LA PAGINA SI ROMPEVA, e non per un test.

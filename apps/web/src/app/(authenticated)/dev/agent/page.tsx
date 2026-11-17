@@ -52,7 +52,7 @@ function DisabledNotice() {
       <PageHeader title={t("agentDev.title")} description={t("agentDev.description")} />
       <Card data-testid="agentdev-disabled">
         <CardHeader>
-          <CardTitle>{t("agentDev.disabledTitle")}</CardTitle>
+          <CardTitle as="h2">{t("agentDev.disabledTitle")}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">{t("agentDev.disabledDesc")}</p>

@@ -102,7 +102,7 @@ export default function PositionDetailPage() {
       </nav>
 
       <Card>
-        <CardHeader><CardTitle>{t("positions.detail.cardTitle")}</CardTitle></CardHeader>
+        <CardHeader><CardTitle as="h2">{t("positions.detail.cardTitle")}</CardTitle></CardHeader>
         <CardContent>
           <FieldGrid
             testId="position-fields"

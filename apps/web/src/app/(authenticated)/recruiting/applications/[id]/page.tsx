@@ -184,7 +184,7 @@ export default function ApplicationDetailPage() {
       )}
 
       <Card>
-        <CardHeader><CardTitle>{t("recruiting.application.stageTitle")}</CardTitle></CardHeader>
+        <CardHeader><CardTitle as="h2">{t("recruiting.application.stageTitle")}</CardTitle></CardHeader>
         <CardContent className="grid gap-3 sm:grid-cols-3">
           <div data-testid="field-stage">
             <p className="text-xs text-muted-foreground">{t("recruiting.fields.stage")}</p>
@@ -215,7 +215,7 @@ export default function ApplicationDetailPage() {
       </Card>
 
       <Card>
-        <CardHeader><CardTitle>{t("recruiting.application.interviewsTitle")}</CardTitle></CardHeader>
+        <CardHeader><CardTitle as="h2">{t("recruiting.application.interviewsTitle")}</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           {canInterview && (<div className="grid gap-3 md:grid-cols-5" data-testid="interview-form">
             <select data-testid="interview-kind" className={SELECT_CLASS} value={iv.kind} onChange={(e) => setIv({ ...iv, kind: e.target.value })}>
@@ -259,7 +259,7 @@ export default function ApplicationDetailPage() {
       </Card>
 
       <Card>
-        <CardHeader><CardTitle>{t("recruiting.application.offerTitle")}</CardTitle></CardHeader>
+        <CardHeader><CardTitle as="h2">{t("recruiting.application.offerTitle")}</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           {canOffer && (<div className="grid gap-3 md:grid-cols-4" data-testid="offer-form">
             <Input type="number" min={1} step={100} data-testid="offer-salary" placeholder={t("recruiting.fields.grossAnnualSalary")} value={of.grossAnnualSalary} onChange={(e) => setOf({ ...of, grossAnnualSalary: e.target.value })} />

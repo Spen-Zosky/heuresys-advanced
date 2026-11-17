@@ -269,7 +269,7 @@ export default function VisualizationDetailPage() {
           {mermaidSource ? (
             <Card data-testid="visualization-renderer-card">
               <CardHeader>
-                <CardTitle>{t("visualizations.detail.diagramTitle")}</CardTitle>
+                <CardTitle as="h2">{t("visualizations.detail.diagramTitle")}</CardTitle>
               </CardHeader>
               <CardContent data-testid="visualization-renderer">
                 {/* Piano PIANO_organigrammi-navigazione_20261115.md (N6): la stessa navigazione degli
@@ -290,7 +290,7 @@ export default function VisualizationDetailPage() {
           <section className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <Card data-testid="visualization-nodes-card">
               <CardHeader>
-                <CardTitle>{t("visualizations.detail.nodesTitle", { count: nodes.data?.total ?? t("visualizations.detail.dash") })}</CardTitle>
+                <CardTitle as="h2">{t("visualizations.detail.nodesTitle", { count: nodes.data?.total ?? t("visualizations.detail.dash") })}</CardTitle>
               </CardHeader>
               <CardContent className="p-0">
                 {nodes.isLoading ? (
@@ -312,7 +312,7 @@ export default function VisualizationDetailPage() {
 
             <Card data-testid="visualization-edges-card">
               <CardHeader>
-                <CardTitle>{t("visualizations.detail.edgesTitle", { count: edges.data?.total ?? t("visualizations.detail.dash") })}</CardTitle>
+                <CardTitle as="h2">{t("visualizations.detail.edgesTitle", { count: edges.data?.total ?? t("visualizations.detail.dash") })}</CardTitle>
               </CardHeader>
               <CardContent className="p-0">
                 {edges.isLoading ? (
@@ -342,7 +342,7 @@ export default function VisualizationDetailPage() {
           <section className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <Card data-testid="visualization-versions-card">
               <CardHeader>
-                <CardTitle>{t("visualizations.detail.versionsTitle")}</CardTitle>
+                <CardTitle as="h2">{t("visualizations.detail.versionsTitle")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {versions.isLoading ? (
@@ -384,7 +384,7 @@ export default function VisualizationDetailPage() {
 
             <Card data-testid="visualization-export-card">
               <CardHeader>
-                <CardTitle>{t("visualizations.detail.exportTitle")}</CardTitle>
+                <CardTitle as="h2">{t("visualizations.detail.exportTitle")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <label htmlFor="viz-format" className="block text-sm text-muted-foreground">

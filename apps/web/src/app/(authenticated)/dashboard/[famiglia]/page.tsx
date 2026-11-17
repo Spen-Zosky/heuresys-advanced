@@ -54,7 +54,7 @@ function Vista({ v, t, famiglia }: { v: DashboardBlockData; t: (k: string) => st
     return (
       <Card data-testid={`vista-${v.code}`} data-access={v.access}>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle as="h2" className="flex items-center gap-2">
             {negata ? <Lock className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
             {v.name}
           </CardTitle>
@@ -86,7 +86,7 @@ function Vista({ v, t, famiglia }: { v: DashboardBlockData; t: (k: string) => st
     return (
       <Card data-testid={`vista-${v.code}`} data-access={v.access}>
         <CardHeader>
-          <CardTitle>{v.name}</CardTitle>
+          <CardTitle as="h2">{v.name}</CardTitle>
         </CardHeader>
         <CardContent>
           {v.content.counters.length === 0 ? (
@@ -108,7 +108,7 @@ function Vista({ v, t, famiglia }: { v: DashboardBlockData; t: (k: string) => st
     return (
       <Card data-testid={`vista-${v.code}`} data-access={v.access}>
         <CardHeader>
-          <CardTitle>{v.name}</CardTitle>
+          <CardTitle as="h2">{v.name}</CardTitle>
         </CardHeader>
         <CardContent>
           {punti.length === 0 ? (
@@ -131,7 +131,7 @@ function Vista({ v, t, famiglia }: { v: DashboardBlockData; t: (k: string) => st
   return (
     <Card data-testid={`vista-${v.code}`} data-access={v.access}>
       <CardHeader>
-        <CardTitle>{v.name}</CardTitle>
+        <CardTitle as="h2">{v.name}</CardTitle>
       </CardHeader>
       <CardContent>
         {righe.length === 0 ? (

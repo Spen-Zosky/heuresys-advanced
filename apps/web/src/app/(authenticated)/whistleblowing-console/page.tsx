@@ -199,7 +199,7 @@ export default function WhistleblowingConsolePage() {
       {selectedId && (
         <Card data-testid="wb-console-detail">
           <CardHeader>
-            <CardTitle>
+            <CardTitle as="h2">
               {detail.data ? (
                 <span className="flex flex-wrap items-center gap-2">
                   <span className="font-mono text-sm">{detail.data.trackingCode}</span>

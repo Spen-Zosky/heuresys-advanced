@@ -184,7 +184,7 @@ export function RolesEditor({ userId }: { userId: string }) {
   return (
     <Card data-testid="user-roles-editor">
       <CardHeader>
-        <CardTitle>
+        <CardTitle as="h2">
           {t("users.detail.roles.cardTitle")}
           <span className="ml-2 text-sm font-normal text-muted-foreground">{items.length}</span>
         </CardTitle>

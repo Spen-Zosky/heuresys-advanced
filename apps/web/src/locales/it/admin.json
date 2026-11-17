@@ -1950,6 +1950,7 @@
     "annullamenti": {
       "GIORNALE_UNDO": "giornale di annullamento",
       "RIGA_SOSTITUTIVA": "riga sostitutiva"
-    }
+    },
+    "identita": "{{codice}} · v{{versione}} · {{agente}}"
   }
 }

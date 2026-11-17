@@ -15,7 +15,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
-import type { GdprDataMapResponse, GdprErasureReport, GdprRequestListResponse, GdprRetentionReport, User } from "@heuresys/shared";
+import type { GdprDataMapResponse, GdprErasureReport, GdprRequest, GdprRetentionReport, User } from "@heuresys/shared";
+
+interface GdprRequestListResponse { items: GdprRequest[]; total: number }
 import { PageHeader } from "@/components/intestazione-pagina";
 import { apiFetch } from "@/lib/api/fetch";
 import { useCurrentUserPermissions } from "@/lib/api/auth";

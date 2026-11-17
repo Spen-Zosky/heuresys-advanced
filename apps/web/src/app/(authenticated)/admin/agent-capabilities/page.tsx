@@ -15,7 +15,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
-import type { AgentCapability, AgentCapabilityListResponse } from "@heuresys/shared";
+import type { AgentCapability } from "@heuresys/shared";
+
+interface AgentCapabilityListResponse { items: AgentCapability[] }
 import { PageHeader } from "@/components/intestazione-pagina";
 import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
@@ -56,7 +58,7 @@ function Capacita({ c }: { c: AgentCapability }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <span>
           <span className="font-medium">{c.description}</span>
-          <span className="block font-mono text-xs text-muted-foreground">{c.code} · v{c.version} · {c.agentCode}</span>
+          <span className="block font-mono text-xs text-muted-foreground">{t("agentCaps.identita", { codice: c.code, versione: c.version, agente: c.agentCode })}</span>
         </span>
         <span className="flex flex-wrap items-center gap-2">
           <Badge variant={(c.activation?.mode ?? "CONFERMA") === "LIBERA" ? "warning" : "secondary"} data-testid="agent-capability-mode">

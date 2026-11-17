@@ -48,7 +48,7 @@ Prova: `apps/web/tests/e2e/ondata3-schede-esistenti.spec.ts`. I gesti che non si
 
 ## Ondata 3b — pagine nuove (PR a sé)
 
-Mentoring (`/mentorship`), riscontri e piani d'azione sul clima (nella pagina esistente `/engagement`), valutazioni delle competenze (`/learning/assessments`), GDPR dell'amministrazione (`/admin/gdpr`), capacità dell'agente (`/admin/agent-capabilities`). Ognuna chiede la sua voce di menu con una migrazione (modello `000385`, barra di `000484`) e il passaggio dei cancelli delle pagine raggiungibili.
+Mentoring (`/mentorship`), riscontri e piani d'azione sul clima (nella pagina esistente `/engagement`), valutazioni delle competenze (`/learning/assessments`), GDPR dell'amministrazione (`/admin/gdpr`), capacità dell'agente (`/admin/agent-capabilities`). Nessuna migrazione di menu: ogni pagina entra come scheda di un gruppo di `section-tabs.tsx` (seconda porta ammessa da `check_pagine_raggiungibili.py`), e la scheda compare solo con il permesso di lettura del suo modulo (`PERMESSI_SCHEDE`). `/mentorship` nella Carriera, `/assessments` accanto a `/performance`, `/admin/gdpr` accanto a `/provenance`, `/admin/agent-capabilities` accanto a `/admin/roles`; riscontri e piani d'azione nella pagina `/engagement`. Prova: `apps/web/tests/e2e/ondata3-pagine-nuove.spec.ts`.
 
 ## Fuori da questa sessione
 

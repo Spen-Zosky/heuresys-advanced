@@ -2039,8 +2039,8 @@
   },
   "seed-acquisition-runs": {
    "base": "/seed-acquisition-runs",
-   "data": "2026-11-18",
-   "decisione": "Enzo, 2026-11-17: approvate le cinque ondate degli endpoint senza consumatori (PR #280, piano docs/piani/PIANO_endpoint-orfani-ondate_20261117.md), criterio (b): all'agente, con le scritture approvate dalla persona. Ondata 4. Si aprono SOLO le scritture elencate in `scritture` (classe C nel catalogo generico: ogni chiamata chiede l'approvazione della persona); nessuna cancellazione. La ricerca di dati di partenza e' un'attivita' dell'agente (research-propose); la decisione sui candidati resta umana.",
+   "data": "2026-11-05",
+   "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
     "get": {
      "method": "GET",
@@ -2056,19 +2056,9 @@
      "method": "GET",
      "path": "/:id/candidates",
      "permission": "seed_acquisition:read"
-    },
-    "patch_by_id": {
-     "method": "PATCH",
-     "path": "/:id",
-     "permission": "seed_acquisition:trigger"
-    },
-    "post": {
-     "method": "POST",
-     "path": "/",
-     "permission": "seed_acquisition:trigger"
     }
    },
-   "solaLettura": false
+   "solaLettura": true
   },
   "seed-approval-decisions": {
    "base": "/seed-approval-decisions",
@@ -2480,8 +2470,8 @@
   },
   "tenant-import-runs": {
    "base": "/tenant-import-runs",
-   "data": "2026-11-18",
-   "decisione": "Enzo, 2026-11-17: approvate le cinque ondate degli endpoint senza consumatori (PR #280, piano docs/piani/PIANO_endpoint-orfani-ondate_20261117.md), criterio (b): all'agente, con le scritture approvate dalla persona. Ondata 4. Si aprono SOLO le scritture elencate in `scritture` (classe C nel catalogo generico: ogni chiamata chiede l'approvazione della persona); nessuna cancellazione. L'importazione guidata del Tenant Builder: l'agente prepara le fonti e la corsa, la persona conferma la consegna.",
+   "data": "2026-11-05",
+   "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
     "get": {
      "method": "GET",
@@ -2492,24 +2482,9 @@
      "method": "GET",
      "path": "/:id",
      "permission": "seed_acquisition:read"
-    },
-    "post": {
-     "method": "POST",
-     "path": "/",
-     "permission": "seed_acquisition:trigger"
-    },
-    "post_by_id_submit": {
-     "method": "POST",
-     "path": "/:id/submit",
-     "permission": "seed_acquisition:trigger"
-    },
-    "post_sources": {
-     "method": "POST",
-     "path": "/sources",
-     "permission": "seed_acquisition:trigger"
     }
    },
-   "solaLettura": false
+   "solaLettura": true
   },
   "tenant-materialization": {
    "base": "/tenant-materialization",

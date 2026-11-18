@@ -130,27 +130,6 @@
       "decisione": "Enzo, 2026-11-17: approvate le cinque ondate degli endpoint senza consumatori (PR #280, piano docs/piani/PIANO_endpoint-orfani-ondate_20261117.md), criterio (b): all'agente, con le scritture approvate dalla persona. Ondata 4. Si aprono SOLO le scritture elencate in `scritture` (classe C nel catalogo generico: ogni chiamata chiede l'approvazione della persona); nessuna cancellazione. Le posizioni obiettivo come i piani di carriera; /me/career/target resta la vista in lettura."
     },
     {
-      "concetto": "seed-acquisition-runs",
-      "sola_lettura": false,
-      "scritture": [
-        "post",
-        "patch_by_id"
-      ],
-      "data": "2026-11-18",
-      "decisione": "Enzo, 2026-11-17: approvate le cinque ondate degli endpoint senza consumatori (PR #280, piano docs/piani/PIANO_endpoint-orfani-ondate_20261117.md), criterio (b): all'agente, con le scritture approvate dalla persona. Ondata 4. Si aprono SOLO le scritture elencate in `scritture` (classe C nel catalogo generico: ogni chiamata chiede l'approvazione della persona); nessuna cancellazione. La ricerca di dati di partenza e' un'attivita' dell'agente (research-propose); la decisione sui candidati resta umana."
-    },
-    {
-      "concetto": "tenant-import-runs",
-      "sola_lettura": false,
-      "scritture": [
-        "post_sources",
-        "post",
-        "post_by_id_submit"
-      ],
-      "data": "2026-11-18",
-      "decisione": "Enzo, 2026-11-17: approvate le cinque ondate degli endpoint senza consumatori (PR #280, piano docs/piani/PIANO_endpoint-orfani-ondate_20261117.md), criterio (b): all'agente, con le scritture approvate dalla persona. Ondata 4. Si aprono SOLO le scritture elencate in `scritture` (classe C nel catalogo generico: ogni chiamata chiede l'approvazione della persona); nessuna cancellazione. L'importazione guidata del Tenant Builder: l'agente prepara le fonti e la corsa, la persona conferma la consegna."
-    },
-    {
       "concetto": "mentorship",
       "sola_lettura": false,
       "scritture": [

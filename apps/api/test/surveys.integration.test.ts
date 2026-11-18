@@ -88,35 +88,28 @@ describe("surveys API", () => {
     expect(total).toBe(862);
   });
 
-  it("POST /templates without CSRF token -> rejected; with token -> 201", async () => {
-    const payload = { name: "IT_SURV_TestTemplate", category: "engagement", questions: [{ id: "q1", text: "Test?", type: "rating" }] };
-    const noCsrf = await suite.app.inject({ method: "POST", url: "/v1/surveys/templates",
-      headers: { cookie: ch(tenantAdmin.cookies), "content-type": "application/json" }, payload });
-    expect(noCsrf.statusCode).toBeGreaterThanOrEqual(400);
-    const ok = await suite.app.inject({ method: "POST", url: "/v1/surveys/templates",
-      headers: { cookie: ch(tenantAdmin.cookies), "x-csrf-token": tenantAdmin.csrfToken, "content-type": "application/json" }, payload });
-    expect(ok.statusCode).toBe(201);
-    const created = ok.json() as { templateId: string; name: string; category: string };
-    createdTemplateIds.push(created.templateId);
-    expect(created.name).toBe("IT_SURV_TestTemplate");
-    expect(created.category).toBe("engagement");
-  });
-
-  it("full CRUD round-trip on a survey (create -> get -> patch -> delete)", async () => {
+  // Ondata 5 (2026-11-18): resta un solo modello di sondaggio, quello di /engagement (000497).
+  // Le scritture di /v1/surveys sono RITIRATE (lib/rotte-ritirate.ts): 410, e nessuna riga cambia.
+  it("le scritture del modello vecchio rispondono 410 e non toccano le righe", async () => {
     const hdrW = { cookie: ch(tenantAdmin.cookies), "x-csrf-token": tenantAdmin.csrfToken, "content-type": "application/json" };
-    const c = await suite.app.inject({ method: "POST", url: "/v1/surveys", headers: hdrW, payload: { title: "IT_SURV_Crud", status: "draft", audienceType: "all" } });
-    expect(c.statusCode).toBe(201);
-    const id = (c.json() as { surveyId: string }).surveyId;
-    const g = await suite.app.inject({ method: "GET", url: `/v1/surveys/${id}`, headers: { cookie: ch(tenantAdmin.cookies) } });
-    expect(g.statusCode).toBe(200);
-    const patch = await suite.app.inject({ method: "PATCH", url: `/v1/surveys/${id}`, headers: hdrW, payload: { status: "active" } });
-    expect(patch.statusCode).toBe(200);
-    expect((patch.json() as { status: string }).status).toBe("active");
-    // Ondata 5 (2026-11-18): la cancellazione è RITIRATA (lib/rotte-ritirate.ts): 410, e la riga resta.
-    const del = await suite.app.inject({ method: "DELETE", url: `/v1/surveys/${id}`, headers: { cookie: ch(tenantAdmin.cookies), "x-csrf-token": tenantAdmin.csrfToken } });
+    const s = await pool.query<{ id: string; status: string }>("SELECT survey_id AS id, survey_status AS status FROM sys.sys_engagement_surveys ORDER BY survey_id LIMIT 1");
+    expect(s.rows.length, "nessun sondaggio del modello vecchio").toBe(1);
+    const t = await pool.query<{ n: string }>("SELECT count(*)::text AS n FROM sys.sys_engagement_survey_templates");
+    const prove = [
+      { method: "POST" as const, url: "/v1/surveys/templates", payload: { name: "IT_SURV_TestTemplate", category: "engagement", questions: [{ id: "q1", text: "Test?", type: "rating" }] } },
+      { method: "POST" as const, url: "/v1/surveys", payload: { title: "IT_SURV_Crud", status: "draft", audienceType: "all" } },
+      { method: "PATCH" as const, url: `/v1/surveys/${s.rows[0]!.id}`, payload: { status: "draft" } },
+    ];
+    for (const p of prove) {
+      const r = await suite.app.inject({ ...p, headers: hdrW });
+      expect(r.statusCode, `${p.method} ${p.url}`).toBe(410);
+    }
+    const del = await suite.app.inject({ method: "DELETE", url: `/v1/surveys/${s.rows[0]!.id}`, headers: { cookie: ch(tenantAdmin.cookies), "x-csrf-token": tenantAdmin.csrfToken } });
     expect(del.statusCode).toBe(410);
-    const gone = await suite.app.inject({ method: "GET", url: `/v1/surveys/${id}`, headers: { cookie: ch(tenantAdmin.cookies) } });
-    expect(gone.statusCode).toBe(200);
+    const dopo = await pool.query<{ status: string }>("SELECT survey_status AS status FROM sys.sys_engagement_surveys WHERE survey_id = $1", [s.rows[0]!.id]);
+    expect(dopo.rows[0]!.status).toBe(s.rows[0]!.status);
+    const t2 = await pool.query<{ n: string }>("SELECT count(*)::text AS n FROM sys.sys_engagement_survey_templates");
+    expect(t2.rows[0]!.n).toBe(t.rows[0]!.n);
   });
 
   it("USER cannot create (no surveys:create) -> 403", async () => {

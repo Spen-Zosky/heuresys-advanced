@@ -92,7 +92,10 @@ describe("/v1/organization-unit-history integration", () => {
     for (const n of nate) expect(n.oldValue).toEqual({ exists: false });
   });
 
-  it("CREATE / GET: si registra un evento e lo si rilegge", async () => {
+  // Ondata 5 (2026-11-18): la storia la scrive il sistema, non una persona con valori inventati.
+  // La registrazione a mano è RITIRATA (lib/rotte-ritirate.ts): 410, e il registro non cambia.
+  it("registrare a mano un evento risponde 410, e il registro non cambia", async () => {
+    const prima = await pool.query<{ n: string }>("SELECT count(*)::text AS n FROM sys.sys_organization_unit_history WHERE organization_unit_history_unit_id = $1", [unitId]);
     const c = await suite.app.inject({
       method: "POST", url: "/v1/organization-unit-history",
       headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken, "content-type": "application/json" },
@@ -103,42 +106,13 @@ describe("/v1/organization-unit-history integration", () => {
         notes: "Evento di prova dell'integrazione.",
       },
     });
-    expect(c.statusCode).toBe(201);
-    const h = c.json() as { organizationUnitHistoryId: string; actorUserId: string | null };
-    created.push(h.organizationUnitHistoryId);
-    // l'autore è chi ha registrato l'evento
-    expect(h.actorUserId).toBe(tenantS.userId);
-
-    const got = await suite.app.inject({
-      method: "GET", url: `/v1/organization-unit-history/${h.organizationUnitHistoryId}`,
-      headers: { cookie: ch(tenantS.cookies) },
-    });
-    expect(got.statusCode).toBe(200);
+    expect(c.statusCode).toBe(410);
+    expect((c.json() as { error: { code: string } }).error.code).toBe("ROUTE_RETIRED");
+    const dopo = await pool.query<{ n: string }>("SELECT count(*)::text AS n FROM sys.sys_organization_unit_history WHERE organization_unit_history_unit_id = $1", [unitId]);
+    expect(dopo.rows[0]!.n).toBe(prima.rows[0]!.n);
   });
 
-  it("Un cambiamento che non cambia nulla è respinto → 400 EMPTY_CHANGE", async () => {
-    const r = await suite.app.inject({
-      method: "POST", url: "/v1/organization-unit-history",
-      headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken, "content-type": "application/json" },
-      payload: {
-        unitId, changeType: "RENAMED",
-        oldValue: { name: "Identico" }, newValue: { name: "Identico" },
-      },
-    });
-    expect(r.statusCode).toBe(400);
-    const err = (r.json() as { error: { code: string; details?: { reason?: string } } }).error;
-    expect(err.code).toBe("VALIDATION_ERROR");
-    expect(err.details?.reason).toBe("EMPTY_CHANGE");
-  });
-
-  it("Unità inesistente → 404; tipo di evento fuori vocabolario → 400", async () => {
-    const r1 = await suite.app.inject({
-      method: "POST", url: "/v1/organization-unit-history",
-      headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken, "content-type": "application/json" },
-      payload: { unitId: randomUUID(), changeType: "MOVED", oldValue: { a: 1 }, newValue: { a: 2 } },
-    });
-    expect(r1.statusCode).toBe(404);
-
+  it("lo schema resta: un tipo di evento fuori vocabolario è ancora 400", async () => {
     const r2 = await suite.app.inject({
       method: "POST", url: "/v1/organization-unit-history",
       headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken, "content-type": "application/json" },

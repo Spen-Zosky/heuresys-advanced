@@ -6,7 +6,7 @@
  * controllo CSRF: chi non poteva chiamarla riceve ancora 401/403. A chi poteva risponde 410 con il
  * motivo e, dove c'è, l'alternativa. Nessuna riga si tocca: si spegne solo il gesto.
  *
- * Le ragioni sono due:
+ * Le ragioni, per gruppo (più i ritiri del registro delle scoperte: team, storia delle unità, sondaggi):
  *  - una CANCELLAZIONE di un dato che ha una storia: si disattiva con lo stato o la validità
  *    (PATCH o PUT della stessa risorsa), non si toglie la riga;
  *  - la CANCELLAZIONE DI UNA PERSONA: si fa con la procedura GDPR, che lascia il registro.
@@ -31,6 +31,23 @@ export interface RottaRitirata {
 
 const DISATTIVA = "Una cancellazione non toglie più la riga: la risorsa si disattiva con lo stato o la validità.";
 
+const SONDAGGIO = "Resta un solo modello di sondaggio, quello della pagina «Clima e coinvolgimento» (000497): il modello vecchio non si scrive più.";
+const SONDAGGI: RottaRitirata[] = [
+  { metodo: "POST", percorso: "/v1/surveys/templates", motivo: SONDAGGIO, alternativa: "GET /v1/engagement/templates" },
+  { metodo: "PATCH", percorso: "/v1/surveys/templates/:id", motivo: SONDAGGIO, alternativa: "GET /v1/engagement/templates" },
+  { metodo: "DELETE", percorso: "/v1/surveys/templates/:id", motivo: SONDAGGIO, alternativa: "GET /v1/engagement/templates" },
+  { metodo: "POST", percorso: "/v1/surveys", motivo: SONDAGGIO, alternativa: "GET /v1/engagement/surveys" },
+  { metodo: "PATCH", percorso: "/v1/surveys/:id", motivo: SONDAGGIO, alternativa: "GET /v1/engagement/surveys" },
+  { metodo: "DELETE", percorso: "/v1/surveys/:id", motivo: SONDAGGIO, alternativa: "GET /v1/engagement/surveys" },
+];
+const SQUADRA = "Una squadra è un progetto (000363): i team non si scrivono più.";
+const SQUADRE: RottaRitirata[] = [
+  { metodo: "POST", percorso: "/v1/teams", motivo: SQUADRA, alternativa: "POST /v1/projects" },
+  { metodo: "PATCH", percorso: "/v1/teams/:id", motivo: SQUADRA, alternativa: "PATCH /v1/projects/:id" },
+  { metodo: "PUT", percorso: "/v1/teams/:id/members/:userId", motivo: SQUADRA, alternativa: "PUT /v1/projects/:id/members/:userId" },
+  { metodo: "DELETE", percorso: "/v1/teams/:id/members/:userId", motivo: SQUADRA, alternativa: "DELETE /v1/projects/:id/members/:userId" },
+];
+
 const d = (percorso: string, alternativa: string | null): RottaRitirata => ({ metodo: "DELETE", percorso, motivo: DISATTIVA, alternativa });
 
 export const ROTTE_RITIRATE: readonly RottaRitirata[] = Object.freeze([
@@ -39,6 +56,12 @@ export const ROTTE_RITIRATE: readonly RottaRitirata[] = Object.freeze([
     motivo: "La cancellazione di una persona si fa con la procedura GDPR, che lascia il registro della richiesta.",
     alternativa: "POST /v1/gdpr/users/:userId/erasure",
   },
+  {
+    metodo: "POST", percorso: "/v1/organization-unit-history",
+    motivo: "La storia delle unità la scrive il sistema quando un'unità cambia, non una persona con valori scritti a mano.",
+    alternativa: null,
+  },
+  ...SQUADRE,
   d("/v1/job-families/:id", "PATCH /v1/job-families/:id"),
   d("/v1/career-paths/:id", "PATCH /v1/career-paths/:id"),
   d("/v1/career-path-steps/:id", "PATCH /v1/career-path-steps/:id"),
@@ -58,8 +81,7 @@ export const ROTTE_RITIRATE: readonly RottaRitirata[] = Object.freeze([
   d("/v1/mentorship/programs/:id", "PATCH /v1/mentorship/programs/:id"),
   d("/v1/mentorship/pairings/:id", "PATCH /v1/mentorship/pairings/:id"),
   d("/v1/mentorship/sessions/:id", "PATCH /v1/mentorship/sessions/:id"),
-  d("/v1/surveys/templates/:id", "PATCH /v1/surveys/templates/:id"),
-  d("/v1/surveys/:id", "PATCH /v1/surveys/:id"),
+  ...SONDAGGI,
   d("/v1/engagement-feedback/action-plans/:id", "PATCH /v1/engagement-feedback/action-plans/:id"),
   d("/v1/engagement-feedback/:id", "PATCH /v1/engagement-feedback/:id"),
   d("/v1/goals/:id", "PATCH /v1/goals/:id"),

@@ -226,103 +226,36 @@ describe("/v1/teams/* + /v1/me/team integration (WS-4 R1b)", () => {
       expect(r.statusCode).toBe(403);
     });
 
-    it("TENANT_ADMIN creates a team with lead → 201, lead mirrored as LEAD member", async () => {
-      const r = await suite.app.inject({
-        method: "POST", url: "/v1/teams",
-        headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken },
-        payload: { code: CODE, name: "Lifecycle Team", leadUserId: leadId },
-      });
-      expect(r.statusCode).toBe(201);
-      const t = r.json() as { teamId: string; code: string; leadUserId: string; members: { userId: string; role: string }[] };
-      expect(t.code).toBe(CODE);
-      expect(t.leadUserId).toBe(leadId);
-      expect(t.members.find((m) => m.userId === leadId)?.role).toBe("LEAD");
-      teamId = t.teamId;
-    });
-
-    it("duplicate code in tenant → 409 TEAM_CODE_CONFLICT", async () => {
-      const r = await suite.app.inject({
-        method: "POST", url: "/v1/teams",
-        headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken },
-        payload: { code: CODE, name: "Duplicate" },
-      });
-      expect(r.statusCode).toBe(409);
-      expect((r.json() as { error: { code: string } }).error.code).toBe("TEAM_CODE_CONFLICT");
-    });
-
-    it("PUT member (MEMBER) → in list; promoting to LEAD moves the single lead", async () => {
-      const add = await suite.app.inject({
-        method: "PUT", url: `/v1/teams/${teamId}/members/${memberId}`,
-        headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken },
-        payload: { role: "MEMBER" },
-      });
-      expect(add.statusCode).toBe(200);
-      let t = add.json() as { leadUserId: string | null; members: { userId: string; role: string }[] };
-      expect(t.members.find((m) => m.userId === memberId)?.role).toBe("MEMBER");
-
-      const promote = await suite.app.inject({
-        method: "PUT", url: `/v1/teams/${teamId}/members/${memberId}`,
-        headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken },
-        payload: { role: "LEAD" },
-      });
-      expect(promote.statusCode).toBe(200);
-      t = promote.json() as typeof t;
-      expect(t.leadUserId).toBe(memberId);                                     // pointer moved
-      expect(t.members.find((m) => m.userId === memberId)?.role).toBe("LEAD"); // new lead
-      expect(t.members.find((m) => m.userId === leadId)?.role).toBe("MEMBER"); // old lead demoted
-    });
-
-    it("PATCH name + lead back to paolo; leadUserId:null clears lead", async () => {
-      const r = await suite.app.inject({
-        method: "PATCH", url: `/v1/teams/${teamId}`,
-        headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken },
-        payload: { name: "Lifecycle Team v2", leadUserId: leadId },
-      });
-      expect(r.statusCode).toBe(200);
-      let t = r.json() as { name: string; leadUserId: string | null; members: { userId: string; role: string }[] };
-      expect(t.name).toBe("Lifecycle Team v2");
-      expect(t.leadUserId).toBe(leadId);
-      expect(t.members.filter((m) => m.role === "LEAD")).toHaveLength(1); // single-lead invariant
-
-      const clear = await suite.app.inject({
-        method: "PATCH", url: `/v1/teams/${teamId}`,
-        headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken },
-        payload: { leadUserId: null },
-      });
-      expect(clear.statusCode).toBe(200);
-      t = clear.json() as typeof t;
-      expect(t.leadUserId).toBeNull();
-      expect(t.members.filter((m) => m.role === "LEAD")).toHaveLength(0);
-    });
-
-    it("DELETE member removes it; removing an unknown member → 404", async () => {
-      const r = await suite.app.inject({
-        method: "DELETE", url: `/v1/teams/${teamId}/members/${memberId}`,
-        headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken },
-      });
-      expect(r.statusCode).toBe(200);
-      const t = r.json() as { members: { userId: string }[] };
-      expect(t.members.some((m) => m.userId === memberId)).toBe(false);
-
-      const again = await suite.app.inject({
-        method: "DELETE", url: `/v1/teams/${teamId}/members/${memberId}`,
-        headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken },
-      });
-      expect(again.statusCode).toBe(404);
-    });
-
-    it("I5: cross-tenant lead rejected (400); PLATFORM_ADMIN may create in a named tenant", async () => {
+    // Ondata 5 (2026-11-18): una squadra è un progetto (000363). Le scritture dei team sono
+    // RITIRATE (lib/rotte-ritirate.ts): 410 con il rimando ai progetti, e nessuna riga cambia.
+    it("TENANT_ADMIN: creare, correggere e cambiare i membri di un team risponde 410, e il team resta com'era", async () => {
       const { pool } = await import("../src/db/client.js");
-      const heuUser = await pool.query<{ user_id: string }>(
-        `SELECT user_id FROM sys.sys_users WHERE user_email = 'andrea.spenuso@heuresys.com'`,
+      const esistente = await pool.query<{ team_id: string; team_name: string }>(
+        `SELECT t.team_id, t.team_name FROM sys.sys_teams t
+           JOIN sys.sys_users u ON u.user_tenant_id = t.team_tenant_id
+          WHERE u.user_email = 'governo@collaudo.invalid' ORDER BY t.team_id LIMIT 1`,
       );
-      const cross = await suite.app.inject({
-        method: "PUT", url: `/v1/teams/${teamId}/members/${heuUser.rows[0]!.user_id}`,
-        headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken },
-        payload: { role: "MEMBER" },
-      });
-      expect(cross.statusCode).toBe(400); // VALIDATION_ERROR: not the team's tenant
+      expect(esistente.rows.length, "nessun team del tenant su cui provare").toBe(1);
+      teamId = esistente.rows[0]!.team_id;
+      const h = { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken };
+      const prove = [
+        { method: "POST" as const, url: "/v1/teams", payload: { code: CODE, name: "Lifecycle Team", leadUserId: leadId } },
+        { method: "PATCH" as const, url: `/v1/teams/${teamId}`, payload: { name: "non deve cambiare" } },
+        { method: "PUT" as const, url: `/v1/teams/${teamId}/members/${memberId}`, payload: { role: "MEMBER" } },
+        { method: "DELETE" as const, url: `/v1/teams/${teamId}/members/${memberId}` },
+      ];
+      for (const p of prove) {
+        const r = await suite.app.inject({ ...p, headers: h });
+        expect(r.statusCode, `${p.method} ${p.url}`).toBe(410);
+        expect((r.json() as { error: { code: string } }).error.code).toBe("ROUTE_RETIRED");
+      }
+      const dopo = await pool.query<{ team_name: string }>("SELECT team_name FROM sys.sys_teams WHERE team_id = $1", [teamId]);
+      expect(dopo.rows[0]!.team_name).toBe(esistente.rows[0]!.team_name);
+      const nuovo = await pool.query("SELECT 1 FROM sys.sys_teams WHERE team_code = $1", [CODE]);
+      expect(nuovo.rowCount).toBe(0);
+    });
 
+    it("le scritture ritirate chiedono ancora il CSRF", async () => {
       const missingCsrf = await suite.app.inject({
         method: "PATCH", url: `/v1/teams/${teamId}`,
         headers: { cookie: ch(tenantS.cookies) },

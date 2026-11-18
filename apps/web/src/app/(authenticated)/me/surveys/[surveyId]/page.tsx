@@ -103,16 +103,24 @@ export default function MeSurveyAnswerPage() {
                       {completed ? (
                         <p className="text-sm text-muted-foreground" data-testid="me-survey-my-answer">{String(mineVal)}</p>
                       ) : isRating(q.type) ? (
-                        <input
-                          id={`q-${q.questionId}`}
-                          data-testid="me-survey-rating"
-                          type="number"
-                          min={0}
-                          max={10}
-                          className={INPUT_CLASS}
-                          value={answers[q.questionId] ?? ""}
-                          onChange={(e) => setAnswers((a) => ({ ...a, [q.questionId]: e.target.value }))}
-                        />
+                        // D2 (giro qa-web 18/11): la scala dice da dove a dove va il voto.
+                        <>
+                          <input
+                            id={`q-${q.questionId}`}
+                            data-testid="me-survey-rating"
+                            type="number"
+                            min={0}
+                            max={10}
+                            placeholder={t("surveys.ratingPlaceholder")}
+                            aria-describedby={`q-${q.questionId}-scala`}
+                            className={INPUT_CLASS}
+                            value={answers[q.questionId] ?? ""}
+                            onChange={(e) => setAnswers((a) => ({ ...a, [q.questionId]: e.target.value }))}
+                          />
+                          <p id={`q-${q.questionId}-scala`} className="mt-1 text-xs text-muted-foreground" data-testid="me-survey-rating-scale">
+                            {t("surveys.ratingScale")}
+                          </p>
+                        </>
                       ) : (
                         <textarea
                           id={`q-${q.questionId}`}
@@ -132,6 +140,9 @@ export default function MeSurveyAnswerPage() {
                     <Button type="submit" data-testid="me-survey-submit" disabled={answeredCount === 0 || submit.isPending}>
                       {submit.isPending ? t("surveys.submitting") : t("surveys.submit")}
                     </Button>
+                    {answeredCount === 0 && !submit.isPending && (
+                      <p className="text-xs text-muted-foreground" data-testid="me-survey-submit-hint">{t("surveys.submitHint")}</p>
+                    )}
                     {feedback && (
                       <p
                         data-testid={feedback.kind === "ok" ? "me-survey-success" : "me-survey-submit-error"}

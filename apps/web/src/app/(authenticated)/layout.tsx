@@ -6,6 +6,7 @@ import Link from "next/link";
 import { AvvisoBozzaConsolidamento } from "@/components/avviso-bozza-consolidamento";
 import {
   Button,
+  CommandPalette,
   DashboardShell,
   DashboardHeader,
   DashboardSidebar,
@@ -296,6 +297,25 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
       customContent: <CorpoGruppo id={`nav-${sub}`} albero={alberoDelGruppo(items)} attiva={activeRoute} icone={iconaDi} />,
     }));
 
+  // D1 (giro qa-web 18/11): la ricerca in alto (Ctrl+K) si apriva su «Nessun comando configurato». Ora offre le
+  // pagine a cui la persona ha accesso, le stesse del menu laterale (il registro già filtra per mandato), con
+  // l'etichetta del menu nella lingua scelta e raggruppate come nel menu.
+  const contenutoPalette = [...byGroup.entries()]
+    .sort(([, a], [, b]) => minOrder(a) - minOrder(b))
+    .map(([sub, items]) => (
+      <CommandPalette.Group key={`pal-${sub}`} heading={t(`shell:nav.groups.${sub === "me" ? "me_area" : sub}`, { defaultValue: sub })}>
+        {[...items].sort((a, b) => a.ordine - b.ordine).map((v) => (
+          <CommandPalette.Item
+            key={v.id}
+            value={`${typeof v.label === "string" ? v.label : v.id} ${v.id}`}
+            onSelect={() => router.push(v.href)}
+          >
+            {v.label}
+          </CommandPalette.Item>
+        ))}
+      </CommandPalette.Group>
+    ));
+
   const verdict = pageVerdict(pathname, ifaces.data?.routes ?? [], SECTION_TAB_GROUPS);
   // La pagina negata si nomina a parole (la voce di menu), mai col percorso tecnico.
   const nomePaginaNegata =
@@ -368,6 +388,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
             drawerTitle: t("shell:ui.drawerTitle"),
             drawerClose: t("shell:ui.drawerClose"),
           }}
+          commandPaletteContent={contenutoPalette}
           logo={<HeuresysWordmark variant="brand" size={24} />}
           // F-6 (L7): il collegamento del marchio ha già il suo nome accessibile («Heuresys —
           // pagina iniziale autenticata»); il distintivo «advanced» visibile ma fuori da quel

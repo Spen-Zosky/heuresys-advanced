@@ -87,6 +87,17 @@ const ETICHETTA_EVENTO: Record<string, string> = {
 };
 const etichettaEvento = (tipo: unknown): string => ETICHETTA_EVENTO[s(tipo)] ?? "Evento";
 
+/**
+ * C14 (giro qa-web 18/11): la frase dell'evento comincia già col suo tipo («Corso completato: …»,
+ * «Assunto come …»), e la colonna «Tipo» la ripeteva. Il tipo si aggiunge solo se la frase non lo dice:
+ * si confrontano le prime cinque lettere della prima parola, senza maiuscole.
+ */
+export const tipoRipetuto = (frase: unknown, tipo: unknown): boolean => {
+  const radice = (t: string): string => t.trim().split(/\s+/)[0]?.toLowerCase().slice(0, 5) ?? "";
+  const a = radice(s(frase));
+  return a !== "" && a === radice(etichettaEvento(tipo));
+};
+
 /** Le unità del perimetro, espanse alla discendenza: I19 vuole la catena, non il solo livello. */
 const CTE_UNITA = `
   WITH RECURSIVE perimetro AS (
@@ -280,7 +291,7 @@ const processAttivitaRecenti: Fornitore = async (q, p) => {
     r.rows.map((x) => ({
       id: s(x.id),
       label: s(x.label),
-      detail: `${etichettaEvento(x.detail)} · ${s(x.occorso)}`,
+      detail: tipoRipetuto(x.label, x.detail) ? s(x.occorso) : `${etichettaEvento(x.detail)} · ${s(x.occorso)}`,
       value: null,
     })),
   );
@@ -439,7 +450,7 @@ const branchAttivita: Fornitore = async (q, p) => {
     [...P(p), TIPI_EVENTO_RISERVATI],
   );
   return elenco(
-    r.rows.map((x) => ({ id: s(x.id), label: s(x.label), detail: etichettaEvento(x.detail), value: null })),
+    r.rows.map((x) => ({ id: s(x.id), label: s(x.label), detail: tipoRipetuto(x.label, x.detail) ? null : etichettaEvento(x.detail), value: null })),
   );
 };
 
@@ -703,7 +714,7 @@ const selfAttivita: Fornitore = async (q, p) => {
     [p.userId],
   );
   return elenco(
-    r.rows.map((x) => ({ id: s(x.id), label: s(x.label), detail: `${etichettaEvento(x.tipo)} · ${s(x.occorso)}`, value: null })),
+    r.rows.map((x) => ({ id: s(x.id), label: s(x.label), detail: tipoRipetuto(x.label, x.tipo) ? s(x.occorso) : `${etichettaEvento(x.tipo)} · ${s(x.occorso)}`, value: null })),
   );
 };
 

@@ -153,8 +153,14 @@ function Vista({ v, t, famiglia }: { v: DashboardBlockData; t: (k: string) => st
             columns={[
               // R2: le intestazioni le dà la vista; le generiche restano solo come ripiego.
               { header: v.content.columns?.label ?? t("dashboard.famiglie.colonnaVoce"), cell: (r) => testoLeggibile(r.label) },
-              { header: v.content.columns?.detail ?? t("dashboard.famiglie.colonnaDettaglio"), cell: (r) => (r.detail ? testoLeggibile(r.detail) : "—") },
-              { header: v.content.columns?.value ?? t("dashboard.famiglie.colonnaValore"), align: "right", cell: (r) => (r.value === null ? "—" : formati(lingua).numero(r.value, 2)) },
+              // C14: una colonna senza niente su tutte le righe (il tipo che ripeteva la frase, il valore
+              // assente) non si disegna.
+              ...(righe.some((r) => r.detail)
+                ? [{ header: v.content.columns?.detail ?? t("dashboard.famiglie.colonnaDettaglio"), cell: (r: (typeof righe)[number]) => (r.detail ? testoLeggibile(r.detail) : "—") }]
+                : []),
+              ...(righe.some((r) => r.value !== null)
+                ? [{ header: v.content.columns?.value ?? t("dashboard.famiglie.colonnaValore"), align: "right" as const, cell: (r: (typeof righe)[number]) => (r.value === null ? "—" : formati(lingua).numero(r.value, 2)) }]
+                : []),
             ]}
           />
         )}

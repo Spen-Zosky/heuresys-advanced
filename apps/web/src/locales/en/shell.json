@@ -162,7 +162,8 @@
     },
     "kpi": {
       "analytics": "Analytics",
-      "catalog": "KPI catalog"
+      "catalog": "KPI catalog",
+      "templates": "KPI templates"
     },
     "career": {
       "main": "Career",

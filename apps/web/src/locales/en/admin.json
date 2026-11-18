@@ -1952,5 +1952,29 @@
       "RIGA_SOSTITUTIVA": "replacement row"
     },
     "identita": "{{codice}} · v{{versione}} · {{agente}}"
+  },
+  "catalogoKpi": {
+    "titolo": "KPI templates",
+    "descrizione": "Which KPIs measure a process of the operating model and which an organization unit, and with what weight.",
+    "errore": "Could not read the KPI templates",
+    "erroreScrittura": "The change was not saved. Try again.",
+    "conto_one": "{{count}} link",
+    "conto_other": "{{count}} links",
+    "kpi": "KPI",
+    "peso": "Weight",
+    "pesoDa0a1": "Weight (0 to 1)",
+    "scegli": "Choose…",
+    "registra": "Save the link",
+    "togli": "Remove",
+    "confermaTogli": "Remove this link? It can be added back the same way.",
+    "processi": {
+      "titolo": "Process KPIs",
+      "processo": "Process"
+    },
+    "unita": {
+      "titolo": "Organization unit KPIs",
+      "unita": "Organization unit",
+      "daModello": "Unit template (applies to every tenant)"
+    }
   }
 }

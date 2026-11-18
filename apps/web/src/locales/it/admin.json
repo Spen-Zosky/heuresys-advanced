@@ -1952,5 +1952,29 @@
       "RIGA_SOSTITUTIVA": "riga sostitutiva"
     },
     "identita": "{{codice}} · v{{versione}} · {{agente}}"
+  },
+  "catalogoKpi": {
+    "titolo": "Modelli dei KPI",
+    "descrizione": "Quali KPI misurano un processo del modello operativo e quali un'unità organizzativa, e con quale peso.",
+    "errore": "Non è stato possibile leggere i modelli dei KPI",
+    "erroreScrittura": "La modifica non è stata registrata. Riprova.",
+    "conto_one": "{{count}} abbinamento",
+    "conto_other": "{{count}} abbinamenti",
+    "kpi": "KPI",
+    "peso": "Peso",
+    "pesoDa0a1": "Peso (da 0 a 1)",
+    "scegli": "Scegli…",
+    "registra": "Registra l'abbinamento",
+    "togli": "Togli",
+    "confermaTogli": "Togliere questo abbinamento? Lo si può rimettere con lo stesso gesto.",
+    "processi": {
+      "titolo": "KPI dei processi",
+      "processo": "Processo"
+    },
+    "unita": {
+      "titolo": "KPI delle unità organizzative",
+      "unita": "Unità organizzativa",
+      "daModello": "Modello di unità (vale per tutti i tenant)"
+    }
   }
 }

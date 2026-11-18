@@ -4,7 +4,7 @@
 > Le descrizioni gia' curate sono preservate a ogni rigenerazione; per gli ADR che non
 > ne avevano una, la colonna riporta il titolo ed e' marcata *(dal titolo)*.
 
-**55 ADR** in `docs/architecture/adr/`.
+**57 ADR** in `docs/architecture/adr/`.
 
 | # | Titolo | Status | Descrizione | Data |
 |---|---|---|---|---|
@@ -62,7 +62,9 @@
 | [0054](adr/0054_heuresys_piattaforma_del_cambiamento_organizzativo.md) | Heuresys è la piattaforma del cambiamento organizzativo, per qualunque impresa | ACCETTATO il 2026-11-03 da Enzo Spenuso | Heuresys è la piattaforma del cambiamento organizzativo, per qualunque impresa *(dal titolo)* | 2026-11-03 |
 | [0055](adr/0055_la_piattaforma_concede_ruoli_nel_cliente_con_un_motivo.md) | La piattaforma concede ruoli dentro un cliente solo con un motivo scritto | ACCETTATO il 2026-11-06 da Enzo Spenuso, alle 01:22 UTC | La piattaforma concede ruoli dentro un cliente solo con un motivo scritto *(dal titolo)* | 2026-11-06 |
 | [0056](adr/0056_i_principi_agentici_dottrina_comune_degli_agenti.md) | I principi agentici sono la dottrina comune degli agenti di advanced e del datastore | ACCETTATO il 2026-11-06 da Enzo Spenuso, alle 04:00 UTC | I principi agentici sono la dottrina comune degli agenti di advanced e del datastore *(dal titolo)* | 2026-11-06 (proposto e accettato lo stesso giorno) |
+| [0057](adr/0057_il_modello_dei_ruoli.md) | Il modello dei ruoli: il comando si calcola, il funzionale si decide | ACCETTATO il 2026-11-10 da Enzo Spenuso, alle 15:16 UTC | Il modello dei ruoli: il comando si calcola, il funzionale si decide *(dal titolo)* | 2026-11-10 |
 | [0059](adr/0059_allineamento_e_consolidamento_due_modi.md) | Allineamento e Consolidamento: due modi dello stesso motore | ACCETTATO il 2026-11-16 da Enzo Spenuso, alle 01:35 UTC | Allineamento e Consolidamento: due modi dello stesso motore *(dal titolo)* | 2026-11-16 |
+| [0060](adr/0060_le_applet_dell_assistente.md) | Le applet dell'assistente: il lavoro che l'assistente costruisce e svolge, entro i permessi di chi lo chiede | PROPOSTO il 2026-11-18, in attesa del sì di Enzo Spenuso | Le applet dell'assistente: il lavoro che l'assistente costruisce e svolge, entro i permessi di chi lo chiede *(dal titolo)* | 2026-11-18 |
 
 ## Conventions
 

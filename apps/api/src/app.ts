@@ -107,6 +107,7 @@ import { blueprintProcessesRoutes } from "./modules/blueprint-processes/routes.j
 import { blueprintActivationsRoutes } from "./modules/blueprint-activations/routes.js";
 import { blueprintOverridesRoutes } from "./modules/blueprint-overrides/routes.js";
 import { processKpiTemplatesRoutes } from "./modules/process-kpi-templates/routes.js";
+import { tenantProcessesRoutes } from "./modules/tenant-processes/routes.js";
 import { organizationUnitKpiTemplatesRoutes } from "./modules/organization-unit-kpi-templates/routes.js";
 import { seedAcquisitionRunsRoutes } from "./modules/seed-acquisition-runs/routes.js";
 import { tenantImportRunsRoutes } from "./modules/tenant-import-runs/routes.js";
@@ -553,6 +554,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(blueprintOverridesRoutes, { prefix: "/v1/blueprint-overrides" });
   await app.register(tenantBlueprintsRoutes, { prefix: "/v1/tenant-blueprints" });
   await app.register(processKpiTemplatesRoutes, { prefix: "/v1/process-kpi-templates" });
+  await app.register(tenantProcessesRoutes, { prefix: "/v1/tenant-processes" });
   await app.register(organizationUnitKpiTemplatesRoutes, { prefix: "/v1/organization-unit-kpi-templates" });
   // #164 F3 — le 4 superfici ETL brownfield sono RITIRATE (non piu' congelate).
   // Misurato prima di rimuoverle: rispondevano 404 in produzione, quindi il ritiro

@@ -83,6 +83,7 @@ export * from "./schemas/blueprint-overrides.js";
 export * from "./schemas/tenant-blueprints.js";
 export * from "./schemas/research.js";
 export * from "./schemas/process-kpi-templates.js";
+export * from "./schemas/tenant-processes.js";
 export * from "./schemas/organization-unit-kpi-templates.js";
 export * from "./schemas/seed-acquisition-runs.js";
 export * from "./schemas/tenant-import-runs.js";

@@ -127,10 +127,19 @@ describe("engagement normalized read-model (m2b)", () => {
     const rtl = await get("/v1/engagement/templates", tenantAdmin);
     expect(rtl.statusCode).toBe(200);
     const rb = rtl.json() as { items: { tenantId: string; name: string; questionCount: number; type: string | null }[]; total: number };
-    expect(rb.total).toBe(1); // legacy 0c54b84a -> RTL only
-    expect(rb.items[0]!.name).toBe("Custom Engagement Survey");
-    expect(rb.items[0]!.questionCount).toBe(5);
-    expect(rb.items[0]!.type).toBe("custom");
+    // L'atteso viene dal database, non da un numero scritto qui: dalla 000497 ai modelli di RTL si
+    // aggiungono quelli trasferiti dal modello vecchio.
+    const atteso = await pool.query<{ n: string; tenant: string }>(
+      `SELECT count(*)::text AS n, min(t.survey_template_tenant_id::text) AS tenant
+         FROM sys.sys_survey_templates t
+         JOIN sys.sys_users u ON u.user_tenant_id = t.survey_template_tenant_id
+        WHERE u.user_email = 'federica.marchetti@rtl-bank.org'`,
+    );
+    expect(rb.total).toBe(Number(atteso.rows[0]!.n));
+    expect(new Set(rb.items.map((x) => x.tenantId))).toEqual(new Set([atteso.rows[0]!.tenant]));
+    const custom = rb.items.find((x) => x.name === "Custom Engagement Survey");
+    expect(custom?.questionCount).toBe(5);
+    expect(custom?.type).toBe("custom");
 
     const all = (await get("/v1/engagement/templates", admin)).json() as { items: { tenantId: string }[]; total: number };
     // PLATFORM_ADMIN unfiltered: RTL + HEURESYS mapped templates.

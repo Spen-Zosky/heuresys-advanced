@@ -109,23 +109,31 @@ const PROTOTIPO: Record<ConsolidationGroup, string> = {
   POSITIONS_ROLES: `
     SELECT p.blueprint_content_position_code AS key, p.blueprint_content_position_title AS name,
            p.blueprint_content_position_code AS code, NULL::text AS description,
-           p.blueprint_content_position_metadata->>'job_role_code' AS type,
+           -- S1: il ruolo sta nella colonna (000458), i metadati sono vuoti; restano come ripiego.
+           coalesce(p.blueprint_content_position_job_role_code, p.blueprint_content_position_metadata->>'job_role_code') AS type,
            p.blueprint_content_position_metadata->>'seniority_level' AS level,
            u.blueprint_content_unit_name AS parent_name,
-           coalesce(p.blueprint_content_position_metadata->>'esco_occupation_uri',
+           -- S1: l'occupazione ESCO è quella del ruolo del modello (000458); i metadati restano come ripiego.
+           coalesce(jr.blueprint_content_job_role_esco_uri,
+                    p.blueprint_content_position_metadata->>'esco_occupation_uri',
                     p.blueprint_content_position_metadata->>'esco_uri') AS esco_uri,
            NULL::text[] AS activities
       FROM sys.sys_blueprint_content_positions p
       LEFT JOIN sys.sys_blueprint_content_units u
         ON u.blueprint_content_unit_version_id = p.blueprint_content_position_version_id
        AND u.blueprint_content_unit_code = p.blueprint_content_position_unit_code
+      LEFT JOIN sys.sys_blueprint_content_job_roles jr
+        ON jr.blueprint_content_job_role_version_id = p.blueprint_content_position_version_id
+       AND jr.blueprint_content_job_role_code = p.blueprint_content_position_job_role_code
      WHERE p.blueprint_content_position_version_id = $1
      ORDER BY p.blueprint_content_position_code`,
   SKILLS: `
     SELECT s.blueprint_content_skill_code AS key, s.blueprint_content_skill_name AS name, s.blueprint_content_skill_code AS code,
            NULL::text AS description, s.blueprint_content_skill_kind AS type, NULL::text AS level,
            s.blueprint_content_skill_category AS parent_name,
-           coalesce(s.blueprint_content_skill_metadata->>'esco_uri', s.blueprint_content_skill_metadata->>'esco_skill_uri') AS esco_uri,
+           -- S1 (piano 20261116): l'indirizzo ESCO sta nella colonna (000454), i metadati sono vuoti; restano come ripiego.
+           coalesce(s.blueprint_content_skill_esco_uri,
+                    s.blueprint_content_skill_metadata->>'esco_uri', s.blueprint_content_skill_metadata->>'esco_skill_uri') AS esco_uri,
            NULL::text[] AS activities
       FROM sys.sys_blueprint_content_skills s
      WHERE s.blueprint_content_skill_version_id = $1

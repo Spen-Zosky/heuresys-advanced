@@ -501,3 +501,122 @@ export const RunDistanceQuerySchema = z.object({
   dettaglio: z.enum(["true", "false"]).optional(),
   dominio: DistanceDomainSchema.optional(),
 });
+
+/**
+ * La scheda «Allineamento» della pagina del consolidamento (piano `docs/piani/PIANO_scheda-allineamento_20261118.md`).
+ *
+ * Mostra la distanza fra il tenant e il modello di una corsa sui 24 domini, raggruppati in famiglie, e per ogni voce
+ * propone una decisione: Unisco (stessa cosa, nomi diversi), Adotto (il tenant la prende dal modello), Tengo (resta
+ * del tenant), Tolgo (doppione o errore: esce). Chi decide salva le scelte in bozza; il pulsante rosso le approva.
+ * Le decisioni approvate sono il registro da cui il motore dell'allineamento cambierà i dati: la scheda non li cambia.
+ */
+export const ALIGNMENT_DECISION_VALUES = ["UNISCO", "ADOTTO", "TENGO", "TOLGO"] as const;
+export const AlignmentDecisionSchema = z.enum(ALIGNMENT_DECISION_VALUES);
+export type AlignmentDecision = z.infer<typeof AlignmentDecisionSchema>;
+
+/** Il lato della voce: una coppia riconosciuta, una voce del solo modello o del solo tenant. */
+export const ALIGNMENT_SIDE_VALUES = ["COPPIA", "SOLO_MODELLO", "SOLO_TENANT"] as const;
+export const AlignmentSideSchema = z.enum(ALIGNMENT_SIDE_VALUES);
+export type AlignmentSide = z.infer<typeof AlignmentSideSchema>;
+
+/** Quali decisioni ammette ogni lato. Sta qui perché la pagina mostra le stesse scelte che la rotta accetta. */
+export const ALLOWED_ALIGNMENT_DECISIONS: Readonly<Record<AlignmentSide, readonly AlignmentDecision[]>> = {
+  COPPIA: ["UNISCO", "TENGO", "TOLGO"],
+  SOLO_MODELLO: ["ADOTTO", "TOLGO"],
+  SOLO_TENANT: ["TENGO", "TOLGO"],
+};
+
+/** Le famiglie dei 24 domini, nell'ordine della pagina (§3 dell'analisi del 18/11). */
+export const ALIGNMENT_FAMILY_VALUES = [
+  "identita", "organizzazione", "ruoli", "competenze", "processi", "prestazione", "contratto", "normativa",
+  "sviluppo", "ricompensa", "commesse", "persone", "accesso",
+] as const;
+export const ALIGNMENT_FAMILIES: ReadonlyArray<{
+  famiglia: (typeof ALIGNMENT_FAMILY_VALUES)[number];
+  domini: ReadonlyArray<(typeof DISTANCE_DOMAIN_VALUES)[number]>;
+}> = [
+  { famiglia: "identita", domini: ["ateco", "classe"] },
+  { famiglia: "organizzazione", domini: ["unita", "organigramma"] },
+  { famiglia: "ruoli", domini: ["ruoli", "inquadramento", "criticita", "derivati"] },
+  { famiglia: "competenze", domini: ["skill"] },
+  { famiglia: "processi", domini: ["processi", "fasi"] },
+  { famiglia: "prestazione", domini: ["metriche", "obiettivi", "bersagli"] },
+  { famiglia: "contratto", domini: ["ccnl", "condizioni"] },
+  { famiglia: "normativa", domini: ["obblighi", "copertura"] },
+  { famiglia: "sviluppo", domini: ["formazione", "carriere"] },
+  { famiglia: "ricompensa", domini: ["incentivi"] },
+  { famiglia: "commesse", domini: ["commesse"] },
+  { famiglia: "persone", domini: ["utenti"] },
+  { famiglia: "accesso", domini: ["ruoli_funzionali"] },
+];
+export const AlignmentFamilySchema = z.enum(ALIGNMENT_FAMILY_VALUES);
+
+/** Che cosa copre oggi un dominio: i giri del consolidamento per nome, oppure la sola misura. */
+export const AlignmentCoverageSchema = z.enum(["GIRI", "MISURA"]);
+
+export const AlignmentRowSchema = z.object({
+  /** Chiave stabile della voce: dominio, lato, nomi normalizzati e ricorrenza. */
+  chiave: z.string().regex(/^[0-9a-f]{32}$/),
+  lato: AlignmentSideSchema,
+  esito: z.enum(["uguale", "parziale", "diverso", "solo_modello", "solo_tenant"]),
+  modello: z.string().nullable(),
+  tenant: z.string().nullable(),
+  nota: z.string().optional(),
+  /** La decisione che l'agente propone; null per le voci già uguali. */
+  proposta: AlignmentDecisionSchema.nullable(),
+  bozza: AlignmentDecisionSchema.nullable(),
+  approvata: AlignmentDecisionSchema.nullable(),
+  approvataIl: z.iso.datetime().nullable(),
+});
+export type AlignmentRow = z.infer<typeof AlignmentRowSchema>;
+
+export const AlignmentDomainSchema = DistanceCountsSchema.extend({
+  dominio: DistanceDomainSchema,
+  famiglia: AlignmentFamilySchema,
+  copertura: AlignmentCoverageSchema,
+  nota: z.string(),
+  righe_voci: z.array(AlignmentRowSchema),
+});
+export type AlignmentDomain = z.infer<typeof AlignmentDomainSchema>;
+
+export const AlignmentResponseSchema = z.object({
+  runId: z.uuid(),
+  misurataIl: z.iso.datetime(),
+  /** Vero per chi può salvare e approvare le decisioni (il Direttore HR). */
+  puoDecidere: z.boolean(),
+  domini: z.array(AlignmentDomainSchema),
+  totale: DistanceCountsSchema,
+  decisioni: z.object({
+    bozze: z.number().int(),
+    approvate: z.number().int(),
+    /** Decisioni registrate su voci che la misura di oggi non trova più (i dati sono cambiati). */
+    superate: z.number().int(),
+  }),
+});
+export type AlignmentResponse = z.infer<typeof AlignmentResponseSchema>;
+
+export const AlignmentDraftItemSchema = z.object({
+  dominio: DistanceDomainSchema,
+  chiave: z.string().regex(/^[0-9a-f]{32}$/),
+  decisione: AlignmentDecisionSchema,
+});
+export const AlignmentDraftBodySchema = z.object({
+  voci: z.array(AlignmentDraftItemSchema).min(1).max(5000),
+});
+export type AlignmentDraftBody = z.infer<typeof AlignmentDraftBodySchema>;
+
+export const AlignmentDraftResultSchema = z.object({
+  salvate: z.number().int(),
+  /** Voci che la misura di oggi non trova o che non ammettono quella decisione, con la ragione. */
+  scartate: z.array(z.object({ chiave: z.string(), motivo: z.string() })),
+});
+export type AlignmentDraftResult = z.infer<typeof AlignmentDraftResultSchema>;
+
+export const AlignmentApproveResultSchema = z.object({
+  approvate: z.number().int(),
+  approvateIl: z.iso.datetime(),
+});
+export type AlignmentApproveResult = z.infer<typeof AlignmentApproveResultSchema>;
+
+export const AlignmentDiscardResultSchema = z.object({ scartate: z.number().int() });
+export type AlignmentDiscardResult = z.infer<typeof AlignmentDiscardResultSchema>;

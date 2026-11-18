@@ -35,7 +35,8 @@ Che cosa non si chiude in questo ciclo: le correzioni delle pagine escluse sopra
 | R1 | Rilascio: backup verificato, armo, `verifica-deploy.sh` DEPLOYATO, prova nel browser | Claude | DEPLOYATO e schermate | FATTO (#262 su 921df8d2, #273 su c6eda765, #277 su 44ac94c9: verifica-deploy DEPLOYATO, schermate in heuresys-advanced-giro/verifica-262 e verifica-277) |
 | C6 | Ferie del quadro senza la malattia (verifica dal vivo del 16/11) | Claude | PR unita, DEPLOYATA | FATTO (#273) |
 | C7 | Difetti del giudizio delle firme parziali del giro post-#262 (web e API, migrazione 000496) | subagent web + subagent API, ramo `claude/forense-giudizio` | PR unita, DEPLOYATA, verifica dal vivo | FATTO (#277, DEPLOYATA su 44ac94c9; 568 eccezioni riscritte, giornale 1136 righe) |
-| C8 | Tempo relativo in italiano nelle pagine inglesi (verifica dal vivo dopo la #277) | Claude | PR unita, DEPLOYATA | ACTIVE (#282, attende il turno di rilascio) |
+| C8 | Tempo relativo in italiano nelle pagine inglesi (verifica dal vivo dopo la #277) | Claude | PR unita, DEPLOYATA | ACTIVE (riunita nella PR del giudizio del 18/11) |
+| C9 | Difetti del giudizio completo del giro (220.377 verifiche, 4.071 firme nuove giudicate da 10 giudici): testi, tabelle, clic e schermate | subagent, rami `claude/forense-giudizio-2`, `-3`, `-unico` | PR unita, DEPLOYATA, verifica dal vivo | ACTIVE (PR aperta) |
 | V1 | Giro qa-web di verifica sulle righe corrette | Claude | righe tornate OK | — |
 
 ## 3. Registro dei rilievi

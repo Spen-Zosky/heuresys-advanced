@@ -112,7 +112,7 @@ export function StatoErrore({
 }) {
   const { t } = useTranslation();
   if (isApiError(errore) && errore.status === 403) {
-    return <StatoNegato motivo={motivoNegato ?? errore.message} testId={testId} />;
+    return <StatoNegato motivo={motivoNegato ?? testoErrore(errore.status, errore.code)} testId={testId} />;
   }
   const codice = codiceErrore(errore);
   // Giro 18/11 (G-RENDER): «non trovato» scriveva UUID e NOT_FOUND nel testo. Il messaggio e' in parole;

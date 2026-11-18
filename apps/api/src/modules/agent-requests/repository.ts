@@ -1,9 +1,9 @@
 /**
- * apps/api/src/modules/agent-requests/repository.ts — tappa T2, migrazione 000499.
+ * apps/api/src/modules/agent-requests/repository.ts — tappa T2, migrazione 000501.
  *
  * SQL sulle richieste dell'agente e sul registro delle sue chiamate. Il cancello vero (previsione
  * dentro il tetto, motivo del rifiuto, decisione coerente con lo stato) lo tiene il database con i
- * CHECK della 000499; il servizio ne dà un errore leggibile prima.
+ * CHECK della 000501; il servizio ne dà un errore leggibile prima.
  */
 import type { PoolClient } from "pg";
 import type { AgentCall, AgentRequest, AgentRequestStatus } from "@heuresys/shared";

@@ -1,5 +1,5 @@
 /**
- * apps/api/test/agent-requests.integration.test.ts — tappa T2, migrazione 000499.
+ * apps/api/test/agent-requests.integration.test.ts — tappa T2, migrazione 000501.
  *
  * Il cancello «richiesta dell'agente con previsione di spesa, tetto, accetta o rifiuta» e il registro
  * di costo e durata, provati sul servizio con persone prese dal dato. Si prova: la previsione oltre il
@@ -75,7 +75,7 @@ afterAll(async () => {
   await closePool();
 });
 
-describe("i permessi (000499)", () => {
+describe("i permessi (000501)", () => {
   it("decidere e leggere la coda stanno a PLATFORM_ADMIN e a nessun altro ruolo", async () => {
     const r = await pool.query<{ code: string }>(`SELECT auth_role_code AS code FROM sys.sys_auth_roles WHERE retired_at IS NULL`);
     for (const { code } of r.rows) {

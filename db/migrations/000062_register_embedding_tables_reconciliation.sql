@@ -208,9 +208,9 @@ VALUES
   ('sys_agent_proposals', 'D', 'EXCLUDE', NULL,
    '[sign-off: EXCLUDE — proposte dell''assistente in attesa della persona (ADR-0056 D4, mig 000483): righe scritte solo dall''API, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000483.]'),
   ('sys_agent_requests', 'D', 'EXCLUDE', NULL,
-   '[sign-off: EXCLUDE — richieste dell''agente con previsione di spesa e tetto (tappa T2, mig 000499): righe scritte solo dall''API, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000499.]'),
+   '[sign-off: EXCLUDE — richieste dell''agente con previsione di spesa e tetto (tappa T2, mig 000501): righe scritte solo dall''API, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000501.]'),
   ('sys_agent_call_log', 'D', 'EXCLUDE', NULL,
-   '[sign-off: EXCLUDE — registro di costo e durata delle chiamate dell''agente (tappa T2, mig 000499): righe scritte solo dall''API, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000499.]')
+   '[sign-off: EXCLUDE — registro di costo e durata delle chiamate dell''agente (tappa T2, mig 000501): righe scritte solo dall''API, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000501.]')
 ON CONFLICT (reconciliation_registry_table_name) DO NOTHING;
 
 DO $$

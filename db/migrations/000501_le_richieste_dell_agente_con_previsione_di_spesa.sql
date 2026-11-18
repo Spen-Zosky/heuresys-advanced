@@ -1,5 +1,5 @@
 -- ============================================================================================
--- 000499 — Le richieste dell'agente con previsione di spesa, e il registro di costo e durata
+-- 000501 — Le richieste dell'agente con previsione di spesa, e il registro di costo e durata
 --          (tappa T2: «ogni richiesta dell'agente passa dal sì di Enzo»).
 --
 -- IL FATTO. Il datastore ha già collaudato il cancello: ogni lavoro che fa pensare il modello mostra
@@ -127,9 +127,9 @@ CREATE INDEX IF NOT EXISTS sys_agent_call_log_tenant_idx
   ON sys.sys_agent_call_log (agent_call_tenant_id, agent_call_created_at DESC);
 
 COMMENT ON TABLE sys.sys_agent_requests IS
-  '000499 (tappa T2) — una richiesta dell''agente con previsione di spesa e tetto; il CHECK previsione <= tetto è il cancello. La decide solo chi ha agent_request:decide; rifiutare chiede un motivo.';
+  '000501 (tappa T2) — una richiesta dell''agente con previsione di spesa e tetto; il CHECK previsione <= tetto è il cancello. La decide solo chi ha agent_request:decide; rifiutare chiede un motivo.';
 COMMENT ON TABLE sys.sys_agent_call_log IS
-  '000499 (tappa T2) — una riga per chiamata dell''agente: modello, esito, durata, token e costo in dollari, legata a una richiesta quando c''è.';
+  '000501 (tappa T2) — una riga per chiamata dell''agente: modello, esito, durata, token e costo in dollari, legata a una richiesta quando c''è.';
 
 -- ---------------------------------------------------------------- i permessi (solo PLATFORM_ADMIN)
 INSERT INTO sys.sys_auth_permissions
@@ -167,24 +167,24 @@ DECLARE n_tab int; n_cl int; n_rr int; n_ck int; n_perm int; n_rp int; n_trad in
 BEGIN
   SELECT count(*) INTO n_tab FROM information_schema.tables
    WHERE table_schema = 'sys' AND table_name IN ('sys_agent_requests', 'sys_agent_call_log');
-  IF n_tab <> 2 THEN RAISE EXCEPTION '000499: le tabelle sono % invece di 2', n_tab; END IF;
+  IF n_tab <> 2 THEN RAISE EXCEPTION '000501: le tabelle sono % invece di 2', n_tab; END IF;
 
   SELECT count(*) INTO n_cl FROM sys.sys_classificazione_direzione_dato
    WHERE tabella IN ('sys_agent_requests', 'sys_agent_call_log');
   SELECT count(*) INTO n_rr FROM sys.sys_reconciliation_registry
    WHERE reconciliation_registry_table_name IN ('sys_agent_requests', 'sys_agent_call_log');
   IF n_cl <> 2 OR n_rr <> 2 THEN
-    RAISE EXCEPTION '000499: classificate in 000429: % su 2; registrate in 000062: % su 2', n_cl, n_rr;
+    RAISE EXCEPTION '000501: classificate in 000429: % su 2; registrate in 000062: % su 2', n_cl, n_rr;
   END IF;
 
   SELECT count(*) INTO n_ck FROM pg_constraint
    WHERE conname IN ('sys_agent_requests_cap_ck', 'sys_agent_requests_reason_ck',
                      'sys_agent_requests_decided_ck', 'sys_agent_call_log_measures_ck');
-  IF n_ck <> 4 THEN RAISE EXCEPTION '000499: i CHECK su tetto, motivo, decisione e misure sono % invece di 4', n_ck; END IF;
+  IF n_ck <> 4 THEN RAISE EXCEPTION '000501: i CHECK su tetto, motivo, decisione e misure sono % invece di 4', n_ck; END IF;
 
   SELECT count(*) INTO n_perm FROM sys.sys_auth_permissions
    WHERE auth_permission_code IN ('agent_request:decide', 'agent_request:read:all');
-  IF n_perm <> 2 THEN RAISE EXCEPTION '000499: i permessi sono % invece di 2', n_perm; END IF;
+  IF n_perm <> 2 THEN RAISE EXCEPTION '000501: i permessi sono % invece di 2', n_perm; END IF;
 
   -- i due permessi stanno a PLATFORM_ADMIN e a nessun altro ruolo
   SELECT count(*) INTO n_rp FROM sys.sys_auth_role_permissions rp
@@ -198,14 +198,14 @@ BEGIN
    WHERE p.auth_permission_code IN ('agent_request:decide', 'agent_request:read:all')
      AND r.auth_role_code <> 'PLATFORM_ADMIN' AND rp.revoked_at IS NULL;
   IF n_rp <> 2 OR n_fuori <> 0 THEN
-    RAISE EXCEPTION '000499: a PLATFORM_ADMIN % permessi su 2, ad altri ruoli %', n_rp, n_fuori;
+    RAISE EXCEPTION '000501: a PLATFORM_ADMIN % permessi su 2, ad altri ruoli %', n_rp, n_fuori;
   END IF;
 
   SELECT count(*) INTO n_trad FROM sys.sys_reference_translations t
     JOIN sys.sys_auth_permissions p ON p.auth_permission_id = t.entity_id
    WHERE t.entity_table = 'sys_auth_permissions' AND t.locale = 'en' AND t.field = 'name'
      AND p.auth_permission_code IN ('agent_request:decide', 'agent_request:read:all');
-  IF n_trad <> 2 THEN RAISE EXCEPTION '000499: le traduzioni EN dei permessi sono % su 2', n_trad; END IF;
+  IF n_trad <> 2 THEN RAISE EXCEPTION '000501: le traduzioni EN dei permessi sono % su 2', n_trad; END IF;
 
-  RAISE NOTICE '000499 ok: 2 tabelle, 2 permessi a PLATFORM_ADMIN soltanto';
+  RAISE NOTICE '000501 ok: 2 tabelle, 2 permessi a PLATFORM_ADMIN soltanto';
 END $$;

@@ -978,7 +978,13 @@
         "POSITIONS_ROLES": "Posizioni e ruoli",
         "SKILLS": "Competenze",
         "PROCESSES": "Processi",
-        "INDICATORS_GOALS": "Indicatori e obiettivi"
+        "INDICATORS_GOALS": "Indicatori e obiettivi",
+        "CONTRACTS": "Contratti e livelli",
+        "OBLIGATIONS": "Obblighi normativi",
+        "TRAINING": "Formazione",
+        "CAREERS": "Carriere",
+        "INCENTIVES": "Incentivi",
+        "ENGAGEMENTS": "Commesse"
       }
     }
   },

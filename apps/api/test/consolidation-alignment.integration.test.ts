@@ -16,7 +16,8 @@ import type { RoleCode } from "../src/config/constants.js";
 import { tenantConsolidationService as svc } from "../src/modules/tenant-consolidation/service.js";
 import { registraCorsa } from "../src/modules/tenant-consolidation/corse.js";
 import { DOMINI_DISTANZA } from "../src/modules/tenant-consolidation/distanza.js";
-import { vociDelPrototipo } from "../src/modules/tenant-consolidation/sorgenti.js";
+import { vociDelPrototipo, vociDelTenant } from "../src/modules/tenant-consolidation/sorgenti.js";
+import { CONSOLIDATION_GROUP_VALUES } from "@heuresys/shared";
 
 let direttore: ActorContext;
 let runId = "";
@@ -174,5 +175,80 @@ describe("S1: i giri leggono l'indirizzo ESCO dalla colonna", () => {
     const pos = await vociDelPrototipo(pool, versioneProva, "POSITIONS_ROLES");
     expect(pos.find((v) => v.key === "P-S1")).toMatchObject({ escoUri: occ, type: "JR-S1" });
     expect(pos.filter((v) => v.key === "P-VERA")).toHaveLength(1);
+  });
+});
+
+describe("SA5: i giri guardano i sei cataloghi con nome", () => {
+  it("i gruppi nuovi stanno in coda, dopo i cinque di prima", () => {
+    expect(CONSOLIDATION_GROUP_VALUES.slice(0, 5)).toEqual(["ORGANIZATION", "POSITIONS_ROLES", "SKILLS", "PROCESSES", "INDICATORS_GOALS"]);
+    expect(CONSOLIDATION_GROUP_VALUES.slice(5)).toEqual(["CONTRACTS", "OBLIGATIONS", "TRAINING", "CAREERS", "INCENTIVES", "ENGAGEMENTS"]);
+  });
+
+  it("i vincoli del registro accettano i gruppi nuovi (000500)", async () => {
+    const { rows } = await pool.query<{ conname: string; def: string }>(
+      `SELECT conname, pg_get_constraintdef(oid) AS def FROM pg_constraint
+        WHERE conname IN ('sys_tenant_consolidations_group_ck', 'sys_tenant_consolidation_rounds_group_ck',
+                          'sys_tenant_consolidation_working_items_group_ck', 'sys_tenant_consolidation_proposals_group_ck',
+                          'sys_platform_vocabulary_equivalences_group_ck', 'sys_tenant_consolidation_links_group_ck',
+                          'sys_user_delegations_groups_ck')`);
+    expect(rows).toHaveLength(7);
+    for (const r of rows) {
+      for (const g of CONSOLIDATION_GROUP_VALUES) expect(r.def, r.conname).toContain(g);
+    }
+    // La delega tiene la clausola che la 000465 pretende: alla passata dopo la 000465 non la riscrive.
+    expect(rows.find((r) => r.conname === "sys_user_delegations_groups_ck")!.def).toContain("user_delegation_groups IS NOT NULL");
+  });
+
+  it("il lato del modello porta contratti e livelli, obblighi, formazione, carriere, incentivi e commesse", async () => {
+    const V = versioneProva;
+    await pool.query(
+      `INSERT INTO sys.sys_blueprint_content_ccnl (blueprint_content_ccnl_version_id, blueprint_content_ccnl_code, blueprint_content_ccnl_name)
+       VALUES ($1, 'CCNL-P', 'CCNL di prova')`, [V]);
+    await pool.query(
+      `INSERT INTO sys.sys_blueprint_content_ccnl_levels
+         (blueprint_content_ccnl_level_version_id, blueprint_content_ccnl_level_ccnl_code, blueprint_content_ccnl_level_code,
+          blueprint_content_ccnl_level_name, blueprint_content_ccnl_level_category)
+       VALUES ($1, 'CCNL-P', 'L1', 'Primo livello di prova', 'IMPIEGATO')`, [V]);
+    await pool.query(
+      `INSERT INTO sys.sys_blueprint_content_obligations
+         (blueprint_content_obligation_version_id, blueprint_content_obligation_code, blueprint_content_obligation_norm,
+          blueprint_content_obligation_scope, blueprint_content_obligation_subject)
+       VALUES ($1, 'OB-P', 'Norma di prova', 'SICUREZZA', 'Obbligo di prova')`, [V]);
+    await pool.query(
+      `INSERT INTO sys.sys_blueprint_content_training
+         (blueprint_content_training_version_id, blueprint_content_training_code, blueprint_content_training_title, blueprint_content_training_kind)
+       VALUES ($1, 'TR-P', 'Corso di prova', 'CORSO')`, [V]);
+    await pool.query(
+      `INSERT INTO sys.sys_blueprint_content_career_paths
+         (blueprint_content_career_version_id, blueprint_content_career_code, blueprint_content_career_name, blueprint_content_career_kind)
+       VALUES ($1, 'CA-P', 'Percorso di prova', 'VERTICAL')`, [V]);
+    await pool.query(
+      `INSERT INTO sys.sys_blueprint_content_incentives
+         (blueprint_content_incentive_version_id, blueprint_content_incentive_code, blueprint_content_incentive_name, blueprint_content_incentive_kind)
+       VALUES ($1, 'IN-P', 'Premio di prova', 'MBO')`, [V]);
+    await pool.query(
+      `INSERT INTO sys.sys_blueprint_content_engagements
+         (blueprint_content_engagement_version_id, blueprint_content_engagement_code, blueprint_content_engagement_name, blueprint_content_engagement_kind)
+       VALUES ($1, 'EN-P', 'Commessa di prova', 'ALTRO')`, [V]);
+
+    const contratti = await vociDelPrototipo(pool, V, "CONTRACTS");
+    expect(contratti.find((v) => v.key === "CCNL:CCNL-P")).toMatchObject({ name: "CCNL di prova", type: "CCNL" });
+    expect(contratti.find((v) => v.key === "LIV:CCNL-P|L1")).toMatchObject({ name: "Primo livello di prova", parentName: "CCNL di prova", level: "IMPIEGATO" });
+    expect((await vociDelPrototipo(pool, V, "OBLIGATIONS")).find((v) => v.key === "OB-P")).toMatchObject({ name: "Obbligo di prova", type: "SICUREZZA" });
+    expect((await vociDelPrototipo(pool, V, "TRAINING")).find((v) => v.key === "TR-P")).toMatchObject({ name: "Corso di prova", level: "CORSO" });
+    expect((await vociDelPrototipo(pool, V, "CAREERS")).find((v) => v.key === "CA-P")).toMatchObject({ name: "Percorso di prova" });
+    expect((await vociDelPrototipo(pool, V, "INCENTIVES")).find((v) => v.key === "IN-P")).toMatchObject({ name: "Premio di prova", type: "MBO" });
+    expect((await vociDelPrototipo(pool, V, "ENGAGEMENTS")).find((v) => v.key === "EN-P")).toMatchObject({ name: "Commessa di prova" });
+  });
+
+  it("il lato del tenant si legge per ogni gruppo nuovo, senza identificativi di persona; gli obblighi sono vuoti", async () => {
+    expect(await vociDelTenant(pool, direttore.tenantId!, "OBLIGATIONS")).toEqual([]);
+    for (const g of ["CONTRACTS", "TRAINING", "CAREERS", "INCENTIVES", "ENGAGEMENTS"] as const) {
+      const voci = await vociDelTenant(pool, direttore.tenantId!, g);
+      for (const v of voci) expect(v.name, `${g} ${v.key}`).toBeTruthy();
+      expect(new Set(voci.map((v) => v.key)).size, g).toBe(voci.length);
+    }
+    const contratti = await vociDelTenant(pool, direttore.tenantId!, "CONTRACTS");
+    for (const v of contratti) expect(v.key).toMatch(/^(CCNL:|LIV:)/);
   });
 });

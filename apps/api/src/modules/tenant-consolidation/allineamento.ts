@@ -31,6 +31,8 @@ import type { DbConnector } from "./repository.js";
  */
 export const DOMINI_NEI_GIRI: ReadonlySet<DominioDistanza> = new Set<DominioDistanza>([
   "unita", "ruoli", "skill", "processi", "fasi", "metriche", "obiettivi",
+  // SA5: i sei cataloghi con nome entrati nei giri (gruppi CONTRACTS … ENGAGEMENTS).
+  "ccnl", "obblighi", "formazione", "carriere", "incentivi", "commesse",
 ]);
 
 /**

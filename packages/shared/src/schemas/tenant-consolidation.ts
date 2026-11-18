@@ -25,6 +25,14 @@ export const CONSOLIDATION_GROUP_VALUES = [
   "SKILLS",
   "PROCESSES",
   "INDICATORS_GOALS",
+  // I sei cataloghi con nome che i giri non guardavano (piano PIANO_scheda-allineamento_20261118, voce SA5).
+  // Si aggiungono in coda: l'ordine dei cinque gruppi di prima non cambia.
+  "CONTRACTS",
+  "OBLIGATIONS",
+  "TRAINING",
+  "CAREERS",
+  "INCENTIVES",
+  "ENGAGEMENTS",
 ] as const;
 export const ConsolidationGroupSchema = z.enum(CONSOLIDATION_GROUP_VALUES);
 export type ConsolidationGroup = z.infer<typeof ConsolidationGroupSchema>;

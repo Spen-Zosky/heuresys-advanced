@@ -334,7 +334,7 @@ export default function ConsolidationPage() {
                 <p className="text-xs text-muted-foreground">{t("consolidation.approval.previewHint")}</p>
               </div>
             ) : null}
-            <ol data-testid="consolidation-groups" className="grid gap-2 sm:grid-cols-5">
+            <ol data-testid="consolidation-groups" className="grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
               {CONSOLIDATION_GROUP_VALUES.map((g) => {
                 const p = avanzamento.find((x) => x.group === g);
                 const aperto = corrente.openGroup === g;

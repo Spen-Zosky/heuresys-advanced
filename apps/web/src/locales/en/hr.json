@@ -436,7 +436,13 @@
       "POSITIONS_ROLES": "Positions and roles",
       "SKILLS": "Skills",
       "PROCESSES": "Processes",
-      "INDICATORS_GOALS": "Indicators and goals"
+      "INDICATORS_GOALS": "Indicators and goals",
+      "CONTRACTS": "Contracts and levels",
+      "OBLIGATIONS": "Legal obligations",
+      "TRAINING": "Training",
+      "CAREERS": "Careers",
+      "INCENTIVES": "Incentives",
+      "ENGAGEMENTS": "Engagements"
     },
     "open": "Open",
     "done": "Done",

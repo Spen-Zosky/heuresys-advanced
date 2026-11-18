@@ -14,6 +14,9 @@
  *
  * Gruppo 5: il tenant porta i suoi indicatori; il prototipo indicatori e modelli di obiettivo.
  * Gli obiettivi assegnati alle persone sono dati di gestione, non struttura (misura di AC-0).
+ *
+ * Gruppi 6-11 (SA5, piano 20261118): contratti, obblighi, formazione, carriere, incentivi, commesse. Le stesse
+ * tabelle che la misura della distanza (distanza.ts) confronta per nome; qui con chiave, codice e descrizione.
  */
 import type { ConsolidationGroup } from "@heuresys/shared";
 import type { DbConnector } from "./repository.js";
@@ -93,6 +96,55 @@ const TENANT: Record<ConsolidationGroup, string> = {
       FROM sys.sys_kpi_definitions k
      WHERE k.kpi_definition_tenant_id = $1
      ORDER BY k.kpi_definition_code`,
+  // Contratti (SA5): il tenant non ha un catalogo dei CCNL, li porta nei contratti di lavoro. Si leggono il tipo
+  // di CCNL e i livelli in uso, distinti: nessuna riga di persona entra nel lotto, solo il nome del contratto.
+  CONTRACTS: `
+    SELECT 'CCNL:' || c.ccnl AS key, c.ccnl AS name, NULL::text AS code, NULL::text AS description,
+           'CCNL'::text AS type, NULL::text AS level, NULL::text AS parent_name, NULL::text AS esco_uri,
+           NULL::text[] AS activities
+      FROM (SELECT DISTINCT user_contract_ccnl_type AS ccnl FROM sys.sys_user_contracts
+             WHERE user_contract_tenant_id = $1 AND user_contract_ccnl_type IS NOT NULL) c
+    UNION ALL
+    SELECT 'LIV:' || l.ccnl || '|' || l.livello, l.livello, l.livello, NULL::text, 'LIVELLO'::text, l.livello, l.ccnl,
+           NULL::text, NULL::text[]
+      FROM (SELECT DISTINCT user_contract_ccnl_type AS ccnl, user_contract_ccnl_level AS livello FROM sys.sys_user_contracts
+             WHERE user_contract_tenant_id = $1 AND user_contract_ccnl_type IS NOT NULL AND user_contract_ccnl_level IS NOT NULL) l
+     ORDER BY 1`,
+  // Obblighi normativi (SA5): advanced non ha una tabella degli obblighi del tenant, quindi il lato del tenant è
+  // vuoto e ogni obbligo del modello esce come lacuna. È la misura vera, non un ripiego.
+  OBLIGATIONS: `
+    SELECT NULL::text AS key, NULL::text AS name, NULL::text AS code, NULL::text AS description, NULL::text AS type,
+           NULL::text AS level, NULL::text AS parent_name, NULL::text AS esco_uri, NULL::text[] AS activities
+     WHERE false AND $1::uuid IS NOT NULL`,
+  TRAINING: `
+    SELECT m.learning_module_id::text AS key, m.learning_module_title AS name, m.learning_module_code AS code,
+           m.learning_module_description AS description, m.learning_module_delivery AS type, m.learning_module_kind AS level,
+           NULL::text AS parent_name, NULL::text AS esco_uri, NULL::text[] AS activities
+      FROM sys.sys_learning_modules m
+     WHERE m.learning_module_tenant_id = $1
+     ORDER BY m.learning_module_code`,
+  CAREERS: `
+    SELECT c.career_path_id::text AS key, c.career_path_name AS name, c.career_path_code AS code,
+           c.career_path_description AS description, c.career_path_kind AS type, NULL::text AS level,
+           NULL::text AS parent_name, NULL::text AS esco_uri, NULL::text[] AS activities
+      FROM sys.sys_career_paths c
+     WHERE c.career_path_tenant_id = $1
+     ORDER BY c.career_path_code`,
+  INCENTIVES: `
+    SELECT r.objective_reward_rule_id::text AS key, r.objective_reward_rule_name AS name, r.objective_reward_rule_code AS code,
+           NULL::text AS description, NULL::text AS type, NULL::text AS level,
+           NULL::text AS parent_name, NULL::text AS esco_uri, NULL::text[] AS activities
+      FROM sys.sys_objective_reward_rules r
+     WHERE r.objective_reward_rule_tenant_id = $1
+     ORDER BY r.objective_reward_rule_code`,
+  ENGAGEMENTS: `
+    SELECT x.project_id::text AS key, x.project_name AS name, x.project_code AS code,
+           x.project_purpose AS description, NULL::text AS type, NULL::text AS level,
+           u.organization_unit_name AS parent_name, NULL::text AS esco_uri, NULL::text[] AS activities
+      FROM sys.sys_projects x
+      LEFT JOIN sys.sys_organization_units u ON u.organization_unit_id = x.project_organization_unit_id
+     WHERE x.project_tenant_id = $1
+     ORDER BY x.project_code`,
 };
 
 const PROTOTIPO: Record<ConsolidationGroup, string> = {
@@ -162,6 +214,62 @@ const PROTOTIPO: Record<ConsolidationGroup, string> = {
       FROM sys.sys_blueprint_content_goals g
      WHERE g.blueprint_content_goal_version_id = $1
      ORDER BY 1`,
+  CONTRACTS: `
+    SELECT 'CCNL:' || c.blueprint_content_ccnl_code AS key, c.blueprint_content_ccnl_name AS name,
+           c.blueprint_content_ccnl_code AS code, c.blueprint_content_ccnl_scope AS description, 'CCNL'::text AS type,
+           NULL::text AS level, NULL::text AS parent_name, NULL::text AS esco_uri, NULL::text[] AS activities
+      FROM sys.sys_blueprint_content_ccnl c
+     WHERE c.blueprint_content_ccnl_version_id = $1
+    UNION ALL
+    SELECT 'LIV:' || l.blueprint_content_ccnl_level_ccnl_code || '|' || l.blueprint_content_ccnl_level_code,
+           l.blueprint_content_ccnl_level_name, l.blueprint_content_ccnl_level_code, l.blueprint_content_ccnl_level_duties,
+           'LIVELLO'::text, l.blueprint_content_ccnl_level_category, c.blueprint_content_ccnl_name, NULL::text, NULL::text[]
+      FROM sys.sys_blueprint_content_ccnl_levels l
+      LEFT JOIN sys.sys_blueprint_content_ccnl c
+        ON c.blueprint_content_ccnl_version_id = l.blueprint_content_ccnl_level_version_id
+       AND c.blueprint_content_ccnl_code = l.blueprint_content_ccnl_level_ccnl_code
+     WHERE l.blueprint_content_ccnl_level_version_id = $1
+     ORDER BY 1`,
+  OBLIGATIONS: `
+    SELECT o.blueprint_content_obligation_code AS key,
+           coalesce(o.blueprint_content_obligation_subject, o.blueprint_content_obligation_norm) AS name,
+           o.blueprint_content_obligation_code AS code,
+           concat_ws(' — ', o.blueprint_content_obligation_norm, o.blueprint_content_obligation_periodicity) AS description,
+           o.blueprint_content_obligation_scope AS type, NULL::text AS level, NULL::text AS parent_name,
+           NULL::text AS esco_uri, NULL::text[] AS activities
+      FROM sys.sys_blueprint_content_obligations o
+     WHERE o.blueprint_content_obligation_version_id = $1
+     ORDER BY o.blueprint_content_obligation_code`,
+  TRAINING: `
+    SELECT t.blueprint_content_training_code AS key, t.blueprint_content_training_title AS name,
+           t.blueprint_content_training_code AS code, NULL::text AS description, t.blueprint_content_training_delivery AS type,
+           t.blueprint_content_training_kind AS level, NULL::text AS parent_name, NULL::text AS esco_uri, NULL::text[] AS activities
+      FROM sys.sys_blueprint_content_training t
+     WHERE t.blueprint_content_training_version_id = $1
+     ORDER BY t.blueprint_content_training_code`,
+  CAREERS: `
+    SELECT c.blueprint_content_career_code AS key, c.blueprint_content_career_name AS name,
+           c.blueprint_content_career_code AS code, NULL::text AS description, c.blueprint_content_career_kind AS type,
+           NULL::text AS level, NULL::text AS parent_name, NULL::text AS esco_uri, NULL::text[] AS activities
+      FROM sys.sys_blueprint_content_career_paths c
+     WHERE c.blueprint_content_career_version_id = $1
+     ORDER BY c.blueprint_content_career_code`,
+  INCENTIVES: `
+    SELECT i.blueprint_content_incentive_code AS key, i.blueprint_content_incentive_name AS name,
+           i.blueprint_content_incentive_code AS code, i.blueprint_content_incentive_rule AS description,
+           i.blueprint_content_incentive_kind AS type, NULL::text AS level, NULL::text AS parent_name,
+           NULL::text AS esco_uri, NULL::text[] AS activities
+      FROM sys.sys_blueprint_content_incentives i
+     WHERE i.blueprint_content_incentive_version_id = $1
+     ORDER BY i.blueprint_content_incentive_code`,
+  ENGAGEMENTS: `
+    SELECT e.blueprint_content_engagement_code AS key, e.blueprint_content_engagement_name AS name,
+           e.blueprint_content_engagement_code AS code, e.blueprint_content_engagement_description AS description,
+           e.blueprint_content_engagement_kind AS type, NULL::text AS level, NULL::text AS parent_name,
+           NULL::text AS esco_uri, NULL::text[] AS activities
+      FROM sys.sys_blueprint_content_engagements e
+     WHERE e.blueprint_content_engagement_version_id = $1
+     ORDER BY e.blueprint_content_engagement_code`,
 };
 
 export async function vociDelTenant(q: DbConnector, tenantId: string, group: ConsolidationGroup): Promise<Voce[]> {

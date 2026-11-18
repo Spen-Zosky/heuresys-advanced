@@ -10,6 +10,7 @@
  */
 
 import { z } from "zod";
+import { CONSOLIDATION_GROUP_VALUES } from "./tenant-consolidation.js";
 import { paginationFields } from "./_pagination.js";
 import { queryBoolean } from "./_query-boolean.js";
 
@@ -113,7 +114,7 @@ export const CreateDelegationBodySchema = z.object({
   delegateUserId: z.uuid(),
   scope: DelegationScopeSchema.optional().default("APPROVALS"),
   /** Obbligatorio per CONSOLIDATION, vietato per gli altri ambiti (lo controlla anche il CHECK della 000465). */
-  groups: z.array(z.enum(["ORGANIZATION", "POSITIONS_ROLES", "SKILLS", "PROCESSES", "INDICATORS_GOALS"])).min(1).max(5).optional(),
+  groups: z.array(z.enum(CONSOLIDATION_GROUP_VALUES)).min(1).max(CONSOLIDATION_GROUP_VALUES.length).optional(),
   /** Solo per APPROVALS: restringe la delega a un tipo di richiesta (ADR-0051). */
   requestType: DelegableRequestTypeSchema.nullable().optional(),
   /** Obbligatorio per PROCESS_STEP, vietato per gli altri ambiti (CHECK della 000468). */

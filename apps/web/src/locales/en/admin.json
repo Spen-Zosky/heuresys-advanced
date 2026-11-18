@@ -1040,6 +1040,157 @@
       "datiIrraggiungibili": "Dashboard data unreachable",
       "nonDisponibileTitolo": "Dashboard not available",
       "nonDisponibileTesto": "This dashboard does not exist or is outside your permissions."
+    },
+    "catalogo": {
+      "famiglie": {
+        "branch": "Branch dashboard",
+        "company": "Company dashboard",
+        "hr": "HR management dashboard",
+        "org": "Organisation dashboard",
+        "platform": "Platform dashboard",
+        "process": "Processes dashboard",
+        "self": "Self-service dashboard",
+        "tenant": "Tenant management dashboard"
+      },
+      "viste": {
+        "branch": {
+          "organico-filiale": "Branch headcount",
+          "attivita-filiale": "Branch activity",
+          "competenze-filiale": "Branch skills"
+        },
+        "company": {
+          "headcount": "Total headcount",
+          "andamento-organico": "Headcount trend",
+          "copertura-competenze": "Skills coverage",
+          "andamento-valutazioni": "Review trend"
+        },
+        "hr": {
+          "organico": "Headcount",
+          "retribuzioni": "Pay",
+          "valutazioni": "Reviews",
+          "formazione": "Learning",
+          "assenze": "Absences and time off"
+        },
+        "org": {
+          "struttura-unita": "Unit structure",
+          "posizioni-scoperte": "Vacant positions",
+          "catena-di-riporto": "Reporting chain"
+        },
+        "platform": {
+          "salute-sistema": "System health",
+          "credenziali-e-accessi": "Credentials and access",
+          "job-e-corse": "Jobs and scheduled runs"
+        },
+        "process": {
+          "processi-attivi": "Active processes",
+          "attivita-recenti": "Recent activity",
+          "approvazioni-in-coda": "Approvals in the queue"
+        },
+        "self": {
+          "il-mio-profilo": "My profile",
+          "le-mie-attivita": "My activity",
+          "la-mia-formazione": "My learning"
+        },
+        "tenant": {
+          "configurazione-tenant": "Tenant configuration",
+          "blueprint-adottati": "Adopted blueprints",
+          "utenti-del-tenant": "Tenant users"
+        }
+      },
+      "colonne": {
+        "company": {
+          "copertura-competenze": {
+            "label": "Skill",
+            "detail": "Level",
+            "value": "People"
+          }
+        },
+        "process": {
+          "processi-attivi": {
+            "label": "Process",
+            "detail": "Type",
+            "value": "Units"
+          },
+          "attivita-recenti": {
+            "label": "Activity",
+            "detail": "Date"
+          }
+        },
+        "org": {
+          "struttura-unita": {
+            "label": "Unit",
+            "detail": "Type",
+            "value": "Active positions"
+          },
+          "posizioni-scoperte": {
+            "label": "Vacant position",
+            "detail": "Unit"
+          },
+          "catena-di-riporto": {
+            "label": "Unit",
+            "detail": "Manager",
+            "value": "Subordinate units"
+          }
+        },
+        "branch": {
+          "organico-filiale": {
+            "label": "Branch",
+            "value": "People"
+          },
+          "attivita-filiale": {
+            "label": "Activity",
+            "detail": "Date"
+          },
+          "competenze-filiale": {
+            "label": "Skill",
+            "value": "People"
+          }
+        },
+        "platform": {
+          "job-e-corse": {
+            "label": "Run",
+            "detail": "Status and start"
+          }
+        },
+        "tenant": {
+          "configurazione-tenant": {
+            "label": "Tenant",
+            "detail": "Status, industry and size"
+          },
+          "blueprint-adottati": {
+            "label": "Set-up model",
+            "detail": "Status"
+          }
+        },
+        "self": {
+          "il-mio-profilo": {
+            "label": "Person",
+            "detail": "Position and unit"
+          },
+          "le-mie-attivita": {
+            "label": "Activity",
+            "detail": "Date"
+          }
+        }
+      },
+      "contatori": {
+        "attivi": "People in service",
+        "cessati": "Ended employments",
+        "posizioni": "Active positions",
+        "unita": "Organisational units",
+        "pending": "Awaiting a decision",
+        "tenant": "Active companies",
+        "utenti": "Active people",
+        "competenze": "Skills in the catalogue",
+        "correnti": "Current credentials",
+        "da_ruotare": "To rotate",
+        "algoritmi": "Algorithms in use"
+      },
+      "evento": {
+        "COURSE_COMPLETED": "Course completed: {{subject}}",
+        "CERTIFICATION_EARNED": "Certification earned: {{subject}}",
+        "HIRE": "Hired as {{subject}}"
+      }
     }
   },
   "visualizations": {

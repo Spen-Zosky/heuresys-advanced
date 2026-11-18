@@ -55,7 +55,7 @@ const serie = (p: Array<{ bucket: string; value: number }>): DashboardBlockConte
 });
 
 const elenco = (
-  r: Array<{ id: string; label: string; detail: string | null; value: number | null }>,
+  r: Array<{ id: string; label: string; detail: string | null; value: number | null; kind?: string; subject?: string; occurredAt?: string }>,
 ): DashboardBlockContent => ({ kind: "list", rows: r });
 
 const n = (v: unknown): number => Number(v ?? 0);
@@ -96,6 +96,40 @@ export const tipoRipetuto = (frase: unknown, tipo: unknown): boolean => {
   const radice = (t: string): string => t.trim().split(/\s+/)[0]?.toLowerCase().slice(0, 5) ?? "";
   const a = radice(s(frase));
   return a !== "" && a === radice(etichettaEvento(tipo));
+};
+
+/**
+ * C22 (giro qa-web 18/11, G-RENDER): la frase di un evento della storia («Corso completato: …») e'
+ * un testo scritto in italiano e salvato nel dato: in una pagina inglese restava italiano. L'API non
+ * compone frasi per chi guarda: restituisce il tipo e il soggetto, e il web compone la frase con i18n
+ * nella lingua della persona (come `dashboard.activityKind`). Il soggetto e' cio' che segue il
+ * prefisso noto del tipo; se la frase non comincia col prefisso, non si inventa niente e la riga
+ * resta com'e'.
+ */
+const PREFISSI_EVENTO: Record<string, string> = {
+  COURSE_COMPLETED: "Corso completato: ",
+  CERTIFICATION_EARNED: "Certificazione conseguita: ",
+  HIRE: "Assunto come ",
+};
+export const parametriEvento = (tipo: unknown, frase: unknown): { kind: string; subject: string } | null => {
+  const prefisso = PREFISSI_EVENTO[s(tipo)];
+  const testo = s(frase);
+  if (!prefisso || !testo.startsWith(prefisso)) return null;
+  const subject = testo.slice(prefisso.length).trim();
+  return subject === "" ? null : { kind: s(tipo), subject };
+};
+
+/** Una riga di evento: tipo e soggetto per il web, e la frase intera come ripiego. */
+const rigaEvento = (x: { id: unknown; label: unknown; tipo: unknown; occorso?: unknown; giorno?: unknown }, detail: string | null) => {
+  const p = parametriEvento(x.tipo, x.label);
+  return {
+    id: s(x.id),
+    label: s(x.label),
+    detail,
+    value: null,
+    ...(p ? { kind: p.kind, subject: p.subject } : {}),
+    ...(x.giorno ? { occurredAt: s(x.giorno) } : {}),
+  };
 };
 
 /** Le unità del perimetro, espanse alla discendenza: I19 vuole la catena, non il solo livello. */
@@ -274,11 +308,12 @@ const processProcessiAttivi: Fornitore = async (q, p) => {
 };
 
 const processAttivitaRecenti: Fornitore = async (q, p) => {
-  const r = await q.query<{ id: string; label: string; detail: string; occorso: string }>(
+  const r = await q.query<{ id: string; label: string; detail: string; occorso: string; giorno: string }>(
     `SELECT e.user_timeline_event_id::text AS id,
             e.user_timeline_event_summary AS label,
             e.user_timeline_event_type AS detail,
-            to_char(e.user_timeline_event_occurred_at, 'DD/MM/YYYY') AS occorso
+            to_char(e.user_timeline_event_occurred_at, 'DD/MM/YYYY') AS occorso,
+            to_char(e.user_timeline_event_occurred_at, 'YYYY-MM-DD') AS giorno
        FROM sys.sys_user_timeline_events e
        JOIN sys.sys_users su ON su.user_id = e.user_timeline_event_user_id
       WHERE ($1::uuid IS NULL OR e.user_timeline_event_tenant_id = $1::uuid)
@@ -288,12 +323,10 @@ const processAttivitaRecenti: Fornitore = async (q, p) => {
     [p.tenantId, TIPI_EVENTO_RISERVATI],
   );
   return elenco(
-    r.rows.map((x) => ({
-      id: s(x.id),
-      label: s(x.label),
-      detail: tipoRipetuto(x.label, x.detail) ? s(x.occorso) : `${etichettaEvento(x.detail)} · ${s(x.occorso)}`,
-      value: null,
-    })),
+    r.rows.map((x) => rigaEvento(
+      { id: x.id, label: x.label, tipo: x.detail, giorno: x.giorno },
+      tipoRipetuto(x.label, x.detail) ? s(x.occorso) : `${etichettaEvento(x.detail)} · ${s(x.occorso)}`,
+    )),
   );
 };
 
@@ -432,11 +465,12 @@ const branchOrganico: Fornitore = async (q, p) => {
 };
 
 const branchAttivita: Fornitore = async (q, p) => {
-  const r = await q.query<{ id: string; label: string; detail: string }>(
+  const r = await q.query<{ id: string; label: string; detail: string; giorno: string }>(
     `${CTE_FILIALI}
      SELECT e.user_timeline_event_id::text AS id,
             e.user_timeline_event_summary AS label,
-            e.user_timeline_event_type AS detail
+            e.user_timeline_event_type AS detail,
+            to_char(e.user_timeline_event_occurred_at, 'YYYY-MM-DD') AS giorno
        FROM sys.sys_user_timeline_events e
        JOIN sys.sys_users su ON su.user_id = e.user_timeline_event_user_id
        JOIN sys.sys_user_position_assignments a
@@ -450,7 +484,10 @@ const branchAttivita: Fornitore = async (q, p) => {
     [...P(p), TIPI_EVENTO_RISERVATI],
   );
   return elenco(
-    r.rows.map((x) => ({ id: s(x.id), label: s(x.label), detail: tipoRipetuto(x.label, x.detail) ? null : etichettaEvento(x.detail), value: null })),
+    r.rows.map((x) => rigaEvento(
+      { id: x.id, label: x.label, tipo: x.detail, giorno: x.giorno },
+      tipoRipetuto(x.label, x.detail) ? null : etichettaEvento(x.detail),
+    )),
   );
 };
 
@@ -703,18 +740,22 @@ const selfProfilo: Fornitore = async (q, p) => {
 };
 
 const selfAttivita: Fornitore = async (q, p) => {
-  const r = await q.query<{ id: string; label: string; tipo: string; occorso: string }>(
+  const r = await q.query<{ id: string; label: string; tipo: string; occorso: string; giorno: string }>(
     `SELECT e.user_timeline_event_id::text AS id,
             e.user_timeline_event_summary AS label,
             e.user_timeline_event_type AS tipo,
-            to_char(e.user_timeline_event_occurred_at, 'DD/MM/YYYY') AS occorso
+            to_char(e.user_timeline_event_occurred_at, 'DD/MM/YYYY') AS occorso,
+            to_char(e.user_timeline_event_occurred_at, 'YYYY-MM-DD') AS giorno
        FROM sys.sys_user_timeline_events e
       WHERE e.user_timeline_event_user_id = $1::uuid
       ORDER BY e.user_timeline_event_occurred_at DESC NULLS LAST LIMIT 15`,
     [p.userId],
   );
   return elenco(
-    r.rows.map((x) => ({ id: s(x.id), label: s(x.label), detail: tipoRipetuto(x.label, x.tipo) ? s(x.occorso) : `${etichettaEvento(x.tipo)} · ${s(x.occorso)}`, value: null })),
+    r.rows.map((x) => rigaEvento(
+      { id: x.id, label: x.label, tipo: x.tipo, giorno: x.giorno },
+      tipoRipetuto(x.label, x.tipo) ? s(x.occorso) : `${etichettaEvento(x.tipo)} · ${s(x.occorso)}`,
+    )),
   );
 };
 

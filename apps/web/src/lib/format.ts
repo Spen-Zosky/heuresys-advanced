@@ -175,7 +175,8 @@ export function formati(lingua: string | undefined): Formati {
     if (abs < 3600) return rtf.format(Math.round(sec / 60), "minute");
     if (abs < 86_400) return rtf.format(Math.round(sec / 3600), "hour");
     if (abs < 30 * 86_400) return rtf.format(Math.round(sec / 86_400), "day");
-    return data(v);
+    if (abs < 365 * 86_400) return rtf.format(Math.round(sec / (30 * 86_400)), "month");
+    return rtf.format(Math.round(sec / (365 * 86_400)), "year");
   };
 
   const paese = (codice: string | null | undefined) => {

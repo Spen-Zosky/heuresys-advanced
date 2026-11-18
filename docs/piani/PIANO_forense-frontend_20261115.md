@@ -27,12 +27,15 @@ Che cosa non si chiude in questo ciclo: le correzioni delle pagine escluse sopra
 | I3 | Dati 2: portale personale `me/*` (tranne me/org-chart), per persone di ruoli diversi | subagent | rapporto `dati-2.md` | FATTO (dati-2.md, 26 rilievi) |
 | I4 | Dati 3: tutte le altre pagine di prodotto (posizioni, persone, approvazioni, recruiting, learning, engagement, progetti, contenuti, tenant, modelli, processi, admin, org-director, system-health, provenance, consolidation) | subagent | rapporto `dati-3.md` | FATTO (dati-3.md, 24 rilievi; dettagli NON VERIFICATI per 429, si rifanno nel giro qa-web) |
 | I5 | Sorgente, rotte e contratto API: regole C1-C15 nel codice, chiamate del web contro le rotte dell'API e i permessi, voci di menu contro pagine raggiungibili, i18n, typecheck e lint | subagent | rapporto `sorgente-api.md` | FATTO (sorgente-api.md, 14 rilievi) |
-| C1 | Prima ondata: S-01, S-02, S-03, S-04, S-05, S-08, D3-04, D3-05, D3-06, D3-06b, D3-07, D3-08, sessione per persona nell'adattatore qa-web | Claude | PR #262 unita con CI verde | ACTIVE (codice fatto, attende CI e unione) |
-| C2 | Portale personale: rilievi D2-01..D2-26 di `dati-2.md` | subagent, ramo `claude/forense-portale` | PR unita con CI verde, tabella rilievo→esito | ACTIVE (riunita in #262; esiti in esiti-correzioni.md) |
-| C3 | Cruscotti e analisi: rilievi D1..D21 di `dati-1.md` | subagent, ramo `claude/forense-cruscotti` | PR unita con CI verde, tabella rilievo→esito | ACTIVE (riunita in #262; esiti in esiti-correzioni.md) |
-| C4 | Amministrazione e sorgente: D3-02, 09, 12-17, 20, 21, 23 di `dati-3.md`; S-06, S-07, S-09, S-10, S-11 di `sorgente-api.md` | subagent, ramo `claude/forense-amministrazione` | PR unita con CI verde, tabella rilievo→esito | ACTIVE (riunita in #262; esiti in esiti-correzioni.md) |
+| C1 | Prima ondata: S-01, S-02, S-03, S-04, S-05, S-08, D3-04, D3-05, D3-06, D3-06b, D3-07, D3-08, sessione per persona nell'adattatore qa-web | Claude | PR #262 unita con CI verde | FATTO (#262 unita f1e1bee3, DEPLOYATA su 921df8d2) |
+| C2 | Portale personale: rilievi D2-01..D2-26 di `dati-2.md` | subagent, ramo `claude/forense-portale` | PR unita con CI verde, tabella rilievo→esito | FATTO (riunita in #262, DEPLOYATA; esiti in esiti-correzioni.md) |
+| C3 | Cruscotti e analisi: rilievi D1..D21 di `dati-1.md` | subagent, ramo `claude/forense-cruscotti` | PR unita con CI verde, tabella rilievo→esito | FATTO (riunita in #262, DEPLOYATA; esiti in esiti-correzioni.md) |
+| C4 | Amministrazione e sorgente: D3-02, 09, 12-17, 20, 21, 23 di `dati-3.md`; S-06, S-07, S-09, S-10, S-11 di `sorgente-api.md` | subagent, ramo `claude/forense-amministrazione` | PR unita con CI verde, tabella rilievo→esito | FATTO (riunita in #262, DEPLOYATA; esiti in esiti-correzioni.md) |
 | C5 | Rilievi della forma «dato sbagliato da cancellare» (residui di prova, utenze di collaudo, richieste ferme): elenco e comandi proposti | Claude | elenco nel §3 con il comando | FATTO (esiti-correzioni.md, sezione «Dati da decidere con Enzo») |
-| R1 | Rilascio: backup verificato, armo, `verifica-deploy.sh` DEPLOYATO, prova nel browser | Claude | DEPLOYATO e schermate | — |
+| R1 | Rilascio: backup verificato, armo, `verifica-deploy.sh` DEPLOYATO, prova nel browser | Claude | DEPLOYATO e schermate | FATTO (#262 su 921df8d2, #273 su c6eda765, #277 su 44ac94c9: verifica-deploy DEPLOYATO, schermate in heuresys-advanced-giro/verifica-262 e verifica-277) |
+| C6 | Ferie del quadro senza la malattia (verifica dal vivo del 16/11) | Claude | PR unita, DEPLOYATA | FATTO (#273) |
+| C7 | Difetti del giudizio delle firme parziali del giro post-#262 (web e API, migrazione 000496) | subagent web + subagent API, ramo `claude/forense-giudizio` | PR unita, DEPLOYATA, verifica dal vivo | FATTO (#277, DEPLOYATA su 44ac94c9; 568 eccezioni riscritte, giornale 1136 righe) |
+| C8 | Tempo relativo in italiano nelle pagine inglesi (verifica dal vivo dopo la #277) | Claude | PR unita, DEPLOYATA | ACTIVE (#282, attende il turno di rilascio) |
 | V1 | Giro qa-web di verifica sulle righe corrette | Claude | righe tornate OK | — |
 
 ## 3. Registro dei rilievi

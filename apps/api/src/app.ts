@@ -143,6 +143,7 @@ import { calibrationSessionsRoutes } from "./modules/calibration-sessions/routes
 import { predictionsRoutes } from "./modules/predictions/routes.js";
 import { engagementRoutes } from "./modules/engagement/routes.js";
 import { semanticMatchingRoutes } from "./modules/semantic-matching/routes.js";
+import { applicaRitiri } from "./lib/rotte-ritirate.js";
 import { insightsRoutes } from "./modules/insights/routes.js";
 import { capabilityCompositionRoutes } from "./modules/capability-composition/routes.js";
 import { orgHealthRoutes } from "./modules/org-health/routes.js";
@@ -437,6 +438,9 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   });
 
   // 13. Module routes
+  // Ondata 5 (2026-11-18): le rotte ritirate rispondono 410 senza toccare i dati. Va prima dei
+  // moduli, perché `onRoute` vede solo le rotte registrate dopo di lui.
+  applicaRitiri(app);
   // Build ONE mailer-bound MFA service so EMAIL_OTP sends (enrollment + login
   // step-up) flow through the same mailer the rest of auth uses (InMemoryMailer
   // in tests, the configured transactional mailer in prod). Shared by the auth

@@ -28,6 +28,7 @@ import {
   NotFoundError,
   ConflictError,
   PreconditionFailedError,
+  GoneError,
   TenantBoundaryViolation,
   RefreshReplayDetected,
   CsrfFailedError,
@@ -102,6 +103,10 @@ export async function errorHandler(
     reply.code(422).send({
       error: { code: err.code, message: err.message, details: err.details },
     });
+    return;
+  }
+  if (err instanceof GoneError) {
+    reply.code(410).send({ error: { code: err.code, message: err.message, details: err.details } });
     return;
   }
   if (err instanceof PreconditionFailedError) {

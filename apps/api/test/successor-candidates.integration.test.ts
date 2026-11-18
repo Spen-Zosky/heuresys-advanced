@@ -98,13 +98,14 @@ describe("/v1/successor-candidates integration", () => {
     expect(r.statusCode).toBe(404);
   });
 
-  it("Pool with candidates cannot be deleted → 409 SUCCESSION_POOL_HAS_CANDIDATES", async () => {
+  it("Pool with candidates cannot be deleted → 410 ROUTE_RETIRED (ondata 5)", async () => {
     const r = await suite.app.inject({
       method: "DELETE", url: `/v1/succession-pools/${poolId}`,
       headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken },
     });
-    expect(r.statusCode).toBe(409);
-    expect((r.json() as { error: { code: string } }).error.code).toBe("SUCCESSION_POOL_HAS_CANDIDATES");
+    // Ondata 5 (2026-11-18): la cancellazione è ritirata prima ancora del controllo d'uso.
+    expect(r.statusCode).toBe(410);
+    expect((r.json() as { error: { code: string } }).error.code).toBe("ROUTE_RETIRED");
   });
 
   it("GET /readiness-distribution as TENANT_ADMIN → 200 with seeded READY_6_MONTHS bucket", async () => {

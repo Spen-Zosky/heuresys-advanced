@@ -60,6 +60,14 @@ Esecuzione: migrazione `-- @migrate: once` con giornale `staging.*_undo`, conteg
 
 Fatto (ramo locale, PR dopo la #291): `db/migrations/000497_un_solo_modello_di_sondaggio.sql`, inversa `db/scripts/sondaggi/inversa-000497.sql`. Scelte del coordinatore per Enzo (17/11 19:08): valori invariati, scala sulla domanda (`survey_question_options.scale`), sondaggi trasferiti `archived`, normalizzazione solo in lettura, doppioni di trimestre annotati e non fusi. Scelta analoga presa qui: le 117 risposte della q4 del sondaggio sul benessere scritte come `nps` (5-10) su una domanda a scala 5 restano righe senza voto, con il valore d'origine nel metadato. Letture adeguate: `engagement` (scala nei risultati, grafico riportato a 10), `org-health` (normalizzazione per scala), `insights` (la fonte 1 legge le righe trasferite: misurato sulla copia, 158 persone su 158 con la stessa media), `verify-storia36.sql` C8b (esclude gli archiviati). Prova su copia usa-e-getta di `heuresys_ci` della VM: due passate verdi, inversa e ripassata verdi, 6/30/4.112/5 righe. Come si rimisura: `psql -f db/migrations/000497_un_solo_modello_di_sondaggio.sql` su una copia, il NOTICE finale riporta i conteggi.
 
+## Ondata 4 — fatta (PR #305, in coda per il rilascio)
+
+Scritture all'agente per nome (`docs/kb/agent-perimetri.json`, campo `scritture`, classe C con approvazione della persona): `learning-gaps.post`, `user-career-plans.post/patch_by_id`, `user-target-positions.post/patch_by_id/post_by_id_review`, `mentorship.post_pairings`, `goals.patch_by_id`, `okrs.patch_by_id`. Restano fuori `seed-acquisition-runs` e `tenant-import-runs` (decisione del coordinatore per Enzo, 18/11: `check_concetti_agente.py` li esclude come superfici di servizio). Difetto corretto: la base dei moduli montati altrove (`semantic-matching` → `/matching`); prova `python docs/kb/tools/prova_indirizzi_agente.py` (con `--come-prima` è rossa). Ondata 4a: `blueprints/[variantId]/gestione-attivazione.tsx`, `tenant-blueprints/[id]/gestione-fascicolo.tsx`, `seed-acquisition/runs/proposte-corsa.tsx`; prova `apps/web/tests/e2e/ondata4-pulsanti.spec.ts`.
+
+## Ondata 5 — in corso
+
+5c, cancellazioni ritirate: `apps/api/src/lib/rotte-ritirate.ts` (elenco esplicito, `onRoute` prima dei moduli, 410 `ROUTE_RETIRED` con l'alternativa; permessi e CSRF restano); prova `apps/api/test/rotte-ritirate.integration.test.ts`. Restano da fare in questa ondata: le scritture a mano sui grafi di visualizzazione (le loro prove costruiscono i grafi con quelle rotte), le scritture dei team, `POST /v1/organization-unit-history`, `POST /v1/tenants/provision`, le scritture di `/v1/surveys`, e le schermate dei cataloghi (5a).
+
 ## Fuori da questa sessione
 
 Le ondate 3-5 non si chiudono stanotte: ognuna è una PR e un rilascio a sé, e il turno di rilascio è conteso.

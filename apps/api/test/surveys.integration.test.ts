@@ -112,10 +112,11 @@ describe("surveys API", () => {
     const patch = await suite.app.inject({ method: "PATCH", url: `/v1/surveys/${id}`, headers: hdrW, payload: { status: "active" } });
     expect(patch.statusCode).toBe(200);
     expect((patch.json() as { status: string }).status).toBe("active");
+    // Ondata 5 (2026-11-18): la cancellazione è RITIRATA (lib/rotte-ritirate.ts): 410, e la riga resta.
     const del = await suite.app.inject({ method: "DELETE", url: `/v1/surveys/${id}`, headers: { cookie: ch(tenantAdmin.cookies), "x-csrf-token": tenantAdmin.csrfToken } });
-    expect(del.statusCode).toBe(204);
+    expect(del.statusCode).toBe(410);
     const gone = await suite.app.inject({ method: "GET", url: `/v1/surveys/${id}`, headers: { cookie: ch(tenantAdmin.cookies) } });
-    expect(gone.statusCode).toBe(404);
+    expect(gone.statusCode).toBe(200);
   });
 
   it("USER cannot create (no surveys:create) -> 403", async () => {

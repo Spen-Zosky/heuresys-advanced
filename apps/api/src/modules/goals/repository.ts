@@ -28,7 +28,7 @@ const GOAL_COLS = `goal_id, goal_tenant_id, goal_natural_key, goal_subject_user_
   goal_start_date::text AS goal_start_date, goal_due_date::text AS goal_due_date, goal_completed_at,
   goal_tags, goal_metadata, created_at, updated_at,
   (SELECT COALESCE(NULLIF(concat_ws(', ', NULLIF(trim(u.user_last_name), ''), NULLIF(trim(u.user_first_name), '')), ''), u.user_display_name)
-     FROM sys.sys_users u WHERE u.user_id = goal_subject_user_id) AS goal_subject_name`;
+     FROM sys.sys_users u WHERE u.user_id = goal_subject_user_id AND u.user_tenant_id = goal_tenant_id) AS goal_subject_name`;
 
 function toGoal(r: GoalRow): Goal {
   return {

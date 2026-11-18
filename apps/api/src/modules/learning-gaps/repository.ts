@@ -145,7 +145,7 @@ export async function listGaps(
   const off = params.length;
   const res = await q.query<Row>(
     `SELECT ${COLS},
-            (SELECT COALESCE(NULLIF(concat_ws(', ', NULLIF(trim(u.user_last_name), ''), NULLIF(trim(u.user_first_name), '')), ''), u.user_display_name) FROM sys.sys_users u WHERE u.user_id = sys.sys_learning_gaps.learning_gap_user_id) AS user_name,
+            (SELECT COALESCE(NULLIF(concat_ws(', ', NULLIF(trim(u.user_last_name), ''), NULLIF(trim(u.user_first_name), '')), ''), u.user_display_name) FROM sys.sys_users u WHERE u.user_id = sys.sys_learning_gaps.learning_gap_user_id AND u.user_tenant_id = sys.sys_learning_gaps.learning_gap_tenant_id) AS user_name,
             (SELECT p.position_title FROM sys.sys_positions p WHERE p.position_id = sys.sys_learning_gaps.learning_gap_position_id) AS position_title,
             (SELECT s.skill_name FROM sys.sys_skills s WHERE s.skill_id = sys.sys_learning_gaps.learning_gap_skill_id) AS skill_name
        FROM sys.sys_learning_gaps ${whereClause}

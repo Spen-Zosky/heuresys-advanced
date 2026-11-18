@@ -137,6 +137,15 @@ jobs:
         with:
           fetch-depth: 1
 
+      # Ogni corsa ha il suo database: una copia usa-e-getta del modello heuresys_ci, creata qui e
+      # tolta alla fine (db/scripts/ci-db-usa-e-getta.sh, «Ricostruisci e isola», Enzo 2026-11-18).
+      # Da qui in poi POSTGRES_DB e POSTGRES_DATABASE puntano alla copia; il passo dopo lo verifica.
+      - name: Database usa-e-getta della corsa
+        run: bash db/scripts/ci-db-usa-e-getta.sh crea "integrale"
+
+      - name: I passi usano il database della corsa
+        run: bash db/scripts/ci-db-usa-e-getta.sh controlla
+
       - name: Setup pnpm
         uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
         with:
@@ -282,3 +291,7 @@ jobs:
             apps/web/.e2e-fase-*.json
             apps/web/playwright-report/
           retention-days: 7
+
+      - name: Togli il database della corsa
+        if: always()
+        run: bash db/scripts/ci-db-usa-e-getta.sh rimuovi

@@ -1,4 +1,7 @@
 -- 46_engagement_surveys.sql — SDBI B-10b m2 import: legacy RTL engagement_* cluster -> 3 sys.* tables (S971).
+-- ⚠ 2026-11-17 (000497, voce 3c): import chiuso e non piu' in uso. I dati che scriveva vivono ora nel
+--   modello della pagina /engagement (sys_surveys, sys_survey_questions, sys_survey_responses,
+--   sys_survey_templates) come sondaggi archiviati; le tabelle sys_engagement_* restano, non si riscrivono.
 -- RTL-only (legacy tenant 0c54b84a -> v5 RTL 86ba7a65). Employee-centric (I14):
 --   surveys/templates author created_by = legacy users row -> bridged via users.employee_id ->
 --     sys_users.user_external_code='LEGACY_EMP::'||employee_id; unresolved -> FK NULL + legacy id in *_metadata.

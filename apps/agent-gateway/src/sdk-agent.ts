@@ -14,6 +14,7 @@
 import { randomUUID } from "node:crypto";
 import { query } from "@anthropic-ai/claude-agent-sdk";
 import { buildHeuresysMcp } from "./mcp-tools.js";
+import { ISTRUZIONI_ASSISTENTE } from "./istruzioni.js";
 
 /** Gli unici strumenti integrati di Claude Code che l'assistente conserva. */
 export const STRUMENTI_INTEGRATI = ["ToolSearch", "Skill"] as const;
@@ -141,6 +142,8 @@ export async function* runHrAgent(
       // TOOL_NOT_ALLOWLISTED) e non toccava MAI gli strumenti `hrx_*`: 5 criteri su 8 rossi
       // su un perimetro sano. L'agente HR ragiona sul prompt e sugli strumenti MCP: basta.
       settingSources: [],
+      // 2026-11-18: le istruzioni proprie dell'assistente (lingua, formato, {omissis}): istruzioni.ts.
+      systemPrompt: ISTRUZIONI_ASSISTENTE,
       // CRITICAL (M-2): do NOT put `mcp__heuresys__*` in allowedTools — per the SDK,
       // allowedTools are "auto-allowed without prompting", which BYPASSES canUseTool.
       // That would let WRITE tools execute with no human approval. Instead every

@@ -37,6 +37,17 @@ export function ruoliPerAgente(roles: readonly RoleCode[]): RoleCode[] {
   return roles.filter((r) => !MANDATE_ROLES.has(r));
 }
 
+/**
+ * I mandati che un agente non usa nemmeno in lettura: la custodia delle segnalazioni (isolamento
+ * assoluto, ADR-0036 §5) e la sicurezza (credenziali, sessioni, fattori: non sono dati di dominio).
+ */
+export const MANDATI_MAI_ALL_AGENTE: ReadonlySet<RoleCode> = new Set<RoleCode>(["WHISTLEBLOWING_CUSTODIAN", "SECURITY_ADMIN"]);
+
+/** ADR-0050 D6 emendato (2026-11-18): i ruoli con cui l'agente legge per la persona. */
+export function ruoliDiLetturaPerAgente(roles: readonly RoleCode[]): RoleCode[] {
+  return roles.filter((r) => !MANDATI_MAI_ALL_AGENTE.has(r));
+}
+
 export const agentTokensRoutes: FastifyPluginAsyncZod = async (app) => {
   app.post(
     "/",
@@ -57,7 +68,7 @@ export const agentTokensRoutes: FastifyPluginAsyncZod = async (app) => {
 
       const roles = ruoliPerAgente(persona.roles);
       // ADR-0050 D6 emendato (2026-11-18): in lettura l'agente usa il perimetro pieno della persona.
-      const readRoles = [...persona.roles];
+      const readRoles = ruoliDiLetturaPerAgente(persona.roles);
       if (readRoles.length === 0) {
         throw new ForbiddenError(
           "The person has no role to lend to an agent (ADR-0050 D6)",

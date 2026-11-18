@@ -66,7 +66,7 @@ export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOpera
     tool(n, `GET ${p}`, {}, async () => ok(await client.call("GET", p)));
   const rdId = (n: string, base: string) =>
     tool(n, `GET ${base}/:id`, { id: z.string() }, async (a: { id: string }) =>
-      ok(await client.call("GET", `${base}/${a.id}`)),
+      ok(await client.call("GET", `${base}/${encodeURIComponent(a.id)}`)),
     );
   /** A-16: una lettura con filtri facoltativi in querystring (paginazione, soggetto, periodo). */
   const filtri = z.object({}).catchall(z.union([z.string(), z.number(), z.boolean()])).optional();

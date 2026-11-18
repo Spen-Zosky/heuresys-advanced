@@ -24,6 +24,7 @@ import { pool } from "../src/db/client.js";
 import { COOKIES, type RoleCode } from "../src/config/constants.js";
 import { MANDATE_ROLES } from "../src/lib/scope/mandati.js";
 import { ruoliDellaRichiesta } from "../src/middleware/auth.js";
+import { MANDATI_MAI_ALL_AGENTE, ruoliDiLetturaPerAgente } from "../src/modules/agent-tokens/routes.js";
 import { userHasPermission } from "../src/middleware/rbac.js";
 import * as crypto from "node:crypto";
 import { AGENT_TOKEN_TTL_SECONDS, type AgentTokenResponse } from "@heuresys/shared";
@@ -161,8 +162,15 @@ describe("ADR-0050 D6 emendato (2026-11-18) — in lettura l'agente usa il perim
     expect(r.statusCode, r.body).toBe(201);
     const g = r.json() as AgentTokenResponse;
     const dellaPersona = t.app.jwt.decode<{ roles: string[] }>(persona.cookies.get(COOKIES.ACCESS)!)!.roles;
-    expect([...g.readRoles].sort()).toEqual([...dellaPersona].sort());
-    expect((t.app.jwt.decode(g.token) as { rl: string[] }).rl.sort()).toEqual([...dellaPersona].sort());
+    const attesi = dellaPersona.filter((x) => !MANDATI_MAI_ALL_AGENTE.has(x as RoleCode)).sort();
+    expect([...g.readRoles].sort()).toEqual(attesi);
+    expect((t.app.jwt.decode(g.token) as { rl: string[] }).rl.sort()).toEqual(attesi);
+  });
+
+  it("la custodia delle segnalazioni e la sicurezza non entrano mai nelle letture dell'agente", () => {
+    expect(ruoliDiLetturaPerAgente(["USER", "HRMS_MANAGER", "WHISTLEBLOWING_CUSTODIAN", "SECURITY_ADMIN", "PLATFORM_ADMIN"]).sort()).toEqual(
+      ["HRMS_MANAGER", "PLATFORM_ADMIN", "USER"],
+    );
   });
 
   it("un mandato in `rl` vale per le GET e non per le scritture", async () => {

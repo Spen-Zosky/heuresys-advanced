@@ -4743,18 +4743,21 @@ BEGIN
   SELECT round(avg(r.survey_response_rating_value), 2) INTO v_prima
   FROM sys.sys_survey_responses r
   JOIN sys.sys_surveys s ON s.survey_id = r.survey_response_survey_id
-  WHERE s.survey_tenant_id = c_rtl AND s.survey_start_date::date < DATE '2025-03-01';
+  WHERE s.survey_tenant_id = c_rtl AND s.survey_start_date::date < DATE '2025-03-01'
+    -- gli archiviati sono la serie di un altro strumento, su scala 5 (000497): non entrano
+    AND s.survey_status <> 'archived';
 
   SELECT round(avg(r.survey_response_rating_value), 2) INTO v_dopo
   FROM sys.sys_survey_responses r
   JOIN sys.sys_surveys s ON s.survey_id = r.survey_response_survey_id
-  WHERE s.survey_tenant_id = c_rtl
+  WHERE s.survey_tenant_id = c_rtl AND s.survey_status <> 'archived'
     AND s.survey_start_date::date BETWEEN DATE '2025-03-01' AND DATE '2025-06-30';
 
   SELECT round(avg(r.survey_response_rating_value), 2) INTO v_fine
   FROM sys.sys_survey_responses r
   JOIN sys.sys_surveys s ON s.survey_id = r.survey_response_survey_id
-  WHERE s.survey_tenant_id = c_rtl AND s.survey_start_date::date >= DATE '2026-01-01';
+  WHERE s.survey_tenant_id = c_rtl AND s.survey_status <> 'archived'
+    AND s.survey_start_date::date >= DATE '2026-01-01';
 
   IF v_prima IS NULL OR v_dopo IS NULL OR v_fine IS NULL THEN
     BEGIN

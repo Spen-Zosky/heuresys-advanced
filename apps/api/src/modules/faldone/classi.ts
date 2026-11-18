@@ -198,7 +198,6 @@ const TABELLE: Record<string, Riga> = {
   "sys.sys_content_media": ["ACTIVITY", "Lavoro e collaborazione", "Allegati dei documenti"],
   "sys.sys_content_blueprint_links": ["ACTIVITY", "Modelli e configurazione", "Collegamenti dei contenuti"],
   "sys.sys_visualization_graphs": ["ACTIVITY", "Lavoro e collaborazione", "Grafici salvati"],
-  "sys.sys_whistleblowing_reports": ["SPECIAL_CATEGORY", "Lavoro e collaborazione", "Segnalazioni riservate"],
   "audit.user_self_service_actions": ["ACTIVITY", "Lavoro e collaborazione", "Azioni nel portale personale"],
   "audit.valore_eventi": ["ACTIVITY", "Lavoro e collaborazione", "Eventi di valore"],
   "audit.registro_scritture": ["ACTIVITY", "Archivi e registri tecnici", "Registro delle scritture"],
@@ -247,6 +246,7 @@ const TABELLE: Record<string, Riga> = {
   "sys.sys_tenant_blueprints": ["ACTIVITY", "Modelli e configurazione", "Modelli del cliente"],
   "sys.sys_tenant_consolidation_decisions": ["ACTIVITY", "Modelli e configurazione", "Decisioni di consolidamento"],
   "sys.sys_tenant_consolidations": ["ACTIVITY", "Modelli e configurazione", "Consolidamenti"],
+  "sys.sys_alignment_decisions": ["ACTIVITY", "Modelli e configurazione", "Decisioni di allineamento al modello"],
   "reference_sync.import_runs": ["ACTIVITY", "Modelli e configurazione", "Importazioni di riferimento"],
   // ── Archivi e registri tecnici: copie di righe della persona, tenute per poter tornare indietro
   "audit.overtime_exempt_archive": ["ACTIVITY", "Archivi e registri tecnici", "Archivio degli straordinari esenti"],

@@ -23,6 +23,7 @@ import {
   classificazioneDi, LEGAMI_IMPLICITI, LEGAMI_SOGGETTO, TABELLE_CLASSIFICATE,
 } from "../src/modules/faldone/classi.js";
 import { FALDONE_OMISSIS } from "@heuresys/shared";
+import { TABELLE_CUSTODITE } from "../src/modules/whistleblowing/custodia.js";
 import { unCapoConSottoposti, unEstraneoOrganizzativo } from "./helpers/org-actors.js";
 
 const PLATFORM_EMAIL = "platform-test-admin@collaudo.invalid";
@@ -105,8 +106,16 @@ describe("faldone — il cricchetto del catalogo", () => {
     expect(mancanti, "legami soggetto che il database non conosce").toEqual([]);
   });
 
+  it("le tabelle sotto custodia assoluta (ADR-0036 §5) non entrano nel catalogo", () => {
+    expect(TABELLE_CUSTODITE.length).toBeGreaterThan(0);
+    expect(TABELLE_CUSTODITE.filter((x) => cat.tabelle.has(x))).toEqual([]);
+    expect(cat.legami.filter((l) => TABELLE_CUSTODITE.includes(l.tabella) || TABELLE_CUSTODITE.includes(l.madre?.tabella ?? ""))).toEqual([]);
+  });
+
   it("ogni tabella classificata esiste (i giornali di staging possono essere stati tolti)", () => {
-    const mancanti = TABELLE_CLASSIFICATE.filter((x) => !cat.tabelle.has(x) && !x.startsWith("staging."));
+    // IN_ARRIVO: classificate prima che la loro migrazione arrivi su main (un'altra PR la porta).
+    const IN_ARRIVO = new Set(["sys.sys_alignment_decisions"]);
+    const mancanti = TABELLE_CLASSIFICATE.filter((x) => !cat.tabelle.has(x) && !x.startsWith("staging.") && !IN_ARRIVO.has(x));
     expect(mancanti).toEqual([]);
   });
 

@@ -24,6 +24,7 @@
  */
 import type { DbConnector } from "../../lib/scope/org.js";
 import { LEGAMI_IMPLICITI, legameSoggetto } from "./classi.js";
+import { TABELLE_CUSTODITE } from "../whistleblowing/custodia.js";
 
 export interface ColonnaCatalogo {
   nome: string;
@@ -125,6 +126,9 @@ export async function leggiCatalogo(q: DbConnector): Promise<Catalogo> {
     });
     if (r.in_chiave) t.chiave.push(r.colonna);
   }
+  // Custodia assoluta (ADR-0036 §5): quelle tabelle escono dal catalogo prima di ogni altra cosa,
+  // così nessuna sezione, nessun conteggio e nessuna etichetta le tocca.
+  for (const x of TABELLE_CUSTODITE) tabelle.delete(x);
   for (const t of tabelle.values()) t.etichetta = sceltaEtichetta(t.colonne);
 
   const persona = tabelle.get(UTENTI);

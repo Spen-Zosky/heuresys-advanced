@@ -394,15 +394,15 @@ BEGIN
   -- database vuoto le due misure coincidono (315); su uno gia' popolato le righe in piu'
   -- appartengono ad altri file e non sono un errore di questo.
   SELECT count(*) INTO n_dich FROM _classificazione_000429;
-  IF n_dich <> 317 THEN
-    RAISE EXCEPTION '000429: il file dichiara % righe di classificazione, attese 317', n_dich;
+  IF n_dich <> 319 THEN
+    RAISE EXCEPTION '000429: il file dichiara % righe di classificazione, attese 319', n_dich;
   END IF;
 
   SELECT count(*) INTO n_proprie
     FROM _classificazione_000429 d
     JOIN sys.sys_classificazione_direzione_dato c ON c.tabella = d.tabella AND c.stato = d.stato;
-  IF n_proprie <> 317 THEN
-    RAISE EXCEPTION '000429: attese 317 righe di classificazione di questo file, trovate %', n_proprie;
+  IF n_proprie <> 319 THEN
+    RAISE EXCEPTION '000429: attese 319 righe di classificazione di questo file, trovate %', n_proprie;
   END IF;
 
   SELECT count(*) INTO n_non_class FROM sys.v_tabelle_non_classificate;
@@ -421,7 +421,7 @@ BEGIN
 
   SELECT count(*) INTO n_tot FROM sys.sys_classificazione_direzione_dato;
   n_altre := n_tot - n_proprie;
-  RAISE NOTICE '000429: 317 tabelle classificate (76 ibrido, 64 nativo, 132 importato, 45 infrastruttura); altre righe gia'' presenti, di altri file: %; v_tabelle_non_classificate a zero.', n_altre;
+  RAISE NOTICE '000429: 319 tabelle classificate (76 ibrido, 66 nativo, 132 importato, 45 infrastruttura); altre righe gia'' presenti, di altri file: %; v_tabelle_non_classificate a zero.', n_altre;
 END $$;
 
 COMMIT;

@@ -6,6 +6,7 @@
  "_generato_da": "docs/kb/tools/build_agent_operations.py — non modificare a mano",
  "concepts": {
   "activity-classification-mappings": {
+   "base": "/activity-classification-mappings",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -23,6 +24,7 @@
    "solaLettura": true
   },
   "activity-classifications": {
+   "base": "/activity-classifications",
    "data": "2026-09-13",
    "decisione": "Claude, per delega esplicita di Enzo (S1098, 2026-09-13: «esegui tutti da P1 a P3 in autonomia e automaticamente prendendo decisioni per mio conto, nell'ordine che ritieni piu' appropriato»). QUINDICESIMO perimetro in sola lettura. Scelto col criterio meccanico: coda ri-derivata sull'atlante fresco (da 10be43af) — 109 moduli, 14 aperti, 41 in coda di cui 22 neutri. `approvals` e `projects` dichiarano ACTIVITY (non in gara); `enterprise-typing-profiles` resta SCARTATO (porta JSONB occupata da `decided_by` con un nome proprio in chiaro, misurato 2026-09-08). Sotto, un PARI a DICIASSETTE a 2 letture · 1 pagina. ⚠⚠ E DENTRO QUEL PARI C'ERANO TRE FALSI NEUTRI, la stessa forma del difetto `candidates` (S1097): `interviews`, `interview-feedback` e `job-offers` risultavano neutri per il permesso CONDIVISO `job-requisition:read`; misurato su information_schema, il colloquio ha per SOGGETTO la candidatura di una persona, il feedback porta score e raccomandazione (EVALUATION), l'offerta porta `offer_gross_annual_salary` (COMPENSATION). Esclusi (V2) nello stesso commit; `job-postings` e `job-requisitions` restano neutri perche' descrivono il POSTO. Tolti i tre, il RISCHIO CRESCENTE sceglie il piu' LONTANO da una persona: `activity-classifications` e' il codice ATECO di un'ATTIVITA' ECONOMICA — non un posto, non una competenza, non una struttura: e' come un'IMPRESA si descrive al fisco, e I21 lo tiene aperto a ogni settore. COSA E': sys_activity_classifications, 4.304 righe, senza tenant_id. NEUTRALITA' MISURATA su information_schema: delle dieci colonne nessuna e' il SOGGETTO di un dato di persona, e non c'e' nemmeno un ATTORE (nessun created_by). ⚠ APERTO CON UNA GUARDIA, due porte e la prima e' PIENA su tutte le righe: activity_classification_metadata e' JSONB con title_en/title_de (4.304), ordine (3.257) e le chiavi di provenienza della derivazione su 1.047 righe — titoli tradotti e provenienza di un codice, nessuna nomina una persona; activity_classification_description e' TESTO LIBERO, oggi vuoto su tutte. Mig 000411: la sentinella sys.v_classificazione_di_attivita_con_dato_di_persona guarda entrambe le porte, db_health la raccoglie e la pretende a zero (bloccante, non informativa), e la migrazione stessa LA PROVA ROSSA SU TUTTE E DUE iniettando un indirizzo di posta e disfacendolo, con la post-condizione per IMPRONTA md5 su 4.304 righe piene. Misurato in produzione prima di aprire (2026-09-13): 4.304 classificazioni, 0 con descrizione, 4.304 con metadata non vuoto, 0 indirizzi di posta e 0 chiavi di persona in nessuna delle due porte. Un perimetro neutro oggi non e' un perimetro neutro domani: la guardia si mette PRIMA che il buco si apra.",
    "operations": {
@@ -40,6 +42,7 @@
    "solaLettura": true
   },
   "advisor": {
+   "base": "/advisor",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -56,7 +59,49 @@
    },
    "solaLettura": true
   },
+  "agent-capabilities": {
+   "base": "/agent-capabilities",
+   "data": "2026-11-05",
+   "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
+   "operations": {
+    "get": {
+     "method": "GET",
+     "path": "/",
+     "permission": null
+    },
+    "get_by_id": {
+     "method": "GET",
+     "path": "/:id",
+     "permission": null
+    }
+   },
+   "solaLettura": true
+  },
+  "agent-conversations": {
+   "base": "/agent-conversations",
+   "data": "2026-11-05",
+   "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
+   "operations": {
+    "get": {
+     "method": "GET",
+     "path": "/",
+     "permission": null
+    },
+    "get_activities_by_activityid_events": {
+     "method": "GET",
+     "path": "/activities/:activityId/events",
+     "permission": null
+    },
+    "get_by_id": {
+     "method": "GET",
+     "path": "/:id",
+     "permission": null
+    }
+   },
+   "solaLettura": true
+  },
   "analytics": {
+   "base": "/analytics",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -114,6 +159,7 @@
    "solaLettura": true
   },
   "approvals": {
+   "base": "/approvals",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -131,6 +177,7 @@
    "solaLettura": true
   },
   "assessment-methods": {
+   "base": "/assessment-methods",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -143,6 +190,7 @@
    "solaLettura": true
   },
   "assessment-results": {
+   "base": "/assessment-results",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -160,6 +208,7 @@
    "solaLettura": true
   },
   "assessments": {
+   "base": "/assessments",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -177,6 +226,7 @@
    "solaLettura": true
   },
   "blueprint-activations": {
+   "base": "/blueprint-activations",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -194,6 +244,7 @@
    "solaLettura": true
   },
   "blueprint-families": {
+   "base": "/blueprint-families",
    "data": "2026-09-08",
    "decisione": "Claude, per delega esplicita di Enzo (S1093, 2026-09-08: «esegui tutti da P1 a P3 e i gated in autonomia e automaticamente prendendo decisioni per mio conto, nell'ordine che ritieni piu' appropriato»). UNDICESIMO perimetro in sola lettura. Scelto col criterio meccanico: coda ri-derivata sull'atlante fresco — 105 moduli, 10 aperti, 39 in coda di cui 20 neutri — e la testa dei neutri e' ancora un PARI a cinque, tutti a 2 letture e 2 pagine (blueprint-families, enterprise-typing-profiles, job-roles, operating-models, skill-categories). ⚠ `approvals` e' piu' ampio (2 letture, 3 pagine) ma NON e' in gara: dichiara ACTIVITY, non «nessun dato di persona» — stessa esclusione gia' scritta nella 000378. L'ordine fra i cinque e' quello che la 000378 ha stabilito e la 000381 ha applicato, e non si rinegozia ogni volta: il RISCHIO CRESCENTE. job-roles e skill-categories restano i piu' VICINI a una persona (un ruolo e' cio' che una persona ricopre, una categoria di competenza cio' che possiede); enterprise-typing-profiles resta SCARTATO per la ragione misurata ieri, che vale ancora — la sua unica porta, il JSONB enterprise_typing_metadata, e' GIA' OCCUPATA da `decided_by` con un NOME PROPRIO IN CHIARO, e installarvi una guardia significherebbe dichiararla neutra sapendola occupata. Restano blueprint-families e operating-models. ⭐ E FRA I DUE DECIDE LA MISURA, non il nome (2026-09-08, produzione): blueprint-families 1 riga — descrizione «Retail and commercial banking blueprint family.», metadata `{}` — contro le 6 righe di operating-models; e nessuna delle due porte contiene una persona. Ma la ragione che scioglie davvero il pari non e' il conteggio: blueprint-families e' il GENITORE DIRETTO di blueprint-variants, aperto ieri con la 000381 e presidiato dalla sentinella gemella di questa. Aprire il genitore subito dopo il figlio CHIUDE LA COPPIA, invece di lasciare meta' famiglia presidiata e meta' no — che e' la condizione in cui un dato scivola nel ramo non guardato senza che nessuno strumento lo veda. NEUTRALITA' MISURATA su information_schema, non dedotta dai nomi: delle sette colonne di sys_blueprint_families nessuna e' il SOGGETTO di un dato di persona, e — come per enterprise-size-bands e blueprint-variants — non c'e' nemmeno un ATTORE, perche' non esiste un created_by. ⚠ APERTO CON UNA GUARDIA: le porte sono DUE, le stesse della 000370, 000378 e 000381 — blueprint_family_metadata e' JSONB (oggi vale `{}`, cioe' VUOTO ma non assente: una porta aperta su una stanza vuota, non una porta murata) e blueprint_family_description e' TESTO LIBERO, ed e' POPOLATO. Mig 000382: la sentinella sys.v_famiglia_di_fascicoli_con_dato_di_persona guarda entrambe le porte, db_health la raccoglie e la pretende a zero (bloccante, non informativa), e la migrazione stessa LA PROVA ROSSA SU TUTTE E DUE iniettando un indirizzo di posta e disfacendolo. ⭐ E LA PROVA E' PIU' SEVERA CHE NELLA 000381, per una differenza di fatto: li' la descrizione era vuota, qui e' PIENA — una prova che appende e poi toglie puo' restituire un testo DIVERSO da quello di partenza senza che nessun conteggio se ne accorga, perche' le righe resterebbero una. Quindi la post-condizione non guarda solo QUANTE righe ci sono: guarda che il TESTO sia tornato identico, per IMPRONTA md5, insieme al metadata. Misurato in produzione prima di aprire (2026-09-08): 1 famiglia, 1 con descrizione, metadata `{}`, 0 indirizzi di posta in nessuna delle due porte. Un perimetro neutro oggi non e' un perimetro neutro domani: la guardia si mette PRIMA che il buco si apra. Prova generale sul gemello: VERDE, 36/36 sentinelle a zero.",
    "operations": {
@@ -211,6 +262,7 @@
    "solaLettura": true
   },
   "blueprint-overrides": {
+   "base": "/blueprint-overrides",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -228,6 +280,7 @@
    "solaLettura": true
   },
   "blueprint-processes": {
+   "base": "/blueprint-processes",
    "data": "2026-09-13",
    "decisione": "Claude, per delega esplicita di Enzo (S1099, 2026-09-13: «esegui tutti da P1 a P3 in autonomia e automaticamente prendendo decisioni per mio conto, nell'ordine che ritieni piu' appropriato»). SEDICESIMO perimetro in sola lettura. Scelto col criterio meccanico: coda ri-derivata sull'atlante fresco (da af8f8f7e) — 109 moduli, 15 aperti, 37 in coda di cui 18 neutri. `approvals` e `projects` dichiarano ACTIVITY (non in gara); `enterprise-typing-profiles` resta SCARTATO (porta JSONB occupata da `decided_by` con un nome proprio in chiaro, misurato 2026-09-08). Sotto, un PARI a TREDICI a 2 letture · 1 pagina, e il RISCHIO CRESCENTE li ordina per distanza da una persona: i due PROCESSI (`blueprint-processes`, `organization-unit-processes`) descrivono cosa FA un'organizzazione; `blueprint-activations` porta un created_by; `generated-origins` e' provenienza; `job-families`, `skill-families`, `skill-aliases`, `skill-taxonomy-edges` sono i vocabolari con cui si descrivono le persone (piu' vicini); `job-postings` e `job-requisitions` condividono `job-requisition:read` con tre moduli esclusi e aspettano `#54`; `visualization-edges`/`-nodes` ereditano la guardia di `visualization-graphs` (il vocabolario dei nodi ammette 'USER'); `advisor` e' l'ESITO di una lettura, non una struttura. Fra i due processi il REGISTRO precede il LEGAME: `sys_blueprint_process_registry` non ha tenant_id ed e' il genitore diretto di `sys_organization_unit_processes` (tenant + unita'). Aprirlo CHIUDE LA FAMIGLIA del blueprint: famiglie (000382), varianti (000381), modelli operativi (000405), processi. COSA E': 23 righe, i processi di una banca retail (strategia, KYC/AML, credito, tesoreria, compliance, audit…) agganciati a una variante, con codice, nome, nome inglese, ordinale, facoltativita'; ADR-0039 lo dichiara sulla rotta «struttura, aperta a ogni settore (I21)». NEUTRALITA' MISURATA su information_schema: delle tredici colonne nessuna e' il SOGGETTO di un dato di persona, e non c'e' nemmeno un ATTORE (nessun created_by); `blueprint_process_owner_position_code` e' il codice di una POSIZIONE (un posto, I1), non una persona. ⚠ APERTO CON UNA GUARDIA, e le porte sono TRE: `blueprint_process_metadata` JSONB (oggi `{}` su tutte), `blueprint_process_description` TESTO LIBERO (oggi NULL su tutte) e `blueprint_process_owner_position_code` varchar(64) SENZA CHECK (oggi NULL su tutte: un codice per dichiarazione, ma un indirizzo di posta ci sta). Mig 000412: la sentinella sys.v_processo_di_modello_con_dato_di_persona guarda tutte e tre, db_health la raccoglie e la pretende a zero (bloccante, non informativa), e la migrazione stessa LA PROVA ROSSA SU TUTTE E TRE iniettando un indirizzo di posta e disfacendolo, con la post-condizione per IMPRONTA md5 e il ripristino del valore SALVATO ('' e NULL sono due valori diversi). Misurato in produzione prima di aprire (2026-09-13): 23 processi, 0 con descrizione, 0 con metadata non vuoto, 0 con codice di posizione, 0 indirizzi di posta in nessuna delle tre porte. Un perimetro vuoto oggi non e' un perimetro chiuso domani: la guardia si mette PRIMA che il buco si apra.",
    "operations": {
@@ -245,6 +298,7 @@
    "solaLettura": true
   },
   "blueprint-variants": {
+   "base": "/blueprint-variants",
    "data": "2026-09-08",
    "decisione": "Claude, per delega esplicita di Enzo (S1092, 2026-09-08: «esegui tutti da P1 a P3 in autonomia e automaticamente prendendo decisioni per mio conto, nell'ordine che ritieni piu' appropriato»). DECIMO perimetro in sola lettura. Scelto col criterio meccanico e non a intuito: coda ri-derivata sull'atlante fresco il 2026-09-08 — 105 moduli, 9 aperti, 40 in coda di cui 21 neutri — e la testa dei neutri e' di nuovo un PARI, sei moduli a 2 letture e 2 pagine (blueprint-families, blueprint-variants, enterprise-typing-profiles, job-roles, operating-models, skill-categories). L'ordine fra i sei lo aveva gia' dato la 000378 col RISCHIO CRESCENTE — job-roles e skill-categories sono i piu' VICINI a una persona, perche' un ruolo e' cio' che una persona ricopre e una categoria di competenza cio' che possiede; gli altri quattro descrivono COME e' fatta un'organizzazione. Ma dentro quei quattro un ordine non c'era, e stavolta serviva. ⭐ L'ORDINE INTERNO LO DA' LA MISURA DELLE PORTE, non i nomi (2026-09-08, produzione): blueprint-variants 0 descrizioni e 0 metadata — ENTRAMBE VUOTE; blueprint-families 1 descrizione e 0 metadata; operating-models 6 righe; enterprise-typing-profiles 2 righe su 2 con un NOME PROPRIO IN CHIARO. ⚠⚠ IL REPERTO CHE HA CAMBIATO LA SCELTA: enterprise-typing-profiles sembrava il candidato naturale — sorella diretta della banda dimensionale aperta il giorno prima, e nessuna delle sue quindici colonne e' il SOGGETTO di un dato di persona — ma la sua unica porta, il JSONB enterprise_typing_metadata, e' GIA' OCCUPATA: la chiave `decided_by` vale «Enzo 2026-06-15» su entrambe le righe. E' un ATTORE e non un soggetto, la stessa distinzione gia' fatta per link_created_by, ma a differenza di un created_by uuid — che e' opaco — qui c'e' un nome proprio in chiaro che l'agente leggerebbe. Il criterio di tutte le sentinelle di questa famiglia e' l'indirizzo di posta, «e non un nome di persona: quello e' indecidibile, e una guardia che pretende di riconoscerlo mente» — criterio che resta giusto, ma che li' produrrebbe una guardia CIECA sull'unico caso che quel perimetro contiene davvero. Aprirlo oggi vorrebbe dire dichiarare neutra una porta che sappiamo occupata: resta in coda, piu' indietro di quanto sembrasse. NEUTRALITA' MISURATA su information_schema, non dedotta dai nomi: delle nove colonne di sys_blueprint_variants nessuna e' il SOGGETTO di un dato di persona, e — come per enterprise-size-bands — non c'e' nemmeno un ATTORE, perche' non esiste un created_by. Una variante e' l'oggetto piu' DERIVATO dei quattro: una configurazione di una famiglia di configurazioni, agganciata a una banda dimensionale, cioe' a un perimetro gia' aperto e gia' presidiato (000378). ⚠ APERTO CON UNA GUARDIA: le porte sono DUE, le stesse della 000370 e della 000378 — blueprint_variant_metadata e' JSONB e blueprint_variant_description e' TESTO LIBERO. La neutralita' e' quindi vera OGGI e non per costruzione. Mig 000381: la sentinella sys.v_variante_di_fascicolo_con_dato_di_persona guarda entrambe le porte, db_health la raccoglie e la pretende a zero (bloccante, non informativa), e la migrazione stessa LA PROVA ROSSA SU TUTTE E DUE iniettando un indirizzo di posta e disfacendolo — una sentinella provata su una porta sola sarebbe verde anche essendo cieca sull'altra. Misurato in produzione prima di aprire (2026-09-08): 1 variante, 0 con descrizione, 0 con metadata, 0 indirizzi di posta in nessuna delle due porte. Un perimetro vuoto oggi non e' un perimetro chiuso domani: la guardia si mette PRIMA che il buco si apra.",
    "operations": {
@@ -262,6 +316,7 @@
    "solaLettura": true
   },
   "branches": {
+   "base": "/branches",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -279,6 +334,7 @@
    "solaLettura": true
   },
   "calibration-sessions": {
+   "base": "/calibration-sessions",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -301,6 +357,7 @@
    "solaLettura": true
   },
   "candidate-applications": {
+   "base": "/candidate-applications",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -318,6 +375,7 @@
    "solaLettura": true
   },
   "candidates": {
+   "base": "/candidates",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -335,6 +393,7 @@
    "solaLettura": true
   },
   "capability-composition": {
+   "base": "/capability",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -362,6 +421,7 @@
    "solaLettura": true
   },
   "capability-maturity": {
+   "base": "/capability",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -379,6 +439,7 @@
    "solaLettura": true
   },
   "career-path-steps": {
+   "base": "/career-path-steps",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -396,6 +457,7 @@
    "solaLettura": true
   },
   "career-paths": {
+   "base": "/career-paths",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -413,6 +475,7 @@
    "solaLettura": true
   },
   "compensation": {
+   "base": "/compensation",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -480,6 +543,7 @@
    "solaLettura": true
   },
   "content": {
+   "base": "/content",
    "data": "2026-08-21",
    "decisione": "Enzo (#214 F3, mandato in blocco S1077: «li voglio tutti, scegli tu la cronologia, procedi autonomamente»). QUARTO perimetro in sola lettura, scelto col criterio meccanico e non a intuito: e' il primo della coda dei neutri per ampiezza di lettura (7 letture · 3 pagine), e `RESOURCE_SENZA_DATI_DI_PERSONA` lo dichiara privo di dati di persona con parole proprie — e' il patrimonio documentale di un'azienda (manuali, politiche, materiali), non le persone che vi compaiono. I candidati piu' ampi non erano in gara: `analytics` e `dashboard` sono fra i RISERVATI dal 2026-08-19 (F5) per le classi che espongono davvero. Rischio crescente rispettato: dopo l'organigramma (rubrica), le posizioni (posti) e il fascicolo di configurazione (struttura), il contenuto e' l'oggetto piu' vicino a un documento e piu' lontano da una persona.",
    "operations": {
@@ -522,6 +586,7 @@
    "solaLettura": true
   },
   "content-blueprint-links": {
+   "base": "/content-blueprint-links",
    "data": "2026-09-04",
    "decisione": "Enzo (#214 F3/F6, mandato in blocco S1077: «li voglio tutti, scegli tu la cronologia, procedi autonomamente»). SETTIMO perimetro in sola lettura. Scelto col criterio meccanico e non a intuito — primo della coda dei neutri per ampiezza di lettura (3 letture · 2 pagine) — ma la testa della coda era un PARI con `visualization-exports`, stesse 3 letture e 2 pagine. Il pari lo scioglie la regola dell'ordine, che e' il RISCHIO CRESCENTE: `visualization-exports` eredita la superficie di `visualization-graphs`, aperto il 2026-08-26 CON UNA GUARDIA perche' il vocabolario dei nodi ammette 'USER'. Fra due candidati pari si apre prima quello piu' lontano da una persona. NEUTRALITA' MISURATA su information_schema, non dedotta dai nomi: delle dieci colonne di `sys_content_blueprint_links` nessuna e' il SOGGETTO di un dato di persona — `link_created_by` e' l'ATTORE che ha creato il collegamento, la stessa distinzione gia' fatta per `feedback_reviewed_by_user_id`: chi esamina non e' chi e' esaminato. ⚠ APERTO CON UNA GUARDIA, e stavolta le porte sono DUE invece di una: `link_metadata` e' JSONB (la stessa di `tenant_metadata`, mig. 000367) e `link_note` e' TESTO LIBERO — questa e' nuova, perche' una persona vi entra scrivendola, senza una chiave che la annunci. Mig `000370`: la sentinella `sys.v_content_blueprint_link_con_dato_di_persona` guarda entrambe, db_health la raccoglie e la pretende a zero (bloccante, non informativa), e la migrazione stessa LA PROVA ROSSA SU TUTTE E DUE le porte iniettando un indirizzo di posta e disfacendolo — una sentinella provata su una porta sola sarebbe verde anche essendo cieca sull'altra. Sul testo libero il criterio e' l'indirizzo di posta e non «un nome di persona»: quello e' indecidibile, e una guardia che pretende di riconoscerlo mente.",
    "operations": {
@@ -544,6 +609,7 @@
    "solaLettura": true
   },
   "dashboard": {
+   "base": "/dashboard",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -571,6 +637,7 @@
    "solaLettura": true
   },
   "data-classification": {
+   "base": "/data-classification",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -583,6 +650,7 @@
    "solaLettura": true
   },
   "delegations": {
+   "base": "/delegations",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -600,6 +668,7 @@
    "solaLettura": true
   },
   "engagement": {
+   "base": "/engagement",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -627,6 +696,7 @@
    "solaLettura": true
   },
   "engagement-feedback": {
+   "base": "/engagement-feedback",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -654,6 +724,7 @@
    "solaLettura": true
   },
   "enterprise-size-bands": {
+   "base": "/enterprise-size-bands",
    "data": "2026-09-07",
    "decisione": "Claude, per delega esplicita di Enzo (S1091, 2026-09-07: «esegui tutti da P0 a P3 in autonomia e automaticamente prendendo decisioni per mio conto»). NONO perimetro in sola lettura. Scelto col criterio meccanico e non a intuito, ma stavolta la testa della coda dei neutri non era un pari a due: era un PARI A SETTE — blueprint-families, blueprint-variants, enterprise-size-bands, enterprise-typing-profiles, job-roles, operating-models, skill-categories, tutti a 2 letture e 2 pagine (misurato 2026-09-07: 101 moduli, 8 aperti, 41 in coda di cui 22 neutri). Il pari lo scioglie la stessa regola che ha sciolto quello del 2026-09-04, il RISCHIO CRESCENTE: fra pari si apre prima quello piu' lontano da una persona. Applicata ai sette la scala e' leggibile senza opinione — `job-roles` e `skill-categories` sono i piu' VICINI, perche' un ruolo e' cio' che una persona ricopre e una categoria di competenza cio' che possiede: sono i vocabolari con cui si descrivono le persone, non le imprese; `blueprint-families`, `blueprint-variants`, `operating-models` ed `enterprise-typing-profiles` descrivono COME e' fatta un'organizzazione; `enterprise-size-bands` e' il piu' LONTANO, perche' e' una scala di misura dell'impresa (quanti dipendenti, quanto fatturato) e non un oggetto che una persona possa occupare, possedere o ricoprire. ⚠ `approvals` e' piu' ampio (2 letture, 3 pagine) ma NON e' fra i neutri: dichiara ACTIVITY, e la sua apertura andra' motivata su quella classe — non era in gara. NEUTRALITA' MISURATA su information_schema, non dedotta dai nomi: delle undici colonne di `sys_enterprise_size_bands` nessuna e' il SOGGETTO di un dato di persona, e qui — a differenza di `content-blueprint-links` — non c'e' nemmeno un ATTORE, perche' non esiste un `created_by`: la distinzione «chi esamina non e' chi e' esaminato» qui non serve. ⚠ APERTO CON UNA GUARDIA: le porte sono DUE, le stesse della 000370 — `enterprise_size_band_metadata` e' JSONB e `enterprise_size_band_description` e' TESTO LIBERO. La neutralita' e' quindi vera OGGI e non per costruzione, come per `visualization-graphs` (000355) e `tenants` (000367). Mig `000378`: la sentinella `sys.v_banda_dimensionale_con_dato_di_persona` guarda entrambe le porte, db_health la raccoglie e la pretende a zero (bloccante, non informativa), e la migrazione stessa LA PROVA ROSSA SU TUTTE E DUE iniettando un indirizzo di posta e disfacendolo — una sentinella provata su una porta sola sarebbe verde anche essendo cieca sull'altra. Sul testo libero il criterio resta l'indirizzo di posta e non «un nome di persona»: quello e' indecidibile, e una guardia che pretende di riconoscerlo mente. Misurato in produzione prima di aprire (2026-09-07): 5 bande, 0 con descrizione, 0 con metadata, 0 indirizzi di posta in nessuna delle due porte. Un perimetro vuoto oggi non e' un perimetro chiuso domani: la guardia si mette PRIMA che il buco si apra.",
    "operations": {
@@ -671,6 +742,7 @@
    "solaLettura": true
   },
   "enterprise-typing-profiles": {
+   "base": "/enterprise-typing-profiles",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -688,6 +760,7 @@
    "solaLettura": true
   },
   "evidence": {
+   "base": "/evidence",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -705,6 +778,7 @@
    "solaLettura": true
   },
   "gdpr": {
+   "base": "/gdpr",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -722,6 +796,7 @@
    "solaLettura": true
   },
   "generated-origins": {
+   "base": "/generated-origins",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -739,8 +814,9 @@
    "solaLettura": true
   },
   "goals": {
-   "data": "2026-11-05",
-   "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
+   "base": "/goals",
+   "data": "2026-11-18",
+   "decisione": "Enzo, 2026-11-17: approvate le cinque ondate degli endpoint senza consumatori (PR #280, piano docs/piani/PIANO_endpoint-orfani-ondate_20261117.md), criterio (b): all'agente, con le scritture approvate dalla persona. Ondata 4. Si aprono SOLO le scritture elencate in `scritture` (classe C nel catalogo generico: ogni chiamata chiede l'approvazione della persona); nessuna cancellazione. Aggiornare l'avanzamento di un obiettivo e' una richiesta naturale all'assistente.",
    "operations": {
     "get": {
      "method": "GET",
@@ -786,11 +862,17 @@
      "method": "GET",
      "path": "/templates",
      "permission": "goal:read"
+    },
+    "patch_by_id": {
+     "method": "PATCH",
+     "path": "/:id",
+     "permission": "goal:update"
     }
    },
-   "solaLettura": true
+   "solaLettura": false
   },
   "hierarchy-levels": {
+   "base": "/hierarchy-levels",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -803,6 +885,7 @@
    "solaLettura": true
   },
   "insights": {
+   "base": "/insights",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -830,6 +913,7 @@
    "solaLettura": true
   },
   "interview-feedback": {
+   "base": "/interview-feedback",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -847,6 +931,7 @@
    "solaLettura": true
   },
   "interviews": {
+   "base": "/interviews",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -864,6 +949,7 @@
    "solaLettura": true
   },
   "job-families": {
+   "base": "/job-families",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -881,6 +967,7 @@
    "solaLettura": true
   },
   "job-offers": {
+   "base": "/job-offers",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -898,6 +985,7 @@
    "solaLettura": true
   },
   "job-postings": {
+   "base": "/job-postings",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -915,6 +1003,7 @@
    "solaLettura": true
   },
   "job-requisitions": {
+   "base": "/job-requisitions",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -932,6 +1021,7 @@
    "solaLettura": true
   },
   "job-roles": {
+   "base": "/job-roles",
    "data": "2026-09-12",
    "decisione": "Claude, per delega esplicita di Enzo (S1097, 2026-09-12: «esegui tutti da P1 a P3, #198, #41, hold e fuori registro. Procedi in autonomia e automaticamente prendendo decisioni per mio conto, nell'ordine che ritieni piu' appropriato»). QUATTORDICESIMO perimetro in sola lettura. Scelto col criterio meccanico: coda ri-derivata sull'atlante fresco (da e818bc8b) — 108 moduli, 13 aperti, 44 in coda di cui 25 neutri. ⚠⚠ LA TESTA DELLA CODA ERA UN FALSO: `candidate-applications` (2 letture · 3 pagine) e `candidates` risultavano «nessun dato di persona» perche' le loro rotte GET portano il permesso `job-requisition:read`, e la resource `job-requisition` sta in RESOURCE_SENZA_DATI_DI_PERSONA con una ragione vera PER LE REQUISIZIONI soltanto. Il permesso e' CONDIVISO da tre moduli: misurato su information_schema, `sys_candidates` porta nome, cognome, email, telefono, consenso e conservazione; `sys_candidate_applications` ha per SOGGETTO il candidato (stadio, motivo di rifiuto). E' la stessa forma del difetto `engagement` (S1083): il criterio accettava come neutro un silenzio. CORRETTO NELLO STESSO COMMIT: i due moduli sono ESCLUSI (V2, elenco esplicito) come `leads` — persone esterne all'organico, fuori dalla tassonomia dei dipendenti, e l'agente non le legge. Il permesso condiviso e' materia di #54. Tolti i due, la testa e' un PARI a due a 2 letture · 2 pagine: enterprise-typing-profiles resta SCARTATO per la ragione misurata il 2026-09-08 e ancora vera (porta JSONB gia' occupata da `decided_by` con un nome proprio in chiaro); resta job-roles, che la 000407 aveva gia' messo per ultimo dei tre «vocabolari delle persone» con la motivazione scritta — un RUOLO e' cio' che una persona RICOPRE, l'etichetta di un posto — e che si apre ora perche' gli altri due sono aperti o scartati. ⚠ `approvals` e' piu' ampio (2 letture, 3 pagine) ma NON e' in gara: dichiara ACTIVITY. COSA E': sys_job_roles, il CATALOGO delle mansioni — 176 righe, agganciate a una famiglia, con codice, nome, descrizione, seniority; `job_role_tenant_id` (000397) e' NULL su tutte: e' il vocabolario dei posti, non chi li occupa, e data-classes.ts lo dichiara con parole proprie («la mansione e' un posto, non chi lo occupa»). NEUTRALITA' MISURATA su information_schema: delle dodici colonne nessuna e' il SOGGETTO di un dato di persona; created_by/updated_by sono ATTORI (uuid opachi), la stessa distinzione di link_created_by. ⚠ APERTO CON UNA GUARDIA, due porte ENTRAMBE PIENE: job_role_metadata e' JSONB, non vuoto su 136 righe su 176 — 111 portano venti chiavi ereditate dal legacy (salary_min, salary_max, salary_band_code, currency, sap_stell, sap_persk, sap_stext, esco_occupation_code, source_reference…) TUTTE a null (misurato: 0 valori non nulli), 25 portano `source` e `legacy_job_title` (un titolo di mansione, non un nome): residuo, non sapere. Le chiavi retributive a null sono chiavi di un CATALOGO (la banda di un ruolo), non la retribuzione di una persona. job_role_description e' TESTO LIBERO popolato su 89 righe. Mig 000408: la sentinella sys.v_ruolo_con_dato_di_persona guarda entrambe le porte, db_health la raccoglie e la pretende a zero (bloccante, non informativa), e la migrazione stessa LA PROVA ROSSA SU TUTTE E DUE iniettando un indirizzo di posta e disfacendolo, con la post-condizione per IMPRONTA md5 su 176 righe piene. Misurato in produzione prima di aprire (2026-09-12): 176 ruoli, 89 con descrizione, 136 con metadata non vuoto, 0 indirizzi di posta in nessuna delle due porte. Un perimetro neutro oggi non e' un perimetro neutro domani: la guardia si mette PRIMA che il buco si apra.",
    "operations": {
@@ -949,6 +1039,7 @@
    "solaLettura": true
   },
   "kpi-definitions": {
+   "base": "/kpi-definitions",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -986,6 +1077,7 @@
    "solaLettura": true
   },
   "leads": {
+   "base": "/leads",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -998,8 +1090,9 @@
    "solaLettura": true
   },
   "learning-gaps": {
-   "data": "2026-11-05",
-   "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
+   "base": "/learning-gaps",
+   "data": "2026-11-18",
+   "decisione": "Enzo, 2026-11-17: approvate le cinque ondate degli endpoint senza consumatori (PR #280, piano docs/piani/PIANO_endpoint-orfani-ondate_20261117.md), criterio (b): all'agente, con le scritture approvate dalla persona. Ondata 4. Si aprono SOLO le scritture elencate in `scritture` (classe C nel catalogo generico: ogni chiamata chiede l'approvazione della persona); nessuna cancellazione. Il gap si calcola dall'analisi delle competenze: l'agente lo propone, la persona conferma.",
    "operations": {
     "get": {
      "method": "GET",
@@ -1030,11 +1123,17 @@
      "method": "GET",
      "path": "/summary",
      "permission": "gap_analysis:read"
+    },
+    "post": {
+     "method": "POST",
+     "path": "/",
+     "permission": "gap_analysis:create"
     }
    },
-   "solaLettura": true
+   "solaLettura": false
   },
   "learning-modules": {
+   "base": "/learning-modules",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -1052,6 +1151,7 @@
    "solaLettura": true
   },
   "learning-path-steps": {
+   "base": "/learning-path-steps",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -1069,6 +1169,7 @@
    "solaLettura": true
   },
   "learning-paths": {
+   "base": "/learning-paths",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -1085,7 +1186,26 @@
    },
    "solaLettura": true
   },
+  "mandate-acts": {
+   "base": "/mandate-acts",
+   "data": "2026-11-05",
+   "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
+   "operations": {
+    "get": {
+     "method": "GET",
+     "path": "/",
+     "permission": "role:assign"
+    },
+    "get_by_id": {
+     "method": "GET",
+     "path": "/:id",
+     "permission": "role:assign"
+    }
+   },
+   "solaLettura": true
+  },
   "me": {
+   "base": "/me",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -1249,6 +1369,11 @@
      "path": "/notification-preferences",
      "permission": "notification:read:self"
     },
+    "get_organigramma": {
+     "method": "GET",
+     "path": "/organigramma",
+     "permission": "user_profile:read:self"
+    },
     "get_pay_slips": {
      "method": "GET",
      "path": "/pay-slips",
@@ -1314,10 +1439,20 @@
      "path": "/pulse-checks",
      "permission": "insight:read:self"
     },
+    "get_quadro": {
+     "method": "GET",
+     "path": "/quadro",
+     "permission": "user_profile:read:self"
+    },
     "get_risk": {
      "method": "GET",
      "path": "/risk",
      "permission": "career_succession:read:self"
+    },
+    "get_rubrica": {
+     "method": "GET",
+     "path": "/rubrica",
+     "permission": "user_profile:read:self"
     },
     "get_security_sessions": {
      "method": "GET",
@@ -1373,8 +1508,9 @@
    "solaLettura": true
   },
   "mentorship": {
-   "data": "2026-11-05",
-   "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
+   "base": "/mentorship",
+   "data": "2026-11-18",
+   "decisione": "Enzo, 2026-11-17: approvate le cinque ondate degli endpoint senza consumatori (PR #280, piano docs/piani/PIANO_endpoint-orfani-ondate_20261117.md), criterio (b): all'agente, con le scritture approvate dalla persona. Ondata 4. Si aprono SOLO le scritture elencate in `scritture` (classe C nel catalogo generico: ogni chiamata chiede l'approvazione della persona); nessuna cancellazione. L'abbinamento mentore-allievo e' un suggerimento (punteggi di affinita'): l'agente propone, le persone confermano.",
    "operations": {
     "get_match_scores": {
      "method": "GET",
@@ -1415,11 +1551,17 @@
      "method": "GET",
      "path": "/sessions/:id",
      "permission": "mentorship:read"
+    },
+    "post_pairings": {
+     "method": "POST",
+     "path": "/pairings",
+     "permission": "mentorship:create"
     }
    },
-   "solaLettura": true
+   "solaLettura": false
   },
   "mfa-policy": {
+   "base": "/mfa-policy",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -1427,11 +1569,17 @@
      "method": "GET",
      "path": "/",
      "permission": "mfa_policy:read"
+    },
+    "get_exemptions": {
+     "method": "GET",
+     "path": "/exemptions",
+     "permission": "mfa_policy:read"
     }
    },
    "solaLettura": true
   },
   "notifications": {
+   "base": "/notifications",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -1444,6 +1592,7 @@
    "solaLettura": true
   },
   "observability": {
+   "base": "/observability",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -1466,6 +1615,7 @@
    "solaLettura": true
   },
   "occupation-classifications": {
+   "base": "/occupation-classifications",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -1483,8 +1633,9 @@
    "solaLettura": true
   },
   "okrs": {
-   "data": "2026-11-05",
-   "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
+   "base": "/okrs",
+   "data": "2026-11-18",
+   "decisione": "Enzo, 2026-11-17: approvate le cinque ondate degli endpoint senza consumatori (PR #280, piano docs/piani/PIANO_endpoint-orfani-ondate_20261117.md), criterio (b): all'agente, con le scritture approvate dalla persona. Ondata 4. Si aprono SOLO le scritture elencate in `scritture` (classe C nel catalogo generico: ogni chiamata chiede l'approvazione della persona); nessuna cancellazione. Come gli obiettivi.",
    "operations": {
     "get": {
      "method": "GET",
@@ -1505,11 +1656,17 @@
      "method": "GET",
      "path": "/:id/key-results",
      "permission": "okr:read"
+    },
+    "patch_by_id": {
+     "method": "PATCH",
+     "path": "/:id",
+     "permission": "okr:update"
     }
    },
-   "solaLettura": true
+   "solaLettura": false
   },
   "operating-models": {
+   "base": "/operating-models",
    "data": "2026-09-12",
    "decisione": "Claude, per delega esplicita di Enzo (S1095, 2026-09-12: «esegui tutti da P1 a P3 in autonomia e automaticamente prendendo decisioni per mio conto, nell'ordine che ritieni piu' appropriato»). DODICESIMO perimetro in sola lettura. Scelto col criterio meccanico: coda ri-derivata sull'atlante fresco (da 8b81b12f) — 107 moduli, 11 aperti, 39 in coda di cui 20 neutri — e la testa dei neutri e' un PARI a quattro, tutti a 2 letture e 2 pagine (enterprise-typing-profiles, job-roles, operating-models, skill-categories). ⚠ `approvals` e' piu' ampio (2 letture, 3 pagine) ma NON e' in gara: dichiara ACTIVITY, stessa esclusione della 000378 e della 000382. L'ordine fra i quattro e' il RISCHIO CRESCENTE gia' stabilito: job-roles e skill-categories restano i piu' VICINI a una persona (un ruolo e' cio' che una persona ricopre, una categoria di competenza cio' che possiede); enterprise-typing-profiles resta SCARTATO per la ragione misurata il 2026-09-08, che vale ancora — la sua unica porta, il JSONB enterprise_typing_metadata, e' GIA' OCCUPATA da `decided_by` con un NOME PROPRIO IN CHIARO. Resta operating-models, l'ultimo dei quattro «intermedi» ancora in coda: la 000381 ha aperto le varianti, la 000382 le famiglie, questa chiude la terna. COSA E': `sys_operating_model_catalog` e' un CATALOGO di modelli operativi (B2B_SERVICES, MANUFACTURING, MIXED, PUBLIC_SECTOR, RETAIL, WHOLESALE), una classificazione aperta a ogni settore (I21) senza tenant_id: e' il vocabolario con cui un cliente si descrive, non contenuto di un cliente. NEUTRALITA' MISURATA su information_schema, non dedotta dai nomi: delle sette colonne nessuna e' il SOGGETTO di un dato di persona, e non c'e' nemmeno un ATTORE (non esiste un created_by). ⚠ APERTO CON UNA GUARDIA: le porte sono DUE, le stesse della 000370/000378/000381/000382 — operating_model_metadata e' JSONB (oggi `{}` su tutte e sei le righe) e operating_model_description e' TESTO LIBERO (oggi NULL su tutte e sei). Mig 000405: la sentinella sys.v_modello_operativo_con_dato_di_persona guarda entrambe le porte, db_health la raccoglie e la pretende a zero (bloccante, non informativa), e la migrazione stessa LA PROVA ROSSA SU TUTTE E DUE iniettando un indirizzo di posta e disfacendolo, con la post-condizione per IMPRONTA md5 della 000382 — e il ripristino della descrizione rimette il valore SALVATO, perche' '' e NULL sono due valori diversi. Misurato in produzione prima di aprire (2026-09-12): 6 modelli, 0 con descrizione, metadata `{}` su tutti, 0 indirizzi di posta in nessuna delle due porte. Un perimetro vuoto oggi non e' un perimetro chiuso domani: la guardia si mette PRIMA che il buco si apra.",
    "operations": {
@@ -1527,6 +1684,7 @@
    "solaLettura": true
   },
   "org-health": {
+   "base": "/org-health",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -1539,6 +1697,7 @@
    "solaLettura": true
   },
   "organization-unit-history": {
+   "base": "/organization-unit-history",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -1556,6 +1715,7 @@
    "solaLettura": true
   },
   "organization-unit-kpi-templates": {
+   "base": "/organization-unit-kpi-templates",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -1573,6 +1733,7 @@
    "solaLettura": true
   },
   "organization-unit-processes": {
+   "base": "/organization-unit-processes",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -1590,6 +1751,7 @@
    "solaLettura": true
   },
   "organization-units": {
+   "base": "/organization-units",
    "data": "2026-08-16",
    "decisione": "Enzo (#156): primo perimetro in sola lettura. Coerente con la decisione dello stesso giorno su #193 — l'organigramma e' rubrica aziendale, visibile a chiunque lavori in azienda. E' l'unico candidato la cui sensibilita' non e' una stima di chi scrive, ma una scelta di prodotto scritta e datata.",
    "operations": {
@@ -1607,6 +1769,7 @@
    "solaLettura": true
   },
   "performance-reviews": {
+   "base": "/performance-reviews",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -1624,6 +1787,7 @@
    "solaLettura": true
   },
   "platform-tenant-assignments": {
+   "base": "/platform-tenant-assignments",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -1636,6 +1800,7 @@
    "solaLettura": true
   },
   "position-career-paths": {
+   "base": "/position-career-paths",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -1653,6 +1818,7 @@
    "solaLettura": true
   },
   "position-succession-relevance": {
+   "base": "/position-succession-relevance",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -1670,6 +1836,7 @@
    "solaLettura": true
   },
   "positions": {
+   "base": "/positions",
    "data": "2026-08-17",
    "decisione": "Enzo (#214): «apri positions». Secondo perimetro in sola lettura, ed e' il primo DAVVERO neutro della coda: 8 letture, 5 pagine, e la classe non e' un'assenza ma un'affermazione scritta in data-classes.ts — «una posizione e' un POSTO nell'organigramma; chi lo occupa si legge da user, che e' PERSONAL». Il candidato piu' ampio (analytics, 10 letture) e' stato SCARTATO nella stessa decisione: le sue cinque pagine espongono per dichiarazione propria anche competenze e retribuzioni, e compariva fra i neutri solo per un buco del criterio, chiuso in S1068.",
    "operations": {
@@ -1717,6 +1884,7 @@
    "solaLettura": true
   },
   "predictions": {
+   "base": "/predictions",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -1744,6 +1912,7 @@
    "solaLettura": true
   },
   "process-kpi-templates": {
+   "base": "/process-kpi-templates",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -1761,6 +1930,7 @@
    "solaLettura": true
   },
   "projects": {
+   "base": "/projects",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -1778,6 +1948,7 @@
    "solaLettura": true
   },
   "provenance": {
+   "base": "/provenance",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -1795,6 +1966,7 @@
    "solaLettura": true
   },
   "public-job-postings": {
+   "base": "/public",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -1812,6 +1984,7 @@
    "solaLettura": true
   },
   "public-stats": {
+   "base": "/public",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -1824,6 +1997,7 @@
    "solaLettura": true
   },
   "reference-sync": {
+   "base": "/reference-sync",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -1846,6 +2020,7 @@
    "solaLettura": true
   },
   "review-cycles": {
+   "base": "/review-cycles",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -1863,8 +2038,9 @@
    "solaLettura": true
   },
   "seed-acquisition-runs": {
-   "data": "2026-11-05",
-   "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
+   "base": "/seed-acquisition-runs",
+   "data": "2026-11-18",
+   "decisione": "Enzo, 2026-11-17: approvate le cinque ondate degli endpoint senza consumatori (PR #280, piano docs/piani/PIANO_endpoint-orfani-ondate_20261117.md), criterio (b): all'agente, con le scritture approvate dalla persona. Ondata 4. Si aprono SOLO le scritture elencate in `scritture` (classe C nel catalogo generico: ogni chiamata chiede l'approvazione della persona); nessuna cancellazione. La ricerca di dati di partenza e' un'attivita' dell'agente (research-propose); la decisione sui candidati resta umana.",
    "operations": {
     "get": {
      "method": "GET",
@@ -1880,11 +2056,22 @@
      "method": "GET",
      "path": "/:id/candidates",
      "permission": "seed_acquisition:read"
+    },
+    "patch_by_id": {
+     "method": "PATCH",
+     "path": "/:id",
+     "permission": "seed_acquisition:trigger"
+    },
+    "post": {
+     "method": "POST",
+     "path": "/",
+     "permission": "seed_acquisition:trigger"
     }
    },
-   "solaLettura": true
+   "solaLettura": false
   },
   "seed-approval-decisions": {
+   "base": "/seed-approval-decisions",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -1902,6 +2089,7 @@
    "solaLettura": true
   },
   "seed-candidate-records": {
+   "base": "/seed-candidate-records",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -1929,6 +2117,7 @@
    "solaLettura": true
   },
   "semantic-matching": {
+   "base": "/matching",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -1981,6 +2170,7 @@
    "solaLettura": true
   },
   "skill-aliases": {
+   "base": "/skill-aliases",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -1998,6 +2188,7 @@
    "solaLettura": true
   },
   "skill-categories": {
+   "base": "/skill-categories",
    "data": "2026-09-12",
    "decisione": "Claude, per delega esplicita di Enzo (S1096, 2026-09-12: «esegui tutti da P1 a P3, poi i debiti aperti e i due gated. tutto in autonomia e automaticamente prendendo decisioni per mio conto, nell'ordine che ritieni piu' appropriato»). TREDICESIMO perimetro in sola lettura. Scelto col criterio meccanico: coda ri-derivata sull'atlante fresco (da 344cd461) — 108 moduli, 12 aperti, 45 in coda di cui 19 neutri — e la testa dei neutri e' un PARI a tre, tutti a 2 letture e 2 pagine (enterprise-typing-profiles, job-roles, skill-categories). ⚠ `approvals` e' piu' ampio (2 letture, 3 pagine) ma NON e' in gara: dichiara ACTIVITY, stessa esclusione della 000378/000382/000405. Chiusa la terna degli intermedi (000381, 000382, 000405), per la prima volta la scelta cade fra i «vocabolari delle persone», che il piano di #214 diceva di aprire «con una motivazione su quella vicinanza, non per ampiezza». enterprise-typing-profiles resta SCARTATO per la ragione misurata il 2026-09-08 (porta JSONB gia' occupata da `decided_by` con un nome proprio in chiaro). ⭐ FRA job-roles E skill-categories LA DISTANZA DA UNA PERSONA NON E' LA STESSA, anche se la 000378 le aveva messe nella stessa riga: un RUOLO e' cio' che una persona RICOPRE — l'etichetta di un posto, da cui si risale a chi lo occupa; una CATEGORIA DI COMPETENZA e' cio' che RAGGRUPPA le competenze (Cognitive, Technical, Leadership…), un livello della tassonomia. Una persona possiede COMPETENZE (`sys_user_skills`, classe SKILL, chiusa), non categorie: nessuna riga di sys_skill_categories si lega a una persona, nemmeno in due passaggi. E' una CLASSIFICAZIONE del genere che I21 tiene aperta a ogni settore, e data-classes.ts la dichiara «catalogo globale». Quindi prima le categorie, poi i ruoli. COSA E': sys_skill_categories, 7 righe (Cognitive · External · Interpersonal · Leadership · Performance · Personal · Technical), senza tenant_id, agganciate a una famiglia e referenziate dalle competenze. NEUTRALITA' MISURATA su information_schema: delle otto colonne nessuna e' il SOGGETTO di un dato di persona, e non c'e' nemmeno un ATTORE (nessun created_by). ⚠ APERTO CON UNA GUARDIA, due porte e stavolta ENTRAMBE PIENE: skill_category_metadata e' JSONB e porta su 6 righe su 7 sette chiavi ereditate dal legacy (weight, is_active, tenant_id, deleted_at, sort_order, framework_id, behavioral_indicators) TUTTE a null — residuo, non sapere, e nessuna nomina una persona; skill_category_description e' TESTO LIBERO popolato su 6 righe su 7. Mig 000407: la sentinella sys.v_categoria_di_competenza_con_dato_di_persona guarda entrambe le porte, db_health la raccoglie e la pretende a zero (bloccante, non informativa), e la migrazione stessa LA PROVA ROSSA SU TUTTE E DUE iniettando un indirizzo di posta e disfacendolo, con la post-condizione per IMPRONTA md5 — che qui conta doppio, perche' un ripristino che rimettesse `{}` al posto delle sette chiavi a null passerebbe un conteggio e fallirebbe l'impronta. Misurato in produzione prima di aprire (2026-09-12): 7 categorie, 6 con descrizione, 6 con metadata non vuoto, 0 indirizzi di posta in nessuna delle due porte. Un perimetro neutro oggi non e' un perimetro neutro domani: la guardia si mette PRIMA che il buco si apra.",
    "operations": {
@@ -2015,6 +2206,7 @@
    "solaLettura": true
   },
   "skill-families": {
+   "base": "/skill-families",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -2032,6 +2224,7 @@
    "solaLettura": true
   },
   "skill-proficiency-levels": {
+   "base": "/skill-proficiency-levels",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -2044,6 +2237,7 @@
    "solaLettura": true
   },
   "skill-taxonomy-edges": {
+   "base": "/skill-taxonomy-edges",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -2061,6 +2255,7 @@
    "solaLettura": true
   },
   "skills": {
+   "base": "/skills",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -2083,6 +2278,7 @@
    "solaLettura": true
   },
   "succession-pools": {
+   "base": "/succession-pools",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -2100,6 +2296,7 @@
    "solaLettura": true
   },
   "successor-candidates": {
+   "base": "/successor-candidates",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -2122,6 +2319,7 @@
    "solaLettura": true
   },
   "successor-readiness": {
+   "base": "/successor-readiness",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -2139,6 +2337,7 @@
    "solaLettura": true
   },
   "surveys": {
+   "base": "/surveys",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -2176,6 +2375,7 @@
    "solaLettura": true
   },
   "talent-review": {
+   "base": "/talent-review",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -2213,6 +2413,7 @@
    "solaLettura": true
   },
   "teams": {
+   "base": "/teams",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -2230,6 +2431,7 @@
    "solaLettura": true
   },
   "tenant-blueprints": {
+   "base": "/tenant-blueprints",
    "data": "2026-08-19",
    "decisione": "Enzo (#214 F3): «apri tenant-blueprints». Terzo perimetro in sola lettura. E' il fascicolo di configurazione di un'azienda — struttura, non persone — e `RESOURCE_SENZA_DATI_DI_PERSONA` lo dichiara tale con quelle parole, non per assenza dall'elenco delle riservate. Scelto fra i candidati neutri per ampiezza di lettura (6 letture, 3 pagine) nella stessa decisione in cui F5 ha reso misurabili anche i candidati piu' ampi: `analytics` e `dashboard` sono usciti dai NON MISURABILI e sono caduti fra i RISERVATI per le classi che espongono davvero, quindi non erano in gara.",
    "operations": {
@@ -2276,41 +2478,10 @@
    },
    "solaLettura": true
   },
-  "tenant-consolidation": {
-   "data": "2026-11-05",
-   "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
-   "operations": {
-    "get": {
-     "method": "GET",
-     "path": "/",
-     "permission": "consolidation:read"
-    },
-    "get_access": {
-     "method": "GET",
-     "path": "/access",
-     "permission": null
-    },
-    "get_by_id": {
-     "method": "GET",
-     "path": "/:id",
-     "permission": null
-    },
-    "get_by_id_progress": {
-     "method": "GET",
-     "path": "/:id/progress",
-     "permission": null
-    },
-    "get_by_id_proposals": {
-     "method": "GET",
-     "path": "/:id/proposals",
-     "permission": null
-    }
-   },
-   "solaLettura": true
-  },
   "tenant-import-runs": {
-   "data": "2026-11-05",
-   "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
+   "base": "/tenant-import-runs",
+   "data": "2026-11-18",
+   "decisione": "Enzo, 2026-11-17: approvate le cinque ondate degli endpoint senza consumatori (PR #280, piano docs/piani/PIANO_endpoint-orfani-ondate_20261117.md), criterio (b): all'agente, con le scritture approvate dalla persona. Ondata 4. Si aprono SOLO le scritture elencate in `scritture` (classe C nel catalogo generico: ogni chiamata chiede l'approvazione della persona); nessuna cancellazione. L'importazione guidata del Tenant Builder: l'agente prepara le fonti e la corsa, la persona conferma la consegna.",
    "operations": {
     "get": {
      "method": "GET",
@@ -2321,23 +2492,40 @@
      "method": "GET",
      "path": "/:id",
      "permission": "seed_acquisition:read"
+    },
+    "post": {
+     "method": "POST",
+     "path": "/",
+     "permission": "seed_acquisition:trigger"
+    },
+    "post_by_id_submit": {
+     "method": "POST",
+     "path": "/:id/submit",
+     "permission": "seed_acquisition:trigger"
+    },
+    "post_sources": {
+     "method": "POST",
+     "path": "/sources",
+     "permission": "seed_acquisition:trigger"
     }
    },
-   "solaLettura": true
+   "solaLettura": false
   },
   "tenant-materialization": {
+   "base": "/tenant-materialization",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
     "get_sources": {
      "method": "GET",
      "path": "/sources",
-     "permission": null
+     "permission": "tenant_materialization:execute"
     }
    },
    "solaLettura": true
   },
   "tenants": {
+   "base": "/tenants",
    "data": "2026-08-30",
    "decisione": "Enzo (#214 F3, mandato in blocco S1077: «li voglio tutti, scegli tu la cronologia, procedi autonomamente»). SESTO perimetro in sola lettura, primo della coda dei neutri per ampiezza di lettura (3 letture · 4 pagine). E' l'unico finora la cui neutralita' e' vera PER COSTRUZIONE e non per misura: `sys_tenancies` non ha alcuna colonna di persona (verificato su information_schema, non dedotto dai nomi) e le tre rotte read — lista, catalogo degli industry-code, singolo tenant — non uniscono persone. ⚠ APERTO CON UNA GUARDIA per l'unica via d'ingresso che resta: `tenant_metadata` e' JSONB, oggi porta solo chiavi di configurazione (domain, industry, ateco_code, is_platform, legacy_tenant_id, rebuilt_at, regulatory_intensity, blueprint_variant_code) ma per costruzione puo' accogliere un referente o una email. Mig `000367`: la sentinella `sys.v_tenant_metadata_con_dato_di_persona`, che db_health raccoglie e pretende a zero — bloccante, non informativa — e che la migrazione stessa PROVA ROSSA iniettando un referente in un tenant finto e disfacendolo. E' lo stesso rimedio di `visualization-graphs` (000355), applicato prima che il buco si apra invece che dopo averlo trovato. · SOLA LETTURA",
    "operations": {
@@ -2360,6 +2548,7 @@
    "solaLettura": true
   },
   "time-off": {
+   "base": "/time-off",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -2382,6 +2571,7 @@
    "solaLettura": true
   },
   "training-initiatives": {
+   "base": "/training-initiatives",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -2399,8 +2589,9 @@
    "solaLettura": true
   },
   "user-career-plans": {
-   "data": "2026-11-05",
-   "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
+   "base": "/user-career-plans",
+   "data": "2026-11-18",
+   "decisione": "Enzo, 2026-11-17: approvate le cinque ondate degli endpoint senza consumatori (PR #280, piano docs/piani/PIANO_endpoint-orfani-ondate_20261117.md), criterio (b): all'agente, con le scritture approvate dalla persona. Ondata 4. Si aprono SOLO le scritture elencate in `scritture` (classe C nel catalogo generico: ogni chiamata chiede l'approvazione della persona); nessuna cancellazione. Il piano di carriera e' una conversazione personale: l'agente propone, la persona conferma.",
    "operations": {
     "get": {
      "method": "GET",
@@ -2411,11 +2602,22 @@
      "method": "GET",
      "path": "/:id",
      "permission": "career_succession:read"
+    },
+    "patch_by_id": {
+     "method": "PATCH",
+     "path": "/:id",
+     "permission": "career_succession:update"
+    },
+    "post": {
+     "method": "POST",
+     "path": "/",
+     "permission": "career_succession:create"
     }
    },
-   "solaLettura": true
+   "solaLettura": false
   },
   "user-position-assignments": {
+   "base": "/user-position-assignments",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -2433,8 +2635,9 @@
    "solaLettura": true
   },
   "user-target-positions": {
-   "data": "2026-11-05",
-   "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
+   "base": "/user-target-positions",
+   "data": "2026-11-18",
+   "decisione": "Enzo, 2026-11-17: approvate le cinque ondate degli endpoint senza consumatori (PR #280, piano docs/piani/PIANO_endpoint-orfani-ondate_20261117.md), criterio (b): all'agente, con le scritture approvate dalla persona. Ondata 4. Si aprono SOLO le scritture elencate in `scritture` (classe C nel catalogo generico: ogni chiamata chiede l'approvazione della persona); nessuna cancellazione. Le posizioni obiettivo come i piani di carriera; /me/career/target resta la vista in lettura.",
    "operations": {
     "get": {
      "method": "GET",
@@ -2445,11 +2648,27 @@
      "method": "GET",
      "path": "/:id",
      "permission": "career_succession:read"
+    },
+    "patch_by_id": {
+     "method": "PATCH",
+     "path": "/:id",
+     "permission": "career_succession:update"
+    },
+    "post": {
+     "method": "POST",
+     "path": "/",
+     "permission": "career_succession:create"
+    },
+    "post_by_id_review": {
+     "method": "POST",
+     "path": "/:id/review",
+     "permission": "career_succession:update"
     }
    },
-   "solaLettura": true
+   "solaLettura": false
   },
   "user-timeline": {
+   "base": "/user-timeline",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -2467,6 +2686,7 @@
    "solaLettura": true
   },
   "users": {
+   "base": "/users",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -2494,6 +2714,7 @@
    "solaLettura": true
   },
   "visualization-edges": {
+   "base": "/visualization-edges",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -2511,6 +2732,7 @@
    "solaLettura": true
   },
   "visualization-exports": {
+   "base": "/visualization-exports",
    "data": "2026-09-05",
    "decisione": "Enzo (#214 F6, mandato in blocco S1077: «li voglio tutti, scegli tu la cronologia, procedi autonomamente»). OTTAVO perimetro in sola lettura, e stavolta la coda non ha lasciato scelta: e' il primo dei neutri per ampiezza di lettura (3 letture · 2 pagine) SENZA PARI — ed e' lo stesso candidato che il settimo aveva scartato il 2026-09-04, quando il pari con `content-blueprint-links` fu sciolto dalla regola del rischio crescente. La regola che allora lo rimando' indietro e' la stessa che oggi lo fa passare. NEUTRALITA' MISURATA su information_schema, non dedotta dai nomi: delle undici colonne di `sys_visualization_exports` nessuna e' il SOGGETTO di un dato di persona — sono il grafo di origine, il layout, il formato, il contenuto e la sua misura; non c'e' nemmeno un ATTORE, quindi qui non serve la distinzione «chi esamina non e' chi e' esaminato» servita altrove. ⚠ APERTO CON UNA GUARDIA, e le porte sono QUATTRO — una in piu' del settimo, e la quarta e' di natura diversa dalle altre. Un export EREDITA la superficie di `visualization-graphs` (aperto 2026-08-26 con guardia, perche' il vocabolario dei nodi ammette 'USER'), ma la eredita GIA' SERIALIZZATA: la sentinella del grafo (`v_grafo_con_nodo_di_persona`, mig 000355) guarda i nodi VIVI, mentre un export e' una fotografia gia' scattata. Se un grafo con nodi di persona venisse esportato e poi corretto, la sentinella del grafo tornerebbe verde e l'export resterebbe con i nomi dentro, leggibile dall'agente e invisibile a ogni strumento esistente. Non e' un caso di scuola: `export_payload` contiene oggi SVG interi da ~29 KB, cioe' le etichette dei nodi disegnate una per una. Mig `000373`: la sentinella `sys.v_export_di_visualizzazione_con_dato_di_persona` guarda ① `export_metadata` JSONB, ② `export_payload`, ③ `export_payload_uri` e ④ la DISCENDENZA da un grafo con nodi di tipo 'USER' — la via che le altre tre non possono vedere, perche' un nome proprio senza chiocciola non e' riconoscibile in un testo ma il TIPO del nodo lo dichiara. db_health la raccoglie e la pretende a zero (bloccante, non informativa), e la migrazione stessa LA PROVA ROSSA SU TUTTE E QUATTRO le porte iniettando e disfacendo. Sul testo il criterio resta l'indirizzo di posta e non «un nome di persona»: quello e' indecidibile, e una guardia che pretende di riconoscerlo mente. Misurato prima di aprire (2026-09-05, produzione): 16 export · 13 con payload · 3 con uri · 3 con metadata; email nel payload 0, nell'uri 0, nel metadata 0, export da grafi con nodi 'USER' 0.",
    "operations": {
@@ -2533,6 +2755,7 @@
    "solaLettura": true
   },
   "visualization-graphs": {
+   "base": "/visualization-graphs",
    "data": "2026-08-26",
    "decisione": "Enzo (#214 F3, mandato in blocco S1077: «li voglio tutti, scegli tu la cronologia, procedi autonomamente»). QUINTO perimetro in sola lettura, primo della coda dei neutri per ampiezza di lettura (5 letture · 4 pagine). ⚠ APERTO CON UNA GUARDIA, e la ragione è un buco del criterio trovato misurando (S1081): `data-classes.ts` dichiara `visualization` senza dati di persona («grafici salvati») e i DATI di oggi le danno ragione — 316 nodi su 316 sono di tipo POSITION, nessuna persona — ma il vocabolario che il modello AMMETTE contiene anche 'USER' (dove `node_label` sarebbe il nome di una persona) e 'SUCCESSION_POOL'. La dichiarazione era vera oggi, non per costruzione: il giorno in cui una pagina salvasse un organigramma per persone, l'agente leggerebbe nomi propri da un perimetro dichiarato neutro e nessuno strumento se ne accorgerebbe. Rimedio nella mig 000355: la sentinella `sys.v_grafo_con_nodo_di_persona`, che db_health raccoglie e pretende a zero — bloccante, non informativa. Così l'apertura resta dimostrabile nel tempo invece che cieca.",
    "operations": {
@@ -2565,6 +2788,7 @@
    "solaLettura": true
   },
   "visualization-layouts": {
+   "base": "/visualization-layouts",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -2582,6 +2806,7 @@
    "solaLettura": true
   },
   "visualization-node-layouts": {
+   "base": "/visualization-node-layouts",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -2599,6 +2824,7 @@
    "solaLettura": true
   },
   "visualization-nodes": {
+   "base": "/visualization-nodes",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {
@@ -2616,6 +2842,7 @@
    "solaLettura": true
   },
   "visualization-styles": {
+   "base": "/visualization-styles",
    "data": "2026-11-05",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
    "operations": {

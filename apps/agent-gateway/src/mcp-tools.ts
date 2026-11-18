@@ -148,18 +148,23 @@ export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOpera
           "hrx_entity_query",
           "Esegue un'operazione dichiarata da hrx_concept_describe. Il metodo e il percorso " +
             "li decide la mappa, non questo input: dichiararsi in lettura non cambia cio' che " +
-            "l'operazione e'. params riempie i segnaposto del percorso; query va in querystring.",
+            "l'operazione e'. params riempie i segnaposto del percorso; query va in querystring; body e' il " +
+            "corpo di una scrittura dichiarata, che passa sempre dall'approvazione della persona.",
           {
             conceptId: z.string(),
             operationId: z.string(),
             params: z.object({}).catchall(z.union([z.string(), z.number(), z.boolean()])).optional(),
             query: z.object({}).catchall(z.union([z.string(), z.number(), z.boolean()])).optional(),
+            // Ondata 4: il corpo di una scrittura dichiarata (POST/PATCH/PUT). Su una GET si scarta.
+            // La scrittura passa comunque dall'approvazione della persona, che vede questo corpo.
+            body: z.object({}).catchall(z.any()).optional(),
           },
           async (a: {
             conceptId: string;
             operationId: string;
             params?: Record<string, string | number | boolean>;
             query?: Record<string, string | number | boolean>;
+            body?: Record<string, unknown>;
           }) => {
             const op = operations.operationsOf(a.conceptId)[a.operationId];
             // Ridondante col gate, e deve restarlo: il gate e' la guardia di sicurezza, questo
@@ -174,8 +179,11 @@ export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOpera
             const qs = new URLSearchParams(
               Object.entries(a.query ?? {}).map(([k, v]) => [k, String(v)] as [string, string]),
             ).toString();
-            const base = `/${a.conceptId}${percorso === "/" ? "" : percorso}`;
-            return ok(await client.call(op.method, qs ? `${base}?${qs}` : base));
+            const radice = operations.baseOf(a.conceptId);
+            const base = `${radice === "/" ? "" : radice}${percorso === "/" ? "" : percorso}` || "/";
+            const url = qs ? `${base}?${qs}` : base;
+            const scrive = op.method.toUpperCase() !== "GET";
+            return ok(scrive ? await client.call(op.method, url, a.body ?? {}) : await client.call(op.method, url));
           },
         ),
       ]

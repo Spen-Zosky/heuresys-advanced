@@ -55,8 +55,8 @@
   "processes": {
     "title": "Process catalogue",
     "description": "The processes of the tenant's blueprint, in value-chain order.",
-    "count": "{{count}} processes",
-    "count_one": "{{count}} process",
+    "count": "{{count}} model processes",
+    "count_one": "{{count}} model process",
     "error": "Unable to load the processes.",
     "emptyTitle": "No processes",
     "emptyDescription": "There are no processes.",

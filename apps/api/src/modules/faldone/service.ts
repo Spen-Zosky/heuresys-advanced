@@ -23,9 +23,9 @@
  */
 import { pool } from "../../db/client.js";
 import type { ActorContext } from "../../lib/actor.js";
-import { isPlatform } from "../../lib/actor.js";
 import { NotFoundError } from "../../errors/index.js";
-import { canReadOrgTarget, HR_MANDATED_ROLES, haPerimetroTenantMascherato } from "../../lib/scope/resolver.js";
+import { canReadOrgTarget, haPerimetroTenantMascherato } from "../../lib/scope/resolver.js";
+import { haMandatoHr, haMandatoPiattaforma } from "../../lib/scope/mandati.js";
 import { masksSensitiveClass, masksTopOfChainPay } from "../../lib/scope/mask.js";
 import { chainLevelOf } from "../../lib/scope/org.js";
 import { serveConferma } from "../../lib/scope/conferma.js";
@@ -171,11 +171,11 @@ async function contesto(actor: ActorContext, userId: string): Promise<{ persona:
   const comp = masksSensitiveClass(actor, "COMPENSATION", userId)
     || masksTopOfChainPay(actor, userId, livelloAttore, livelloSoggetto) || d5Comp;
   const evalu = masksSensitiveClass(actor, "EVALUATION", userId) || d5Eval;
-  const privata = self || actor.roles.some((x) => HR_MANDATED_ROLES.has(x)) || haPerimetroTenantMascherato(actor) || isPlatform(actor);
+  const privata = self || haMandatoHr(actor) || haPerimetroTenantMascherato(actor) || haMandatoPiattaforma(actor);
   return {
     persona: { userId, nome: row.nome || "(senza nome)", tenantId: row.tenant_id },
     diritti: {
-      self, privata, credenziali: isPlatform(actor), comp, eval: evalu,
+      self, privata, credenziali: haMandatoPiattaforma(actor), comp, eval: evalu,
       confermaRichiesta: [...(d5Comp ? ["COMPENSATION" as const] : []), ...(d5Eval ? ["EVALUATION" as const] : [])],
     },
   };

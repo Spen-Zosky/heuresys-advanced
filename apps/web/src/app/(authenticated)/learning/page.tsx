@@ -1,5 +1,6 @@
 "use client";
 
+import { Codice } from "@/components/codice";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
@@ -18,7 +19,7 @@ function buildColumns(t: TFunction, onEdit: (id: string) => void): DataColumn<Le
   return [
     { header: t("shared.name"), cell: (m) => <span className="font-medium text-foreground">{m.title}</span> },
     // R2/C1: il codice resta nel dettaglio della riga, non in testa alla tabella.
-    { header: t("shared.code"), secondaria: true, cell: (m) => <span className="font-mono text-xs" data-grezzo="">{m.code}</span> },
+    { header: t("shared.code"), secondaria: true, cell: (m) => <Codice value={m.code} /> },
     {
       header: t("learning.cols.duration"),
       cell: (m) => <span className="text-xs text-muted-foreground">{m.durationMinutes ?? "—"}</span>,

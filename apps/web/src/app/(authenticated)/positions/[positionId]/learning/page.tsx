@@ -18,11 +18,13 @@ import { EntityTable } from "@/components/data-table-panel";
 import { StatusBadge } from "@/components/status-pill";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { useFormat } from "@/lib/format";
+import { useEnumLabel } from "@/lib/enum-labels";
 import { NomeOppure, SenzaNome } from "@/components/senza-nome";
 
 export default function PositionLearningPage() {
   const { t } = useTranslation("admin");
   const fmt = useFormat();
+  const enumLabel = useEnumLabel();
   const params = useParams<{ positionId: string }>();
   const positionId = params.positionId;
 
@@ -56,7 +58,17 @@ export default function PositionLearningPage() {
   });
 
   const reqItems = requirements.data?.items ?? [];
-  const moduleItems = modules.data?.items ?? [];
+  // C18: due moduli del catalogo con lo stesso titolo, erogazione e durata (copie con codici diversi)
+  // producevano righe identiche per la stessa competenza: si riuniscono per ciò che la persona legge.
+  const moduleItems = (() => {
+    const viste = new Set<string>();
+    return (modules.data?.items ?? []).filter((m) => {
+      const k = [m.skillId, m.learningModuleTitle, m.learningModuleDelivery, m.learningModuleDurationMinutes, m.requiredProficiency, m.targetProficiency].join("|");
+      if (viste.has(k)) return false;
+      viste.add(k);
+      return true;
+    });
+  })();
   const gapItems = gaps.rows;
 
   return (
@@ -103,12 +115,8 @@ export default function PositionLearningPage() {
               {
                 header: t("positions.learning.requirements.columns.path"),
                 cell: (r) => (
-                  <span className="text-sm">
-                    {r.learningPathName ?? t("positions.learning.dash")}
-                    {r.learningPathCode ? (
-                      <span className="ml-2 font-mono text-xs text-muted-foreground">{r.learningPathCode}</span>
-                    ) : null}
-                  </span>
+                  // C19 (giro qa-web 18/11): il codice del corso («CRS-rtl-bank-9») non dice niente a chi legge: si mostra il nome.
+                  <span className="text-sm">{r.learningPathName ?? t("positions.learning.dash")}</span>
                 ),
               },
               {
@@ -164,7 +172,7 @@ export default function PositionLearningPage() {
                 header: t("positions.learning.modules.columns.delivery"),
                 cell: (m) => (
                   <span className="text-xs text-muted-foreground">
-                    {m.learningModuleDelivery ?? t("positions.learning.dash")}
+                    {m.learningModuleDelivery ? enumLabel("learningDelivery", m.learningModuleDelivery) : t("positions.learning.dash")}
                     {m.learningModuleDurationMinutes
                       ? ` · ${t("positions.learning.modules.minutes", { count: m.learningModuleDurationMinutes })}`
                       : ""}

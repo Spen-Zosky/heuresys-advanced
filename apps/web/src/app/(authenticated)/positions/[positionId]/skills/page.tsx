@@ -1,5 +1,6 @@
 "use client";
 
+import { Codice } from "@/components/codice";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
@@ -71,7 +72,7 @@ export default function PositionSkillsPage() {
             caption={t("positions.skills.caption")}
             columns={[
               { header: t("positions.skills.columns.skill"), cell: (s) => <NomeOppure nome={s.skillName} id={s.skillId} /> },
-              { header: t("positions.skills.columns.code"), cell: (s) => <span className="font-mono text-xs">{s.skillCode ?? "—"}</span> },
+              { header: t("positions.skills.columns.code"), cell: (s) => <Codice value={s.skillCode} /> },
               { header: t("positions.skills.columns.proficiency"), cell: (s) => <EnumStatusBadge domain="proficiency" value={s.requiredProficiency} /> },
               { header: t("positions.skills.columns.weight"), cell: (s) => <span className="text-xs">{s.weight}</span> },
               { header: "", cell: (s) => (

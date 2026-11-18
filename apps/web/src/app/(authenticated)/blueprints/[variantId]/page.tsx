@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { Codice } from "@/components/codice";
 import { PageHeader } from "@/components/intestazione-pagina";
 import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
 import type { BlueprintActivation, BlueprintVariant, BlueprintProcess, ContentLinkForProcess } from "@heuresys/shared";
@@ -45,6 +46,7 @@ export default function BlueprintVariantDetailPage() {
     params: { variantId },
     enabled: !!variantId && tab === "processes",
   });
+  const esisteOpzionale = processes.rows.some((p) => p.isOptional);
   const activations = usePaginatedList<BlueprintActivation>({
     queryKey: ["blueprint-activations", variantId],
     path: "/v1/blueprint-activations",
@@ -138,17 +140,21 @@ export default function BlueprintVariantDetailPage() {
               emptyTitle={t("detail.processesEmpty")}
               caption={t("detail.processesCaption")}
               columns={[
-                { header: t("detail.processColumns.ordinal"), cell: (p) => <span className="text-xs text-muted-foreground">{p.ordinal}</span> },
-                { header: t("detail.processColumns.code"), cell: (p) => <span className="font-mono text-xs">{p.code}</span> },
+                // C15 (giro qa-web 18/11): la numerazione parte da 1 (il dato è un indice che parte da 0), e la
+                // colonna «Opzionale» compare solo se almeno un processo lo è (sempre «No» non dice niente).
+                { header: t("detail.processColumns.ordinal"), cell: (p) => <span className="text-xs text-muted-foreground">{p.ordinal + 1}</span> },
+                { header: t("detail.processColumns.code"), cell: (p) => <Codice value={p.code} /> },
                 { header: t("detail.processColumns.name"), cell: (p) => p.name },
-                {
-                  header: t("detail.processColumns.optional"),
-                  cell: (p) => (
-                    <StatusPill tone={p.isOptional ? "info" : "neutral"}>
-                      {p.isOptional ? t("detail.yes") : t("detail.no")}
-                    </StatusPill>
-                  ),
-                },
+                ...(esisteOpzionale
+                  ? [{
+                      header: t("detail.processColumns.optional"),
+                      cell: (p: BlueprintProcess) => (
+                        <StatusPill tone={p.isOptional ? "info" : "neutral"}>
+                          {p.isOptional ? t("detail.yes") : t("detail.no")}
+                        </StatusPill>
+                      ),
+                    }]
+                  : []),
               ]}
             />
           </CardContent>
@@ -171,9 +177,9 @@ export default function BlueprintVariantDetailPage() {
               emptyTitle={t("detail.activationsEmpty")}
               caption={t("detail.activationsCaption")}
               columns={[
-                { header: t("detail.activationColumns.tenantId"), cell: (a) => <span title={a.tenantId}><NomeOppure nome={a.tenantName} id={a.tenantId} /></span> },
-                { header: t("detail.activationColumns.status"), cell: (a) => <EnumStatusBadge domain="blueprintActivationStatus" value={a.status} /> },
+                { header: t("detail.activationColumns.tenantId"), cell: (a) => <NomeOppure nome={a.tenantName} id={a.tenantId} /> },
                 { header: t("detail.activationColumns.activatedAt"), cell: (a) => <span className="text-xs">{fmt.data(a.effectiveFrom)}</span> },
+                { header: t("detail.activationColumns.status"), cell: (a) => <EnumStatusBadge domain="blueprintActivationStatus" value={a.status} /> },
               ]}
             />
           </CardContent>

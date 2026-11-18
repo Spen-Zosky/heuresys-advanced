@@ -18,6 +18,7 @@ import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
 import { NomeOppure } from "@/components/senza-nome";
 import { useFormat, type Formati } from "@/lib/format";
+import { maiuscolaIniziale } from "@/lib/testi";
 
 // Gap#1 Porta 2 — Org-Director console. Live capability/maturity per org-unit,
 // driven by the MLCE composite (/v1/capability/composition) + the Maturity engine
@@ -115,17 +116,23 @@ export default function OrgDirectorPage() {
   const isError = composition.isError || maturity.isError;
 
   // Drill columns: every score component is shown, never just the blend (no black box).
+  // C17 (giro qa-web 18/11): le colonne che non dicono niente non si disegnano. Se tutte le righe hanno la stessa
+  // maturità (oggi 0 %), la priorità d'investimento è uguale all'essenzialità: restano la priorità e la maturità
+  // comune, dette una volta nel sottotitolo. Le posizioni e quelle critiche stanno in una cella sola, in parole.
+  const righeEssenziali = essential.data?.items ?? [];
+  const maturitaComune = righeEssenziali.length > 1 && righeEssenziali.every((r) => r.maturity === righeEssenziali[0]!.maturity);
+  const prioritaUgualeEssenzialita = righeEssenziali.length > 0 && righeEssenziali.every((r) => r.investmentPriority === r.essentialityScore);
   const essentialColumns = useMemo<DataColumn<EssentialCapabilityItem>[]>(() => [
-    { header: t("orgDirector.essential.cols.skill"), cell: (r) => <span className="font-medium text-foreground" title={r.skillCode}>{r.skillName}</span> },
+    { header: t("orgDirector.essential.cols.skill"), cell: (r) => <span className="font-medium text-foreground">{maiuscolaIniziale(r.skillName)}</span> },
     { header: t("orgDirector.essential.cols.priority"), align: "right", cell: (r) => <span className="font-semibold tabular-nums text-foreground">{fmt.numeroFisso(r.investmentPriority, 1)}</span> },
-    { header: t("orgDirector.essential.cols.essentiality"), align: "right", cell: (r) => <span className="tabular-nums text-xs text-muted-foreground">{fmt.numeroFisso(r.essentialityScore, 1)}</span> },
+    ...(prioritaUgualeEssenzialita ? [] : [{ header: t("orgDirector.essential.cols.essentiality"), align: "right" as const, cell: (r: EssentialCapabilityItem) => <span className="tabular-nums text-xs text-muted-foreground">{fmt.numeroFisso(r.essentialityScore, 1)}</span> }]),
     { header: t("orgDirector.essential.cols.econ"), align: "right", cell: (r) => <span className="tabular-nums text-xs text-muted-foreground">{fmt.percento(r.econ, "0-1")}</span> },
     { header: t("orgDirector.essential.cols.crit"), align: "right", cell: (r) => <span className="tabular-nums text-xs text-muted-foreground">{fmt.percento(r.crit, "0-1")}</span> },
     { header: t("orgDirector.essential.cols.scarcity"), align: "right", cell: (r) => <span className="tabular-nums text-xs text-muted-foreground">{fmt.percento(r.scarcity, "0-1")}</span> },
-    { header: t("orgDirector.essential.cols.maturity"), align: "right", cell: (r) => <span className="tabular-nums text-xs text-muted-foreground">{fmt.percento(r.maturity, "0-1")}</span> },
-    { header: t("orgDirector.essential.cols.demand"), align: "right", cell: (r) => <span className="tabular-nums text-xs text-muted-foreground">{r.positionsRequiring} · {r.criticalPositions}</span> },
+    ...(maturitaComune ? [] : [{ header: t("orgDirector.essential.cols.maturity"), align: "right" as const, cell: (r: EssentialCapabilityItem) => <span className="tabular-nums text-xs text-muted-foreground">{fmt.percento(r.maturity, "0-1")}</span> }]),
+    { header: t("orgDirector.essential.cols.demand"), align: "right", cell: (r) => <span className="tabular-nums text-xs text-muted-foreground">{t("orgDirector.essential.demandValue", { n: r.positionsRequiring, critical: r.criticalPositions })}</span> },
     { header: t("orgDirector.essential.cols.holders"), align: "right", cell: (r) => <span className="tabular-nums text-xs text-muted-foreground">{r.holders}</span> },
-  ], [t, fmt]);
+  ], [t, fmt, maturitaComune, prioritaUgualeEssenzialita]);
 
   const radarAxes = useMemo(() => [
     { id: "composite", label: t("orgDirector.radar.axes.composite") },
@@ -189,7 +196,7 @@ export default function OrgDirectorPage() {
                   econ: Math.round(essential.data.weights.econ * 100),
                   crit: Math.round(essential.data.weights.crit * 100),
                   scarcity: Math.round(essential.data.weights.scarcity * 100),
-                })
+                }) + (maturitaComune ? ` ${t("orgDirector.essential.maturityCommon", { value: fmt.percento(righeEssenziali[0]!.maturity, "0-1") })}` : "")
               : t("orgDirector.essential.subtitleIdle")
           }
         />

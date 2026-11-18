@@ -16,6 +16,7 @@
  * non si salva, sarebbe peggio di un campo numerico onesto.
  */
 
+import { Codice } from "@/components/codice";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -133,7 +134,7 @@ export function LearningPathsPanel() {
   });
 
   const columns: DataColumn<LearningPath>[] = [
-    { header: t("shared.code"), cell: (p) => <span className="font-mono text-xs">{p.code}</span> },
+    { header: t("shared.code"), cell: (p) => <Codice value={p.code} /> },
     { header: t("shared.name"), cell: (p) => <span className="font-medium text-foreground">{p.name}</span> },
     {
       header: t("learning.paths.targetOutcome"),

@@ -294,7 +294,7 @@ function EvaluationPanel({
                   >
                     <span>
                       {/* F-2 (L6): il nome del cancello; il codice resta nel suggerimento. */}
-                      <span title={g.gateCode}>{g.gateName}</span>
+                      <span>{g.gateName}</span>
                       {!g.isBlocking ? (
                         <span className="ml-2 text-xs text-muted-foreground">
                           {t("compReward.evaluation.nonBlocking")}
@@ -439,12 +439,12 @@ function buildObjectiveRuleColumns(
   return [
     // F-3 (banco L6, 4/11): sei regole portano come codice una chiave d'importazione
     // (`LEGACY_BP::<uuid>`), che non è un codice da leggere. Si mostra il codice solo quando
-    // è un codice; la chiave resta nel suggerimento. La bonifica del dato è a parte.
+    // è un codice. La bonifica del dato è a parte.
     {
       header: t("compReward.cols.code"),
       cell: (r) =>
         r.code.includes("::") ? (
-          <span className="text-xs text-muted-foreground" title={r.code}>
+          <span className="text-xs text-muted-foreground">
             —
           </span>
         ) : (
@@ -493,7 +493,7 @@ function buildHandoffColumns(
     {
       header: t("compReward.cols.recipient"),
       cell: (r) => (
-        <span className="text-xs" title={r.recipientSystem}>
+        <span className="text-xs">
           {enumLabel("payrollRecipientSystem", r.recipientSystem)}
         </span>
       ),
@@ -507,15 +507,16 @@ function buildHandoffColumns(
       ),
     },
     {
-      header: t("compReward.cols.status"),
-      cell: (r) => (
-        <EnumStatusBadge domain="payrollHandoffStatus" value={r.status} />
-      ),
-    },
-    {
       header: t("compReward.cols.handedOff"),
       cell: (r) => (
         <span className="tabular-nums text-xs">{f.data(r.handedOffAt)}</span>
+      ),
+    },
+    // R3: lo stato è l'ultima colonna.
+    {
+      header: t("compReward.cols.status"),
+      cell: (r) => (
+        <EnumStatusBadge domain="payrollHandoffStatus" value={r.status} />
       ),
     },
   ];
@@ -541,7 +542,7 @@ function buildRewardGateColumns(
       header: t("compensation.cols.gate"),
       cell: (g) => (
         // il nome del cancello, mai il codice a vista: il codice resta nel suggerimento
-        <span className="text-xs" title={g.catalogCode}>{g.catalogName}</span>
+        <span className="text-xs">{g.catalogName}</span>
       ),
     },
     {

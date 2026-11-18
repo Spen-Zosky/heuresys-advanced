@@ -42,3 +42,9 @@ export function testo(lingua: string | undefined, chiave: string, parametri?: Re
   const grezzo = cerca(linguaDi(lingua)) ?? cerca("it") ?? chiave;
   return grezzo.replace(/\{\{(\w+)\}\}/g, (_m, nome: string) => String(parametri?.[nome] ?? ""));
 }
+
+/** La prima lettera maiuscola: i nomi delle competenze ESCO arrivano in minuscolo («applicare le competenze…»). */
+export function maiuscolaIniziale(s: string | null | undefined): string {
+  if (!s) return "";
+  return s.charAt(0).toLocaleUpperCase() + s.slice(1);
+}

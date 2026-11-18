@@ -130,6 +130,7 @@
     "emptyDescription": "No goals found for this tenant",
     "caption": "Goals",
     "cols": {
+      "person": "Person",
       "type": "Type",
       "priority": "Priority",
       "progress": "Progress",
@@ -217,6 +218,8 @@
       "emptyTitle": "No rankable capability",
       "emptyDescription": "The ranking populates when positions declare required skills.",
       "caption": "Essential capabilities (investment priority)",
+      "demandValue": "{{n}} ({{critical}} critical)",
+      "maturityCommon": "Maturity is {{value}} for every skill.",
       "cols": {
         "skill": "Skill",
         "priority": "Invest. priority",
@@ -297,6 +300,7 @@
         "filtro": "Filter the units",
         "unita": "Unit",
         "scegli": "Choose among {{count}} units",
+        "scegli_one": "Choose among {{count}} unit",
         "invia": "Assign",
         "giaPresente": "This unit already has a role in the process.",
         "errore": "Assignment failed. Try again.",
@@ -384,6 +388,7 @@
       "onlyModel": "Model only",
       "onlyTenant": "Company only",
       "lost": "{{count}} tenant items at risk of being lost",
+      "lost_one": "{{count}} tenant item at risk of being lost",
       "domains": {
         "ateco": "ATECO classification",
         "classe": "Company class",
@@ -1404,6 +1409,7 @@
     "descrizione": "Mentoring programmes, mentor and mentee pairs and their meetings.",
     "nessuno": "not set",
     "programmi": "Programmes ({{count}})",
+    "programmi_one": "Programme ({{count}})",
     "erroreCarica": "Mentoring could not be loaded.",
     "nessunProgramma": "No mentoring programme.",
     "statoProgramma": "Programme status",
@@ -1414,6 +1420,7 @@
     "mesi": "{{count}} months",
     "mesi_one": "{{count}} month",
     "coppie": "Mentor and mentee pairs ({{count}})",
+    "coppie_one": "Mentor and mentee pair ({{count}})",
     "filtraProgramma": "Programme",
     "tuttiProgrammi": "All programmes",
     "senzaProgramma": "no programme",

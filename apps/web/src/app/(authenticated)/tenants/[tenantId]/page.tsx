@@ -168,7 +168,7 @@ export default function TenantDetailPage() {
                   >
                     {/* F-3 (L6): l'identificativo del profilo resta nel suggerimento; prima la riga
                         mostrava solo quello e uno stato che l'API non manda. */}
-                    <span className="text-foreground" title={p.enterpriseTypingProfileId}>
+                    <span className="text-foreground">
                       {t("tenants.detail.typingAssessed", { date: fmt.data(p.assessedAt) })}
                     </span>
                     <span className="text-xs text-muted-foreground">

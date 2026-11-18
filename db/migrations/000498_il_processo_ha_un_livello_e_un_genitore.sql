@@ -1,5 +1,5 @@
 -- ============================================================================
--- 000497 — Il processo del tenant ha un livello e un genitore (piano
+-- 000498 — Il processo del tenant ha un livello e un genitore (piano
 --          docs/piani/PIANO_processi-e-progetti-sistematici_20261118.md, voce V2)
 --
 -- IL PROBLEMA. Misurato il 2026-11-18 in produzione: RTL Bank ha 42 processi attivi, ma sono due
@@ -51,14 +51,14 @@ BEGIN
 
   SELECT count(*), coalesce(md5(string_agg((to_jsonb(t) - 'tenant_process_parent_id' - 'tenant_process_level')::text, '|' ORDER BY t.tenant_process_id)), '')
     INTO w_n, w_h FROM sys.sys_tenant_processes t;
-  IF w_n <> v_n OR w_h <> v_h THEN RAISE EXCEPTION '000497: i processi del tenant sono cambiati (% -> % righe)', v_n, w_n; END IF;
-  RAISE NOTICE '000497: livello e genitore presenti; % processi invariati.', v_n;
+  IF w_n <> v_n OR w_h <> v_h THEN RAISE EXCEPTION '000498: i processi del tenant sono cambiati (% -> % righe)', v_n, w_n; END IF;
+  RAISE NOTICE '000498: livello e genitore presenti; % processi invariati.', v_n;
 END $$;
 
 COMMENT ON COLUMN sys.sys_tenant_processes.tenant_process_parent_id IS
-  '000497 — il processo di primo livello che contiene questo sottoprocesso; nullo per un processo di primo livello.';
+  '000498 — il processo di primo livello che contiene questo sottoprocesso; nullo per un processo di primo livello.';
 COMMENT ON COLUMN sys.sys_tenant_processes.tenant_process_level IS
-  '000497 — 1 processo, 2 sottoprocesso. Le pagine contano «Processi» al livello 1 e i sottoprocessi dentro il loro processo.';
+  '000498 — 1 processo, 2 sottoprocesso. Le pagine contano «Processi» al livello 1 e i sottoprocessi dentro il loro processo.';
 
 -- Sentinella: deve stare a zero.
 CREATE OR REPLACE VIEW sys.v_tenant_processes_parent_defects AS

@@ -1,4 +1,4 @@
--- Colloca i processi P01-P30 di RTL Bank come sottoprocessi dei processi unici (000497, voce V2 del
+-- Colloca i processi P01-P30 di RTL Bank come sottoprocessi dei processi unici (000498, voce V2 del
 -- piano docs/piani/PIANO_processi-e-progetti-sistematici_20261118.md).
 --
 -- Decisione di Enzo del 2026-11-18 03:43 di Roma: i P adottati dal consolidamento il 2026-11-17 sono

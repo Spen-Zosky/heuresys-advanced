@@ -1,7 +1,7 @@
 /**
  * apps/api/test/tenant-process-levels.integration.test.ts
  *
- * 000497 — il processo del tenant ha un livello e un genitore. Le pagine contano «Processi» al primo
+ * 000498 — il processo del tenant ha un livello e un genitore. Le pagine contano «Processi» al primo
  * livello e i sottoprocessi dentro il loro processo (piano processi e progetti sistematici, V2).
  *
  * Come può fallire:
@@ -35,7 +35,7 @@ async function difetti(ids: string[]): Promise<string[]> {
   return r.rows.map((x) => x.difetto);
 }
 
-describe("000497 — livello e genitore del processo del tenant", () => {
+describe("000498 — livello e genitore del processo del tenant", () => {
   let tenantA = "";
   let tenantB = "";
 

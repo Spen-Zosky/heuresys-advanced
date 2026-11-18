@@ -1,6 +1,6 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `8829c2cb` (2026-11-17T18:32:47+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `a25cfa50` (2026-11-18T02:20:53+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
@@ -8,11 +8,11 @@
 |---|---|
 | Moduli API | 121 |
 | Route API | 724 |
-| Pagine web | 132 |
+| Pagine web | 136 |
 | Schemi shared | 134 |
 | Tabelle DB | 419 (vuote: 38) |
 | Viste / matview | 90 / 0 |
-| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 364 |
+| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 324 |
 
 ## Moduli API
 
@@ -142,8 +142,8 @@
 
 ## Pagine web per zona
 
-- **admin** (78): /admin/mfa-policy · /admin/roles · /analytics/attendance · /analytics/compensation · /analytics/kpi · /analytics/org-network · /analytics/overtime · /analytics/skills · /analytics/skills-by-category · /analytics/skills-graph · /analytics/skills-group-share · /analytics/workforce · /approvals · /approvals/[id] · /blueprints · /blueprints/[variantId] · /career-succession · /compensation-intelligence · /consolidation · /content · /content/[id] · /dashboard · /dashboard/[famiglia] · /dev/agent · /engagement · /engagement/[surveyId] · /gaps · /generated-origins · /goals · /insights · /insights/skill-gap · /insights/succession-readiness · /job-catalog · /kpis · /leads · /learning · /learning/training-initiatives · /okrs · /org-director · /org-director/advisor · /org-director/health · /org-director/vrio · /organization · /organization/org-chart · /performance · /positions · /positions/[positionId] · /positions/[positionId]/kpis · /positions/[positionId]/learning · /positions/[positionId]/skills · /process-owner · /processes · /projects · /projects/[id] · /provenance · /recruiting · /recruiting/applications/[id] · /recruiting/candidates · /recruiting/postings · /recruiting/requisitions · /seed-acquisition/runs · /skill-taxonomy · /skills · /system-health · /talent-review · /tenant-blueprints · /tenant-blueprints/[id] · /tenant-blueprints/[id]/versions/[n]/build · /tenant-blueprints/[id]/versions/[n]/diff · /tenants · /tenants/[tenantId] · /tenants/[tenantId]/enterprise-typing · /time-off · /users · /users/[userId] · /visualizations · /visualizations/[graphId] · /whistleblowing-console
-- **me** (27): /me · /me/analytics · /me/approvals · /me/career · /me/career/target · /me/certifications · /me/delegations · /me/documents · /me/gaps · /me/handbook · /me/handbook/[id] · /me/inbox · /me/kpis · /me/learning · /me/learning/catalogue · /me/matching · /me/org-chart · /me/performance · /me/positions · /me/profile · /me/security · /me/skills · /me/skills/self-assessment · /me/surveys · /me/surveys/[surveyId] · /me/team · /me/time-off
+- **admin** (81): /admin/agent-capabilities · /admin/gdpr · /admin/mfa-policy · /admin/roles · /analytics/attendance · /analytics/compensation · /analytics/kpi · /analytics/org-network · /analytics/overtime · /analytics/skills · /analytics/skills-by-category · /analytics/skills-graph · /analytics/skills-group-share · /analytics/workforce · /approvals · /approvals/[id] · /assessments · /blueprints · /blueprints/[variantId] · /career-succession · /compensation-intelligence · /consolidation · /content · /content/[id] · /dashboard · /dashboard/[famiglia] · /dev/agent · /engagement · /engagement/[surveyId] · /gaps · /generated-origins · /goals · /insights · /insights/skill-gap · /insights/succession-readiness · /job-catalog · /kpis · /leads · /learning · /learning/training-initiatives · /okrs · /org-director · /org-director/advisor · /org-director/health · /org-director/vrio · /organization · /organization/org-chart · /performance · /positions · /positions/[positionId] · /positions/[positionId]/kpis · /positions/[positionId]/learning · /positions/[positionId]/skills · /process-owner · /processes · /projects · /projects/[id] · /provenance · /recruiting · /recruiting/applications/[id] · /recruiting/candidates · /recruiting/postings · /recruiting/requisitions · /seed-acquisition/runs · /skill-taxonomy · /skills · /system-health · /talent-review · /tenant-blueprints · /tenant-blueprints/[id] · /tenant-blueprints/[id]/versions/[n]/build · /tenant-blueprints/[id]/versions/[n]/diff · /tenants · /tenants/[tenantId] · /tenants/[tenantId]/enterprise-typing · /time-off · /users · /users/[userId] · /visualizations · /visualizations/[graphId] · /whistleblowing-console
+- **me** (28): /me · /me/analytics · /me/approvals · /me/career · /me/career/target · /me/certifications · /me/delegations · /me/documents · /me/gaps · /me/handbook · /me/handbook/[id] · /me/inbox · /me/kpis · /me/learning · /me/learning/catalogue · /me/matching · /me/org-chart · /me/performance · /me/positions · /me/profile · /me/security · /me/skills · /me/skills/self-assessment · /me/surveys · /me/surveys/[surveyId] · /me/team · /me/time-off · /mentorship
 - **public** (9): / · /accessibilita · /app · /demo · /investors · /jobs · /login · /privacy · /whistleblowing
 - **showcase** (18): /showcase · /showcase/charts · /showcase/dashboard-cards · /showcase/footer · /showcase/forms · /showcase/header · /showcase/icons · /showcase/landing-page · /showcase/login-page · /showcase/logo · /showcase/page-types · /showcase/palettes · /showcase/primary-initial-page · /showcase/shell · /showcase/sidebar · /showcase/system-health · /showcase/tables · /showcase/typography
 

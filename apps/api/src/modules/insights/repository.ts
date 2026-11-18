@@ -143,18 +143,18 @@ export async function extractFlightRiskFeatures(
     -- appropriate for a risk signal that is inherently relative-to-peers. The [0,1] percentile
     -- is mapped back to [1,5] so the scorer's normEngagement((5-avg)/4) is unchanged.
     eng_src AS (
-      -- source 1: engagement_survey_responses (native 1-5, jsonb-array shape). The dual-shape
-      -- guard stays: an API-created default '{}' (object) yields zero elements instead of
-      -- aborting the whole recompute with "cannot extract elements from an object".
-      SELECT r.response_subject_user_id AS user_id, 'eng'::text AS src,
-             avg(COALESCE((e->>'value')::numeric, (e->>'rating')::numeric)) AS v
-      FROM sys.sys_engagement_survey_responses r
-      CROSS JOIN LATERAL jsonb_array_elements(
-        CASE WHEN jsonb_typeof(r.response_answers) = 'array'
-             THEN r.response_answers ELSE '[]'::jsonb END
-      ) e
-      WHERE ((e->>'question_type') = 'rating' OR (e ? 'rating'))
-        AND COALESCE((e->>'value')::numeric, (e->>'rating')::numeric) IS NOT NULL
+      -- source 1: the engagement responses of the old model (native 1-5). Since 000497 they live
+      -- in survey_responses, one row per answer, under the DA_ESRESP:: keys, and the question
+      -- carries its scale; they stay a SEPARATE source so the per-source percentile below keeps
+      -- comparing a 1-5 vote with 1-5 votes only (voce 3c: values unchanged, normalized on read).
+      SELECT r.survey_response_subject_user_id AS user_id, 'eng'::text AS src,
+             avg(r.survey_response_rating_value::numeric) AS v
+      FROM sys.sys_survey_responses r
+      JOIN sys.sys_survey_questions q ON q.survey_question_id = r.survey_response_question_id
+      WHERE r.survey_response_natural_key LIKE 'DA\\_ESRESP::%'
+        AND q.survey_question_type = 'rating'
+        AND r.survey_response_rating_value IS NOT NULL
+        AND r.survey_response_subject_user_id IS NOT NULL
       GROUP BY 1
       UNION ALL
       -- source 2: survey_responses rating (1-10 rating mixed with NPS, structured column)
@@ -163,6 +163,7 @@ export async function extractFlightRiskFeatures(
       FROM sys.sys_survey_responses
       WHERE survey_response_rating_value IS NOT NULL
         AND survey_response_subject_user_id IS NOT NULL
+        AND survey_response_natural_key NOT LIKE 'DA\\_ESRESP::%'
       GROUP BY 1
       UNION ALL
       -- source 3: pulse checks (native 1-5) — mood + satisfaction, averaged per row then per user

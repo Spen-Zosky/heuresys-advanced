@@ -368,7 +368,9 @@ VALUES
   ('sys_agent_conversations', 'nativo', 'EMENDATO per la mig 000483 (ADR-0056 D4): conversazioni di una persona con l''assistente, scritte solo dall''API, nessuno scrittore di importazione'),
   ('sys_agent_activities', 'nativo', 'EMENDATO per la mig 000483 (ADR-0056 D4): attivita'' dell''assistente in una conversazione, scritte solo dall''API'),
   ('sys_agent_activity_events', 'nativo', 'EMENDATO per la mig 000483 (ADR-0056 D4): cio'' che la persona vede di un''attivita'' dell''assistente, scritto solo dall''API'),
-  ('sys_agent_proposals', 'nativo', 'EMENDATO per la mig 000483 (ADR-0056 D4): proposte dell''assistente in attesa della persona, scritte solo dall''API');
+  ('sys_agent_proposals', 'nativo', 'EMENDATO per la mig 000483 (ADR-0056 D4): proposte dell''assistente in attesa della persona, scritte solo dall''API'),
+  ('sys_agent_requests', 'nativo', 'EMENDATO per la mig 000499 (tappa T2): richieste dell''agente con previsione di spesa e tetto, scritte solo dall''API'),
+  ('sys_agent_call_log', 'nativo', 'EMENDATO per la mig 000499 (tappa T2): registro di costo e durata delle chiamate dell''agente, scritto solo dall''API');
 
 INSERT INTO sys.sys_classificazione_direzione_dato (tabella, stato, motivo)
 SELECT tabella, stato, motivo FROM _classificazione_000429

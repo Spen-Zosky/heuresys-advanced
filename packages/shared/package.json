@@ -681,6 +681,11 @@
       "types": "./dist/schemas/agent-conversations.d.ts",
       "heuresys-source": "./src/schemas/agent-conversations.ts",
       "default": "./dist/schemas/agent-conversations.js"
+    },
+    "./schemas/agent-requests": {
+      "types": "./dist/schemas/agent-requests.d.ts",
+      "heuresys-source": "./src/schemas/agent-requests.ts",
+      "default": "./dist/schemas/agent-requests.js"
     }
   },
   "scripts": {

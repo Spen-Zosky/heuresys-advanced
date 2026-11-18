@@ -98,7 +98,7 @@ export async function listCandidates(
   const off = params.length;
   const res = await q.query<Row>(
     `SELECT ${COLS},
-            (SELECT u.user_display_name FROM sys.sys_users u WHERE u.user_id = sys.sys_successor_candidates.successor_candidate_user_id) AS user_name,
+            (SELECT COALESCE(NULLIF(concat_ws(', ', NULLIF(trim(u.user_last_name), ''), NULLIF(trim(u.user_first_name), '')), ''), u.user_display_name) FROM sys.sys_users u WHERE u.user_id = sys.sys_successor_candidates.successor_candidate_user_id) AS user_name,
             (SELECT sp.succession_pool_name FROM sys.sys_succession_pools sp WHERE sp.succession_pool_id = sys.sys_successor_candidates.successor_candidate_pool_id) AS pool_name
        FROM sys.sys_successor_candidates ${whereClause}
       ORDER BY created_at DESC, successor_candidate_id

@@ -262,7 +262,7 @@ export async function listRewardGates(
        latest.reward_gate_result_override_reason   AS result_override_reason,
        latest.reward_gate_result_payload AS result_payload,
        latest.reward_gate_result_recorded_at AS result_recorded_at,
-       (SELECT u.user_display_name FROM sys.sys_users u
+       (SELECT COALESCE(NULLIF(concat_ws(', ', NULLIF(trim(u.user_last_name), ''), NULLIF(trim(u.user_first_name), '')), ''), u.user_display_name) FROM sys.sys_users u
          WHERE u.user_id = g.reward_gate_user_id AND u.user_tenant_id = g.reward_gate_tenant_id) AS user_name
      FROM sys.sys_reward_gates g
      JOIN sys.sys_reward_gate_catalog c ON c.reward_gate_catalog_id = g.reward_gate_catalog_id
@@ -518,7 +518,7 @@ interface VariablePayRow {
 
 const VARIABLE_PAY_COLS = `variable_pay_calculation_id, variable_pay_calculation_tenant_id,
   variable_pay_calculation_user_id,
-  (SELECT u.user_display_name FROM sys.sys_users u WHERE u.user_id = variable_pay_calculation_user_id) AS subject_user_name,
+  (SELECT COALESCE(NULLIF(concat_ws(', ', NULLIF(trim(u.user_last_name), ''), NULLIF(trim(u.user_first_name), '')), ''), u.user_display_name) FROM sys.sys_users u WHERE u.user_id = variable_pay_calculation_user_id) AS subject_user_name,
   variable_pay_calculation_position_id,
   variable_pay_calculation_period_start::text AS variable_pay_calculation_period_start,
   variable_pay_calculation_period_end::text AS variable_pay_calculation_period_end,
@@ -613,7 +613,7 @@ interface RecReadRow {
 
 const REC_READ_COLS = `compensation_recommendation_id, compensation_recommendation_tenant_id,
   compensation_recommendation_user_id,
-  (SELECT u.user_display_name FROM sys.sys_users u WHERE u.user_id = compensation_recommendation_user_id) AS subject_user_name,
+  (SELECT COALESCE(NULLIF(concat_ws(', ', NULLIF(trim(u.user_last_name), ''), NULLIF(trim(u.user_first_name), '')), ''), u.user_display_name) FROM sys.sys_users u WHERE u.user_id = compensation_recommendation_user_id) AS subject_user_name,
   compensation_recommendation_position_id,
   compensation_recommendation_period_start::text AS compensation_recommendation_period_start,
   compensation_recommendation_period_end::text AS compensation_recommendation_period_end,

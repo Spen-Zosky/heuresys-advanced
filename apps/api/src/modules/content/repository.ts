@@ -205,7 +205,7 @@ function mapDocument(r: Record<string, unknown>): DocumentRow {
 
 const VER_COLS = `version_id, version_tenant_id, version_document_id, version_number, version_title, version_body,
   version_body_format, version_author_user_id, version_change_note, version_metadata, created_at,
-  (SELECT u.user_display_name FROM sys.sys_users u
+  (SELECT COALESCE(NULLIF(concat_ws(', ', NULLIF(trim(u.user_last_name), ''), NULLIF(trim(u.user_first_name), '')), ''), u.user_display_name) FROM sys.sys_users u
     WHERE u.user_id = version_author_user_id AND u.user_tenant_id = version_tenant_id) AS version_author_name`;
 
 function mapVersion(r: Record<string, unknown>): VersionRow {

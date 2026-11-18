@@ -12,7 +12,7 @@ export type DbConnector = Pool | PoolClient;
 
 interface GoalRow {
   goal_id: string; goal_tenant_id: string; goal_natural_key: string;
-  goal_subject_user_id: string | null; goal_owner_user_id: string | null;
+  goal_subject_user_id: string | null; goal_subject_name?: string | null; goal_owner_user_id: string | null;
   goal_parent_goal_id: string | null; goal_template_id: string | null;
   goal_title: string; goal_description: string | null; goal_type: string;
   goal_category: string | null; goal_priority: string; goal_status: string;
@@ -26,12 +26,15 @@ const GOAL_COLS = `goal_id, goal_tenant_id, goal_natural_key, goal_subject_user_
   goal_parent_goal_id, goal_template_id, goal_title, goal_description, goal_type, goal_category,
   goal_priority, goal_status, goal_progress_percent, goal_weight,
   goal_start_date::text AS goal_start_date, goal_due_date::text AS goal_due_date, goal_completed_at,
-  goal_tags, goal_metadata, created_at, updated_at`;
+  goal_tags, goal_metadata, created_at, updated_at,
+  (SELECT COALESCE(NULLIF(concat_ws(', ', NULLIF(trim(u.user_last_name), ''), NULLIF(trim(u.user_first_name), '')), ''), u.user_display_name)
+     FROM sys.sys_users u WHERE u.user_id = goal_subject_user_id) AS goal_subject_name`;
 
 function toGoal(r: GoalRow): Goal {
   return {
     goalId: r.goal_id, tenantId: r.goal_tenant_id, naturalKey: r.goal_natural_key,
-    subjectUserId: r.goal_subject_user_id, ownerUserId: r.goal_owner_user_id,
+    subjectUserId: r.goal_subject_user_id, subjectName: r.goal_subject_name ?? null,
+    ownerUserId: r.goal_owner_user_id,
     parentGoalId: r.goal_parent_goal_id, templateId: r.goal_template_id,
     title: r.goal_title, description: r.goal_description,
     type: r.goal_type as Goal["type"], category: r.goal_category,

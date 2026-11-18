@@ -1,6 +1,6 @@
 # ADR-0060 — Le applet dell'assistente: il lavoro che l'assistente costruisce e svolge, entro i permessi di chi lo chiede
 
-- **Status**: PROPOSTO il 2026-11-18, in attesa del sì di Enzo Spenuso
+- **Status**: ACCETTATO il 2026-11-18 da Enzo Spenuso, alle 15:50 UTC (16:50 ora di Roma), sulla scheda del thread «Progettare le applet generate dall'assistente»: «Accetto tutto» (ADR e decisioni E1-E5 del piano, come raccomandate). Proposto lo stesso giorno
 - **Date**: 2026-11-18
 - **Redatto da**: Claude Code, thread «Progettare le applet generate dall'assistente»
 - **Richiesta**: Enzo Spenuso, 2026-11-18 alle 15:32 UTC (16:32 ora di Roma): «i nostri agenti/assistenti sono in grado di generare delle applet sulla base della richiesta dell'utente e svolgerle in autonomia?»; alle 15:37 UTC il caso guida sulla pagina del consolidamento («21 processi su 42 non hanno un responsabile in carica»); alle 15:40 UTC: «progetta tutto in modo esteso e robusto: deve poter fare tutto e i limiti ed i perimetri d'azione saranno interamente derivati dalle autorizzazioni e dai permessi a disposizione dell'utente loggato».

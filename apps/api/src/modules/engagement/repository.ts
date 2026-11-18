@@ -111,7 +111,8 @@ export async function surveyResults(pool: Pool, surveyId: string): Promise<Engag
             q.survey_question_category, q.survey_question_display_order,
             count(r.survey_response_id) AS response_count,
             avg(r.survey_response_rating_value) FILTER (WHERE r.survey_response_rating_value IS NOT NULL) AS avg_rating,
-            COALESCE((q.survey_question_options->>'scale')::int,
+            COALESCE(CASE WHEN q.survey_question_options->>'scale' ~ '^[0-9]+$'
+                          THEN (q.survey_question_options->>'scale')::int END,
                      CASE WHEN q.survey_question_type IN ('rating', 'nps') THEN 10 END) AS scale
        FROM sys.sys_survey_questions q
        LEFT JOIN sys.sys_survey_responses r ON r.survey_response_question_id = q.survey_question_id

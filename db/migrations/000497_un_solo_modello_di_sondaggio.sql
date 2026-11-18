@@ -113,6 +113,18 @@ BEGIN
     RAISE EXCEPTION '000497: % voti non interi: non li arrotondo, mi fermo', n;
   END IF;
 
+  -- Guardia: una scala dichiarata deve essere un intero fra 2 e 10, altrimenti le letture che
+  -- riportano i voti alla stessa scala dividerebbero per zero o per un valore senza senso.
+  SELECT count(*) INTO n
+    FROM sys.sys_engagement_surveys s
+   CROSS JOIN LATERAL jsonb_array_elements(CASE WHEN jsonb_typeof(s.survey_questions) = 'array'
+                                                THEN s.survey_questions ELSE '[]'::jsonb END) q
+   WHERE q->>'type' IN ('rating', 'nps') AND q ? 'scale'
+     AND NOT (q->>'scale' ~ '^[0-9]+$' AND (q->>'scale')::int BETWEEN 2 AND 10);
+  IF n <> 0 THEN
+    RAISE EXCEPTION '000497: % domande con una scala che non è un intero fra 2 e 10: mi fermo', n;
+  END IF;
+
   -- ── il piano: le chiavi che mancano, scritte nel giornale PRIMA di scrivere ──
   INSERT INTO staging.sondaggi_un_modello_undo (tabella, natural_key, tenant_id)
   SELECT 'sys_survey_templates', 'DA_ESTMPL::' || t.template_id, t.template_tenant_id

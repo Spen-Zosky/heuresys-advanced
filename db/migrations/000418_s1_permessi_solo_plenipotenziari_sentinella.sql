@@ -194,6 +194,17 @@ SELECT v.code, 'ADR-0053 D4 e passo A1: il catalogo delle capacità è della pia
   ) AS v(code)
 ON CONFLICT (permission_code) DO NOTHING;
 
+-- [richieste dell'agente con previsione di spesa, mig 000501] decidere una richiesta e leggere tutte
+-- quelle del tenant sono poteri della sola piattaforma, per decisione (ogni richiesta dell'agente passa
+-- dal sì di chi decide): è la regola, non un debito.
+INSERT INTO sys.sys_permessi_plenipotenziari_ammessi (permission_code, motivo, data)
+SELECT v.code, 'Richieste dell''agente con previsione di spesa: decidere e leggere tutte le richieste e il registro delle chiamate e'' un potere della sola piattaforma. E'' la regola, non un debito.', DATE '2026-11-18'
+  FROM (VALUES
+  ('agent_request:decide'),
+  ('agent_request:read:all')
+  ) AS v(code)
+ON CONFLICT (permission_code) DO NOTHING;
+
 CREATE OR REPLACE VIEW sys.v_permessi_solo_plenipotenziari AS
 WITH titolari AS (
   SELECT p.auth_permission_code AS permission_code,

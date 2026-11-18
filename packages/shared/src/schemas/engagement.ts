@@ -38,6 +38,10 @@ export const EngagementQuestionResultSchema = z.object({
   displayOrder: z.number().int().nullable(),
   responseCount: z.number().int(),
   avgRating: z.number().nullable(),
+  /** Il massimo della scala su cui si vota la domanda (10 di regola, 5 per i sondaggi trasferiti
+   *  dal modello vecchio, voce 3c); null per le domande senza voto. Le medie si confrontano solo
+   *  riportate alla stessa scala, in lettura. */
+  scale: z.number().int().nullable(),
 });
 export type EngagementQuestionResult = z.infer<typeof EngagementQuestionResultSchema>;
 

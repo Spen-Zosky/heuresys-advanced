@@ -104,19 +104,8 @@ BEGIN
   GET DIAGNOSTICS v_n = ROW_COUNT;
   RAISE NOTICE 'storia36 C8: cicli rimasti aperti, chiusi alla loro scadenza %', v_n;
 
-  -- la stessa cosa nell'altra famiglia, dove un ciclo è aperto da 18 mesi
-  UPDATE sys.sys_engagement_surveys s
-     SET survey_status = 'closed',
-         survey_metadata = COALESCE(s.survey_metadata, '{}'::jsonb)
-           || jsonb_build_object('storia36_riparazione', 'C8', 'motivo',
-                'ciclo rimasto aperto oltre la propria finestra'),
-         updated_at = now()
-   WHERE s.survey_tenant_id = c_rtl
-     AND s.survey_status = 'active'
-     AND s.survey_end_date IS NOT NULL
-     AND s.survey_end_date::date < c_to - 30;
-  GET DIAGNOSTICS v_n = ROW_COUNT;
-  RAISE NOTICE 'storia36 C8: cicli di ascolto chiusi nell''altra famiglia %', v_n;
+  -- L'altra famiglia (`sys_engagement_surveys`) qui non si scrive più: dal 2026-11-17 i suoi
+  -- sondaggi stanno in `sys_surveys` come archiviati (000497), e lì erano già tutti chiusi.
 
   -- un ciclo non può avere più rispondenti che invitati: «Annual Engagement
   -- Survey 2025» dichiarava 150 inviti e raccoglieva 156 risposte — il 104%.

@@ -520,7 +520,6 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
     "tabelle": [
       "sys_attendance",
       "sys_compensation_bands",
-      "sys_engagement_survey_responses",
       "sys_flight_risk_scores",
       "sys_job_role_embeddings",
       "sys_position_compensation_profiles",
@@ -528,6 +527,7 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_pulse_checks",
       "sys_skill_gap_scores",
       "sys_succession_readiness_scores",
+      "sys_survey_questions",
       "sys_survey_responses",
       "sys_user_kpi_evidence",
       "sys_user_position_assignments",

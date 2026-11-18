@@ -1515,5 +1515,61 @@
     },
     "approve": "Approve",
     "withdraw": "Withdraw"
+  },
+  "tassonomie": {
+    "titolo": "Catalog navigator",
+    "descrizione": "Sectors, occupations and skills: drill down by level, search by name or meaning and follow the links between entries. Shows only what advanced holds for the tenant.",
+    "schede": {
+      "settori": "Sectors",
+      "professioni": "Occupations",
+      "competenze": "Skills",
+      "significato": "Search by meaning"
+    },
+    "filo": "Path",
+    "descrizioneFinestra": "Entry card with path, linked entries and cross-catalog matches.",
+    "catalogo": "Catalog: {{catalogo}}",
+    "percorso": "Where it sits",
+    "inCima": "This is a top-level entry.",
+    "figli": "Entries below it ({{n}})",
+    "nessunFiglio": "It has no entries below it.",
+    "corrispondenze": "Matches in other catalogs",
+    "nessunaCorrispondenza": "No match recorded.",
+    "errore": "Unable to read the catalog",
+    "caricamento": "Loading…",
+    "catalogoVuoto": "This catalog has no entries.",
+    "radice": "Top level",
+    "cerca": "Search by code or name",
+    "risultati": "{{n}} results",
+    "scendi": "Drill down ({{n}})",
+    "nessunRisultato": "No results.",
+    "cercaCompetenza": "Skill name",
+    "cercaBottone": "Search",
+    "scriviCompetenza": "Type at least two letters to search for a skill.",
+    "trovate": "{{n}} skills found",
+    "senzaNome": "Unnamed skill",
+    "sopra": "Broader skills",
+    "sotto": "More specific skills",
+    "nessunLegame": "No link recorded.",
+    "schemi": {
+      "ATECO_2025": "ATECO 2025",
+      "NACE_REV_2_1": "NACE Rev. 2.1",
+      "ATECO_2007": "ATECO 2007",
+      "NACE_REV_2": "NACE Rev. 2",
+      "ISCO_08": "ISCO-08",
+      "CP_2021": "Occupation classification 2021"
+    },
+    "tipoLegame": {
+      "EXACT": "Exact",
+      "NARROWER": "Narrower",
+      "BROADER": "Broader",
+      "RELATED": "Related",
+      "APPROXIMATE": "Approximate"
+    },
+    "tipoArco": {
+      "IS_A": "Is a kind of",
+      "PART_OF": "Part of",
+      "RELATED": "Related",
+      "PREREQUISITE_OF": "Prerequisite of"
+    }
   }
 }

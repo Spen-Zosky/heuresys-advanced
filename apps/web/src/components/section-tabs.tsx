@@ -45,6 +45,8 @@ const MERGE_GROUPS: ReadonlyArray<Group> = [
     // raggiungibile per check_pagine_raggiungibili senza una migrazione di menu.
     { href: "/analytics/skills-graph", key: "skill.graph" },
     { href: "/skills", key: "skill.catalog" },
+    // Navigatore dei cataloghi (settori, professioni, competenze): scheda nuova, nessuna voce di menu.
+    { href: "/tassonomie", key: "skill.navigatore" },
     { href: "/gaps", key: "skill.gap" },
     { href: "/insights/skill-gap", key: "skill.skillGap" },
   ] },

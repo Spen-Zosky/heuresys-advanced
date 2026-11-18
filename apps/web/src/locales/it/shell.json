@@ -154,7 +154,8 @@
       "catalog": "Catalogo",
       "gap": "Divari",
       "skillGap": "Divari di competenza",
-      "graph": "Grafo"
+      "graph": "Grafo",
+      "navigatore": "Navigatore"
     },
     "comp": {
       "analytics": "Analisi",

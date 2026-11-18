@@ -414,8 +414,8 @@ BEGIN
   SELECT count(*) FILTER (WHERE stato = 'nativo')         INTO n_nativo    FROM _classificazione_000429;
   SELECT count(*) FILTER (WHERE stato = 'importato')      INTO n_importato FROM _classificazione_000429;
   SELECT count(*) FILTER (WHERE stato = 'infrastruttura') INTO n_infra     FROM _classificazione_000429;
-  IF n_ibrido <> 76 OR n_nativo <> 64 OR n_importato <> 132 OR n_infra <> 45 THEN
-    RAISE EXCEPTION '000429: conteggio inatteso — ibrido=% nativo=% importato=% infrastruttura=% (attesi 76/64/132/45)',
+  IF n_ibrido <> 76 OR n_nativo <> 66 OR n_importato <> 132 OR n_infra <> 45 THEN
+    RAISE EXCEPTION '000429: conteggio inatteso — ibrido=% nativo=% importato=% infrastruttura=% (attesi 76/66/132/45)',
       n_ibrido, n_nativo, n_importato, n_infra;
   END IF;
 

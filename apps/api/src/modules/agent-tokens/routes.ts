@@ -29,19 +29,13 @@ import {
 import type { RoleCode } from "../../config/constants.js";
 import { pool } from "../../db/client.js";
 import { ForbiddenError, UnauthorizedError } from "../../errors/index.js";
-import { MANDATE_ROLES } from "../../lib/scope/mandati.js";
+import { MANDATE_ROLES, MANDATI_MAI_ALL_AGENTE } from "../../lib/scope/mandati.js";
 import { isRolePermissionCacheLoaded, userHasPermission } from "../../middleware/rbac.js";
 
 /** ADR-0050 D6: i ruoli che una persona può prestare a un agente. */
 export function ruoliPerAgente(roles: readonly RoleCode[]): RoleCode[] {
   return roles.filter((r) => !MANDATE_ROLES.has(r));
 }
-
-/**
- * I mandati che un agente non usa nemmeno in lettura: la custodia delle segnalazioni (isolamento
- * assoluto, ADR-0036 §5) e la sicurezza (credenziali, sessioni, fattori: non sono dati di dominio).
- */
-export const MANDATI_MAI_ALL_AGENTE: ReadonlySet<RoleCode> = new Set<RoleCode>(["WHISTLEBLOWING_CUSTODIAN", "SECURITY_ADMIN"]);
 
 /** ADR-0050 D6 emendato (2026-11-18): i ruoli con cui l'agente legge per la persona. */
 export function ruoliDiLetturaPerAgente(roles: readonly RoleCode[]): RoleCode[] {

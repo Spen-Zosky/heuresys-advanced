@@ -110,12 +110,15 @@ export async function surveyResults(pool: Pool, surveyId: string): Promise<Engag
     `SELECT q.survey_question_id, q.survey_question_text, q.survey_question_type,
             q.survey_question_category, q.survey_question_display_order,
             count(r.survey_response_id) AS response_count,
-            avg(r.survey_response_rating_value) FILTER (WHERE r.survey_response_rating_value IS NOT NULL) AS avg_rating
+            avg(r.survey_response_rating_value) FILTER (WHERE r.survey_response_rating_value IS NOT NULL) AS avg_rating,
+            COALESCE(CASE WHEN q.survey_question_options->>'scale' ~ '^[0-9]+$'
+                          THEN (q.survey_question_options->>'scale')::int END,
+                     CASE WHEN q.survey_question_type IN ('rating', 'nps') THEN 10 END) AS scale
        FROM sys.sys_survey_questions q
        LEFT JOIN sys.sys_survey_responses r ON r.survey_response_question_id = q.survey_question_id
       WHERE q.survey_question_survey_id = $1
       GROUP BY q.survey_question_id, q.survey_question_text, q.survey_question_type,
-               q.survey_question_category, q.survey_question_display_order
+               q.survey_question_category, q.survey_question_display_order, q.survey_question_options
       ORDER BY q.survey_question_display_order NULLS LAST, q.survey_question_text`,
     [surveyId],
   );
@@ -130,6 +133,7 @@ export async function surveyResults(pool: Pool, surveyId: string): Promise<Engag
       r.avg_rating == null || Number(r.response_count) < K_ANONIMATO_MINIMO
         ? null
         : Math.round(Number(r.avg_rating) * 100) / 100,
+    scale: numOrNull(r.scale),
   }));
 }
 

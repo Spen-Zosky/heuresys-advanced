@@ -1,5 +1,6 @@
 -- db/scripts/faldone/censimento.sql — censimento MISURATO dei dati legati a una persona.
--- Sola lettura. Uso: psql -X -A -F $'\t' -f db/scripts/faldone/censimento.sql heuresys_advanced
+-- Non scrive niente: crea solo viste TEMPORANEE dentro una transazione che finisce in ROLLBACK
+-- (una transazione READ ONLY non le permetterebbe). Uso: psql -X -A -F $'\t' -f db/scripts/faldone/censimento.sql heuresys_advanced
 -- Livelli:
 --   L0  sys.sys_users (la persona stessa)
 --   L1  tabelle con una FK verso sys.sys_users (dato diretto)
@@ -7,7 +8,7 @@
 --   R   tabelle riferite da L1/L2 (decodifiche: posizioni, unità, competenze...) — colonne collegate
 --   IMPL colonne che sembrano puntare a una persona ma non hanno FK (legami impliciti)
 \pset footer off
-BEGIN READ ONLY;
+BEGIN;
 
 CREATE TEMP VIEW fk AS
 SELECT c.oid, cn.nspname AS src_schema, cl.relname AS src_table,

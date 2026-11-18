@@ -163,7 +163,7 @@ export default function OrgDirectorPage() {
       />
 
       <section data-testid="org-director-radar" className="space-y-3">
-        <PageHeader
+        <PageHeader senzaQuadro
           data-testid="org-director-radar-title"
           title={selected ? t("orgDirector.radar.title", { unit: selected.name }) : t("orgDirector.radar.titleIdle")}
           description={t("orgDirector.radar.subtitle")}
@@ -187,7 +187,7 @@ export default function OrgDirectorPage() {
           { id: "essenziali", titolo: t("orgDirector.tabs.essential"), contenuto: (
       // #55 F1 — Essential Capability Ranker (declared formula, drillable components)
       <section data-testid="org-director-essential" className="space-y-3">
-        <PageHeader
+        <PageHeader senzaQuadro
           data-testid="org-director-essential-title"
           title={t("orgDirector.essential.title")}
           description={

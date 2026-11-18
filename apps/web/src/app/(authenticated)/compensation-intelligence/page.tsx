@@ -395,7 +395,7 @@ function buildBonusPoolColumns(
   return [
     {
       header: t("compReward.cols.scope"),
-      cell: (r) => <span className="font-mono text-xs">{r.scope}</span>,
+      cell: (r) => <span className="text-sm first-letter:uppercase">{r.scope}</span>,
     },
     {
       header: t("compReward.cols.orgUnit"),
@@ -617,7 +617,9 @@ export default function CompensationIntelligencePage() {
       {
         name: t("compensation.seriesName"),
         type: "pie" as const,
-        radius: ["45%", "72%"],
+        // la legenda sta in basso: l anello si alza e si restringe per non finirle sotto (giro 18/11)
+        center: ["50%", "42%"],
+        radius: ["34%", "58%"],
         avoidLabelOverlap: true,
         itemStyle: { borderColor: "transparent", borderWidth: 2 },
         label: { show: false },

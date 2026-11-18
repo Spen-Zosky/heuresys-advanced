@@ -101,9 +101,10 @@ export default function BlueprintVariantDetailPage() {
             {t("detail.back")}
           </Link>
         }
-        badges={
-          <span data-testid="blueprint-code" className="font-mono text-sm text-muted-foreground">{v.code}</span>
-        }
+        // R4 (giro 18/11, G-RENDER): il codice di lavoro («REGIONAL_RETAIL_BANK_MEDIUM», in una pagina
+        // italiana reso «Regional retail bank medium») non si mostra: la persona legge il nome, e sotto
+        // il nome la descrizione se il modello ne ha una diversa dal nome.
+        {...(v.description && v.description !== v.name ? { description: v.description } : {})}
       />
 
       <nav className="flex gap-1 border-b border-border" data-testid="blueprint-tabs">

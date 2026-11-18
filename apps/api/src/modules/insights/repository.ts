@@ -17,6 +17,7 @@
  * Column names verified live against the seed (S974).
  */
 import type { Pool, PoolClient } from "pg";
+import { cognomeNomeSql } from "../../lib/nome-persona-sql.js";
 import { ANALYTICS_ROW_CAP, guardResultCap } from "../../lib/result-cap.js";
 import { soloPersone } from "../../lib/scope/persone.js";
 
@@ -102,7 +103,7 @@ export async function extractFlightRiskFeatures(
   const sc = userScopeClause(scope);
   const sql = `
     WITH scoped AS (
-      SELECT DISTINCT u.user_id, u.user_tenant_id, u.user_display_name
+      SELECT DISTINCT u.user_id, u.user_tenant_id, ${cognomeNomeSql('u')} AS user_display_name
       FROM sys.sys_users u
       ${PRIMARY_ASSIGNMENT_JOIN}
       WHERE u.user_status = 'ACTIVE' AND (${sc.sql})
@@ -306,7 +307,7 @@ const ACTIVE_SCORE_JOIN_SELECT = `
   SELECT DISTINCT ON (fr.flight_risk_score_user_id)
          fr.flight_risk_score_user_id   AS user_id,
          fr.flight_risk_score_tenant_id AS tenant_id,
-         u.user_display_name            AS display_name,
+         ${cognomeNomeSql('u')} AS display_name,
          fr.flight_risk_score_value     AS value,
          fr.flight_risk_score_band      AS band,
          fr.flight_risk_score_model_version AS model_version,
@@ -438,7 +439,7 @@ export async function extractReadinessFeatures(
   const np = sc.params.length;
   const sql = `
     WITH scoped AS (
-      SELECT DISTINCT u.user_id, u.user_tenant_id, u.user_display_name
+      SELECT DISTINCT u.user_id, u.user_tenant_id, ${cognomeNomeSql('u')} AS user_display_name
       FROM sys.sys_users u
       ${PRIMARY_ASSIGNMENT_JOIN}
       WHERE u.user_status = 'ACTIVE' AND (${sc.sql})
@@ -520,7 +521,7 @@ export async function extractSkillGapFeatures(
   const sc = userScopeClause(scope);
   const sql = `
     WITH scoped AS (
-      SELECT DISTINCT u.user_id, u.user_tenant_id, u.user_display_name
+      SELECT DISTINCT u.user_id, u.user_tenant_id, ${cognomeNomeSql('u')} AS user_display_name
       FROM sys.sys_users u
       ${PRIMARY_ASSIGNMENT_JOIN}
       WHERE u.user_status = 'ACTIVE' AND (${sc.sql})
@@ -634,7 +635,7 @@ export async function readReadinessScores(q: DbConnector, scope: ScopeFilter): P
     `SELECT DISTINCT ON (sr.succession_readiness_score_user_id, sr.succession_readiness_score_position_id)
             sr.succession_readiness_score_user_id   AS user_id,
             sr.succession_readiness_score_tenant_id AS tenant_id,
-            u.user_display_name                     AS display_name,
+            ${cognomeNomeSql('u')} AS display_name,
             sr.succession_readiness_score_position_id AS position_id,
             p.position_code, p.position_title,
             sr.succession_readiness_score_value         AS value,
@@ -676,7 +677,7 @@ export async function readSkillGapScores(q: DbConnector, scope: ScopeFilter): Pr
     `SELECT DISTINCT ON (sg.skill_gap_score_user_id)
             sg.skill_gap_score_user_id   AS user_id,
             sg.skill_gap_score_tenant_id AS tenant_id,
-            u.user_display_name          AS display_name,
+            ${cognomeNomeSql('u')} AS display_name,
             sg.skill_gap_score_position_id AS position_id,
             p.position_code, p.position_title,
             sg.skill_gap_score_value         AS value,

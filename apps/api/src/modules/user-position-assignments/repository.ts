@@ -4,6 +4,7 @@
  * approvazione (approvals/effects/position-assignment.ts), non passano da qui (D4=B).
  */
 import type { Pool, PoolClient } from "pg";
+import { cognomeNomeSql } from "../../lib/nome-persona-sql.js";
 import type { UserPositionAssignmentListQuery } from "@heuresys/shared";
 
 export type DbConnector = Pool | PoolClient;
@@ -12,7 +13,7 @@ const SELECT = `
   SELECT a.user_position_assignment_id AS assignment_id,
          a.user_position_assignment_tenant_id AS tenant_id,
          a.user_position_assignment_user_id AS user_id,
-         u.user_display_name AS user_display_name,
+         ${cognomeNomeSql('u')} AS user_display_name,
          a.user_position_assignment_position_id AS position_id,
          p.position_title AS position_title,
          a.user_position_assignment_kind AS kind,

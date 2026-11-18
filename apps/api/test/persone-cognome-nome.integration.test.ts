@@ -41,6 +41,10 @@ const ELENCHI: Array<[string, string, string]> = [
   ["/v1/successor-candidates?limit=100", "userId", "userName"],
   // C20: gli obiettivi con lo stesso titolo si distinguono per la persona a cui appartengono.
   ["/v1/goals?limit=100", "subjectUserId", "subjectName"],
+  // C21 (giro 18/11, G-RENDER): le tre viste di insights nominavano la persona con user_display_name.
+  ["/v1/insights/flight-risk", "userId", "displayName"],
+  ["/v1/insights/succession-readiness", "userId", "displayName"],
+  ["/v1/insights/skill-gap", "userId", "displayName"],
 ];
 
 describe("C12: le persone degli elenchi si scrivono «Cognome, Nome» dall'API", () => {
@@ -89,6 +93,50 @@ describe("C12: le persone degli elenchi si scrivono «Cognome, Nome» dall'API",
       if (items.length > 0) expect(verificate).toBeGreaterThan(0);
     });
   }
+
+  it("i passi di approvazione nominano l'approvatore «Cognome, Nome»", async () => {
+    // Le richieste che questo mandato vede davvero: l'elenco, non un id pescato dal database.
+    const el = await suite.app.inject({ method: "GET", url: "/v1/approvals?limit=10", headers: { cookie } });
+    expect(el.statusCode).toBe(200);
+    const richieste = (el.json() as { items: Array<{ approvalRequestId: string }> }).items;
+    expect(richieste.length, "la prova ha bisogno di richieste vere").toBeGreaterThan(0);
+    let verificati = 0;
+    for (const riga of richieste) {
+      const r = await suite.app.inject({ method: "GET", url: `/v1/approvals/${riga.approvalRequestId}`, headers: { cookie } });
+      if (r.statusCode !== 200) continue; // fuori dal perimetro di questo mandato
+      const steps = (r.json() as { steps: Array<{ approverUserId: string | null; approverName: string | null }> }).steps;
+      for (const s of steps) {
+        if (!s.approverUserId || !s.approverName) continue;
+        expect(s.approverName).toBe(atteso(nomi.get(s.approverUserId)!));
+        verificati++;
+      }
+    }
+    expect(verificati).toBeGreaterThan(0);
+  });
+
+  it("la scheda di una persona (dossier) si intitola «Cognome, Nome»", async () => {
+    const el = await suite.app.inject({ method: "GET", url: "/v1/users?limit=5", headers: { cookie } });
+    expect(el.statusCode).toBe(200);
+    const persone = (el.json() as { items: Array<{ userId: string }> }).items;
+    expect(persone.length).toBeGreaterThan(0);
+    let verificate = 0;
+    for (const p of persone) {
+      const r = await suite.app.inject({ method: "GET", url: `/v1/users/${p.userId}/dossier`, headers: { cookie } });
+      if (r.statusCode !== 200) continue;
+      const profile = (r.json() as { profile: { displayName: string | null } }).profile;
+      expect(profile.displayName).toBe(atteso(nomi.get(p.userId)!));
+      verificate++;
+    }
+    expect(verificate).toBeGreaterThan(0);
+  });
+
+  it("le lacune formative del cruscotto nominano la persona «Cognome, Nome»", async () => {
+    const r = await suite.app.inject({ method: "GET", url: "/v1/dashboard/widgets", headers: { cookie } });
+    expect(r.statusCode).toBe(200);
+    const items = (r.json() as { upcomingLearningDeadlines: Array<{ userId: string; userDisplayName: string }> }).upcomingLearningDeadlines;
+    expect(items.length, "la prova ha bisogno di lacune vere").toBeGreaterThan(0);
+    for (const it of items) expect(it.userDisplayName).toBe(atteso(nomi.get(it.userId)!));
+  });
 
   it("le versioni dei contenuti nominano l'autore «Cognome, Nome»", async () => {
     const d = await pool.query<{ version_document_id: string; version_author_user_id: string }>(

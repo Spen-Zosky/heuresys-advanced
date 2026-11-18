@@ -988,7 +988,8 @@
       "motivo": "Your profile does not include this data. If you need it for your work, ask whoever manages roles in your company."
     },
     "codice": "Code: {{codice}}.",
-    "nonDisponibile": "unavailable"
+    "nonDisponibile": "unavailable",
+    "perAssistenza": "For support"
   },
   "stepUp": {
     "title": "Confirm your identity",

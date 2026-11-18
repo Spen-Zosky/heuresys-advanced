@@ -228,10 +228,13 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
       return null;
     }
     return (
-      <main className="min-h-screen flex items-center justify-center">
-        <span data-testid="app-error" className="text-sm text-danger">
-          {me.error instanceof Error ? me.error.message : t("shell:session.error")}
-        </span>
+      <main className="flex min-h-screen items-center justify-center px-6">
+        <div data-testid="app-error" className="max-w-md text-center">
+          <p className="text-sm text-danger">{t("shell:session.error")}</p>
+          <button type="button" onClick={() => void me.refetch()} className="mt-3 rounded-control border border-border px-3 py-1.5 text-sm hover:bg-muted">
+            {t("common:retry")}
+          </button>
+        </div>
       </main>
     );
   }
@@ -430,7 +433,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
           socials={[]}
           websiteLabel={t("shell:ui.website")}
           rightSlot={
-            <span className="inline-flex items-center gap-3 text-xs">
+            <span className="inline-flex items-center gap-3 pr-14 text-xs">
               <span>{t("shell:brand.version")}</span>
               <span aria-hidden className="text-border">·</span>
               <span>{identity.role}</span>
@@ -449,7 +452,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
       <StepUpDialog />
       {/* S1009: in-page tab bar for the 6 merge groups; renders nothing off those routes. */}
       {verdict.kind === "denied" ? (
-        <main data-testid="page-no-access" className="mx-auto max-w-2xl space-y-4 px-6 py-10">
+        <main data-testid="page-no-access" className="mx-auto w-full min-w-0 max-w-2xl space-y-4 break-words px-6 py-10 [overflow-wrap:anywhere]">
           <header className="space-y-1">
             <h1 className="text-2xl font-bold tracking-tight">{t("shell:noAccess.title")}</h1>
             <p className="text-sm text-muted-foreground">{nomePaginaNegata ? t("shell:noAccess.body", { pagina: nomePaginaNegata }) : t("shell:noAccess.bodyGenerico")}</p>
@@ -464,7 +467,8 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
           <SectionTabs />
           {/* L10 A-8: il pannello dell'agente, solo sulle pagine idonee e solo a flag acceso. */}
           <PannelloAgente />
-          <ReteDiPagina>{children}</ReteDiPagina>
+          {/* spazio in fondo: il simbolo dell assistente e fisso in basso a destra e non deve coprire l ultima riga */}
+          <div className="pb-16"><ReteDiPagina>{children}</ReteDiPagina></div>
           </SchedeProvider>
         </ContestoAgenteProvider>
       )}

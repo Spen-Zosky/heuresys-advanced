@@ -62,11 +62,52 @@ export function fase(righe: readonly StreamLine[]): "consulta" | "scrive" | "pen
  * virgolette solo dove servono.
  */
 export function csvDa(righe: readonly (readonly string[])[]): string {
-  const cella = (v: string) => (/[;"\n\r]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
+  const cella = (grezzo: string) => {
+    const v = disinnesca(grezzo);
+    return /[;"\n\r]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+  };
   return righe.map((r) => r.map(cella).join(";")).join("\r\n");
 }
 
 /** Una tabella in testo separato da tabulazioni, per incollarla in un foglio di calcolo. */
 export function tsvDa(righe: readonly (readonly string[])[]): string {
-  return righe.map((r) => r.map((v) => v.replace(/[\t\n\r]+/g, " ")).join("\t")).join("\n");
+  return righe.map((r) => r.map((v) => disinnesca(v).replace(/[\t\n\r]+/g, " ")).join("\t")).join("\n");
+}
+
+/**
+ * Una cella che il foglio di calcolo leggerebbe come formula (=, +, -, @, tabulazione, a capo in
+ * testa) prende un apostrofo davanti: il testo resta quello, ma non si esegue. I numeri restano numeri.
+ */
+export function disinnesca(v: string): string {
+  if (/^[-+]?\d[\d.,]*%?$/.test(v.trim())) return v;
+  return /^[=+\-@\t\r]/.test(v) ? `'${v}` : v;
+}
+
+/** Che cosa farebbe una scrittura proposta, in parole: l'azione e i campi che cambia. */
+export interface RiepilogoProposta {
+  azione: "crea-aggiorna" | "elimina" | "costruisci" | "altro";
+  oggetto: string;
+  campi: Array<{ nome: string; valore: string }>;
+}
+
+/**
+ * Dal nome dello strumento e dagli argomenti (già oscurati dal gateway) il riepilogo che la persona
+ * legge prima di confermare: non si consente una modifica senza sapere quale.
+ */
+export function riepilogoProposta(tool: unknown, input: unknown, massimo = 12): RiepilogoProposta {
+  const nome = typeof tool === "string" ? (tool.split("__").pop() ?? tool) : "";
+  const azione = /_upsert$/.test(nome) ? "crea-aggiorna" : /_delete$/.test(nome) ? "elimina" : /materialize/.test(nome) ? "costruisci" : "altro";
+  const oggetto = nome.replace(/^hrx_/, "").replace(/_(upsert|delete|materialize)$/, "").replace(/_/g, " ");
+  const campi: Array<{ nome: string; valore: string }> = [];
+  const visita = (v: unknown, prefisso: string) => {
+    if (campi.length >= massimo) return;
+    if (v !== null && typeof v === "object" && !Array.isArray(v)) {
+      for (const [k, x] of Object.entries(v as Record<string, unknown>)) visita(x, prefisso && prefisso !== "payload" ? `${prefisso}.${k}` : k);
+      return;
+    }
+    const testo = typeof v === "string" ? v : JSON.stringify(v);
+    campi.push({ nome: prefisso || "valore", valore: (testo ?? "").slice(0, 200) });
+  };
+  visita(input, "");
+  return { azione, oggetto, campi };
 }

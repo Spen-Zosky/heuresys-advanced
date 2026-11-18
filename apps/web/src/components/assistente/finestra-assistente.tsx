@@ -26,7 +26,7 @@ import { AgentLauncher, AgentSymbol, Button, type AgentActivityStatus } from "@h
 import { AGENT_DEV_ENABLED, useAgentStream, type PendingApproval } from "@/lib/use-agent-stream";
 import { paginaIdonea } from "@/lib/agente/idoneita";
 import { titoloLeggibile } from "@/lib/agente/risposta";
-import { fase, messaggiDaRighe, type Messaggio } from "@/lib/agente/messaggi";
+import { fase, messaggiDaRighe, riepilogoProposta, type Messaggio } from "@/lib/agente/messaggi";
 import { useContestoDichiarato, useVistaAttuale } from "@/lib/agente/contesto";
 import { LavoroInCorso } from "@/components/lavoro-in-corso";
 import { IspettoreAssistente, type ContenutoIspezionabile } from "./ispettore-assistente";
@@ -449,10 +449,29 @@ function Approvazione({
         ? t("agente.approvazioneLetturaSenzaNumero")
         : t("agente.approvazioneLettura", { persone: approval.personeDistinte })
       : t("agente.approvazioneScrittura");
+  // Una scrittura si conferma sapendo quale: l'azione, l'oggetto e i campi che cambia.
+  const riepilogo = approval.classe === "read" ? null : riepilogoProposta(approval.tool, approval.input);
   return (
     <div data-testid="agente-approval" className="rounded-lg border border-primary/40 bg-primary/5 px-4 py-3 text-sm">
       <p className="font-semibold">{t("agente.approvazioneTitolo")}</p>
       <p className="mt-1">{descrizione}</p>
+      {riepilogo && (
+        <div data-testid="agente-approval-riepilogo" className="mt-2 rounded-md border border-border bg-background px-3 py-2">
+          <p className="font-medium">
+            {t(`agente.azione_${riepilogo.azione}`)}: {riepilogo.oggetto}
+          </p>
+          {riepilogo.campi.length > 0 && (
+            <dl className="mt-1 grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-xs">
+              {riepilogo.campi.map((c, i) => (
+                <div key={i} className="contents">
+                  <dt className="text-muted-foreground">{c.nome}</dt>
+                  <dd className="break-words">{c.valore}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+        </div>
+      )}
       {scade && (
         <p className="mt-1 text-xs text-muted-foreground">
           {t("agente.approvalExpires")} {scade}

@@ -166,13 +166,26 @@
     },
     "career": {
       "main": "Career",
-      "readiness": "Succession readiness"
+      "readiness": "Succession readiness",
+      "mentorship": "Mentoring"
     },
     "recruiting": {
       "pipeline": "Pipeline",
       "requisitions": "Requisitions",
       "postings": "Postings",
       "candidates": "Candidates"
+    },
+    "performance": {
+      "cycles": "Cycles and reviews",
+      "assessments": "People assessments"
+    },
+    "dati": {
+      "provenance": "Provenance register",
+      "gdpr": "Personal data (GDPR)"
+    },
+    "permessi": {
+      "roles": "Roles & permissions",
+      "agent": "Agent capabilities"
     }
   },
   "session": {

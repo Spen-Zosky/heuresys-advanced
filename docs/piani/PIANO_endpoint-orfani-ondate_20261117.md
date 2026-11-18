@@ -30,10 +30,39 @@ Come si rimisura: `awk -F'\t' 'NR>1{print $10" "$5}' docs/kb/analisi/endpoint-or
 
 Simulazione: tutte le rotte esistono con il loro permesso (`requirePermission`), i comandi compaiono solo a chi ha quel permesso, i dati vengono dalle `/v1/*` vive; nessun tocco al database né all'API. La prova E2E cambia e rimette com'era (reversibile).
 
+## Ondata 3a — schede esistenti
+
+| endpoint | dove | file |
+|---|---|---|
+| `career-paths`, `career-path-steps`, `position-career-paths`, `succession-pools`, `position-succession-relevance`, `successor-candidates`, `successor-readiness` (scritture) | `/career-succession` | `career-succession/gestione.tsx` |
+| `POST /v1/review-cycles/:id/transition` | `/performance` | `performance/avanza-ciclo.tsx` |
+| `PATCH /v1/skill-aliases/:id` | `/skills/[id]` | `skills/_components/skill-relations.tsx` |
+| `POST/DELETE /v1/organization-unit-processes` | `/process-owner` | `process-owner/assegna-unita.tsx` |
+| `PATCH /v1/tenants/:id`, `POST /v1/platform-tenant-assignments`, `/:id/revoke` | `/tenants/[id]` | `tenants/[tenantId]/gestione-tenant.tsx` |
+| `GET/POST /v1/auth/mfa/recovery-codes` | `/me/security` | `components/sicurezza-accessi.tsx` |
+| `GET /v1/auth/admin/users/:id/sessions`, `POST /v1/auth/admin/revoke-user/:id` | `/users/[id]` | stesso componente |
+| `POST /v1/compensation/recommendations` | `/compensation-intelligence` | `compensation-intelligence/nuova-raccomandazione.tsx` |
+| `POST /v1/capability/composition/recompute`, `/maturity/recompute` | `/org-director` | `org-director/ricalcola.tsx` (lavoro lungo con `LavoroInCorso`) |
+
+Prova: `apps/web/tests/e2e/ondata3-schede-esistenti.spec.ts`. I gesti che non si disfano (fase di un ciclo, stato di un tenant, rigenerazione dei codici) si provano fino al comando visibile, senza premerlo.
+
+## Ondata 3b — pagine nuove (PR a sé)
+
+Mentoring (`/mentorship`), riscontri e piani d'azione sul clima (nella pagina esistente `/engagement`), valutazioni delle competenze (`/learning/assessments`), GDPR dell'amministrazione (`/admin/gdpr`), capacità dell'agente (`/admin/agent-capabilities`). Nessuna migrazione di menu: ogni pagina entra come scheda di un gruppo di `section-tabs.tsx` (seconda porta ammessa da `check_pagine_raggiungibili.py`), e la scheda compare solo con il permesso di lettura del suo modulo (`PERMESSI_SCHEDE`). `/mentorship` nella Carriera, `/assessments` accanto a `/performance`, `/admin/gdpr` accanto a `/provenance`, `/admin/agent-capabilities` accanto a `/admin/roles`; riscontri e piani d'azione nella pagina `/engagement`. Prova: `apps/web/tests/e2e/ondata3-pagine-nuove.spec.ts`.
+
 ## Fuori da questa sessione
 
 Le ondate 3-5 non si chiudono stanotte: ognuna è una PR e un rilascio a sé, e il turno di rilascio è conteso.
 
 ## Registro delle scoperte
 
+Da proporre a Enzo una volta sola, come «fuori da questo ciclo»:
+
+- `POST /v1/organization-unit-history`: scrivere a mano una riga di storia con valori vecchi e nuovi inventati non ha senso; la storia la scrive il sistema. Proposta: classe c (ritiro) nell'ondata 5.
+- `POST /v1/compensation/handoff-records`: il passaggio alla paghe è un evento d'integrazione, non un modulo da compilare. Proposta: classe b (agente o integrazione) nell'ondata 4.
+- `POST /v1/tenants/provision`: è spento da un interruttore (`FEATURE_DISABLED`) e il suo lavoro lo fa il costruttore di tenant. Proposta: classe c nell'ondata 5.
+- `GET /v1/capability/composition/:tipo/:id`, `GET /v1/capability/maturity/org-units/:id`, `GET /v1/mandate-acts/:id`: letture puntuali di dati che le pagine già mostrano dagli elenchi. Proposta: letture dell'agente (ondata 4).
+
+- I team (`POST/PATCH /v1/teams`, membri): la `000363` ha deciso che una squadra è un progetto, e i 26 team sono diventati i 26 progetti (misura del 17/11: `sys_teams` 26, `sys_projects` 26). Una pagina `/teams` riaprirebbe il doppione che quella decisione ha chiuso. Proposta: classe c (ritiro) nell'ondata 5, non una pagina nuova.
+- Due modelli di sondaggio convivono e sono entrambi popolati (misura del 17/11): il modulo `engagement` legge `sys_surveys` (14 sondaggi, 8.288 risposte) ed è la pagina `/engagement`; il modulo `surveys` scrive `sys_engagement_surveys` (6 sondaggi, 862 risposte) e non ha pagina. Costruire `/surveys` darebbe due pagine per la stessa cosa: prima si sceglie quale modello resta (decisione di architettura, di Enzo), poi si migra l'altro. Fino ad allora `/surveys` resta fuori dall'ondata 3b.
 - L'estrattore di #280 conta come orfani i percorsi composti a runtime (`/v1/content/${id}/${action}`): `return-to-draft` e `unpublish` hanno già un chiamante.

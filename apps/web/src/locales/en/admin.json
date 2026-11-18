@@ -155,7 +155,54 @@
     "emptyTitle": "No surveys",
     "emptyDescription": "There are no surveys.",
     "caption": "Surveys",
-    "errorMessage": "Could not load surveys."
+    "errorMessage": "Could not load surveys.",
+    "riscontri": {
+      "titolo": "Climate feedback and action plans",
+      "mostra": "Show",
+      "tutti": "All",
+      "conteggio": "{{mostrati}} of {{totale}}",
+      "nessuno": "No feedback in this state.",
+      "statoDi": "Feedback status",
+      "categoriaLabel": "Feedback type",
+      "messaggio": "Feedback received",
+      "registra": "Record",
+      "errore": "Operation failed. Try again.",
+      "stato": {
+        "new": "New",
+        "reviewed": "Read",
+        "actioned": "Taken in charge",
+        "archived": "Archived"
+      },
+      "categoria": {
+        "concern": "Concern",
+        "recognition": "Recognition",
+        "suggestion": "Suggestion",
+        "other": "Other"
+      }
+    },
+    "piani": {
+      "titolo": "Action plans",
+      "nessuno": "No action plan.",
+      "statoDi": "Plan status",
+      "entro": "by {{data}}",
+      "titoloLabel": "Plan title",
+      "prioritaLabel": "Priority",
+      "scadenza": "Due date",
+      "daRiscontro": "Comes from feedback",
+      "nessunRiscontro": "None",
+      "crea": "Create the plan",
+      "stato": {
+        "planned": "Planned",
+        "in_progress": "In progress",
+        "completed": "Completed"
+      },
+      "priorita": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+        "critical": "Critical"
+      }
+    }
   },
   "users": {
     "title": "Users",
@@ -354,6 +401,17 @@
         "history": "History",
         "manage": "Management"
       }
+    },
+    "sessioni": {
+      "titolo": "Open sessions ({{count}})",
+      "nessuna": "No open session.",
+      "dispositivo": "{{browser}} on {{sistema}}",
+      "ultimo": "last access {{data}}",
+      "scade": "expires {{data}}",
+      "conferma": "Close all sessions of this person? They will have to sign in again.",
+      "chiudiTutte": "Close all sessions",
+      "chiuse": "Sessions closed.",
+      "errore": "Operation failed. Try again."
     }
   },
   "tenants": {
@@ -422,6 +480,24 @@
       "archived": "Company archived.",
       "archiveError": "The company could not be archived.",
       "noPermission": "You do not have permission to modify client companies."
+    },
+    "gestione": {
+      "modifica": "Edit the tenant details",
+      "nome": "Name",
+      "paese": "Country (two-letter code)",
+      "nonDichiarata": "Not declared",
+      "salva": "Save",
+      "salvato": "Saved.",
+      "errore": "Operation failed. Try again.",
+      "confermaStato": "Move the tenant to «{{stato}}»? It changes access for all its people.",
+      "assegnazioni": "Who on the platform follows this tenant",
+      "assegnazioniSpiega": "Revoking an assignment closes it with today's date: the history stays.",
+      "dal": "since {{data}}",
+      "ritira": "Revoke",
+      "confermaRitira": "Revoke this assignment?",
+      "nessunaAssegnazione": "No active assignment.",
+      "assegnaPersona": "Assign a platform person",
+      "assegna": "Assign"
     }
   },
   "enterpriseTyping": {
@@ -1627,7 +1703,20 @@
       "status": "Status",
       "handedOff": "Handed off"
     },
-    "rewardGates": "Reward gates"
+    "rewardGates": "Reward gates",
+    "nuova": {
+      "titolo": "New pay recommendation",
+      "apri": "New",
+      "chiudi": "Close",
+      "persona": "Person",
+      "dal": "Period from",
+      "al": "Period to",
+      "importo": "Amount (euro)",
+      "motivazione": "Rationale",
+      "registra": "Record the proposal",
+      "vietato": "You are not allowed to record recommendations.",
+      "errore": "Recording failed. Try again."
+    }
   },
   "whistleblowingConsole": {
     "title": "Whistleblowing reports",
@@ -1768,5 +1857,100 @@
       "CONFIRMED": "Confirmed",
       "SUPERSEDED": "Superseded"
     }
+  },
+  "gdpr": {
+    "titolo": "Personal data (GDPR)",
+    "descrizione": "Export and erasure of a person's data, retention run, request register and data map.",
+    "persona": "A person's data",
+    "scegliPersona": "Person",
+    "esporta": "Export their data",
+    "esportando": "Exporting…",
+    "provaCancellazione": "Try the erasure",
+    "lavoro": "Personal data operation",
+    "lavoroCancella": "Counting the rows the erasure would touch, table by table.",
+    "lavoroEsporta": "Collecting all the person's data into a file.",
+    "lavoroConserva": "Counting the rows beyond the retention period.",
+    "errore": "Operation failed. Try again.",
+    "esitoProva": "Trial: the erasure would touch {{count}} rows. Nothing was changed.",
+    "esitoVero": "Erasure done: {{count}} rows processed.",
+    "parolaCancella": "ERASE",
+    "parolaConserva": "APPLY",
+    "confermaScrivi": "To run it for real type {{parola}}",
+    "cancellaDavvero": "Erase for real (cannot be undone)",
+    "conservazione": "Retention run",
+    "conservazioneSpiega": "Removes data beyond the retention period declared in the map. Try first, then apply.",
+    "provaConservazione": "Try the retention",
+    "esitoProvaConserva": "Trial: {{count}} rows are beyond the retention period. Nothing was changed.",
+    "esitoVeroConserva": "Retention applied: {{count}} rows processed.",
+    "applicaDavvero": "Apply for real (cannot be undone)",
+    "giorni": "{{count}} days",
+    "giorni_one": "{{count}} day",
+    "registro": "Request register ({{mostrati}} of {{totale}})",
+    "nessunaRichiesta": "No request recorded.",
+    "mappa": "Personal data map ({{count}} tables)",
+    "strategie": {
+      "DELETE": "deleted",
+      "ANONYMIZE": "anonymised",
+      "RETAIN": "retained"
+    },
+    "tipi": {
+      "EXPORT": "Export",
+      "ERASURE": "Erasure",
+      "RETENTION_RUN": "Retention"
+    },
+    "statiRichiesta": {
+      "COMPLETED": "Done",
+      "DRY_RUN": "Trial"
+    }
+  },
+  "agentCaps": {
+    "titolo": "Agent capabilities",
+    "descrizione": "What the agent may do, on which data, with which limit and how it is undone; and whether it acts asking for confirmation or freely.",
+    "elenco": "Capabilities ({{count}})",
+    "erroreCarica": "Capabilities could not be loaded.",
+    "nessuna": "No capability recorded.",
+    "dettagli": "Details",
+    "chiudi": "Close",
+    "limiti": "At most {{volume}} rows per run · undone with {{annullamento}}",
+    "nessunaOperazione": "No operation declared.",
+    "classe": "class {{classe}}",
+    "classeLabel": "Class",
+    "concetto": "Concept",
+    "operazione": "Operation",
+    "metodo": "Method",
+    "aggiungiOperazione": "Add the operation",
+    "pubblica": "Publish",
+    "confermaPubblica": "Publish the capability? From then on the agent can use it, with confirmation.",
+    "ritira": "Retire",
+    "confermaRitira": "Retire the capability? The agent will no longer be able to use it.",
+    "modo": "Mode for this tenant",
+    "ragione": "Reason for the decision",
+    "decidi": "Decide",
+    "vietato": "You are not allowed to do this.",
+    "duplicata": "A capability with this code already exists.",
+    "rifiutata": "Refused by the API",
+    "errore": "Operation failed. Try again.",
+    "nuova": "New capability (draft)",
+    "codice": "Code",
+    "agente": "Agent",
+    "volume": "Row limit per run",
+    "descrizioneLabel": "Description",
+    "annullamento": "How it is undone",
+    "riferimentoAnnullamento": "Undo reference",
+    "creaBozza": "Create the draft",
+    "stati": {
+      "BOZZA": "Draft",
+      "PUBBLICATA": "Published",
+      "RITIRATA": "Retired"
+    },
+    "modi": {
+      "CONFERMA": "With confirmation",
+      "LIBERA": "Freely"
+    },
+    "annullamenti": {
+      "GIORNALE_UNDO": "undo journal",
+      "RIGA_SOSTITUTIVA": "replacement row"
+    },
+    "identita": "{{codice}} · v{{versione}} · {{agente}}"
   }
 }

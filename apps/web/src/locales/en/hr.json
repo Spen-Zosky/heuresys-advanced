@@ -66,7 +66,11 @@
         "PART_OF": "is part of",
         "RELATED": "is related to",
         "PREREQUISITE_OF": "is a prerequisite of"
-      }
+      },
+      "correggi": "Correct",
+      "salva": "Save",
+      "annulla": "Cancel",
+      "erroreCorreggi": "Correction failed."
     }
   },
   "kpis": {
@@ -236,6 +240,17 @@
       "L3": "Defined",
       "L4": "Managed",
       "L5": "Optimizing"
+    },
+    "ricalcolo": {
+      "avvia": "Recompute capability and maturity",
+      "inCorso": "Recomputing…",
+      "conferma": "Recompute capability and maturity of all units? It may take a few minutes.",
+      "titolo": "Capability recompute",
+      "passo1": "Step 1 of 2: capability composition of people, positions and units.",
+      "passo2": "Step 2 of 2: unit maturity, which reads the composition just computed.",
+      "fatto": "Recompute done: {{count}} units scored.",
+      "fatto_one": "Recompute done: {{count}} unit scored.",
+      "errore": "Recompute failed. Try again."
     }
   },
   "processOwner": {
@@ -277,6 +292,16 @@
         "CONTRIBUTOR": "Responsible · R",
         "CONSULTED": "Consulted · C",
         "INFORMED": "Informed · I"
+      },
+      "assegna": {
+        "filtro": "Filter the units",
+        "unita": "Unit",
+        "scegli": "Choose among {{count}} units",
+        "invia": "Assign",
+        "giaPresente": "This unit already has a role in the process.",
+        "errore": "Assignment failed. Try again.",
+        "togli": "Remove",
+        "confermaTogli": "Remove this unit from the process?"
       }
     }
   },
@@ -655,7 +680,59 @@
     "poolsCaption": "Succession pools",
     "candidatesEmpty": "No candidate recorded",
     "candidatesCaption": "Succession candidates",
-    "nomeInterno": "(name not assigned)"
+    "nomeInterno": "(name not assigned)",
+    "gestione": {
+      "vietato": "You are not allowed to make this change.",
+      "duplicato": "An item with this code or link already exists.",
+      "nonValido": "The data are not valid: check the fields.",
+      "errore": "Save failed. Try again.",
+      "cerca": "Search",
+      "scegliPosizione": "Choose the position",
+      "posizione": "Position",
+      "percorsi": "Career path management",
+      "nome": "Name",
+      "codice": "Code",
+      "descrizione": "Description",
+      "creaPercorso": "Create the path",
+      "scegliPercorso": "Path to manage",
+      "nessuno": "None",
+      "salva": "Save",
+      "passi": "Path steps",
+      "nessunPasso": "No step declared.",
+      "mesi": "Typical duration (months)",
+      "ordine": "Order",
+      "da": "From position",
+      "a": "To position",
+      "aggiungiPasso": "Add the step",
+      "posizioniCollegate": "Positions the path starts from",
+      "nessunaPosizione": "No linked position.",
+      "collegaPosizione": "Link a position",
+      "collega": "Link",
+      "scollega": "Unlink",
+      "confermaScollega": "Unlink this position from the path?",
+      "bacini": "Succession pool management",
+      "creaBacino": "Create the pool",
+      "scegliBacino": "Pool to manage",
+      "rilevanza": "Succession relevance of the position",
+      "rilevanzaOra": "Now: critical {{critica}}, horizon {{orizzonte}}.",
+      "rilevanzaAssente": "Relevance not declared yet.",
+      "si": "yes",
+      "no": "no",
+      "critica": "Critical position",
+      "orizzonte": "Readiness horizon",
+      "orizzonteNessuno": "Not declared",
+      "togli": "Remove",
+      "confermaTogli": "Remove the declared relevance?",
+      "candidati": "Succession candidate management",
+      "aggiungiCandidato": "Add the candidate",
+      "scegliCandidato": "Candidate to manage",
+      "persona": "Person",
+      "confermaTogliCandidato": "Remove this person from the pool?",
+      "valutazione": "Record a readiness assessment",
+      "punteggio": "Score (-100 to 100)",
+      "registra": "Record",
+      "registrata": "Assessment recorded."
+    }
   },
   "compensation": {
     "title": "Compensation intelligence",
@@ -1028,7 +1105,11 @@
         "type": "Type",
         "period": "Period",
         "status": "Status"
-      }
+      },
+      "confermaFase": "Move the cycle to «{{fase}}»? The people involved will see the change.",
+      "annulla": "Cancel the cycle",
+      "passaA": "Move to: {{fase}}",
+      "erroreFase": "Phase change failed."
     },
     "reviews": {
       "title": "Performance reviews",
@@ -1316,6 +1397,111 @@
       "raccomandazione": "Recommendation",
       "voto": "Score (0-10)",
       "annulla": "Cancel"
+    }
+  },
+  "mentorship": {
+    "titolo": "Mentoring",
+    "descrizione": "Mentoring programmes, mentor and mentee pairs and their meetings.",
+    "nessuno": "not set",
+    "programmi": "Programmes ({{count}})",
+    "erroreCarica": "Mentoring could not be loaded.",
+    "nessunProgramma": "No mentoring programme.",
+    "statoProgramma": "Programme status",
+    "nome": "Programme name",
+    "tipo": "Type",
+    "durataMesi": "Duration (months)",
+    "creaProgramma": "Create the programme (draft)",
+    "mesi": "{{count}} months",
+    "mesi_one": "{{count}} month",
+    "coppie": "Mentor and mentee pairs ({{count}})",
+    "filtraProgramma": "Programme",
+    "tuttiProgrammi": "All programmes",
+    "senzaProgramma": "no programme",
+    "statoCoppia": "Pair status",
+    "frequenza": "Meeting frequency",
+    "apriIncontri": "Meetings",
+    "chiudiIncontri": "Close",
+    "nessunaCoppia": "No pair.",
+    "statoIncontro": "Meeting status",
+    "voto": "Rating",
+    "senzaVoto": "—",
+    "minuti": "{{count}} minutes",
+    "minuti_one": "{{count}} minute",
+    "nessunIncontro": "No meeting.",
+    "quando": "When",
+    "durata": "Duration (minutes)",
+    "fissa": "Schedule the meeting",
+    "errore": "Operation failed. Try again.",
+    "tipi": {
+      "GENERAL": "General",
+      "LEADERSHIP": "Leadership",
+      "TECHNICAL": "Technical",
+      "MANAGEMENT": "Management",
+      "DEI": "Diversity and inclusion"
+    },
+    "statiProgramma": {
+      "DRAFT": "Draft",
+      "ACTIVE": "Active",
+      "INACTIVE": "Suspended",
+      "ARCHIVED": "Archived"
+    },
+    "statiCoppia": {
+      "PENDING": "To start",
+      "ACTIVE": "Active",
+      "ON_HOLD": "On hold",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    },
+    "frequenze": {
+      "WEEKLY": "Weekly",
+      "BI_WEEKLY": "Every two weeks",
+      "MONTHLY": "Monthly",
+      "QUARTERLY": "Quarterly",
+      "AD_HOC": "When needed"
+    },
+    "statiIncontro": {
+      "SCHEDULED": "Scheduled",
+      "COMPLETED": "Held",
+      "CANCELLED": "Cancelled",
+      "NO_SHOW": "No show",
+      "RESCHEDULED": "Rescheduled"
+    }
+  },
+  "assessments": {
+    "titolo": "People assessments",
+    "descrizione": "Manager, 360°, peer, self and external assessments, with results by dimension.",
+    "elenco": "Assessments ({{mostrati}} of {{totale}})",
+    "stato": "Status",
+    "tutti": "All",
+    "erroreCarica": "Assessments could not be loaded.",
+    "nessuna": "No assessment.",
+    "senzaPeriodo": "no period",
+    "chiudi": "Close",
+    "risultati": "Results",
+    "nessunRisultato": "No result recorded.",
+    "dimensione": "Dimension",
+    "punteggio": "Score (0-100)",
+    "commento": "Comment",
+    "registraRisultato": "Record the result",
+    "errore": "Operation failed. Try again.",
+    "nuova": "Open an assessment",
+    "persona": "Person assessed",
+    "tipo": "Type",
+    "dal": "Period from",
+    "al": "Period to",
+    "apri": "Open the assessment",
+    "tipi": {
+      "MANAGER": "By the manager",
+      "THREE_SIXTY": "360°",
+      "PEER": "Peer",
+      "SELF": "Self",
+      "EXTERNAL": "External"
+    },
+    "stati": {
+      "OPEN": "Open",
+      "IN_PROGRESS": "In progress",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
     }
   },
   "consolidationVocabulary": {

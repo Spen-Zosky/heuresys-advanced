@@ -35,6 +35,7 @@ import { useFormat, type Formati } from "@/lib/format";
 import { useEnumLabel, type EnumLabelFn } from "@/lib/enum-labels";
 import { NomeOppure } from "@/components/senza-nome";
 import { SchedePagina } from "@/components/schede-pagina";
+import { NuovaRaccomandazione } from "./nuova-raccomandazione";
 
 interface RewardGate {
   rewardGateId: string;
@@ -876,6 +877,7 @@ export default function CompensationIntelligencePage() {
                     emptyTitle={tA("compReward.empty")}
                     caption={tA("compReward.recommendations")}
                   />
+                  <NuovaRaccomandazione />
                 </section>
               </>
             ),

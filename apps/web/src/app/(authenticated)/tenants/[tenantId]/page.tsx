@@ -15,6 +15,7 @@ import { EnumStatusBadge } from "@/components/enum-badge";
 import { useFormat } from "@/lib/format";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
+import { AssegnazioniPiattaforma, ModificaTenant } from "./gestione-tenant";
 
 type Tab = "overview" | "typing" | "users";
 
@@ -146,6 +147,8 @@ export default function TenantDetailPage() {
           </CardContent>
         </Card>
       )}
+      {tab === "overview" && <ModificaTenant key={tn.updatedAt} tenant={tn} settori={settori.data?.items ?? []} />}
+      {tab === "overview" && <AssegnazioniPiattaforma tenantId={tn.tenantId} />}
 
       {tab === "typing" && (
         <Card data-testid="tenant-tab-content-typing">

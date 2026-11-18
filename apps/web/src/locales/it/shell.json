@@ -166,13 +166,26 @@
     },
     "career": {
       "main": "Carriera",
-      "readiness": "Readiness successione"
+      "readiness": "Readiness successione",
+      "mentorship": "Mentoring"
     },
     "recruiting": {
       "pipeline": "Fasi della selezione",
       "requisitions": "Richieste",
       "postings": "Annunci",
       "candidates": "Candidati"
+    },
+    "performance": {
+      "cycles": "Cicli e valutazioni",
+      "assessments": "Valutazioni delle persone"
+    },
+    "dati": {
+      "provenance": "Registro di provenienza",
+      "gdpr": "Dati personali (GDPR)"
+    },
+    "permessi": {
+      "roles": "Ruoli e permessi",
+      "agent": "Capacità dell'agente"
     }
   },
   "session": {

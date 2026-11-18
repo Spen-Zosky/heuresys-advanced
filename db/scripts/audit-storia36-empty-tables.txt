@@ -18,3 +18,5 @@ sys_auth_sessions | Tabella MORTA, verificata al C10: il prodotto non la usa (le
 sys_content_media | Allegare file ai documenti significherebbe inventarli (C9): i 10 documenti pubblicati hanno testo e revisioni reali, ma non esiste un allegato binario che non sia finto.
 sys_notification_preferences | Le preferenze di notifica sono SCELTE PERSONALI di ciascuno, non storia dell'azienda (C7): precompilarle significherebbe attribuire alle persone decisioni che non hanno preso. Restano vuote finche' un utente vero non le imposta (il default e' nel codice).
 sys_process_kpi_templates | Gate EXCLUDE gia' in vigore (S970/S994), rispettato dal C7: i template KPI di processo sono esclusi dal perimetro di popolamento.
+sys_agent_requests | Le richieste dell'agente con previsione di spesa nascono dall'uso dell'agente e passano dal sì di Enzo (tappa T2, mig 000499): inventarle significherebbe fingere richieste che nessuno ha fatto. Restano vuote finché l'agente non ne propone una vera.
+sys_agent_call_log | Il registro di costo e durata registra le chiamate vere dell'agente (tappa T2, mig 000499): righe inventate falserebbero il costo. Vuoto finché il gateway non vi scrive.

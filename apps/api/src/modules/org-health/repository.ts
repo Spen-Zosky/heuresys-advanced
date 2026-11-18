@@ -97,13 +97,17 @@ export async function loadOrgHealthInputs(
         ORDER BY s.survey_tenant_id, s.survey_end_date DESC NULLS LAST, s.created_at DESC
      ),
      engagement AS (
-       -- scala 1..10 (misurata, vedi testata); testo e scelta non sono misurazioni
+       -- scala 1..10 (misurata, vedi testata) salvo che la domanda dichiari la sua: i sondaggi
+       -- trasferiti dal modello vecchio votano su 5 (000497) e si riportano qui, in lettura;
+       -- testo e scelta non sono misurazioni
        SELECT op.ou_id,
               avg(CASE
                     WHEN q.survey_question_type = 'nps'
-                      THEN r.survey_response_rating_value::numeric / 10.0
+                      THEN r.survey_response_rating_value::numeric
+                           / NULLIF(COALESCE(sc.scala, 10.0), 0)
                     WHEN q.survey_question_type = 'rating'
-                      THEN (r.survey_response_rating_value::numeric - 1) / 9.0
+                      THEN (r.survey_response_rating_value::numeric - 1)
+                           / NULLIF(COALESCE(sc.scala, 10.0) - 1, 0)
                   END) AS score,
               count(*) FILTER (
                 WHERE q.survey_question_type IN ('rating', 'nps')
@@ -115,6 +119,9 @@ export async function loadOrgHealthInputs(
          JOIN latest_survey ls ON ls.survey_id = r.survey_response_survey_id
          JOIN sys.sys_survey_questions q
               ON q.survey_question_id = r.survey_response_question_id
+        -- la scala si accetta solo se è un intero: un valore scritto male vale come assente (10)
+        CROSS JOIN LATERAL (SELECT CASE WHEN q.survey_question_options->>'scale' ~ '^[0-9]+$'
+                                        THEN (q.survey_question_options->>'scale')::numeric END AS scala) sc
         GROUP BY op.ou_id
      ),
      execution AS (

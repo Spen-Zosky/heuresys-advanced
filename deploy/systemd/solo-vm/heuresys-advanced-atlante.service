@@ -21,4 +21,4 @@ WorkingDirectory=@@REPO_DIR@@
 Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ExecStart=/usr/bin/env bash @@REPO_DIR@@/scripts/atlante-automatico.sh
 # clone locale + pnpm install + build_atlas: un paio di minuti nel caso tipico
-TimeoutStartSec=1800
+TimeoutStartSec=5400

@@ -438,7 +438,8 @@
       "tabs": {
         "overview": "Panoramica",
         "typing": "Tipologia d'impresa",
-        "users": "Utenti"
+        "users": "Utenti",
+        "contracts": "Contratti"
       },
       "overviewTitle": "Anagrafica",
       "typingTitle": "Profili Enterprise Typing",
@@ -460,7 +461,32 @@
       "typingEmployees_one": "{{n}} dipendente",
       "typingEmpty": "Nessun profilo di tipizzazione registrato.",
       "usersHint": "La lista utenti completa è gestita nella pagina dedicata.",
-      "usersLink": "Apri /users →"
+      "usersLink": "Apri /users →",
+      "contracts": {
+        "title": "Contratti collettivi del tenant",
+        "industry": "Settore del tenant: {{name}}.",
+        "summary": "{{contracts}} contratti, {{levels}} livelli, {{gaps}} senza minimo; {{people}} persone con contratto in vigore.",
+        "gapWarning": "{{n}} livelli non hanno il minimo tabellare: vanno completati nel modello.",
+        "outsideWarning": "{{n}} persone hanno un livello che i contratti del modello non contengono.",
+        "scope": "Ambito",
+        "parties": "Parti firmatarie",
+        "effective": "Decorrenza",
+        "level": "Livello",
+        "category": "Categoria",
+        "minimum": "Minimo annuo",
+        "people": "Persone",
+        "state": "Stato",
+        "gap": "Minimo mancante",
+        "complete": "Completo",
+        "empty": "Nessun contratto collettivo nel modello attivo di questo tenant.",
+        "loadError": "Impossibile caricare i contratti.",
+        "categories": {
+          "DIRIGENTE": "Dirigente",
+          "QUADRO": "Quadro",
+          "IMPIEGATO": "Impiegato",
+          "OPERAIO": "Operaio"
+        }
+      }
     },
     "editing": {
       "createTitle": "Nuova azienda cliente",

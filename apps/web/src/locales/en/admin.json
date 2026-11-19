@@ -438,7 +438,8 @@
       "tabs": {
         "overview": "Overview",
         "typing": "Enterprise Typing",
-        "users": "Users"
+        "users": "Users",
+        "contracts": "Agreements"
       },
       "overviewTitle": "Profile",
       "typingTitle": "Enterprise Typing Profiles",
@@ -460,7 +461,32 @@
       "typingEmployees_one": "{{n}} employee",
       "typingEmpty": "No typing profile registered.",
       "usersHint": "The full user list is managed on its dedicated page.",
-      "usersLink": "Open /users →"
+      "usersLink": "Open /users →",
+      "contracts": {
+        "title": "Tenant collective agreements",
+        "industry": "Tenant industry: {{name}}.",
+        "summary": "{{contracts}} agreements, {{levels}} levels, {{gaps}} without a minimum; {{people}} people under a current contract.",
+        "gapWarning": "{{n}} levels have no pay minimum: complete them in the model.",
+        "outsideWarning": "{{n}} people hold a level the model's agreements do not contain.",
+        "scope": "Scope",
+        "parties": "Signatory parties",
+        "effective": "Effective",
+        "level": "Level",
+        "category": "Category",
+        "minimum": "Annual minimum",
+        "people": "People",
+        "state": "Status",
+        "gap": "Minimum missing",
+        "complete": "Complete",
+        "empty": "No collective agreement in this tenant's active model.",
+        "loadError": "Unable to load the agreements.",
+        "categories": {
+          "DIRIGENTE": "Executive",
+          "QUADRO": "Manager",
+          "IMPIEGATO": "Clerical",
+          "OPERAIO": "Manual"
+        }
+      }
     },
     "editing": {
       "createTitle": "New client company",

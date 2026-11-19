@@ -178,7 +178,7 @@ export function JobRolesPanel() {
   return (
     <Card data-testid="job-roles-panel">
       <CardHeader>
-        <CardTitle>
+        <CardTitle as="h2">
           {t("jobCatalog.role.title")}
           <span className="ml-2 text-sm font-normal text-muted-foreground" data-testid="job-roles-count">
             {conteggio(roles.data, t)}

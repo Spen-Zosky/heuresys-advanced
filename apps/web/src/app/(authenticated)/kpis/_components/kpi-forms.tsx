@@ -94,7 +94,7 @@ export function KpiCreator() {
   return (
     <Card data-testid="kpi-creator">
       <CardHeader>
-        <CardTitle className="flex items-center justify-between gap-3">
+        <CardTitle as="h2" className="flex items-center justify-between gap-3">
           <span>{t("kpis.form.createTitle")}</span>
           <Button type="button" variant="outline" data-testid="kpi-create-toggle" onClick={() => setAperto((v) => !v)}>
             {aperto ? t("kpis.form.close") : t("kpis.form.create")}
@@ -234,7 +234,7 @@ export function KpiEditor({ kpiId, onClose }: { kpiId: string; onClose: () => vo
   return (
     <Card data-testid="kpi-editor">
       <CardHeader>
-        <CardTitle>
+        <CardTitle as="h2">
           {t("kpis.form.editTitle")}
           <span className="ml-2 font-mono text-sm font-normal text-muted-foreground">{kpi.data!.code}</span>
         </CardTitle>

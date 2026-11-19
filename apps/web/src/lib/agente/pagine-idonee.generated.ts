@@ -2,6 +2,8 @@
 // Piano interfacce L10, A-8: le pagine idonee al pannello dell'agente (#159 F1, prove P1-P4).
 // Un segmento [x] della rotta vale per un segmento qualunque dell'indirizzo.
 export const PAGINE_IDONEE_AGENTE: readonly string[] = [
+  "/admin/agent-capabilities",
+  "/admin/gdpr",
   "/analytics/attendance",
   "/analytics/compensation",
   "/analytics/kpi",
@@ -14,6 +16,7 @@ export const PAGINE_IDONEE_AGENTE: readonly string[] = [
   "/analytics/workforce",
   "/approvals",
   "/approvals/[id]",
+  "/assessments",
   "/blueprints",
   "/blueprints/[variantId]",
   "/career-succession",
@@ -63,6 +66,7 @@ export const PAGINE_IDONEE_AGENTE: readonly string[] = [
   "/me/surveys/[surveyId]",
   "/me/team",
   "/me/time-off",
+  "/mentorship",
   "/okrs",
   "/org-director",
   "/org-director/advisor",

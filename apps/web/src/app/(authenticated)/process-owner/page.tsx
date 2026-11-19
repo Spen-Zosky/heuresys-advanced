@@ -5,11 +5,13 @@ import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { Badge, Button } from "@heuresys/ui";
 import { PageHeader } from "@/components/intestazione-pagina";
-import type { OrgUnitProcessForProcess, OrgUnitProcessesForProcessResponse, OrgUnitProcessRole } from "@heuresys/shared";
+import type { BlueprintActivation, OrgUnitProcessForProcess, OrgUnitProcessesForProcessResponse, OrgUnitProcessRole } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
+import { AssegnaUnitaAlProcesso, TogliUnitaDalProcesso, usePermessiRaci } from "./assegna-unita";
 import { StatusPill } from "@/components/status-pill";
+import { useVersioneAttiva } from "@/lib/versione-attiva";
 
 // Gap#1 Porta 1 — Process-Owner console. Live blueprint-process catalog
 // (/v1/blueprint-processes) PLUS the RACI drill-down (Gap#1 follow-up): selecting a
@@ -64,9 +66,19 @@ export default function ProcessOwnerPage() {
 
   // C4 (#42): server-side pagination (was `?limit=200`). The API already ORDERs
   // BY (variant_id, ordinal) — the client sort is defensive, over the current page only.
+  // Gli stessi processi della pagina «Processi»: quelli della versione del modello in vigore per il
+  // tenant. Senza filtro la console elencava l'intero registro (53 righe di due versioni, 2026-11-18)
+  // e il suo conteggio non coincideva con nessun'altra pagina.
+  const attive = useQuery({
+    queryKey: ["blueprint-activations", "active"],
+    queryFn: () => apiFetch<{ items: BlueprintActivation[]; total: number }>("/v1/blueprint-activations?status=ACTIVE&limit=200"),
+  });
+  const versione = useVersioneAttiva(attive.data?.items);
   const processes = usePaginatedList<ProcessRow>({
-    queryKey: ["blueprint-processes", "list"],
+    queryKey: ["blueprint-processes", "list", versione.variantId, versione.variantVersionId],
     path: "/v1/blueprint-processes",
+    params: versione,
+    enabled: !attive.isLoading,
     // The blueprint process catalog is a bounded reference set (~40 rows) and the
     // console sorts it by ordinal client-side — a 25-row first page would hide the
     // tail processes (and their RACI drill) behind the pager for no gain.
@@ -85,7 +97,13 @@ export default function ProcessOwnerPage() {
   const raciRows = useMemo<OrgUnitProcessForProcess[]>(() => raci.data?.items ?? [], [raci.data]);
 
   const processColumns = useMemo(() => buildProcessColumns(t, setSelected, selected?.id ?? null), [t, selected]);
-  const raciColumns = useMemo(() => buildRaciColumns(t), [t]);
+  const permRaci = usePermessiRaci();
+  const raciColumns = useMemo(() => {
+    const base = buildRaciColumns(t);
+    if (!permRaci.togli || !selected) return base;
+    const pid = selected.id;
+    return [...base, { header: "", cell: (r: OrgUnitProcessForProcess) => <TogliUnitaDalProcesso id={r.orgUnitProcessId} processId={pid} /> }];
+  }, [t, permRaci.togli, selected]);
 
   return (
     <main data-testid="process-owner-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
@@ -118,6 +136,9 @@ export default function ProcessOwnerPage() {
             rows={raciRows} rowKey={(r) => r.orgUnitProcessId} rowTestId="raci-drill-row" columns={raciColumns}
             emptyTestId="raci-drill-empty" emptyTitle={t("processOwner.raci.empty")} caption={t("processOwner.raci.caption")}
           />
+        )}
+        {selected !== null && permRaci.crea && (
+          <AssegnaUnitaAlProcesso processId={selected.id} giaAssegnate={raciRows.map((r) => r.orgUnitId)} />
         )}
       </section>
     </main>

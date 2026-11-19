@@ -13,6 +13,7 @@ import type {
   MaturityCriterion,
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { RicalcolaCapacita } from "./ricalcola";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
 import { NomeOppure } from "@/components/senza-nome";
@@ -142,6 +143,7 @@ export default function OrgDirectorPage() {
         description={t("orgDirector.description")}
         badges={composition.data ? <Badge variant="secondary" data-testid="org-director-count">{t("orgDirector.count", { count: rows.length })}</Badge> : undefined}
       />
+      <RicalcolaCapacita />
       {/* C5: unità (con il loro profilo) e capacità essenziali in due schede. */}
       <SchedePagina
         schede={[

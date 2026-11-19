@@ -200,7 +200,7 @@ function ExemptionsCard({ canManage }: { canManage: boolean }) {
   return (
     <Card data-testid="mfa-exemptions-card">
       <CardHeader>
-        <CardTitle>{t("mfaPolicy.exemptions.title")}</CardTitle>
+        <CardTitle as="h2">{t("mfaPolicy.exemptions.title")}</CardTitle>
         <p className="text-sm text-muted-foreground">{t("mfaPolicy.exemptions.description")}</p>
       </CardHeader>
       <CardContent className="p-0">
@@ -312,7 +312,7 @@ export default function AdminMfaPolicyPage() {
           { id: "regole", titolo: t("mfaPolicy.tabs.rules"), contenuto: (
       <Card>
         <CardHeader>
-          <CardTitle>{t("mfaPolicy.cardTitle")}</CardTitle>
+          <CardTitle as="h2">{t("mfaPolicy.cardTitle")}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {policies.isLoading ? (

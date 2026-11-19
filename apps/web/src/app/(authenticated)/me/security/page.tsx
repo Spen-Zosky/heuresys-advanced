@@ -34,6 +34,8 @@ import { useEnumLabel } from "@/lib/enum-labels";
 import { dispositivoLeggibile } from "@/lib/person-label";
 import { useFormat } from "@/lib/format";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
+import { ConsensiEDati, PreferenzeNotifiche } from "./privacy-notifiche";
+import { CodiciDiRecupero } from "@/components/sicurezza-accessi";
 
 // Stable no-op subscribe for useSyncExternalStore reads of immutable browser capabilities.
 const subscribeNever = () => () => {};
@@ -447,7 +449,7 @@ export default function MeSecurityPage() {
 
       <Card data-testid="me-security-factors-card">
         <CardHeader>
-          <CardTitle>{t("security.factorsCardTitle")}</CardTitle>
+          <CardTitle as="h2">{t("security.factorsCardTitle")}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {factors.isLoading ? (
@@ -499,7 +501,7 @@ export default function MeSecurityPage() {
       {pendingFactor ? (
         <Card data-testid="me-security-enroll-pending-card">
           <CardHeader>
-            <CardTitle>{t("security.pendingCardTitle")}</CardTitle>
+            <CardTitle as="h2">{t("security.pendingCardTitle")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm">
@@ -580,7 +582,7 @@ export default function MeSecurityPage() {
       ) : pendingEmailOtp ? (
         <Card data-testid="me-security-emailotp-pending-card">
           <CardHeader>
-            <CardTitle>{t("security.emailPendingCardTitle")}</CardTitle>
+            <CardTitle as="h2">{t("security.emailPendingCardTitle")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm" data-testid="me-security-emailotp-hint">
@@ -645,7 +647,7 @@ export default function MeSecurityPage() {
       ) : pendingConfirm ? (
         <Card data-testid="me-security-confirm-card">
           <CardHeader>
-            <CardTitle>{t("security.confirmCardTitle")}</CardTitle>
+            <CardTitle as="h2">{t("security.confirmCardTitle")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm" data-testid="me-security-confirm-hint">
@@ -709,7 +711,7 @@ export default function MeSecurityPage() {
       ) : pendingSmsOtp ? (
         <Card data-testid="me-security-smsotp-pending-card">
           <CardHeader>
-            <CardTitle>{t("security.smsPendingCardTitle")}</CardTitle>
+            <CardTitle as="h2">{t("security.smsPendingCardTitle")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm" data-testid="me-security-smsotp-hint">
@@ -773,7 +775,7 @@ export default function MeSecurityPage() {
       ) : smsPrompt ? (
         <Card data-testid="me-security-sms-phone-card">
           <CardHeader>
-            <CardTitle>{t("security.smsPhoneCardTitle")}</CardTitle>
+            <CardTitle as="h2">{t("security.smsPhoneCardTitle")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <form
@@ -867,7 +869,7 @@ export default function MeSecurityPage() {
 
       <Card data-testid="me-security-sessions-card">
         <CardHeader>
-          <CardTitle>{t("security.sessions.title")}</CardTitle>
+          <CardTitle as="h2">{t("security.sessions.title")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {sessions.isLoading ? (
@@ -921,6 +923,10 @@ export default function MeSecurityPage() {
           )}
         </CardContent>
       </Card>
+
+      <CodiciDiRecupero />
+      <PreferenzeNotifiche />
+      <ConsensiEDati />
     </main>
   );
 }

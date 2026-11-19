@@ -1910,6 +1910,46 @@ if [ -f "$RC" ]; then
   grep -q 'reset --hard' <(sed -n '/^if \[ "\$COPIA" = 1 \] && \[ -z/,/^fi$/p' scripts/vm-deploy.sh) \
     && fail "vm-deploy: il modo copia fa reset --hard della cartella del repo" || ok "vm-deploy: il modo copia non tocca la cartella del repo"
 fi
+# ------------------- Q. rilascia.sh — il rilascio dei thread con le guardie dentro (2026-11-17)
+section "rilascia.sh — G1-G4 fermano, il verde arma (fixture git)"
+RT="$(mktemp -d)"
+(
+  set -e; cd "$RT"
+  git init -q --bare origin.git
+  git clone -q origin.git w 2>/dev/null; cd w
+  git config user.email t@t; git config user.name t
+  mkdir scripts; cp "$ROOT/scripts/rilascia.sh" "$ROOT/scripts/arma-deploy.sh" scripts/
+  git add .; git commit -qm A; git push -q origin HEAD:refs/heads/main HEAD:refs/heads/prod
+  echo b > b; git add b; git commit -qm B; git push -q origin HEAD:refs/heads/main
+  git switch -q -c laterale; echo c > c; git add c; git commit -qm C; git push -q origin HEAD:refs/heads/laterale
+  git switch -q --detach origin/main 2>/dev/null || git checkout -q main
+  touch "$RT/mark"
+) >/dev/null 2>&1
+W="$RT/w"; B="$(git -C "$W" rev-parse origin/main)"; C="$(git -C "$W" rev-parse laterale)"; A="$(git -C "$W" rev-parse origin/prod)"
+rl() { ( cd "$W" && RILASCIO_BACKUP_MARK="$RT/mark" RILASCIO_NO_RINNOVO=1 "$@" ) >/dev/null 2>&1; }
+prod_e() { [ "$(git -C "$RT/origin.git" rev-parse refs/heads/prod)" = "$1" ]; }
+rl env RILASCIO_CI_STATO="6 5 0 1" bash scripts/rilascia.sh "$B"; e=$?
+[ $e = 1 ] && prod_e "$A" && ok "rilascia: CI rossa -> fermo, prod non si muove" || fail "rilascia: CI rossa non ferma (exit $e)"
+rl env RILASCIO_CI_STATO="6 4 2 0" bash scripts/rilascia.sh "$B"; e=$?
+[ $e = 1 ] && prod_e "$A" && ok "rilascia: CI in volo -> fermo" || fail "rilascia: CI in volo non ferma (exit $e)"
+rl env RILASCIO_CI_STATO="0 0 0 0" bash scripts/rilascia.sh "$B"; e=$?
+[ $e = 1 ] && prod_e "$A" && ok "rilascia: nessuna corsa -> fermo" || fail "rilascia: nessuna corsa non ferma (exit $e)"
+rl env RILASCIO_CI_STATO="6 6 0 0" bash scripts/rilascia.sh "$C"; e=$?
+[ $e = 1 ] && prod_e "$A" && ok "rilascia: commit fuori da main -> fermo" || fail "rilascia: commit fuori da main non ferma (exit $e)"
+touch -d '25 hours ago' "$RT/mark"
+rl env RILASCIO_CI_STATO="6 6 0 0" bash scripts/rilascia.sh "$B"; e=$?
+[ $e = 1 ] && prod_e "$A" && ok "rilascia: backup vecchio -> fermo" || fail "rilascia: backup vecchio non ferma (exit $e)"
+touch "$RT/mark"
+rl env RILASCIO_CI_STATO="6 6 0 0" bash scripts/rilascia.sh "$B" --dry-run; e=$?
+[ $e = 0 ] && prod_e "$A" && ok "rilascia: dry-run verde non spinge" || fail "rilascia: dry-run (exit $e)"
+rl env RILASCIO_CI_STATO="6 6 0 0" bash scripts/rilascia.sh "$B"; e=$?
+[ $e = 0 ] && prod_e "$B" && ok "rilascia: tutto verde -> prod armato sul commit" || fail "rilascia: il verde non arma (exit $e)"
+git -C "$RT/origin.git" update-ref refs/heads/prod "$C"
+rl env RILASCIO_CI_STATO="6 6 0 0" bash scripts/rilascia.sh "$B"; e=$?
+[ $e = 1 ] && prod_e "$C" && ok "rilascia: servirebbe un force-push -> fermo" || fail "rilascia: non fast-forward non ferma (exit $e)"
+( cd "$ROOT" && RILASCIO_CI_STATO="6 6 0 0" ARMA_DRYRUN=1 bash scripts/rilascia.sh HEAD --dry-run ) >/dev/null 2>&1; e=$?
+[ $e = 1 ] && ok "rilascia: variabili di test su origin reale -> fermo" || fail "rilascia: variabili di test accettate su origin reale (exit $e)"
+rm -rf "$RT"
 # ---------------------------------------------------------------- summary
 printf '\n%d ok, %d failed\n' "$PASS" "$FAIL"
 [ "$FAIL" = 0 ]

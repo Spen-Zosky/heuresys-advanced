@@ -229,14 +229,27 @@ export async function chiSei(
   persona: { cookieAccess: string },
   fetchImpl: FetchLike = globalThis.fetch as unknown as FetchLike,
 ): Promise<string | undefined> {
+  return (await chiEDove(baseUrl, persona, fetchImpl))?.userId;
+}
+
+/**
+ * Chi parla e in quale tenant (`GET /v1/auth/me`), per l'ammissione all'assistente (ADR-0056 D3):
+ * `tenantId` è null per chi ha un mandato di piattaforma. Non lancia: senza risposta valida non c'è nessuno.
+ */
+export async function chiEDove(
+  baseUrl: string,
+  persona: { cookieAccess: string },
+  fetchImpl: FetchLike = globalThis.fetch as unknown as FetchLike,
+): Promise<{ userId: string; tenantId: string | null } | undefined> {
   try {
     const res = await fetchImpl(`${baseUrl.replace(/\/$/, "")}/v1/auth/me`, {
       method: "GET",
       headers: { cookie: `hrx_access=${persona.cookieAccess}` },
     });
     if (!res.ok) return undefined;
-    const dati = (await res.json()) as { userId?: unknown };
-    return typeof dati.userId === "string" && dati.userId ? dati.userId : undefined;
+    const dati = (await res.json()) as { userId?: unknown; tenantId?: unknown };
+    if (typeof dati.userId !== "string" || !dati.userId) return undefined;
+    return { userId: dati.userId, tenantId: typeof dati.tenantId === "string" && dati.tenantId ? dati.tenantId : null };
   } catch {
     return undefined; // un'API che non risponde non dice chi sei: fail-closed
   }

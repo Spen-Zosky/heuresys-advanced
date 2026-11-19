@@ -66,7 +66,11 @@
         "PART_OF": "is part of",
         "RELATED": "is related to",
         "PREREQUISITE_OF": "is a prerequisite of"
-      }
+      },
+      "correggi": "Correct",
+      "salva": "Save",
+      "annulla": "Cancel",
+      "erroreCorreggi": "Correction failed."
     }
   },
   "kpis": {
@@ -236,13 +240,24 @@
       "L3": "Defined",
       "L4": "Managed",
       "L5": "Optimizing"
+    },
+    "ricalcolo": {
+      "avvia": "Recompute capability and maturity",
+      "inCorso": "Recomputing…",
+      "conferma": "Recompute capability and maturity of all units? It may take a few minutes.",
+      "titolo": "Capability recompute",
+      "passo1": "Step 1 of 2: capability composition of people, positions and units.",
+      "passo2": "Step 2 of 2: unit maturity, which reads the composition just computed.",
+      "fatto": "Recompute done: {{count}} units scored.",
+      "fatto_one": "Recompute done: {{count}} unit scored.",
+      "errore": "Recompute failed. Try again."
     }
   },
   "processOwner": {
     "title": "Process owner",
     "description": "Blueprint process catalog (graph navigation, not BPM runtime).",
-    "count": "{{count}} processes",
-    "count_one": "{{count}} process",
+    "count": "{{count}} model processes",
+    "count_one": "{{count}} model process",
     "errorMessage": "Failed to load processes",
     "emptyTitle": "No processes",
     "emptyDescription": "There are no processes in the blueprint.",
@@ -277,6 +292,16 @@
         "CONTRIBUTOR": "Responsible · R",
         "CONSULTED": "Consulted · C",
         "INFORMED": "Informed · I"
+      },
+      "assegna": {
+        "filtro": "Filter the units",
+        "unita": "Unit",
+        "scegli": "Choose among {{count}} units",
+        "invia": "Assign",
+        "giaPresente": "This unit already has a role in the process.",
+        "errore": "Assignment failed. Try again.",
+        "togli": "Remove",
+        "confermaTogli": "Remove this unit from the process?"
       }
     }
   },
@@ -346,6 +371,45 @@
       "CONSOLIDATION_ALREADY_OPEN": "A consolidation is already open.",
       "CONSOLIDATION_VERSION_INVALID": "This run's model no longer exists.",
       "PERMISSION_DENIED": "You do not have the mandate for this operation."
+    },
+    "distance": {
+      "loading": "Measuring the distance from the model…",
+      "error": "The distance from the model could not be measured.",
+      "title": "Distance from the model",
+      "summary": "{{rows}} rows compared: {{same}} the same, {{partial}} partial, {{different}} different, {{onlyModel}} only in the model, {{onlyTenant}} only in your company.",
+      "domain": "Domain",
+      "same": "Same",
+      "partial": "Partial",
+      "different": "Different",
+      "onlyModel": "Model only",
+      "onlyTenant": "Company only",
+      "lost": "{{count}} tenant items at risk of being lost",
+      "domains": {
+        "ateco": "ATECO classification",
+        "classe": "Company class",
+        "ccnl": "Collective agreements",
+        "processi": "Processes",
+        "unita": "Organisation units",
+        "organigramma": "Org chart",
+        "obblighi": "Obligations",
+        "ruoli": "Roles",
+        "copertura": "Coverage",
+        "inquadramento": "Grading",
+        "fasi": "Process phases",
+        "skill": "Skills",
+        "obiettivi": "Objectives",
+        "metriche": "Metrics",
+        "derivati": "Derived data",
+        "bersagli": "Targets",
+        "formazione": "Training",
+        "carriere": "Careers",
+        "incentivi": "Incentives",
+        "commesse": "Engagements",
+        "criticita": "Critical points",
+        "condizioni": "Conditions",
+        "ruoli_funzionali": "Functional roles",
+        "utenti": "Users"
+      }
     }
   },
   "consolidation": {
@@ -616,7 +680,59 @@
     "poolsCaption": "Succession pools",
     "candidatesEmpty": "No candidate recorded",
     "candidatesCaption": "Succession candidates",
-    "nomeInterno": "(name not assigned)"
+    "nomeInterno": "(name not assigned)",
+    "gestione": {
+      "vietato": "You are not allowed to make this change.",
+      "duplicato": "An item with this code or link already exists.",
+      "nonValido": "The data are not valid: check the fields.",
+      "errore": "Save failed. Try again.",
+      "cerca": "Search",
+      "scegliPosizione": "Choose the position",
+      "posizione": "Position",
+      "percorsi": "Career path management",
+      "nome": "Name",
+      "codice": "Code",
+      "descrizione": "Description",
+      "creaPercorso": "Create the path",
+      "scegliPercorso": "Path to manage",
+      "nessuno": "None",
+      "salva": "Save",
+      "passi": "Path steps",
+      "nessunPasso": "No step declared.",
+      "mesi": "Typical duration (months)",
+      "ordine": "Order",
+      "da": "From position",
+      "a": "To position",
+      "aggiungiPasso": "Add the step",
+      "posizioniCollegate": "Positions the path starts from",
+      "nessunaPosizione": "No linked position.",
+      "collegaPosizione": "Link a position",
+      "collega": "Link",
+      "scollega": "Unlink",
+      "confermaScollega": "Unlink this position from the path?",
+      "bacini": "Succession pool management",
+      "creaBacino": "Create the pool",
+      "scegliBacino": "Pool to manage",
+      "rilevanza": "Succession relevance of the position",
+      "rilevanzaOra": "Now: critical {{critica}}, horizon {{orizzonte}}.",
+      "rilevanzaAssente": "Relevance not declared yet.",
+      "si": "yes",
+      "no": "no",
+      "critica": "Critical position",
+      "orizzonte": "Readiness horizon",
+      "orizzonteNessuno": "Not declared",
+      "togli": "Remove",
+      "confermaTogli": "Remove the declared relevance?",
+      "candidati": "Succession candidate management",
+      "aggiungiCandidato": "Add the candidate",
+      "scegliCandidato": "Candidate to manage",
+      "persona": "Person",
+      "confermaTogliCandidato": "Remove this person from the pool?",
+      "valutazione": "Record a readiness assessment",
+      "punteggio": "Score (-100 to 100)",
+      "registra": "Record",
+      "registrata": "Assessment recorded."
+    }
   },
   "compensation": {
     "title": "Compensation intelligence",
@@ -743,7 +859,23 @@
       "end": "End",
       "seats": "Seats"
     },
-    "cohortNd": "N/A"
+    "cohortNd": "N/A",
+    "form": {
+      "nuova": "New training initiative",
+      "crea": "Create",
+      "chiudi": "Close",
+      "cercaCorso": "Search the course",
+      "corso": "Course",
+      "scegliCorso": "Choose the course",
+      "codice": "Edition code",
+      "modifica": "Edit: {{nome}}",
+      "modificaBreve": "Edit",
+      "salva": "Save",
+      "annulla": "Cancel",
+      "vietato": "You are not allowed to manage training initiatives.",
+      "duplicato": "An initiative with this code already exists.",
+      "errore": "Save failed. Try again."
+    }
   },
   "evidence": {
     "title": "Underlying evidence",
@@ -973,7 +1105,11 @@
         "type": "Type",
         "period": "Period",
         "status": "Status"
-      }
+      },
+      "confermaFase": "Move the cycle to «{{fase}}»? The people involved will see the change.",
+      "annulla": "Cancel the cycle",
+      "passaA": "Move to: {{fase}}",
+      "erroreFase": "Phase change failed."
     },
     "reviews": {
       "title": "Performance reviews",
@@ -1037,6 +1173,24 @@
       "MEMBER": "Member",
       "CONTRIBUTOR": "Contributor",
       "OBSERVER": "Observer"
+    },
+    "gestione": {
+      "nuovo": "New project",
+      "crea": "Create",
+      "chiudi": "Close",
+      "nome": "Name",
+      "codice": "Code",
+      "titolo": "Project management",
+      "salva": "Save",
+      "avanzamento": "Progress (%)",
+      "aggiungiPersone": "Add people to the project",
+      "ruolo": "Role in the project",
+      "aggiungi": "Add",
+      "togli": "Remove",
+      "confermaTogli": "Remove this person from the project?",
+      "vietato": "You are not allowed to manage projects.",
+      "duplicato": "A project with this code already exists.",
+      "errore": "Save failed. Try again."
     }
   },
   "recruiting": {
@@ -1232,6 +1386,134 @@
       "offerError": "Offer rejected by the server.",
       "noOffers": "No offers.",
       "salaryMasked": "amount not visible with your mandate"
+    },
+    "correzioni": {
+      "candidato": "Candidate details",
+      "assunto": "Hired person (required for «Hired»)",
+      "salva": "Save",
+      "salvato": "Saved.",
+      "errore": "Save failed. Try again.",
+      "correggi": "Correct",
+      "raccomandazione": "Recommendation",
+      "voto": "Score (0-10)",
+      "annulla": "Cancel"
     }
+  },
+  "mentorship": {
+    "titolo": "Mentoring",
+    "descrizione": "Mentoring programmes, mentor and mentee pairs and their meetings.",
+    "nessuno": "not set",
+    "programmi": "Programmes ({{count}})",
+    "erroreCarica": "Mentoring could not be loaded.",
+    "nessunProgramma": "No mentoring programme.",
+    "statoProgramma": "Programme status",
+    "nome": "Programme name",
+    "tipo": "Type",
+    "durataMesi": "Duration (months)",
+    "creaProgramma": "Create the programme (draft)",
+    "mesi": "{{count}} months",
+    "mesi_one": "{{count}} month",
+    "coppie": "Mentor and mentee pairs ({{count}})",
+    "filtraProgramma": "Programme",
+    "tuttiProgrammi": "All programmes",
+    "senzaProgramma": "no programme",
+    "statoCoppia": "Pair status",
+    "frequenza": "Meeting frequency",
+    "apriIncontri": "Meetings",
+    "chiudiIncontri": "Close",
+    "nessunaCoppia": "No pair.",
+    "statoIncontro": "Meeting status",
+    "voto": "Rating",
+    "senzaVoto": "—",
+    "minuti": "{{count}} minutes",
+    "minuti_one": "{{count}} minute",
+    "nessunIncontro": "No meeting.",
+    "quando": "When",
+    "durata": "Duration (minutes)",
+    "fissa": "Schedule the meeting",
+    "errore": "Operation failed. Try again.",
+    "tipi": {
+      "GENERAL": "General",
+      "LEADERSHIP": "Leadership",
+      "TECHNICAL": "Technical",
+      "MANAGEMENT": "Management",
+      "DEI": "Diversity and inclusion"
+    },
+    "statiProgramma": {
+      "DRAFT": "Draft",
+      "ACTIVE": "Active",
+      "INACTIVE": "Suspended",
+      "ARCHIVED": "Archived"
+    },
+    "statiCoppia": {
+      "PENDING": "To start",
+      "ACTIVE": "Active",
+      "ON_HOLD": "On hold",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    },
+    "frequenze": {
+      "WEEKLY": "Weekly",
+      "BI_WEEKLY": "Every two weeks",
+      "MONTHLY": "Monthly",
+      "QUARTERLY": "Quarterly",
+      "AD_HOC": "When needed"
+    },
+    "statiIncontro": {
+      "SCHEDULED": "Scheduled",
+      "COMPLETED": "Held",
+      "CANCELLED": "Cancelled",
+      "NO_SHOW": "No show",
+      "RESCHEDULED": "Rescheduled"
+    }
+  },
+  "assessments": {
+    "titolo": "People assessments",
+    "descrizione": "Manager, 360°, peer, self and external assessments, with results by dimension.",
+    "elenco": "Assessments ({{mostrati}} of {{totale}})",
+    "stato": "Status",
+    "tutti": "All",
+    "erroreCarica": "Assessments could not be loaded.",
+    "nessuna": "No assessment.",
+    "senzaPeriodo": "no period",
+    "chiudi": "Close",
+    "risultati": "Results",
+    "nessunRisultato": "No result recorded.",
+    "dimensione": "Dimension",
+    "punteggio": "Score (0-100)",
+    "commento": "Comment",
+    "registraRisultato": "Record the result",
+    "errore": "Operation failed. Try again.",
+    "nuova": "Open an assessment",
+    "persona": "Person assessed",
+    "tipo": "Type",
+    "dal": "Period from",
+    "al": "Period to",
+    "apri": "Open the assessment",
+    "tipi": {
+      "MANAGER": "By the manager",
+      "THREE_SIXTY": "360°",
+      "PEER": "Peer",
+      "SELF": "Self",
+      "EXTERNAL": "External"
+    },
+    "stati": {
+      "OPEN": "Open",
+      "IN_PROGRESS": "In progress",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    }
+  },
+  "consolidationVocabulary": {
+    "title": "Common vocabulary",
+    "hint": "The equivalences between your company's term and the model's. The platform approves them.",
+    "row": "{{group}}: “{{tenant}}” matches “{{model}}”",
+    "statuses": {
+      "PROPOSTA": "Proposed",
+      "APPROVATA": "Approved",
+      "RITIRATA": "Withdrawn"
+    },
+    "approve": "Approve",
+    "withdraw": "Withdraw"
   }
 }

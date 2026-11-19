@@ -32,6 +32,10 @@ on:
       - "packages/shared/src/schemas/**"
       - "db/migrations/**"
       - "docs/kb/tools/build_atlas.py"
+      # Il commit che RIGENERA l'atlante tocca solo questi file: senza questo percorso il
+      # workflow non riparte, l'esito rosso del commit precedente resta «il piu' recente» e
+      # deploy-watch blocca per sempre il rilascio (2026-11-17, #279 poi #288).
+      - "docs/kb/atlas/**"
       - ".github/workflows/atlas-freshness.yml"
       # L'atlante stesso: il commit che lo rigenera è quello che rifà verde un rosso.
       # Senza questa riga il rosso restava l'ultimo esito nella finestra del rilascio e il

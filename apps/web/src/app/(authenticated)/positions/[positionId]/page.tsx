@@ -13,6 +13,7 @@ import { FieldGrid } from "@/components/detail-panel";
 import { StatusBadge, StatusPill } from "@/components/status-pill";
 import { MaskedCell, isMasked } from "@/components/masked-cell";
 import { PositionEditor } from "./_components/position-editor";
+import { TitolariPosizione } from "./_components/titolari-posizione";
 import { Riferimento } from "@/components/scheda-rapida";
 import { useLeggibile } from "@/lib/leggibile";
 
@@ -102,7 +103,7 @@ export default function PositionDetailPage() {
       </nav>
 
       <Card>
-        <CardHeader><CardTitle>{t("positions.detail.cardTitle")}</CardTitle></CardHeader>
+        <CardHeader><CardTitle as="h2">{t("positions.detail.cardTitle")}</CardTitle></CardHeader>
         <CardContent>
           <FieldGrid
             testId="position-fields"
@@ -119,6 +120,8 @@ export default function PositionDetailPage() {
           />
         </CardContent>
       </Card>
+
+      <TitolariPosizione positionId={positionId} />
 
       {/* Sopra si LEGGE la posizione, qui la si RIDISEGNA: legami scelti per
           nome da elenchi veri, non incollando identificativi (#44). */}

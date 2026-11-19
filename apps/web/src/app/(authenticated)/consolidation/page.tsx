@@ -34,6 +34,7 @@ import { useFormat } from "@/lib/format";
 import { StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { DecisioneDialog } from "./decisione-dialog";
 import { RegistroCorse } from "./registro-corse";
+import { VocabolarioComune } from "./vocabolario-comune";
 import { DecisioniInBlocco } from "./decisioni-in-blocco";
 import { OrganigrammaCliente } from "./organigramma-cliente";
 import { LavoroInCorso } from "@/components/lavoro-in-corso";
@@ -291,6 +292,8 @@ export default function ConsolidationPage() {
         />
       ) : null}
 
+      {access.data ? <VocabolarioComune onErrore={setErrore} /> : null}
+
       {access.data ? <OrganigrammaCliente /> : null}
 
       {sessions.data && corrente === null ? (
@@ -311,7 +314,7 @@ export default function ConsolidationPage() {
       {corrente ? (
         <Card data-testid="consolidation-session">
           <CardHeader>
-            <CardTitle className="flex flex-wrap items-center gap-3">
+            <CardTitle as="h2" className="flex flex-wrap items-center gap-3">
               <span>{t("consolidation.session", { date: fmt.data(corrente.startedAt) })}</span>
               <StatusPill tone="info">{t(`consolidation.statuses.${corrente.status}`)}</StatusPill>
               {inCorso ? (
@@ -483,7 +486,7 @@ export default function ConsolidationPage() {
       ) : null}
       {conferma ? (
         <Dialog open onOpenChange={(o) => { if (!o) setConferma(null); }}>
-          <DialogContent className={MODALE.piccola} data-testid="consolidation-approval-dialog">
+          <DialogContent className={MODALE.piccola} data-testid="consolidation-approval-dialog" closeLabel={t("shell:ui.close")}>
             <DialogHeader>
               <DialogTitle>{t(`consolidation.approval.${conferma}Title`)}</DialogTitle>
               <DialogDescription>{t(`consolidation.approval.${conferma}Body`, { count: nBozza })}</DialogDescription>

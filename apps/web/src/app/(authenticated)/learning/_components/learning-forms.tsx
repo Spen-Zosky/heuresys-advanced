@@ -99,7 +99,7 @@ export function LearningModuleCreator() {
   return (
     <Card data-testid="learning-creator">
       <CardHeader>
-        <CardTitle className="flex items-center justify-between gap-3">
+        <CardTitle as="h2" className="flex items-center justify-between gap-3">
           <span>{t("learning.form.createTitle")}</span>
           <Button type="button" variant="outline" data-testid="learning-create-toggle" onClick={() => setAperto((v) => !v)}>
             {aperto ? t("learning.form.close") : t("learning.form.create")}
@@ -248,7 +248,7 @@ export function LearningModuleEditor({ moduleId, onClose }: { moduleId: string; 
   return (
     <Card data-testid="learning-editor">
       <CardHeader>
-        <CardTitle>
+        <CardTitle as="h2">
           {t("learning.form.editTitle")}
           <span className="ml-2 font-mono text-sm font-normal text-muted-foreground">{modulo.data!.code}</span>
         </CardTitle>

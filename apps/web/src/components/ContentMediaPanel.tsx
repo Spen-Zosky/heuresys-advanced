@@ -66,7 +66,7 @@ export function ContentMediaPanel({ documentId, canEdit }: { documentId: string;
   return (
     <Card data-testid="content-media-panel">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>{t("content.media.title")}</CardTitle>
+        <CardTitle as="h2">{t("content.media.title")}</CardTitle>
         {canEdit && (
           <>
             <input

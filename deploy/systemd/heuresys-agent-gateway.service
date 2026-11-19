@@ -1,7 +1,7 @@
 # Template — placeholders (@@...@@) are rendered by scripts/vm-deploy.sh. Do NOT install by hand.
 # Portata nei modelli il 2026-11-10 (D1 di docs/piani/PIANO_turni-advanced-datastore_20261110.md):
 # fino ad allora l'unita' era scritta a mano in /etc e girava dalla cartella del repo; ora segue la
-# copia rilasciata come api e web. Gli override locali (AGENT_GATEWAY_ALLOWED_USER_IDS, origine web)
+# copia rilasciata come api e web. Gli override locali (AGENT_GATEWAY_ALLOWED_USER_IDS, AGENT_GATEWAY_ALLOWED_TENANT_IDS, origine web)
 # restano nel drop-in /etc/systemd/system/heuresys-agent-gateway.service.d/, che vm-deploy non tocca.
 [Unit]
 Description=Heuresys Advanced — agent-gateway (giudice del consolidamento, abbonamento Claude, :8790)

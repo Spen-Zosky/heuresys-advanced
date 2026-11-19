@@ -86,7 +86,7 @@ export default function PositionLearningPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t("positions.learning.requirements.cardTitle")}</CardTitle>
+          <CardTitle as="h2">{t("positions.learning.requirements.cardTitle")}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <EntityTable<PositionLearningRequirement> originPath={"/v1/positions"}
@@ -134,7 +134,7 @@ export default function PositionLearningPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t("positions.learning.modules.cardTitle")}</CardTitle>
+          <CardTitle as="h2">{t("positions.learning.modules.cardTitle")}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <EntityTable<PositionLearningModule> originPath={"/v1/positions"}
@@ -183,7 +183,7 @@ export default function PositionLearningPage() {
       {leggeLeLacune ? (
       <Card>
         <CardHeader>
-          <CardTitle>{t("positions.learning.gaps.cardTitle")}</CardTitle>
+          <CardTitle as="h2">{t("positions.learning.gaps.cardTitle")}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <EntityTable<LearningGap>

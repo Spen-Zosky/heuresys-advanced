@@ -67,7 +67,7 @@ export function EvidenceDrawer({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={MODALE.media}>
+      <DialogContent className={MODALE.media} closeLabel={t("shell:ui.close")}>
         <DialogHeader>
           <DialogTitle>{t("evidence.title")}</DialogTitle>
           <DialogDescription>{subjectName}</DialogDescription>

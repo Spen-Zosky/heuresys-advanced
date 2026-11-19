@@ -273,12 +273,24 @@
     "emptyDesc": "You have no notifications at the moment.",
     "feedTitle": "Notifications",
     "messages": {
-      "APPROVAL_REMINDER": { "subject": "Approval pending: {{title}}", "body": "An approval request assigned to you is overdue. Open it to decide." },
-      "APPROVAL_OVERDUE": { "subject": "Approval overdue: {{title}}", "body": "A request you opened has been waiting for {{cycles}} cycles without a decision from the approver." },
+      "APPROVAL_REMINDER": {
+        "subject": "Approval pending: {{title}}",
+        "body": "An approval request assigned to you is overdue. Open it to decide."
+      },
+      "APPROVAL_OVERDUE": {
+        "subject": "Approval overdue: {{title}}",
+        "body": "A request you opened has been waiting for {{cycles}} cycles without a decision from the approver."
+      },
       "GAP_CLOSURE_DUE": {
         "subject": "Skill gap to close",
         "body": "A skill gap was detected for your position ({{segment}}).",
-        "segment": { "MAJOR_GAP": "major gap", "MODERATE_GAP": "moderate gap", "MINOR_GAP": "minor gap", "ALIGNED": "aligned", "UNKNOWN": "gap to assess" }
+        "segment": {
+          "MAJOR_GAP": "major gap",
+          "MODERATE_GAP": "moderate gap",
+          "MINOR_GAP": "minor gap",
+          "ALIGNED": "aligned",
+          "UNKNOWN": "gap to assess"
+        }
       }
     },
     "approvals": {
@@ -669,7 +681,56 @@
     "confirmCardTitle": "Confirm the new verification method",
     "confirmInstruction": "For security we sent a confirmation code via email to {{email}}. Enter it to activate the new method.",
     "confirmCodeLabel": "Confirmation code received via email",
-    "confirmVerifiedActive": "Verification method confirmed and active"
+    "confirmVerifiedActive": "Verification method confirmed and active",
+    "privacy": {
+      "notificheTitolo": "How you receive notices",
+      "tipo": "Notice",
+      "nellApp": "In the app",
+      "email": "By email",
+      "erroreCarica": "Preferences could not be loaded.",
+      "erroreSalva": "Save failed. Try again.",
+      "titolo": "Privacy: consents and your data",
+      "dal": "last changed {{data}}",
+      "dato": "Given",
+      "nonDato": "Not given",
+      "togli": "Withdraw consent",
+      "dai": "Give consent",
+      "esporta": "Download my data",
+      "esportando": "Preparing the data…",
+      "esportaSpiega": "A file with all the data the platform keeps about you (GDPR, articles 15 and 20).",
+      "esportato": "File downloaded.",
+      "erroreEsporta": "Export failed. Try again.",
+      "tipi": {
+        "TRAINING_DEADLINE": "Training deadlines",
+        "ASSESSMENT_REQUEST": "Assessment requests",
+        "MANAGER_FEEDBACK_READY": "Manager feedback ready",
+        "CAREER_TARGET_STATUS": "Career targets",
+        "GAP_CLOSURE_DUE": "Skill gap actions",
+        "SYSTEM": "System notices",
+        "APPROVAL_REQUEST": "Approval requests",
+        "APPROVAL_REMINDER": "Approval reminders",
+        "APPROVAL_OVERDUE": "Overdue approvals"
+      },
+      "finalita": {
+        "ANALYTICS_PROFILING": "Analytics and profiling",
+        "MARKETING_COMMUNICATIONS": "Promotional communications",
+        "INTERNAL_PHOTO_USE": "Internal use of the photo",
+        "THIRD_PARTY_SHARING": "Sharing with third parties"
+      }
+    },
+    "recupero": {
+      "titolo": "Recovery codes",
+      "restano": "You have {{count}} recovery codes left.",
+      "restano_one": "You have {{count}} recovery code left.",
+      "erroreCarica": "Recovery codes could not be read.",
+      "spiega": "They let you sign in if you lose your second-factor device. Regenerating them cancels the old ones.",
+      "conferma": "Generate new codes? The ones you have now will stop working.",
+      "generando": "Generating…",
+      "genera": "Generate new codes",
+      "errore": "Generation failed. Try again.",
+      "unaVolta": "Keep them now: they will not be shown again.",
+      "salvati": "I have kept them"
+    }
   },
   "skills": {
     "title": "My skills",

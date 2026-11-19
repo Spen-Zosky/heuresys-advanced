@@ -18,7 +18,8 @@
 # I1 sui path di deploy, dove quattro copie byte-identiche sono diventate una.
 #
 # Uso:
-#   bash scripts/arma-deploy.sh [--ref <nome>] [--why <testo>] [--dry-run]
+#   bash scripts/arma-deploy.sh [--ref <nome>] [--sha <commit>] [--why <testo>] [--dry-run]
+#   --sha: arma quel commit invece di HEAD (lo usa scripts/rilascia.sh, che ha gia' le guardie)
 # Env:
 #   DEPLOY_ARM_REF   ref da armare (default: prod) — la stessa che legge close-propagate
 #   ARMA_DRYRUN      =1 : dichiara cosa farebbe e non spinge niente (usato dai test)
@@ -36,20 +37,22 @@ set -euo pipefail
 
 REF="${DEPLOY_ARM_REF:-prod}"
 WHY=""
+SHA_ARG=""
 DRYRUN="${ARMA_DRYRUN:-}"
 while [ $# -gt 0 ]; do
   case "$1" in
     --ref)     REF="${2:?--ref richiede un nome}"; shift 2 ;;
     --why)     WHY="${2:-}"; shift 2 ;;
+    --sha)     SHA_ARG="${2:?--sha richiede un commit}"; shift 2 ;;
     --dry-run) DRYRUN=1; shift ;;
-    *) echo "uso: arma-deploy.sh [--ref <nome>] [--why <testo>] [--dry-run]" >&2; exit 2 ;;
+    *) echo "uso: arma-deploy.sh [--ref <nome>] [--sha <commit>] [--why <testo>] [--dry-run]" >&2; exit 2 ;;
   esac
 done
 
 ROOT="$(git rev-parse --show-toplevel)"; cd "$ROOT"
 SCRIPTS="$ROOT/scripts"
-HEAD_SHA="$(git rev-parse HEAD)"
-SHORT="$(git rev-parse --short HEAD)"
+HEAD_SHA="$(git rev-parse --verify "${SHA_ARG:-HEAD}^{commit}")"
+SHORT="$(git rev-parse --short "$HEAD_SHA")"
 
 diario() {  # esito, ragione — non fallisce mai la corsa (il diario e' un testimone, non un giudice)
   [ -f "$SCRIPTS/close-log.sh" ] && bash "$SCRIPTS/close-log.sh" step arma "$1" "$2" >/dev/null 2>&1 || true
@@ -72,7 +75,7 @@ if [ -n "$DRYRUN" ]; then
 fi
 
 echo "[arma] origin/$REF -> $SHORT${WHY:+ ($WHY)}"
-if git push --quiet origin "HEAD:refs/heads/$REF"; then
+if git push --quiet origin "$HEAD_SHA:refs/heads/$REF"; then
   echo "  armato $SHORT — il deploy parte da se' entro ~5 minuti dal verde della CI"
   echo "  (sorvegliante: heuresys-advanced-deploy-watch.timer su VM e linux-pc)"
   diario eseguito "${WHY:-armamento richiesto dal chiamante}"

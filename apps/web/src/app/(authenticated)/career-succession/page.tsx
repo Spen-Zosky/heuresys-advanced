@@ -14,6 +14,7 @@ import { EnumStatusBadge } from "@/components/enum-badge";
 import { EChartsCard } from "../_charts-client";
 import { NomeOppure } from "@/components/senza-nome";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { GestioneBacini, GestioneCandidati, GestionePercorsi } from "./gestione";
 
 /** L'orizzonte di prontezza va dal piu' vicino al piu' lontano, non in ordine alfabetico (D11). */
 const ORDINE_PRONTEZZA = ["READY_NOW", "READY_6_MONTHS", "READY_1_YEAR", "READY_2_YEARS", "NOT_READY"];
@@ -142,7 +143,7 @@ export default function CareerSuccessionPage() {
       </nav>
 
       {tab === "paths" && (
-        <div data-testid="career-content-paths">
+        <div data-testid="career-content-paths" className="space-y-4">
           <EntityTable<CareerPath>
             isLoading={paths.query.isLoading}
             isError={paths.query.isError}
@@ -156,10 +157,11 @@ export default function CareerSuccessionPage() {
             emptyTitle={t("career.pathsEmpty")}
             caption={t("career.pathsCaption")}
           />
+          <GestionePercorsi percorsi={paths.rows} />
         </div>
       )}
       {tab === "pools" && (
-        <div data-testid="career-content-pools">
+        <div data-testid="career-content-pools" className="space-y-4">
           <EntityTable<SuccessionPool>
             isLoading={pools.query.isLoading}
             isError={pools.query.isError}
@@ -173,6 +175,7 @@ export default function CareerSuccessionPage() {
             emptyTitle={t("career.poolsEmpty")}
             caption={t("career.poolsCaption")}
           />
+          <GestioneBacini bacini={pools.rows} />
         </div>
       )}
       {tab === "candidates" && (
@@ -207,6 +210,7 @@ export default function CareerSuccessionPage() {
             emptyTitle={t("career.candidatesEmpty")}
             caption={t("career.candidatesCaption")}
           />
+          <GestioneCandidati candidati={candidates.rows} />
         </div>
       )}
     </main>

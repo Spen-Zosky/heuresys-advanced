@@ -4,7 +4,7 @@
  * in a header, and single-flight refresh on 401 (M-5).
  */
 import { describe, it, expect } from "vitest";
-import { HeuresysClient, INTESTAZIONE_ORIGINE, chiSei, chiediGettoneAgente, type FetchLike, type Session } from "../src/heuresys-client.js";
+import { HeuresysClient, INTESTAZIONE_ORIGINE, chiEDove, chiSei, chiediGettoneAgente, type FetchLike, type Session } from "../src/heuresys-client.js";
 
 const session: Session = {
   cookieAccess: "ACCESS",
@@ -166,5 +166,19 @@ describe("chiSei: chi decide un'approvazione lo dice l'API (ADR-0056 T3)", () =>
     await expect(chiSei("http://api", { cookieAccess: "X" }, vuota.fetchImpl)).resolves.toBeUndefined();
     const guasto: FetchLike = async () => { throw new Error("ECONNREFUSED"); };
     await expect(chiSei("http://api", { cookieAccess: "X" }, guasto)).resolves.toBeUndefined();
+  });
+});
+
+describe("chiEDove: chi parla e in quale tenant, per l'ammissione all'assistente (ADR-0056 D3)", () => {
+  it("restituisce persona e tenant; il mandato di piattaforma ha tenant null", async () => {
+    const conTenant = recordingFetch(() => ({ ok: true, status: 200, body: { userId: "u-1", tenantId: "t-1" } }));
+    await expect(chiEDove("http://api", { cookieAccess: "X" }, conTenant.fetchImpl)).resolves.toEqual({ userId: "u-1", tenantId: "t-1" });
+    const piattaforma = recordingFetch(() => ({ ok: true, status: 200, body: { userId: "u-2", tenantId: null } }));
+    await expect(chiEDove("http://api", { cookieAccess: "X" }, piattaforma.fetchImpl)).resolves.toEqual({ userId: "u-2", tenantId: null });
+  });
+
+  it("senza persona non c'è nessuno", async () => {
+    const vuota = recordingFetch(() => ({ ok: true, status: 200, body: { tenantId: "t-1" } }));
+    await expect(chiEDove("http://api", { cookieAccess: "X" }, vuota.fetchImpl)).resolves.toBeUndefined();
   });
 });

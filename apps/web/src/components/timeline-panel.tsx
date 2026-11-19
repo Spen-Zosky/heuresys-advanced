@@ -64,7 +64,7 @@ export function TimelinePanel({ basePath, userId, testId = "timeline-panel" }: T
   return (
     <Card data-testid={testId}>
       <CardHeader>
-        <CardTitle>{t("timeline.title")}</CardTitle>
+        <CardTitle as="h2">{t("timeline.title")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {summary.data && summary.data.total > 0 ? (

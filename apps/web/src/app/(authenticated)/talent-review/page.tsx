@@ -157,7 +157,7 @@ export default function TalentReviewPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t("talentReview.nineBox.title")}</CardTitle>
+          <CardTitle as="h2">{t("talentReview.nineBox.title")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-stretch gap-3">

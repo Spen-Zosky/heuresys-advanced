@@ -9,6 +9,7 @@ import { FolderKanban } from "lucide-react";
 import type { ProjectListResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
+import { NuovoProgetto } from "./gestione-progetto";
 
 /**
  * `#143` F5 — i progetti, dall'API reale e da nient'altro.
@@ -40,6 +41,8 @@ export default function ProjectsPage() {
         title={t("projects.title")}
         description={t("projects.description")}
       />
+
+      <NuovoProgetto />
 
       {q.isLoading ? (
         <StatoCaricamento testId="projects-loading" />

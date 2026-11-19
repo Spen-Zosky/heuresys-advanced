@@ -57,11 +57,23 @@ jobs:
       # limit (10/5min) would starve the 5-persona setup + retries. CI-only;
       # PROD keeps its own value.
       AUTH_LOGIN_RATELIMIT_MAX: "200"
+      # Le spec della PR scrivono (PATCH/POST): il controllo d'origine del CSRF le rifiuta con
+      # ORIGIN_MISMATCH se l'origine del web di prova non e' dichiarata, come nella integrale.
+      ADMIN_ORIGIN: "http://localhost:3187"
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 1
+
+      # Ogni corsa ha il suo database: una copia usa-e-getta del modello heuresys_ci, creata qui e
+      # tolta alla fine (db/scripts/ci-db-usa-e-getta.sh, «Ricostruisci e isola», Enzo 2026-11-18).
+      # Da qui in poi POSTGRES_DB e POSTGRES_DATABASE puntano alla copia; il passo dopo lo verifica.
+      - name: Database usa-e-getta della corsa
+        run: bash db/scripts/ci-db-usa-e-getta.sh crea "smoke"
+
+      - name: I passi usano il database della corsa
+        run: bash db/scripts/ci-db-usa-e-getta.sh controlla
 
       - name: Setup pnpm
         uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
@@ -221,6 +233,22 @@ jobs:
         # (auth.setup.ts → storageState) still runs as a project dependency.
         run: pnpm exec playwright test smoke-5-personas.spec.ts --reporter=list,html
 
+      # Le spec che la PR aggiunge o cambia girano QUI, sulla PR (2026-11-17): la suite
+      # integrale e' solo a mano e cade spesso al preflight per carico della macchina, quindi
+      # una spec nuova poteva entrare in main senza aver girato mai. Si confrontano gli alberi
+      # della base e della PR (checkout shallow: niente merge-base, basta il diff fra alberi).
+      - name: Run the E2E specs this PR adds or changes
+        if: github.event_name == 'pull_request'
+        working-directory: apps/web
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          git fetch --no-tags --depth=1 origin "$BASE_REF"
+          specs=$(git diff --name-only --diff-filter=AM FETCH_HEAD HEAD -- tests/e2e | grep -E '\.spec\.ts$' | grep -v 'smoke-5-personas' | sed 's|^apps/web/||' || true)
+          if [ -z "$specs" ]; then echo "nessuna spec E2E nuova o cambiata"; exit 0; fi
+          echo "spec della PR:"; echo "$specs"
+          pnpm exec playwright test $specs --reporter=list,html
+
       - name: Upload Playwright report on failure
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
@@ -234,3 +262,7 @@ jobs:
         run: |
           [ -n "$API_PID" ] && kill $API_PID 2>/dev/null || true
           [ -n "$WEB_PID" ] && kill $WEB_PID 2>/dev/null || true
+
+      - name: Togli il database della corsa
+        if: always()
+        run: bash db/scripts/ci-db-usa-e-getta.sh rimuovi

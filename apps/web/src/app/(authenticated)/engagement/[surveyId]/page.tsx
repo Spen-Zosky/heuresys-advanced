@@ -15,7 +15,8 @@ import { useEnumLabel } from "@/lib/enum-labels";
 import { EChartsCard } from "../../_charts-client";
 import { useFormat } from "@/lib/format";
 
-/** Bar of avgRating per rated question (rating/nps only). */
+/** Bar of avgRating per rated question (rating/nps only), riportata alla scala 10 in lettura:
+ *  i sondaggi trasferiti dal modello vecchio votano su 5 (voce 3c), e il valore salvato non cambia. */
 function ratingsBarOption(questions: EngagementQuestionResult[], label: string) {
   const rated = questions.filter((q) => q.avgRating != null);
   return {
@@ -23,7 +24,7 @@ function ratingsBarOption(questions: EngagementQuestionResult[], label: string) 
     grid: { left: 40, right: 20, top: 30, bottom: 80 },
     xAxis: { type: "category" as const, data: rated.map((q) => q.text.slice(0, 24)), axisLabel: { interval: 0, rotate: 35, fontSize: 10 } },
     yAxis: { type: "value" as const, name: label, max: 10 },
-    series: [{ type: "bar" as const, data: rated.map((q) => q.avgRating) }],
+    series: [{ type: "bar" as const, data: rated.map((q) => (q.scale && q.scale !== 10 ? Math.round(((q.avgRating ?? 0) * 1000) / q.scale) / 100 : q.avgRating)) }],
   };
 }
 
@@ -46,7 +47,7 @@ export default function EngagementResultsPage() {
       { header: t("engagement.results.type"), cell: (q) => <span className="text-muted-foreground">{enumLabel("questionType", q.type)}</span> },
       { header: t("engagement.results.category"), cell: (q) => <span className="text-muted-foreground">{enumLabel("surveyCategory", q.category)}</span> },
       { header: t("engagement.results.responses"), cell: (q) => <span className="text-muted-foreground">{q.responseCount}</span> },
-      { header: t("engagement.results.avg"), cell: (q) => <span className="text-muted-foreground">{q.avgRating != null ? fmt.numeroFisso(q.avgRating, 2) : "—"}</span> },
+      { header: t("engagement.results.avg"), cell: (q) => <span className="text-muted-foreground">{q.avgRating != null ? `${fmt.numeroFisso(q.avgRating, 2)}${q.scale ? ` / ${q.scale}` : ""}` : "—"}</span> },
     ],
     [t, enumLabel, fmt],
   );
@@ -94,7 +95,7 @@ export default function EngagementResultsPage() {
           {hasRated && (
             <Card data-testid="engagement-results-chart">
               <CardHeader>
-                <CardTitle>{t("engagement.results.chartTitle")}</CardTitle>
+                <CardTitle as="h2">{t("engagement.results.chartTitle")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <EChartsCard option={ratingsBarOption(d.questions, t("engagement.results.avg"))} height={360} ariaLabel={t("engagement.results.chartTitle")} />

@@ -79,7 +79,7 @@ export default function MeSurveyAnswerPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>{completed ? t("surveys.yourAnswers") : t("surveys.formTitle")}</CardTitle>
+              <CardTitle as="h2">{completed ? t("surveys.yourAnswers") : t("surveys.formTitle")}</CardTitle>
             </CardHeader>
             <CardContent>
               <form

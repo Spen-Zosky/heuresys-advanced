@@ -155,7 +155,54 @@
     "emptyTitle": "Nessun sondaggio",
     "emptyDescription": "Non ci sono sondaggi.",
     "caption": "Sondaggi",
-    "errorMessage": "Impossibile caricare i sondaggi."
+    "errorMessage": "Impossibile caricare i sondaggi.",
+    "riscontri": {
+      "titolo": "Riscontri sul clima e piani d'azione",
+      "mostra": "Mostra",
+      "tutti": "Tutti",
+      "conteggio": "{{mostrati}} di {{totale}}",
+      "nessuno": "Nessun riscontro in questo stato.",
+      "statoDi": "Stato del riscontro",
+      "categoriaLabel": "Tipo di riscontro",
+      "messaggio": "Riscontro ricevuto",
+      "registra": "Registra",
+      "errore": "Operazione non riuscita. Riprova.",
+      "stato": {
+        "new": "Nuovo",
+        "reviewed": "Letto",
+        "actioned": "Preso in carico",
+        "archived": "Archiviato"
+      },
+      "categoria": {
+        "concern": "Preoccupazione",
+        "recognition": "Riconoscimento",
+        "suggestion": "Proposta",
+        "other": "Altro"
+      }
+    },
+    "piani": {
+      "titolo": "Piani d'azione",
+      "nessuno": "Nessun piano d'azione.",
+      "statoDi": "Stato del piano",
+      "entro": "entro il {{data}}",
+      "titoloLabel": "Titolo del piano",
+      "prioritaLabel": "Priorità",
+      "scadenza": "Scadenza",
+      "daRiscontro": "Nasce dal riscontro",
+      "nessunRiscontro": "Nessuno",
+      "crea": "Crea il piano",
+      "stato": {
+        "planned": "Pianificato",
+        "in_progress": "In corso",
+        "completed": "Concluso"
+      },
+      "priorita": {
+        "low": "Bassa",
+        "medium": "Media",
+        "high": "Alta",
+        "critical": "Critica"
+      }
+    }
   },
   "users": {
     "title": "Utenti",
@@ -354,6 +401,17 @@
         "history": "Storia",
         "manage": "Gestione"
       }
+    },
+    "sessioni": {
+      "titolo": "Sessioni aperte ({{count}})",
+      "nessuna": "Nessuna sessione aperta.",
+      "dispositivo": "{{browser}} su {{sistema}}",
+      "ultimo": "ultimo accesso {{data}}",
+      "scade": "scade {{data}}",
+      "conferma": "Chiudere tutte le sessioni di questa persona? Dovrà accedere di nuovo.",
+      "chiudiTutte": "Chiudi tutte le sessioni",
+      "chiuse": "Sessioni chiuse.",
+      "errore": "Operazione non riuscita. Riprova."
     }
   },
   "tenants": {
@@ -422,6 +480,24 @@
       "archived": "Azienda archiviata.",
       "archiveError": "Non è stato possibile archiviare l'azienda.",
       "noPermission": "Non hai i permessi per modificare le aziende clienti."
+    },
+    "gestione": {
+      "modifica": "Modifica i dati del tenant",
+      "nome": "Nome",
+      "paese": "Paese (codice di due lettere)",
+      "nonDichiarata": "Non dichiarata",
+      "salva": "Salva",
+      "salvato": "Salvato.",
+      "errore": "Operazione non riuscita. Riprova.",
+      "confermaStato": "Portare il tenant allo stato «{{stato}}»? Cambia l'accesso di tutte le sue persone.",
+      "assegnazioni": "Chi della piattaforma segue questo tenant",
+      "assegnazioniSpiega": "Ritirare un'assegnazione la chiude con la data di oggi: la storia resta.",
+      "dal": "dal {{data}}",
+      "ritira": "Ritira",
+      "confermaRitira": "Ritirare questa assegnazione?",
+      "nessunaAssegnazione": "Nessuna assegnazione attiva.",
+      "assegnaPersona": "Assegna una persona della piattaforma",
+      "assegna": "Assegna"
     }
   },
   "enterpriseTyping": {
@@ -572,18 +648,18 @@
       }
     },
     "kpis": {
-      "title": "KPI richiesti",
+      "title": "Indicatori richiesti",
       "back": "← Posizione",
-      "count": "{{count}} KPI associati",
-      "count_one": "{{count}} KPI associato",
+      "count": "{{count}} indicatori associati",
+      "count_one": "{{count}} indicatore associato",
       "cardTitle": "Requisiti",
-      "empty": "Nessun KPI richiesto dichiarato.",
-      "caption": "KPI richiesti dalla posizione",
+      "empty": "Nessun indicatore richiesto dichiarato.",
+      "caption": "Indicatori richiesti dalla posizione",
       "columns": {
         "code": "Codice",
-        "kpi": "KPI",
+        "kpi": "Indicatore",
         "weight": "Peso",
-        "template": "Template"
+        "template": "Obiettivo di riferimento"
       }
     },
     "learning": {
@@ -631,17 +707,17 @@
       }
     },
     "skills": {
-      "title": "Skill richieste",
+      "title": "Competenze richieste",
       "back": "← Posizione",
-      "count": "{{count}} skill associate",
-      "count_one": "{{count}} skill associata",
+      "count": "{{count}} competenze associate",
+      "count_one": "{{count}} competenza associata",
       "cardTitle": "Requisiti",
-      "empty": "Nessuna skill richiesta dichiarata.",
-      "caption": "Skill richieste dalla posizione",
+      "empty": "Nessuna competenza richiesta dichiarata.",
+      "caption": "Competenze richieste dalla posizione",
       "columns": {
         "code": "Codice",
-        "skill": "Skill",
-        "proficiency": "Proficiency",
+        "skill": "Competenza",
+        "proficiency": "Livello richiesto",
         "weight": "Peso"
       }
     },
@@ -661,6 +737,45 @@
       "INACTIVE": "Non attive",
       "tenant": "Tenant",
       "allTenants": "Tutti"
+    },
+    "requisiti": {
+      "nuovaCompetenza": "Aggiungi una competenza richiesta",
+      "nuovoIndicatore": "Aggiungi un indicatore richiesto",
+      "aggiungi": "Aggiungi",
+      "chiudi": "Chiudi",
+      "cerca": "Cerca nel catalogo",
+      "voce": "Voce del catalogo",
+      "scegli": "Scegli una voce",
+      "salva": "Salva",
+      "togli": "Togli",
+      "confermaTogli": "Togliere questo requisito dalla posizione?",
+      "vietato": "Non hai il permesso di modificare la posizione.",
+      "giaPresente": "Questa voce è già un requisito della posizione.",
+      "errore": "Salvataggio non riuscito. Riprova."
+    },
+    "titolari": {
+      "titolo": "Chi occupa la posizione",
+      "spiegazione": "Assegnare, terminare o trasferire un incarico crea una richiesta di approvazione: l'incarico cambia solo quando è approvata.",
+      "vuoto": "Nessun incarico attivo su questa posizione.",
+      "fte": "quota {{fte}}",
+      "dal": "dal {{data}}",
+      "termina": "Termina",
+      "trasferisci": "Trasferisci",
+      "cercaPosizione": "Cerca la posizione",
+      "nuovaPosizione": "Nuova posizione",
+      "scegliPosizione": "Scegli la posizione",
+      "dataFine": "Ultimo giorno",
+      "dataInizio": "Dal giorno",
+      "proponi": "Proponi",
+      "annulla": "Annulla",
+      "nuovoTitolare": "Proponi un nuovo titolare",
+      "tipo": "Tipo di incarico",
+      "quota": "Quota di tempo (0-1)",
+      "inviata": "Proposta inviata: la trovi tra le approvazioni.",
+      "avviso": "Avviso sulla gerarchia dei livelli nell'unità {{unita}}: {{posto}}. Non blocca la proposta.",
+      "vietato": "Non hai il permesso di proporre questo cambiamento.",
+      "conflitto": "C'è già una proposta o un incarico che lo impedisce.",
+      "errore": "Invio non riuscito. Riprova."
     }
   },
   "roles": {
@@ -828,6 +943,43 @@
       "sessions_manage": "gestire le sessioni",
       "update_self": "modificare i propri dati",
       "upload_self": "caricare i propri file"
+    },
+    "deleghe": {
+      "titolo": "Deleghe del tenant",
+      "delegante": "Chi delega",
+      "delegato": "A chi",
+      "oggetto": "Che cosa",
+      "gruppi": "Gruppi del consolidamento",
+      "dal": "Dal",
+      "al": "Al (facoltativo)",
+      "motivo": "Motivo",
+      "registra": "Registra la delega",
+      "vuoto": "Nessuna delega registrata.",
+      "periodo": "Periodo",
+      "senzaFine": "senza fine",
+      "revoca": "Revoca",
+      "confermaRevoca": "Revocare questa delega?",
+      "stato": "Stato",
+      "revocata": "Revocata",
+      "inVigore": "In vigore",
+      "nonInVigore": "Non in vigore",
+      "vietato": "Non hai il permesso di gestire le deleghe.",
+      "conflitto": "Esiste già una delega uguale in vigore.",
+      "nonValida": "La delega non è valida: controlla persone, oggetto e date.",
+      "errore": "Salvataggio non riuscito. Riprova.",
+      "ambito": {
+        "APPROVALS": "Tutte le approvazioni",
+        "FULL": "Mandato pieno",
+        "CONSOLIDATION": "Consolidamento con il prototipo",
+        "PROCESS_STEP": "Passo di processo"
+      },
+      "gruppo": {
+        "ORGANIZATION": "Organizzazione",
+        "POSITIONS_ROLES": "Posizioni e ruoli",
+        "SKILLS": "Competenze",
+        "PROCESSES": "Processi",
+        "INDICATORS_GOALS": "Indicatori e obiettivi"
+      }
     }
   },
   "dashboard": {
@@ -1055,7 +1207,11 @@
       "colName": "Nome",
       "colSlug": "Indirizzo breve",
       "colActions": "Azioni",
-      "delete": "Elimina"
+      "delete": "Elimina",
+      "modifica": "Modifica",
+      "salva": "Salva",
+      "annulla": "Annulla",
+      "erroreModifica": "Modifica non riuscita."
     },
     "detail": {
       "back": "← Contenuti",
@@ -1547,7 +1703,20 @@
       "status": "Stato",
       "handedOff": "Consegnato"
     },
-    "rewardGates": "Cancelli di premio"
+    "rewardGates": "Cancelli di premio",
+    "nuova": {
+      "titolo": "Nuova raccomandazione retributiva",
+      "apri": "Nuova",
+      "chiudi": "Chiudi",
+      "persona": "Persona",
+      "dal": "Periodo dal",
+      "al": "Periodo al",
+      "importo": "Importo (euro)",
+      "motivazione": "Motivazione",
+      "registra": "Registra la proposta",
+      "vietato": "Non hai il permesso di registrare raccomandazioni.",
+      "errore": "Registrazione non riuscita. Riprova."
+    }
   },
   "whistleblowingConsole": {
     "title": "Segnalazioni whistleblowing",
@@ -1688,5 +1857,100 @@
       "CONFIRMED": "Confermate",
       "SUPERSEDED": "Sostituite"
     }
+  },
+  "gdpr": {
+    "titolo": "Dati personali (GDPR)",
+    "descrizione": "Esportazione e cancellazione dei dati di una persona, corsa di conservazione, registro delle richieste e mappa dei dati.",
+    "persona": "I dati di una persona",
+    "scegliPersona": "Persona",
+    "esporta": "Esporta i suoi dati",
+    "esportando": "Esportazione…",
+    "provaCancellazione": "Prova la cancellazione",
+    "lavoro": "Operazione sui dati personali",
+    "lavoroCancella": "Conto delle righe che la cancellazione toccherebbe, tabella per tabella.",
+    "lavoroEsporta": "Raccolta di tutti i dati della persona in un file.",
+    "lavoroConserva": "Conto delle righe oltre il periodo di conservazione.",
+    "errore": "Operazione non riuscita. Riprova.",
+    "esitoProva": "Prova: la cancellazione toccherebbe {{count}} righe. Niente è stato cambiato.",
+    "esitoVero": "Cancellazione eseguita: {{count}} righe trattate.",
+    "parolaCancella": "CANCELLA",
+    "parolaConserva": "APPLICA",
+    "confermaScrivi": "Per eseguirla davvero scrivi {{parola}}",
+    "cancellaDavvero": "Cancella davvero (non si disfa)",
+    "conservazione": "Corsa di conservazione",
+    "conservazioneSpiega": "Toglie i dati oltre il periodo di conservazione dichiarato nella mappa. Prima si prova, poi si applica.",
+    "provaConservazione": "Prova la conservazione",
+    "esitoProvaConserva": "Prova: {{count}} righe sono oltre il periodo di conservazione. Niente è stato cambiato.",
+    "esitoVeroConserva": "Conservazione applicata: {{count}} righe trattate.",
+    "applicaDavvero": "Applica davvero (non si disfa)",
+    "giorni": "{{count}} giorni",
+    "giorni_one": "{{count}} giorno",
+    "registro": "Registro delle richieste ({{mostrati}} di {{totale}})",
+    "nessunaRichiesta": "Nessuna richiesta registrata.",
+    "mappa": "Mappa dei dati personali ({{count}} tabelle)",
+    "strategie": {
+      "DELETE": "si cancella",
+      "ANONYMIZE": "si rende anonimo",
+      "RETAIN": "si conserva"
+    },
+    "tipi": {
+      "EXPORT": "Esportazione",
+      "ERASURE": "Cancellazione",
+      "RETENTION_RUN": "Conservazione"
+    },
+    "statiRichiesta": {
+      "COMPLETED": "Eseguita",
+      "DRY_RUN": "Prova"
+    }
+  },
+  "agentCaps": {
+    "titolo": "Capacità dell'agente",
+    "descrizione": "Che cosa l'agente può fare, su quali dati, con quale limite e come si annulla; e se agisce chiedendo conferma o in libertà.",
+    "elenco": "Capacità ({{count}})",
+    "erroreCarica": "Non è stato possibile caricare le capacità.",
+    "nessuna": "Nessuna capacità registrata.",
+    "dettagli": "Dettagli",
+    "chiudi": "Chiudi",
+    "limiti": "Al massimo {{volume}} righe per giro · si annulla con {{annullamento}}",
+    "nessunaOperazione": "Nessuna operazione dichiarata.",
+    "classe": "classe {{classe}}",
+    "classeLabel": "Classe",
+    "concetto": "Concetto",
+    "operazione": "Operazione",
+    "metodo": "Metodo",
+    "aggiungiOperazione": "Aggiungi l'operazione",
+    "pubblica": "Pubblica",
+    "confermaPubblica": "Pubblicare la capacità? Da quel momento l'agente la può usare, con conferma.",
+    "ritira": "Ritira",
+    "confermaRitira": "Ritirare la capacità? L'agente smette di poterla usare.",
+    "modo": "Modo per questo tenant",
+    "ragione": "Ragione della decisione",
+    "decidi": "Decidi",
+    "vietato": "Non hai il permesso per questa operazione.",
+    "duplicata": "Esiste già una capacità con questo codice.",
+    "rifiutata": "Rifiutata dall'API",
+    "errore": "Operazione non riuscita. Riprova.",
+    "nuova": "Nuova capacità (in bozza)",
+    "codice": "Codice",
+    "agente": "Agente",
+    "volume": "Limite di righe per giro",
+    "descrizioneLabel": "Descrizione",
+    "annullamento": "Come si annulla",
+    "riferimentoAnnullamento": "Riferimento dell'annullamento",
+    "creaBozza": "Crea la bozza",
+    "stati": {
+      "BOZZA": "Bozza",
+      "PUBBLICATA": "Pubblicata",
+      "RITIRATA": "Ritirata"
+    },
+    "modi": {
+      "CONFERMA": "Con conferma",
+      "LIBERA": "In libertà"
+    },
+    "annullamenti": {
+      "GIORNALE_UNDO": "giornale di annullamento",
+      "RIGA_SOSTITUTIVA": "riga sostitutiva"
+    },
+    "identita": "{{codice}} · v{{versione}} · {{agente}}"
   }
 }

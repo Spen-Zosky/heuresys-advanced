@@ -30,6 +30,8 @@ export const AREE_PER_ROTTA: Array<[string, AreaQuadro[]]> = [
   ["/performance", ["valutazioni", "obiettivi"]],
   ["/talent-review", ["valutazioni"]],
   ["/career-succession", ["posizioni", "valutazioni"]],
+  ["/mentorship", ["valutazioni", "formazione"]],
+  ["/assessments", ["valutazioni"]],
   ["/insights", ["persone", "valutazioni"]],
   ["/skills", ["formazione"]],
   ["/gaps", ["formazione"]],

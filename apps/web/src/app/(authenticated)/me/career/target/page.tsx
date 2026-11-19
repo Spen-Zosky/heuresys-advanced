@@ -78,7 +78,7 @@ export default function MeCareerTargetPage() {
       </div>
 
       <Card>
-        <CardHeader><CardTitle>{t("careerTarget.cardTitle")}</CardTitle></CardHeader>
+        <CardHeader><CardTitle as="h2">{t("careerTarget.cardTitle")}</CardTitle></CardHeader>
         <CardContent>
           <form
             onSubmit={(e) => { void onSubmit(e); }}

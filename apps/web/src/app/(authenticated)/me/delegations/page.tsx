@@ -147,7 +147,7 @@ export default function MeDelegationsPage() {
 
       {(proposte.data?.items ?? []).length > 0 && (
         <Card data-testid="me-delegations-proposals">
-          <CardHeader><CardTitle>{t("delegations.proposals.title")}</CardTitle></CardHeader>
+          <CardHeader><CardTitle as="h2">{t("delegations.proposals.title")}</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             {proposte.data!.items.map((p, i) => (
               <div key={`prop-${i}`} className="flex flex-wrap items-center justify-between gap-3 rounded-control border border-border p-3">
@@ -176,7 +176,7 @@ export default function MeDelegationsPage() {
 
       {persone.length > 0 && (
         <Card data-testid="me-delegations-form">
-          <CardHeader><CardTitle>{t("delegations.form.title")}</CardTitle></CardHeader>
+          <CardHeader><CardTitle as="h2">{t("delegations.form.title")}</CardTitle></CardHeader>
           <CardContent>
             <form onSubmit={invia} className="grid gap-4 sm:grid-cols-2">
               <label className="space-y-1 text-sm">
@@ -231,7 +231,7 @@ export default function MeDelegationsPage() {
 
       {(casella.data?.items ?? []).length > 0 && (
         <Card data-testid="me-delegations-inbox">
-          <CardHeader><CardTitle>{t("delegations.inbox.title")}</CardTitle></CardHeader>
+          <CardHeader><CardTitle as="h2">{t("delegations.inbox.title")}</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             {decidi.isError && <p className="text-sm text-danger">{messaggioDi(decidi.error, t)}</p>}
             {casella.data!.items.map((a) => (
@@ -261,7 +261,7 @@ export default function MeDelegationsPage() {
       )}
 
       <Card data-testid="me-delegations-granted">
-        <CardHeader><CardTitle>{t("delegations.granted.title")}</CardTitle></CardHeader>
+        <CardHeader><CardTitle as="h2">{t("delegations.granted.title")}</CardTitle></CardHeader>
         <CardContent>
           {granted.length === 0 ? (
             <StatoVuoto titolo={persone.length > 0 ? t("delegations.granted.empty") : t("delegations.granted.noChain")} />
@@ -290,7 +290,7 @@ export default function MeDelegationsPage() {
       </Card>
 
       <Card data-testid="me-delegations-received">
-        <CardHeader><CardTitle>{t("delegations.received.title")}</CardTitle></CardHeader>
+        <CardHeader><CardTitle as="h2">{t("delegations.received.title")}</CardTitle></CardHeader>
         <CardContent>
           {received.length === 0 ? (
             <StatoVuoto icona={<Users className="h-6 w-6" />} titolo={t("delegations.received.emptyTitle")} motivo={t("delegations.received.emptyDesc")} />

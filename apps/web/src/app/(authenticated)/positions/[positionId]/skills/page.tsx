@@ -8,8 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
 import { PageHeader } from "@/components/intestazione-pagina";
 import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable } from "@/components/data-table-panel";
-import { StatusBadge } from "@/components/status-pill";
+import { EnumStatusBadge } from "@/components/enum-badge";
 import { NomeOppure } from "@/components/senza-nome";
+import { NuovaCompetenzaRichiesta, TogliRequisito } from "../_components/requisiti-modifica";
 
 interface PositionSkillReq {
   requirementId: string;
@@ -53,8 +54,10 @@ export default function PositionSkillsPage() {
         }
       />
 
+      <NuovaCompetenzaRichiesta positionId={positionId} />
+
       <Card>
-        <CardHeader><CardTitle>{t("positions.skills.cardTitle")}</CardTitle></CardHeader>
+        <CardHeader><CardTitle as="h2">{t("positions.skills.cardTitle")}</CardTitle></CardHeader>
         <CardContent className="p-0">
           <EntityTable<PositionSkillReq> originPath={"/v1/positions"}
             isLoading={skills.isLoading}
@@ -67,10 +70,13 @@ export default function PositionSkillsPage() {
             emptyTitle={t("positions.skills.empty")}
             caption={t("positions.skills.caption")}
             columns={[
-              { header: t("positions.skills.columns.code"), cell: (s) => <span className="font-mono text-xs">{s.skillCode ?? "—"}</span> },
               { header: t("positions.skills.columns.skill"), cell: (s) => <NomeOppure nome={s.skillName} id={s.skillId} /> },
-              { header: t("positions.skills.columns.proficiency"), cell: (s) => <StatusBadge value={s.requiredProficiency} /> },
+              { header: t("positions.skills.columns.code"), cell: (s) => <span className="font-mono text-xs">{s.skillCode ?? "—"}</span> },
+              { header: t("positions.skills.columns.proficiency"), cell: (s) => <EnumStatusBadge domain="proficiency" value={s.requiredProficiency} /> },
               { header: t("positions.skills.columns.weight"), cell: (s) => <span className="text-xs">{s.weight}</span> },
+              { header: "", cell: (s) => (
+                <TogliRequisito percorso={`/v1/positions/${positionId}/skills/${s.skillId}`} chiave={["positions", positionId, "skills"]} testId="position-skill-remove" />
+              ) },
             ]}
           />
         </CardContent>

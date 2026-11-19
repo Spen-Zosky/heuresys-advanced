@@ -84,7 +84,7 @@ In mod-platform la finestra ha a destra ciò che l'attività ha prodotto o usato
 
 ### L10. Che cosa resta com'è
 
-Restano le regole già in vigore in Heuresys, che coincidono con mod-platform o ne sono più strette: l'assistente è usato solo dalle persone nominate in `AGENT_GATEWAY_ALLOWED_USER_IDS` e il motore è l'abbonamento Claude di Enzo (ADR-0056 D3, regola di Enzo del 2026-11-10); ogni conversazione è della sua persona, e un'altra riceve 404; l'agente non ha più permessi della persona (P12); nessuna cancellazione libera (P17); il dettato aspetta il giorno in cui la finestra accetta la voce (ADR-0056 D7).
+Restano le regole già in vigore in Heuresys, che coincidono con mod-platform o ne sono più strette: l'assistente è usato solo dalle persone nominate in `AGENT_GATEWAY_ALLOWED_USER_IDS` o dalle persone dei tenant nominati in `AGENT_GATEWAY_ALLOWED_TENANT_IDS` (il caso di D3: Enzo che entra con l'utenza di una persona del tenant; aggiunto il 2026-11-17) e il motore è l'abbonamento Claude di Enzo (ADR-0056 D3, regola di Enzo del 2026-11-10); ogni conversazione è della sua persona, e un'altra riceve 404; l'agente non ha più permessi della persona (P12); nessuna cancellazione libera (P17); il dettato aspetta il giorno in cui la finestra accetta la voce (ADR-0056 D7).
 
 ### L11. Il datastore
 

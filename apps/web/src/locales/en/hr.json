@@ -1403,6 +1403,8 @@
     "titolo": "Mentoring",
     "descrizione": "Mentoring programmes, mentor and mentee pairs and their meetings.",
     "nessuno": "not set",
+    "omissis": "{omissis}",
+    "omissisAiuto": "Person outside your scope: the name is not shown.",
     "programmi": "Programmes ({{count}})",
     "erroreCarica": "Mentoring could not be loaded.",
     "nessunProgramma": "No mentoring programme.",

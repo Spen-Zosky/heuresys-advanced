@@ -11,8 +11,8 @@
 # vecchio per ore dopo ogni unione, Atlas freshness su main era rosso (15 corse rosse su 21 dal 15 al
 # 18/11), deploy-watch fermava il rilascio, e i thread rigeneravano a mano: 16 commit «atlante
 # rigenerato» in 4 giorni. Ora il timer passa ogni 20 minuti, ma lo script lavora solo se origin/main
-# e' cambiato dall'ultimo giro (passo 0, un `git fetch`), e la PR che apre si unisce da sola con
-# `gh pr merge --auto --squash` quando la sua CI e' verde: e' la stessa unione con CI verde che i
+# e' cambiato dall'ultimo giro (passo 0, un `git fetch`), e la PR che apre la unisce
+# lo script stesso, dopo aver aspettato che la sua CI sia tutta verde: e' la stessa unione con CI verde che i
 # thread fanno gia' per permesso permanente (13/11/2026), e la PR tocca solo docs/kb/atlas.
 #
 # Che cosa fa, in ordine:
@@ -156,14 +156,23 @@ git commit -q -F "$msg" -- docs/kb/atlas
 rm -f "$msg"
 git push -q -u origin "$ramo"
 gh pr create --base main --head "$ramo" --title "docs(kb): rigenera l'atlante ($OGGI)" \
-  --body "Rigenerazione automatica dell'atlante (scripts/atlante-automatico.sh, timer heuresys-advanced-atlante sulla VM). atlante_fresco.py: fresco; tabelle DB $prima -> $dopo. Si unisce da sola quando la sua CI e' verde (gh pr merge --auto --squash)."
+  --body "Rigenerazione automatica dell'atlante (scripts/atlante-automatico.sh, timer heuresys-advanced-atlante sulla VM). atlante_fresco.py: fresco; tabelle DB $prima -> $dopo. Lo script la unisce da solo quando tutta la sua CI e' verde."
 log "PR aperta dal ramo $ramo"
-# Unione automatica a CI verde. Se GitHub la rifiuta (impostazione del repo spenta), la PR resta
-# aperta come prima e la si unisce a mano: non e' un errore del giro.
-if gh pr merge "$ramo" --auto --squash --delete-branch >/dev/null 2>&1; then
-  log "unione automatica richiesta: si unisce quando la CI e' verde"
+# Unione a CI verde, aspettata qui. NON `gh pr merge --auto`: main non ha controlli obbligatori,
+# quindi GitHub non ha niente da aspettare e `--auto` unisce SUBITO, prima che la CI parta (visto
+# il 19/11 con la #313). Si aspetta che i controlli compaiano, poi che finiscano tutti; si unisce
+# solo se sono tutti verdi e la testa del ramo e' ancora il commit di questo giro. Ogni altro
+# esito lascia la PR aperta, da unire a mano: non e' un errore del giro.
+testa_ramo="$(git rev-parse HEAD)"
+sleep 60
+if timeout 1200 gh pr checks "$ramo" --watch --interval 30 >/dev/null 2>&1; then
+  if gh pr merge "$ramo" --squash --delete-branch --match-head-commit "$testa_ramo" >/dev/null 2>&1; then
+    log "CI verde: PR unita"
+  else
+    log "CI verde ma unione rifiutata: la PR resta da unire a mano"
+  fi
 else
-  log "unione automatica non disponibile: la PR resta da unire a mano"
+  log "CI non verde, assente o oltre 20 minuti: la PR resta da unire a mano"
 fi
 
 cd "$ROOT"

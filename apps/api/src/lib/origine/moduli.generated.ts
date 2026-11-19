@@ -54,6 +54,16 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_agent_proposals"
     ]
   },
+  "agent-requests": {
+    "prefissi": [
+      "/v1/agent-requests"
+    ],
+    "tabelle": [
+      "sys_agent_call_log",
+      "sys_agent_requests",
+      "sys_users"
+    ]
+  },
   "agent-tokens": {
     "prefissi": [
       "/v1/auth/agent-tokens"
@@ -502,7 +512,8 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_goal_milestones",
       "sys_goal_templates",
       "sys_goal_updates",
-      "sys_goals"
+      "sys_goals",
+      "sys_users"
     ]
   },
   "hierarchy-levels": {
@@ -1338,9 +1349,12 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "/v1/tenants"
     ],
     "tabelle": [
+      "sys_blueprint_content_ccnl",
+      "sys_blueprint_content_ccnl_levels",
       "sys_blueprint_variant_versions",
       "sys_industry_codes",
-      "sys_tenancies"
+      "sys_tenancies",
+      "sys_user_contracts"
     ]
   },
   "time-off": {

@@ -4,18 +4,27 @@
 #
 # PERCHE' ESISTE (Enzo, 2026-11-02). `atlante_fresco.py` diventa «vecchio» a ogni unione che tocca
 # moduli, rotte, pagine o migrazioni, e rigenerarlo chiede il database vivo: lo faceva qualcuno a mano
-# sulla VM. Questo script lo fa ogni mattina dal timer `heuresys-advanced-atlante.timer`
-# (deploy/systemd/solo-vm/) e propone il risultato come PR. Non unisce mai: la PR resta da unire
-# come le altre.
+# sulla VM. Questo script lo fa dal timer `heuresys-advanced-atlante.timer` (deploy/systemd/solo-vm/)
+# e propone il risultato come PR.
+#
+# DOPO OGNI UNIONE, NON OGNI MATTINA (2026-11-19). Con il giro solo alle 05:00 l'atlante restava
+# vecchio per ore dopo ogni unione, Atlas freshness su main era rosso (15 corse rosse su 21 dal 15 al
+# 18/11), deploy-watch fermava il rilascio, e i thread rigeneravano a mano: 16 commit «atlante
+# rigenerato» in 4 giorni. Ora il timer passa ogni 20 minuti, ma lo script lavora solo se origin/main
+# e' cambiato dall'ultimo giro (passo 0, un `git fetch`), e la PR che apre si unisce da sola con
+# `gh pr merge --auto --squash` quando la sua CI e' verde: e' la stessa unione con CI verde che i
+# thread fanno gia' per permesso permanente (13/11/2026), e la PR tocca solo docs/kb/atlas.
 #
 # Che cosa fa, in ordine:
+#   0. se origin/main e' lo stesso commit gia' guardato al giro prima, esce 0 senza fare niente;
 #   1. se c'e' gia' una PR aperta da un ramo `atlante/*`, esce 0 senza fare niente;
 #   2. apre una copia di prova da origin/main con scripts/copia-prova.sh (se un'altra copia e'
 #      aperta esce 0: riprova al giro dopo);
 #   3. nella copia chiede `atlante_fresco.py`: «fresco» → chiude la copia ed esce 0;
 #   4. «vecchio» o «indeciso» → pnpm install, build_atlas.py con le coordinate del DB lette dal
 #      .env della VM (la password non viene mai stampata), controlla che la sezione dati non perda
-#      tabelle rispetto a main, committa su `atlante/<AAAAMMGG>`, pusha e apre la PR;
+#      tabelle rispetto a main, committa su `atlante/<AAAAMMGG>`, pusha, apre la PR e ne chiede
+#      l'unione automatica a CI verde;
 #   5. chiude la copia e la cancella dal cestino: sulla VM il cestino non libera disco (regola del
 #      30/10/2026), e la copia l'ha creata questo script.
 #
@@ -38,6 +47,18 @@ log() { echo "[atlante-automatico] $*"; }
 
 exec 9>"${XDG_RUNTIME_DIR:-/tmp}/heuresys-atlante-automatico.lock"
 flock -n 9 || { log "un'altra corsa e' in volo: esco"; exit 0; }
+
+# 0. main non e' cambiato dall'ultimo giro: niente da guardare. Il commit si segna solo quando il
+#    giro arriva in fondo (fresco, identico o PR aperta), cosi' un giro fallito si ripete al prossimo.
+STATO_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/heuresys-advanced"
+ULTIMO="$STATO_DIR/atlante-ultimo-main"
+mkdir -p "$STATO_DIR"
+git -C "$ROOT" fetch -q origin main
+TESTA="$(git -C "$ROOT" rev-parse origin/main)"
+if [ "$(cat "$ULTIMO" 2>/dev/null || true)" = "$TESTA" ]; then
+  exit 0
+fi
+segna_guardato() { printf '%s\n' "$TESTA" > "$ULTIMO"; }
 
 # 1. una PR di rigenerazione gia' aperta basta
 aperte="$(cd "$ROOT" && gh pr list --state open \
@@ -82,6 +103,7 @@ log "atlante_fresco.py: $stato"
 if [ "$stato" = "fresco" ]; then
   chiudi_e_cancella
   log "niente da fare"
+  segna_guardato
   exit 0
 fi
 
@@ -117,7 +139,7 @@ fi
 
 if git diff --quiet -- docs/kb/atlas; then
   log "rigenerato ma identico a main: niente da proporre"
-  cd "$ROOT"; chiudi_e_cancella; exit 0
+  cd "$ROOT"; chiudi_e_cancella; segna_guardato; exit 0
 fi
 
 ramo="atlante/$OGGI"
@@ -132,8 +154,16 @@ git commit -q -F "$msg" -- docs/kb/atlas
 rm -f "$msg"
 git push -q -u origin "$ramo"
 gh pr create --base main --head "$ramo" --title "docs(kb): rigenera l'atlante ($OGGI)" \
-  --body "Rigenerazione automatica dell'atlante (scripts/atlante-automatico.sh, timer heuresys-advanced-atlante sulla VM). atlante_fresco.py: fresco; tabelle DB $prima -> $dopo. Non si unisce da sola."
+  --body "Rigenerazione automatica dell'atlante (scripts/atlante-automatico.sh, timer heuresys-advanced-atlante sulla VM). atlante_fresco.py: fresco; tabelle DB $prima -> $dopo. Si unisce da sola quando la sua CI e' verde (gh pr merge --auto --squash)."
 log "PR aperta dal ramo $ramo"
+# Unione automatica a CI verde. Se GitHub la rifiuta (impostazione del repo spenta), la PR resta
+# aperta come prima e la si unisce a mano: non e' un errore del giro.
+if gh pr merge "$ramo" --auto --squash --delete-branch >/dev/null 2>&1; then
+  log "unione automatica richiesta: si unisce quando la CI e' verde"
+else
+  log "unione automatica non disponibile: la PR resta da unire a mano"
+fi
 
 cd "$ROOT"
 chiudi_e_cancella
+segna_guardato

@@ -98,7 +98,7 @@ import { PreferencesApplier } from "../../components/preferences-applier";
 import { StepUpDialog } from "../../components/step-up-dialog";
 import { SectionTabs, SECTION_TAB_GROUPS } from "../../components/section-tabs";
 import { pageVerdict } from "../../lib/page-guard";
-import { PannelloAgente } from "../../components/pannello-agente";
+import { PannelloAgente } from "../../components/assistente/finestra-assistente";
 import { ContestoAgenteProvider } from "../../lib/agente/contesto";
 import { SchedeProvider } from "@/components/scheda-rapida";
 import { CorpoGruppo, useScorrimentoMenu } from "../../components/menu-laterale";

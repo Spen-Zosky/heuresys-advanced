@@ -13,7 +13,7 @@ export interface RigaLeggibile {
 }
 
 /** Il testo più lungo che una riga porta in finestra. */
-export const MAX_RIGA = 4000;
+export const MAX_RIGA = 20000;
 
 /**
  * Da un evento `message` dello stream (il `data:` JSON dell'SDK) alle righe da mostrare.

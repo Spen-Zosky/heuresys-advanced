@@ -111,6 +111,30 @@ describe("T6b — il giro continua a finestra chiusa", () => {
   });
 });
 
+describe("2026-11-18 — la domanda tutta su dati vietati riceve il messaggio fisso", () => {
+  it("con il rifiuto, il registro, la finestra e il risultato portano il messaggio, non il testo del modello", async () => {
+    const reg = new RegistroFinto({ id: CONV, sdkSessionRef: null, personsSeen: [] });
+    const { d, scritti } = deps(reg, async function* () {
+      yield testo("Mi dispiace, non riesco a leggere le retribuzioni.");
+      yield risultato("Mi dispiace, non riesco a leggere le retribuzioni.");
+    }, { rifiuto: () => "Non hai le autorizzazioni necessarie." });
+    await eseguiGiro(d);
+    expect(reg.eventi.at(-1)).toEqual({ kind: "TESTO", payload: { testo: "Non hai le autorizzazioni necessarie.", origine: "piattaforma", rifiuto: true } });
+    expect(scritti.join("")).toContain("event: rifiuto");
+    expect(reg.stati.at(-1)).toEqual({ status: "FATTA", result: "Non hai le autorizzazioni necessarie." });
+  });
+
+  it("senza rifiuto il risultato resta quello del modello", async () => {
+    const reg = new RegistroFinto({ id: CONV, sdkSessionRef: null, personsSeen: [] });
+    const { d, scritti } = deps(reg, async function* () {
+      yield risultato("ecco i dati");
+    }, { rifiuto: () => null });
+    await eseguiGiro(d);
+    expect(scritti.join("")).not.toContain("event: rifiuto");
+    expect(reg.stati.at(-1)).toEqual({ status: "FATTA", result: "ecco i dati" });
+  });
+});
+
 describe("T6b — la conversazione si riprende", () => {
   it("la sessione salvata va a resume, il contatore riparte dalle impronte e le impronte si salvano alla fine", async () => {
     const seme = new ContatorePersone();

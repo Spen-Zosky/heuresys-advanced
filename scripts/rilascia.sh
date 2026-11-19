@@ -14,6 +14,8 @@
 #   G1  il commit e' su origin/main (uguale o antenato della punta)
 #   G2  origin/prod e' antenato del commit: solo avanzamento, mai force-push
 #   G3  CI: almeno una corsa sul commit, tutte concluse, nessuna bocciata
+#       (dal 2026-11-19, se l'albero del commit e' gia' verde nella PR, la corsa su main
+#       salta i job e risulta verde: scripts/ci/tree-gia-verificato.sh; G3 non cambia)
 #   G4  backup di heuresys_advanced verificato da meno di 24 ore
 #       (marcatore di ~/.claude/tools/backup-verificato.sh; se e' vecchio lo rinnova)
 # Dopo: l'atto e' arma-deploy.sh (uno solo, #217 I4); il rollout lo fa

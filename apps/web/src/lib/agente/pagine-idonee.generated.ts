@@ -4,6 +4,7 @@
 export const PAGINE_IDONEE_AGENTE: readonly string[] = [
   "/admin/agent-capabilities",
   "/admin/catalogo-kpi",
+  "/admin/dati-di-riferimento",
   "/admin/gdpr",
   "/admin/tassonomie",
   "/analytics/attendance",

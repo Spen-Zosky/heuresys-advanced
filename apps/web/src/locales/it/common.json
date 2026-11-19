@@ -867,6 +867,12 @@
       "M": "Media",
       "L": "Grande",
       "XL": "Molto grande"
+    },
+    "referenceSyncRunStatus": {
+      "RUNNING": "In corso",
+      "COMPLETED": "Completata",
+      "FAILED": "Non riuscita",
+      "CANCELLED": "Annullata"
     }
   },
   "masked": "nascosto per il tuo profilo",

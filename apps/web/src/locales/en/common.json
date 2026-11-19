@@ -867,6 +867,12 @@
       "M": "Medium",
       "L": "Large",
       "XL": "Very large"
+    },
+    "referenceSyncRunStatus": {
+      "RUNNING": "Running",
+      "COMPLETED": "Completed",
+      "FAILED": "Failed",
+      "CANCELLED": "Cancelled"
     }
   },
   "masked": "withheld for your profile",

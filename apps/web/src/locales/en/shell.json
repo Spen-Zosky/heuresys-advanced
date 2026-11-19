@@ -183,7 +183,8 @@
     "dati": {
       "provenance": "Provenance register",
       "gdpr": "Personal data (GDPR)",
-      "tassonomie": "Taxonomies"
+      "tassonomie": "Taxonomies",
+      "riferimento": "Official sources"
     },
     "permessi": {
       "roles": "Roles & permissions",

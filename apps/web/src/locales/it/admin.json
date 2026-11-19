@@ -2024,5 +2024,31 @@
       "contoModelli_one": "{{count}} modello operativo",
       "contoModelli_other": "{{count}} modelli operativi"
     }
+  },
+  "datiRiferimento": {
+    "titolo": "Fonti ufficiali dei dati di riferimento",
+    "descrizione": "Le tassonomie ufficiali (ESCO, ATECO 2025, gerarchia delle competenze ESCO) si aggiornano dalle loro fonti pubblicate. Un aggiornamento inserisce e aggiorna, non cancella mai; se la fonte non è cambiata si ferma subito.",
+    "fonti": "Fonti",
+    "fonte": "Fonte",
+    "ultimoSuccesso": "Ultimo aggiornamento riuscito",
+    "ultimaCorsa": "Ultima corsa",
+    "mai": "Mai",
+    "aggiorna": "Aggiorna ora",
+    "inCorso": "Aggiornamento in corso…",
+    "conferma": "Aggiornare adesso «{{fonte}}» dalla fonte ufficiale? Può durare alcuni minuti.",
+    "lavoro": "Aggiornamento di «{{fonte}}» in corso",
+    "lavoroDettaglio": "Si legge la fonte pubblicata e si confrontano le voci con il catalogo. Alla fine qui compare quante voci sono state inserite e aggiornate.",
+    "fatto": "«{{fonte}}» aggiornata: {{totale}} voci lette, {{inserite}} inserite, {{aggiornate}} aggiornate.",
+    "invariata": "«{{fonte}}» è invariata dall'ultimo aggiornamento: non c'era niente da fare.",
+    "erroreCorsa": "L'aggiornamento non è riuscito. Riprova più tardi.",
+    "errore": "Non è stato possibile leggere le fonti dei dati di riferimento",
+    "storico": "Corse precedenti",
+    "contoCorse_one": "{{count}} corsa",
+    "contoCorse_other": "{{count}} corse",
+    "inizio": "Inizio",
+    "fine": "Fine",
+    "voci": "Voci lette",
+    "inseriteAggiornate": "Inserite / aggiornate",
+    "stato": "Stato"
   }
 }

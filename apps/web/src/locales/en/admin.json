@@ -2024,5 +2024,31 @@
       "contoModelli_one": "{{count}} operating model",
       "contoModelli_other": "{{count}} operating models"
     }
+  },
+  "datiRiferimento": {
+    "titolo": "Official reference data sources",
+    "descrizione": "The official taxonomies (ESCO, ATECO 2025, ESCO skill hierarchy) are refreshed from their published sources. A refresh inserts and updates, never deletes; if the source has not changed it stops at once.",
+    "fonti": "Sources",
+    "fonte": "Source",
+    "ultimoSuccesso": "Last successful refresh",
+    "ultimaCorsa": "Last run",
+    "mai": "Never",
+    "aggiorna": "Refresh now",
+    "inCorso": "Refreshing…",
+    "conferma": "Refresh «{{fonte}}» from the official source now? It may take a few minutes.",
+    "lavoro": "Refreshing «{{fonte}}»",
+    "lavoroDettaglio": "The published source is read and its entries are compared with the catalog. At the end, the number of inserted and updated entries appears here.",
+    "fatto": "«{{fonte}}» refreshed: {{totale}} entries read, {{inserite}} inserted, {{aggiornate}} updated.",
+    "invariata": "«{{fonte}}» has not changed since the last refresh: nothing to do.",
+    "erroreCorsa": "The refresh did not succeed. Try again later.",
+    "errore": "Could not read the reference data sources",
+    "storico": "Previous runs",
+    "contoCorse_one": "{{count}} run",
+    "contoCorse_other": "{{count}} runs",
+    "inizio": "Start",
+    "fine": "End",
+    "voci": "Entries read",
+    "inseriteAggiornate": "Inserted / updated",
+    "stato": "Status"
   }
 }

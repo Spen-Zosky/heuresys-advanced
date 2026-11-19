@@ -29,6 +29,7 @@ export const AREE_PER_ROTTA: Array<[string, AreaQuadro[]]> = [
   ["/kpis", ["obiettivi"]],
   ["/admin/catalogo-kpi", ["obiettivi", "processi"]],
   ["/admin/tassonomie", ["posizioni"]],
+  ["/admin/dati-di-riferimento", ["posizioni", "formazione"]],
   ["/performance", ["valutazioni", "obiettivi"]],
   ["/talent-review", ["valutazioni"]],
   ["/career-succession", ["posizioni", "valutazioni"]],

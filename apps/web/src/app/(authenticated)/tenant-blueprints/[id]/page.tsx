@@ -32,6 +32,7 @@ import type {
 } from "@heuresys/shared";
 import { Button, Input } from "@heuresys/ui";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
+import { DatiFascicolo, RicercaFascicolo } from "./gestione-fascicolo";
 import { apiFetch } from "@/lib/api/fetch";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { StatusPill } from "@/components/status-pill";
@@ -136,7 +137,11 @@ export default function TenantBlueprintDetailPage({
 
       <PassoProcessi base={base} versione={versione} modificabile={modificabile} />
 
+      <RicercaFascicolo base={base} modificabile={modificabile} />
+
       <Sottometti base={base} blueprintId={id} versione={versione} modificabile={modificabile} />
+
+      <DatiFascicolo key={`${fascicolo.data.name}-${fascicolo.data.status}-${fascicolo.data.tenantId ?? ""}`} fascicolo={fascicolo.data} />
     </div>
   );
 }

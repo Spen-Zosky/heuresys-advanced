@@ -114,6 +114,7 @@ import { registraSorgente } from "./modules/research/sorgenti/index.js";
 import { seedCandidateRecordsRoutes } from "./modules/seed-candidate-records/routes.js";
 import { seedApprovalDecisionsRoutes } from "./modules/seed-approval-decisions/routes.js";
 import { meRoutes } from "./modules/me/routes.js";
+import { faldoneRoutes, faldoneSelfRoutes } from "./modules/faldone/routes.js";
 import { compensationRoutes } from "./modules/compensation/routes.js";
 import { dashboardRoutes } from "./modules/dashboard/routes.js";
 import { analyticsRoutes } from "./modules/analytics/routes.js";
@@ -569,6 +570,13 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(seedCandidateRecordsRoutes, { prefix: "/v1/seed-candidate-records" });
   await app.register(seedApprovalDecisionsRoutes, { prefix: "/v1/seed-approval-decisions" });
   await app.register(meRoutes, { prefix: "/v1/me" });
+  // Il Faldone dell'Utente: tutti i dati di una persona, nessuno escluso, con {omissis}.
+  // Staccato dalla produzione finché non arriva la correzione di riservatezza (revisione del
+  // 2026-11-19): le rotte esistono solo dove FALDONE_ATTIVO=1, cioè nelle sue prove.
+  if (process.env["FALDONE_ATTIVO"] === "1") {
+    await app.register(faldoneSelfRoutes, { prefix: "/v1/me/faldone" });
+    await app.register(faldoneRoutes, { prefix: "/v1/faldone" });
+  }
   await app.register(compensationRoutes, { prefix: "/v1/compensation" });
   await app.register(dashboardRoutes, { prefix: "/v1/dashboard" });
   await app.register(analyticsRoutes, { prefix: "/v1/analytics" });

@@ -96,7 +96,7 @@ BEGIN
   SELECT uuid_generate_v5(c_ns, 'STORIA36::C3::CURVE::' || v.code), c_rtl,
          v.code, v.name, v.kind, v.payload::jsonb, true
   FROM (VALUES
-    ('MBO_STANDARD', 'Curva MBO standard (soglia 80%, target 100%, cap 150%)', 'CAPPED',
+    ('MBO_STANDARD', 'Curva MBO standard (soglia 80%, obiettivo 100%, tetto 150%)', 'CAPPED',
      '{"threshold": 0.8, "floor_payout": 0.5, "target": 1.0, "cap": 1.5, "storia36": "C3"}'),
     ('VAP_LINEAR', 'Curva VAP lineare (premio aziendale art. 51)', 'LINEAR',
      '{"min": 0, "max": 1.2, "storia36": "C3"}'),

@@ -63,6 +63,8 @@ export interface AtlasOperation {
 
 interface ConceptEntry {
   solaLettura: boolean;
+  /** Dove l'API monta il modulo, senza `/v1` (ondata 4: `semantic-matching` sta sotto `/matching`). */
+  base?: string;
   data: string;
   decisione: string;
   operations: Record<string, AtlasOperation>;
@@ -117,6 +119,16 @@ export class AtlasOperationResolver implements OperationResolver {
   /** L'elenco CHIUSO delle operazioni di un concetto (ADR-0033 §2: `describe`). */
   operationsOf(conceptId: string): Record<string, AtlasOperation> {
     return this.concepts[conceptId]?.operations ?? {};
+  }
+
+  /**
+   * L'indirizzo base del concetto. Dal 2026-11-18 lo dichiara la mappa (dal prefisso dell'atlante):
+   * prima si usava sempre `/<concetto>`, e per i moduli montati altrove ogni chiamata andava a vuoto.
+   * Una mappa vecchia senza `base` torna al comportamento di prima.
+   */
+  baseOf(conceptId: string): string {
+    const b = this.concepts[conceptId]?.base;
+    return b && b.startsWith("/") ? b.replace(/\/$/, "") || "/" : `/${conceptId}`;
   }
 
   /** Il metodo, o `undefined` se la coppia non esiste. L'ignoto non è una lettura. */

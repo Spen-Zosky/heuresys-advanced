@@ -571,8 +571,12 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(seedApprovalDecisionsRoutes, { prefix: "/v1/seed-approval-decisions" });
   await app.register(meRoutes, { prefix: "/v1/me" });
   // Il Faldone dell'Utente: tutti i dati di una persona, nessuno escluso, con {omissis}.
-  await app.register(faldoneSelfRoutes, { prefix: "/v1/me/faldone" });
-  await app.register(faldoneRoutes, { prefix: "/v1/faldone" });
+  // Staccato dalla produzione finché non arriva la correzione di riservatezza (revisione del
+  // 2026-11-19): le rotte esistono solo dove FALDONE_ATTIVO=1, cioè nelle sue prove.
+  if (process.env["FALDONE_ATTIVO"] === "1") {
+    await app.register(faldoneSelfRoutes, { prefix: "/v1/me/faldone" });
+    await app.register(faldoneRoutes, { prefix: "/v1/faldone" });
+  }
   await app.register(compensationRoutes, { prefix: "/v1/compensation" });
   await app.register(dashboardRoutes, { prefix: "/v1/dashboard" });
   await app.register(analyticsRoutes, { prefix: "/v1/analytics" });

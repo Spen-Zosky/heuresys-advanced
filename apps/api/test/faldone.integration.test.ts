@@ -14,6 +14,9 @@
  * Ogni atteso viene dal database vivo.
  */
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
+
+// Le rotte del faldone sono staccate dalla produzione (app.ts): qui si accendono per provarle.
+process.env["FALDONE_ATTIVO"] = "1";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { passwordFor } from "./helpers/personas.js";

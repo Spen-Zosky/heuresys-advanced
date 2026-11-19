@@ -65,6 +65,12 @@ export interface GiroDeps {
    * potrebbe raccontarla (blocco I4: `notaSugliEsiti` sui comandi della vista). `null`, niente nota.
    */
   nota?: () => string | null;
+  /**
+   * A fine giro, il messaggio fisso quando la domanda era tutta su dati che la persona non può
+   * vedere (omissis.ts: almeno una lettura negata e nessuna riuscita). Lo decide il gateway, non
+   * il modello, e prende il posto della sua risposta. `null`, la risposta resta quella del modello.
+   */
+  rifiuto?: () => string | null;
   now?: () => number;
 }
 
@@ -182,6 +188,12 @@ export async function eseguiGiro(d: GiroDeps): Promise<EsitoGiro> {
     d.scrivi(evento("nota", { testo: nota }));
   }
 
+  const rifiuto = motivo === undefined && !errore ? (d.rifiuto?.() ?? null) : null;
+  if (rifiuto) {
+    registro.aggiungi([{ kind: "TESTO", payload: { testo: rifiuto, origine: "piattaforma", rifiuto: true } }]);
+    d.scrivi(evento("rifiuto", { testo: rifiuto }));
+  }
+
   let esito: EsitoGiro;
   if (motivo !== undefined) {
     registro.aggiungi([{ kind: "LIMITE", payload: { limite: motivo } }]);
@@ -195,7 +207,11 @@ export async function eseguiGiro(d: GiroDeps): Promise<EsitoGiro> {
   await registro.stato(esito.stato, {
     ...(esito.motivo ? { stopReason: esito.motivo } : {}),
     // Il risultato salvato porta la nota: chi lo rilegge non trova un «fatto» senza la correzione.
-    ...(fine?.risultato && esito.stato === "FATTA" ? { result: nota ? `${fine.risultato}\n\n${nota}` : fine.risultato } : {}),
+    ...(rifiuto && esito.stato === "FATTA"
+      ? { result: rifiuto }
+      : fine?.risultato && esito.stato === "FATTA"
+        ? { result: nota ? `${fine.risultato}\n\n${nota}` : fine.risultato }
+        : {}),
   });
   await registro.ricorda({ personsSeen: d.contatore.impronte() });
   d.scrivi(evento("done", {}));

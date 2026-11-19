@@ -18,6 +18,7 @@ import { StatusBadge, StatusPill } from "@/components/status-pill";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { NomeOppure } from "@/components/senza-nome";
 import { useFormat } from "@/lib/format";
+import { ScostamentiAttivazione, StatoAttivazione } from "./gestione-attivazione";
 
 // LinkedDoc === the shared `ContentLinkForProcess` row shape (linkId/role/documentId/
 // documentTitle/documentKind/documentStatus/blueprintProcessName + a few unused extras).
@@ -33,6 +34,7 @@ export default function BlueprintVariantDetailPage() {
   const params = useParams<{ variantId: string }>();
   const variantId = params.variantId;
   const [tab, setTab] = useState<Tab>("processes");
+  const [aperta, setAperta] = useState<string | null>(null);
 
   const variant = useQuery({
     queryKey: ["blueprint-variants", variantId],
@@ -181,8 +183,23 @@ export default function BlueprintVariantDetailPage() {
                 { header: t("detail.activationColumns.tenantId"), cell: (a) => <NomeOppure nome={a.tenantName} id={a.tenantId} /> },
                 { header: t("detail.activationColumns.activatedAt"), cell: (a) => <span className="text-xs">{fmt.data(a.effectiveFrom)}</span> },
                 { header: t("detail.activationColumns.status"), cell: (a) => <EnumStatusBadge domain="blueprintActivationStatus" value={a.status} /> },
+                {
+                  header: t("gestione.colonnaGestione"),
+                  cell: (a) => (
+                    <div className="flex flex-wrap items-center gap-2">
+                      <StatoAttivazione attivazione={a} />
+                      <button type="button" className="text-xs underline" data-testid="activation-overrides-toggle"
+                        onClick={() => setAperta(aperta === a.blueprintActivationId ? null : a.blueprintActivationId)}>
+                        {aperta === a.blueprintActivationId ? t("gestione.chiudiScostamenti") : t("gestione.apriScostamenti")}
+                      </button>
+                    </div>
+                  ),
+                },
               ]}
             />
+            {aperta && activations.rows.some((a) => a.blueprintActivationId === aperta) && (
+              <ScostamentiAttivazione attivazione={activations.rows.find((a) => a.blueprintActivationId === aperta)!} variantId={variantId} />
+            )}
           </CardContent>
         </Card>
       )}

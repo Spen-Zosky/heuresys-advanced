@@ -124,6 +124,49 @@ def leggi_rotte(righe):
     return moduli
 
 
+def leggi_prefissi(righe):
+    """atlas.yaml -> {modulo: [prefisso, ...]}: il percorso su cui l'API monta il modulo.
+
+    Ondata 4 (2026-11-18): il catalogo generico chiamava `/<concetto><percorso>`, cioè dava per
+    scontato che il modulo stesse sotto `/v1/<concetto>`. Per sei moduli non è vero
+    (`semantic-matching` sta sotto `/v1/matching`, `capability-*` sotto `/v1/capability`):
+    ogni loro lettura andava a un indirizzo inesistente. La base ora viene dall'atlante.
+    """
+    moduli, in_api, mod, campo = {}, False, None, None
+    for ln in righe:
+        if re.match(r"^api:$", ln):
+            in_api = True
+            continue
+        if in_api and re.match(r"^[a-z_]+:$", ln):
+            break
+        if not in_api:
+            continue
+        m = re.match(r"^  ([a-z0-9][a-z0-9-]*):$", ln)
+        if m:
+            mod, campo = m.group(1), None
+            moduli[mod] = []
+            continue
+        m = re.match(r"^    ([a-z]+):", ln)
+        if m:
+            campo = m.group(1)
+            continue
+        m = re.match(r'^      - "?(/v1/[^"\s]*?)/?"?$', ln)
+        if m and campo == "prefixes" and mod is not None:
+            moduli[mod].append(m.group(1))
+    return moduli
+
+
+def base_di(cid, prefissi):
+    """La base del concetto senza `/v1`, oppure None se non si può dire quale sia.
+
+    Un modulo con più prefissi (tenant-consolidation) non dice nell'atlante a quale prefisso
+    appartenga ogni rotta: si lascia fuori invece di indovinare (fail-closed)."""
+    p = prefissi.get(cid) or []
+    if len(p) != 1:
+        return None
+    return p[0][len("/v1"):] or "/"
+
+
 def costruisci(radice="."):
     atlas_p = os.path.join(radice, ATLAS)
     perim_p = os.path.join(radice, PERIMETRI)
@@ -139,7 +182,9 @@ def costruisci(radice="."):
              "e' uno stato legittimo solo prima della prima decisione: se non lo e', "
              "la decisione non e' stata registrata")
 
-    rotte = leggi_rotte(io.open(atlas_p, encoding="utf-8").read().splitlines())
+    righe_atlas = io.open(atlas_p, encoding="utf-8").read().splitlines()
+    rotte = leggi_rotte(righe_atlas)
+    prefissi = leggi_prefissi(righe_atlas)
     if not rotte:
         ceco("l'atlante non ha prodotto alcuna rotta", "rigenerarlo: build_atlas.py")
 
@@ -154,19 +199,38 @@ def costruisci(radice="."):
             mancanti.append(cid)
             continue
         solo_lettura = bool(voce.get("sola_lettura"))
+        base = base_di(cid, prefissi)
+        if base is None:
+            ceco("il perimetro aperto '%s' non ha un prefisso unico nell'atlante (%s)"
+                 % (cid, ", ".join(prefissi.get(cid) or ["nessuno"])),
+                 "l'operazione non saprebbe a quale indirizzo andare")
+        # Ondata 4: `scritture` elenca le SOLE scritture aperte del perimetro, per operationId.
+        # Senza l'elenco un perimetro in scrittura aprirebbe anche le cancellazioni.
+        scritture = voce.get("scritture")
+        if not solo_lettura and not scritture:
+            ceco("il perimetro '%s' apre le scritture senza elencarle in `scritture`" % cid,
+                 "una scrittura si apre per nome, mai per modulo intero")
         ops = {}
         for r in rotte[cid]:
             if not r.get("path"):
                 continue
-            if solo_lettura and (r["method"] or "").upper() != "GET":
+            metodo = (r["method"] or "").upper()
+            oid = operation_id(r["method"], r["path"])
+            if metodo != "GET" and (solo_lettura or oid not in scritture):
                 continue
-            ops[operation_id(r["method"], r["path"])] = {
-                "method": r["method"].upper(),
+            ops[oid] = {
+                "method": metodo,
                 "path": r["path"],
                 "permission": r.get("permission"),
             }
+        if not solo_lettura:
+            ignote = sorted(set(scritture) - set(ops))
+            if ignote:
+                ceco("il perimetro '%s' elenca scritture che l'atlante non ha: %s" % (cid, ", ".join(ignote)),
+                     "il nome dell'operazione e' sbagliato, o l'atlante e' superato")
         out[cid] = {
             "solaLettura": solo_lettura,
+            "base": base,
             "data": voce["data"],
             "decisione": voce["decisione"],
             "operations": ops,
@@ -174,6 +238,10 @@ def costruisci(radice="."):
     # #254: ogni altro modulo con una lettura entra in sola lettura, con le sole GET.
     for cid, righe in rotte.items():
         if cid in out or cid in FUORI_DALLE_LETTURE:
+            continue
+        base = base_di(cid, prefissi)
+        if base is None:
+            # più prefissi: l'indirizzo di ogni lettura non è deducibile, quindi non si apre
             continue
         ops = {}
         for r in righe:
@@ -186,6 +254,7 @@ def costruisci(radice="."):
         if ops:
             out[cid] = {
                 "solaLettura": True,
+                "base": base,
                 "data": DATA_LETTURE,
                 "decisione": DECISIONE_LETTURE,
                 "operations": ops,

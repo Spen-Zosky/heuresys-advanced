@@ -445,6 +445,8 @@ export const LENTI: Lente[] = [
                   count(*)::int AS prima
              FROM sys.sys_tenant_processes tp
             WHERE tp.tenant_process_is_active AND $2::uuid[] IS NULL
+              -- Solo i processi di primo livello (000498): un sottoprocesso risponde al responsabile del suo processo.
+              AND tp.tenant_process_level = 1
               AND ($1::uuid[] IS NULL OR tp.tenant_process_tenant_id = ANY($1::uuid[]))`,
     leggi: (v, tot, L) =>
       !tot

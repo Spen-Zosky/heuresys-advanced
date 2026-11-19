@@ -10,6 +10,7 @@ import { queryBoolean } from "./_query-boolean.js";
 export const BlueprintProcessSchema = z.object({
   blueprintProcessId: z.uuid(),
   variantId: z.uuid(),
+  variantVersionId: z.uuid().nullable(),
   code: z.string(),
   name: z.string(),
   ordinal: z.number().int(),
@@ -23,6 +24,12 @@ export type BlueprintProcess = z.infer<typeof BlueprintProcessSchema>;
 
 export const BlueprintProcessListQuerySchema = z.object({
   variantId: z.uuid().optional(),
+  /**
+   * La versione del modello (C4, 000463: il codice è unico per versione). Una variante può avere più
+   * versioni: senza questo filtro l'elenco somma i processi di tutte e il conteggio non è quello del
+   * tenant (misurato il 2026-11-18: 53 righe in due versioni contro i 23 processi del modello in vigore).
+   */
+  variantVersionId: z.uuid().optional(),
   isOptional: queryBoolean().optional(),
   ...paginationFields(500, 100),
 });

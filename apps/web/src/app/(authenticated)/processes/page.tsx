@@ -9,6 +9,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
+import { useVersioneAttiva } from "@/lib/versione-attiva";
 
 function buildColumns(t: TFunction): DataColumn<BlueprintProcess>[] {
   return [
@@ -33,13 +34,14 @@ export default function ProcessesPage() {
     queryKey: ["blueprint-activations", "active"],
     queryFn: () => apiFetch<{ items: BlueprintActivation[]; total: number }>("/v1/blueprint-activations?status=ACTIVE&limit=200"),
   });
-  const varianti = new Set((attive.data?.items ?? []).map((a) => a.variantId));
-  const variantId = varianti.size === 1 ? [...varianti][0] : "";
+  // Il filtro è la VERSIONE in vigore, non la sola variante (C4, 000463): una variante può avere più
+  // versioni e il registro le somma (2026-11-18: 53 righe contro i 23 processi del modello di RTL).
+  const versione = useVersioneAttiva(attive.data?.items);
   // C4 (#42): server-side pagination (was `?limit=200`).
   const processes = usePaginatedList<BlueprintProcess>({
-    queryKey: ["blueprint-processes", "list", variantId],
+    queryKey: ["blueprint-processes", "list", versione.variantId, versione.variantVersionId],
     path: "/v1/blueprint-processes",
-    params: { variantId },
+    params: versione,
     enabled: !attive.isLoading,
   });
 

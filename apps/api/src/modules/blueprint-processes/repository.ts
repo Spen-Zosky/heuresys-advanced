@@ -12,6 +12,7 @@ export type DbConnector = Pool | PoolClient;
 
 interface Row {
   blueprint_process_id: string; blueprint_process_variant_id: string;
+  blueprint_process_variant_version_id: string | null;
   blueprint_process_code: string; blueprint_process_name: string;
   blueprint_process_ordinal: number; blueprint_process_description: string | null;
   blueprint_process_is_optional: boolean;
@@ -19,7 +20,7 @@ interface Row {
   created_at: Date; updated_at: Date;
 }
 
-const COLS = `blueprint_process_id, blueprint_process_variant_id, blueprint_process_code,
+const COLS = `blueprint_process_id, blueprint_process_variant_id, blueprint_process_variant_version_id, blueprint_process_code,
   blueprint_process_name, blueprint_process_ordinal, blueprint_process_description,
   blueprint_process_is_optional, blueprint_process_metadata, created_at, updated_at`;
 
@@ -27,6 +28,7 @@ function toProc(r: Row): BlueprintProcess {
   return {
     blueprintProcessId: r.blueprint_process_id,
     variantId: r.blueprint_process_variant_id,
+    variantVersionId: r.blueprint_process_variant_version_id,
     code: r.blueprint_process_code, name: r.blueprint_process_name,
     ordinal: r.blueprint_process_ordinal,
     description: r.blueprint_process_description,
@@ -42,6 +44,7 @@ export async function listProcesses(
 ): Promise<{ items: BlueprintProcess[]; total: number }> {
   const where: string[] = []; const params: unknown[] = [];
   if (query.variantId) { params.push(query.variantId); where.push(`blueprint_process_variant_id = $${params.length}`); }
+  if (query.variantVersionId) { params.push(query.variantVersionId); where.push(`blueprint_process_variant_version_id = $${params.length}`); }
   if (query.isOptional !== undefined) { params.push(query.isOptional); where.push(`blueprint_process_is_optional = $${params.length}`); }
   const w = where.length ? `WHERE ${where.join(" AND ")}` : "";
   const tr = await q.query<{ total: string }>(`SELECT count(*)::text AS total FROM sys.sys_blueprint_process_registry ${w}`, params);

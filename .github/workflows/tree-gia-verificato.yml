@@ -1,0 +1,44 @@
+name: Albero già verificato (riusabile)
+
+# Chiamato dai workflow di CI che girano sia sulle PR sia su main. Decide se la corsa su
+# main è un doppione: stesso albero già verde nella PR dello stesso workflow. Logica e
+# motivazioni in scripts/ci/tree-gia-verificato.sh. Ogni dubbio degrada a «la CI gira».
+
+on:
+  workflow_call:
+    inputs:
+      workflow-file:
+        description: "nome del file del workflow chiamante (es. lint.yml)"
+        required: true
+        type: string
+    outputs:
+      skip:
+        description: "true se l'albero è già verde nella PR: i job veri si saltano"
+        value: ${{ jobs.tree.outputs.skip }}
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  tree:
+    # Serve solo sui push a main: sulle PR non costa nemmeno un checkout, e (D-08) una PR da
+    # fork non tocca mai il runner. I job veri dei chiamanti non dipendono dal suo esito:
+    # se salta o fallisce, la CI gira (`!cancelled() && skip != 'true'`).
+    if: ${{ github.event_name == 'push' }}
+    runs-on: [self-hosted, oci-vm]
+    timeout-minutes: 2
+    outputs:
+      skip: ${{ steps.tree.outputs.skip }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 1
+
+      - name: L'albero è già stato verificato dalla PR?
+        id: tree
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WORKFLOW_FILE: ${{ inputs.workflow-file }}
+        run: bash scripts/ci/tree-gia-verificato.sh

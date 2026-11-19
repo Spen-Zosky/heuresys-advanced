@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { StatsCard } from "@/components/indicatori-leggibili";
 import { Briefcase, GraduationCap, TriangleAlert } from "lucide-react";
 import { apiFetch } from "../../../../lib/api/fetch";
+import { useCurrentUser } from "../../../../lib/api/auth";
 
 interface MeProfile { displayName: string | null; email: string; roles: string[] }
 interface MePositions { items: Array<{ positionTitle: string; positionCode: string; isPrimary: boolean }>; total: number }
@@ -16,6 +17,8 @@ const ICON_CLS = "h-4 w-4";
 /** Riepilogo — the original My HR landing (greeting + primary position + learning + gaps). */
 export function MeSummaryTab() {
   const { t } = useTranslation("ess");
+  // Il saluto si rivolge per nome («Ciao, Alice»): «Nome Cognome» e «Cognome, Nome» sono elenchi, non una voce.
+  const corrente = useCurrentUser();
   const profile = useQuery({ queryKey: ["me", "profile"], queryFn: () => apiFetch<MeProfile>("/v1/me/profile") });
   const positions = useQuery({ queryKey: ["me", "positions"], queryFn: () => apiFetch<MePositions>("/v1/me/positions") });
   const learning = useQuery({ queryKey: ["me", "learning"], queryFn: () => apiFetch<MeLearningList>("/v1/me/learning") });
@@ -31,7 +34,7 @@ export function MeSummaryTab() {
     <div className="space-y-8" data-testid="myhr-summary">
       <header className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight text-foreground" data-testid="me-greeting">
-          {t("landing.greeting", { name: profile.data?.displayName ?? profile.data?.email ?? "…" })}
+          {t("landing.greeting", { name: corrente.data?.firstName?.trim() || profile.data?.displayName || profile.data?.email || "…" })}
         </h1>
         <p className="text-sm text-muted-foreground" data-testid="me-email">{profile.data?.email ?? ""}</p>
         <p className="text-sm text-muted-foreground" data-testid="me-roles">

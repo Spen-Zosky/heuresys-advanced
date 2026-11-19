@@ -17,6 +17,7 @@ import {
   UpdateTenantBodySchema,
   TenantIdParamSchema,
   IndustryCodeListResponseSchema,
+  TenantContractsResponseSchema,
 } from "@heuresys/shared";
 import { EmptyResponseSchema } from "@heuresys/shared";
 import { ProvisionTenantBodySchema, ProvisionTenantResponseSchema } from "@heuresys/shared";
@@ -66,6 +67,19 @@ export const tenantsRoutes: FastifyPluginAsyncZod = async (app) => {
       },
     },
     async (req) => tenantsService.getById(actorFromReq(req), req.params.id),
+  );
+
+  /* --- GET /v1/tenants/:id/contracts — contratti collettivi, livelli, minimi, lacune */
+  app.get(
+    "/:id/contracts",
+    {
+      preHandler: [requirePermission("tenant:read")],
+      schema: {
+        params: TenantIdParamSchema,
+        response: { 200: TenantContractsResponseSchema },
+      },
+    },
+    async (req) => tenantsService.contracts(actorFromReq(req), req.params.id),
   );
 
   /* --- POST /v1/tenants -------------------------------------------- */

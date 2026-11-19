@@ -6,8 +6,12 @@
  * agente e un compito. Il gettone:
  *  - porta la persona (`sub`), l'agente e il compito (`agt`): A-1, l'API distingue l'agente
  *    dalla persona, e il registro delle scritture li conserva tutti e due;
- *  - porta i ruoli della persona SENZA i mandati (ADR-0050 D6: un agente non porta mai un
- *    ruolo di `MANDATE_ROLES`) e, se il compito lo dice, solo alcuni permessi (`scp`): A-2;
+ *  - porta i ruoli della persona SENZA i mandati per le scritture (ADR-0050 D6: un agente non
+ *    scrive mai con un ruolo di `MANDATE_ROLES`) e, se il compito lo dice, solo alcuni permessi
+ *    (`scp`): A-2;
+ *  - porta in `rl` i ruoli PIENI della persona, che valgono solo per le letture (GET/HEAD):
+ *    ADR-0050 D6 emendato il 2026-11-18, l'assistente legge ciò che la persona apre a schermo,
+ *    mandato compreso; ciò che lei non vede non gli arriva (mascheramento e dinieghi dell'API);
  *  - dura `AGENT_TOKEN_TTL_SECONDS` e non si rinnova; resta legato alla sessione della persona
  *    (`fam`), e quando quella si chiude smette di valere subito (middleware/auth.ts): A-3.
  *
@@ -25,12 +29,17 @@ import {
 import type { RoleCode } from "../../config/constants.js";
 import { pool } from "../../db/client.js";
 import { ForbiddenError, UnauthorizedError } from "../../errors/index.js";
-import { MANDATE_ROLES } from "../../lib/scope/mandati.js";
+import { MANDATE_ROLES, MANDATI_MAI_ALL_AGENTE } from "../../lib/scope/mandati.js";
 import { isRolePermissionCacheLoaded, userHasPermission } from "../../middleware/rbac.js";
 
 /** ADR-0050 D6: i ruoli che una persona può prestare a un agente. */
 export function ruoliPerAgente(roles: readonly RoleCode[]): RoleCode[] {
   return roles.filter((r) => !MANDATE_ROLES.has(r));
+}
+
+/** ADR-0050 D6 emendato (2026-11-18): i ruoli con cui l'agente legge per la persona. */
+export function ruoliDiLetturaPerAgente(roles: readonly RoleCode[]): RoleCode[] {
+  return roles.filter((r) => !MANDATI_MAI_ALL_AGENTE.has(r));
 }
 
 export const agentTokensRoutes: FastifyPluginAsyncZod = async (app) => {
@@ -52,18 +61,20 @@ export const agentTokensRoutes: FastifyPluginAsyncZod = async (app) => {
       }
 
       const roles = ruoliPerAgente(persona.roles);
-      if (roles.length === 0) {
+      // ADR-0050 D6 emendato (2026-11-18): in lettura l'agente usa il perimetro pieno della persona.
+      const readRoles = ruoliDiLetturaPerAgente(persona.roles);
+      if (readRoles.length === 0) {
         throw new ForbiddenError(
-          "Without its mandates the person has no role to lend to an agent (ADR-0050 D6)",
+          "The person has no role to lend to an agent (ADR-0050 D6)",
           AGENT_TOKEN_ERRORS.AGENT_NO_ROLES,
         );
       }
       const chiesti = req.body.permissions ? [...new Set(req.body.permissions)].sort() : null;
       if (chiesti) {
-        const fuori = chiesti.filter((p) => !userHasPermission({ roles }, p));
+        const fuori = chiesti.filter((p) => !userHasPermission({ roles: readRoles }, p));
         if (fuori.length > 0) {
           throw new ForbiddenError(
-            `The task asks for permissions the person does not hold without mandates: ${fuori.join(", ")}`,
+            `The task asks for permissions the person does not hold: ${fuori.join(", ")}`,
             AGENT_TOKEN_ERRORS.AGENT_SCOPE_EXCEEDS_PERSON,
           );
         }
@@ -97,6 +108,7 @@ export const agentTokensRoutes: FastifyPluginAsyncZod = async (app) => {
           sub: persona.userId,
           tenant_id: persona.tenantId,
           roles,
+          rl: readRoles,
           jti,
           fam: persona.familyId,
           agt: { cod: req.body.agentCode, cmp: req.body.task },
@@ -119,6 +131,7 @@ export const agentTokensRoutes: FastifyPluginAsyncZod = async (app) => {
         task: req.body.task,
         permissions: chiesti,
         roles,
+        readRoles,
         userId: persona.userId,
         tenantId: persona.tenantId ?? null,
         tenantCode,

@@ -116,3 +116,50 @@ export const TenantIdParamSchema = z.object({
   id: z.uuid(),
 });
 export type TenantIdParam = z.infer<typeof TenantIdParamSchema>;
+
+/* --- GET /v1/tenants/:id/contracts — i contratti collettivi del tenant ------ */
+/* Sola lettura e additivo: i livelli e i minimi vengono dai modelli che il tenant ha attivi
+   (sys_blueprint_content_ccnl*), le persone dai contratti in vigore del tenant stesso. */
+
+export const TenantContractLevelSchema = z.object({
+  code: z.string(),
+  name: z.string(),
+  /** DIRIGENTE | QUADRO | IMPIEGATO | OPERAIO, se il modello lo dichiara. */
+  category: z.string().nullable(),
+  /** Minimo tabellare annuo in euro (stringa decimale); null = lacuna. */
+  annualMinimumEur: z.string().nullable(),
+  minimumNote: z.string().nullable(),
+  duties: z.string().nullable(),
+  /** Persone del tenant con contratto in vigore su questo livello. */
+  people: z.number().int().min(0),
+});
+export type TenantContractLevel = z.infer<typeof TenantContractLevelSchema>;
+
+export const TenantContractSchema = z.object({
+  code: z.string(),
+  name: z.string(),
+  scope: z.string().nullable(),
+  parties: z.string().nullable(),
+  effective: z.string().nullable(),
+  levels: z.array(TenantContractLevelSchema),
+  /** Codici dei livelli privi di minimo. */
+  gapLevelCodes: z.array(z.string()),
+});
+export type TenantContract = z.infer<typeof TenantContractSchema>;
+
+export const TenantContractsResponseSchema = z.object({
+  tenantId: z.uuid(),
+  industryCode: z.string(),
+  industryName: z.string().nullable(),
+  contracts: z.array(TenantContractSchema),
+  summary: z.object({
+    contracts: z.number().int().min(0),
+    levels: z.number().int().min(0),
+    levelsWithoutMinimum: z.number().int().min(0),
+    /** Persone con contratto in vigore. */
+    peopleWithContract: z.number().int().min(0),
+    /** Di cui su un livello che i contratti del modello non contengono. */
+    peopleOutsideModelLevels: z.number().int().min(0),
+  }),
+});
+export type TenantContractsResponse = z.infer<typeof TenantContractsResponseSchema>;

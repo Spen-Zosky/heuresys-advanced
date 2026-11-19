@@ -87,7 +87,7 @@ export default function ApprovalDetailPage() {
   const busy = decide.isPending || apply.isPending;
 
   // L10 A-8 — il contesto che il pannello comune dell'agente mostra e manda al gateway.
-  useContestoAgente(d ? t("approvals.detail.agent.context", { title: d.title, id }) : null);
+  useContestoAgente(d ? t("approvals.detail.agent.context", { title: d.title }) : null);
 
   return (
     <main data-testid="approval-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">

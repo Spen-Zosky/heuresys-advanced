@@ -138,6 +138,13 @@ export const MANDATE_ROLES: ReadonlySet<RoleCode> = new Set<RoleCode>([
   "WHISTLEBLOWING_CUSTODIAN",
 ]);
 
+/**
+ * ADR-0050 D6 emendato (2026-11-18): i mandati che un agente non usa nemmeno in lettura. La custodia
+ * delle segnalazioni (isolamento assoluto, ADR-0036 §5) e la sicurezza (credenziali, sessioni,
+ * fattori: non sono dati di dominio). Gli altri mandati della persona valgono per le letture.
+ */
+export const MANDATI_MAI_ALL_AGENTE: ReadonlySet<RoleCode> = new Set<RoleCode>(["WHISTLEBLOWING_CUSTODIAN", "SECURITY_ADMIN"]);
+
 /** ADR-0050 D1: la persona porta almeno un mandato forte. */
 export function ruoliPortanoMandato(roles: readonly RoleCode[]): boolean {
   return roles.some((r) => MANDATE_ROLES.has(r));

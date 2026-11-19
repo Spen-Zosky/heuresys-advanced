@@ -8,7 +8,7 @@
  * per tab orizzontali». Una pagina passa le sue sezioni come schede: in vista c'è una sezione
  * sola, la scheda scelta resta nell'indirizzo (`?scheda=`), così un collegamento o il tasto
  * indietro riportano allo stesso punto, e un conteggio accanto al titolo dice che cosa c'è dentro
- * senza aprirla. Le schede che non stanno in larghezza scorrono (`TabsOverflow` di @heuresys/ui
+ * senza aprirla. Le schede che non stanno in larghezza vanno a capo, invece di scorrere con l ultima tagliata (`TabsOverflow` di @heuresys/ui
  * non serve: qui il contenuto è sempre di questa pagina).
  */
 import { useFormat } from "@/lib/format";
@@ -46,7 +46,7 @@ export function SchedePagina({ schede, chiave = "scheda" }: { schede: SchedaPagi
   if (visibili.length === 0) return null;
   return (
     <Tabs value={attiva} onValueChange={cambia} className="mt-2">
-      <TabsList className="w-full justify-start overflow-x-auto" data-testid="schede-pagina">
+      <TabsList className="h-auto w-full flex-wrap justify-start gap-1" data-testid="schede-pagina">
         {visibili.map((s) => (
           <TabsTrigger key={s.id} value={s.id} className="shrink-0" data-testid={`scheda-${s.id}`}>
             {s.titolo}

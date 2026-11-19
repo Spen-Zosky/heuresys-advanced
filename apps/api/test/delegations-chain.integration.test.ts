@@ -21,6 +21,7 @@ import {
   unCapoConSottoposti, unSottopostoOrganizzativo, unEstraneoOrganizzativo, type Attore,
 } from "./helpers/org-actors.js";
 import { delegationChainUserIds, orgSubtreeUserIds, ownUnitIds } from "../src/lib/scope/org.js";
+import { cognomeNomeSql } from "../src/lib/nome-persona-sql.js";
 
 const AMMINISTRA = "federica.marchetti@rtl-bank.org";
 
@@ -262,7 +263,7 @@ describe("ADR-0051 §3 e §5 — decidere per conto di", () => {
 
     // V-3 del piano interfacce: la pagina dice «deciso da X per conto di Y», quindi il
     // dettaglio porta il nome di chi ha deciso e la lista conta i passi decisi per delega.
-    const nome = await pool.query<{ n: string }>(`SELECT user_display_name AS n FROM sys.sys_users WHERE user_id = $1`, [sotto.userId]);
+    const nome = await pool.query<{ n: string }>(`SELECT ${cognomeNomeSql("u")} AS n FROM sys.sys_users u WHERE u.user_id = $1`, [sotto.userId]);
     const dett = await chiama(capo.email, "GET", `/v1/approvals/${requestId}`);
     expect(dett.statusCode).toBe(200);
     const visto = (dett.json() as { steps: { approvalStepId: string; decidedByName: string | null }[] }).steps

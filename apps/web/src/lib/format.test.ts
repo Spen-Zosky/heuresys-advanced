@@ -71,5 +71,9 @@ describe("F-1 — un solo modo di mettere in forma", () => {
     const adesso = Date.UTC(2026, 10, 4, 12, 0, 0);
     expect(it_.relativo(new Date(adesso - 3 * 86_400_000), adesso)).toBe("3 giorni fa");
     expect(en.relativo(new Date(adesso - 2 * 3_600_000), adesso)).toBe("2 hours ago");
+    // Forense 16/11: la dashboard inglese diceva «2 mesi fa» (formatRelativeTime di @heuresys/ui è solo italiano).
+    expect(en.relativo(new Date(adesso - 65 * 86_400_000), adesso)).toBe("2 months ago");
+    expect(it_.relativo(new Date(adesso - 65 * 86_400_000), adesso)).toBe("2 mesi fa");
+    expect(en.relativo(new Date(adesso - 800 * 86_400_000), adesso)).toBe("2 years ago");
   });
 });

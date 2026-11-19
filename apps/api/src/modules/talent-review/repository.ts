@@ -48,7 +48,7 @@ interface NineBoxDbRow {
 }
 
 const NINE_BOX_COLS = `talent_score_id, talent_score_user_id,
-  (SELECT u.user_display_name FROM sys.sys_users u WHERE u.user_id = talent_score_user_id) AS subject_user_name,
+  (SELECT COALESCE(NULLIF(concat_ws(', ', NULLIF(trim(u.user_last_name), ''), NULLIF(trim(u.user_first_name), '')), ''), u.user_display_name) FROM sys.sys_users u WHERE u.user_id = talent_score_user_id AND u.user_tenant_id = talent_score_tenant_id) AS subject_user_name,
   talent_score_potential, talent_score_performance, talent_score_band,
   ${bandCase("talent_score_potential")} AS potential_band,
   ${bandCase("talent_score_performance")} AS performance_band,
@@ -125,7 +125,7 @@ interface FitDbRow {
 const FIT_COLS = `(SELECT p.position_title FROM sys.sys_positions p WHERE p.position_id = employee_position_fit_score_position_id) AS position_title,
   employee_position_fit_score_id, employee_position_fit_score_tenant_id,
   employee_position_fit_score_user_id,
-  (SELECT u.user_display_name FROM sys.sys_users u WHERE u.user_id = employee_position_fit_score_user_id) AS subject_user_name,
+  (SELECT COALESCE(NULLIF(concat_ws(', ', NULLIF(trim(u.user_last_name), ''), NULLIF(trim(u.user_first_name), '')), ''), u.user_display_name) FROM sys.sys_users u WHERE u.user_id = employee_position_fit_score_user_id AND u.user_tenant_id = employee_position_fit_score_tenant_id) AS subject_user_name,
   employee_position_fit_score_position_id, employee_position_fit_score_dimension,
   employee_position_fit_score_score, employee_position_fit_score_payload,
   employee_position_fit_score_computed_at, created_at`;
@@ -202,7 +202,7 @@ interface ReadinessDbRow {
 
 const READINESS_COLS = `(SELECT p.position_title FROM sys.sys_positions p WHERE p.position_id = readiness_score_position_id) AS position_title,
   readiness_score_id, readiness_score_tenant_id, readiness_score_user_id,
-  (SELECT u.user_display_name FROM sys.sys_users u WHERE u.user_id = readiness_score_user_id) AS subject_user_name,
+  (SELECT COALESCE(NULLIF(concat_ws(', ', NULLIF(trim(u.user_last_name), ''), NULLIF(trim(u.user_first_name), '')), ''), u.user_display_name) FROM sys.sys_users u WHERE u.user_id = readiness_score_user_id AND u.user_tenant_id = readiness_score_tenant_id) AS subject_user_name,
   readiness_score_position_id, readiness_score_horizon, readiness_score_value,
   readiness_score_payload, readiness_score_computed_at, created_at`;
 
@@ -282,7 +282,7 @@ interface SuccessionDbRow {
 
 const SUCCESSION_COLS = `(SELECT p.position_title FROM sys.sys_positions p WHERE p.position_id = succession_score_position_id) AS position_title,
   succession_score_id, succession_score_tenant_id, succession_score_user_id,
-  (SELECT u.user_display_name FROM sys.sys_users u WHERE u.user_id = succession_score_user_id) AS subject_user_name,
+  (SELECT COALESCE(NULLIF(concat_ws(', ', NULLIF(trim(u.user_last_name), ''), NULLIF(trim(u.user_first_name), '')), ''), u.user_display_name) FROM sys.sys_users u WHERE u.user_id = succession_score_user_id AND u.user_tenant_id = succession_score_tenant_id) AS subject_user_name,
   succession_score_position_id, succession_score_value, succession_score_horizon,
   succession_score_payload, succession_score_computed_at, created_at`;
 

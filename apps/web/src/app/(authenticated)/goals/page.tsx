@@ -23,6 +23,8 @@ function toneForStatus(s: string): "info" | "success" | "warning" | "danger" | "
 function buildColumns(t: TFunction, enumLabel: EnumLabelFn, onTimeline: (g: Goal) => void, fmt: Formati): DataColumn<Goal>[] {
   return [
     { header: t("shared.name"), cell: (g) => <span className="font-medium text-foreground">{g.title}</span> },
+    // C20: più obiettivi con lo stesso titolo si distinguono per la persona (R1: «Cognome, Nome», dall'API).
+    { header: t("goals.cols.person"), cell: (g) => <span className="text-xs text-foreground">{g.subjectName ?? "—"}</span> },
     { header: t("goals.cols.type"), cell: (g) => <span className="text-xs text-muted-foreground">{enumLabel("goalType", g.type)}</span> },
     { header: t("goals.cols.priority"), cell: (g) => <span className="text-xs text-muted-foreground">{enumLabel("goalPriority", g.priority)}</span> },
     { header: t("goals.cols.progress"), cell: (g) => <span className="text-xs text-muted-foreground">{fmt.percento(g.progressPercent, "0-100")}</span> },

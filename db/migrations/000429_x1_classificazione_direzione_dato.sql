@@ -369,7 +369,9 @@ VALUES
   ('sys_agent_conversations', 'nativo', 'EMENDATO per la mig 000483 (ADR-0056 D4): conversazioni di una persona con l''assistente, scritte solo dall''API, nessuno scrittore di importazione'),
   ('sys_agent_activities', 'nativo', 'EMENDATO per la mig 000483 (ADR-0056 D4): attivita'' dell''assistente in una conversazione, scritte solo dall''API'),
   ('sys_agent_activity_events', 'nativo', 'EMENDATO per la mig 000483 (ADR-0056 D4): cio'' che la persona vede di un''attivita'' dell''assistente, scritto solo dall''API'),
-  ('sys_agent_proposals', 'nativo', 'EMENDATO per la mig 000483 (ADR-0056 D4): proposte dell''assistente in attesa della persona, scritte solo dall''API');
+  ('sys_agent_proposals', 'nativo', 'EMENDATO per la mig 000483 (ADR-0056 D4): proposte dell''assistente in attesa della persona, scritte solo dall''API'),
+  ('sys_agent_requests', 'nativo', 'EMENDATO per la mig 000501 (tappa T2): richieste dell''agente con previsione di spesa e tetto, scritte solo dall''API'),
+  ('sys_agent_call_log', 'nativo', 'EMENDATO per la mig 000501 (tappa T2): registro di costo e durata delle chiamate dell''agente, scritto solo dall''API');
 
 INSERT INTO sys.sys_classificazione_direzione_dato (tabella, stato, motivo)
 SELECT tabella, stato, motivo FROM _classificazione_000429
@@ -393,15 +395,15 @@ BEGIN
   -- database vuoto le due misure coincidono (315); su uno gia' popolato le righe in piu'
   -- appartengono ad altri file e non sono un errore di questo.
   SELECT count(*) INTO n_dich FROM _classificazione_000429;
-  IF n_dich <> 318 THEN
-    RAISE EXCEPTION '000429: il file dichiara % righe di classificazione, attese 318', n_dich;
+  IF n_dich <> 320 THEN
+    RAISE EXCEPTION '000429: il file dichiara % righe di classificazione, attese 320', n_dich;
   END IF;
 
   SELECT count(*) INTO n_proprie
     FROM _classificazione_000429 d
     JOIN sys.sys_classificazione_direzione_dato c ON c.tabella = d.tabella AND c.stato = d.stato;
-  IF n_proprie <> 318 THEN
-    RAISE EXCEPTION '000429: attese 318 righe di classificazione di questo file, trovate %', n_proprie;
+  IF n_proprie <> 320 THEN
+    RAISE EXCEPTION '000429: attese 320 righe di classificazione di questo file, trovate %', n_proprie;
   END IF;
 
   SELECT count(*) INTO n_non_class FROM sys.v_tabelle_non_classificate;
@@ -413,14 +415,14 @@ BEGIN
   SELECT count(*) FILTER (WHERE stato = 'nativo')         INTO n_nativo    FROM _classificazione_000429;
   SELECT count(*) FILTER (WHERE stato = 'importato')      INTO n_importato FROM _classificazione_000429;
   SELECT count(*) FILTER (WHERE stato = 'infrastruttura') INTO n_infra     FROM _classificazione_000429;
-  IF n_ibrido <> 76 OR n_nativo <> 65 OR n_importato <> 132 OR n_infra <> 45 THEN
-    RAISE EXCEPTION '000429: conteggio inatteso — ibrido=% nativo=% importato=% infrastruttura=% (attesi 76/65/132/45)',
+  IF n_ibrido <> 76 OR n_nativo <> 67 OR n_importato <> 132 OR n_infra <> 45 THEN
+    RAISE EXCEPTION '000429: conteggio inatteso — ibrido=% nativo=% importato=% infrastruttura=% (attesi 76/67/132/45)',
       n_ibrido, n_nativo, n_importato, n_infra;
   END IF;
 
   SELECT count(*) INTO n_tot FROM sys.sys_classificazione_direzione_dato;
   n_altre := n_tot - n_proprie;
-  RAISE NOTICE '000429: 317 tabelle classificate (76 ibrido, 64 nativo, 132 importato, 45 infrastruttura); altre righe gia'' presenti, di altri file: %; v_tabelle_non_classificate a zero.', n_altre;
+  RAISE NOTICE '000429: 319 tabelle classificate (76 ibrido, 66 nativo, 132 importato, 45 infrastruttura); altre righe gia'' presenti, di altri file: %; v_tabelle_non_classificate a zero.', n_altre;
 END $$;
 
 COMMIT;

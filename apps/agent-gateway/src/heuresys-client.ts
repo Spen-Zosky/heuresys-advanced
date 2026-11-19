@@ -13,6 +13,8 @@
  * fetchImpl is injectable so the client is unit-testable without live heuresys.
  */
 
+import { conOmissis, letturaNegata, type EsitiLetture } from "./omissis.js";
+
 export interface Session {
   cookieAccess: string;
   cookieCsrf: string;
@@ -100,6 +102,13 @@ export class HeuresysClient {
     this.contatore = contatore;
   }
 
+  /** Le letture del giro in corso, riuscite e negate (omissis.ts): servono al rifiuto deterministico. */
+  private esiti: EsitiLetture | undefined;
+
+  collegaEsiti(esiti: EsitiLetture): void {
+    this.esiti = esiti;
+  }
+
   /** Single-flight refresh: concurrent 401s await one rotation. Returns success. */
   private async refreshOnce(): Promise<boolean> {
     if (!this.refreshing) {
@@ -143,19 +152,29 @@ export class HeuresysClient {
       const refreshed = await this.refreshOnce();
       if (refreshed) res = await doFetch();
     }
+    const lettura = SAFE_METHODS.has(method);
+    // Richiesta di Enzo del 2026-11-18: una lettura che l'API nega alla persona non è un guasto,
+    // è un'informazione per la risposta. Torna al modello come esito NON_AUTORIZZATO e si conta.
+    if (lettura && res.status === 403) {
+      this.esiti?.negata();
+      return letturaNegata() as T;
+    }
     if (!res.ok) {
       throw new Error(`${method} ${path} -> ${res.status}`);
     }
-    const dati = (await res.json()) as T;
+    if (lettura) this.esiti?.riuscita();
+    const grezzi = (await res.json()) as unknown;
     // A-14: l'origine del dato del modulo che ha risposto (nativo, importato, ibrido, misto),
     // legata alla risposta stessa: chi la passa all'agente la ritrova senza indovinarla.
+    // I campi che l'API ha tolto tornano al loro posto come {omissis} (omissis.ts).
+    const dati = conOmissis(grezzi) as T;
     const origine = res.headers?.get(INTESTAZIONE_ORIGINE);
     if (origine && typeof dati === "object" && dati !== null) this.origini.set(dati, origine);
     // #251 — le persone distinte si contano QUI, sulla risposta già mascherata dall'API (R3):
     // il contatore non vede mai un campo che l'utente non poteva vedere. `aggiungi` non alza
     // per contratto, ma il `try` resta: un contatore rotto non deve poter negare una lettura.
     try {
-      this.contatore?.aggiungi(dati);
+      this.contatore?.aggiungi(grezzi);
     } catch {
       /* contare non è la lettura: un guasto del contatore non cambia l'esito della chiamata */
     }

@@ -130,6 +130,7 @@
     "emptyDescription": "Non ci sono obiettivi per questo tenant",
     "caption": "Elenco obiettivi",
     "cols": {
+      "person": "Persona",
       "type": "Tipo",
       "priority": "Priorità",
       "progress": "Avanzamento",
@@ -217,6 +218,8 @@
       "emptyTitle": "Nessuna capability classificabile",
       "emptyDescription": "Il ranking si popola quando le posizioni dichiarano skill richieste.",
       "caption": "Capability essenziali (priorità d'investimento)",
+      "demandValue": "{{n}} (di cui {{critical}} critiche)",
+      "maturityCommon": "La maturità è {{value}} per tutte le competenze.",
       "cols": {
         "skill": "Competenza",
         "priority": "Priorità invest.",
@@ -297,6 +300,7 @@
         "filtro": "Filtra le unità",
         "unita": "Unità",
         "scegli": "Scegli fra {{count}} unità",
+        "scegli_one": "Scegli fra {{count}} unità",
         "invia": "Assegna",
         "giaPresente": "Questa unità ha già un ruolo nel processo.",
         "errore": "Assegnazione non riuscita. Riprova.",
@@ -384,6 +388,7 @@
       "onlyModel": "Solo modello",
       "onlyTenant": "Solo azienda",
       "lost": "{{count}} elementi del tenant rischiano di perdersi",
+      "lost_one": "{{count}} elemento del tenant rischia di perdersi",
       "domains": {
         "ateco": "Classificazione ATECO",
         "classe": "Classe d'impresa",
@@ -1417,6 +1422,7 @@
     "omissis": "{omissis}",
     "omissisAiuto": "Persona fuori dal tuo perimetro: il nome non si mostra.",
     "programmi": "Programmi ({{count}})",
+    "programmi_one": "Programma ({{count}})",
     "erroreCarica": "Non è stato possibile caricare il mentoring.",
     "nessunProgramma": "Nessun programma di mentoring.",
     "statoProgramma": "Stato del programma",
@@ -1427,6 +1433,7 @@
     "mesi": "{{count}} mesi",
     "mesi_one": "{{count}} mese",
     "coppie": "Coppie mentore e allievo ({{count}})",
+    "coppie_one": "Coppia mentore e allievo ({{count}})",
     "filtraProgramma": "Programma",
     "tuttiProgrammi": "Tutti i programmi",
     "senzaProgramma": "senza programma",

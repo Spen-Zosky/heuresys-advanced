@@ -92,7 +92,20 @@ export const mentorshipService = {
 
   // ── Pairings ──
   async listMentorships(a: ActorContext, query: MentorshipListQuery) {
-    return repo.listMentorships(pool, listTenantFilter(a), await resolveReadAllowList(a), query);
+    const allow = await resolveReadAllowList(a);
+    const res = await repo.listMentorships(pool, listTenantFilter(a), allow, query);
+    if (!allow) return res;
+    // La lista mostra una coppia se ALMENO una delle due persone è nel perimetro (OR): il nome
+    // dell'altra, fuori dalla catena, non si rivela. La pagina lo mostra come {omissis}.
+    const visibili = new Set(allow);
+    return {
+      ...res,
+      items: res.items.map((m) => ({
+        ...m,
+        mentorName: m.mentorUserId && !visibili.has(m.mentorUserId) ? null : m.mentorName,
+        menteeName: m.menteeUserId && !visibili.has(m.menteeUserId) ? null : m.menteeName,
+      })),
+    };
   },
   async getMentorship(a: ActorContext, id: string) {
     const m = await repo.findMentorshipById(pool, id);

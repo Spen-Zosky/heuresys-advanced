@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -41,19 +40,30 @@ export default function EngagementResultsPage() {
     enabled: Boolean(surveyId),
   });
 
-  const columns: DataColumn<EngagementQuestionResult>[] = useMemo(
-    () => [
-      { header: t("engagement.results.question"), cell: (q) => <span className="font-medium text-foreground">{q.text}</span> },
-      { header: t("engagement.results.type"), cell: (q) => <span className="text-muted-foreground">{enumLabel("questionType", q.type)}</span> },
-      { header: t("engagement.results.category"), cell: (q) => <span className="text-muted-foreground">{enumLabel("surveyCategory", q.category)}</span> },
-      { header: t("engagement.results.responses"), cell: (q) => <span className="text-muted-foreground">{q.responseCount}</span> },
-      { header: t("engagement.results.avg"), cell: (q) => <span className="text-muted-foreground">{q.avgRating != null ? `${fmt.numeroFisso(q.avgRating, 2)}${q.scale ? ` / ${q.scale}` : ""}` : "—"}</span> },
-    ],
-    [t, enumLabel, fmt],
-  );
-
   const d = results.data;
   const hasRated = (d?.questions ?? []).some((q) => q.avgRating != null);
+
+  // C15 (giro qa-web 18/11): una colonna che ha lo stesso valore su tutte le righe non dice niente
+  // (Tipo sempre «Valutazione», Risposte sempre 100): si toglie, e il valore comune va nel sottotitolo.
+  // La media porta la sua scala nell'intestazione.
+  const domande = d?.questions ?? [];
+  const costante = <K,>(f: (q: EngagementQuestionResult) => K) => domande.length > 1 && domande.every((q) => f(q) === f(domande[0]!));
+  const tipoCostante = costante((q) => q.type);
+  const categoriaCostante = costante((q) => q.category);
+  const risposteCostanti = costante((q) => q.responseCount);
+  const columns: DataColumn<EngagementQuestionResult>[] = [
+    { header: t("engagement.results.question"), cell: (q) => <span className="font-medium text-foreground">{q.text}</span> },
+    ...(tipoCostante ? [] : [{ header: t("engagement.results.type"), cell: (q: EngagementQuestionResult) => <span className="text-muted-foreground">{enumLabel("questionType", q.type)}</span> }]),
+    ...(categoriaCostante ? [] : [{ header: t("engagement.results.category"), cell: (q: EngagementQuestionResult) => <span className="text-muted-foreground">{enumLabel("surveyCategory", q.category)}</span> }]),
+    ...(risposteCostanti ? [] : [{ header: t("engagement.results.responses"), cell: (q: EngagementQuestionResult) => <span className="text-muted-foreground">{q.responseCount}</span> }]),
+    // La scala la dichiara ogni domanda (000497): la media si legge «x / scala».
+    { header: t("engagement.results.avg"), cell: (q) => <span className="text-muted-foreground">{q.avgRating != null ? `${fmt.numeroFisso(q.avgRating, 2)} / ${q.scale ?? 10}` : "—"}</span> },
+  ];
+  const sottotitolo = [
+    t("engagement.results.subtitle", { count: domande.length }),
+    ...(tipoCostante && domande[0] ? [t("engagement.results.allOfType", { tipo: enumLabel("questionType", domande[0].type) })] : []),
+    ...(risposteCostanti && domande[0] ? [t("engagement.results.eachResponses", { n: domande[0].responseCount })] : []),
+  ].join(" · ");
 
   return (
     <main data-testid="engagement-results-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
@@ -74,7 +84,7 @@ export default function EngagementResultsPage() {
         />
       ) : (
         <>
-          <PageHeader data-testid="engagement-results-title" title={d.title} description={t("engagement.results.subtitle", { count: d.questions.length })} />
+          <PageHeader data-testid="engagement-results-title" title={d.title} description={sottotitolo} />
 
           <div data-testid="engagement-results-table">
             <EntityTable<EngagementQuestionResult> originPath={"/v1/engagement/surveys"}

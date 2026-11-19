@@ -85,11 +85,13 @@ function PannelloAgenteAcceso({ pathname, idonea }: { pathname: string; idonea: 
     INTERROTTA: t("agente.statoINTERROTTA"),
   };
 
-  // Il titolo della finestra si legge al disegno: il contesto si mostra solo a pannello aperto,
-  // cioè dopo un gesto nel browser, mai nel disegno del server.
-  const titolo = typeof document === "undefined" ? "" : document.title;
+  // Il nome della pagina in parole (C7, giro qa-web 18/11): il titolo della finestra è sempre
+  // «Heuresys» e l'indirizzo porta un UUID, che non dicono a che pagina si è. Si legge l'intestazione
+  // principale al disegno: il contesto si mostra solo a pannello aperto, cioè dopo un gesto nel
+  // browser, mai nel disegno del server. L'indirizzo parte comunque al gateway, in `percorso`.
+  const titolo = typeof document === "undefined" ? "" : (document.querySelector("main h1")?.textContent ?? "").trim();
 
-  const contesto = dichiarato ?? t("agente.contestoPagina", { titolo: titolo || pathname, percorso: pathname });
+  const contesto = dichiarato ?? (titolo ? t("agente.contestoPagina", { titolo }) : t("agente.contestoPaginaSenzaNome"));
 
   const testoAvviso = agent.notice === null ? null : t(`agente.${agent.notice.code}`, agent.notice.params ?? {});
   const descrizioneApprovazione =

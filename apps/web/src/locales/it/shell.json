@@ -189,7 +189,7 @@
     }
   },
   "session": {
-    "error": "Errore sessione"
+    "error": "Non riesco a caricare la tua sessione. Riprova tra qualche istante."
   },
   "logout": "Esci",
   "language": {

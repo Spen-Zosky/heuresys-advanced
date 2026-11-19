@@ -105,7 +105,7 @@ export function MandateActsQueue() {
                       <td className="py-2 pr-4">
                         <Badge variant="secondary">{t(`users.detail.roles.act.kind.${a.kind}`)}</Badge>
                       </td>
-                      <td className="py-2 pr-4" title={a.roleCode}>{ruolo(a.roleCode)}</td>
+                      <td className="py-2 pr-4">{ruolo(a.roleCode)}</td>
                       <td className="py-2 pr-4 max-w-80 whitespace-pre-wrap">{a.reason}</td>
                       <td className="py-2 pr-4 text-muted-foreground">{a.reviewBy ? f.data(a.reviewBy) : "—"}</td>
                       <td className="py-2 pr-4 text-muted-foreground">

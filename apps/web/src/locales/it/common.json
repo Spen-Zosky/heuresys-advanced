@@ -1002,7 +1002,8 @@
       "motivo": "Il tuo profilo non comprende questi dati. Se ti servono per il tuo lavoro, chiedi a chi gestisce i ruoli nella tua azienda."
     },
     "codice": "Codice: {{codice}}.",
-    "nonDisponibile": "non disponibile"
+    "nonDisponibile": "non disponibile",
+    "perAssistenza": "Per l'assistenza"
   },
   "stepUp": {
     "title": "Conferma la tua identità",
@@ -1111,7 +1112,8 @@
     "approvalResolved": "Decisione inviata: {{decision}}",
     "errorRun": "Esecuzione fallita: {{message}}",
     "noSession": "Nessuna sessione: effettua il login per inoltrare i cookie al gateway.",
-    "contestoPagina": "Pagina «{{titolo}}» ({{percorso}})",
+    "contestoPagina": "Pagina «{{titolo}}»",
+    "contestoPaginaSenzaNome": "Pagina corrente",
     "apri": "Chiedi all'assistente",
     "chiudi": "Chiudi l'assistente",
     "reasonRequired": "Per negare serve un motivo: scrivilo e conferma.",

@@ -57,7 +57,7 @@ function Voce({ i }: { i: Insight }) {
 
 export function QuadroInsight() {
   const { t, i18n } = useTranslation("common");
-  const lingua = i18n.language === "en" ? "en" : "it";
+  const lingua = i18n.language?.toLowerCase().startsWith("en") ? "en" : "it";
   const pathname = usePathname();
   const aree = areeDellaRotta(pathname);
   const [tutte, setTutte] = useState(false);

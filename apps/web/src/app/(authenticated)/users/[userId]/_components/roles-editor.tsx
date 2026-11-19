@@ -213,7 +213,7 @@ export function RolesEditor({ userId }: { userId: string }) {
               <tbody><Leggibile>
                 {items.map((g) => (
                   <tr key={g.grantId} className="border-b last:border-0" data-testid={`user-role-${g.roleCode}`}>
-                    <td className="py-2 pr-4 align-top" title={g.roleCode}>{t(`shell:roles.${g.roleCode}`, { defaultValue: codiceInParole(g.roleCode) })}</td>
+                    <td className="py-2 pr-4 align-top">{t(`shell:roles.${g.roleCode}`, { defaultValue: codiceInParole(g.roleCode) })}</td>
                     <td className="py-2 pr-4 align-top text-muted-foreground">
                       {g.tenantId ? t("users.detail.roles.scopeTenant") : t("users.detail.roles.scopePlatform")}
                     </td>

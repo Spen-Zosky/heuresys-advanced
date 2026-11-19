@@ -78,7 +78,7 @@
         "title": "Assistente su questa richiesta",
         "description": "Strumento di sviluppo: chiedi all'agente qualcosa su questa richiesta di approvazione. Tool e input di eventuali scritture sono già oscurati dal gateway.",
         "contextLabel": "Contesto",
-        "context": "Richiesta di approvazione «{{title}}» ({{id}})",
+        "context": "Richiesta di approvazione «{{title}}»",
         "promptLabel": "Istruzione",
         "promptPlaceholder": "Es. Riassumi lo stato di questa richiesta di approvazione.",
         "run": "Esegui",
@@ -147,6 +147,9 @@
       "category": "Categoria",
       "responses": "Risposte",
       "avg": "Media",
+      "avgScale": "Media (scala 0–10)",
+      "allOfType": "Tutte le domande sono di tipo «{{tipo}}»",
+      "eachResponses": "{{n}} risposte per domanda",
       "emptyTitle": "Nessuna domanda",
       "emptyDescription": "Questo sondaggio non ha domande.",
       "caption": "Risultati per domanda",
@@ -404,6 +407,7 @@
     },
     "sessioni": {
       "titolo": "Sessioni aperte ({{count}})",
+      "titolo_one": "Sessione aperta ({{count}})",
       "nessuna": "Nessuna sessione aperta.",
       "dispositivo": "{{browser}} su {{sistema}}",
       "ultimo": "ultimo accesso {{data}}",
@@ -645,6 +649,7 @@
         "jobRole": "Ruolo professionale",
         "owner": "Proprietario della posizione",
         "reportsTo": "Riferisce a",
+        "listTruncated": "Il menù mostra {{shown}} posizioni su {{total}}.",
         "criticality": "Criticità",
         "economicWeight": "Peso economico",
         "effectiveFrom": "In vigore dal",
@@ -686,6 +691,11 @@
         "kpi": "Indicatore",
         "weight": "Peso",
         "template": "Obiettivo di riferimento"
+      },
+      "soglia": {
+        "min": "Minimo",
+        "target": "Obiettivo",
+        "stretch": "Massimo"
       }
     },
     "learning": {
@@ -1056,6 +1066,157 @@
       "datiIrraggiungibili": "Dati della dashboard non raggiungibili",
       "nonDisponibileTitolo": "Dashboard non disponibile",
       "nonDisponibileTesto": "Questa dashboard non esiste o non rientra nei tuoi permessi."
+    },
+    "catalogo": {
+      "famiglie": {
+        "branch": "Dashboard Filiale",
+        "company": "Dashboard Azienda",
+        "hr": "Dashboard Direzione HR",
+        "org": "Dashboard Organizzazione",
+        "platform": "Dashboard Piattaforma",
+        "process": "Dashboard Processi",
+        "self": "Dashboard Self-Service",
+        "tenant": "Dashboard Gestione del tenant"
+      },
+      "viste": {
+        "branch": {
+          "organico-filiale": "Organico della filiale",
+          "attivita-filiale": "Attività della filiale",
+          "competenze-filiale": "Competenze della filiale"
+        },
+        "company": {
+          "headcount": "Organico complessivo",
+          "andamento-organico": "Andamento dell'organico",
+          "copertura-competenze": "Copertura delle competenze",
+          "andamento-valutazioni": "Andamento delle valutazioni"
+        },
+        "hr": {
+          "organico": "Organico",
+          "retribuzioni": "Retribuzioni",
+          "valutazioni": "Valutazioni",
+          "formazione": "Formazione",
+          "assenze": "Assenze e permessi"
+        },
+        "org": {
+          "struttura-unita": "Struttura delle unità",
+          "posizioni-scoperte": "Posizioni scoperte",
+          "catena-di-riporto": "Catena di riporto"
+        },
+        "platform": {
+          "salute-sistema": "Salute del sistema",
+          "credenziali-e-accessi": "Credenziali e accessi",
+          "job-e-corse": "Job e corse pianificate"
+        },
+        "process": {
+          "processi-attivi": "Processi attivi",
+          "attivita-recenti": "Attività recenti",
+          "approvazioni-in-coda": "Approvazioni in coda"
+        },
+        "self": {
+          "il-mio-profilo": "Il mio profilo",
+          "le-mie-attivita": "Le mie attività",
+          "la-mia-formazione": "La mia formazione"
+        },
+        "tenant": {
+          "configurazione-tenant": "Configurazione del tenant",
+          "blueprint-adottati": "Blueprint adottati",
+          "utenti-del-tenant": "Utenti del tenant"
+        }
+      },
+      "colonne": {
+        "company": {
+          "copertura-competenze": {
+            "label": "Competenza",
+            "detail": "Livello",
+            "value": "Persone"
+          }
+        },
+        "process": {
+          "processi-attivi": {
+            "label": "Processo",
+            "detail": "Tipo",
+            "value": "Unità"
+          },
+          "attivita-recenti": {
+            "label": "Attività",
+            "detail": "Data"
+          }
+        },
+        "org": {
+          "struttura-unita": {
+            "label": "Unità",
+            "detail": "Tipo",
+            "value": "Posizioni attive"
+          },
+          "posizioni-scoperte": {
+            "label": "Posizione scoperta",
+            "detail": "Unità"
+          },
+          "catena-di-riporto": {
+            "label": "Unità",
+            "detail": "Responsabile",
+            "value": "Unità dipendenti"
+          }
+        },
+        "branch": {
+          "organico-filiale": {
+            "label": "Filiale",
+            "value": "Persone"
+          },
+          "attivita-filiale": {
+            "label": "Attività",
+            "detail": "Data"
+          },
+          "competenze-filiale": {
+            "label": "Competenza",
+            "value": "Persone"
+          }
+        },
+        "platform": {
+          "job-e-corse": {
+            "label": "Corsa",
+            "detail": "Stato e inizio"
+          }
+        },
+        "tenant": {
+          "configurazione-tenant": {
+            "label": "Tenant",
+            "detail": "Stato, settore e dimensione"
+          },
+          "blueprint-adottati": {
+            "label": "Modello di impianto",
+            "detail": "Stato"
+          }
+        },
+        "self": {
+          "il-mio-profilo": {
+            "label": "Persona",
+            "detail": "Posizione e unità"
+          },
+          "le-mie-attivita": {
+            "label": "Attività",
+            "detail": "Data"
+          }
+        }
+      },
+      "contatori": {
+        "attivi": "Persone in servizio",
+        "cessati": "Rapporti conclusi",
+        "posizioni": "Posizioni attive",
+        "unita": "Unità organizzative",
+        "pending": "In attesa di una decisione",
+        "tenant": "Aziende attive",
+        "utenti": "Persone attive",
+        "competenze": "Competenze a catalogo",
+        "correnti": "Credenziali correnti",
+        "da_ruotare": "Da ruotare",
+        "algoritmi": "Algoritmi in uso"
+      },
+      "evento": {
+        "COURSE_COMPLETED": "Corso completato: {{subject}}",
+        "CERTIFICATION_EARNED": "Certificazione conseguita: {{subject}}",
+        "HIRE": "Assunto come {{subject}}"
+      }
     }
   },
   "visualizations": {
@@ -1605,6 +1766,15 @@
     "description": "Richieste di assenza, policy di maturazione del tenant e registro delle transazioni per saldo. Consultazione in sola lettura.",
     "requests": "Richieste di assenza",
     "accrualRules": "Regole di maturazione",
+    "accrualAmount": "{{amount}} giorni {{period}}",
+    "accrualPeriod": {
+      "MONTHLY": "al mese",
+      "QUARTERLY": "a trimestre",
+      "SEMIANNUAL": "a semestre",
+      "ANNUAL": "all'anno",
+      "PER_PAY_PERIOD": "a periodo di paga",
+      "LUMP_SUM": "in un'unica soluzione"
+    },
     "transactions": "Transazioni saldo",
     "error": "Errore di caricamento.",
     "empty": "Nessun record.",
@@ -1677,7 +1847,7 @@
       "dimension": "Dimensione",
       "score": "Punteggio",
       "horizon": "Orizzonte",
-      "value": "Valore",
+      "value": "Valore (0–100)",
       "rationale": "Motivazione",
       "businessImpact": "Impatto business",
       "flaggedAt": "Segnalata",
@@ -1724,7 +1894,7 @@
       "code": "Codice",
       "name": "Nome",
       "position": "Posizione",
-      "value": "Valore",
+      "value": "Punti di valutazione della posizione",
       "recipient": "Sistema destinatario",
       "status": "Stato",
       "handedOff": "Consegnato"
@@ -1898,7 +2068,9 @@
     "lavoroConserva": "Conto delle righe oltre il periodo di conservazione.",
     "errore": "Operazione non riuscita. Riprova.",
     "esitoProva": "Prova: la cancellazione toccherebbe {{count}} righe. Niente è stato cambiato.",
+    "esitoProva_one": "Prova: la cancellazione toccherebbe {{count}} riga. Niente è stato cambiato.",
     "esitoVero": "Cancellazione eseguita: {{count}} righe trattate.",
+    "esitoVero_one": "Cancellazione eseguita: {{count}} riga trattata.",
     "parolaCancella": "CANCELLA",
     "parolaConserva": "APPLICA",
     "confermaScrivi": "Per eseguirla davvero scrivi {{parola}}",
@@ -1907,13 +2079,16 @@
     "conservazioneSpiega": "Toglie i dati oltre il periodo di conservazione dichiarato nella mappa. Prima si prova, poi si applica.",
     "provaConservazione": "Prova la conservazione",
     "esitoProvaConserva": "Prova: {{count}} righe sono oltre il periodo di conservazione. Niente è stato cambiato.",
+    "esitoProvaConserva_one": "Prova: {{count}} riga è oltre il periodo di conservazione. Niente è stato cambiato.",
     "esitoVeroConserva": "Conservazione applicata: {{count}} righe trattate.",
+    "esitoVeroConserva_one": "Conservazione applicata: {{count}} riga trattata.",
     "applicaDavvero": "Applica davvero (non si disfa)",
     "giorni": "{{count}} giorni",
     "giorni_one": "{{count}} giorno",
     "registro": "Registro delle richieste ({{mostrati}} di {{totale}})",
     "nessunaRichiesta": "Nessuna richiesta registrata.",
     "mappa": "Mappa dei dati personali ({{count}} tabelle)",
+    "mappa_one": "Mappa dei dati personali ({{count}} tabella)",
     "strategie": {
       "DELETE": "si cancella",
       "ANONYMIZE": "si rende anonimo",
@@ -1933,6 +2108,7 @@
     "titolo": "Capacità dell'agente",
     "descrizione": "Che cosa l'agente può fare, su quali dati, con quale limite e come si annulla; e se agisce chiedendo conferma o in libertà.",
     "elenco": "Capacità ({{count}})",
+    "elenco_one": "Capacità ({{count}})",
     "erroreCarica": "Non è stato possibile caricare le capacità.",
     "nessuna": "Nessuna capacità registrata.",
     "dettagli": "Dettagli",

@@ -168,6 +168,23 @@ describe("mandato K, G-1 — assegna/termina/trasferisci via approvazioni (D4=B)
     expect(await totaleRighe(), "DIF-4: totale ORA, non un letterale").toBe(prima + 1);
   }, 60_000);
 
+  it("(e) la lista dei titolari di una posizione rispetta il contratto: date come stringhe, non 500", async () => {
+    // Giro del 2026-11-19: /positions/[id] riceveva 500 RESPONSE_CONTRACT_VIOLATION perché il
+    // driver consegna `date`/`timestamptz` come Date e il contratto vuole stringhe.
+    const persona = await assignmentAttivo("alberto.colombo@rtl-bank.org");
+    const res = await suite.app.inject({
+      method: "GET",
+      url: `/v1/user-position-assignments?positionId=${persona.positionId}&status=ACTIVE&limit=200`,
+      headers: { cookie: ch(hrmsManager.cookies) },
+    });
+    expect(res.statusCode, res.body).toBe(200);
+    const body = res.json() as { items: Array<{ startDate: string; createdAt: string; updatedAt: string }>; total: number };
+    expect(body.items.length).toBeGreaterThan(0);
+    const riga = body.items[0]!;
+    expect(riga.startDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(Number.isNaN(Date.parse(riga.createdAt))).toBe(false);
+  }, 30_000);
+
   it("(b) TEAM_LEADER non ha il permesso: 403 (non 404, non un errore di route)", async () => {
     const r = await suite.app.inject({
       method: "POST", url: "/v1/user-position-assignments", headers: headers(teamLeader),

@@ -5,6 +5,11 @@
 #   - Weekly checks for npm (root + workspaces) and GitHub Actions
 #   - Group minor + patch updates per ecosystem to reduce PR noise
 #   - Manual review required for major bumps (each in its own PR)
+#
+# Orario (2026-11-19): domenica alle 14:00, ora di Roma. Le PR di Dependabot fanno girare build,
+# test di integrazione e smoke sull'unico runner off-prod (misura 15-18/11: 276 min di runner per
+# due PR, attese medie 56-79 min). Il lunedì alle 06:00 cadeva nella fascia più carica del runner
+# (04-08); il primo pomeriggio della domenica è la più scarica. Le prove restano tutte.
 
 version: 2
 updates:
@@ -13,8 +18,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "monday"
-      time: "06:00"
+      day: "sunday"
+      time: "14:00"
       timezone: "Europe/Rome"
     open-pull-requests-limit: 5
     groups:
@@ -61,8 +66,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "monday"
-      time: "06:00"
+      day: "sunday"
+      time: "14:00"
       timezone: "Europe/Rome"
     open-pull-requests-limit: 3
     groups:

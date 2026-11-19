@@ -107,6 +107,11 @@
       "heuresys-source": "./src/schemas/user-dossier.ts",
       "default": "./dist/schemas/user-dossier.js"
     },
+    "./schemas/faldone": {
+      "types": "./dist/schemas/faldone.d.ts",
+      "heuresys-source": "./src/schemas/faldone.ts",
+      "default": "./dist/schemas/faldone.js"
+    },
     "./schemas/positions": {
       "types": "./dist/schemas/positions.d.ts",
       "heuresys-source": "./src/schemas/positions.ts",

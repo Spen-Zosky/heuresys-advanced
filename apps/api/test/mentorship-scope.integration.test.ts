@@ -122,7 +122,7 @@ async function seedMatchScore(mentorId: string | null, menteeId: string | null):
 }
 
 interface ListedPairings {
-  items: Array<{ mentorshipId: string; mentorUserId: string | null; menteeUserId: string | null }>;
+  items: Array<{ mentorshipId: string; mentorUserId: string | null; menteeUserId: string | null; mentorName: string | null; menteeName: string | null }>;
   total: number;
 }
 interface ListedScores {
@@ -207,6 +207,25 @@ describe("/v1/mentorship — F3 org-axis isolation (ADR-0027, D-50)", () => {
     expect(r.statusCode).toBe(200);
     const body = r.json() as ListedPairings;
     expect(body.items.some((i) => i.mentorshipId === bothReadableId)).toBe(true);
+  });
+
+  it("LIST names: the in-scope party carries «Cognome, Nome», the outsider counterpart is null ({omissis})", async () => {
+    // Giro 2026-11-19: the page asked /v1/users/:id per party and got 404 for outsiders. Names now
+    // come with the pairing; the counterpart outside the chain is masked, not revealed.
+    const r = await suite.app.inject({
+      method: "GET",
+      url: `/v1/mentorship/pairings?limit=200`,
+      headers: { cookie: ch(paolo.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as ListedPairings;
+    const both = body.items.find((i) => i.mentorshipId === bothReadableId);
+    expect(both?.mentorName, "mentor in scope has a name").toBeTruthy();
+    expect(both?.menteeName, "mentee in scope has a name").toBeTruthy();
+    const mixed = body.items.find((i) => i.mentorshipId === mixedPartyId);
+    expect(mixed, "mixed pairing is listed via the in-scope mentor").toBeDefined();
+    expect(mixed!.mentorName).toBeTruthy();
+    expect(mixed!.menteeName, "outsider name must not leak").toBeNull();
   });
 
   /* ===================== ANTI-LEAK core invariant (outsider) ===================== */

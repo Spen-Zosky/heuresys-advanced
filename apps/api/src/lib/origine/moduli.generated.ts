@@ -767,7 +767,8 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_mentor_match_scores",
       "sys_mentorship_programs",
       "sys_mentorship_sessions",
-      "sys_mentorships"
+      "sys_mentorships",
+      "sys_users"
     ]
   },
   "mfa-policy": {

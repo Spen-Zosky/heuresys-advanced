@@ -102,7 +102,8 @@ describe("scheda Allineamento", () => {
     expect(unita.righe_voci.length).toBe(unita.righe);
     expect(unita.righe_voci).toContainEqual(expect.objectContaining({ esito: "solo_modello", modello: UNICA, proposta: "ADOTTO", bozza: null }));
     expect(unita.righe_voci).toContainEqual(expect.objectContaining({ esito: "uguale", modello: unitaVera, proposta: null }));
-    expect(a.domini.find((x) => x.dominio === "obblighi")!.copertura).toBe("MISURA");
+    expect(a.domini.find((x) => x.dominio === "obblighi")!.copertura).toBe("GIRI");
+    expect(a.domini.find((x) => x.dominio === "criticita")!.copertura).toBe("MISURA");
   });
 
   it("salva una bozza, la approva, scarta la bozza dopo e torna all'approvata, senza toccare il tenant", async () => {

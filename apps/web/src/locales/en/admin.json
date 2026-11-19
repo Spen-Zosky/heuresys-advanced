@@ -1978,8 +1978,8 @@
     }
   },
   "tassonomie": {
-    "titolo": "Occupation catalog",
-    "descrizionePagina": "The ISCO-08 and CP 2021 classifications describing occupations, shared by every tenant. An entry is not removed: it is corrected.",
+    "titolo": "Taxonomies",
+    "descrizionePagina": "The catalogs shared by every tenant that describe occupations and enterprises: ISCO and CP occupations, ATECO and NACE economic activities with their correspondences, size bands and operating models. An entry is not removed: it is corrected.",
     "professioni": "Occupations",
     "schema": "Classification",
     "cerca": "Search by name or code",
@@ -1998,6 +1998,31 @@
     "nuova": "New entry in this classification",
     "aggiungi": "Add the entry",
     "precedenti": "Previous",
-    "successivi": "Next"
+    "successivi": "Next",
+    "attivita": "Economic activities",
+    "apri": "Open",
+    "corrispondenze": {
+      "titolo": "Correspondences with other classifications",
+      "conto_one": "{{count}} correspondence",
+      "conto_other": "{{count}} correspondences",
+      "cerca": "Search the corresponding class (at least 2 letters)",
+      "tipo": "Kind of correspondence",
+      "fiducia": "Confidence (0 to 1)",
+      "aggiungi": "Add the correspondence",
+      "errore": "The correspondence was not saved. It may already exist."
+    },
+    "imprese": {
+      "fasce": "Enterprise size bands",
+      "modelli": "Operating models",
+      "taglia": "Size",
+      "addetti": "Employees (from – to)",
+      "fatturato": "Revenue in euro (from – to)",
+      "addettiDa": "Employees from",
+      "addettiA": "Employees up to",
+      "fatturatoDa": "Revenue from (euro)",
+      "fatturatoA": "Revenue up to (euro)",
+      "contoModelli_one": "{{count}} operating model",
+      "contoModelli_other": "{{count}} operating models"
+    }
   }
 }

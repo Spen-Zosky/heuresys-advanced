@@ -1978,8 +1978,8 @@
     }
   },
   "tassonomie": {
-    "titolo": "Catalogo delle professioni",
-    "descrizionePagina": "Le classificazioni ISCO-08 e CP 2021 che descrivono le professioni, valide per tutti i tenant. Una voce non si toglie: si corregge.",
+    "titolo": "Tassonomie",
+    "descrizionePagina": "I cataloghi validi per tutti i tenant con cui si descrivono professioni e imprese: professioni ISCO e CP, attività economiche ATECO e NACE con le loro corrispondenze, fasce dimensionali e modelli operativi. Una voce non si toglie: si corregge.",
     "professioni": "Professioni",
     "schema": "Classificazione",
     "cerca": "Cerca per nome o codice",
@@ -1998,6 +1998,31 @@
     "nuova": "Nuova voce in questa classificazione",
     "aggiungi": "Aggiungi la voce",
     "precedenti": "Precedenti",
-    "successivi": "Successivi"
+    "successivi": "Successivi",
+    "attivita": "Attività economiche",
+    "apri": "Apri",
+    "corrispondenze": {
+      "titolo": "Corrispondenze con le altre classificazioni",
+      "conto_one": "{{count}} corrispondenza",
+      "conto_other": "{{count}} corrispondenze",
+      "cerca": "Cerca la classe corrispondente (almeno 2 lettere)",
+      "tipo": "Tipo di corrispondenza",
+      "fiducia": "Fiducia (da 0 a 1)",
+      "aggiungi": "Aggiungi la corrispondenza",
+      "errore": "La corrispondenza non è stata registrata. Forse esiste già."
+    },
+    "imprese": {
+      "fasce": "Fasce dimensionali delle imprese",
+      "modelli": "Modelli operativi",
+      "taglia": "Taglia",
+      "addetti": "Addetti (da – a)",
+      "fatturato": "Fatturato in euro (da – a)",
+      "addettiDa": "Addetti da",
+      "addettiA": "Addetti fino a",
+      "fatturatoDa": "Fatturato da (euro)",
+      "fatturatoA": "Fatturato fino a (euro)",
+      "contoModelli_one": "{{count}} modello operativo",
+      "contoModelli_other": "{{count}} modelli operativi"
+    }
   }
 }

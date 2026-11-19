@@ -845,6 +845,28 @@
     "occupationClassScheme": {
       "ISCO_08": "ISCO-08 (internazionale)",
       "CP_2021": "CP 2021 (ISTAT)"
+    },
+    "activityClassScheme": {
+      "ATECO_2025": "ATECO 2025",
+      "NACE_REV_2_1": "NACE Rev. 2.1",
+      "ATECO_2007": "ATECO 2007",
+      "NACE_REV_2": "NACE Rev. 2",
+      "ATECO": "ATECO",
+      "NACE": "NACE"
+    },
+    "activityMappingKind": {
+      "EXACT": "Equivalente",
+      "NARROWER": "Più ristretta",
+      "BROADER": "Più ampia",
+      "RELATED": "Collegata",
+      "APPROXIMATE": "Approssimata"
+    },
+    "enterpriseSizeBandCode": {
+      "XS": "Micro",
+      "S": "Piccola",
+      "M": "Media",
+      "L": "Grande",
+      "XL": "Molto grande"
     }
   },
   "masked": "nascosto per il tuo profilo",

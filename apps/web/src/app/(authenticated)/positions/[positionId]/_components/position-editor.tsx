@@ -63,10 +63,13 @@ export function PositionEditor({ positionId }: { positionId: string }) {
 
   // Gli elenchi servono SOLO a chi può scrivere: a un lettore non si fanno
   // pagare quattro chiamate per dei menù che non vedrà.
+  // C6 (giro qa-web 18/11): le liste si chiedono già per il tenant della posizione, invece di caricare
+  // le prime 200 righe di tutti i tenant e filtrarle nel browser (il menù perdeva le voci oltre le 200).
+  const tenantDellaPosizione = position.data?.tenantId ?? null;
   const orgUnits = useQuery({
-    queryKey: ["organization-units", "picker"],
-    queryFn: () => apiFetch<{ items: OrganizationUnit[] }>(`/v1/organization-units?limit=${LIST_LIMIT}`),
-    enabled: canUpdate,
+    queryKey: ["organization-units", "picker", tenantDellaPosizione],
+    queryFn: () => apiFetch<{ items: OrganizationUnit[] }>(`/v1/organization-units?limit=${LIST_LIMIT}&tenantId=${tenantDellaPosizione}`),
+    enabled: canUpdate && tenantDellaPosizione !== null,
   });
   const jobRoles = useQuery({
     // I21: il catalogo dei ruoli come lo vede il cliente della posizione, non quello di tutte le industrie
@@ -75,9 +78,9 @@ export function PositionEditor({ positionId }: { positionId: string }) {
     enabled: canUpdate && !!position.data,
   });
   const positions = useQuery({
-    queryKey: ["positions", "picker"],
-    queryFn: () => apiFetch<{ items: Position[] }>(`/v1/positions?limit=${LIST_LIMIT}`),
-    enabled: canUpdate,
+    queryKey: ["positions", "picker", tenantDellaPosizione],
+    queryFn: () => apiFetch<{ items: Position[]; total: number }>(`/v1/positions?limit=${LIST_LIMIT}&tenantId=${tenantDellaPosizione}`),
+    enabled: canUpdate && tenantDellaPosizione !== null,
   });
   // S-7: proprietario e peso economico arrivano trattenuti a chi non vede le retribuzioni.
   // Chi non li vede non li riscrive: il modulo li omette dal PATCH invece di mandarli
@@ -85,9 +88,9 @@ export function PositionEditor({ positionId }: { positionId: string }) {
   const ownerMasked = isMasked(position.data, "ownerUserId");
   const weightMasked = isMasked(position.data, "economicWeight");
   const users = useQuery({
-    queryKey: ["users", "picker"],
-    queryFn: () => apiFetch<{ items: User[] }>(`/v1/users?limit=${LIST_LIMIT}`),
-    enabled: canUpdate && !ownerMasked,
+    queryKey: ["users", "picker", tenantDellaPosizione],
+    queryFn: () => apiFetch<{ items: User[] }>(`/v1/users?limit=${LIST_LIMIT}&tenantId=${tenantDellaPosizione}`),
+    enabled: canUpdate && !ownerMasked && tenantDellaPosizione !== null,
   });
 
   const { register, handleSubmit, formState } = useForm<FormValues>({
@@ -220,6 +223,12 @@ export function PositionEditor({ positionId }: { positionId: string }) {
                     </option>
                   ))}
               </select>
+              {/* R5: un elenco troncato non è mai silenzioso. */}
+              {positions.data && positions.data.total > positions.data.items.length && (
+                <p data-testid="position-edit-reportsto-troncato" className="mt-1 text-xs text-muted-foreground">
+                  {t("positions.detail.edit.listTruncated", { shown: positions.data.items.length, total: positions.data.total })}
+                </p>
+              )}
             </div>
 
             {!ownerMasked && (

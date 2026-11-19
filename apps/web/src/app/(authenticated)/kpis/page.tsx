@@ -1,5 +1,6 @@
 "use client";
 
+import { Codice } from "@/components/codice";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -23,7 +24,7 @@ function buildColumns(
   return [
     { header: t("shared.name"), cell: (k) => <span className="font-medium text-foreground">{k.name}</span> },
     // R2/C1: il codice non è la prima colonna né il dato da leggere; resta nel dettaglio della riga.
-    { header: t("shared.code"), secondaria: true, cell: (k) => <span className="font-mono text-xs" data-grezzo="">{k.code}</span> },
+    { header: t("shared.code"), secondaria: true, cell: (k) => <Codice value={k.code} /> },
     { header: t("kpis.cols.unit"), cell: (k) => <span className="text-xs text-muted-foreground">{k.unit ? enumLabel("kpiUnit", k.unit) : "—"}</span> },
     { header: t("kpis.cols.polarity"), cell: (k) => <span className="text-xs text-muted-foreground">{enumLabel("kpiPolarity", k.polarity)}</span> },
     {

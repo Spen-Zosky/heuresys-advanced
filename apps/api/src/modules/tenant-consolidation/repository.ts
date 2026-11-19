@@ -580,7 +580,8 @@ export async function decisioniDaApplicare(
       WHERE c.tenant_consolidation_id = $2 AND c.tenant_consolidation_tenant_id = $1
         AND p.tenant_consolidation_proposal_superseded_at IS NULL
         AND l.tenant_consolidation_link_decision_id IS DISTINCT FROM d.tenant_consolidation_decision_id
-      ORDER BY array_position(ARRAY['ORGANIZATION','POSITIONS_ROLES','SKILLS','PROCESSES','INDICATORS_GOALS'],
+      ORDER BY array_position(ARRAY['ORGANIZATION','POSITIONS_ROLES','SKILLS','PROCESSES','INDICATORS_GOALS',
+                                    'CONTRACTS','OBLIGATIONS','TRAINING','CAREERS','INCENTIVES','ENGAGEMENTS'],
                               p.tenant_consolidation_proposal_group::text),
                d.tenant_consolidation_decision_decided_at`,
     [tenantId, consolidationId],

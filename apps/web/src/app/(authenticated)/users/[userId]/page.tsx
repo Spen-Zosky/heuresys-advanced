@@ -304,13 +304,13 @@ export default function UserDetailPage() {
 
           <Section title={s("learning")} count={d.learning.length} testId="dossier-learning">
             <MiniTable
-              head={[s("col.course"), s("col.mandatory"), s("col.status"), s("col.enrolledOn")]}
+              head={[s("col.course"), s("col.mandatory"), s("col.enrolledOn"), s("col.status")]}
               empty={s("empty.learning")}
               rows={d.learning.slice(0, 12).map((x, i) => [
                 x.title ?? x.moduleTitle ?? x.pathName ?? "—",
                 x.isMandatory ? s("yes") : s("no"),
-                <EnumStatusBadge key={i} domain="learningStatus" value={x.status ?? ""} />,
                 f.data(x.enrolledAt),
+                <EnumStatusBadge key={i} domain="learningStatus" value={x.status ?? ""} />,
               ])}
             />
             {d.learning.length > 12 && (

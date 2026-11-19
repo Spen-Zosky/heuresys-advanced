@@ -319,6 +319,9 @@
     "formTitle": "Answer the survey",
     "submit": "Submit responses",
     "submitting": "Submitting…",
+    "ratingPlaceholder": "0 – 10",
+    "ratingScale": "Give a score from 0 to 10.",
+    "submitHint": "Answer at least one question to be able to submit.",
     "submitSuccess": "Responses submitted.",
     "submitError": "Submission failed."
   },

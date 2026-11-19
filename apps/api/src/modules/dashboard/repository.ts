@@ -5,6 +5,7 @@
  */
 
 import type { Pool, PoolClient } from "pg";
+import { cognomeNomeSql } from "../../lib/nome-persona-sql.js";
 import { soloPersone } from "../../lib/scope/persone.js";
 import type {
   DashboardCounters,
@@ -204,7 +205,7 @@ export async function getUpcomingLearningDeadlines(
     `SELECT
        lg.learning_gap_id,
        lg.learning_gap_user_id   AS user_id,
-       u.user_display_name,
+       ${cognomeNomeSql('u')} AS user_display_name,
        COALESCE(lg.learning_gap_position_id, a.user_position_assignment_position_id) AS position_id,
        p.position_title,
        lg.learning_gap_skill_id AS skill_id,
@@ -212,7 +213,7 @@ export async function getUpcomingLearningDeadlines(
        lg.learning_gap_severity AS severity,
        lg.learning_gap_detected_at AS detected_at
      FROM sys.sys_learning_gaps lg
-     JOIN sys.sys_users u ON u.user_id = lg.learning_gap_user_id
+     JOIN sys.sys_users u ON u.user_id = lg.learning_gap_user_id AND u.user_tenant_id = lg.learning_gap_tenant_id
      LEFT JOIN sys.sys_user_position_assignments a
        ON a.user_position_assignment_user_id = lg.learning_gap_user_id
       AND a.user_position_assignment_status = 'ACTIVE'

@@ -37,8 +37,13 @@ export const AgentTokenResponseSchema = z.object({
   task: z.string(),
   /** I permessi del gettone (null = tutti quelli dei ruoli del gettone). */
   permissions: z.array(z.string()).nullable(),
-  /** I ruoli che il gettone porta: quelli della persona senza i mandati (ADR-0050 D6). */
+  /** I ruoli che il gettone porta per le scritture: quelli della persona senza i mandati (ADR-0050 D6). */
   roles: z.array(z.string()),
+  /**
+   * I ruoli che valgono per le letture (GET/HEAD): quelli pieni della persona, mandato compreso
+   * (ADR-0050 D6 emendato il 2026-11-18). Ciò che la persona non vede resta mascherato o negato.
+   */
+  readRoles: z.array(z.string()),
   /**
    * L10, A-12: per conto di chi lavora l'agente, perché il suo diario dica chi e in quale tenant
    * (`audit.agent_gateway_decisions`) e le soglie di persone siano quelle del tenant (A-6).
@@ -53,9 +58,9 @@ export type AgentTokenResponse = z.infer<typeof AgentTokenResponseSchema>;
 export const AGENT_TOKEN_ERRORS = {
   /** Un gettone d'agente non chiede un altro gettone, né tocca l'autenticazione. */
   AGENT_FORBIDDEN_AUTH: "AGENT_FORBIDDEN_AUTH",
-  /** Un permesso chiesto che la persona, senza mandati, non ha. */
+  /** Un permesso chiesto che la persona non ha. */
   AGENT_SCOPE_EXCEEDS_PERSON: "AGENT_SCOPE_EXCEEDS_PERSON",
-  /** Tolti i mandati, alla persona non resta nessun ruolo da prestare. */
+  /** Alla persona non resta nessun ruolo da prestare. */
   AGENT_NO_ROLES: "AGENT_NO_ROLES",
   /** Serve una sessione piena della persona (non di sola iscrizione, non scaduta). */
   AGENT_SESSION_REQUIRED: "AGENT_SESSION_REQUIRED",

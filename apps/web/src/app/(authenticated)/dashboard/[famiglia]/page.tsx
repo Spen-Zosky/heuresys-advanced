@@ -46,9 +46,14 @@ import { useEnumLabel } from "../../../../lib/enum-labels";
 
 /** Le viste con valori si disegnano per forma; le altre dicono perché non li hanno. */
 function Vista({ v, t, famiglia }: { v: DashboardBlockData; t: (k: string) => string; famiglia: string }) {
-  const { i18n } = useTranslation();
+  const { i18n, t: tx } = useTranslation("admin");
   const enumLabel = useEnumLabel();
   const lingua = i18n.language;
+  // C22: nome, intestazioni ed etichette del catalogo sono dati scritti in italiano nel database;
+  // si traducono per codice nella lingua di chi guarda, e il testo dell'API resta il ripiego.
+  const nome = tx(`dashboard.catalogo.viste.${famiglia}.${v.code}`, { defaultValue: v.name });
+  const intestazione = (campo: "label" | "detail" | "value", ripiego: string | undefined): string | undefined =>
+    ripiego === undefined ? undefined : tx(`dashboard.catalogo.colonne.${famiglia}.${v.code}.${campo}`, { defaultValue: ripiego });
   if (v.content === null) {
     const negata = v.access === "denied";
     return (
@@ -56,7 +61,7 @@ function Vista({ v, t, famiglia }: { v: DashboardBlockData; t: (k: string) => st
         <CardHeader>
           <CardTitle as="h2" className="flex items-center gap-2">
             {negata ? <Lock className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-            {v.name}
+            {nome}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -86,7 +91,7 @@ function Vista({ v, t, famiglia }: { v: DashboardBlockData; t: (k: string) => st
     return (
       <Card data-testid={`vista-${v.code}`} data-access={v.access}>
         <CardHeader>
-          <CardTitle as="h2">{v.name}</CardTitle>
+          <CardTitle as="h2">{nome}</CardTitle>
         </CardHeader>
         <CardContent>
           {v.content.counters.length === 0 ? (
@@ -94,7 +99,7 @@ function Vista({ v, t, famiglia }: { v: DashboardBlockData; t: (k: string) => st
           ) : (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {v.content.counters.map((c) => (
-                <StatsCard key={c.key} label={testoLeggibile(c.label)} value={c.value} />
+                <StatsCard key={c.key} label={testoLeggibile(tx(`dashboard.catalogo.contatori.${c.key}`, { defaultValue: c.label }))} value={c.value} />
               ))}
             </div>
           )}
@@ -108,7 +113,7 @@ function Vista({ v, t, famiglia }: { v: DashboardBlockData; t: (k: string) => st
     return (
       <Card data-testid={`vista-${v.code}`} data-access={v.access}>
         <CardHeader>
-          <CardTitle as="h2">{v.name}</CardTitle>
+          <CardTitle as="h2">{nome}</CardTitle>
         </CardHeader>
         <CardContent>
           {punti.length === 0 ? (
@@ -131,7 +136,7 @@ function Vista({ v, t, famiglia }: { v: DashboardBlockData; t: (k: string) => st
   return (
     <Card data-testid={`vista-${v.code}`} data-access={v.access}>
       <CardHeader>
-        <CardTitle as="h2">{v.name}</CardTitle>
+        <CardTitle as="h2">{nome}</CardTitle>
       </CardHeader>
       <CardContent>
         {righe.length === 0 ? (
@@ -149,12 +154,28 @@ function Vista({ v, t, famiglia }: { v: DashboardBlockData; t: (k: string) => st
             isError={false}
             rows={righe}
             rowKey={(r) => r.id}
-            caption={v.name}
+            caption={nome}
             columns={[
               // R2: le intestazioni le dà la vista; le generiche restano solo come ripiego.
-              { header: v.content.columns?.label ?? t("dashboard.famiglie.colonnaVoce"), cell: (r) => testoLeggibile(r.label) },
-              { header: v.content.columns?.detail ?? t("dashboard.famiglie.colonnaDettaglio"), cell: (r) => (r.detail ? testoLeggibile(r.detail) : "—") },
-              { header: v.content.columns?.value ?? t("dashboard.famiglie.colonnaValore"), align: "right", cell: (r) => (r.value === null ? "—" : formati(lingua).numero(r.value, 2)) },
+              {
+                header: intestazione("label", v.content.columns?.label) ?? t("dashboard.famiglie.colonnaVoce"),
+                // C22: un evento arriva come tipo e soggetto, e la frase si compone nella lingua di chi guarda.
+                cell: (r) => (r.kind && r.subject
+                  ? tx(`dashboard.catalogo.evento.${r.kind}`, { subject: r.subject, defaultValue: r.label })
+                  : testoLeggibile(r.label)),
+              },
+              // C14: una colonna senza niente su tutte le righe (il tipo che ripeteva la frase, il valore
+              // assente) non si disegna.
+              ...(righe.some((r) => r.detail || r.occurredAt)
+                ? [{
+                    header: intestazione("detail", v.content.columns?.detail) ?? t("dashboard.famiglie.colonnaDettaglio"),
+                    // il giorno dell'evento si scrive nel formato della lingua, non in quello del server
+                    cell: (r: (typeof righe)[number]) => (r.occurredAt ? formati(lingua).data(r.occurredAt) : r.detail ? testoLeggibile(r.detail) : "—"),
+                  }]
+                : []),
+              ...(righe.some((r) => r.value !== null)
+                ? [{ header: intestazione("value", v.content.columns?.value) ?? t("dashboard.famiglie.colonnaValore"), align: "right" as const, cell: (r: (typeof righe)[number]) => (r.value === null ? "—" : formati(lingua).numero(r.value, 2)) }]
+                : []),
             ]}
           />
         )}
@@ -210,11 +231,14 @@ export default function CruscottoDiFamigliaPage() {
     );
   }
 
+  // C22: il nome della famiglia e' un dato italiano del catalogo; si traduce per codice.
+  const nomeFamiglia = tr(`dashboard.catalogo.famiglie.${famiglia.code}`, { defaultValue: famiglia.name });
+
   return (
     <div className="space-y-6" data-testid={`cruscotto-${famiglia.code}`}>
       <PageHeader
         badges={<Badge variant="outline"><LayoutDashboard className="mr-1 h-3.5 w-3.5" />{t("dashboard.famiglie.badge")}</Badge>}
-        title={famiglia.name}
+        title={nomeFamiglia}
         description={
           famiglia.maskedBlockCount > 0
             ? tr("dashboard.famiglie.visteConTrattenute", {

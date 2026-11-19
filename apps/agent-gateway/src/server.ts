@@ -31,6 +31,7 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import { ApprovalRegistry, type ApprovalDecision } from "./approval-bridge.js";
 import { DbAuditSink, FileAuditSink, type AuditSink } from "./audit-sink.js";
 import { auditPool } from "./db-pool.js";
+import { EsitiLetture } from "./omissis.js";
 import { HeuresysClient, chiEDove, chiSei, chiediGettoneAgente, registraDecisione } from "./heuresys-client.js";
 import { ConversazioneNonTrovata, ConversazioneOccupata, RegistroConversazione } from "./conversazione.js";
 import { eseguiGiro } from "./giro.js";
@@ -421,6 +422,9 @@ const server = createServer(async (req, res) => {
         // quello del registro no (le risposte del registro non sono letture dell'agente).
         const client = new HeuresysClient({ baseUrl: HEURESYS_API, session: gettone.session, agente: AGENTE_ASSISTENTE });
         const clientRegistro = new HeuresysClient({ baseUrl: HEURESYS_API, session: gettone.session, agente: AGENTE_ASSISTENTE });
+        // Le letture del giro (omissis.ts): se sono tutte negate, la risposta è il messaggio fisso.
+        const esitiLetture = new EsitiLetture();
+        client.collegaEsiti(esitiLetture);
 
         // ADR-0056 D4 (T6b): la conversazione e il giro stanno nel database, attraverso l'API.
         // Se non si riesce a salvarli il giro non parte: una conversazione che la persona non
@@ -488,6 +492,7 @@ const server = createServer(async (req, res) => {
           approvalTimeoutMs: APPROVAL_TIMEOUT_MS,
           scrivi,
           nota: () => notaSugliEsiti(vista.esiti),
+          rifiuto: () => esitiLetture.rifiuto(),
           esegui: (o) =>
             runHrAgent(mandato, client, {
               approve: o.approve,

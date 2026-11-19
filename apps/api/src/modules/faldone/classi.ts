@@ -229,6 +229,8 @@ const TABELLE: Record<string, Riga> = {
   "sys.sys_agent_activities": ["ACTIVITY", "Assistente e agenti", "Attività dell'assistente"],
   "sys.sys_agent_capabilities": ["ACTIVITY", "Assistente e agenti", "Capacità degli agenti"],
   "sys.sys_agent_capability_activations": ["ACTIVITY", "Assistente e agenti", "Attivazioni delle capacità"],
+  "sys.sys_agent_requests": ["ACTIVITY", "Assistente e agenti", "Richieste dell'agente"],
+  "sys.sys_agent_call_log": ["ACTIVITY", "Assistente e agenti", "Costo e durata delle chiamate dell'agente"],
   // ── Modelli e configurazione (la persona vi compare come autrice o approvatrice)
   "sys.sys_blueprint_activations": ["ACTIVITY", "Modelli e configurazione", "Attivazioni dei modelli"],
   "sys.sys_blueprint_overrides": ["ACTIVITY", "Modelli e configurazione", "Personalizzazioni dei modelli"],
@@ -354,6 +356,8 @@ const SOGGETTO: ReadonlySet<string> = new Set([
   "audit.overtime_exempt_archive.overtime_subject_user_id",
   "audit.chiavi_idempotenza.chiave_idempotenza_user_id",
   "sys.sys_agent_conversations.agent_conversation_user_id",
+  "sys.sys_agent_requests.agent_request_requester_id",
+  "sys.sys_agent_call_log.agent_call_user_id",
   "sys.sys_assessments.assessment_subject_user_id",
   "sys.sys_attendance.attendance_subject_user_id",
   "sys.sys_auth_identities.auth_identity_user_id",

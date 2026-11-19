@@ -83,17 +83,29 @@ function makeClientFacade(): PoolClient {
     query: (...args: any[]) => {
       const stmt = firstStatement(args);
       // «BEGIN ISOLATION LEVEL …» vale come BEGIN: dentro la transazione del file il livello è già fissato.
-      if (stmt === "BEGIN" || /^BEGIN ISOLATION LEVEL /i.test(stmt)) {
+      // «BEGIN READ ONLY» (la distanza del consolidamento) diventa un savepoint in sola lettura: passato tale e
+      // quale renderebbe di sola lettura l'intera transazione del file, e ogni scrittura dopo fallirebbe. La sola
+      // lettura vale dentro il savepoint e si toglie con ROLLBACK TO, che annulla anche il cambio di modalità.
+      if (stmt === "BEGIN" || /^BEGIN ISOLATION LEVEL /i.test(stmt) || /^BEGIN( TRANSACTION)? READ ONLY$/i.test(stmt)) {
         const name = `d52_sp_${++savepointSeq}`;
-        savepointStack.push(name);
-        return (fileClient as any).query(`SAVEPOINT ${name}`);
+        const readOnly = /READ ONLY$/i.test(stmt);
+        savepointStack.push(readOnly ? `${name}:ro` : name);
+        return (fileClient as any).query(
+          readOnly ? `SAVEPOINT ${name}; SET TRANSACTION READ ONLY` : `SAVEPOINT ${name}`,
+        );
       }
       if (stmt === "COMMIT") {
-        const name = savepointStack.pop();
-        return (fileClient as any).query(name ? `RELEASE SAVEPOINT ${name}` : "SELECT 1");
+        const entry = savepointStack.pop();
+        if (entry?.endsWith(":ro")) {
+          // Una transazione in sola lettura non ha scritto niente: si chiude tornando indietro, così la modalità
+          // di sola lettura non sopravvive al savepoint.
+          const name = entry.slice(0, -3);
+          return (fileClient as any).query(`ROLLBACK TO SAVEPOINT ${name}; RELEASE SAVEPOINT ${name}`);
+        }
+        return (fileClient as any).query(entry ? `RELEASE SAVEPOINT ${entry}` : "SELECT 1");
       }
       if (stmt === "ROLLBACK") {
-        const name = savepointStack.pop();
+        const name = savepointStack.pop()?.replace(/:ro$/, "");
         return (fileClient as any).query(
           name ? `ROLLBACK TO SAVEPOINT ${name}; RELEASE SAVEPOINT ${name}` : "SELECT 1",
         );

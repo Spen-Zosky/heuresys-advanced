@@ -18,7 +18,7 @@ function buildColumns(t: TFunction, aperta: string | null, apri: (id: string | n
       // the contract does expose (C4 #42: local interfaces had drifted).
       header: t("seedRuns.columns.code"),
       // F-3 (L6): l'identificativo della corsa non è più una colonna a sé; resta nel suggerimento del codice.
-      cell: (r) => <span className="font-mono text-xs text-muted-foreground" title={r.seedAcquisitionRunId}>{r.code}</span>,
+      cell: (r) => <span className="font-mono text-xs text-muted-foreground">{r.code}</span>,
     },
     {
       header: t("seedRuns.columns.startedAt"),

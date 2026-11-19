@@ -29,7 +29,12 @@ interface Bersaglio {
   creabile: boolean;
 }
 
-const BERSAGLI: Record<ConsolidationGroup, Bersaglio> = {
+/**
+ * Le tabelle che una decisione può scrivere. I sei cataloghi aggiunti con SA5 (contratti, obblighi, formazione,
+ * carriere, incentivi, commesse) non ci sono di proposito: le loro decisioni si registrano nel collegamento e i dati
+ * del tenant li cambia il motore dell'allineamento, provato su copia (decisione del 2026-11-18).
+ */
+const BERSAGLI: Partial<Record<ConsolidationGroup, Bersaglio>> = {
   ORGANIZATION: {
     table: "sys_organization_units", id: "organization_unit_id", tenant: "organization_unit_tenant_id",
     name: "organization_unit_name", code: "organization_unit_code", description: null,
@@ -117,7 +122,7 @@ async function ritira(
     [tenantId, proposalId],
   );
   for (const r of rows) {
-    const b = Object.values(BERSAGLI).find((x) => x.table === r.table_name);
+    const b = Object.values(BERSAGLI).find((x) => x?.table === r.table_name);
     if (!b) continue;
     // Ciò che la decisione nuova vuole uguale a ciò che la vecchia aveva scritto resta com'è: niente da ritirare né da riscrivere.
     if (voluti.some((v) => v.recordId === r.record_id && v.column === r.column_name && v.value === r.value_after)) {
@@ -172,6 +177,13 @@ export async function applicaDecisione(
 ): Promise<RapportoApplicazione> {
   const rapporto: RapportoApplicazione = { changed: [], created: [], reverted: 0, skipped: [] };
   const b = BERSAGLI[p.group];
+  if (!b) {
+    rapporto.skipped.push(
+      "Questo catalogo si registra soltanto: la scelta resta nel collegamento e i dati del tenant li cambia il motore dell'allineamento.",
+    );
+    await registraCollegamento(db, tenantId, p, d, rapporto);
+    return rapporto;
+  }
 
   const proto = (await vociDelPrototipo(db, variantVersionId, p.group)).filter((v) => p.prototypeKeys.includes(v.key));
 
@@ -291,6 +303,14 @@ export async function applicaDecisione(
   await ritira(db, tenantId, p.proposalId, d.decisionId, voluti, rapporto);
   for (const v of voluti) await scrivi(db, tenantId, p, d.decisionId, b, v.recordId, v.column, v.value, rapporto);
 
+  await registraCollegamento(db, tenantId, p, d, rapporto);
+  return rapporto;
+}
+
+/** Il collegamento porta la scelta corrente della proposta e il rapporto dell'applicazione. */
+async function registraCollegamento(
+  db: DbConnector, tenantId: string, p: ProposteDati, d: DecisioneCorrente, rapporto: RapportoApplicazione,
+): Promise<void> {
   await db.query(
     `INSERT INTO sys.sys_tenant_consolidation_links
        (tenant_consolidation_link_tenant_id, tenant_consolidation_link_proposal_id, tenant_consolidation_link_decision_id,
@@ -309,5 +329,4 @@ export async function applicaDecisione(
        tenant_consolidation_link_applied_at = now()`,
     [tenantId, p.proposalId, d.decisionId, p.group, d.decision, d.form, d.adr48State, p.tenantKeys, p.prototypeKeys, JSON.stringify(rapporto)],
   );
-  return rapporto;
 }

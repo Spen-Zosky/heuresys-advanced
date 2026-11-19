@@ -19,6 +19,9 @@
     "formTitle": "Compila il sondaggio",
     "submit": "Invia risposte",
     "submitting": "Invio…",
+    "ratingPlaceholder": "0 – 10",
+    "ratingScale": "Dai un voto da 0 a 10.",
+    "submitHint": "Rispondi ad almeno una domanda per poter inviare.",
     "submitSuccess": "Risposte inviate.",
     "submitError": "Invio non riuscito."
   },

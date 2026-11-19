@@ -192,7 +192,7 @@
     }
   },
   "session": {
-    "error": "Session error"
+    "error": "Your session could not be loaded. Please try again in a moment."
   },
   "logout": "Sign out",
   "language": {

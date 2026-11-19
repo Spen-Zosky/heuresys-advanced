@@ -44,7 +44,7 @@ export function DatiVariante({ v }: { v: BlueprintVariant }) {
     <section data-testid="blueprint-variant-data" className="rounded-card border border-border bg-card px-6 py-4 shadow-card">
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-1 text-sm">
-          <p className="text-foreground" data-testid="blueprint-variant-description">{v.description ?? t("famiglie.senzaDescrizione")}</p>
+          {/* La descrizione sta già sotto il titolo della pagina. */}
           <p className="text-muted-foreground">{t("varianti.fascia")}: {fascia?.name ?? t("varianti.nessunaFascia")}</p>
         </div>
         {puo && (
@@ -77,11 +77,11 @@ export function DatiVariante({ v }: { v: BlueprintVariant }) {
 export function ProcessoInModifica({ p, onChiudi }: { p: BlueprintProcess; onChiudi: () => void }) {
   const { t } = useTranslation("blueprints");
   const qc = useQueryClient();
-  const [bz, setBz] = useState({ name: p.name, ordinal: String(p.ordinal), description: p.description ?? "", isOptional: p.isOptional });
-  const ordineOk = /^\d+$/.test(bz.ordinal) && Number(bz.ordinal) <= 32767;
+  const [bz, setBz] = useState({ name: p.name, ordinal: String(p.ordinal + 1), description: p.description ?? "", isOptional: p.isOptional });
+  const ordineOk = /^\d+$/.test(bz.ordinal) && Number(bz.ordinal) >= 1 && Number(bz.ordinal) <= 32768;
   const salva = useMutation({
     mutationFn: () => apiFetch(`/v1/blueprint-processes/${p.blueprintProcessId}`, {
-      method: "PATCH", body: { name: bz.name.trim(), ordinal: Number(bz.ordinal), description: testo(bz.description), isOptional: bz.isOptional },
+      method: "PATCH", body: { name: bz.name.trim(), ordinal: Number(bz.ordinal) - 1, description: testo(bz.description), isOptional: bz.isOptional },
     }),
     onSuccess: () => { onChiudi(); void qc.invalidateQueries({ queryKey: ["blueprint-processes"] }); },
   });

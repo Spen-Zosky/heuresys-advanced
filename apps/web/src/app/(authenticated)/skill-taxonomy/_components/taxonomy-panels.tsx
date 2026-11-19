@@ -13,6 +13,7 @@
  * endpoint), quindi non si finge un pannello di modifica che non esiste.
  */
 
+import { Codice } from "@/components/codice";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -116,7 +117,7 @@ export function SkillFamiliesPanel() {
   });
 
   const columns: DataColumn<SkillFamily>[] = [
-    { header: t("shared.code"), cell: (f) => <span className="font-mono text-xs">{f.code}</span> },
+    { header: t("shared.code"), cell: (f) => <Codice value={f.code} /> },
     { header: t("shared.name"), cell: (f) => <span className="font-medium text-foreground">{f.name}</span> },
     {
       header: t("taxonomy.description"),
@@ -370,7 +371,7 @@ export function SkillCategoriesPanel() {
   ));
 
   const columns: DataColumn<SkillCategory>[] = [
-    { header: t("shared.code"), cell: (c) => <span className="font-mono text-xs">{c.code}</span> },
+    { header: t("shared.code"), cell: (c) => <Codice value={c.code} /> },
     { header: t("shared.name"), cell: (c) => <span className="font-medium text-foreground">{c.name}</span> },
     {
       header: t("taxonomy.categories.family"),
@@ -569,7 +570,7 @@ export function ProficiencyLevelsPanel() {
 
   const columns: DataColumn<SkillProficiencyLevel>[] = [
     { header: t("taxonomy.levels.rank"), cell: (l) => <span className="font-mono text-xs">{l.rank}</span> },
-    { header: t("shared.code"), cell: (l) => <span className="font-mono text-xs">{l.code}</span> },
+    { header: t("shared.code"), cell: (l) => <Codice value={l.code} /> },
     { header: t("shared.name"), cell: (l) => <span className="font-medium text-foreground">{l.name}</span> },
     {
       header: t("taxonomy.description"),

@@ -16,8 +16,9 @@ import { useFormat } from "@/lib/format";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { AssegnazioniPiattaforma, ModificaTenant } from "./gestione-tenant";
+import { ContrattiTenant } from "./contratti-tenant";
 
-type Tab = "overview" | "typing" | "users";
+type Tab = "overview" | "typing" | "users" | "contracts";
 
 export default function TenantDetailPage() {
   const { t } = useTranslation("admin");
@@ -32,6 +33,7 @@ export default function TenantDetailPage() {
       { key: "overview", label: t("tenants.detail.tabs.overview") },
       { key: "typing", label: t("tenants.detail.tabs.typing") },
       { key: "users", label: t("tenants.detail.tabs.users") },
+      { key: "contracts", label: t("tenants.detail.tabs.contracts") },
     ],
     [t],
   );
@@ -168,7 +170,7 @@ export default function TenantDetailPage() {
                   >
                     {/* F-3 (L6): l'identificativo del profilo resta nel suggerimento; prima la riga
                         mostrava solo quello e uno stato che l'API non manda. */}
-                    <span className="text-foreground" title={p.enterpriseTypingProfileId}>
+                    <span className="text-foreground">
                       {t("tenants.detail.typingAssessed", { date: fmt.data(p.assessedAt) })}
                     </span>
                     <span className="text-xs text-muted-foreground">
@@ -186,6 +188,8 @@ export default function TenantDetailPage() {
           </CardContent>
         </Card>
       )}
+
+      {tab === "contracts" && <ContrattiTenant tenantId={tn.tenantId} />}
 
       {tab === "users" && (
         <Card data-testid="tenant-tab-content-users">

@@ -130,6 +130,7 @@
     "emptyDescription": "Non ci sono obiettivi per questo tenant",
     "caption": "Elenco obiettivi",
     "cols": {
+      "person": "Persona",
       "type": "Tipo",
       "priority": "Priorità",
       "progress": "Avanzamento",
@@ -217,6 +218,8 @@
       "emptyTitle": "Nessuna capability classificabile",
       "emptyDescription": "Il ranking si popola quando le posizioni dichiarano skill richieste.",
       "caption": "Capability essenziali (priorità d'investimento)",
+      "demandValue": "{{n}} (di cui {{critical}} critiche)",
+      "maturityCommon": "La maturità è {{value}} per tutte le competenze.",
       "cols": {
         "skill": "Competenza",
         "priority": "Priorità invest.",
@@ -297,6 +300,7 @@
         "filtro": "Filtra le unità",
         "unita": "Unità",
         "scegli": "Scegli fra {{count}} unità",
+        "scegli_one": "Scegli fra {{count}} unità",
         "invia": "Assegna",
         "giaPresente": "Questa unità ha già un ruolo nel processo.",
         "errore": "Assegnazione non riuscita. Riprova.",
@@ -384,6 +388,7 @@
       "onlyModel": "Solo modello",
       "onlyTenant": "Solo azienda",
       "lost": "{{count}} elementi del tenant rischiano di perdersi",
+      "lost_one": "{{count}} elemento del tenant rischia di perdersi",
       "domains": {
         "ateco": "Classificazione ATECO",
         "classe": "Classe d'impresa",
@@ -436,7 +441,13 @@
       "POSITIONS_ROLES": "Posizioni e ruoli",
       "SKILLS": "Competenze",
       "PROCESSES": "Processi",
-      "INDICATORS_GOALS": "Indicatori e obiettivi"
+      "INDICATORS_GOALS": "Indicatori e obiettivi",
+      "CONTRACTS": "Contratti e livelli",
+      "OBLIGATIONS": "Obblighi normativi",
+      "TRAINING": "Formazione",
+      "CAREERS": "Carriere",
+      "INCENTIVES": "Incentivi",
+      "ENGAGEMENTS": "Commesse"
     },
     "open": "Aperto",
     "done": "Concluso",
@@ -604,6 +615,11 @@
       "result": "Fatto nella bozza: {{decided}} decisioni, {{cascaded}} in cascata, {{skipped}} saltate.",
       "resultUndo": "Tornate da decidere: {{count}}.",
       "resultUndo_one": "Tornata da decidere: {{count}}."
+    },
+    "tabs": {
+      "aria": "Consolidamento e allineamento",
+      "consolidation": "Consolidamento",
+      "alignment": "Allineamento"
     }
   },
   "gaps": {
@@ -1406,6 +1422,7 @@
     "omissis": "{omissis}",
     "omissisAiuto": "Persona fuori dal tuo perimetro: il nome non si mostra.",
     "programmi": "Programmi ({{count}})",
+    "programmi_one": "Programma ({{count}})",
     "erroreCarica": "Non è stato possibile caricare il mentoring.",
     "nessunProgramma": "Nessun programma di mentoring.",
     "statoProgramma": "Stato del programma",
@@ -1416,6 +1433,7 @@
     "mesi": "{{count}} mesi",
     "mesi_one": "{{count}} mese",
     "coppie": "Coppie mentore e allievo ({{count}})",
+    "coppie_one": "Coppia mentore e allievo ({{count}})",
     "filtraProgramma": "Programma",
     "tuttiProgrammi": "Tutti i programmi",
     "senzaProgramma": "senza programma",
@@ -1517,5 +1535,103 @@
     },
     "approve": "Approva",
     "withdraw": "Ritira"
+  },
+  "alignment": {
+    "title": "Allineamento al modello",
+    "description": "Tutte le 24 famiglie di dati della tua azienda messe a confronto con il modello della corsa, una voce alla volta. Per ogni voce l'agente propone una decisione: Unisco (stessa cosa con nomi diversi), Adotto (la prendiamo dal modello), Tengo (resta nostra), Tolgo (doppione o errore). Le decisioni si salvano in bozza e si approvano con il pulsante rosso: l'approvazione le registra, non cambia ancora i dati dell'azienda.",
+    "run": "Corsa del modello",
+    "measured": "Misura fatta il {{when}}",
+    "refresh": "Rimisura",
+    "measuring": "Misura della distanza in corso…",
+    "measuringDetail": "Confronto tutte le voci del modello con quelle dell'azienda: può richiedere qualche secondo.",
+    "saving": "Salvataggio delle decisioni in corso…",
+    "loadError": "Non riesco a leggere l'allineamento.",
+    "noRunsTitle": "Nessuna corsa del modello",
+    "noRuns": "Per allineare l'azienda serve una corsa del modello accolta nel registro delle corse, nella scheda Consolidamento.",
+    "pending": "Ci sono {{count}} decisioni in bozza non ancora approvate.",
+    "pending_one": "C'è 1 decisione in bozza non ancora approvata.",
+    "approve": "Approva le decisioni ({{count}})",
+    "discard": "Scarta le bozze",
+    "approveHint": "Approvare registra le decisioni nel database a nome tuo. I dati dell'azienda cambieranno dopo, con il motore dell'allineamento provato su una copia.",
+    "approved": "{{count}} decisioni approvate il {{when}}.",
+    "approved_one": "1 decisione approvata il {{when}}.",
+    "approvaTitle": "Approvare le decisioni in bozza?",
+    "approvaBody": "Le {{count}} decisioni in bozza diventano decisioni approvate, registrate a tuo nome. Nessun dato dell'azienda cambia adesso.",
+    "approvaConfirm": "Approva",
+    "scartaTitle": "Scartare le bozze?",
+    "scartaBody": "Le {{count}} decisioni in bozza si annullano; quelle già approvate restano come sono.",
+    "scartaConfirm": "Scarta",
+    "navAria": "Famiglie e domini dell'allineamento",
+    "overview": "Quadro d'insieme",
+    "cleanup": "Pulizia",
+    "cleanupDescription": "Le voci che l'agente propone di togliere: nomi che nell'azienda compaiono due volte nello stesso catalogo.",
+    "summary": "Su {{rows}} voci confrontate, {{same}} sono uguali, {{partial}} uguali in parte, {{different}} diverse, {{onlyModel}} solo nel modello e {{onlyTenant}} solo nell'azienda.",
+    "decisionsSummary": "Decisioni: {{drafts}} in bozza, {{approved}} approvate, {{stale}} su voci che non ci sono più.",
+    "families": {
+      "identita": "Identità",
+      "organizzazione": "Organizzazione",
+      "ruoli": "Ruoli",
+      "competenze": "Competenze",
+      "processi": "Processi",
+      "prestazione": "Prestazione",
+      "contratto": "Contratto",
+      "normativa": "Normativa",
+      "sviluppo": "Sviluppo",
+      "ricompensa": "Ricompensa",
+      "commesse": "Commesse",
+      "persone": "Persone",
+      "accesso": "Accesso"
+    },
+    "coverage": {
+      "GIRI": "Nei giri del consolidamento",
+      "MISURA": "Solo misurato"
+    },
+    "domainCounts": "{{rows}} voci: {{same}} uguali, {{partial}} parziali, {{different}} diverse, {{onlyModel}} solo nel modello, {{onlyTenant}} solo nell'azienda.",
+    "filterOutcome": "Esito",
+    "allOutcomes": "Tutti gli esiti",
+    "filterDecision": "Decisione",
+    "allDecisions": "Tutte le decisioni",
+    "search": "Cerca una voce",
+    "showEqual": "Mostra anche le uguali",
+    "shown": "{{count}} voci su {{total}}",
+    "acceptProposals": "Accetta le proposte di queste voci ({{count}})",
+    "acceptProposals_one": "Accetta la proposta di questa voce",
+    "rejected": "{{count}} voci non salvate: {{reason}}",
+    "rejected_one": "1 voce non salvata: {{reason}}",
+    "noRows": "Nessuna voce da decidere con questi filtri.",
+    "none": "Nessuna",
+    "choose": "Scegli…",
+    "decidedOf": "{{done}} su {{total}}",
+    "cols": {
+      "domain": "Dominio",
+      "model": "Voce del modello",
+      "tenant": "Voce dell'azienda",
+      "note": "Differenza",
+      "outcome": "Esito",
+      "proposal": "Proposta",
+      "decision": "Decisione",
+      "status": "Stato",
+      "decided": "Decise",
+      "coverage": "Copertura"
+    },
+    "outcomes": {
+      "uguale": "Uguale",
+      "parziale": "Parziale",
+      "diverso": "Diverso",
+      "solo_modello": "Solo nel modello",
+      "solo_tenant": "Solo nell'azienda"
+    },
+    "decisions": {
+      "UNISCO": "Unisco",
+      "ADOTTO": "Adotto",
+      "TENGO": "Tengo",
+      "TOLGO": "Tolgo"
+    },
+    "statuses": {
+      "daDecidere": "Da decidere",
+      "bozza": "In bozza",
+      "approvata": "Approvata",
+      "allineata": "Allineata"
+    }
   }
 }

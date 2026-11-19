@@ -12,7 +12,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
-import type { Delegation, DelegationListResponse, User } from "@heuresys/shared";
+import { CONSOLIDATION_GROUP_VALUES, type Delegation, type DelegationListResponse, type User } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
@@ -25,7 +25,7 @@ const SELECT_CLASS =
 
 type Ambito = "APPROVALS" | "FULL" | "CONSOLIDATION";
 const AMBITI: readonly Ambito[] = ["APPROVALS", "FULL", "CONSOLIDATION"];
-const GRUPPI = ["ORGANIZATION", "POSITIONS_ROLES", "SKILLS", "PROCESSES", "INDICATORS_GOALS"] as const;
+const GRUPPI = CONSOLIDATION_GROUP_VALUES;
 const oggi = () => new Date().toISOString().slice(0, 10);
 
 function messaggio(err: unknown, t: (k: string) => string): string {

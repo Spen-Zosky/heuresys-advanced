@@ -327,5 +327,36 @@
     "respingi": "Reject",
     "daCorreggere": "Needs changes",
     "errore": "Decision not saved."
+  },
+  "famiglie": {
+    "titolo": "Model families and variants",
+    "hint": "A family groups the variants of an operating model (for example by company size). A family or a variant is not removed: its name or description is corrected.",
+    "conto_one": "{{count}} family",
+    "conto_other": "{{count}} families",
+    "senzaDescrizione": "No description",
+    "correggi": "Correct",
+    "chiudi": "Close",
+    "salva": "Save",
+    "nome": "Name",
+    "descrizione": "Description",
+    "codice": "Code",
+    "nuova": "New family",
+    "aggiungi": "Add the family",
+    "errore": "The change was not saved. Check that the code does not already exist and try again."
+  },
+  "varianti": {
+    "nuova": "New variant",
+    "famiglia": "Family",
+    "scegli": "Choose…",
+    "fascia": "Size band",
+    "nessunaFascia": "No size band",
+    "aggiungi": "Add the variant",
+    "errore": "The variant was not saved. Check that the code does not already exist and try again."
+  },
+  "processi": {
+    "correggi": "Correct the process «{{nome}}»",
+    "ordine": "Position in the list",
+    "facoltativo": "Optional process",
+    "errore": "The process was not updated. Try again."
   }
 }

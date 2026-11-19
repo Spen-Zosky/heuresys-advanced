@@ -18,6 +18,8 @@ import { EnumStatusBadge } from "@/components/enum-badge";
 import { NomeOppure } from "@/components/senza-nome";
 import { useFormat } from "@/lib/format";
 import { ScostamentiAttivazione, StatoAttivazione } from "./gestione-attivazione";
+import { DatiVariante, ProcessoInModifica, usePuoCorreggere } from "./gestione-variante";
+import { Button } from "@heuresys/ui";
 
 // LinkedDoc === the shared `ContentLinkForProcess` row shape (linkId/role/documentId/
 // documentTitle/documentKind/documentStatus/blueprintProcessName + a few unused extras).
@@ -34,6 +36,8 @@ export default function BlueprintVariantDetailPage() {
   const variantId = params.variantId;
   const [tab, setTab] = useState<Tab>("processes");
   const [aperta, setAperta] = useState<string | null>(null);
+  const [processoAperto, setProcessoAperto] = useState<string | null>(null);
+  const puoCorreggere = usePuoCorreggere();
 
   const variant = useQuery({
     queryKey: ["blueprint-variants", variantId],
@@ -106,6 +110,8 @@ export default function BlueprintVariantDetailPage() {
         }
       />
 
+      <DatiVariante key={v.updatedAt} v={v} />
+
       <nav className="flex gap-1 border-b border-border" data-testid="blueprint-tabs">
         {TAB_KEYS.map((key) => (
           <button
@@ -151,8 +157,20 @@ export default function BlueprintVariantDetailPage() {
                     </StatusPill>
                   ),
                 },
+                ...(puoCorreggere ? [{
+                  header: "",
+                  cell: (p: BlueprintProcess) => (
+                    <Button type="button" size="sm" variant="ghost" data-testid="blueprint-process-edit" onClick={() => setProcessoAperto(p.blueprintProcessId)}>
+                      {t("famiglie.correggi")}
+                    </Button>
+                  ),
+                }] : []),
               ]}
             />
+            {(() => {
+              const p = processes.rows.find((x) => x.blueprintProcessId === processoAperto);
+              return p ? <ProcessoInModifica key={`${p.blueprintProcessId}:${p.updatedAt}`} p={p} onChiudi={() => setProcessoAperto(null)} /> : null;
+            })()}
           </CardContent>
         </Card>
       )}

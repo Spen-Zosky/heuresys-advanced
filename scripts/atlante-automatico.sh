@@ -79,9 +79,11 @@ chiudi_e_cancella() {
   rmdir "$CESTINO"/prove-heuresys-advanced_* 2>/dev/null || true
 }
 
-# 2. copia di prova da origin/main
+# 2. copia di prova da origin/main. --anche-se-altre: la copia «atlante-auto» e' riservata a questo
+#    script e non tocca quelle dei thread. Senza, una sola copia altrui aperta (il 19/11 ce n'era
+#    una aperta dal 10/11) fermava ogni giro: l'ultima PR automatica dell'atlante era dell'11/11.
 set +e
-bash "$ROOT/scripts/copia-prova.sh" apri "$NOME" "atlante automatico (timer heuresys-advanced-atlante)"
+bash "$ROOT/scripts/copia-prova.sh" apri "$NOME" "atlante automatico (timer heuresys-advanced-atlante)" --anche-se-altre
 rc=$?
 set -e
 case "$rc" in

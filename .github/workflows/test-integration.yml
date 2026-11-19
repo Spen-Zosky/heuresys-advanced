@@ -37,7 +37,13 @@ permissions:
   contents: read
 concurrency:
   group: test-integration-${{ github.ref }}
-  cancel-in-progress: false  # do NOT cancel running test suites mid-flight
+  # Sulle PR una corsa superata da un push più nuovo si annulla: il suo esito non serve più e tiene
+  # occupato l'unico runner off-prod (misura 15-18/11: 15 corse già superate prima di partire, 202 min
+  # di runner, attese medie di 36-138 min per le altre). Dal 18/11 ogni corsa ha il suo database
+  # usa-e-getta (db/scripts/ci-db-usa-e-getta.sh, rimosso con `if: always()` anche sull'annullamento,
+  # e spazzato dopo 12 ore se la corsa è uccisa), quindi interrompere a metà non sporca heuresys_ci.
+  # Su main resta false: ogni commit di main ha il suo esito, che il rilascio legge.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   test-integration:

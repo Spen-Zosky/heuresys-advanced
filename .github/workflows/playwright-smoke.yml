@@ -17,6 +17,11 @@ on:
       - ".github/workflows/playwright-smoke.yml"
   pull_request:
     branches: [main]
+    # Una PR di sola documentazione (piani, ADR, atlante) non cambia niente di ciò che la smoke prova,
+    # e la smoke occupa l'unico runner off-prod per ~10 min più l'attesa.
+    paths-ignore:
+      - "docs/**"
+      - "**/*.md"
   workflow_dispatch: {}
 
 permissions:
@@ -26,7 +31,10 @@ permissions:
   contents: read
 concurrency:
   group: playwright-${{ github.ref }}
-  cancel-in-progress: false
+  # Sulle PR la corsa superata da un push più nuovo si annulla (misura 15-18/11: 22 corse già superate
+  # prima di partire, 202 min di runner off-prod). Database usa-e-getta e passi `if: always()` di
+  # pulizia girano anche sull'annullamento. Su main resta false.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   playwright-smoke:

@@ -40,21 +40,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Seconda passata = doppione? Se l'albero e' gia' verde nella PR, su main i job si saltano
-  # (scripts/ci/tree-gia-verificato.sh). Ogni dubbio: la CI gira.
-  tree:
-    permissions:
-      contents: read
-      actions: read
-    uses: ./.github/workflows/tree-gia-verificato.yml
-    with:
-      workflow-file: state-lint.yml
   state-lint:
-    needs: tree
     # Security (D-08): the self-hosted runner sits on the PROD host — a fork PR must NEVER
     # run on it. Same-repo PRs (Dependabot lives in this repo) + push/dispatch only; skip
     # Dependabot defer-major PRs (single-runner churn, D-09). Push events have no PR context.
-    if: ${{ !cancelled() && needs.tree.outputs.skip != 'true' && ((github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && !contains(github.event.pull_request.labels.*.name, 'defer-major')) }}
+    if: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && !contains(github.event.pull_request.labels.*.name, 'defer-major') }}
     runs-on: [self-hosted, oci-vm]
     timeout-minutes: 5
     steps:

@@ -441,7 +441,13 @@
       "POSITIONS_ROLES": "Positions and roles",
       "SKILLS": "Skills",
       "PROCESSES": "Processes",
-      "INDICATORS_GOALS": "Indicators and goals"
+      "INDICATORS_GOALS": "Indicators and goals",
+      "CONTRACTS": "Contracts and levels",
+      "OBLIGATIONS": "Legal obligations",
+      "TRAINING": "Training",
+      "CAREERS": "Careers",
+      "INCENTIVES": "Incentives",
+      "ENGAGEMENTS": "Engagements"
     },
     "open": "Open",
     "done": "Done",
@@ -609,6 +615,11 @@
       "result": "Done in the draft: {{decided}} decisions, {{cascaded}} in cascade, {{skipped}} skipped.",
       "resultUndo": "Back to undecided: {{count}}.",
       "resultUndo_one": "Back to undecided: {{count}}."
+    },
+    "tabs": {
+      "aria": "Consolidation and alignment",
+      "consolidation": "Consolidation",
+      "alignment": "Alignment"
     }
   },
   "gaps": {
@@ -1524,5 +1535,103 @@
     },
     "approve": "Approve",
     "withdraw": "Withdraw"
+  },
+  "alignment": {
+    "title": "Alignment with the model",
+    "description": "All 24 data families of your company compared with the run's model, item by item. For each item the agent proposes a decision: Merge (same thing, different names), Adopt (we take it from the model), Keep (it stays ours), Remove (duplicate or error). Decisions are saved as drafts and approved with the red button: approval records them, it does not change the company's data yet.",
+    "run": "Model run",
+    "measured": "Measured on {{when}}",
+    "refresh": "Measure again",
+    "measuring": "Measuring the distance…",
+    "measuringDetail": "Comparing every model item with the company's: it can take a few seconds.",
+    "saving": "Saving decisions…",
+    "loadError": "Unable to read the alignment.",
+    "noRunsTitle": "No model run",
+    "noRuns": "Aligning the company needs a model run accepted in the run register, in the Consolidation tab.",
+    "pending": "There are {{count}} draft decisions not yet approved.",
+    "pending_one": "There is 1 draft decision not yet approved.",
+    "approve": "Approve decisions ({{count}})",
+    "discard": "Discard drafts",
+    "approveHint": "Approving records the decisions in the database under your name. The company's data will change later, with the alignment engine tested on a copy.",
+    "approved": "{{count}} decisions approved on {{when}}.",
+    "approved_one": "1 decision approved on {{when}}.",
+    "approvaTitle": "Approve the draft decisions?",
+    "approvaBody": "The {{count}} draft decisions become approved decisions, recorded under your name. No company data changes now.",
+    "approvaConfirm": "Approve",
+    "scartaTitle": "Discard the drafts?",
+    "scartaBody": "The {{count}} draft decisions are cancelled; those already approved stay as they are.",
+    "scartaConfirm": "Discard",
+    "navAria": "Alignment families and domains",
+    "overview": "Overview",
+    "cleanup": "Cleanup",
+    "cleanupDescription": "Items the agent proposes to remove: names that appear twice in the same company catalogue.",
+    "summary": "Of {{rows}} items compared, {{same}} are equal, {{partial}} partly equal, {{different}} different, {{onlyModel}} only in the model and {{onlyTenant}} only in the company.",
+    "decisionsSummary": "Decisions: {{drafts}} drafts, {{approved}} approved, {{stale}} on items no longer present.",
+    "families": {
+      "identita": "Identity",
+      "organizzazione": "Organization",
+      "ruoli": "Roles",
+      "competenze": "Skills",
+      "processi": "Processes",
+      "prestazione": "Performance",
+      "contratto": "Contract",
+      "normativa": "Regulation",
+      "sviluppo": "Development",
+      "ricompensa": "Reward",
+      "commesse": "Engagements",
+      "persone": "People",
+      "accesso": "Access"
+    },
+    "coverage": {
+      "GIRI": "In the consolidation rounds",
+      "MISURA": "Measured only"
+    },
+    "domainCounts": "{{rows}} items: {{same}} equal, {{partial}} partial, {{different}} different, {{onlyModel}} only in the model, {{onlyTenant}} only in the company.",
+    "filterOutcome": "Outcome",
+    "allOutcomes": "All outcomes",
+    "filterDecision": "Decision",
+    "allDecisions": "All decisions",
+    "search": "Search an item",
+    "showEqual": "Show equal items too",
+    "shown": "{{count}} items of {{total}}",
+    "acceptProposals": "Accept the proposals for these items ({{count}})",
+    "acceptProposals_one": "Accept the proposal for this item",
+    "rejected": "{{count}} items not saved: {{reason}}",
+    "rejected_one": "1 item not saved: {{reason}}",
+    "noRows": "No items to decide with these filters.",
+    "none": "None",
+    "choose": "Choose…",
+    "decidedOf": "{{done}} of {{total}}",
+    "cols": {
+      "domain": "Domain",
+      "model": "Model item",
+      "tenant": "Company item",
+      "note": "Difference",
+      "outcome": "Outcome",
+      "proposal": "Proposal",
+      "decision": "Decision",
+      "status": "Status",
+      "decided": "Decided",
+      "coverage": "Coverage"
+    },
+    "outcomes": {
+      "uguale": "Equal",
+      "parziale": "Partial",
+      "diverso": "Different",
+      "solo_modello": "Only in the model",
+      "solo_tenant": "Only in the company"
+    },
+    "decisions": {
+      "UNISCO": "Merge",
+      "ADOTTO": "Adopt",
+      "TENGO": "Keep",
+      "TOLGO": "Remove"
+    },
+    "statuses": {
+      "daDecidere": "To decide",
+      "bozza": "Draft",
+      "approvata": "Approved",
+      "allineata": "Aligned"
+    }
   }
 }

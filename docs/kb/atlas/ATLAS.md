@@ -1,18 +1,18 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `a25cfa50` (2026-11-18T02:20:53+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `3e5ace83` (2026-11-19T14:47:42+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
 | Layer | Valore |
 |---|---|
-| Moduli API | 121 |
-| Route API | 724 |
+| Moduli API | 122 |
+| Route API | 730 |
 | Pagine web | 136 |
-| Schemi shared | 134 |
-| Tabelle DB | 419 (vuote: 38) |
-| Viste / matview | 90 / 0 |
-| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 324 |
+| Schemi shared | 135 |
+| Tabelle DB | 422 (vuote: 38) |
+| Viste / matview | 91 / 0 |
+| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 336 |
 
 ## Moduli API
 
@@ -54,6 +54,7 @@
 | enterprise-size-bands | /v1/enterprise-size-bands | 4 | 3 | 1 | 1 |
 | enterprise-typing-profiles | /v1/enterprise-typing-profiles | 4 | 3 | 1 | 1 |
 | evidence | /v1/evidence | 2 | 1 | 14 | 2 |
+| faldone | /v1/faldone, /v1/me/faldone | 6 | 2 | 1 | 1 |
 | gdpr | /v1/gdpr | 5 | 4 | 4 | 1 |
 | generated-origins | /v1/generated-origins | 2 | 1 | 1 | 1 |
 | goals | /v1/goals | 12 | 4 | 7 | 4 |
@@ -74,7 +75,7 @@
 | learning-paths | /v1/learning-paths | 5 | 4 | 2 | 1 |
 | mandate-acts | /v1/mandate-acts | 6 | 1 | 5 | 0 |
 | me | /v1/me | 76 | 32 | 64 | 52 |
-| mentorship | /v1/mentorship | 17 | 4 | 4 | 3 |
+| mentorship | /v1/mentorship | 17 | 4 | 5 | 3 |
 | mfa-policy | /v1/mfa-policy | 4 | 2 | 4 | 1 |
 | notifications | /v1/notifications | 2 | 2 | 2 | 0 |
 | observability | /v1/observability | 3 | 1 | 5 | 2 |

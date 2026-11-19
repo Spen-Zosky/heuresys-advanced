@@ -20,7 +20,7 @@ section() { printf '\n\033[1m== %s ==\033[0m\n' "$*"; }
 section "bash -n syntax gate (scripts/ + db/scripts/)"
 while IFS= read -r f; do
   if bash -n "$f" 2>/dev/null; then ok "bash -n $f"; else fail "bash -n $f"; fi
-done < <(ls scripts/*.sh scripts/hooks/*.sh scripts/test/*.sh db/scripts/*.sh db/scripts/_lib/*.sh 2>/dev/null)
+done < <(ls scripts/*.sh scripts/ci/*.sh scripts/hooks/*.sh scripts/test/*.sh db/scripts/*.sh db/scripts/_lib/*.sh 2>/dev/null)
 
 # ------------------------------------------------------------ B. shellcheck
 section "shellcheck (severity=error)"
@@ -1950,6 +1950,31 @@ rl env RILASCIO_CI_STATO="6 6 0 0" bash scripts/rilascia.sh "$B"; e=$?
 ( cd "$ROOT" && RILASCIO_CI_STATO="6 6 0 0" ARMA_DRYRUN=1 bash scripts/rilascia.sh HEAD --dry-run ) >/dev/null 2>&1; e=$?
 [ $e = 1 ] && ok "rilascia: variabili di test su origin reale -> fermo" || fail "rilascia: variabili di test accettate su origin reale (exit $e)"
 rm -rf "$RT"
+# ------------------------------------------- I. tree-gia-verificato.sh (fixture)
+section "tree-gia-verificato.sh — la seconda passata di CI e' un doppione solo a albero uguale"
+TG="$(mktemp -d)"; ( cd "$TG" && git init -q . && git config user.email t@t && git config user.name t \
+  && echo a > f && git add f && git commit -qm 1 && echo b > f && git commit -qam 2 ) >/dev/null 2>&1
+TG_SHA="$(git -C "$TG" rev-parse HEAD)"; TG_TREE="$(git -C "$TG" rev-parse 'HEAD^{tree}')"
+mkdir -p "$TG/fx/git/commits"
+tg() {  # tg <evento> <albero della testa PR>  -> stampa skip=...
+  printf '{"workflow_runs":[{"event":"pull_request","conclusion":"success","head_sha":"aaa111","head_repository":{"full_name":"o/r"}}]}' > "$TG/fx/runs.json"
+  mkdir -p "$TG/fx/actions/workflows/lint.yml"
+  cp "$TG/fx/runs.json" "$TG/fx/actions/workflows/lint.yml/runs?event=pull_request&status=success&per_page=30.json"
+  printf '{"tree":{"sha":"%s"}}' "$2" > "$TG/fx/git/commits/aaa111.json"
+  : > "$TG/out"
+  ( cd "$TG" && GITHUB_EVENT_NAME="$1" GITHUB_REPOSITORY=o/r GITHUB_SHA="$TG_SHA" WORKFLOW_FILE=lint.yml \
+      GITHUB_OUTPUT="$TG/out" TREE_GIA_FIXTURE="$TG/fx" bash "$ROOT/scripts/ci/tree-gia-verificato.sh" ) >/dev/null 2>&1
+  cat "$TG/out"
+}
+[ "$(tg push "$TG_TREE")" = "skip=true" ]  && ok "tree uguale a quello verde in PR -> salta" || fail "tree uguale non salta"
+[ "$(tg push 0000000000000000000000000000000000000000)" = "skip=false" ] && ok "tree diverso -> la CI su main gira" || fail "tree diverso salta"
+[ "$(tg pull_request "$TG_TREE")" = "skip=false" ] && ok "evento PR -> gira sempre" || fail "evento PR salta"
+[ "$(tg workflow_dispatch "$TG_TREE")" = "skip=false" ] && ok "dispatch manuale -> gira sempre" || fail "dispatch salta"
+rm -f "$TG/fx/actions/workflows/lint.yml/"*; : > "$TG/out"
+( cd "$TG" && GITHUB_EVENT_NAME=push GITHUB_REPOSITORY=o/r GITHUB_SHA="$TG_SHA" WORKFLOW_FILE=lint.yml GITHUB_OUTPUT="$TG/out" \
+    TREE_GIA_FIXTURE="$TG/fx" bash "$ROOT/scripts/ci/tree-gia-verificato.sh" ) >/dev/null 2>&1
+[ "$(cat "$TG/out")" = "skip=false" ] && ok "API muta -> la CI su main gira (fail-open verso il lavoro)" || fail "API muta salta"
+rm -rf "$TG"
 # ---------------------------------------------------------------- summary
 printf '\n%d ok, %d failed\n' "$PASS" "$FAIL"
 [ "$FAIL" = 0 ]

@@ -4,7 +4,7 @@
 
 ## heuresys-advanced-atlante (piano di pulizia, voce A2)
 
-Ogni mattina alle 05:00 (ora di Roma) `scripts/atlante-automatico.sh` chiede a `atlante_fresco.py`, su una copia di prova da `origin/main`, se l'atlante è ancora vero. Se è «vecchio» lo rigenera con `build_atlas.py` leggendo il database (sola lettura, coordinate dal `.env` della VM), committa su un ramo `atlante/<AAAAMMGG>` e apre la PR. Non unisce mai, e non apre una seconda PR finché una `atlante/*` resta aperta. Sul linux-pc non va installata: rigenererebbe dal clone.
+Ogni 20 minuti, solo se origin/main è cambiato dal giro prima, `scripts/atlante-automatico.sh` chiede a `atlante_fresco.py`, su una copia di prova da `origin/main`, se l'atlante è ancora vero. Se è «vecchio» lo rigenera con `build_atlas.py` leggendo il database (sola lettura, coordinate dal `.env` della VM), committa su un ramo `atlante/<AAAAMMGG>`, apre la PR e ne chiede l'unione automatica a CI verde (`gh pr merge --auto --squash`). Non apre una seconda PR finché una `atlante/*` resta aperta. Sul linux-pc non va installata: rigenererebbe dal clone.
 
 Installazione sulla VM (dalla radice del checkout che il timer deve usare):
 

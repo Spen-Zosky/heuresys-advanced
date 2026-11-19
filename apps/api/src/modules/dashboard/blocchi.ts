@@ -294,6 +294,13 @@ const processProcessiAttivi: Fornitore = async (q, p) => {
        LEFT JOIN sys.sys_organization_unit_processes oup
               ON oup.org_unit_process_blueprint_process_id = bp.blueprint_process_id
              AND ($1::uuid IS NULL OR oup.org_unit_process_tenant_id = $1::uuid)
+      -- I processi del modello in vigore per il tenant, non l'intero registro: il registro e' unico per
+      -- versione (000463) e senza questo filtro la vista mescolava le versioni di tutti i modelli
+      -- (2026-11-18: 53 righe contro i 23 processi di RTL), con un conteggio diverso da ogni altra pagina.
+      WHERE $1::uuid IS NULL
+         OR bp.blueprint_process_variant_version_id IN (
+              SELECT a.blueprint_activation_variant_version_id FROM sys.sys_blueprint_activations a
+               WHERE a.blueprint_activation_tenant_id = $1::uuid AND a.blueprint_activation_status = 'ACTIVE')
       GROUP BY 1, 2, 3 ORDER BY 4 DESC, 2 LIMIT 20`,
     [p.tenantId],
   );

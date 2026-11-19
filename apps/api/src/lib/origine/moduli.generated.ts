@@ -463,6 +463,15 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "v_source_lineage_normalizzata"
     ]
   },
+  "faldone": {
+    "prefissi": [
+      "/v1/faldone",
+      "/v1/me/faldone"
+    ],
+    "tabelle": [
+      "sys_users"
+    ]
+  },
   "gdpr": {
     "prefissi": [
       "/v1/gdpr"
@@ -520,7 +529,6 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
     "tabelle": [
       "sys_attendance",
       "sys_compensation_bands",
-      "sys_engagement_survey_responses",
       "sys_flight_risk_scores",
       "sys_job_role_embeddings",
       "sys_position_compensation_profiles",
@@ -528,6 +536,7 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_pulse_checks",
       "sys_skill_gap_scores",
       "sys_succession_readiness_scores",
+      "sys_survey_questions",
       "sys_survey_responses",
       "sys_user_kpi_evidence",
       "sys_user_position_assignments",
@@ -758,7 +767,8 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_mentor_match_scores",
       "sys_mentorship_programs",
       "sys_mentorship_sessions",
-      "sys_mentorships"
+      "sys_mentorships",
+      "sys_users"
     ]
   },
   "mfa-policy": {

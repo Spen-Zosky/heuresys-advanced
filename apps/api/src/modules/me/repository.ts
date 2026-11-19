@@ -1728,7 +1728,10 @@ export async function listMyProcessParticipations(
   }>(
     `SELECT pp.participant_id,
             pp.org_unit_process_id,
-            bpr.blueprint_process_name  AS process_name,
+            -- Il nome del processo è quello del tenant (000462), come nella vista dell'owner: il nome del
+            -- modello resta solo dove il tenant non ne ha uno. Due nomi per lo stesso processo erano un caso
+            -- della confusione fra processi del modello e processi del tenant (2026-11-18).
+            coalesce(tp.tenant_process_name, bpr.blueprint_process_name) AS process_name,
             ou.organization_unit_name,
             pp.role,
             pp.is_active,
@@ -1739,13 +1742,16 @@ export async function listMyProcessParticipations(
               ON pos.position_id = pp.position_id
        LEFT JOIN sys.sys_organization_unit_processes oup
               ON oup.organization_unit_process_id = pp.org_unit_process_id
+       LEFT JOIN sys.sys_tenant_processes tp
+              ON tp.tenant_process_id = oup.org_unit_process_tenant_process_id
+             AND tp.tenant_process_tenant_id = oup.org_unit_process_tenant_id
        LEFT JOIN sys.sys_blueprint_process_registry bpr
               ON bpr.blueprint_process_id = oup.org_unit_process_blueprint_process_id
        LEFT JOIN sys.sys_organization_units ou
               ON ou.organization_unit_id = oup.org_unit_process_org_unit_id
       WHERE pp.user_id = $1
         AND pp.tenant_id = $2
-      ORDER BY pp.is_active DESC, bpr.blueprint_process_name NULLS LAST, pp.participant_id`,
+      ORDER BY pp.is_active DESC, coalesce(tp.tenant_process_name, bpr.blueprint_process_name) NULLS LAST, pp.participant_id`,
     [userId, tenantId],
   );
   const items: MeProcessParticipation[] = res.rows.map((r) => ({
@@ -1790,8 +1796,11 @@ export async function listProcessCollaborators(
 } | null> {
   const mio = await q.query<{ blueprint_process_id: string; process_name: string | null }>(
     `SELECT oup.org_unit_process_blueprint_process_id AS blueprint_process_id,
-            bpr.blueprint_process_name               AS process_name
+            coalesce(tp.tenant_process_name, bpr.blueprint_process_name) AS process_name
        FROM sys.sys_organization_unit_processes oup
+       LEFT JOIN sys.sys_tenant_processes tp
+              ON tp.tenant_process_id = oup.org_unit_process_tenant_process_id
+             AND tp.tenant_process_tenant_id = oup.org_unit_process_tenant_id
        LEFT JOIN sys.sys_blueprint_process_registry bpr
               ON bpr.blueprint_process_id = oup.org_unit_process_blueprint_process_id
       WHERE oup.organization_unit_process_id = $1

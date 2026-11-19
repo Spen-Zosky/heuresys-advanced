@@ -20,6 +20,7 @@ export * from "./schemas/gdpr.js";
 export * from "./schemas/users.js";
 export * from "./schemas/mandate-acts.js";
 export * from "./schemas/user-dossier.js";
+export * from "./schemas/faldone.js";
 export * from "./schemas/review-cycles.js";
 export * from "./schemas/performance-reviews.js";
 export * from "./schemas/calibration.js";

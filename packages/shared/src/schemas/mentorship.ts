@@ -91,6 +91,9 @@ export const MentorshipSchema = z.object({
   programId: z.uuid().nullable(),
   mentorUserId: z.uuid().nullable(),
   menteeUserId: z.uuid().nullable(),
+  /** «Cognome, Nome» del mentore e del mentee, dal server: la pagina non chiede `/v1/users/:id`. */
+  mentorName: z.string().nullable(),
+  menteeName: z.string().nullable(),
   status: MentorshipStatusEnum,
   focusAreas: z.array(z.string()).nullable(),
   meetingFrequency: MeetingFrequencyEnum,

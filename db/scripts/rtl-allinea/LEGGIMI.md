@@ -9,3 +9,7 @@ Aperto: custodia storia36 con 5 check rossi legati alla storia chiusa (C2c, C3c,
 ## Convergenza (12/11/2026)
 
 Prova: ripristina il dump «prima», `applica.sh` (corsa 1), poi `bash convergenza.sh "<psql>" <cartella-log>` due volte: ogni script rieseguito non deve cambiare nessuna riga (updated_at compreso) ne' aggiungere righe ai giornali. Va fatta su un database con un nome proprio (`DB_NAME=<nome> copia-fase.sh prova`), mai sul nome condiviso.
+
+## J3 e J4 (15/11/2026)
+
+J3_testi_inglesi.sql (generato da genera_J3_testi.py) traduce i testi inglesi di RTL; J4_residui_prova.sql toglie i tre residui di prova. Idempotenti, con giornale (`staging.rtl_allinea_testi_undo`, `staging.rtl_residui_prova_undo`). Provati sul banco, NON applicati in produzione e non ancora in `applica.sh`: l inserimento nell ordine e la produzione sono una decisione di Enzo.

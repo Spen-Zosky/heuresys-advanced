@@ -132,6 +132,13 @@ cd "$COPIA"
 [ "$(python3 docs/kb/tools/atlante_fresco.py || true)" = "fresco" ] \
   || { log "dopo la rigenerazione l'atlante non risulta fresco: mi fermo"; exit 1; }
 
+# I file che derivano dall'atlante si rigenerano nello stesso commit: senza, «File generati
+# allineati» diventa rosso su main appena l'atlante cambia (19/11, #313 poi #315).
+GENERATI="docs/kb/atlas apps/api/src/lib/origine/moduli.generated.ts"
+python3 docs/kb/tools/build_origine_moduli.py >/dev/null
+python3 docs/kb/tools/check_idoneita_agente.py --check-ts apps/web/src/lib/agente/pagine-idonee.generated.ts >/dev/null \
+  || { log "pagine-idonee.generated.ts non e' allineato all'atlante e non lo rigenero io: mi fermo"; exit 1; }
+
 tabelle() { grep -m1 -oE '\| Tabelle DB \| [0-9]+' | grep -oE '[0-9]+$'; }
 prima="$(git show HEAD:docs/kb/atlas/ATLAS.md | tabelle || echo 0)"
 dopo="$(tabelle < docs/kb/atlas/ATLAS.md || echo 0)"
@@ -139,7 +146,8 @@ if [ "${dopo:-0}" -lt "${prima:-0}" ]; then
   log "la sezione dati perde tabelle ($prima → $dopo): niente commit"; exit 1
 fi
 
-if git diff --quiet -- docs/kb/atlas; then
+# shellcheck disable=SC2086
+if git diff --quiet -- $GENERATI; then
   log "rigenerato ma identico a main: niente da proporre"
   cd "$ROOT"; chiudi_e_cancella; segna_guardato; exit 0
 fi
@@ -151,8 +159,10 @@ msg="$(mktemp)"
 printf '%s\n' "docs(kb): rigenera l'atlante ($OGGI)" "" \
   "Rigenerato dal timer heuresys-advanced-atlante sulla VM (scripts/atlante-automatico.sh)." \
   "atlante_fresco.py: fresco. Tabelle DB $prima -> $dopo." > "$msg"
-git add docs/kb/atlas
-git commit -q -F "$msg" -- docs/kb/atlas
+# shellcheck disable=SC2086
+git add $GENERATI
+# shellcheck disable=SC2086
+git commit -q -F "$msg" -- $GENERATI
 rm -f "$msg"
 git push -q -u origin "$ramo"
 gh pr create --base main --head "$ramo" --title "docs(kb): rigenera l'atlante ($OGGI)" \
@@ -165,14 +175,14 @@ log "PR aperta dal ramo $ramo"
 # esito lascia la PR aperta, da unire a mano: non e' un errore del giro.
 testa_ramo="$(git rev-parse HEAD)"
 sleep 60
-if timeout 1200 gh pr checks "$ramo" --watch --interval 30 >/dev/null 2>&1; then
+if timeout 3600 gh pr checks "$ramo" --watch --interval 30 >/dev/null 2>&1; then
   if gh pr merge "$ramo" --squash --delete-branch --match-head-commit "$testa_ramo" >/dev/null 2>&1; then
     log "CI verde: PR unita"
   else
     log "CI verde ma unione rifiutata: la PR resta da unire a mano"
   fi
 else
-  log "CI non verde, assente o oltre 20 minuti: la PR resta da unire a mano"
+  log "CI non verde, assente o oltre 60 minuti: la PR resta da unire a mano"
 fi
 
 cd "$ROOT"

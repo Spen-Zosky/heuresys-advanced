@@ -185,7 +185,8 @@
     },
     "permessi": {
       "roles": "Roles & permissions",
-      "agent": "Agent capabilities"
+      "agent": "Agent capabilities",
+      "requests": "Agent requests"
     }
   },
   "session": {

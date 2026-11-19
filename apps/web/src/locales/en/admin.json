@@ -2154,5 +2154,35 @@
       "RIGA_SOSTITUTIVA": "replacement row"
     },
     "identita": "{{codice}} · v{{versione}} · {{agente}}"
+  },
+  "agentReq": {
+    "titolo": "Agent requests",
+    "descrizione": "The requests the agent proposes, with the cost estimate and the cap: each waits for a yes or a no before it starts.",
+    "elenco": "Requests ({{count}})",
+    "elenco_one": "Requests ({{count}})",
+    "erroreCarica": "The requests could not be loaded.",
+    "nessuna": "No requests.",
+    "filtroStato": "Status",
+    "tutte": "All statuses",
+    "stati": {
+      "IN_ATTESA": "Pending",
+      "ACCETTATA": "Accepted",
+      "RIFIUTATA": "Rejected"
+    },
+    "chi": "Asked by {{persona}} · {{perimetro}} · {{data}}",
+    "personaAssente": "person no longer present",
+    "spesa": "Estimate {{previsione}} · cap {{tetto}}",
+    "motivo": "Reason for rejection: {{motivo}}",
+    "accetta": "Accept",
+    "rifiuta": "Reject",
+    "motivoLabel": "Reason for rejection",
+    "confermaRifiuto": "Confirm rejection",
+    "vietato": "You are not allowed to decide this request.",
+    "giaDecisa": "The request has already been decided.",
+    "rifiutata": "Request not accepted by the service",
+    "errore": "Operation failed.",
+    "registroTitolo": "Cost and duration of agent calls",
+    "registroTotali": "{{chiamate}} calls · cost {{costo}} · duration {{durata}}",
+    "erroreRegistro": "The call log could not be loaded."
   }
 }

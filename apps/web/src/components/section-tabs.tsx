@@ -62,6 +62,7 @@ const MERGE_GROUPS: ReadonlyArray<Group> = [
   { id: "permessi", tabs: [
     { href: "/admin/roles", key: "permessi.roles" },
     { href: "/admin/agent-capabilities", key: "permessi.agent" },
+    { href: "/admin/agent-requests", key: "permessi.requests" },
   ] },
   { id: "dati", tabs: [
     { href: "/provenance", key: "dati.provenance" },
@@ -118,6 +119,7 @@ const PERMESSI_SCHEDE: Readonly<Record<string, string>> = {
   "/assessments": "assessment:read",
   "/admin/gdpr": "gdpr:read",
   "/admin/agent-capabilities": "agent_capability:read",
+  "/admin/agent-requests": "agent_request:read:all",
 };
 
 export function SectionTabs() {

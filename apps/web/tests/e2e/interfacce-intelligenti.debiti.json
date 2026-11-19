@@ -3,6 +3,7 @@
   "pagine": {
     "/users": [],
     "/admin/catalogo-kpi": [],
+    "/admin/tassonomie": [],
     "/positions": [],
     "/approvals": [],
     "/processes": [],

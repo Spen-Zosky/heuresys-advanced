@@ -67,6 +67,7 @@ const MERGE_GROUPS: ReadonlyArray<Group> = [
   { id: "dati", tabs: [
     { href: "/provenance", key: "dati.provenance" },
     { href: "/admin/gdpr", key: "dati.gdpr" },
+    { href: "/admin/tassonomie", key: "dati.tassonomie" },
   ] },
   { id: "performance", tabs: [
     { href: "/performance", key: "performance.cycles" },
@@ -119,6 +120,7 @@ const PERMESSI_SCHEDE: Readonly<Record<string, string>> = {
   "/assessments": "assessment:read",
   "/admin/gdpr": "gdpr:read",
   "/admin/catalogo-kpi": "process_kpi_template:read",
+  "/admin/tassonomie": "occupation_classification:read",
   "/admin/agent-capabilities": "agent_capability:read",
 };
 

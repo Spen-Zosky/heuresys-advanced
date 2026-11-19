@@ -1976,5 +1976,28 @@
       "unita": "Organization unit",
       "daModello": "Unit template (applies to every tenant)"
     }
+  },
+  "tassonomie": {
+    "titolo": "Occupation catalog",
+    "descrizionePagina": "The ISCO-08 and CP 2021 classifications describing occupations, shared by every tenant. An entry is not removed: it is corrected.",
+    "professioni": "Occupations",
+    "schema": "Classification",
+    "cerca": "Search by name or code",
+    "errore": "Could not read the occupation catalog",
+    "erroreScrittura": "The change was not saved. Check that the code does not already exist and try again.",
+    "conto_one": "{{count}} entry",
+    "conto_other": "{{count}} entries, showing {{da}} to {{a}}",
+    "nome": "Name",
+    "codice": "Code",
+    "codiceSuperiore": "Parent entry code",
+    "descrizione": "Description",
+    "livello": "Level (1 to 10)",
+    "correggi": "Correct",
+    "chiudi": "Close",
+    "salva": "Save",
+    "nuova": "New entry in this classification",
+    "aggiungi": "Add the entry",
+    "precedenti": "Previous",
+    "successivi": "Next"
   }
 }

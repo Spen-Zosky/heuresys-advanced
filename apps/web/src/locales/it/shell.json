@@ -182,7 +182,8 @@
     },
     "dati": {
       "provenance": "Registro di provenienza",
-      "gdpr": "Dati personali (GDPR)"
+      "gdpr": "Dati personali (GDPR)",
+      "tassonomie": "Professioni (ISCO, CP)"
     },
     "permessi": {
       "roles": "Ruoli e permessi",

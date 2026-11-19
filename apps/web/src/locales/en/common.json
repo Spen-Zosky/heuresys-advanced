@@ -841,6 +841,10 @@
       "APPROVED": "Approved",
       "REJECTED": "Rejected",
       "APPLIED": "Applied"
+    },
+    "occupationClassScheme": {
+      "ISCO_08": "ISCO-08 (international)",
+      "CP_2021": "CP 2021 (ISTAT)"
     }
   },
   "masked": "withheld for your profile",

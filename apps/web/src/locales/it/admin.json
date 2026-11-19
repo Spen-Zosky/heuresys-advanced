@@ -1976,5 +1976,28 @@
       "unita": "Unità organizzativa",
       "daModello": "Modello di unità (vale per tutti i tenant)"
     }
+  },
+  "tassonomie": {
+    "titolo": "Catalogo delle professioni",
+    "descrizionePagina": "Le classificazioni ISCO-08 e CP 2021 che descrivono le professioni, valide per tutti i tenant. Una voce non si toglie: si corregge.",
+    "professioni": "Professioni",
+    "schema": "Classificazione",
+    "cerca": "Cerca per nome o codice",
+    "errore": "Non è stato possibile leggere il catalogo delle professioni",
+    "erroreScrittura": "La modifica non è stata registrata. Controlla che il codice non esista già e riprova.",
+    "conto_one": "{{count}} voce",
+    "conto_other": "{{count}} voci, mostrate da {{da}} a {{a}}",
+    "nome": "Nome",
+    "codice": "Codice",
+    "codiceSuperiore": "Codice della voce superiore",
+    "descrizione": "Descrizione",
+    "livello": "Livello (da 1 a 10)",
+    "correggi": "Correggi",
+    "chiudi": "Chiudi",
+    "salva": "Salva",
+    "nuova": "Nuova voce in questa classificazione",
+    "aggiungi": "Aggiungi la voce",
+    "precedenti": "Precedenti",
+    "successivi": "Successivi"
   }
 }

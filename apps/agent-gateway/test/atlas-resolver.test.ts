@@ -160,12 +160,33 @@ describe("#156 il file generato sul disco è coerente con la decisione", () => {
     for (const op of Object.values(vero.operationsOf("compensation"))) expect(op.method).toBe("GET");
   });
 
-  it("non contiene NESSUNA operazione di scrittura", () => {
+  it("le scritture sono SOLO quelle elencate nei perimetri decisi, e nessuna è una cancellazione", () => {
+    // Fino all'ondata 4 (2026-11-18) la mappa non conteneva nessuna scrittura. Ora un perimetro può
+    // aprirne, ma solo per nome (`scritture`) e con la decisione scritta: l'atteso si deriva da lì.
+    const perimetri = JSON.parse(
+      readFileSync(join(radiceRepo(), "docs", "kb", "agent-perimetri.json"), "utf8"),
+    ) as { aperti?: Array<{ concetto: string; sola_lettura?: boolean; scritture?: string[] }> };
+    const ammesse = new Set<string>();
+    for (const v of perimetri.aperti ?? []) {
+      if (!v.sola_lettura) for (const w of v.scritture ?? []) ammesse.add(`${v.concetto}.${w}`);
+    }
+    expect(ammesse.size, "ondata 4: le scritture decise non si leggono").toBeGreaterThan(0);
+    const trovate = new Set<string>();
     for (const cid of vero.conceptIds()) {
       for (const [opId, op] of Object.entries(vero.operationsOf(cid))) {
-        expect(["GET", "HEAD"], `${cid}.${opId} è una scrittura in un perimetro di sola lettura`)
-          .toContain(op.method);
+        if (["GET", "HEAD"].includes(op.method)) continue;
+        expect(op.method, `${cid}.${opId}: una cancellazione non si apre all'agente`).not.toBe("DELETE");
+        expect(ammesse.has(`${cid}.${opId}`), `${cid}.${opId} è una scrittura che nessuna decisione elenca`).toBe(true);
+        trovate.add(`${cid}.${opId}`);
       }
     }
+    expect([...trovate].sort()).toEqual([...ammesse].sort());
+  });
+
+  it("ogni concetto dichiara la base su cui l'API lo monta (ondata 4)", () => {
+    // `semantic-matching` sta sotto /matching: prima dell'ondata 4 il catalogo chiamava /semantic-matching.
+    expect(vero.baseOf("semantic-matching")).toBe("/matching");
+    expect(vero.baseOf("positions")).toBe("/positions");
+    expect(vero.conceptIds()).not.toContain("tenant-consolidation");
   });
 });

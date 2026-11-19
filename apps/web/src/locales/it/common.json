@@ -827,6 +827,20 @@
       "LOW": "Basso",
       "MEDIUM": "Medio",
       "HIGH": "Alto"
+    },
+    "blueprintOverrideInclusion": {
+      "IN": "Incluso",
+      "PARTIAL": "In parte",
+      "OUT": "Escluso"
+    },
+    "statoPropostaRicerca": {
+      "PENDING": "In attesa",
+      "PASSED": "Passata ai controlli",
+      "FAILED": "Respinta dai controlli",
+      "WARNING": "Con avviso",
+      "APPROVED": "Approvata",
+      "REJECTED": "Respinta",
+      "APPLIED": "Applicata"
     }
   },
   "masked": "nascosto per il tuo profilo",

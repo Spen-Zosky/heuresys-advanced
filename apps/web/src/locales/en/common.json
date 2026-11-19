@@ -827,6 +827,20 @@
       "LOW": "Low",
       "MEDIUM": "Medium",
       "HIGH": "High"
+    },
+    "blueprintOverrideInclusion": {
+      "IN": "Included",
+      "PARTIAL": "Partly",
+      "OUT": "Excluded"
+    },
+    "statoPropostaRicerca": {
+      "PENDING": "Pending",
+      "PASSED": "Passed the checks",
+      "FAILED": "Failed the checks",
+      "WARNING": "With warning",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "APPLIED": "Applied"
     }
   },
   "masked": "withheld for your profile",

@@ -1234,6 +1234,7 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
     ],
     "tabelle": [
       "sys_activity_classifications",
+      "sys_alignment_decisions",
       "sys_auth_permissions",
       "sys_auth_role_permissions",
       "sys_auth_roles",

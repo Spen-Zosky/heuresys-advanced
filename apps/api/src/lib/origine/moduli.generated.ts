@@ -463,6 +463,15 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "v_source_lineage_normalizzata"
     ]
   },
+  "faldone": {
+    "prefissi": [
+      "/v1/faldone",
+      "/v1/me/faldone"
+    ],
+    "tabelle": [
+      "sys_users"
+    ]
+  },
   "gdpr": {
     "prefissi": [
       "/v1/gdpr"

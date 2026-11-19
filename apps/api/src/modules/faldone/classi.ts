@@ -29,6 +29,12 @@ export interface Classificazione {
   privata?: true;
   /** La legge in chiaro solo la persona stessa (questionari di clima, per costruzione anonimi verso gli altri). */
   soloSe?: true;
+  /** Dato di talento riservato: parla della persona ma NON si comunica alla persona (rischio di uscita,
+   *  calibrazione, successione, previsioni). Agli altri vale la regola della sua classe. */
+  nonASe?: true;
+  /** Anonima per costruzione: le colonne che indicano altre persone non escono per nessuno, nemmeno
+   *  per il mandato HR, e alla persona stessa il contenuto arriva solo dal modulo che lo aggrega. */
+  anonima?: true;
 }
 
 export const CAPITOLI = [
@@ -54,7 +60,8 @@ export const CAPITOLI = [
 ] as const;
 export type Capitolo = (typeof CAPITOLI)[number];
 
-type Riga = [DataClass, Capitolo, string, ("privata" | "soloSe")?];
+type Bandiera = "privata" | "soloSe" | "nonASe" | "anonima";
+type Riga = [DataClass, Capitolo, string, ...Bandiera[]];
 
 /** Una riga per ogni tabella che il database lega alla persona (diretta, collegata o implicita). */
 const TABELLE: Record<string, Riga> = {
@@ -94,8 +101,8 @@ const TABELLE: Record<string, Riga> = {
   "sys.sys_teams": ["ACTIVITY", "Lavoro e collaborazione", "Team"],
   "sys.sys_team_members": ["ACTIVITY", "Lavoro e collaborazione", "Appartenenza ai team"],
   "sys.sys_job_roles": ["PERSONAL", "Modelli e configurazione", "Mansioni"],
-  "sys.sys_critical_positions": ["EVALUATION", "Talento e successione", "Posizioni critiche"],
-  "sys.sys_position_succession_relevance": ["EVALUATION", "Talento e successione", "Rilevanza per la successione"],
+  "sys.sys_critical_positions": ["EVALUATION", "Talento e successione", "Posizioni critiche", "nonASe"],
+  "sys.sys_position_succession_relevance": ["EVALUATION", "Talento e successione", "Rilevanza per la successione", "nonASe"],
   "sys.sys_position_career_paths": ["PERSONAL", "Carriera", "Percorsi di carriera delle posizioni"],
   "sys.sys_position_kpi_requirements": ["EVALUATION", "Obiettivi e indicatori", "Indicatori richiesti dalle posizioni"],
   "sys.sys_position_learning_requirements": ["SKILL", "Formazione", "Formazione richiesta dalle posizioni"],
@@ -149,40 +156,40 @@ const TABELLE: Record<string, Riga> = {
   // ── Valutazioni
   "sys.sys_performance_reviews": ["EVALUATION", "Valutazioni", "Valutazioni della prestazione"],
   "sys.sys_performance_review_competency_ratings": ["EVALUATION", "Valutazioni", "Giudizi sulle competenze"],
-  "sys.sys_valutazione_condivisione_eccezioni": ["EVALUATION", "Valutazioni", "Eccezioni alla condivisione della valutazione"],
-  "sys.sys_feedback_360_responses": ["EVALUATION", "Valutazioni", "Feedback a 360 gradi"],
+  "sys.sys_valutazione_condivisione_eccezioni": ["EVALUATION", "Valutazioni", "Eccezioni alla condivisione della valutazione", "nonASe"],
+  "sys.sys_feedback_360_responses": ["EVALUATION", "Valutazioni", "Feedback a 360 gradi", "anonima"],
   "sys.sys_continuous_feedback": ["EVALUATION", "Valutazioni", "Feedback continuo"],
-  "sys.sys_calibration_discussions": ["EVALUATION", "Valutazioni", "Discussioni di calibrazione"],
-  "sys.sys_calibration_participants": ["EVALUATION", "Valutazioni", "Partecipazioni alla calibrazione"],
-  "sys.sys_calibration_sessions": ["EVALUATION", "Valutazioni", "Sessioni di calibrazione"],
+  "sys.sys_calibration_discussions": ["EVALUATION", "Valutazioni", "Discussioni di calibrazione", "nonASe"],
+  "sys.sys_calibration_participants": ["EVALUATION", "Valutazioni", "Partecipazioni alla calibrazione", "nonASe"],
+  "sys.sys_calibration_sessions": ["EVALUATION", "Valutazioni", "Sessioni di calibrazione", "nonASe"],
   "sys.sys_review_cycles": ["EVALUATION", "Modelli e configurazione", "Cicli di valutazione"],
   "sys.sys_assessments": ["EVALUATION", "Valutazioni", "Assessment"],
   "sys.sys_assessment_results": ["EVALUATION", "Valutazioni", "Esiti degli assessment"],
   "sys.sys_user_assessment_evidence": ["EVALUATION", "Valutazioni", "Evidenze degli assessment"],
   "sys.sys_behavioral_assessments": ["EVALUATION", "Valutazioni", "Valutazioni comportamentali"],
-  "sys.sys_employee_position_fit_scores": ["EVALUATION", "Valutazioni", "Aderenza alle posizioni"],
+  "sys.sys_employee_position_fit_scores": ["EVALUATION", "Valutazioni", "Aderenza alle posizioni", "nonASe"],
   // ── Talento e successione
-  "sys.sys_talent_scores": ["EVALUATION", "Talento e successione", "Punteggi di talento"],
-  "sys.sys_flight_risk_scores": ["EVALUATION", "Talento e successione", "Rischio di uscita"],
-  "sys.sys_model_predictions": ["EVALUATION", "Talento e successione", "Previsioni dei modelli"],
-  "sys.sys_readiness_scores": ["EVALUATION", "Talento e successione", "Prontezza"],
-  "sys.sys_succession_scores": ["EVALUATION", "Talento e successione", "Punteggi di successione"],
-  "sys.sys_succession_readiness_scores": ["EVALUATION", "Talento e successione", "Prontezza alla successione"],
-  "sys.sys_succession_pools": ["EVALUATION", "Talento e successione", "Bacini di successione"],
-  "sys.sys_successor_candidates": ["EVALUATION", "Talento e successione", "Candidature alla successione"],
-  "sys.sys_successor_readiness": ["EVALUATION", "Talento e successione", "Prontezza del successore"],
-  "sys.sys_advisor_suggestions": ["EVALUATION", "Talento e successione", "Suggerimenti del consigliere"],
+  "sys.sys_talent_scores": ["EVALUATION", "Talento e successione", "Punteggi di talento", "nonASe"],
+  "sys.sys_flight_risk_scores": ["EVALUATION", "Talento e successione", "Rischio di uscita", "nonASe"],
+  "sys.sys_model_predictions": ["EVALUATION", "Talento e successione", "Previsioni dei modelli", "nonASe"],
+  "sys.sys_readiness_scores": ["EVALUATION", "Talento e successione", "Prontezza", "nonASe"],
+  "sys.sys_succession_scores": ["EVALUATION", "Talento e successione", "Punteggi di successione", "nonASe"],
+  "sys.sys_succession_readiness_scores": ["EVALUATION", "Talento e successione", "Prontezza alla successione", "nonASe"],
+  "sys.sys_succession_pools": ["EVALUATION", "Talento e successione", "Bacini di successione", "nonASe"],
+  "sys.sys_successor_candidates": ["EVALUATION", "Talento e successione", "Candidature alla successione", "nonASe"],
+  "sys.sys_successor_readiness": ["EVALUATION", "Talento e successione", "Prontezza del successore", "nonASe"],
+  "sys.sys_advisor_suggestions": ["EVALUATION", "Talento e successione", "Suggerimenti del consigliere", "nonASe"],
   "sys.sys_capability_scores": ["SKILL", "Competenze", "Punteggi di capacità"],
   // ── Carriera
   "sys.sys_user_career_plans": ["PERSONAL", "Carriera", "Piani di carriera"],
   "sys.sys_user_target_positions": ["PERSONAL", "Carriera", "Posizioni obiettivo"],
   "sys.sys_career_paths": ["PERSONAL", "Modelli e configurazione", "Percorsi di carriera"],
   // ── Clima e coinvolgimento
-  "sys.sys_engagement_survey_responses": ["PERSONAL", "Clima e coinvolgimento", "Risposte ai questionari di clima", "soloSe"],
-  "sys.sys_survey_responses": ["PERSONAL", "Clima e coinvolgimento", "Risposte ai sondaggi", "soloSe"],
+  "sys.sys_engagement_survey_responses": ["PERSONAL", "Clima e coinvolgimento", "Risposte ai questionari di clima", "soloSe", "anonima"],
+  "sys.sys_survey_responses": ["PERSONAL", "Clima e coinvolgimento", "Risposte ai sondaggi", "soloSe", "anonima"],
   "sys.sys_survey_assignments": ["ACTIVITY", "Clima e coinvolgimento", "Sondaggi assegnati"],
-  "sys.sys_pulse_checks": ["PERSONAL", "Clima e coinvolgimento", "Rilevazioni lampo", "soloSe"],
-  "sys.sys_engagement_feedback": ["ACTIVITY", "Clima e coinvolgimento", "Segnalazioni di clima"],
+  "sys.sys_pulse_checks": ["PERSONAL", "Clima e coinvolgimento", "Rilevazioni lampo", "soloSe", "anonima"],
+  "sys.sys_engagement_feedback": ["ACTIVITY", "Clima e coinvolgimento", "Segnalazioni di clima", "anonima"],
   "sys.sys_engagement_surveys": ["ACTIVITY", "Clima e coinvolgimento", "Questionari di clima"],
   "sys.sys_engagement_survey_templates": ["ACTIVITY", "Modelli e configurazione", "Modelli di questionario"],
   "sys.sys_engagement_action_plans": ["ACTIVITY", "Clima e coinvolgimento", "Piani d'azione sul clima"],
@@ -204,7 +211,7 @@ const TABELLE: Record<string, Riga> = {
   // ── Selezione
   "sys.sys_candidates": ["PERSONAL", "Selezione", "Candidatura"],
   "sys.sys_candidate_applications": ["PERSONAL", "Selezione", "Domande di assunzione"],
-  "sys.sys_interview_feedback": ["EVALUATION", "Selezione", "Esiti dei colloqui"],
+  "sys.sys_interview_feedback": ["EVALUATION", "Selezione", "Esiti dei colloqui", "nonASe"],
   // ── Accesso e sicurezza
   "sys.sys_user_auth_roles": ["PERSONAL", "Accesso e sicurezza", "Ruoli assegnati"],
   "sys.sys_auth_identities": ["CREDENTIAL", "Accesso e sicurezza", "Identità di accesso"],
@@ -468,8 +475,11 @@ export function classificazioneDi(tabella: string): Classificazione | undefined 
   const r = TABELLE[tabella];
   if (!r) return undefined;
   const c: Classificazione = { classe: r[0], capitolo: r[1], titolo: r[2] };
-  if (r[3] === "privata") c.privata = true;
-  if (r[3] === "soloSe") c.soloSe = true;
+  const bandiere = r.slice(3) as Bandiera[];
+  if (bandiere.includes("privata")) c.privata = true;
+  if (bandiere.includes("soloSe")) c.soloSe = true;
+  if (bandiere.includes("nonASe")) c.nonASe = true;
+  if (bandiere.includes("anonima")) c.anonima = true;
   return c;
 }
 
@@ -498,3 +508,6 @@ export function ruoloDiRelazione(colonna: string): string {
   for (const [re, r] of RUOLI) if (re.test(colonna)) return r;
   return "collegati";
 }
+
+/** Le colonne che indicano una persona senza chiave esterna (legami impliciti), per tabella. */
+export const COLONNE_PERSONA_IMPLICITE: ReadonlySet<string> = new Set(LEGAMI_IMPLICITI);

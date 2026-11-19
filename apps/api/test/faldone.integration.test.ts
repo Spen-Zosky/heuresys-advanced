@@ -20,11 +20,11 @@ import { passwordFor } from "./helpers/personas.js";
 import { pool, closePool } from "../src/db/client.js";
 import { leggiCatalogo, type Catalogo } from "../src/modules/faldone/catalogo.js";
 import {
-  classificazioneDi, LEGAMI_IMPLICITI, LEGAMI_SOGGETTO, TABELLE_CLASSIFICATE,
+  classificazioneDi, COLONNE_PERSONA_IMPLICITE, LEGAMI_IMPLICITI, LEGAMI_SOGGETTO, TABELLE_CLASSIFICATE,
 } from "../src/modules/faldone/classi.js";
 import { FALDONE_OMISSIS } from "@heuresys/shared";
 import { TABELLE_CUSTODITE } from "../src/modules/whistleblowing/custodia.js";
-import { unCapoConSottoposti, unEstraneoOrganizzativo } from "./helpers/org-actors.js";
+import { unCapoConSottoposti, unEstraneoOrganizzativo, unSottopostoOrganizzativo } from "./helpers/org-actors.js";
 
 const PLATFORM_EMAIL = "platform-test-admin@collaudo.invalid";
 const HR_MANDATE_EMAIL = "federica.marchetti@rtl-bank.org";
@@ -141,7 +141,8 @@ describe("faldone — l'accesso", () => {
     expect(b.totali["righe"]).toBeGreaterThan(0);
     for (const s of b.sezioni.filter((x) => x.legame === "soggetto")) {
       if (s.visibilita !== "piena") {
-        expect(s.motivoOmissis, `${s.id}: a sé stessi si nascondono solo i segreti`).toMatch(/segreti/);
+        expect(s.motivoOmissis, `${s.id}: a sé stessi si nascondono solo segreti, talento riservato, anonimato`)
+          .toMatch(/segreti|talento riservato|anonimo/);
       }
     }
     const conRinnovi = b.sezioni.find((s) => s.tabella === "sys.sys_auth_refresh_tokens" && s.legame === "soggetto");
@@ -197,5 +198,90 @@ describe("faldone — l'accesso", () => {
   it("una sezione che non esiste risponde 404", async () => {
     const r = await get(platform, `/v1/faldone/${targetId}/sezioni/sys.sys_inesistente.colonna`);
     expect(r.status).toBe(404);
+  });
+});
+
+/**
+ * La revisione del 2026-11-19: quattro regole che il dossier non conosceva perché non legge tutto.
+ * Ognuna di queste prove era rossa sul codice della PR #296 (misurato prima di correggere).
+ */
+describe("faldone — riservatezza oltre il dossier", () => {
+  interface Righe { righe: Record<string, unknown>[]; etichette: Record<string, string>[] }
+
+  it("per sé stessi, i dati di talento riservati sono {omissis} (rischio di uscita, calibrazione, successione)", async () => {
+    const r = await get(hr, "/v1/me/faldone");
+    expect(r.status).toBe(200);
+    const riservate = (r.body as Indice).sezioni.filter((s) => s.legame === "soggetto" && classificazioneDi(s.tabella)?.nonASe);
+    expect(riservate.length, "nessuna sezione di talento riservato nel catalogo").toBeGreaterThan(5);
+    const aperte = riservate.filter((s) => s.visibilita !== "omissis").map((s) => s.id);
+    expect(aperte, "sezioni di talento riservato in chiaro alla persona stessa").toEqual([]);
+  });
+
+  it("feedback a 360: chi l'ha scritto non esce per nessuno, nemmeno per il mandato HR, e il suo nome non si risolve", async () => {
+    const { rows } = await pool.query<{ target: string; reviewer: string }>(
+      `SELECT f.response_target_user_id::text AS target, f.response_reviewer_user_id::text AS reviewer
+         FROM sys.sys_feedback_360_responses f JOIN sys.sys_users u ON u.user_id = f.response_target_user_id
+         JOIN sys.sys_users h ON lower(h.user_email) = $1 AND h.user_tenant_id = u.user_tenant_id
+        WHERE f.response_reviewer_user_id IS NOT NULL AND f.response_reviewer_user_id <> f.response_target_user_id
+        LIMIT 1`, [HR_MANDATE_EMAIL],
+    );
+    const caso = rows[0];
+    expect(caso, "nessun feedback a 360 con autore: la prova non può fallire").toBeTruthy();
+    const idx = await get(hr, `/v1/faldone/${caso!.target}`);
+    expect(idx.status).toBe(200);
+    const sez = (idx.body as Indice).sezioni.find((s) => s.tabella === "sys.sys_feedback_360_responses"
+      && s.legame === "soggetto");
+    expect(sez?.righe).toBeGreaterThan(0);
+    expect(sez!.campiOmessi).toContain("response_reviewer_user_id");
+    const p = await get(hr, `/v1/faldone/${caso!.target}/sezioni/${sez!.id}?limit=500`);
+    expect(p.status).toBe(200);
+    const b = p.body as Righe;
+    for (const riga of b.righe) expect(riga["response_reviewer_user_id"]).toBe(FALDONE_OMISSIS);
+    for (const e of b.etichette) expect(e["response_reviewer_user_id"]).toBeUndefined();
+    expect(p.raw.includes(caso!.reviewer), "l'identificativo dell'autore attraversa la risposta").toBe(false);
+  });
+
+  it("una valutazione non ancora comunicata non esiste nel faldone, nemmeno per il mandato HR (ADR-0036 §5)", async () => {
+    const { rows } = await pool.query<{ uid: string; comunicate: number }>(
+      `SELECT r.review_subject_user_id::text AS uid,
+              count(*) FILTER (WHERE r.review_shared_at IS NOT NULL OR r.review_acknowledged_at IS NOT NULL)::int AS comunicate
+         FROM sys.sys_performance_reviews r JOIN sys.sys_users u ON u.user_id = r.review_subject_user_id
+         JOIN sys.sys_users h ON lower(h.user_email) = $1 AND h.user_tenant_id = u.user_tenant_id
+        GROUP BY 1
+       HAVING bool_or(r.review_shared_at IS NULL AND r.review_acknowledged_at IS NULL)
+        LIMIT 1`, [HR_MANDATE_EMAIL],
+    );
+    const caso = rows[0];
+    expect(caso, "nessuna valutazione non comunicata: la prova non può fallire").toBeTruthy();
+    const idx = await get(hr, `/v1/faldone/${caso!.uid}`);
+    expect(idx.status).toBe(200);
+    const sez = (idx.body as Indice).sezioni.find((s) => s.tabella === "sys.sys_performance_reviews" && s.legame === "soggetto");
+    expect(sez?.righe).toBe(caso!.comunicate);
+  });
+
+  it("chi non ha il mandato HR non vede chi altro compare nelle righe di un sottoposto, né il suo nome", async () => {
+    const capo = await unCapoConSottoposti(pool);
+    const sotto = await unSottopostoOrganizzativo(pool, capo.userId);
+    const s = await login(t, capo.email);
+    const r = await get(s, `/v1/faldone/${sotto.userId}`);
+    expect(r.status, r.raw.slice(0, 200)).toBe(200);
+    const scoperte: string[] = [];
+    for (const sez of (r.body as Indice).sezioni) {
+      const tab = sez.tabella === "sys.sys_users" ? cat.persona : cat.tabelle.get(sez.tabella);
+      for (const c of tab?.colonne ?? []) {
+        const persona = c.riferisce?.tabella === "sys.sys_users" || COLONNE_PERSONA_IMPLICITE.has(`${sez.tabella}.${c.nome}`);
+        if (persona && c.nome !== (sez as Sezione & { colonnaLegame?: string }).colonnaLegame && !sez.campiOmessi.includes(c.nome)) {
+          scoperte.push(`${sez.id}:${c.nome}`);
+        }
+      }
+    }
+    expect(scoperte, "colonne che indicano persone terze in chiaro a chi non ha il mandato HR").toEqual([]);
+    const conDati = (r.body as Indice).sezioni.find((x) => x.righe > 0 && x.campiOmessi.some((n) => /_by$|_user_id$/.test(n)));
+    if (conDati) {
+      const p = await get(s, `/v1/faldone/${sotto.userId}/sezioni/${conDati.id}?limit=50`);
+      expect(p.status).toBe(200);
+      const b = p.body as Righe;
+      for (const e of b.etichette) for (const n of conDati.campiOmessi) expect(e[n], n).toBeUndefined();
+    }
   });
 });

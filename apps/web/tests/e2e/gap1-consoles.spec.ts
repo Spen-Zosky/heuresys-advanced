@@ -54,6 +54,18 @@ test.describe("Process-Owner console — live process catalog", () => {
     await expect(page.getByTestId("process-owner-row").first()).toBeVisible();
   });
 
+  // 2026-11-18: la console contava l'intero registro (53, due versioni) e «Processi» i 23 del modello
+  // in vigore. Le due pagine parlano degli stessi processi: lo stesso numero.
+  test("Process-Owner and Processes pages show the same process count", async ({ page }) => {
+    await page.goto("/processes", { waitUntil: "domcontentloaded", timeout: 60_000 });
+    const a = (await page.getByTestId("processes-count").textContent({ timeout: 45_000 })) ?? "";
+    await page.goto("/process-owner", { waitUntil: "domcontentloaded", timeout: 60_000 });
+    const b = (await page.getByTestId("process-owner-count").textContent({ timeout: 45_000 })) ?? "";
+    const n = (s: string) => Number((/\d+/.exec(s.replace(/\./g, "")) ?? ["-1"])[0]);
+    expect(n(a)).toBeGreaterThan(0);
+    expect(n(b)).toBe(n(a));
+  });
+
   // Gap#1 follow-up: the RACI drill-down (/v1/organization-unit-processes/by-process/:id).
   // "Human Capital Management" (process 17) has live OU↔process RACI assignments on the
   // rebuilt RTL_BANK reference tenant (2 OUs, OWNER + CONTRIBUTOR).

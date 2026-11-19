@@ -107,15 +107,24 @@ interface MentorshipRow {
   mentorship_goals: string[] | null; mentorship_match_score: string | null;
   mentorship_start_date: Date | string | null; mentorship_end_date: Date | string | null; mentorship_notes: string | null;
   mentorship_metadata: Record<string, unknown>; created_at: Date; updated_at: Date;
+  mentor_name: string | null; mentee_name: string | null;
 }
+/** «Cognome, Nome» di una persona, letto qui e non con un `/v1/users/:id` per riga: chi vede
+ *  la coppia vede i due nomi anche se una delle due persone è fuori dalla sua catena (giro del
+ *  2026-11-19, 404 su `/v1/users/<uuid>` per i perimetri limitati). Solo il nome, come
+ *  nell'organigramma. */
+const NOME = (col: string) => `(SELECT COALESCE(NULLIF(concat_ws(', ', NULLIF(trim(u.user_last_name), ''), NULLIF(trim(u.user_first_name), '')), ''), u.user_display_name)
+    FROM sys.sys_users u WHERE u.user_id = ${col})`;
 const MENT_COLS = `mentorship_id, mentorship_tenant_id, mentorship_natural_key, mentorship_program_id,
   mentorship_mentor_user_id, mentorship_mentee_user_id, mentorship_status, mentorship_focus_areas,
   mentorship_meeting_frequency, mentorship_goals, mentorship_match_score, mentorship_start_date,
-  mentorship_end_date, mentorship_notes, mentorship_metadata, created_at, updated_at`;
+  mentorship_end_date, mentorship_notes, mentorship_metadata, created_at, updated_at,
+  ${NOME("mentorship_mentor_user_id")} AS mentor_name, ${NOME("mentorship_mentee_user_id")} AS mentee_name`;
 function toMentorship(r: MentorshipRow): Mentorship {
   return {
     mentorshipId: r.mentorship_id, tenantId: r.mentorship_tenant_id, naturalKey: r.mentorship_natural_key,
     programId: r.mentorship_program_id, mentorUserId: r.mentorship_mentor_user_id, menteeUserId: r.mentorship_mentee_user_id,
+    mentorName: r.mentor_name, menteeName: r.mentee_name,
     status: r.mentorship_status as Mentorship["status"], focusAreas: r.mentorship_focus_areas,
     meetingFrequency: r.mentorship_meeting_frequency as Mentorship["meetingFrequency"], goals: r.mentorship_goals,
     matchScore: num(r.mentorship_match_score), startDate: dateOnly(r.mentorship_start_date), endDate: dateOnly(r.mentorship_end_date),

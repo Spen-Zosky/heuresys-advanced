@@ -493,6 +493,7 @@ const server = createServer(async (req, res) => {
           scrivi,
           nota: () => notaSugliEsiti(vista.esiti),
           rifiuto: () => esitiLetture.rifiuto(),
+          attesa: { sospendi: posto.sospendi, riprendi: posto.riprendi },
           // Il costo e la durata del giro vanno nel registro delle chiamate dell'agente. Col gettone
           // d'agente: l'API non accetta questa scrittura da nessun altro (403).
           chiamata: async (c) => {

@@ -25,6 +25,9 @@ export const OrganizationUnitSchema = z.object({
   parentId: z.uuid().nullable(),
   parentName: z.string().nullable(), // G-02: parent OU name, resolved on the list endpoint
   managerUserId: z.uuid().nullable(),
+  // Il nome del responsabile, «Cognome, Nome», risolto sull'elenco come parentName (2026-11-20:
+  // l'assistente rispondeva «nome non disponibile» perché doveva ricostruirlo dall'anagrafica).
+  managerName: z.string().nullable(),
   effectiveFrom: z.string(),
   effectiveTo: z.string().nullable(),
   isActive: z.boolean(),

@@ -116,7 +116,17 @@ export function leggiLimiti(env: Record<string, string | undefined> = process.en
 }
 
 export type Ingresso =
-  | { ok: true; esci: () => void }
+  | {
+      ok: true;
+      esci: () => void;
+      /**
+       * Prova dal vivo del 2026-11-20: due conversazioni ferme ad aspettare la conferma della
+       * persona le impedivano di aprirne una terza (TOO_MANY_CONVERSATIONS_PERSON). Mentre il giro
+       * aspetta la persona non lavora: il suo posto personale si sospende e si riprende alla decisione.
+       */
+      sospendi: () => void;
+      riprendi: () => void;
+    }
   | { ok: false; motivo: "PERSONA" | "SERVIZIO" };
 
 /**
@@ -126,6 +136,9 @@ export type Ingresso =
  */
 export class ConversazioniAperte {
   private readonly perPersona = new Map<string, number>();
+  /** Conversazioni sospese per persona: anche loro hanno un tetto, pari a `perPersona`, così una
+   * persona non riempie il servizio di giri in attesa (revisione di sicurezza del 2026-11-20). */
+  private readonly sospese = new Map<string, number>();
   private totale = 0;
 
   constructor(private readonly limiti: Pick<Limiti, "perPersona" | "totali">) {}
@@ -141,15 +154,35 @@ export class ConversazioniAperte {
     this.perPersona.set(persona, sue + 1);
     this.totale += 1;
     let uscito = false;
+    let sospeso = false;
+    const sposta = (mappa: Map<string, number>, delta: number) => {
+      const ora = (mappa.get(persona) ?? 0) + delta;
+      if (ora > 0) mappa.set(persona, ora);
+      else mappa.delete(persona);
+    };
     return {
       ok: true,
       esci: () => {
         if (uscito) return;
         uscito = true;
-        const ora = (this.perPersona.get(persona) ?? 1) - 1;
-        if (ora > 0) this.perPersona.set(persona, ora);
-        else this.perPersona.delete(persona);
+        sposta(sospeso ? this.sospese : this.perPersona, -1);
         this.totale -= 1;
+      },
+      sospendi: () => {
+        if (uscito || sospeso) return;
+        // Oltre il tetto delle sospese il posto resta occupato: la persona aspetta, come prima.
+        if ((this.sospese.get(persona) ?? 0) >= this.limiti.perPersona) return;
+        sospeso = true;
+        sposta(this.perPersona, -1);
+        sposta(this.sospese, 1);
+      },
+      riprendi: () => {
+        if (uscito || !sospeso) return;
+        sospeso = false;
+        // Il giro era già ammesso: riprende anche se nel frattempo la persona ne ha aperti altri
+        // (al massimo 2 × perPersona in tutto, per il tetto delle sospese).
+        sposta(this.sospese, -1);
+        sposta(this.perPersona, 1);
       },
     };
   }

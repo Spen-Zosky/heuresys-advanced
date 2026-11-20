@@ -53,6 +53,26 @@ describe("/v1/organization-units/* integration", () => {
     expect(body.total).toBeGreaterThanOrEqual(6); // RTL seed has 6
   });
 
+  it("LIST: il responsabile arriva con il nome «Cognome, Nome» (prova dal vivo dell'assistente, 2026-11-20)", async () => {
+    const r = await suite.app.inject({
+      method: "GET", url: "/v1/organization-units?limit=200",
+      headers: { cookie: ch(employeeS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const items = (r.json() as { items: Array<{ managerUserId: string | null; managerName: string | null }> }).items;
+    const conResponsabile = items.filter((u) => u.managerUserId !== null);
+    // L'atteso si ricava dal database, non da un nome scritto qui.
+    for (const u of conResponsabile) {
+      const atteso = await pool.query<{ nome: string | null }>(
+        `SELECT COALESCE(NULLIF(concat_ws(', ', NULLIF(trim(user_last_name), ''), NULLIF(trim(user_first_name), '')), ''), user_display_name) AS nome
+           FROM sys.sys_users WHERE user_id = $1`,
+        [u.managerUserId],
+      );
+      expect(u.managerName).toBe(atteso.rows[0]?.nome ?? null);
+    }
+    for (const u of items.filter((x) => x.managerUserId === null)) expect(u.managerName).toBeNull();
+  });
+
   it("CREATE / GET / PATCH / DELETE happy path as TENANT_ADMIN", async () => {
     const code = `${SUITE_PREFIX}_HAPPY`;
     const created = await suite.app.inject({

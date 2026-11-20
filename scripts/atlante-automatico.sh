@@ -60,11 +60,28 @@ if [ "$(cat "$ULTIMO" 2>/dev/null || true)" = "$TESTA" ]; then
 fi
 segna_guardato() { printf '%s\n' "$TESTA" > "$ULTIMO"; }
 
+# 0b. rilascio armato: main deve restare sul commit armato fino a DEPLOYATO (scripts/blocco-rilascio.sh).
+#     Si esce senza segnare il giro, cosi' il primo giro dopo il rilascio guarda di nuovo.
+blocco_attivo() { [ -f "$ROOT/scripts/blocco-rilascio.sh" ] && bash "$ROOT/scripts/blocco-rilascio.sh" attivo; }
+if blocco_attivo; then
+  log "rilascio armato in corso: main e' fermo, riprovo dopo DEPLOYATO"
+  exit 0
+fi
+
 # 1. una PR di rigenerazione gia' aperta basta
 aperte="$(cd "$ROOT" && gh pr list --state open \
   --json headRefName -q '[.[] | select(.headRefName | startswith("atlante/"))] | length')"
 if [ "$aperte" != "0" ]; then
-  log "c'e' gia' una PR aperta da un ramo atlante/*: esco senza fare niente"
+  # Una PR rimasta aperta (per esempio perche' nel frattempo era stato armato un rilascio) si unisce
+  # qui se la sua CI e' gia' tutta verde e non c'e' un rilascio armato; altrimenti si aspetta.
+  vecchia="$(cd "$ROOT" && gh pr list --state open --json number,headRefName,headRefOid \
+    -q '[.[] | select(.headRefName | startswith("atlante/"))][0] | "\(.number) \(.headRefOid)"')"
+  if (cd "$ROOT" && gh pr checks "${vecchia% *}" >/dev/null 2>&1) \
+     && (cd "$ROOT" && gh pr merge "${vecchia% *}" --squash --delete-branch --match-head-commit "${vecchia#* }" >/dev/null 2>&1); then
+    log "PR #${vecchia% *} rimasta aperta: CI verde, unita"
+  else
+    log "c'e' gia' una PR aperta da un ramo atlante/* (#${vecchia% *}), CI non ancora verde: esco"
+  fi
   exit 0
 fi
 
@@ -176,7 +193,10 @@ log "PR aperta dal ramo $ramo"
 testa_ramo="$(git rev-parse HEAD)"
 sleep 60
 if timeout 3600 gh pr checks "$ramo" --watch --interval 30 >/dev/null 2>&1; then
-  if gh pr merge "$ramo" --squash --delete-branch --match-head-commit "$testa_ramo" >/dev/null 2>&1; then
+  if blocco_attivo; then
+    log "CI verde ma nel frattempo e' stato armato un rilascio: la PR resta aperta, la unisce il giro dopo DEPLOYATO"
+    NON_SEGNARE=1
+  elif gh pr merge "$ramo" --squash --delete-branch --match-head-commit "$testa_ramo" >/dev/null 2>&1; then
     log "CI verde: PR unita"
   else
     log "CI verde ma unione rifiutata: la PR resta da unire a mano"
@@ -187,4 +207,4 @@ fi
 
 cd "$ROOT"
 chiudi_e_cancella
-segna_guardato
+[ "${NON_SEGNARE:-0}" = 1 ] || segna_guardato

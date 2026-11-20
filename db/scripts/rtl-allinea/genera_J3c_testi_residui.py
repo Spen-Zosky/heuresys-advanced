@@ -26,10 +26,8 @@ TENANT = {
     "sys_goals": "goal_tenant_id = '{T}'",
     "sys_kpi_definitions": "kpi_definition_tenant_id = '{T}'",
     "sys_kpi_targets": "kpi_target_tenant_id = '{T}'",
-    "sys_leads": "true",
     "sys_mentorship_programs": "program_tenant_id = '{T}'",
     "sys_okr_check_ins": "check_in_tenant_id = '{T}'",
-    "sys_okrs": "okr_tenant_id = '{T}'",
     "sys_overtime": "overtime_tenant_id = '{T}'",
     "sys_performance_review_competency_ratings": "rating_tenant_id = '{T}'",
     "sys_predictive_models": "model_tenant_id = '{T}'",
@@ -133,7 +131,7 @@ mappa("sys_goals", "goal_category", [
     ("development", "sviluppo"), ("sales", "vendite")])
 mappa("sys_goal_templates", "template_category", [
     ("development", "sviluppo"), ("learning", "apprendimento"), ("project", "progetto"), ("career", "carriera")])
-add("sys_okrs", "okr_department", "Company-wide", "Intera azienda")
+# «Company-wide» NON si traduce: e' il valore sentinella che la migrazione 000357 (riapplicata a ogni deploy) e il codice leggono per «OKR di tutta l'azienda».
 mappa("sys_kpi_targets", "kpi_target_unit", [("ratio", "rapporto"), ("score", "punteggio"), ("days", "giorni")])
 # --- KPI ---
 KPI1 = "Tempo di determinazione della posizione di liquidità giornaliera (daily cash position)"
@@ -146,7 +144,7 @@ add("sys_kpi_definitions", "kpi_definition_formula", "(numero giorni con daily c
 # --- formazione, documenti, contatti ---
 mappa("sys_user_education_records", "user_education_field_of_study", [("Business Administration", "Economia Aziendale"), ("Computer Science", "Informatica")])
 add("sys_content_versions", "version_change_note", "Initial version", "Versione iniziale")
-add("sys_leads", "lead_message", "Please contact me with more information.", "Vi chiedo di contattarmi per avere maggiori informazioni.")
+# sys_leads: il testo inglese e' nel campo ruolo che una persona ha scritto nel modulo del sito (lead_role), non un dato RTL: non si riscrive.
 # --- riparazione: primo carattere perso da J (substr(s, 24) al posto di substr(s, 23)) ---
 for nome, ente in [
     ("Scrum Master Certified", "Scrum Alliance"), ("Financial Risk Manager (FRM)", "GARP"), ("Antiriciclaggio AML Specialist", "AICOM"),
@@ -158,6 +156,9 @@ for nome, ente in [
 def q(s):
     return "'" + s.replace("'", "''") + "'"
 
+
+import guardia_valori  # un valore che il codice o le migrazioni leggono non si traduce (caso «Company-wide», 20/11/2026)
+guardia_valori.verifica(R)
 
 # Un valore non deve comparire due volte per la stessa colonna con traduzioni diverse
 visti = {}
@@ -232,4 +233,5 @@ SELECT 'J3c ok' esito, (SELECT count(*) FROM staging.rtl_allinea_testi_undo) voc
 \\else
 DO $$ DECLARE n int; BEGIN SELECT count(*) INTO n FROM sys.v_embedding_impronta_non_combacia;
   IF n > 0 THEN RAISE EXCEPTION 'J3c: % vettori non combaciano piu'' col testo, ricalcola: bash db/scripts/rtl-allinea/vettori.sh --ricalcola', n; END IF; END $$;
-\\endif""")
+\\endif
+-- Prima della produzione: bash db/scripts/rtl-allinea/prova-catena.sh <.env della copia di prova> (migrate.sh exit 0 dopo questo script).""")

@@ -110,3 +110,4 @@ SELECT 'J3b ok' esito, (SELECT count(*) FROM staging.rtl_allinea_testi_undo) voc
 DO $$ DECLARE n int; BEGIN SELECT count(*) INTO n FROM sys.v_embedding_impronta_non_combacia;
   IF n > 0 THEN RAISE EXCEPTION 'J3b: % vettori non combaciano piu'' col testo, ricalcola: bash db/scripts/rtl-allinea/vettori.sh --ricalcola', n; END IF; END $$;
 \endif
+-- Prima della produzione: bash db/scripts/rtl-allinea/prova-catena.sh <.env della copia di prova> (migrate.sh exit 0 dopo questo script).

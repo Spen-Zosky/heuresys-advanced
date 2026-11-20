@@ -20,10 +20,8 @@ INSERT INTO tg VALUES
 ('sys_goals','goal_tenant_id = ''86ba7a65-217f-48ba-8ce5-5c09b40a66b0'''),
 ('sys_kpi_definitions','kpi_definition_tenant_id = ''86ba7a65-217f-48ba-8ce5-5c09b40a66b0'''),
 ('sys_kpi_targets','kpi_target_tenant_id = ''86ba7a65-217f-48ba-8ce5-5c09b40a66b0'''),
-('sys_leads','true'),
 ('sys_mentorship_programs','program_tenant_id = ''86ba7a65-217f-48ba-8ce5-5c09b40a66b0'''),
 ('sys_okr_check_ins','check_in_tenant_id = ''86ba7a65-217f-48ba-8ce5-5c09b40a66b0'''),
-('sys_okrs','okr_tenant_id = ''86ba7a65-217f-48ba-8ce5-5c09b40a66b0'''),
 ('sys_overtime','overtime_tenant_id = ''86ba7a65-217f-48ba-8ce5-5c09b40a66b0'''),
 ('sys_performance_review_competency_ratings','rating_tenant_id = ''86ba7a65-217f-48ba-8ce5-5c09b40a66b0'''),
 ('sys_predictive_models','model_tenant_id = ''86ba7a65-217f-48ba-8ce5-5c09b40a66b0'''),
@@ -142,7 +140,6 @@ INSERT INTO tr VALUES
 ('sys_goal_templates','template_category','learning','apprendimento'),
 ('sys_goal_templates','template_category','project','progetto'),
 ('sys_goal_templates','template_category','career','carriera'),
-('sys_okrs','okr_department','Company-wide','Intera azienda'),
 ('sys_kpi_targets','kpi_target_unit','ratio','rapporto'),
 ('sys_kpi_targets','kpi_target_unit','score','punteggio'),
 ('sys_kpi_targets','kpi_target_unit','days','giorni'),
@@ -153,7 +150,6 @@ INSERT INTO tr VALUES
 ('sys_user_education_records','user_education_field_of_study','Business Administration','Economia Aziendale'),
 ('sys_user_education_records','user_education_field_of_study','Computer Science','Informatica'),
 ('sys_content_versions','version_change_note','Initial version','Versione iniziale'),
-('sys_leads','lead_message','Please contact me with more information.','Vi chiedo di contattarmi per avere maggiori informazioni.'),
 ('sys_user_timeline_events','user_timeline_event_summary','Certificazione conseguita: crum Master Certified (Scrum Alliance)','Certificazione conseguita: Scrum Master Certified (Scrum Alliance)'),
 ('sys_user_timeline_events','user_timeline_event_summary','Certificazione conseguita: inancial Risk Manager (FRM) (GARP)','Certificazione conseguita: Financial Risk Manager (FRM) (GARP)'),
 ('sys_user_timeline_events','user_timeline_event_summary','Certificazione conseguita: ntiriciclaggio AML Specialist (AICOM)','Certificazione conseguita: Antiriciclaggio AML Specialist (AICOM)'),
@@ -212,3 +208,4 @@ SELECT 'J3c ok' esito, (SELECT count(*) FROM staging.rtl_allinea_testi_undo) voc
 DO $$ DECLARE n int; BEGIN SELECT count(*) INTO n FROM sys.v_embedding_impronta_non_combacia;
   IF n > 0 THEN RAISE EXCEPTION 'J3c: % vettori non combaciano piu'' col testo, ricalcola: bash db/scripts/rtl-allinea/vettori.sh --ricalcola', n; END IF; END $$;
 \endif
+-- Prima della produzione: bash db/scripts/rtl-allinea/prova-catena.sh <.env della copia di prova> (migrate.sh exit 0 dopo questo script).

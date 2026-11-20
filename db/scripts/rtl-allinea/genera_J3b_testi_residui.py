@@ -83,6 +83,9 @@ def q(s):
     return "'" + s.replace("'", "''") + "'"
 
 
+import guardia_valori  # un valore che il codice o le migrazioni leggono non si traduce (caso «Company-wide», 20/11/2026)
+guardia_valori.verifica(R)
+
 # Un valore non deve comparire due volte per la stessa colonna con traduzioni diverse
 visti = {}
 for t, c, en, it in R:
@@ -156,4 +159,5 @@ SELECT 'J3b ok' esito, (SELECT count(*) FROM staging.rtl_allinea_testi_undo) voc
 \\else
 DO $$ DECLARE n int; BEGIN SELECT count(*) INTO n FROM sys.v_embedding_impronta_non_combacia;
   IF n > 0 THEN RAISE EXCEPTION 'J3b: % vettori non combaciano piu'' col testo, ricalcola: bash db/scripts/rtl-allinea/vettori.sh --ricalcola', n; END IF; END $$;
-\\endif""")
+\\endif
+-- Prima della produzione: bash db/scripts/rtl-allinea/prova-catena.sh <.env della copia di prova> (migrate.sh exit 0 dopo questo script).""")

@@ -1,6 +1,6 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `d80c897f` (2026-11-20T11:16:11+00:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `b2450996` (2026-11-20T15:46:43+00:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
@@ -10,7 +10,7 @@
 | Route API | 740 |
 | Pagine web | 140 |
 | Schemi shared | 136 |
-| Tabelle DB | 428 (vuote: 39) |
+| Tabelle DB | 429 (vuote: 39) |
 | Viste / matview | 91 / 0 |
 | Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 330 |
 
@@ -104,7 +104,7 @@
 | reference-sync | /v1/reference-sync | 4 | 2 | 3 | 2 |
 | research | — | 0 | 0 | 20 | 1 |
 | review-cycles | /v1/review-cycles | 4 | 2 | 1 | 2 |
-| rubrica | — | 0 | 0 | 4 | 1 |
+| rubrica | — | 0 | 0 | 4 | 2 |
 | seed-acquisition-runs | /v1/seed-acquisition-runs | 6 | 3 | 1 | 1 |
 | seed-approval-decisions | /v1/seed-approval-decisions | 3 | 2 | 2 | 1 |
 | seed-candidate-records | /v1/seed-candidate-records | 5 | 2 | 3 | 1 |

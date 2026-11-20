@@ -70,6 +70,8 @@
       "learning": "Formazione",
       "learning_training-initiatives": "Iniziative formative",
       "admin_roles": "Ruoli",
+      "admin_agent-capabilities": "Capacità dell'agente",
+      "admin_agent-requests": "Richieste dell'agente",
       "admin_mfa-policy": "Politica di autenticazione a più fattori",
       "provenance": "Registro di provenienza",
       "generated-origins": "Registro delle righe generate",

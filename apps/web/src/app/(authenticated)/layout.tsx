@@ -323,7 +323,8 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
   // La pagina negata si nomina a parole (la voce di menu), mai col percorso tecnico.
   const nomePaginaNegata =
     verdict.kind === "denied"
-      ? t(`shell:nav.voci.${verdict.route.replace(/^\//, "").replace(/\//g, "_")}`, { defaultValue: "" })
+      ? t(`shell:nav.voci.${pathname.replace(/^\//, "").replace(/\//g, "_")}`, { defaultValue: "" }) ||
+        t(`shell:nav.voci.${verdict.route.replace(/^\//, "").replace(/\//g, "_")}`, { defaultValue: "" })
       : "";
 
   const roles = user.roles ?? [];

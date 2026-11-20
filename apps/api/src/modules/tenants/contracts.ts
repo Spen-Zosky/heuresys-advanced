@@ -40,7 +40,7 @@ export async function contrattiDelTenant(q: DbConnector, tenantId: string): Prom
       `SELECT DISTINCT ON (blueprint_content_ccnl_code)
               blueprint_content_ccnl_code AS code, blueprint_content_ccnl_name AS name,
               blueprint_content_ccnl_scope AS scope, blueprint_content_ccnl_parties AS parties,
-              blueprint_content_ccnl_effective::text AS effective
+              blueprint_content_ccnl_effective AS effective
          FROM sys.sys_blueprint_content_ccnl
         WHERE blueprint_content_ccnl_version_id = ANY($1::uuid[])
         ORDER BY blueprint_content_ccnl_code, blueprint_content_ccnl_name`,

@@ -37,14 +37,25 @@ async function login(t: TestApp, email: string): Promise<S> {
 const DA_SALTARE = /(esegui|\/run\b|generate|stream|export|download|events|\/sse\b|logout|callback|verify|confirm|unsubscribe|webhook|\/auth\/)/i;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-/** Le rotte GET dichiarate, lette dall'albero di Fastify (un percorso per riga, con i metodi fra parentesi). */
-function rotteGet(t: TestApp): string[] {
+/** Le rotte GET dichiarate. `printRoutes` stampa un ALBERO (i figli portano solo il pezzo che segue il padre,
+ *  anche con commonPrefix:false): il percorso intero si ricostruisce dalla profondita' di ogni riga. */
+export function rotteDaAlbero(testo: string): string[] {
   const out = new Set<string>();
-  for (const riga of t.app.printRoutes({ commonPrefix: false }).split("\n")) {
-    const m = /^\S*\s*(\/\S*)\s+\(([^)]*)\)/.exec(riga.trim());
-    if (m && m[2]!.split(",").map((x) => x.trim()).includes("GET")) out.add(m[1]!);
+  const pila: string[] = [];
+  for (const riga of testo.split("\n")) {
+    const m = /^((?:│   |    )*)(?:├── |└── )(.+?)(?: \(([^)]*)\))?\s*$/.exec(riga);
+    if (!m) continue;
+    const profondita = m[1]!.length / 4;
+    pila.length = profondita;
+    pila[profondita] = m[2]!;
+    const metodi = m[3]?.split(",").map((x) => x.trim()) ?? [];
+    if (metodi.includes("GET")) out.add(pila.join("").replace(/(.)\/$/, "$1"));
   }
   return [...out].sort();
+}
+
+function rotteGet(t: TestApp): string[] {
+  return rotteDaAlbero(t.app.printRoutes({ commonPrefix: false }));
 }
 
 /** I primi identificativi (al massimo 3) che si ricavano da una risposta d'elenco: la prima riga sola puo' essere
@@ -144,6 +155,7 @@ describe("nessuna risposta fuori contratto con dati veri", () => {
     const insieme = new Set(tutte);
     const violazioni: string[] = [];
     let chiamate = 0;
+    const rotteChiamate = new Set<string>();
 
     const chiama = async (url: string, s: S): Promise<{ status: number; corpo: unknown }> => {
       const r = await Promise.race([
@@ -179,6 +191,7 @@ describe("nessuna risposta fuori contratto con dati veri", () => {
         for (const url of urls) {
           const r = await chiama(url, s);
           chiamate++;
+          rotteChiamate.add(rotta);
           const codice = (r.corpo as { error?: { code?: string } } | null)?.error?.code;
           if (r.status === 500 && codice === "RESPONSE_CONTRACT_VIOLATION") violazioni.push(`${nome}: GET ${url}  (rotta ${rotta})`);
         }
@@ -186,6 +199,8 @@ describe("nessuna risposta fuori contratto con dati veri", () => {
     }
 
     expect(chiamate, "nessuna rotta e' stata chiamata").toBeGreaterThan(50);
+    // Canarino: la rotta che ha motivato la guardia deve essere stata davvero chiamata, altrimenti la prova e' cieca.
+    expect([...rotteChiamate], "la rotta dei contratti non e' stata chiamata: la guardia e' cieca").toContain("/v1/tenants/:id/contracts");
     expect(violazioni, "rotte che rispondono fuori dal proprio contratto con dati veri").toEqual([]);
   }, 900_000);
 });

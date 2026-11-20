@@ -219,3 +219,32 @@ describe("chiEDove: chi parla e in quale tenant, per l'ammissione all'assistente
     await expect(chiEDove("http://api", { cookieAccess: "X" }, vuota.fetchImpl)).resolves.toBeUndefined();
   });
 });
+
+describe("filtri delle letture dalla specifica", () => {
+  it("espone i parametri di query di ogni GET (userId per le richieste di assenza) e li legge una volta sola", async () => {
+    const { fetchImpl, calls } = recordingFetch(() => ({
+      ok: true,
+      status: 200,
+      body: {
+        paths: {
+          "/v1/time-off/requests": {
+            get: { parameters: [{ in: "query", name: "userId", schema: { type: "string", format: "uuid" } }, { in: "query", name: "status", schema: { type: "string" } }] },
+          },
+          "/v1/skills": { get: { parameters: [] } },
+        },
+      },
+    }));
+    const c = new HeuresysClient({ baseUrl: "http://api", session, fetchImpl });
+    const m = await c.filtriDelleLetture();
+    await c.filtriDelleLetture();
+    expect(m.get("/v1/time-off/requests")).toEqual({ userId: "uuid", status: "string" });
+    expect(m.has("/v1/skills")).toBe(false); // CONTROPROVA: senza filtri non compare
+    expect(calls).toHaveLength(1);
+  });
+
+  it("senza specifica non lancia: descrizione senza filtri", async () => {
+    const { fetchImpl } = recordingFetch(() => ({ ok: false, status: 500 }));
+    const c = new HeuresysClient({ baseUrl: "http://api", session, fetchImpl });
+    expect((await c.filtriDelleLetture()).size).toBe(0);
+  });
+});

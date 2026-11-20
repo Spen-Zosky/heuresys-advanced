@@ -143,6 +143,38 @@ export class HeuresysClient {
     return typeof dati === "object" && dati !== null ? this.origini.get(dati) : undefined;
   }
 
+  private filtriCache: Promise<Map<string, Record<string, string>>> | undefined;
+
+  /**
+   * I filtri di query di ogni lettura, ricavati dalla specifica OpenAPI dell'API (generata dai
+   * contratti Zod): `"/v1/time-off/requests" -> { userId: "uuid", status: "string", … }`.
+   * Il modello non può indovinare i nomi dei filtri: li legge da qui (hrx_concept_describe).
+   * Non lancia: senza specifica la descrizione resta senza filtri, come prima.
+   */
+  filtriDelleLetture(): Promise<Map<string, Record<string, string>>> {
+    this.filtriCache ??= (async () => {
+      const mappa = new Map<string, Record<string, string>>();
+      try {
+        const res = await this.fetchImpl(`${this.baseUrl}/openapi.json`, { method: "GET", headers: this.headers("GET") });
+        if (!res.ok) return mappa;
+        const spec = (await res.json()) as {
+          paths?: Record<string, { get?: { parameters?: Array<{ in?: string; name?: string; schema?: { type?: string; format?: string } }> } }>;
+        };
+        for (const [percorso, voce] of Object.entries(spec.paths ?? {})) {
+          const filtri: Record<string, string> = {};
+          for (const prm of voce.get?.parameters ?? []) {
+            if (prm.in === "query" && prm.name) filtri[prm.name] = prm.schema?.format ?? prm.schema?.type ?? "string";
+          }
+          if (Object.keys(filtri).length > 0) mappa.set(percorso, filtri);
+        }
+      } catch {
+        /* nessuna specifica: nessun filtro dichiarato */
+      }
+      return mappa;
+    })();
+    return this.filtriCache;
+  }
+
   async call<T = unknown>(method: string, path: string, body?: unknown): Promise<T> {
     const url = `${this.baseUrl}/v1${path}`;
     const doFetch = () =>

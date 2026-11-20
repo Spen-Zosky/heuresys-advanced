@@ -107,6 +107,7 @@ import { blueprintProcessesRoutes } from "./modules/blueprint-processes/routes.j
 import { blueprintActivationsRoutes } from "./modules/blueprint-activations/routes.js";
 import { blueprintOverridesRoutes } from "./modules/blueprint-overrides/routes.js";
 import { processKpiTemplatesRoutes } from "./modules/process-kpi-templates/routes.js";
+import { tenantProcessesRoutes } from "./modules/tenant-processes/routes.js";
 import { organizationUnitKpiTemplatesRoutes } from "./modules/organization-unit-kpi-templates/routes.js";
 import { seedAcquisitionRunsRoutes } from "./modules/seed-acquisition-runs/routes.js";
 import { tenantImportRunsRoutes } from "./modules/tenant-import-runs/routes.js";
@@ -554,6 +555,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(blueprintOverridesRoutes, { prefix: "/v1/blueprint-overrides" });
   await app.register(tenantBlueprintsRoutes, { prefix: "/v1/tenant-blueprints" });
   await app.register(processKpiTemplatesRoutes, { prefix: "/v1/process-kpi-templates" });
+  await app.register(tenantProcessesRoutes, { prefix: "/v1/tenant-processes" });
   await app.register(organizationUnitKpiTemplatesRoutes, { prefix: "/v1/organization-unit-kpi-templates" });
   // #164 F3 — le 4 superfici ETL brownfield sono RITIRATE (non piu' congelate).
   // Misurato prima di rimuoverle: rispondevano 404 in produzione, quindi il ritiro
@@ -578,12 +580,8 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(seedApprovalDecisionsRoutes, { prefix: "/v1/seed-approval-decisions" });
   await app.register(meRoutes, { prefix: "/v1/me" });
   // Il Faldone dell'Utente: tutti i dati di una persona, nessuno escluso, con {omissis}.
-  // Staccato dalla produzione finché non arriva la correzione di riservatezza (revisione del
-  // 2026-11-19): le rotte esistono solo dove FALDONE_ATTIVO=1, cioè nelle sue prove.
-  if (process.env["FALDONE_ATTIVO"] === "1") {
-    await app.register(faldoneSelfRoutes, { prefix: "/v1/me/faldone" });
-    await app.register(faldoneRoutes, { prefix: "/v1/faldone" });
-  }
+  await app.register(faldoneSelfRoutes, { prefix: "/v1/me/faldone" });
+  await app.register(faldoneRoutes, { prefix: "/v1/faldone" });
   await app.register(compensationRoutes, { prefix: "/v1/compensation" });
   await app.register(dashboardRoutes, { prefix: "/v1/dashboard" });
   await app.register(analyticsRoutes, { prefix: "/v1/analytics" });

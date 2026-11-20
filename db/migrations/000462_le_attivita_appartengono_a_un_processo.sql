@@ -276,8 +276,11 @@ COMMIT;
 DO $$
 DECLARE n_cl int; n_rr int;
 BEGIN
+  -- sys_tenant_processes è 'ibrido' da ADR-0060 P3 (la rotta nativa del responsabile): qui si
+  -- controlla che le tre tabelle siano classificate, con lo stato che 000429 dichiara per ciascuna.
   SELECT count(*) INTO n_cl FROM unnest(ARRAY['sys_tenant_processes','sys_tenant_process_steps','sys_tenant_process_activity_rules']) t(nome)
-   WHERE NOT EXISTS (SELECT 1 FROM sys.sys_classificazione_direzione_dato c WHERE c.tabella = t.nome AND c.stato = 'importato');
+   WHERE NOT EXISTS (SELECT 1 FROM sys.sys_classificazione_direzione_dato c WHERE c.tabella = t.nome
+                      AND c.stato = CASE WHEN t.nome = 'sys_tenant_processes' THEN 'ibrido' ELSE 'importato' END);
   SELECT count(*) INTO n_rr FROM unnest(ARRAY['sys_tenant_processes','sys_tenant_process_steps','sys_tenant_process_activity_rules']) t(nome)
    WHERE NOT EXISTS (SELECT 1 FROM sys.sys_reconciliation_registry r WHERE r.reconciliation_registry_table_name = t.nome);
   IF n_cl <> 0 OR n_rr <> 0 THEN

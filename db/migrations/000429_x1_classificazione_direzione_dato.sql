@@ -348,7 +348,7 @@ VALUES
   ('sys_blueprint_content_perimeters', 'importato', 'EMENDATO per la mig 000458 (onda 2, O2-01, pacchetto datastore v0.3): contenuto di modello scritto solo dal caricatore del pacchetto del datastore (origine_dato DATASTORE), nessuna rotta API'),
   ('sys_blueprint_content_process_steps', 'importato', 'EMENDATO per la mig 000458 (onda 2, O2-01, pacchetto datastore v0.3): contenuto di modello scritto solo dal caricatore del pacchetto del datastore (origine_dato DATASTORE), nessuna rotta API'),
   ('sys_blueprint_content_position_responsibilities', 'importato', 'EMENDATO per la mig 000458 (onda 2, O2-01, pacchetto datastore v0.3): contenuto di modello scritto solo dal caricatore del pacchetto del datastore (origine_dato DATASTORE), nessuna rotta API'),
-  ('sys_tenant_processes', 'importato', 'EMENDATO per la mig 000462 (ADR-0049, onda 2 T1): processo del tenant scritto solo dal riempimento fuori catena (db/scripts/attivita/), nessuna rotta API di scrittura'),
+  ('sys_tenant_processes', 'ibrido', 'EMENDATO per la mig 000462 (ADR-0049, onda 2 T1) e per ADR-0060 P3: due scrittori reali, il riempimento fuori catena (db/scripts/attivita/) e la rotta nativa PATCH /v1/tenant-processes/:id/owner, che cambia il solo responsabile'),
   ('sys_tenant_process_steps', 'importato', 'EMENDATO per la mig 000462 (ADR-0049, onda 2 T2): attivita'' del processo del tenant, dalle fasi del datastore, scritte solo dal riempimento fuori catena, nessuna rotta API di scrittura'),
   ('sys_tenant_process_activity_rules', 'importato', 'EMENDATO per la mig 000462 (ADR-0049): regole tipo di richiesta -> processo, scritte solo dal riempimento fuori catena, nessuna rotta API di scrittura'),
   ('sys_blueprint_content_receipts', 'infrastruttura', 'EMENDATO per la mig 000460 (consolidamento C3): registro tecnico dei ricevimenti dei pacchetti del datastore, scritto solo dal caricatore, non dato del cliente'),
@@ -417,14 +417,16 @@ BEGIN
   SELECT count(*) FILTER (WHERE stato = 'nativo')         INTO n_nativo    FROM _classificazione_000429;
   SELECT count(*) FILTER (WHERE stato = 'importato')      INTO n_importato FROM _classificazione_000429;
   SELECT count(*) FILTER (WHERE stato = 'infrastruttura') INTO n_infra     FROM _classificazione_000429;
-  IF n_ibrido <> 76 OR n_nativo <> 69 OR n_importato <> 132 OR n_infra <> 45 THEN
-    RAISE EXCEPTION '000429: conteggio inatteso — ibrido=% nativo=% importato=% infrastruttura=% (attesi 76/69/132/45)',
+  -- 77/131 da ADR-0060 P3: sys_tenant_processes passa da importato a ibrido (era 76/132).
+  -- 69 nativo da 000503: sys_project_phases e sys_project_dependencies (era 67).
+  IF n_ibrido <> 77 OR n_nativo <> 69 OR n_importato <> 131 OR n_infra <> 45 THEN
+    RAISE EXCEPTION '000429: conteggio inatteso — ibrido=% nativo=% importato=% infrastruttura=% (attesi 77/69/131/45)',
       n_ibrido, n_nativo, n_importato, n_infra;
   END IF;
 
   SELECT count(*) INTO n_tot FROM sys.sys_classificazione_direzione_dato;
   n_altre := n_tot - n_proprie;
-  RAISE NOTICE '000429: 319 tabelle classificate (76 ibrido, 66 nativo, 132 importato, 45 infrastruttura); altre righe gia'' presenti, di altri file: %; v_tabelle_non_classificate a zero.', n_altre;
+  RAISE NOTICE '000429: 322 tabelle classificate (77 ibrido, 69 nativo, 131 importato, 45 infrastruttura); altre righe gia'' presenti, di altri file: %; v_tabelle_non_classificate a zero.', n_altre;
 END $$;
 
 COMMIT;

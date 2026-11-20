@@ -51,6 +51,7 @@ export const PAGINE_IDONEE_AGENTE: readonly string[] = [
   "/me/certifications",
   "/me/delegations",
   "/me/documents",
+  "/me/faldone",
   "/me/gaps",
   "/me/handbook",
   "/me/handbook/[id]",
@@ -95,6 +96,7 @@ export const PAGINE_IDONEE_AGENTE: readonly string[] = [
   "/skill-taxonomy",
   "/skills",
   "/talent-review",
+  "/tassonomie",
   "/tenant-blueprints",
   "/tenant-blueprints/[id]",
   "/tenant-blueprints/[id]/versions/[n]/build",
@@ -107,6 +109,7 @@ export const PAGINE_IDONEE_AGENTE: readonly string[] = [
   "/time-off",
   "/users",
   "/users/[userId]",
+  "/users/[userId]/faldone",
   "/visualizations",
   "/visualizations/[graphId]",
 ];

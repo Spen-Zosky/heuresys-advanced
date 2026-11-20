@@ -1354,9 +1354,12 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_blueprint_activations",
       "sys_blueprint_content_ccnl",
       "sys_blueprint_content_ccnl_levels",
+      "sys_blueprint_runs",
       "sys_blueprint_variant_versions",
+      "sys_blueprint_variants",
       "sys_industry_codes",
       "sys_tenancies",
+      "sys_tenant_consolidations",
       "sys_user_contracts"
     ]
   },

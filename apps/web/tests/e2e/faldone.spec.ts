@@ -16,7 +16,11 @@ async function apriUnaSezione(page: Page): Promise<void> {
   // La sezione più piccola fra quelle in chiaro: si misura la pagina, non la velocità di una tabella enorme.
   const apribili = page.locator('[data-testid="faldone-sezione"][data-visibilita="piena"]').filter({ has: page.getByTestId("faldone-apri") });
   const n = await apribili.count();
-  const sezione = n > 0 ? apribili.nth(n - 1) : page.getByTestId("faldone-sezione").filter({ has: page.getByTestId("faldone-apri") }).last();
+  const scelta = n > 0 ? apribili.nth(n - 1) : page.getByTestId("faldone-sezione").filter({ has: page.getByTestId("faldone-apri") }).last();
+  // Il pulsante sparisce dopo il clic: la sezione si ritrova per identificativo, non per il pulsante.
+  const id = await scelta.getAttribute("data-sezione");
+  expect(id).toBeTruthy();
+  const sezione = page.locator(`[data-testid="faldone-sezione"][data-sezione="${id}"]`);
   await sezione.getByTestId("faldone-apri").click();
   const esito = sezione.getByTestId("faldone-riga").or(sezione.getByTestId("stato-errore")).first();
   await expect(esito).toBeVisible({ timeout: 30_000 });

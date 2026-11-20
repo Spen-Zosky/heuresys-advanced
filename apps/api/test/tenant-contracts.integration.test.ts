@@ -76,7 +76,7 @@ describe("/v1/tenants/:id/contracts", () => {
       await pool.query(
         `INSERT INTO sys.sys_blueprint_runs (blueprint_run_tenant_id, blueprint_run_code, blueprint_run_package_version, blueprint_run_package_hash,
            blueprint_run_variant_version_id, blueprint_run_model_label, blueprint_run_model_loaded_at)
-         VALUES ($1, 'R1', 1, 'h', $2, 'Prova', now())`, [tenantId, altra.versione]);
+         VALUES ($1, 'R1', 1, repeat('a', 64), $2, 'Prova', now())`, [tenantId, altra.versione]);
       const r = await suite.app.inject({ method: "GET", url: `/v1/tenants/${tenantId}/contracts`, headers: { cookie } });
       expect(r.statusCode).toBe(200);
       const b = r.json() as { source: { kind: string }; contracts: { levels: unknown[] }[] };

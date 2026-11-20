@@ -2857,5 +2857,9 @@
    },
    "solaLettura": true
   }
+ },
+ "esclusi": {
+  "auth": "superficie di autenticazione: il gettone d'agente non la tocca (L9, A-3)",
+  "whistleblowing": "isolamento assoluto delle segnalazioni, solo la custodia (ADR-0036 §5, mig 000414)"
  }
 }

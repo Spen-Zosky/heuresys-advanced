@@ -71,6 +71,8 @@ export interface GiroDeps {
    * il modello, e prende il posto della sua risposta. `null`, la risposta resta quella del modello.
    */
   rifiuto?: () => string | null;
+  /** Il posto della conversazione (limiti.ts): si sospende mentre il giro aspetta la persona. */
+  attesa?: { sospendi: () => void; riprendi: () => void };
   now?: () => number;
 }
 
@@ -139,9 +141,15 @@ export async function eseguiGiro(d: GiroDeps): Promise<EsitoGiro> {
     registro.aggiungi([{ kind: "PROPOSTA", payload: { proposalId: approvalId, strumento: tool } }]);
     await registro.stato("IN_ATTESA");
     d.scrivi(evento("approval_required", payload));
-    const ok = await decided;
-    await registro.stato("IN_CORSO");
-    return ok;
+    // Mentre aspetta la persona il giro non lavora: non occupa il suo posto personale (limiti.ts).
+    d.attesa?.sospendi();
+    try {
+      const ok = await decided;
+      await registro.stato("IN_CORSO");
+      return ok;
+    } finally {
+      d.attesa?.riprendi();
+    }
   };
 
   let sessione = registro.conversazione.sdkSessionRef ?? undefined;

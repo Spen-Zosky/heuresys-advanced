@@ -30,6 +30,7 @@ interface Row {
   created_at: Date;
   updated_at: Date;
   parent_name?: string | null; // G-02: resolved on the list query, undefined elsewhere
+  manager_name?: string | null; // come parent_name: «Cognome, Nome» del responsabile, sull'elenco
 }
 
 const COLS = `organization_unit_id, organization_unit_tenant_id,
@@ -41,6 +42,7 @@ const COLS = `organization_unit_id, organization_unit_tenant_id,
   created_at, updated_at`;
 
 import { toDateOnly } from "../../lib/date-only.js";
+import { cognomeNomeSql } from "../../lib/nome-persona-sql.js";
 
 function dateOnly(d: Date | null): string | null {
   return toDateOnly(d);
@@ -58,6 +60,7 @@ function toOu(r: Row): OrganizationUnit {
     parentId: r.organization_unit_parent_id,
     parentName: r.parent_name ?? null,
     managerUserId: r.organization_unit_manager_user_id,
+    managerName: r.manager_name ?? null,
     effectiveFrom: dateOnly(r.organization_unit_effective_from)!,
     effectiveTo: dateOnly(r.organization_unit_effective_to),
     isActive: r.organization_unit_is_active,
@@ -97,7 +100,10 @@ export async function listOus(
   const res = await q.query<Row>(
     `SELECT ${COLS},
             (SELECT p.organization_unit_name FROM sys.sys_organization_units p
-              WHERE p.organization_unit_id = sys.sys_organization_units.organization_unit_parent_id) AS parent_name
+              WHERE p.organization_unit_id = sys.sys_organization_units.organization_unit_parent_id) AS parent_name,
+            (SELECT ${cognomeNomeSql("m")} FROM sys.sys_users m
+              WHERE m.user_id = sys.sys_organization_units.organization_unit_manager_user_id
+                AND m.user_tenant_id = sys.sys_organization_units.organization_unit_tenant_id) AS manager_name
        FROM sys.sys_organization_units ${whereClause}
       ORDER BY lower(organization_unit_name), organization_unit_code LIMIT $${limIdx} OFFSET $${offIdx}`,
     params,

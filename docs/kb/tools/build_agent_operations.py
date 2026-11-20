@@ -273,6 +273,9 @@ def main():
         "_generato_da": "docs/kb/tools/build_agent_operations.py — non modificare a mano",
         "_fonti": [ATLAS.replace("\\", "/"), PERIMETRI.replace("\\", "/")],
         "concepts": dati,
+        # Prova dal vivo del 2026-11-20: una domanda sulle segnalazioni riceveva «nel catalogo non
+        # c'è» invece del rifiuto. Il gateway deve sapere che questi concetti esistono e sono vietati.
+        "esclusi": dict(sorted(FUORI_DALLE_LETTURE.items())),
     }, ensure_ascii=False, indent=1, sort_keys=True)
     if "--stdout" in sys.argv:
         print(testo)

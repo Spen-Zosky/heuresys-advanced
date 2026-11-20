@@ -16,6 +16,8 @@ import { z } from "zod";
 import type { HeuresysClient } from "./heuresys-client.js";
 import type { AtlasOperationResolver } from "./atlas-resolver.js";
 import type { PonteVista } from "./comandi-vista.js";
+import { caricaEsclusi, concettiPer } from "./concetti-esclusi.js";
+import { letturaNegata } from "./omissis.js";
 
 /**
  * Sostituisce i `:segnaposto` del percorso con i parametri, e rifiuta ciò che non torna.
@@ -49,7 +51,12 @@ export function bindPath(template: string, params: Record<string, unknown>): str
 // passa. Il test `mcp-tools-list.test.ts` chiama `tools/list` sul server VERO: se torna a
 // lanciare, e' lui a dirlo, non la prova live. Dal 2026-10-30 (SDK 0.3.314, zod 4.6.7) il
 // crash non si riproduce piu' e la controprova lo verifica; qui si resta su `catchall`.
-export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOperationResolver, vista?: PonteVista) {
+export function buildHeuresysMcp(
+  client: HeuresysClient,
+  operations?: AtlasOperationResolver,
+  vista?: PonteVista,
+  esclusi: Record<string, string> = caricaEsclusi(),
+) {
   // A-14: l'agente sa da dove viene ciò che legge. Se l'API ha dichiarato l'origine del dato
   // (nativo, importato, ibrido, misto), la risposta la porta in un secondo blocco.
   const ok = (d: unknown) => {
@@ -113,19 +120,31 @@ export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOpera
     ? [
         tool(
           "hrx_concepts_search",
-          "Elenca i concetti di dominio che l'agente puo' interrogare (perimetri aperti). " +
-            "Filtro testuale facoltativo. Ritorna id e operazioni disponibili.",
+          "Elenca i concetti di dominio che l'agente puo' interrogare. Filtro testuale facoltativo, " +
+            "anche in italiano (retribuzione, ferie, persone, segnalazioni…). Ritorna id e operazioni; " +
+            "i concetti vietati alla persona compaiono con accesso NON_AUTORIZZATO. Senza corrispondenze " +
+            "ritorna l'elenco completo degli id.",
           { query: z.string().optional() },
           async (a: { query?: string }) => {
-            const q = (a.query ?? "").trim().toLowerCase();
-            const ids = operations
-              .conceptIds()
-              .filter((id) => q === "" || id.toLowerCase().includes(q));
+            const tutti = operations.conceptIds();
+            // Prova dal vivo del 2026-11-20: la ricerca confrontava solo gli id inglesi, e una
+            // domanda in italiano concludeva che i dati «non si possono leggere».
+            const testoDi = (id: string) =>
+              Object.values(operations.operationsOf(id)).map((o) => `${o.path} ${o.permission ?? ""}`).join(" ");
+            const trovati = concettiPer(a.query ?? "", tutti, testoDi);
+            const vietati = (a.query ?? "").trim() === "" ? [] : concettiPer(a.query ?? "", Object.keys(esclusi));
+            // Una ricerca che porta SOLO a concetti vietati è una lettura negata: il rifiuto fisso
+            // lo decide il gateway (omissis.ts), non il modello.
+            if (vietati.length > 0 && trovati.length === 0) client.segnaLetturaNegata();
             return ok({
-              concepts: ids.map((id) => ({
+              concepts: (trovati.length > 0 || vietati.length > 0 ? trovati : tutti).map((id) => ({
                 conceptId: id,
                 operations: Object.keys(operations.operationsOf(id)).sort(),
               })),
+              ...(vietati.length > 0
+                ? { vietati: vietati.map((id) => ({ conceptId: id, accesso: "NON_AUTORIZZATO", ...letturaNegata() })) }
+                : {}),
+              ...(trovati.length === 0 && vietati.length === 0 ? { nota: "nessuna corrispondenza: ecco tutti i concetti" } : {}),
             });
           },
         ),
@@ -135,6 +154,10 @@ export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOpera
             "e permesso richiesto. Cio' che non compare qui non e' invocabile.",
           { conceptId: z.string() },
           async (a: { conceptId: string }) => {
+            if (Object.prototype.hasOwnProperty.call(esclusi, a.conceptId)) {
+              client.segnaLetturaNegata();
+              return ok({ conceptId: a.conceptId, known: true, accesso: "NON_AUTORIZZATO", ...letturaNegata() });
+            }
             const ops = operations.operationsOf(a.conceptId);
             // Un concetto ignoto NON e' un elenco vuoto: la differenza fra «non esiste» e
             // «esiste e non fa nulla» e' esattamente cio' che il modello deve poter dire.

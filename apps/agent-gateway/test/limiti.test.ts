@@ -93,6 +93,32 @@ describe("ConversazioniAperte", () => {
     expect(c.entra("bruno")).toEqual({ ok: false, motivo: "PERSONA" });
     expect(c.entra("anna").ok).toBe(true);
   });
+
+  it("prova del 2026-11-20: due giri che aspettano la conferma non bloccano una conversazione nuova", () => {
+    const c = new ConversazioniAperte({ perPersona: 2, totali: 10 });
+    const a = c.entra("valentina");
+    const b = c.entra("valentina");
+    if (!a.ok || !b.ok) throw new Error("dovevano entrare");
+    expect(c.entra("valentina")).toEqual({ ok: false, motivo: "PERSONA" });
+    a.sospendi();
+    b.sospendi();
+    const terza = c.entra("valentina");
+    expect(terza.ok).toBe(true);
+    // Alla decisione i due giri riprendono anche oltre il limite: erano già ammessi.
+    a.riprendi();
+    b.riprendi();
+    expect(c.entra("valentina")).toEqual({ ok: false, motivo: "PERSONA" });
+    // Sospendere e riprendere due volte non sposta i conti; esci da sospeso non toglie due volte.
+    a.sospendi();
+    a.sospendi();
+    a.esci();
+    b.esci();
+    if (terza.ok) terza.esci();
+    expect(c.aperte).toBe(0);
+    expect(c.entra("valentina").ok).toBe(true);
+    expect(c.entra("valentina").ok).toBe(true);
+    expect(c.entra("valentina")).toEqual({ ok: false, motivo: "PERSONA" });
+  });
 });
 
 describe("personeAmmesse: solo chi è nominato (ADR-0056 D3)", () => {

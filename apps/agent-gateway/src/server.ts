@@ -493,6 +493,7 @@ const server = createServer(async (req, res) => {
           scrivi,
           nota: () => notaSugliEsiti(vista.esiti),
           rifiuto: () => esitiLetture.rifiuto(),
+          attesa: { sospendi: posto.sospendi, riprendi: posto.riprendi },
           esegui: (o) =>
             runHrAgent(mandato, client, {
               approve: o.approve,

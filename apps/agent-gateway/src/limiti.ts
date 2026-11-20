@@ -116,7 +116,17 @@ export function leggiLimiti(env: Record<string, string | undefined> = process.en
 }
 
 export type Ingresso =
-  | { ok: true; esci: () => void }
+  | {
+      ok: true;
+      esci: () => void;
+      /**
+       * Prova dal vivo del 2026-11-20: due conversazioni ferme ad aspettare la conferma della
+       * persona le impedivano di aprirne una terza (TOO_MANY_CONVERSATIONS_PERSON). Mentre il giro
+       * aspetta la persona non lavora: il suo posto personale si sospende e si riprende alla decisione.
+       */
+      sospendi: () => void;
+      riprendi: () => void;
+    }
   | { ok: false; motivo: "PERSONA" | "SERVIZIO" };
 
 /**
@@ -141,15 +151,30 @@ export class ConversazioniAperte {
     this.perPersona.set(persona, sue + 1);
     this.totale += 1;
     let uscito = false;
+    let sospeso = false;
+    const togli = () => {
+      const ora = (this.perPersona.get(persona) ?? 1) - 1;
+      if (ora > 0) this.perPersona.set(persona, ora);
+      else this.perPersona.delete(persona);
+    };
     return {
       ok: true,
       esci: () => {
         if (uscito) return;
         uscito = true;
-        const ora = (this.perPersona.get(persona) ?? 1) - 1;
-        if (ora > 0) this.perPersona.set(persona, ora);
-        else this.perPersona.delete(persona);
+        if (!sospeso) togli();
         this.totale -= 1;
+      },
+      sospendi: () => {
+        if (uscito || sospeso) return;
+        sospeso = true;
+        togli();
+      },
+      riprendi: () => {
+        if (uscito || !sospeso) return;
+        sospeso = false;
+        // Il giro era già ammesso: riprende anche se nel frattempo la persona ne ha aperti altri.
+        this.perPersona.set(persona, (this.perPersona.get(persona) ?? 0) + 1);
       },
     };
   }

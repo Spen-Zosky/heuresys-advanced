@@ -109,6 +109,11 @@ export class HeuresysClient {
     this.esiti = esiti;
   }
 
+  /** Una lettura negata che non passa dall'API: un concetto vietato chiesto al catalogo. */
+  segnaLetturaNegata(): void {
+    this.esiti?.negata();
+  }
+
   /** Single-flight refresh: concurrent 401s await one rotation. Returns success. */
   private async refreshOnce(): Promise<boolean> {
     if (!this.refreshing) {

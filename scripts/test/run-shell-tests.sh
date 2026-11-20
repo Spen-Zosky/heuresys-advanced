@@ -2009,6 +2009,20 @@ br togli prova
 br attivo; [ $? = 1 ] && ok "togli: blocco tolto a mano" || fail "togli non toglie"
 br boh; [ $? = 2 ] && ok "comando sconosciuto -> 2" || fail "comando sconosciuto non esce 2"
 rm -rf "$BR"
+# ------------------------------------------------- guardia dei valori J3* (20/11/2026)
+section "guardia valori: un testo che il codice o le migrazioni leggono non si traduce"
+GV="db/scripts/rtl-allinea"
+if command -v python3 >/dev/null 2>&1; then
+  python3 - "$GV" >/dev/null 2>&1 <<'PY' && ok "guardia rossa su «Company-wide» (000357)" || fail "la guardia non vede «Company-wide»"
+import sys; sys.path.insert(0, sys.argv[1]); import guardia_valori as g
+sys.exit(0 if g.trova([("sys_okrs", "okr_department", "Company-wide")]) else 1)
+PY
+  for gen in genera_J3_testi genera_J3b_testi_residui genera_J3c_testi_residui; do
+    if python3 "$GV/$gen.py" >/dev/null 2>&1; then ok "guardia verde: $gen"; else fail "guardia rossa: $gen"; fi
+  done
+else
+  ok "python3 assente: guardia valori saltata"
+fi
 # ---------------------------------------------------------------- summary
 printf '\n%d ok, %d failed\n' "$PASS" "$FAIL"
 [ "$FAIL" = 0 ]

@@ -29,3 +29,7 @@ J7_mansioni_famiglia_livello.sql compila famiglia e livello di 11 mansioni RTL-*
 J7b_mansioni_famiglia_livello_regola.sql compila le ultime 25 mansioni del profilo di RTL con una regola dichiarata: famiglia dal gruppo di unita' ISCO della voce ESCO collegata, livello dalla parola che apre il titolo. Dopo J7 e J7b nel profilo di RTL (142 mansioni) nessuna mansione ha famiglia o livello vuoti. Fuori dal profilo restano vuote 22 PROTO-* di altre industrie.
 
 J7c_mansioni_famiglia_mancante.sql compila la famiglia delle 37 mansioni del profilo di RTL che avevano il livello ma non la famiglia (modelli DEPT-* e DIR-*, CEO-EXEC): dalla direzione che il codice nomina, o dall'ISCO. Dopo J7, J7b e J7c nel profilo di RTL (142 mansioni) nessuna ha famiglia o livello vuoti. I livelli gia' presenti non si toccano (per esempio DIR-*-DIR e' JUNIOR, CEO-EXEC e' ENTRY: sono dati da rivedere, non vuoti).
+
+## Guardia dei valori e prova della catena (20/11/2026)
+
+genera_J3*.py chiamano guardia_valori.py: un valore che db/migrations, apps/api/src o packages/shared/src leggono come letterale accanto al nome della colonna (confronto, CHECK, default) non si traduce, e il generatore esce rosso (caso «Company-wide» della 000357, che fece uscire rossa la catena dopo J3c). Dopo ogni J di testi applicato alla copia di prova: bash prova-catena.sh <.env della copia> (migrate.sh exit 0); rifiuta i database che non sono di prova.

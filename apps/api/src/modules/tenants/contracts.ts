@@ -28,7 +28,7 @@ export async function contrattiDelTenant(q: DbConnector, tenantId: string): Prom
   const tenant = t.rows[0];
   if (!tenant) return null;
 
-  let versioni = await versioniAttiveDelTenant(q, tenantId);
+  const versioni = await versioniAttiveDelTenant(q, tenantId);
   // Come per la scala dei livelli: se le tabelle del contratto non ci sono su questo database, la scheda è vuota, non rotta.
   const presente = await q.query<{ ok: boolean }>(`SELECT to_regclass('sys.sys_blueprint_content_ccnl_levels') IS NOT NULL AS ok`);
   let ccnl: RigaCcnl[] = [];
@@ -81,7 +81,6 @@ export async function contrattiDelTenant(q: DbConnector, tenantId: string): Prom
       const a = alt.rows[0];
       if (a) {
         await leggi([a.id]);
-        versioni = [a.id];
         source = { kind: "OTHER_VERSION", versionNumber: Number(a.numero), versionStatus: a.stato };
       }
     }

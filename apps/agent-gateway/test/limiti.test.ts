@@ -119,6 +119,21 @@ describe("ConversazioniAperte", () => {
     expect(c.entra("valentina").ok).toBe(true);
     expect(c.entra("valentina")).toEqual({ ok: false, motivo: "PERSONA" });
   });
+
+  it("le sospese hanno un tetto: una persona non riempie il servizio di giri in attesa", () => {
+    const c = new ConversazioniAperte({ perPersona: 2, totali: 100 });
+    const aperte: Array<{ sospendi: () => void }> = [];
+    for (let i = 0; i < 10; i++) {
+      const g = c.entra("valentina");
+      if (!g.ok) break;
+      g.sospendi();
+      aperte.push(g);
+    }
+    // 2 sospese + 2 attive (le ultime due non si sospendono più): mai oltre 2 × perPersona.
+    expect(aperte.length).toBe(4);
+    expect(c.aperte).toBe(4);
+    expect(c.entra("valentina")).toEqual({ ok: false, motivo: "PERSONA" });
+  });
 });
 
 describe("personeAmmesse: solo chi è nominato (ADR-0056 D3)", () => {

@@ -136,6 +136,9 @@ export type Ingresso =
  */
 export class ConversazioniAperte {
   private readonly perPersona = new Map<string, number>();
+  /** Conversazioni sospese per persona: anche loro hanno un tetto, pari a `perPersona`, così una
+   * persona non riempie il servizio di giri in attesa (revisione di sicurezza del 2026-11-20). */
+  private readonly sospese = new Map<string, number>();
   private totale = 0;
 
   constructor(private readonly limiti: Pick<Limiti, "perPersona" | "totali">) {}
@@ -152,29 +155,34 @@ export class ConversazioniAperte {
     this.totale += 1;
     let uscito = false;
     let sospeso = false;
-    const togli = () => {
-      const ora = (this.perPersona.get(persona) ?? 1) - 1;
-      if (ora > 0) this.perPersona.set(persona, ora);
-      else this.perPersona.delete(persona);
+    const sposta = (mappa: Map<string, number>, delta: number) => {
+      const ora = (mappa.get(persona) ?? 0) + delta;
+      if (ora > 0) mappa.set(persona, ora);
+      else mappa.delete(persona);
     };
     return {
       ok: true,
       esci: () => {
         if (uscito) return;
         uscito = true;
-        if (!sospeso) togli();
+        sposta(sospeso ? this.sospese : this.perPersona, -1);
         this.totale -= 1;
       },
       sospendi: () => {
         if (uscito || sospeso) return;
+        // Oltre il tetto delle sospese il posto resta occupato: la persona aspetta, come prima.
+        if ((this.sospese.get(persona) ?? 0) >= this.limiti.perPersona) return;
         sospeso = true;
-        togli();
+        sposta(this.perPersona, -1);
+        sposta(this.sospese, 1);
       },
       riprendi: () => {
         if (uscito || !sospeso) return;
         sospeso = false;
-        // Il giro era già ammesso: riprende anche se nel frattempo la persona ne ha aperti altri.
-        this.perPersona.set(persona, (this.perPersona.get(persona) ?? 0) + 1);
+        // Il giro era già ammesso: riprende anche se nel frattempo la persona ne ha aperti altri
+        // (al massimo 2 × perPersona in tutto, per il tetto delle sospese).
+        sposta(this.sospese, -1);
+        sposta(this.perPersona, 1);
       },
     };
   }

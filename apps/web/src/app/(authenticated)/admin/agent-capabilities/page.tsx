@@ -22,7 +22,7 @@ import { PageHeader } from "@/components/intestazione-pagina";
 import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
-import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
+import { StatoCaricamento, StatoErrore, StatoNegato, StatoVuoto } from "@/components/stato-pagina";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -124,9 +124,11 @@ function Capacita({ c }: { c: AgentCapability }) {
 export default function AgentCapabilitiesPage() {
   const { t } = useTranslation("admin");
   const qc = useQueryClient();
-  const perms = useCurrentUserPermissions().data?.permissions ?? [];
+  const permessi = useCurrentUserPermissions();
+  const perms = permessi.data?.permissions ?? [];
+  const puoLeggere = perms.includes("agent_capability:read");
   const [nuova, setNuova] = useState({ code: "", agentCode: "", description: "", undoMechanism: "GIORNALE_UNDO" as string, undoRef: "", volumeCap: "50" });
-  const elenco = useQuery({ queryKey: ["agent-capabilities"], queryFn: () => apiFetch<AgentCapabilityListResponse>("/v1/agent-capabilities") });
+  const elenco = useQuery({ queryKey: ["agent-capabilities"], queryFn: () => apiFetch<AgentCapabilityListResponse>("/v1/agent-capabilities"), enabled: puoLeggere });
   const crea = useMutation({
     mutationFn: () => apiFetch("/v1/agent-capabilities", {
       method: "POST",
@@ -135,6 +137,16 @@ export default function AgentCapabilitiesPage() {
     onSuccess: () => { setNuova({ code: "", agentCode: "", description: "", undoMechanism: "GIORNALE_UNDO", undoRef: "", volumeCap: "50" }); void qc.invalidateQueries({ queryKey: ["agent-capabilities"] }); },
   });
   const codiceValido = /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/.test(nuova.code.trim());
+  // Il registro è di chi ha agent_capability:read: agli altri la pagina lo dice, senza una chiamata che tornerebbe 403.
+  if (permessi.isLoading) return <main className="mx-auto max-w-7xl px-6 pb-8"><StatoCaricamento /></main>;
+  if (!puoLeggere) {
+    return (
+      <main data-testid="agent-capabilities-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+        <PageHeader title={t("agentCaps.titolo")} description={t("agentCaps.descrizione")} />
+        <StatoNegato motivo={t("agentCaps.negato")} />
+      </main>
+    );
+  }
   return (
     <main data-testid="agent-capabilities-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader title={t("agentCaps.titolo")} description={t("agentCaps.descrizione")} />

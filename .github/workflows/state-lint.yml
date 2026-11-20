@@ -28,6 +28,12 @@ on:
       - ".programmi/**"
       - "docs/kb/tools/programmi.py"
       - ".github/workflows/state-lint.yml"
+  # Giro giornaliero (2026-11-20): su main state-lint gira solo quando si toccano i file di stato,
+  # e cosi' e' rimasto rosso dal 5 al 20/11 senza che nessuno lo vedesse (SOT_STATE indietro di 31
+  # migrazioni, un modulo senza test). Ogni mattina alle 05:40 UTC gira su main; se e' rosso, il job
+  # `avviso` apre (o aggiorna) un'issue con l'etichetta `state-lint-rosso`.
+  schedule:
+    - cron: "40 5 * * *"
   workflow_dispatch: {}
 
 permissions:
@@ -80,3 +86,29 @@ jobs:
 
       - name: Module/test coverage census — repo
         run: python3 docs/kb/tools/check_module_test_coverage.py
+
+  avviso:
+    # Solo per il giro giornaliero o un lancio a mano, e solo se state-lint e' rosso: un'issue
+    # sola con l'etichetta `state-lint-rosso`, a cui si aggiunge un commento a ogni giro rosso.
+    needs: state-lint
+    if: ${{ failure() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
+    runs-on: [self-hosted, off-prod]
+    timeout-minutes: 3
+    permissions:
+      issues: write
+    steps:
+      - name: Apri o aggiorna l'issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          CORSA: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        # Solo `gh api`: sul linux-pc c'e' gh 2.4, che non ha `gh label` ne' `gh issue --json`.
+        run: |
+          gh api -X POST "repos/$GH_REPO/labels" -f name=state-lint-rosso -f color=B60205 >/dev/null 2>&1 || true
+          n="$(gh api "repos/$GH_REPO/issues?state=open&labels=state-lint-rosso&per_page=1" -q '.[0].number // empty')"
+          testo="state-lint e' rosso su main ($(date -u +%Y-%m-%d)). Corsa: $CORSA"
+          if [ -n "$n" ]; then
+            gh api -X POST "repos/$GH_REPO/issues/$n/comments" -f body="$testo" >/dev/null
+          else
+            gh api -X POST "repos/$GH_REPO/issues" -f title="state-lint rosso su main" -f body="$testo" -f "labels[]=state-lint-rosso" >/dev/null
+          fi

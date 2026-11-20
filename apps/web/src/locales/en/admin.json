@@ -457,7 +457,6 @@
         "tenantId": "Tenant ID",
         "createdAt": "Created"
       },
-      "omissis": "{omissis}",
       "dash": "—",
       "wizardLink": "Open Enterprise Typing wizard →",
       "typingAssessed": "Assessed on {{date}}",
@@ -656,6 +655,7 @@
         "effectiveFrom": "Effective from",
         "effectiveTo": "Effective to"
       },
+      "omissis": "{omissis}",
       "dash": "—",
       "edit": {
         "listTruncated": "The menu shows {{shown}} of {{total}} positions.",

@@ -24,8 +24,8 @@
 -- dato finto.
 --
 -- NESSUNA COLONNA NOMINA UNA PERSONA: chi porta una fase è un'appartenenza, e l'autore non si scrive
--- qui (lo scrive il registro di audit dell'API). Le tabelle restano quindi fuori dal catalogo del
--- Faldone e dalla mappa GDPR.
+-- qui (lo scrive il registro di audit dell'API). Attraverso l'appartenenza la fase è un dato
+-- COLLEGATO della persona: il Faldone la legge come «Fasi dei progetti che porta» (faldone/classi.ts).
 -- CLASSIFICAZIONE E REGISTRO: tabelle classificate in 000429 e registrate in 000062, file di numero
 --   minore, emendati come per la 000501; vuote per ragione scritta nell'elenco di storia36.
 -- IDEMPOTENTE: IF NOT EXISTS, vincoli in forma DROP/ADD.

@@ -49,6 +49,19 @@ describe("/v1/processes", () => {
   });
 
   it("la scheda di un processo porta sottoprocessi e attività coerenti con i conteggi della sintesi", async () => {
+    // Il database della CI può non avere processi di RTL: allora la prova se ne crea uno con un
+    // sottoprocesso, nella transazione del file che torna indietro alla fine (tx-isolation).
+    const ci = await pool.query<{ n: number }>(
+      `SELECT count(*)::int AS n FROM sys.sys_tenant_processes
+        WHERE tenant_process_tenant_id = $1 AND tenant_process_is_active AND tenant_process_level = 1`, [RTL]);
+    if (ci.rows[0]!.n === 0) {
+      const padre = randomUUID();
+      await pool.query(
+        `INSERT INTO sys.sys_tenant_processes (tenant_process_id, tenant_process_tenant_id, tenant_process_code,
+           tenant_process_name, tenant_process_level, tenant_process_parent_id)
+         VALUES ($1, $2, 'PROVA-V4-P', 'Processo di prova V4', 1, NULL),
+                ($3, $2, 'PROVA-V4-S', 'Sottoprocesso di prova V4', 2, $1)`, [padre, RTL, randomUUID()]);
+    }
     const l = TenantProcessListResponseSchema.parse(
       (await t.app.inject({ method: "GET", url: "/v1/processes?level=1", headers: { cookie } })).json());
     const conSotto = l.items.find((p) => p.subprocessCount > 0) ?? l.items[0];

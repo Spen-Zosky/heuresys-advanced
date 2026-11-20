@@ -121,6 +121,14 @@ async function seminaTenantConContratti(): Promise<string> {
   return tenantId;
 }
 
+/** Il limite di richieste e' per indirizzo (600 al minuto): ogni chiamata della guardia ne porta uno proprio,
+ *  cosi' la prova misura i contratti delle risposte e non il limitatore. */
+let contatore = 0;
+function indirizzoNuovo(): string {
+  contatore++;
+  return `10.${(contatore >> 16) & 255}.${(contatore >> 8) & 255}.${contatore & 255}`;
+}
+
 let t: TestApp;
 let rtlId = "";
 let provaId = "";
@@ -159,7 +167,7 @@ describe("nessuna risposta fuori contratto con dati veri", () => {
 
     const chiama = async (url: string, s: S): Promise<{ status: number; corpo: unknown }> => {
       const r = await Promise.race([
-        t.app.inject({ method: "GET", url, headers: hdr(s) }),
+        t.app.inject({ method: "GET", url, headers: hdr(s), remoteAddress: indirizzoNuovo() }),
         new Promise<never>((_, no) => setTimeout(() => no(new Error(`nessuna risposta in 30 s: ${url}`)), 30_000)),
       ]);
       let corpo: unknown = null;

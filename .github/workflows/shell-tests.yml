@@ -65,12 +65,26 @@ jobs:
           tar -xJf "$d/sc.tar.xz" -C "$d" --strip-components=1 shellcheck-v0.9.0/shellcheck
           echo "$d" >> "$GITHUB_PATH"
 
-      # Alcuni casi chiamano `python`; sui PC Linux c'e' solo `python3`. Un collegamento della corsa.
-      - name: python -> python3
+      # Alcuni casi chiamano `python` e alcuni strumenti importano `yaml` (zp_review.py). Sui PC
+      # Linux c'e' solo `python3`, e sul Debian 13 (mod-hpz420workstation) manca pyyaml: li'
+      # zp-review-tests dava «3 passati, 17 falliti» (misurato il 20/11: «serve pyyaml»), mentre
+      # sulla VM e sul linux-pc passava. Se l'interprete di sistema non ha yaml, la corsa si fa un
+      # ambiente suo con pyyaml fissato; in ogni caso `python` e `python3` puntano allo stesso.
+      - name: python e pyyaml della corsa
         run: |
-          command -v python >/dev/null 2>&1 && exit 0
-          mkdir -p "$RUNNER_TEMP/pybin" && ln -sf "$(command -v python3)" "$RUNNER_TEMP/pybin/python"
-          echo "$RUNNER_TEMP/pybin" >> "$GITHUB_PATH"
+          # Il venv va in PATH con la sua cartella bin: un collegamento a bin/python3 messo altrove
+          # non trova pyvenv.cfg e torna l'interprete di sistema, senza yaml (visto il 20/11).
+          if python3 -c 'import yaml' 2>/dev/null; then
+            d="$RUNNER_TEMP/pybin"; mkdir -p "$d"
+            command -v python >/dev/null 2>&1 || ln -sf "$(command -v python3)" "$d/python"
+          else
+            python3 -m venv "$RUNNER_TEMP/pyenv"
+            "$RUNNER_TEMP/pyenv/bin/pip" install --quiet --disable-pip-version-check 'pyyaml==6.0.2'
+            d="$RUNNER_TEMP/pyenv/bin"
+          fi
+          echo "$d" >> "$GITHUB_PATH"
+          PATH="$d:$PATH" python -c 'import sys, yaml; print(sys.version.split()[0], "pyyaml", yaml.__version__)'
+          PATH="$d:$PATH" python3 -c 'import yaml'
 
       - name: Run shell test gate
         run: bash scripts/test/run-shell-tests.sh

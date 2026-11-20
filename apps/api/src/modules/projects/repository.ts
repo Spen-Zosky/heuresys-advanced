@@ -152,6 +152,7 @@ export async function findProjectByCode(
 
 export async function loadProjectMembers(db: Eseguibile, id: string): Promise<ProjectMember[]> {
   const r = await db.query<{
+    project_member_id: string;
     project_member_user_id: string;
     project_member_role: string;
     email: string | null;
@@ -160,7 +161,7 @@ export async function loadProjectMembers(db: Eseguibile, id: string): Promise<Pr
     project_member_ends_on: Date | string | null;
     is_current: boolean;
   }>(
-    `SELECT m.project_member_user_id, m.project_member_role,
+    `SELECT m.project_member_id, m.project_member_user_id, m.project_member_role,
             u.user_email AS email,
             COALESCE(nullif(concat_ws(', ', nullif(trim(u.user_last_name), ''), nullif(trim(u.user_first_name), '')), ''), nullif(trim(u.user_display_name), '')) AS full_name,
             m.project_member_starts_on, m.project_member_ends_on,
@@ -173,6 +174,7 @@ export async function loadProjectMembers(db: Eseguibile, id: string): Promise<Pr
       ORDER BY (m.project_member_role = 'LEAD') DESC, full_name ASC NULLS LAST /* S-09: «Cognome, Nome» */`, [id]);
 
   return r.rows.map((x) => ({
+    memberId: x.project_member_id,
     userId: x.project_member_user_id,
     role: x.project_member_role as ProjectMember["role"],
     email: x.email,

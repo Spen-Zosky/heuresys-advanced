@@ -127,6 +127,11 @@
       "heuresys-source": "./src/schemas/projects.ts",
       "default": "./dist/schemas/projects.js"
     },
+    "./schemas/project-plan": {
+      "types": "./dist/schemas/project-plan.d.ts",
+      "heuresys-source": "./src/schemas/project-plan.ts",
+      "default": "./dist/schemas/project-plan.js"
+    },
     "./schemas/teams": {
       "types": "./dist/schemas/teams.d.ts",
       "heuresys-source": "./src/schemas/teams.ts",

@@ -20,3 +20,5 @@ sys_notification_preferences | Le preferenze di notifica sono SCELTE PERSONALI d
 sys_process_kpi_templates | Gate EXCLUDE gia' in vigore (S970/S994), rispettato dal C7: i template KPI di processo sono esclusi dal perimetro di popolamento.
 sys_agent_requests | Le richieste dell'agente con previsione di spesa nascono dall'uso dell'agente e passano dal sì di Enzo (tappa T2, mig 000501): inventarle significherebbe fingere richieste che nessuno ha fatto. Restano vuote finché l'agente non ne propone una vera.
 sys_agent_call_log | Il registro di costo e durata registra le chiamate vere dell'agente (tappa T2, mig 000501): righe inventate falserebbero il costo. Vuoto finché il gateway non vi scrive.
+sys_project_phases | Il piano di un progetto (fasi, attività, tappe, date) lo scrive chi guida il progetto dalla sua pagina (V6, mig 000503): i progetti di RTL sono le squadre di prima, senza date né processo, e nessuna fonte porta un piano. Inventarlo sarebbe un dato finto. Vuota finché qualcuno non pianifica.
+sys_project_dependencies | Le dipendenze fra le fasi nascono con il piano (V6, mig 000503): senza fasi vere non ce ne sono. Vuota finché qualcuno non pianifica.

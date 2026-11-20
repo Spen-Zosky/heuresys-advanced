@@ -1207,6 +1207,81 @@
       "vietato": "You are not allowed to manage projects.",
       "duplicato": "A project with this code already exists.",
       "errore": "Save failed. Try again."
+    },
+    "piano": {
+      "scheda": "Plan",
+      "gantt": "Gantt",
+      "dipendenze": "Dependencies",
+      "titolo": "Project plan ({{count}} items)",
+      "titolo_one": "Project plan ({{count}} item)",
+      "aggiungi": "Add a phase",
+      "aggiungiDentro": "Add inside",
+      "modifica": "Edit",
+      "togli": "Remove",
+      "processo": "Process the project carries out",
+      "vuoto": "The project has no plan yet.",
+      "vuotoGestore": "The project has no plan yet: add the first phase with its dates.",
+      "ganttVuoto": "The Gantt chart appears once at least one plan item has a date.",
+      "dipendenzeVuote": "No dependencies between the plan items.",
+      "legameFrase": "“{{dopo}}” waits for “{{prima}}”: {{legame}}",
+      "ritardo": "{{count}} days of lag",
+      "ritardo_one": "{{count}} day of lag",
+      "pianificato": "Planned",
+      "effettivo": "Actual",
+      "dentro": "Part of",
+      "primoLivello": "Top level of the plan",
+      "attivitaProcesso": "Process activity",
+      "descrizione": "Description",
+      "modificaTitolo": "Edit the plan item",
+      "nuovaTitolo": "New plan item",
+      "dataTappa": "Milestone date",
+      "inizioPianificato": "Planned start",
+      "finePianificata": "Planned end",
+      "inizioEffettivo": "Actual start",
+      "fineEffettiva": "Actual end",
+      "nessuno": "Nobody",
+      "annulla": "Cancel",
+      "salva": "Save",
+      "salvataggio": "Saving…",
+      "prima": "Before",
+      "dopo": "After",
+      "tipoLegame": "Link type",
+      "ritardoGiorni": "Lag in days",
+      "aggiungiLegame": "Add the dependency",
+      "colonne": {
+        "nome": "Name",
+        "tipo": "Type",
+        "chi": "Owner",
+        "inizio": "Start",
+        "fine": "End",
+        "avanzamento": "Progress",
+        "stato": "Status"
+      },
+      "tipo": {
+        "PHASE": "Phase",
+        "ACTIVITY": "Activity",
+        "MILESTONE": "Milestone"
+      },
+      "stato": {
+        "PLANNED": "Planned",
+        "ACTIVE": "In progress",
+        "COMPLETED": "Completed",
+        "CANCELLED": "Cancelled"
+      },
+      "legame": {
+        "FS": "starts when the other finishes",
+        "SS": "starts when the other starts",
+        "FF": "finishes when the other finishes",
+        "SF": "finishes when the other starts"
+      },
+      "errori": {
+        "lettura": "The project plan could not be loaded.",
+        "vietato": "You do not lead this project: the plan is edited by its lead or by an HR mandate.",
+        "ciclo": "This link would close a loop: a phase would end up waiting for itself.",
+        "duplicato": "This dependency already exists.",
+        "dati": "Check the data: the end cannot come before the start, and a milestone has a single date.",
+        "generico": "Saving failed. Try again."
+      }
     }
   },
   "recruiting": {

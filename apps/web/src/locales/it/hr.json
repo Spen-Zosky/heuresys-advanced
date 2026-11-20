@@ -1207,6 +1207,81 @@
       "vietato": "Non hai il permesso di gestire i progetti.",
       "duplicato": "Esiste già un progetto con questo codice.",
       "errore": "Salvataggio non riuscito. Riprova."
+    },
+    "piano": {
+      "scheda": "Piano",
+      "gantt": "Gantt",
+      "dipendenze": "Dipendenze",
+      "titolo": "Piano del progetto ({{count}} voci)",
+      "titolo_one": "Piano del progetto ({{count}} voce)",
+      "aggiungi": "Aggiungi una fase",
+      "aggiungiDentro": "Aggiungi dentro",
+      "modifica": "Modifica",
+      "togli": "Togli",
+      "processo": "Processo che il progetto esegue",
+      "vuoto": "Il progetto non ha ancora un piano.",
+      "vuotoGestore": "Il progetto non ha ancora un piano: aggiungi la prima fase con le sue date.",
+      "ganttVuoto": "Il Gantt compare quando almeno una fase del piano ha una data.",
+      "dipendenzeVuote": "Nessuna dipendenza fra le fasi del piano.",
+      "legameFrase": "«{{dopo}}» aspetta «{{prima}}»: {{legame}}",
+      "ritardo": "{{count}} giorni di ritardo",
+      "ritardo_one": "{{count}} giorno di ritardo",
+      "pianificato": "Pianificato",
+      "effettivo": "Effettivo",
+      "dentro": "Fa parte di",
+      "primoLivello": "Primo livello del piano",
+      "attivitaProcesso": "Attività del processo",
+      "descrizione": "Descrizione",
+      "modificaTitolo": "Modifica la voce del piano",
+      "nuovaTitolo": "Nuova voce del piano",
+      "dataTappa": "Data della tappa",
+      "inizioPianificato": "Inizio pianificato",
+      "finePianificata": "Fine pianificata",
+      "inizioEffettivo": "Inizio effettivo",
+      "fineEffettiva": "Fine effettiva",
+      "nessuno": "Nessuno",
+      "annulla": "Annulla",
+      "salva": "Salva",
+      "salvataggio": "Salvataggio in corso…",
+      "prima": "Prima",
+      "dopo": "Dopo",
+      "tipoLegame": "Tipo di legame",
+      "ritardoGiorni": "Ritardo in giorni",
+      "aggiungiLegame": "Aggiungi la dipendenza",
+      "colonne": {
+        "nome": "Nome",
+        "tipo": "Tipo",
+        "chi": "Chi la porta",
+        "inizio": "Inizio",
+        "fine": "Fine",
+        "avanzamento": "Avanzamento",
+        "stato": "Stato"
+      },
+      "tipo": {
+        "PHASE": "Fase",
+        "ACTIVITY": "Attività",
+        "MILESTONE": "Tappa"
+      },
+      "stato": {
+        "PLANNED": "Pianificata",
+        "ACTIVE": "In corso",
+        "COMPLETED": "Completata",
+        "CANCELLED": "Annullata"
+      },
+      "legame": {
+        "FS": "comincia quando l'altra finisce",
+        "SS": "comincia quando l'altra comincia",
+        "FF": "finisce quando l'altra finisce",
+        "SF": "finisce quando l'altra comincia"
+      },
+      "errori": {
+        "lettura": "Non è stato possibile caricare il piano del progetto.",
+        "vietato": "Non guidi questo progetto: il piano lo modifica chi lo guida o chi ha un mandato HR.",
+        "ciclo": "Questo legame chiuderebbe un cerchio: una fase finirebbe per aspettare sé stessa.",
+        "duplicato": "Questa dipendenza c'è già.",
+        "dati": "Controlla i dati: la fine non può venire prima dell'inizio, e una tappa ha una data sola.",
+        "generico": "Non è stato possibile salvare. Riprova."
+      }
     }
   },
   "recruiting": {

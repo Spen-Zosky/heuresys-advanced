@@ -18,6 +18,12 @@ import {
   ProjectMemberUpsertBodySchema,
   ProjectProgressBodySchema,
   ProjectUpdateBodySchema,
+  ProjectSchedaSchema,
+  ProjectPhaseCreateBodySchema,
+  ProjectPhaseUpdateBodySchema,
+  ProjectPhaseParamSchema,
+  ProjectDependencyCreateBodySchema,
+  ProjectDependencyParamSchema,
 } from "@heuresys/shared";
 import { actorFromRequest as actor } from "../../lib/actor.js";
 import { requirePermission } from "../../middleware/rbac.js";
@@ -73,6 +79,36 @@ export const projectsRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [app.verifyCsrf, requirePermission("project:manage")],
     schema: { params: ProjectMemberParamSchema, response: { 200: ProjectDetailSchema } },
   }, async (req) => projectsService.removeMember(actor(req), req.params.id, req.params.userId));
+  /* --- il piano del progetto (V6/V7, 000503): la scheda si legge con project:read, si pianifica con project:manage --- */
+  app.get("/:id/scheda", {
+    preHandler: [requirePermission("project:read")],
+    schema: { params: ProjectIdParamSchema, response: { 200: ProjectSchedaSchema } },
+  }, async (req) => projectsService.scheda(actor(req), req.params.id));
+
+  app.post("/:id/phases", {
+    preHandler: [app.verifyCsrf, requirePermission("project:manage")],
+    schema: { params: ProjectIdParamSchema, body: ProjectPhaseCreateBodySchema, response: { 200: ProjectSchedaSchema } },
+  }, async (req) => projectsService.addPhase(actor(req), req.params.id, req.body));
+
+  app.patch("/:id/phases/:phaseId", {
+    preHandler: [app.verifyCsrf, requirePermission("project:manage")],
+    schema: { params: ProjectPhaseParamSchema, body: ProjectPhaseUpdateBodySchema, response: { 200: ProjectSchedaSchema } },
+  }, async (req) => projectsService.updatePhase(actor(req), req.params.id, req.params.phaseId, req.body));
+
+  app.delete("/:id/phases/:phaseId", {
+    preHandler: [app.verifyCsrf, requirePermission("project:manage")],
+    schema: { params: ProjectPhaseParamSchema, response: { 200: ProjectSchedaSchema } },
+  }, async (req) => projectsService.removePhase(actor(req), req.params.id, req.params.phaseId));
+
+  app.post("/:id/dependencies", {
+    preHandler: [app.verifyCsrf, requirePermission("project:manage")],
+    schema: { params: ProjectIdParamSchema, body: ProjectDependencyCreateBodySchema, response: { 200: ProjectSchedaSchema } },
+  }, async (req) => projectsService.addDependency(actor(req), req.params.id, req.body));
+
+  app.delete("/:id/dependencies/:dependencyId", {
+    preHandler: [app.verifyCsrf, requirePermission("project:manage")],
+    schema: { params: ProjectDependencyParamSchema, response: { 200: ProjectSchedaSchema } },
+  }, async (req) => projectsService.removeDependency(actor(req), req.params.id, req.params.dependencyId));
 };
 
 export { projectsService };

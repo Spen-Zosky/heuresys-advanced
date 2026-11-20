@@ -12,6 +12,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { useFormat } from "@/lib/format";
 import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
 import { GestioneProgetto, TogliMembro } from "../gestione-progetto";
+import { PianoProgetto } from "../piano-progetto";
 
 /**
  * `#143` F5 — il dettaglio di un progetto: il lavoro e chi lo fa.
@@ -64,7 +65,7 @@ export default function ProjectDetailPage() {
   const correnti = p.members.filter((m) => m.isCurrent);
 
   return (
-    <main data-testid="project-detail-page" className="mx-auto max-w-4xl space-y-8 px-6 pb-8">
+    <main data-testid="project-detail-page" className="mx-auto max-w-6xl space-y-8 px-6 pb-8">
       <PageHeader title={p.name} description={p.code} />
 
       <Card>
@@ -92,6 +93,8 @@ export default function ProjectDetailPage() {
       </Card>
 
       <GestioneProgetto key={`${p.status}-${p.progressPct}`} progetto={p} />
+
+      <PianoProgetto projectId={p.projectId} />
 
       <Card>
         <CardHeader>

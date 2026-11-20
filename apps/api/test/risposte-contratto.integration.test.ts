@@ -211,6 +211,8 @@ describe("nessuna risposta fuori contratto con dati veri", () => {
       `SELECT data_type AS t FROM information_schema.columns WHERE table_schema='sys' AND table_name='sys_blueprint_content_ccnl' AND column_name='blueprint_content_ccnl_effective'`);
     const diretta = await chiama(`/v1/tenants/${provaId}/contracts`, attori[0]!.s);
     expect(diretta.status, `contratti del tenant di prova (colonna ${col?.t}): ${JSON.stringify(diretta.corpo).slice(0, 300)}`).toBe(200);
+    const corpoDiretto = JSON.stringify(diretta.corpo);
+    expect(corpoDiretto, `il tenant di prova deve mostrare il suo contratto datato (colonna ${col?.t}): ${corpoDiretto.slice(0, 400)}`).toContain('"effective":"2024-01-01"');
     expect(chiamate, "nessuna rotta e' stata chiamata").toBeGreaterThan(50);
     // Canarino: la rotta che ha motivato la guardia deve essere stata davvero chiamata, altrimenti la prova e' cieca.
     expect([...rotteChiamate], "la rotta dei contratti non e' stata chiamata: la guardia e' cieca").toContain("/v1/tenants/:id/contracts");

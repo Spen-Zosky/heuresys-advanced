@@ -1177,6 +1177,8 @@
     "riga": "Dettaglio della riga"
   },
   "organigramma": {
+    "senzaCliente": "Nessun cliente nel tuo perimetro",
+    "senzaClienteMotivo": "Il tuo mandato non ha ancora clienti assegnati: l'organigramma mostra solo i clienti che ti sono assegnati.",
     "aggiorna": "Aggiorna",
     "aggiornando": "Aggiornamento…",
     "calcolato": "Calcolato dai dati vivi il {{quando}}",

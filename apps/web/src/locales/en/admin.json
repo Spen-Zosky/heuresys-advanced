@@ -457,6 +457,7 @@
         "tenantId": "Tenant ID",
         "createdAt": "Created"
       },
+      "omissis": "{omissis}",
       "dash": "—",
       "wizardLink": "Open Enterprise Typing wizard →",
       "typingAssessed": "Assessed on {{date}}",
@@ -650,7 +651,6 @@
         "jobRole": "Job Role",
         "owner": "Owner",
         "reportsTo": "Reports to",
-        "listTruncated": "The menu shows {{shown}} of {{total}} positions.",
         "criticality": "Criticality",
         "economicWeight": "Economic weight",
         "effectiveFrom": "Effective from",
@@ -658,6 +658,7 @@
       },
       "dash": "—",
       "edit": {
+        "listTruncated": "The menu shows {{shown}} of {{total}} positions.",
         "cardTitle": "Position — edit",
         "readOnly": "You do not have permission to edit this position.",
         "title": "Title",
@@ -843,6 +844,7 @@
     },
     "resources": {
       "agent_capability": "Agent capabilities",
+      "agent_request": "Agent requests",
       "agent_conversation": "Assistant conversations",
       "analytics": "Analytics",
       "approval": "Approvals",
@@ -2112,6 +2114,7 @@
     }
   },
   "agentCaps": {
+    "negato": "The agent capability registry is visible to HR leadership and to tenant and platform administration: your profile does not have this mandate.",
     "titolo": "Agent capabilities",
     "descrizione": "What the agent may do, on which data, with which limit and how it is undone; and whether it acts asking for confirmation or freely.",
     "elenco": "Capabilities ({{count}})",
@@ -2237,6 +2240,11 @@
     "negato": "The occupation and enterprise catalogs are maintained by platform administration: your profile does not have this mandate."
   },
   "datiRiferimento": {
+    "nomiFonti": {
+      "ESCO": "ESCO — EU occupation & skill taxonomy",
+      "ATECO_2025": "ATECO 2025 — ISTAT Italian economic activity classification",
+      "ESCO_SKILL_HIERARCHY": "ESCO skill hierarchy — group and broader skill of each skill"
+    },
     "titolo": "Official reference data sources",
     "descrizione": "The official taxonomies (ESCO, ATECO 2025, ESCO skill hierarchy) are refreshed from their published sources. A refresh inserts and updates, never deletes; if the source has not changed it stops at once.",
     "fonti": "Sources",

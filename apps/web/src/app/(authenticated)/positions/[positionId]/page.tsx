@@ -16,6 +16,7 @@ import { PositionEditor } from "./_components/position-editor";
 import { TitolariPosizione } from "./_components/titolari-posizione";
 import { Riferimento } from "@/components/scheda-rapida";
 import { useLeggibile } from "@/lib/leggibile";
+import { nomeOOmissis } from "@/lib/leggibile-nucleo";
 
 interface PositionDetail {
   positionId: string;
@@ -41,7 +42,7 @@ interface PositionDetail {
 export default function PositionDetailPage() {
   const { t } = useTranslation("admin");
   const leggi = useLeggibile();
-  const nome = (id: string) => leggi.persona(id) ?? leggi.testo(id);
+  const nome = (id: string) => nomeOOmissis(leggi, id, t("positions.detail.omissis"));
   const params = useParams<{ positionId: string }>();
   const positionId = params.positionId;
   const position = useQuery({

@@ -415,14 +415,15 @@ BEGIN
   SELECT count(*) FILTER (WHERE stato = 'nativo')         INTO n_nativo    FROM _classificazione_000429;
   SELECT count(*) FILTER (WHERE stato = 'importato')      INTO n_importato FROM _classificazione_000429;
   SELECT count(*) FILTER (WHERE stato = 'infrastruttura') INTO n_infra     FROM _classificazione_000429;
-  IF n_ibrido <> 76 OR n_nativo <> 67 OR n_importato <> 132 OR n_infra <> 45 THEN
-    RAISE EXCEPTION '000429: conteggio inatteso — ibrido=% nativo=% importato=% infrastruttura=% (attesi 76/67/132/45)',
+  -- 77/131 da ADR-0060 P3: sys_tenant_processes passa da importato a ibrido (era 76/132).
+  IF n_ibrido <> 77 OR n_nativo <> 67 OR n_importato <> 131 OR n_infra <> 45 THEN
+    RAISE EXCEPTION '000429: conteggio inatteso — ibrido=% nativo=% importato=% infrastruttura=% (attesi 77/67/131/45)',
       n_ibrido, n_nativo, n_importato, n_infra;
   END IF;
 
   SELECT count(*) INTO n_tot FROM sys.sys_classificazione_direzione_dato;
   n_altre := n_tot - n_proprie;
-  RAISE NOTICE '000429: 319 tabelle classificate (76 ibrido, 66 nativo, 132 importato, 45 infrastruttura); altre righe gia'' presenti, di altri file: %; v_tabelle_non_classificate a zero.', n_altre;
+  RAISE NOTICE '000429: 319 tabelle classificate (77 ibrido, 67 nativo, 131 importato, 45 infrastruttura); altre righe gia'' presenti, di altri file: %; v_tabelle_non_classificate a zero.', n_altre;
 END $$;
 
 COMMIT;

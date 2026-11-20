@@ -72,17 +72,19 @@ jobs:
       # ambiente suo con pyyaml fissato; in ogni caso `python` e `python3` puntano allo stesso.
       - name: python e pyyaml della corsa
         run: |
-          d="$RUNNER_TEMP/pybin"; mkdir -p "$d"
+          # Il venv va in PATH con la sua cartella bin: un collegamento a bin/python3 messo altrove
+          # non trova pyvenv.cfg e torna l'interprete di sistema, senza yaml (visto il 20/11).
           if python3 -c 'import yaml' 2>/dev/null; then
-            py="$(command -v python3)"
+            d="$RUNNER_TEMP/pybin"; mkdir -p "$d"
+            command -v python >/dev/null 2>&1 || ln -sf "$(command -v python3)" "$d/python"
           else
             python3 -m venv "$RUNNER_TEMP/pyenv"
             "$RUNNER_TEMP/pyenv/bin/pip" install --quiet --disable-pip-version-check 'pyyaml==6.0.2'
-            py="$RUNNER_TEMP/pyenv/bin/python3"
+            d="$RUNNER_TEMP/pyenv/bin"
           fi
-          ln -sf "$py" "$d/python"; ln -sf "$py" "$d/python3"
           echo "$d" >> "$GITHUB_PATH"
-          "$d/python" -c 'import sys, yaml; print(sys.version.split()[0], "pyyaml", yaml.__version__)'
+          PATH="$d:$PATH" python -c 'import sys, yaml; print(sys.version.split()[0], "pyyaml", yaml.__version__)'
+          PATH="$d:$PATH" python3 -c 'import yaml'
 
       - name: Run shell test gate
         run: bash scripts/test/run-shell-tests.sh

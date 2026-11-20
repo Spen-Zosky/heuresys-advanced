@@ -67,8 +67,8 @@ describe("/v1/tenants/:id/contracts", () => {
         `INSERT INTO sys.sys_blueprint_activations (blueprint_activation_tenant_id, blueprint_activation_variant_id, blueprint_activation_variant_version_id, blueprint_activation_status)
          VALUES ($1, $2, $3, 'ACTIVE')`, [tenantId, attiva.variante, attiva.versione]);
       await pool.query(
-        `INSERT INTO sys.sys_blueprint_content_ccnl (blueprint_content_ccnl_version_id, blueprint_content_ccnl_code, blueprint_content_ccnl_name)
-         VALUES ($1, 'CCNL_X', 'Contratto di prova')`, [altra.versione]);
+        `INSERT INTO sys.sys_blueprint_content_ccnl (blueprint_content_ccnl_version_id, blueprint_content_ccnl_code, blueprint_content_ccnl_name, blueprint_content_ccnl_effective)
+         VALUES ($1, 'CCNL_X', 'Contratto di prova', DATE '2024-01-01')`, [altra.versione]);
       await pool.query(
         `INSERT INTO sys.sys_blueprint_content_ccnl_levels (blueprint_content_ccnl_level_version_id, blueprint_content_ccnl_level_ccnl_code,
            blueprint_content_ccnl_level_code, blueprint_content_ccnl_level_name, blueprint_content_ccnl_level_annual_minimum_eur)
@@ -79,9 +79,10 @@ describe("/v1/tenants/:id/contracts", () => {
          VALUES ($1, 'R1', 1, repeat('a', 64), $2, 'Prova', now())`, [tenantId, altra.versione]);
       const r = await suite.app.inject({ method: "GET", url: `/v1/tenants/${tenantId}/contracts`, headers: { cookie } });
       expect(r.statusCode).toBe(200);
-      const b = r.json() as { source: { kind: string }; contracts: { levels: unknown[] }[] };
+      const b = r.json() as { source: { kind: string }; contracts: { effective: string | null; levels: unknown[] }[] };
       expect(b.source.kind).toBe("OTHER_VERSION");
       expect(b.contracts).toHaveLength(1);
+      expect(b.contracts[0]!.effective).toBe("2024-01-01"); // la data arriva come testo, non come Date
       expect(b.contracts[0]!.levels).toHaveLength(1);
     } finally {
       await pool.query(`DELETE FROM sys.sys_tenancies WHERE tenant_id = $1`, [tenantId]);

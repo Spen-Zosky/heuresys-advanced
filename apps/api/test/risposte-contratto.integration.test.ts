@@ -47,25 +47,31 @@ function rotteGet(t: TestApp): string[] {
   return [...out].sort();
 }
 
-/** Il primo identificativo che si ricava da una risposta d'elenco. */
-function primoId(corpo: unknown, segmento: string): string | null {
+/** I primi identificativi (al massimo 3) che si ricavano da una risposta d'elenco: la prima riga sola puo' essere
+ *  quella senza dati, e il difetto compare solo dove il campo e' valorizzato. */
+function primiId(corpo: unknown, segmento: string): string[] {
   let righe: unknown = corpo;
   if (!Array.isArray(righe) && righe && typeof righe === "object") {
     righe = Object.values(righe as Record<string, unknown>).find(Array.isArray);
   }
-  const prima = Array.isArray(righe) ? righe[0] : undefined;
-  if (!prima || typeof prima !== "object") return null;
-  const campi = Object.entries(prima as Record<string, unknown>).filter(([, v]) => typeof v === "string" && UUID.test(v));
+  if (!Array.isArray(righe)) return [];
   const singolare = segmento.replace(/s$/, "").replace(/-/g, "").toLowerCase();
-  const scelto =
-    campi.find(([k]) => k === "id") ??
-    campi.find(([k]) => k.toLowerCase() === `${singolare}id`) ??
-    campi.find(([k]) => k.toLowerCase().startsWith(singolare) && k.toLowerCase().endsWith("id")) ??
-    campi[0];
-  return scelto ? String(scelto[1]) : null;
+  const out: string[] = [];
+  for (const riga of righe.slice(0, 3)) {
+    if (!riga || typeof riga !== "object") continue;
+    const campi = Object.entries(riga as Record<string, unknown>).filter(([, v]) => typeof v === "string" && UUID.test(v));
+    const scelto =
+      campi.find(([k]) => k === "id") ??
+      campi.find(([k]) => k.toLowerCase() === `${singolare}id`) ??
+      campi.find(([k]) => k.toLowerCase().startsWith(singolare) && k.toLowerCase().endsWith("id")) ??
+      campi[0];
+    if (scelto) out.push(String(scelto[1]));
+  }
+  return out;
 }
 
 let t: TestApp;
+let rtlId = "";
 const attori: Array<{ nome: string; s: S }> = [];
 
 describe("nessuna risposta fuori contratto con dati veri", () => {
@@ -75,6 +81,7 @@ describe("nessuna risposta fuori contratto con dati veri", () => {
       `SELECT tenant_id AS id FROM sys.sys_tenancies WHERE tenant_code = 'RTL_BANK'`,
     );
     if (!rtl) throw new Error("il tenant RTL_BANK non esiste piu': la prova non ha piu' dati veri da leggere");
+    rtlId = rtl.id;
     attori.push({ nome: "PLATFORM_ADMIN", s: await login(t, (await platformAdmin()).email) });
     attori.push({ nome: "TENANT_ADMIN RTL", s: await login(t, (await tenantAdmin({ tenantId: rtl.id })).email) });
     try {
@@ -107,29 +114,32 @@ describe("nessuna risposta fuori contratto con dati veri", () => {
     };
 
     for (const { nome, s } of attori) {
-      const idDa = new Map<string, string | null>();
+      const idDa = new Map<string, string[]>();
       for (const rotta of tutte) {
         if (DA_SALTARE.test(rotta) || rotta.includes("*")) continue;
         const parametri = rotta.match(/:[A-Za-z0-9_]+/g) ?? [];
-        let url = rotta;
+        let urls: string[] = [rotta];
         if (parametri.length === 1) {
           const prefisso = rotta.slice(0, rotta.indexOf(":")).replace(/\/$/, "");
           if (!insieme.has(prefisso)) continue;
           if (!idDa.has(prefisso)) {
             const r = await chiama(prefisso, s);
             chiamate++;
-            idDa.set(prefisso, r.status === 200 ? primoId(r.corpo, prefisso.split("/").pop() ?? "") : null);
+            const ids = r.status === 200 ? primiId(r.corpo, prefisso.split("/").pop() ?? "") : [];
+            // Il tenant con dati veri (RTL) c'e' sempre fra gli identificativi provati sotto /tenants.
+            if (prefisso === "/v1/tenants" && !ids.includes(rtlId)) ids.push(rtlId);
+            idDa.set(prefisso, ids);
           }
-          const id = idDa.get(prefisso);
-          if (!id) continue;
-          url = rotta.replace(parametri[0]!, id);
+          urls = (idDa.get(prefisso) ?? []).map((id) => rotta.replace(parametri[0]!, id));
         } else if (parametri.length > 1) {
           continue;
         }
-        const r = await chiama(url, s);
-        chiamate++;
-        const codice = (r.corpo as { error?: { code?: string } } | null)?.error?.code;
-        if (r.status === 500 && codice === "RESPONSE_CONTRACT_VIOLATION") violazioni.push(`${nome}: GET ${url}  (rotta ${rotta})`);
+        for (const url of urls) {
+          const r = await chiama(url, s);
+          chiamate++;
+          const codice = (r.corpo as { error?: { code?: string } } | null)?.error?.code;
+          if (r.status === 500 && codice === "RESPONSE_CONTRACT_VIOLATION") violazioni.push(`${nome}: GET ${url}  (rotta ${rotta})`);
+        }
       }
     }
 

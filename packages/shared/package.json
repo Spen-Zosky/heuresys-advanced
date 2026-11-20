@@ -432,6 +432,11 @@
       "heuresys-source": "./src/schemas/process-kpi-templates.ts",
       "default": "./dist/schemas/process-kpi-templates.js"
     },
+    "./schemas/tenant-processes": {
+      "types": "./dist/schemas/tenant-processes.d.ts",
+      "heuresys-source": "./src/schemas/tenant-processes.ts",
+      "default": "./dist/schemas/tenant-processes.js"
+    },
     "./schemas/organization-unit-kpi-templates": {
       "types": "./dist/schemas/organization-unit-kpi-templates.d.ts",
       "heuresys-source": "./src/schemas/organization-unit-kpi-templates.ts",

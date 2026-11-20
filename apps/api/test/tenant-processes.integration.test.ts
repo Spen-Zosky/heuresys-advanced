@@ -65,25 +65,35 @@ async function grant(email: string, role: string): Promise<void> {
 beforeAll(async () => {
   suite = await buildTestApp();
 
-  // Un processo attivo del tenant di RTL e una posizione attiva dello stesso tenant, diversa dal
-  // responsabile attuale e che il PROCESS_OWNER di prova non regge.
-  const p = await pool.query<{ id: string; owner: string | null; pos: string }>(
-    `SELECT tp.tenant_process_id AS id, tp.tenant_process_owner_position_id AS owner, pos.position_id AS pos
-       FROM sys.sys_tenant_processes tp
-       JOIN sys.sys_users u ON u.user_email = $1 AND u.user_tenant_id = tp.tenant_process_tenant_id
-       JOIN LATERAL (
-         SELECT position_id FROM sys.sys_positions
-          WHERE position_tenant_id = tp.tenant_process_tenant_id AND position_is_active
-            AND position_id IS DISTINCT FROM tp.tenant_process_owner_position_id
-          ORDER BY position_id LIMIT 1) pos ON true
-      WHERE tp.tenant_process_is_active
-      ORDER BY tp.tenant_process_code LIMIT 1`,
-    [ANTONIO]);
-  const row = p.rows[0];
-  if (!row) throw new Error("nessun processo attivo con una posizione alternativa nel tenant di RTL");
-  processId = row.id;
-  previousOwner = row.owner;
-  otherPosition = row.pos;
+  // Il file crea il proprio processo, attivo, nel tenant di RTL: la copia della CI non porta i
+  // processi del riempimento fuori catena (db/scripts/attivita/), e una prova che dipende da
+  // righe che forse ci sono non prova niente. Due posizioni attive dello stesso tenant: la prima
+  // è il responsabile di partenza, la seconda quella a cui si passa; nessuna delle due è retta dal
+  // PROCESS_OWNER di prova, così il suo diniego viene dal perimetro. L'isolamento transazionale
+  // annulla tutto a fine file.
+  const pos = await pool.query<{ position_id: string; tenant_id: string }>(
+    `SELECT p.position_id, p.position_tenant_id AS tenant_id
+       FROM sys.sys_positions p
+       JOIN sys.sys_users u ON u.user_email = $1 AND u.user_tenant_id = p.position_tenant_id
+      WHERE p.position_is_active
+        AND NOT EXISTS (
+          SELECT 1 FROM sys.sys_user_position_assignments a
+            JOIN sys.sys_users t ON t.user_id = a.user_position_assignment_user_id AND t.user_email = $2
+           WHERE a.user_position_assignment_position_id = p.position_id
+             AND a.user_position_assignment_status = 'ACTIVE')
+      ORDER BY p.position_id LIMIT 2`,
+    [ANTONIO, TOMMASO]);
+  const [a, b] = pos.rows;
+  if (!a || !b) throw new Error("servono due posizioni attive nel tenant di RTL");
+  const ins = await pool.query<{ id: string }>(
+    `INSERT INTO sys.sys_tenant_processes
+       (tenant_process_tenant_id, tenant_process_code, tenant_process_name, tenant_process_owner_position_id, origine_dato)
+     VALUES ($1, $2, 'Processo di prova del responsabile (ADR-0060 P3)', $3, 'NATIVO')
+     RETURNING tenant_process_id AS id`,
+    [a.tenant_id, `P3-PROVA-${Date.now()}`, a.position_id]);
+  processId = ins.rows[0]!.id;
+  previousOwner = a.position_id;
+  otherPosition = b.position_id;
 
   plain = await login(suite, TOMMASO);          // USER, senza bpm_process:update
   await grant(ANTONIO, "HRMS_MANAGER");

@@ -46,13 +46,24 @@ jobs:
     # checkout reaches the runner. Plus: skip Dependabot defer-major PRs (single
     # runner churn — DEBT_REGISTER D-09). Push events have no PR context → run.
     if: ${{ !cancelled() && needs.tree.outputs.skip != 'true' && ((github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && !contains(github.event.pull_request.labels.*.name, 'defer-major')) }}
-    runs-on: [self-hosted, oci-vm]
+    runs-on: [self-hosted, off-prod]
     timeout-minutes: 5
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 1
+
+      # I runner off-prod non hanno shellcheck di sistema e senza la sezione B del gate si salterebbe.
+      # Si scarica la stessa versione della VM (0.9.0), fissata per impronta SHA-256.
+      - name: shellcheck 0.9.0 (fissato per impronta)
+        run: |
+          if command -v shellcheck >/dev/null 2>&1; then shellcheck --version | sed -n 2p; exit 0; fi
+          d="$RUNNER_TEMP/shellcheck"; mkdir -p "$d"
+          curl -sSLf -o "$d/sc.tar.xz" https://github.com/koalaman/shellcheck/releases/download/v0.9.0/shellcheck-v0.9.0.linux.x86_64.tar.xz
+          echo "700324c6dd0ebea0117591c6cc9d7350d9c7c5c287acbad7630fa17b1d4d9e2f  $d/sc.tar.xz" | sha256sum -c -
+          tar -xJf "$d/sc.tar.xz" -C "$d" --strip-components=1 shellcheck-v0.9.0/shellcheck
+          echo "$d" >> "$GITHUB_PATH"
 
       - name: Run shell test gate
         run: bash scripts/test/run-shell-tests.sh

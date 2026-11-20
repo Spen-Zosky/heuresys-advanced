@@ -45,7 +45,7 @@ jobs:
     # run on it. Same-repo PRs (Dependabot lives in this repo) + push/dispatch only; skip
     # Dependabot defer-major PRs (single-runner churn, D-09). Push events have no PR context.
     if: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && !contains(github.event.pull_request.labels.*.name, 'defer-major') }}
-    runs-on: [self-hosted, oci-vm]
+    runs-on: [self-hosted, off-prod]
     timeout-minutes: 5
     steps:
       - name: Checkout

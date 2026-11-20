@@ -62,7 +62,7 @@ function Riga({ c, voce, puoModificare, extra }: { c: Catalogo; voce: VoceClasse
     <>
       <tr className="border-t border-border" data-testid={`${c.testId}-row`} data-id={voce.id}>
         <td className="py-1">{voce.name}</td>
-        <td className="font-mono text-xs">{voce.code}</td>
+        <td className="font-mono text-xs" data-grezzo>{voce.code}</td>
         <td>{voce.level ?? "—"}</td>
         <td className="text-right">
           {(puoModificare || extra) && (

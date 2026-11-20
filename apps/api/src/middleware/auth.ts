@@ -69,6 +69,8 @@ declare module "@fastify/jwt" {
       agt?: { cod: string; cmp: string };
       /** A-2: permessi del compito. */
       scp?: string[];
+      /** ADR-0050 D6 emendato: i ruoli pieni della persona, solo per le letture del gettone d'agente. */
+      rl?: RoleCode[];
       iat?: number;
       exp?: number;
       iss?: string;
@@ -127,6 +129,17 @@ async function sessioneDellaPersonaViva(familyId: string, userId: string): Promi
   return (rowCount ?? 0) > 0;
 }
 
+/**
+ * ADR-0050 D6 emendato (2026-11-18): un gettone d'agente porta due insiemi di ruoli. In lettura
+ * (GET/HEAD) vale il perimetro pieno della persona (`rl`), mandato compreso, perché l'agente legge
+ * ciò che la persona apre a schermo; ogni altro metodo usa i ruoli senza mandati. Un gettone senza
+ * `rl` (emesso prima dell'emendamento) resta com'era: i soli ruoli senza mandati.
+ */
+export function ruoliDellaRichiesta(method: string, roles: RoleCode[], readRoles: RoleCode[] | undefined): RoleCode[] {
+  const lettura = method === "GET" || method === "HEAD";
+  return lettura && Array.isArray(readRoles) ? readRoles : roles;
+}
+
 const plugin: FastifyPluginAsync = async (app) => {
   // Try to decode the JWT from the access cookie on every request. Failure
   // is non-fatal here — req.user remains undefined and downstream RBAC will
@@ -145,6 +158,7 @@ const plugin: FastifyPluginAsync = async (app) => {
         sua?: number;
         agt?: { cod: string; cmp: string };
         scp?: string[];
+        rl?: RoleCode[];
       }>(token);
       const agt = payload.agt;
       if (agt) {
@@ -161,7 +175,7 @@ const plugin: FastifyPluginAsync = async (app) => {
       req.user = {
         userId: payload.sub,
         tenantId: payload.tenant_id,
-        roles: payload.roles ?? [],
+        roles: ruoliDellaRichiesta(req.method, payload.roles ?? [], agt ? payload.rl : undefined),
         jti: payload.jti,
         familyId: payload.fam,
         enrollmentOnly: payload.enr === true,

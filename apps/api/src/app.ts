@@ -74,6 +74,7 @@ import { delegationsRoutes } from "./modules/delegations/routes.js";
 import { consolidationRunRoutes, consolidationVocabularyRoutes, tenantConsolidationRoutes } from "./modules/tenant-consolidation/routes.js";
 import { agentCapabilitiesRoutes } from "./modules/agent-capabilities/routes.js";
 import { agentConversationsRoutes } from "./modules/agent-conversations/routes.js";
+import { agentRequestsRoutes } from "./modules/agent-requests/routes.js";
 import { platformTenantAssignmentsRoutes } from "./modules/platform-tenant-assignments/routes.js";
 import { careerPathsRoutes } from "./modules/career-paths/routes.js";
 import { careerPathStepsRoutes } from "./modules/career-path-steps/routes.js";
@@ -114,6 +115,7 @@ import { registraSorgente } from "./modules/research/sorgenti/index.js";
 import { seedCandidateRecordsRoutes } from "./modules/seed-candidate-records/routes.js";
 import { seedApprovalDecisionsRoutes } from "./modules/seed-approval-decisions/routes.js";
 import { meRoutes } from "./modules/me/routes.js";
+import { faldoneRoutes, faldoneSelfRoutes } from "./modules/faldone/routes.js";
 import { compensationRoutes } from "./modules/compensation/routes.js";
 import { dashboardRoutes } from "./modules/dashboard/routes.js";
 import { analyticsRoutes } from "./modules/analytics/routes.js";
@@ -142,6 +144,7 @@ import { calibrationSessionsRoutes } from "./modules/calibration-sessions/routes
 import { predictionsRoutes } from "./modules/predictions/routes.js";
 import { engagementRoutes } from "./modules/engagement/routes.js";
 import { semanticMatchingRoutes } from "./modules/semantic-matching/routes.js";
+import { applicaRitiri } from "./lib/rotte-ritirate.js";
 import { insightsRoutes } from "./modules/insights/routes.js";
 import { capabilityCompositionRoutes } from "./modules/capability-composition/routes.js";
 import { orgHealthRoutes } from "./modules/org-health/routes.js";
@@ -436,6 +439,9 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   });
 
   // 13. Module routes
+  // Ondata 5 (2026-11-18): le rotte ritirate rispondono 410 senza toccare i dati. Va prima dei
+  // moduli, perché `onRoute` vede solo le rotte registrate dopo di lui.
+  applicaRitiri(app);
   // Build ONE mailer-bound MFA service so EMAIL_OTP sends (enrollment + login
   // step-up) flow through the same mailer the rest of auth uses (InMemoryMailer
   // in tests, the configured transactional mailer in prod). Shared by the auth
@@ -512,6 +518,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(agentCapabilitiesRoutes, { prefix: "/v1/agent-capabilities" });
   // ADR-0056 D4, piano dei principi agentici T6a: le conversazioni dell'assistente della persona.
   await app.register(agentConversationsRoutes, { prefix: "/v1/agent-conversations" });
+  await app.register(agentRequestsRoutes, { prefix: "/v1/agent-requests" });
   await app.register(consolidationVocabularyRoutes, { prefix: "/v1/consolidation-vocabulary" });
   await app.register(consolidationRunRoutes, { prefix: "/v1/consolidation-runs" });
   await app.register(platformTenantAssignmentsRoutes, { prefix: "/v1/platform-tenant-assignments" });
@@ -569,6 +576,13 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(seedCandidateRecordsRoutes, { prefix: "/v1/seed-candidate-records" });
   await app.register(seedApprovalDecisionsRoutes, { prefix: "/v1/seed-approval-decisions" });
   await app.register(meRoutes, { prefix: "/v1/me" });
+  // Il Faldone dell'Utente: tutti i dati di una persona, nessuno escluso, con {omissis}.
+  // Staccato dalla produzione finché non arriva la correzione di riservatezza (revisione del
+  // 2026-11-19): le rotte esistono solo dove FALDONE_ATTIVO=1, cioè nelle sue prove.
+  if (process.env["FALDONE_ATTIVO"] === "1") {
+    await app.register(faldoneSelfRoutes, { prefix: "/v1/me/faldone" });
+    await app.register(faldoneRoutes, { prefix: "/v1/faldone" });
+  }
   await app.register(compensationRoutes, { prefix: "/v1/compensation" });
   await app.register(dashboardRoutes, { prefix: "/v1/dashboard" });
   await app.register(analyticsRoutes, { prefix: "/v1/analytics" });

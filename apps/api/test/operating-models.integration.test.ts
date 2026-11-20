@@ -165,13 +165,12 @@ describe("/v1/operating-models/* integration", () => {
       method: "DELETE", url: `/v1/operating-models/${id}`,
       headers: { cookie: ch(platformS.cookies), "x-csrf-token": platformS.csrfToken },
     });
-    expect(del.statusCode).toBe(204);
+    expect(del.statusCode).toBe(410); // ondata 5: cancellazione ritirata, la riga resta
 
     const gone = await suite.app.inject({
       method: "GET", url: `/v1/operating-models/${id}`,
       headers: { cookie: ch(platformS.cookies) },
     });
-    expect(gone.statusCode).toBe(404);
-    expect((gone.json() as ErrEnvelope).error.code).toBe("NOT_FOUND");
+    expect(gone.statusCode).toBe(200);
   });
 });

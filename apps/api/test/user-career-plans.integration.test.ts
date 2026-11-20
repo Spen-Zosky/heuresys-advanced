@@ -140,6 +140,6 @@ describe("/v1/user-career-plans integration", () => {
       method: "DELETE", url: `/v1/user-career-plans/${pid}`,
       headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken },
     });
-    expect(del.statusCode).toBe(204);
+    expect(del.statusCode).toBe(410); // ondata 5: cancellazione ritirata, la riga resta
   });
 });

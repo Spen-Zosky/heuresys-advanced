@@ -11,12 +11,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
-import type { User } from "@heuresys/shared";
 import { PageHeader } from "@/components/intestazione-pagina";
 import { apiFetch } from "@/lib/api/fetch";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { useFormat } from "@/lib/format";
-import { cognomeNome } from "@/lib/person-label";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 const SELECT_CLASS =
@@ -28,7 +26,7 @@ const FREQUENZE = ["WEEKLY", "BI_WEEKLY", "MONTHLY", "QUARTERLY", "AD_HOC"] as c
 const STATI_INCONTRO = ["SCHEDULED", "COMPLETED", "CANCELLED", "NO_SHOW", "RESCHEDULED"] as const;
 
 interface Programma { programId: string; name: string; type: string; status: string; durationMonths: number | null; maxParticipants: number | null }
-interface Coppia { mentorshipId: string; programId: string | null; mentorUserId: string | null; menteeUserId: string | null; status: string; meetingFrequency: string; startDate: string | null }
+interface Coppia { mentorshipId: string; programId: string | null; mentorUserId: string | null; menteeUserId: string | null; mentorName: string | null; menteeName: string | null; status: string; meetingFrequency: string; startDate: string | null }
 interface Incontro { sessionId: string; date: string; durationMinutes: number | null; status: string; notes: string | null; rating: number | null }
 
 function usePermessi() {
@@ -36,11 +34,11 @@ function usePermessi() {
   return { crea: p.includes("mentorship:create"), modifica: p.includes("mentorship:update") };
 }
 
-function Persona({ id }: { id: string | null }) {
+function Persona({ id, nome }: { id: string | null; nome: string | null }) {
   const { t } = useTranslation("hr");
-  const q = useQuery({ queryKey: ["users", id], queryFn: () => apiFetch<User>(`/v1/users/${id}`), enabled: !!id, staleTime: 300_000 });
   if (!id) return <span className="text-muted-foreground">{t("mentorship.nessuno")}</span>;
-  return <span className="font-medium">{q.data ? cognomeNome(q.data) : "…"}</span>;
+  if (!nome) return <span className="text-muted-foreground" title={t("mentorship.omissisAiuto")}>{t("mentorship.omissis")}</span>;
+  return <span className="font-medium">{nome}</span>;
 }
 
 function Incontri({ coppia }: { coppia: Coppia }) {
@@ -191,7 +189,7 @@ export default function MentorshipPage() {
             {(coppie.data?.items ?? []).map((c) => (
               <li key={c.mentorshipId} data-testid="mentorship-pairing-row" className="flex flex-wrap items-center justify-between gap-3 px-4 py-2">
                 <span>
-                  <Persona id={c.mentorUserId} /> → <Persona id={c.menteeUserId} />
+                  <Persona id={c.mentorUserId} nome={c.mentorName} /> → <Persona id={c.menteeUserId} nome={c.menteeName} />
                   <span className="text-xs text-muted-foreground"> · {nomeProgramma(c.programId)}</span>
                 </span>
                 <span className="flex flex-wrap items-center gap-2">

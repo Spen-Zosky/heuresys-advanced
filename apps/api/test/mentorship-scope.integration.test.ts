@@ -47,6 +47,7 @@ import { pool, closePool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 import { unSottopostoOrganizzativo, unEstraneoOrganizzativo } from "./helpers/org-actors.js";
 import { attoriDiScena } from "./helpers/attori-di-scena.js";
+import { mentorshipService, type ActorContext } from "../src/modules/mentorship/service.js";
 /**
  * I cinque ruoli di scena, derivati dal dato di oggi invece che scritti a mano (#147).
  * Non sono cinque persone: sono cinque CARATTERISTICHE, e ognuna e' verificata alla
@@ -63,6 +64,7 @@ interface S {
   cookies: Map<string, string>;
   csrfToken: string;
   userId: string;
+  roles: string[];
 }
 function ch(c: Map<string, string>): string {
   return [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; ");
@@ -71,8 +73,8 @@ async function login(t: TestApp, email: string): Promise<S> {
   const r = await loginRaw(t.app, email, PWD);
   const cookies = new Map<string, string>();
   for (const c of r.cookies) cookies.set(c.name, c.value);
-  const body = r.json() as { csrfToken: string; user: { userId: string } };
-  return { cookies, csrfToken: body.csrfToken, userId: body.user.userId };
+  const body = r.json() as { csrfToken: string; user: { userId: string }; roles?: string[] };
+  return { cookies, csrfToken: body.csrfToken, userId: body.user.userId, roles: body.roles ?? [] };
 }
 
 let rtlTenantId: string;
@@ -122,7 +124,7 @@ async function seedMatchScore(mentorId: string | null, menteeId: string | null):
 }
 
 interface ListedPairings {
-  items: Array<{ mentorshipId: string; mentorUserId: string | null; menteeUserId: string | null }>;
+  items: Array<{ mentorshipId: string; mentorUserId: string | null; menteeUserId: string | null; mentorName: string | null; menteeName: string | null }>;
   total: number;
 }
 interface ListedScores {
@@ -207,6 +209,50 @@ describe("/v1/mentorship — F3 org-axis isolation (ADR-0027, D-50)", () => {
     expect(r.statusCode).toBe(200);
     const body = r.json() as ListedPairings;
     expect(body.items.some((i) => i.mentorshipId === bothReadableId)).toBe(true);
+  });
+
+  it("LIST names: the in-scope party carries «Cognome, Nome», the outsider counterpart is null ({omissis})", async () => {
+    // Giro 2026-11-19: the page asked /v1/users/:id per party and got 404 for outsiders. Names now
+    // come with the pairing; the counterpart outside the chain is masked, not revealed.
+    const r = await suite.app.inject({
+      method: "GET",
+      url: `/v1/mentorship/pairings?limit=200`,
+      headers: { cookie: ch(paolo.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as ListedPairings;
+    const both = body.items.find((i) => i.mentorshipId === bothReadableId);
+    expect(both?.mentorName, "mentor in scope has a name").toBeTruthy();
+    expect(both?.menteeName, "mentee in scope has a name").toBeTruthy();
+    const mixed = body.items.find((i) => i.mentorshipId === mixedPartyId);
+    expect(mixed, "mixed pairing is listed via the in-scope mentor").toBeDefined();
+    expect(mixed!.mentorName).toBeTruthy();
+    expect(mixed!.menteeName, "outsider name must not leak").toBeNull();
+  });
+
+  it("WRITE names: create and update responses mask the outsider counterpart too ({omissis})", async () => {
+    // Revisione di sicurezza 2026-11-19: il nome era mascherato solo nell'elenco; le risposte di
+    // creazione e modifica lo restituivano in chiaro. Prova al livello del servizio: misura la
+    // risposta, indipendentemente da quale ruolo abbia oggi il permesso di scrittura.
+    expect(paolo.roles.length, "login returns the actor's roles").toBeGreaterThan(0);
+    const a = { userId: paolo.userId, tenantId: rtlTenantId, roles: paolo.roles } as ActorContext;
+    const created = await mentorshipService.createMentorship(a, {
+      mentorUserId: tommaso.userId,
+      menteeUserId: antonio.userId,
+      status: "ACTIVE",
+      meetingFrequency: "BI_WEEKLY",
+      metadata: { suitePrefix: SUITE_PREFIX },
+    });
+    expect(created.mentorName, "in-scope mentor keeps the name").toBeTruthy();
+    expect(created.menteeName, "outsider name must not leak on create").toBeNull();
+    const updated = await mentorshipService.updateMentorship(a, mixedPartyId, { notes: `${SUITE_PREFIX} nota` });
+    expect(updated.mentorName).toBeTruthy();
+    expect(updated.menteeName, "outsider name must not leak on update").toBeNull();
+    // HR-mandated actor sees both names (tenant-wide).
+    const hr = { userId: federica.userId, tenantId: rtlTenantId, roles: federica.roles } as ActorContext;
+    const hrUpdated = await mentorshipService.updateMentorship(hr, mixedPartyId, { notes: `${SUITE_PREFIX} nota hr` });
+    expect(hrUpdated.mentorName).toBeTruthy();
+    expect(hrUpdated.menteeName, "HR mandate reads the whole tenant").toBeTruthy();
   });
 
   /* ===================== ANTI-LEAK core invariant (outsider) ===================== */

@@ -1,6 +1,6 @@
 "use client";
 import { MODALE } from "@/lib/modale";
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
@@ -31,13 +31,15 @@ import { ApiError } from "@/lib/api/errors";
 import { type DataColumn } from "@/components/data-table-panel";
 import { StatusPill, type StatusTone } from "@/components/status-pill";
 import { useFormat } from "@/lib/format";
-import { StatoErrore, StatoVuoto } from "@/components/stato-pagina";
+import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { DecisioneDialog } from "./decisione-dialog";
 import { RegistroCorse } from "./registro-corse";
 import { VocabolarioComune } from "./vocabolario-comune";
 import { DecisioniInBlocco } from "./decisioni-in-blocco";
 import { OrganigrammaCliente } from "./organigramma-cliente";
 import { LavoroInCorso } from "@/components/lavoro-in-corso";
+import { ProfileTabs } from "@/components/profile-tabs";
+import { SchedaAllineamento } from "./scheda-allineamento";
 
 // AC-10 — La pagina del Direttore HR per il consolidamento del tenant col prototipo
 // (`.programmi/consolidamento/agente/`). L'agente propone, una persona decide: qui si avviano
@@ -253,35 +255,10 @@ export default function ConsolidationPage() {
       : { chiave: "nextCloseLast", vars: {} };
   })();
 
-  return (
-    <main data-testid="consolidation-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
-      <PageHeader
-        data-testid="consolidation-title"
-        title={t("consolidation.title")}
-        description={t("consolidation.description")}
-        badges={access.data?.decidesAs
-          ? <Badge variant="secondary" data-testid="consolidation-role">{t(`consolidation.roles.${access.data.decidesAs}`)}</Badge>
-          : undefined}
-      />
-
-      {errore ? (
-        <div role="alert" data-testid="consolidation-error" className="rounded-card border border-destructive/40 bg-card px-4 py-3 text-sm text-destructive">
-          {errore}
-        </div>
-      ) : null}
-
-      {access.isError || sessions.isError ? (
-        <StatoErrore
-          errore={access.error ?? sessions.error}
-          titolo={t("consolidation.loadError")}
-          testId="consolidation-load-error"
-          onRiprova={() => {
-            void access.refetch();
-            void sessions.refetch();
-          }}
-        />
-      ) : null}
-
+  // La scheda «Consolidamento» è la pagina di sempre: i giri sui cinque gruppi, il registro delle corse,
+  // il vocabolario e l'organigramma. La scheda «Allineamento» le sta accanto (piano 20261118) e non la tocca.
+  const schedaConsolidamento = () => (
+    <div className="space-y-6">
       {access.data ? (
         <RegistroCorse
           canRun={canRun}
@@ -357,7 +334,7 @@ export default function ConsolidationPage() {
                 <p className="text-xs text-muted-foreground">{t("consolidation.approval.previewHint")}</p>
               </div>
             ) : null}
-            <ol data-testid="consolidation-groups" className="grid gap-2 sm:grid-cols-5">
+            <ol data-testid="consolidation-groups" className="grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
               {CONSOLIDATION_GROUP_VALUES.map((g) => {
                 const p = avanzamento.find((x) => x.group === g);
                 const aperto = corrente.openGroup === g;
@@ -484,6 +461,47 @@ export default function ConsolidationPage() {
           />
         </section>
       ) : null}
+    </div>
+  );
+
+  return (
+    <main data-testid="consolidation-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+      <PageHeader
+        data-testid="consolidation-title"
+        title={t("consolidation.title")}
+        description={t("consolidation.description")}
+        badges={access.data?.decidesAs
+          ? <Badge variant="secondary" data-testid="consolidation-role">{t(`consolidation.roles.${access.data.decidesAs}`)}</Badge>
+          : undefined}
+      />
+
+      {errore ? (
+        <div role="alert" data-testid="consolidation-error" className="rounded-card border border-destructive/40 bg-card px-4 py-3 text-sm text-destructive">
+          {errore}
+        </div>
+      ) : null}
+
+      {access.isError || sessions.isError ? (
+        <StatoErrore
+          errore={access.error ?? sessions.error}
+          titolo={t("consolidation.loadError")}
+          testId="consolidation-load-error"
+          onRiprova={() => {
+            void access.refetch();
+            void sessions.refetch();
+          }}
+        />
+      ) : null}
+
+      <Suspense fallback={<StatoCaricamento />}>
+        <ProfileTabs
+          ariaLabel={t("consolidation.tabs.aria")}
+          tabs={[
+            { id: "consolidamento", label: t("consolidation.tabs.consolidation"), testId: "consolidation-tab-consolidation", render: schedaConsolidamento },
+            { id: "allineamento", label: t("consolidation.tabs.alignment"), testId: "consolidation-tab-alignment", render: () => <SchedaAllineamento /> },
+          ]}
+        />
+      </Suspense>
       {conferma ? (
         <Dialog open onOpenChange={(o) => { if (!o) setConferma(null); }}>
           <DialogContent className={MODALE.piccola} data-testid="consolidation-approval-dialog" closeLabel={t("shell:ui.close")}>

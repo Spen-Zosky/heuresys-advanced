@@ -41,6 +41,7 @@ import { chainLevelOf } from "../../lib/scope/org.js";
 import { serveConferma } from "../../lib/scope/conferma.js";
 import { isPlatform } from "../../lib/actor.js";
 import { DOSSIER_PRIV_SECTIONS, type UserDossierProfile } from "@heuresys/shared";
+import { cognomeNome } from "../../lib/nome-persona-sql.js";
 
 const NON_PRIVILEGED_FIELDS = new Set<string>(NON_PRIVILEGED_UPDATABLE_FIELDS);
 
@@ -258,7 +259,8 @@ export const usersService = {
     }
 
     return {
-      profile: outProfile,
+      // R1: la scheda si intitola «Cognome, Nome», non col nome visibile (Nome Cognome).
+      profile: { ...outProfile, displayName: cognomeNome({ displayName: outProfile.displayName ?? null, firstName: target.firstName, lastName: target.lastName }) },
       positions,
       contracts: masksComp ? contracts.map((c) => maskFields(c, CONTRACT_MONEY_FIELDS)) : contracts,
       paySlips: masksComp ? paySlips.map((p) => maskFields(p, PAY_SLIP_MONEY_FIELDS)) : paySlips,

@@ -1,0 +1,160 @@
+/**
+ * apps/api/src/modules/tenants/contracts.ts
+ * Scheda «Contratti» del tenant: i contratti collettivi dei modelli che il tenant ha attivi, con livelli, minimi
+ * e lacune (livelli senza minimo), e quante persone del tenant stanno su ciascun livello. Sola lettura.
+ * Il contratto è quello del modello attivo, quindi coerente col tenant per costruzione (RTL: credito).
+ */
+import type { TenantContract, TenantContractsResponse } from "@heuresys/shared";
+import { versioniAttiveDelTenant } from "../hierarchy-levels/repository.js";
+import { livelloNormale } from "../tenant-consolidation/distanza.js";
+import type { DbConnector } from "./repository.js";
+
+interface RigaCcnl {
+  code: string; name: string; scope: string | null; parties: string | null; effective: string | null;
+}
+interface RigaLivello {
+  ccnl_code: string; code: string; name: string; category: string | null;
+  minimo: string | null; note: string | null; duties: string | null;
+}
+
+export async function contrattiDelTenant(q: DbConnector, tenantId: string): Promise<TenantContractsResponse | null> {
+  const t = await q.query<{ industry_code: string; industry_name: string | null }>(
+    `SELECT t.tenant_industry_code AS industry_code, i.industry_name
+       FROM sys.sys_tenancies t
+       LEFT JOIN sys.sys_industry_codes i ON i.industry_code = t.tenant_industry_code
+      WHERE t.tenant_id = $1`,
+    [tenantId],
+  );
+  const tenant = t.rows[0];
+  if (!tenant) return null;
+
+  const versioni = await versioniAttiveDelTenant(q, tenantId);
+  // Come per la scala dei livelli: se le tabelle del contratto non ci sono su questo database, la scheda è vuota, non rotta.
+  const presente = await q.query<{ ok: boolean }>(`SELECT to_regclass('sys.sys_blueprint_content_ccnl_levels') IS NOT NULL AS ok`);
+  let ccnl: RigaCcnl[] = [];
+  let livelli: RigaLivello[] = [];
+  let source: TenantContractsResponse["source"] = { kind: "ACTIVE", versionNumber: null, versionStatus: null };
+
+  const leggi = async (ids: string[]) => {
+    ccnl = (await q.query<RigaCcnl>(
+      `SELECT DISTINCT ON (blueprint_content_ccnl_code)
+              blueprint_content_ccnl_code AS code, blueprint_content_ccnl_name AS name,
+              blueprint_content_ccnl_scope AS scope, blueprint_content_ccnl_parties AS parties,
+              blueprint_content_ccnl_effective::text AS effective
+         FROM sys.sys_blueprint_content_ccnl
+        WHERE blueprint_content_ccnl_version_id = ANY($1::uuid[])
+        ORDER BY blueprint_content_ccnl_code, blueprint_content_ccnl_name`,
+      [ids],
+    )).rows;
+    livelli = (await q.query<RigaLivello>(
+      `SELECT DISTINCT ON (blueprint_content_ccnl_level_ccnl_code, blueprint_content_ccnl_level_code)
+              blueprint_content_ccnl_level_ccnl_code AS ccnl_code, blueprint_content_ccnl_level_code AS code,
+              blueprint_content_ccnl_level_name AS name, blueprint_content_ccnl_level_category AS category,
+              blueprint_content_ccnl_level_annual_minimum_eur::text AS minimo,
+              blueprint_content_ccnl_level_minimum_note AS note, blueprint_content_ccnl_level_duties AS duties
+         FROM sys.sys_blueprint_content_ccnl_levels
+        WHERE blueprint_content_ccnl_level_version_id = ANY($1::uuid[])
+        ORDER BY blueprint_content_ccnl_level_ccnl_code, blueprint_content_ccnl_level_code,
+                 blueprint_content_ccnl_level_annual_minimum_eur DESC NULLS LAST`,
+      [ids],
+    )).rows;
+  };
+
+  if (presente.rows[0]?.ok) {
+    if (versioni.length > 0) await leggi(versioni);
+    if (ccnl.length === 0) {
+      // La versione attiva non porta contratti: si mostra la versione più recente, fra quelle delle stesse varianti attive del tenant,
+      // che li porta (per esempio quella della corsa in consolidamento), dichiarando la provenienza.
+      // Ordine di preferenza: 1) le versioni delle corse e dei consolidamenti del tenant (il modello che il tenant sta
+      // confrontando), 2) le versioni delle varianti attive, 3) le varianti della stessa famiglia di quelle attive.
+      const alt = await q.query<{ id: string; numero: number; stato: string }>(
+        `WITH cand AS (
+           SELECT r.blueprint_run_variant_version_id AS vid, 1 AS tier FROM sys.sys_blueprint_runs r
+            WHERE r.blueprint_run_tenant_id = $1 AND r.blueprint_run_variant_version_id IS NOT NULL
+           UNION ALL
+           SELECT c.tenant_consolidation_variant_version_id, 1 FROM sys.sys_tenant_consolidations c
+            WHERE c.tenant_consolidation_tenant_id = $1
+           UNION ALL
+           SELECT vv.blueprint_variant_version_id, 2 FROM sys.sys_blueprint_variant_versions vv
+            WHERE vv.blueprint_variant_version_variant_id IN (
+                    SELECT a.blueprint_activation_variant_id FROM sys.sys_blueprint_activations a
+                     WHERE a.blueprint_activation_tenant_id = $1 AND a.blueprint_activation_status = 'ACTIVE')
+           UNION ALL
+           SELECT vv.blueprint_variant_version_id, 3 FROM sys.sys_blueprint_variant_versions vv
+             JOIN sys.sys_blueprint_variants bv ON bv.blueprint_variant_id = vv.blueprint_variant_version_variant_id
+            WHERE bv.blueprint_variant_family_id IN (
+                    SELECT v2.blueprint_variant_family_id FROM sys.sys_blueprint_variants v2
+                      JOIN sys.sys_blueprint_activations a ON a.blueprint_activation_variant_id = v2.blueprint_variant_id
+                     WHERE a.blueprint_activation_tenant_id = $1 AND a.blueprint_activation_status = 'ACTIVE')
+         )
+         SELECT vv.blueprint_variant_version_id AS id, vv.blueprint_variant_version_number AS numero,
+                vv.blueprint_variant_version_status AS stato
+           FROM cand
+           JOIN sys.sys_blueprint_variant_versions vv ON vv.blueprint_variant_version_id = cand.vid
+          WHERE vv.blueprint_variant_version_id <> ALL($2::uuid[])
+            AND vv.blueprint_variant_version_status <> 'RETIRED'
+            AND EXISTS (SELECT 1 FROM sys.sys_blueprint_content_ccnl c WHERE c.blueprint_content_ccnl_version_id = vv.blueprint_variant_version_id)
+          ORDER BY cand.tier, vv.blueprint_variant_version_number DESC
+          LIMIT 1`,
+        [tenantId, versioni],
+      );
+      const a = alt.rows[0];
+      if (a) {
+        await leggi([a.id]);
+        source = { kind: "OTHER_VERSION", versionNumber: Number(a.numero), versionStatus: a.stato };
+      }
+    }
+  }
+
+  // Persone con contratto in vigore, per livello nella forma normale (3A3L, QD2, Dirigente...).
+  const persone = await q.query<{ livello: string | null; n: string }>(
+    `SELECT c.user_contract_ccnl_level AS livello, count(DISTINCT c.user_contract_user_id)::text AS n
+       FROM sys.sys_user_contracts c
+      WHERE c.user_contract_tenant_id = $1 AND c.user_contract_status = 'ACTIVE'
+        AND (c.user_contract_end_date IS NULL OR c.user_contract_end_date >= current_date)
+      GROUP BY 1`,
+    [tenantId],
+  );
+  const perLivello = new Map<string, number>();
+  let conContratto = 0;
+  for (const r of persone.rows) {
+    const n = Number(r.n);
+    conContratto += n;
+    const k = livelloNormale(r.livello);
+    if (k) perLivello.set(k, (perLivello.get(k) ?? 0) + n);
+  }
+  const normaliDelModello = new Set(livelli.map((l) => livelloNormale(l.code)).filter((x): x is string => !!x));
+
+  const contracts: TenantContract[] = ccnl.map((c) => {
+    const lv = livelli
+      .filter((l) => l.ccnl_code === c.code)
+      .map((l) => ({
+        code: l.code, name: l.name, category: l.category, annualMinimumEur: l.minimo,
+        minimumNote: l.note, duties: l.duties,
+        people: perLivello.get(livelloNormale(l.code) ?? "") ?? 0,
+      }))
+      .sort((a, b) => (Number(a.annualMinimumEur ?? Infinity) - Number(b.annualMinimumEur ?? Infinity)) || a.code.localeCompare(b.code));
+    return {
+      code: c.code, name: c.name, scope: c.scope, parties: c.parties, effective: c.effective,
+      levels: lv, gapLevelCodes: lv.filter((l) => l.annualMinimumEur === null).map((l) => l.code),
+    };
+  });
+
+  let fuori = 0;
+  for (const [k, n] of perLivello) if (!normaliDelModello.has(k)) fuori += n;
+
+  return {
+    tenantId,
+    industryCode: tenant.industry_code,
+    industryName: tenant.industry_name,
+    source,
+    contracts,
+    summary: {
+      contracts: contracts.length,
+      levels: contracts.reduce((s, c) => s + c.levels.length, 0),
+      levelsWithoutMinimum: contracts.reduce((s, c) => s + c.gapLevelCodes.length, 0),
+      peopleWithContract: conContratto,
+      peopleOutsideModelLevels: fuori,
+    },
+  };
+}

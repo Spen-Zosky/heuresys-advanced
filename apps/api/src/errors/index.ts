@@ -52,6 +52,17 @@ export class ConflictError extends ApiError {
   }
 }
 
+/**
+ * 410 Gone — la rotta è stata RITIRATA (ondata 5 degli endpoint senza consumatori, 2026-11-18):
+ * esiste ancora, chiede ancora i suoi permessi, ma non fa più niente. Ritirare non è cancellare
+ * (ADR-0035): le righe restano, e `details.alternativa` dice dove si fa ora la stessa cosa.
+ */
+export class GoneError extends ApiError {
+  constructor(message: string, public details: { alternativa: string | null; motivo: string }, code = "ROUTE_RETIRED") {
+    super(code, message);
+  }
+}
+
 /** L10, A-10: la condizione `If-Match` non vale più (la risorsa è cambiata, o non si può leggere). */
 export class PreconditionFailedError extends ApiError {
   constructor(message = "Precondition failed", code = "PRECONDITION_FAILED") {

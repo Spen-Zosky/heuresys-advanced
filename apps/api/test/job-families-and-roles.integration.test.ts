@@ -126,7 +126,8 @@ describe("/v1/job-families + /v1/job-roles integration", () => {
       method: "DELETE", url: `/v1/job-families/${familyId}`,
       headers: { cookie: ch(platformS.cookies), "x-csrf-token": platformS.csrfToken },
     });
-    expect(r.statusCode).toBe(409);
-    expect((r.json() as { error: { code: string } }).error.code).toBe("JOB_FAMILY_IN_USE");
+    // Ondata 5 (2026-11-18): la cancellazione è ritirata prima ancora del controllo d'uso.
+    expect(r.statusCode).toBe(410);
+    expect((r.json() as { error: { code: string } }).error.code).toBe("ROUTE_RETIRED");
   });
 });

@@ -78,7 +78,7 @@
         "title": "Assistant on this request",
         "description": "Developer tool: ask the agent something about this approval request. Tool and input for any write are already redacted by the gateway.",
         "contextLabel": "Context",
-        "context": "Approval request \"{{title}}\" ({{id}})",
+        "context": "Approval request \"{{title}}\"",
         "promptLabel": "Prompt",
         "promptPlaceholder": "e.g. Summarize the status of this approval request.",
         "run": "Run",
@@ -147,6 +147,9 @@
       "category": "Category",
       "responses": "Responses",
       "avg": "Average",
+      "avgScale": "Average (0–10 scale)",
+      "allOfType": "All questions of type \"{{tipo}}\"",
+      "eachResponses": "{{n}} responses per question",
       "emptyTitle": "No questions",
       "emptyDescription": "This survey has no questions.",
       "caption": "Per-question results",
@@ -404,6 +407,7 @@
     },
     "sessioni": {
       "titolo": "Open sessions ({{count}})",
+      "titolo_one": "Open session ({{count}})",
       "nessuna": "No open session.",
       "dispositivo": "{{browser}} on {{sistema}}",
       "ultimo": "last access {{data}}",
@@ -438,7 +442,8 @@
       "tabs": {
         "overview": "Overview",
         "typing": "Enterprise Typing",
-        "users": "Users"
+        "users": "Users",
+        "contracts": "Agreements"
       },
       "overviewTitle": "Profile",
       "typingTitle": "Enterprise Typing Profiles",
@@ -460,7 +465,33 @@
       "typingEmployees_one": "{{n}} employee",
       "typingEmpty": "No typing profile registered.",
       "usersHint": "The full user list is managed on its dedicated page.",
-      "usersLink": "Open /users →"
+      "usersLink": "Open /users →",
+      "contracts": {
+        "title": "Tenant collective agreements",
+        "industry": "Tenant industry: {{name}}.",
+        "summary": "{{contracts}} agreements, {{levels}} levels, {{gaps}} without a minimum; {{people}} people under a current contract.",
+        "gapWarning": "{{n}} levels have no pay minimum: complete them in the model.",
+        "outsideWarning": "{{n}} people hold a level the model's agreements do not contain.",
+        "scope": "Scope",
+        "parties": "Signatory parties",
+        "effective": "Effective",
+        "level": "Level",
+        "category": "Category",
+        "minimum": "Annual minimum",
+        "people": "People",
+        "state": "Status",
+        "gap": "Minimum missing",
+        "complete": "Complete",
+        "empty": "No collective agreement in this tenant's active model.",
+        "loadError": "Unable to load the agreements.",
+        "categories": {
+          "DIRIGENTE": "Executive",
+          "QUADRO": "Manager",
+          "IMPIEGATO": "Clerical",
+          "OPERAIO": "Manual"
+        },
+        "otherVersion": "Agreements from model version {{n}}, not yet active for this tenant (being consolidated): minimums may change."
+      }
     },
     "editing": {
       "createTitle": "New client company",
@@ -624,8 +655,10 @@
         "effectiveFrom": "Effective from",
         "effectiveTo": "Effective to"
       },
+      "omissis": "{omissis}",
       "dash": "—",
       "edit": {
+        "listTruncated": "The menu shows {{shown}} of {{total}} positions.",
         "cardTitle": "Position — edit",
         "readOnly": "You do not have permission to edit this position.",
         "title": "Title",
@@ -660,6 +693,11 @@
         "kpi": "KPI",
         "weight": "Weight",
         "template": "Template"
+      },
+      "soglia": {
+        "min": "Minimum",
+        "target": "Target",
+        "stretch": "Stretch"
       }
     },
     "learning": {
@@ -806,6 +844,7 @@
     },
     "resources": {
       "agent_capability": "Agent capabilities",
+      "agent_request": "Agent requests",
       "agent_conversation": "Assistant conversations",
       "analytics": "Analytics",
       "approval": "Approvals",
@@ -978,7 +1017,13 @@
         "POSITIONS_ROLES": "Positions and roles",
         "SKILLS": "Skills",
         "PROCESSES": "Processes",
-        "INDICATORS_GOALS": "Indicators and goals"
+        "INDICATORS_GOALS": "Indicators and goals",
+        "CONTRACTS": "Contracts and levels",
+        "OBLIGATIONS": "Legal obligations",
+        "TRAINING": "Training",
+        "CAREERS": "Careers",
+        "INCENTIVES": "Incentives",
+        "ENGAGEMENTS": "Engagements"
       }
     }
   },
@@ -1030,6 +1075,157 @@
       "datiIrraggiungibili": "Dashboard data unreachable",
       "nonDisponibileTitolo": "Dashboard not available",
       "nonDisponibileTesto": "This dashboard does not exist or is outside your permissions."
+    },
+    "catalogo": {
+      "famiglie": {
+        "branch": "Branch dashboard",
+        "company": "Company dashboard",
+        "hr": "HR management dashboard",
+        "org": "Organisation dashboard",
+        "platform": "Platform dashboard",
+        "process": "Processes dashboard",
+        "self": "Self-service dashboard",
+        "tenant": "Tenant management dashboard"
+      },
+      "viste": {
+        "branch": {
+          "organico-filiale": "Branch headcount",
+          "attivita-filiale": "Branch activity",
+          "competenze-filiale": "Branch skills"
+        },
+        "company": {
+          "headcount": "Total headcount",
+          "andamento-organico": "Headcount trend",
+          "copertura-competenze": "Skills coverage",
+          "andamento-valutazioni": "Review trend"
+        },
+        "hr": {
+          "organico": "Headcount",
+          "retribuzioni": "Pay",
+          "valutazioni": "Reviews",
+          "formazione": "Learning",
+          "assenze": "Absences and time off"
+        },
+        "org": {
+          "struttura-unita": "Unit structure",
+          "posizioni-scoperte": "Vacant positions",
+          "catena-di-riporto": "Reporting chain"
+        },
+        "platform": {
+          "salute-sistema": "System health",
+          "credenziali-e-accessi": "Credentials and access",
+          "job-e-corse": "Jobs and scheduled runs"
+        },
+        "process": {
+          "processi-attivi": "Active processes",
+          "attivita-recenti": "Recent activity",
+          "approvazioni-in-coda": "Approvals in the queue"
+        },
+        "self": {
+          "il-mio-profilo": "My profile",
+          "le-mie-attivita": "My activity",
+          "la-mia-formazione": "My learning"
+        },
+        "tenant": {
+          "configurazione-tenant": "Tenant configuration",
+          "blueprint-adottati": "Adopted blueprints",
+          "utenti-del-tenant": "Tenant users"
+        }
+      },
+      "colonne": {
+        "company": {
+          "copertura-competenze": {
+            "label": "Skill",
+            "detail": "Level",
+            "value": "People"
+          }
+        },
+        "process": {
+          "processi-attivi": {
+            "label": "Process",
+            "detail": "Type",
+            "value": "Units"
+          },
+          "attivita-recenti": {
+            "label": "Activity",
+            "detail": "Date"
+          }
+        },
+        "org": {
+          "struttura-unita": {
+            "label": "Unit",
+            "detail": "Type",
+            "value": "Active positions"
+          },
+          "posizioni-scoperte": {
+            "label": "Vacant position",
+            "detail": "Unit"
+          },
+          "catena-di-riporto": {
+            "label": "Unit",
+            "detail": "Manager",
+            "value": "Subordinate units"
+          }
+        },
+        "branch": {
+          "organico-filiale": {
+            "label": "Branch",
+            "value": "People"
+          },
+          "attivita-filiale": {
+            "label": "Activity",
+            "detail": "Date"
+          },
+          "competenze-filiale": {
+            "label": "Skill",
+            "value": "People"
+          }
+        },
+        "platform": {
+          "job-e-corse": {
+            "label": "Run",
+            "detail": "Status and start"
+          }
+        },
+        "tenant": {
+          "configurazione-tenant": {
+            "label": "Tenant",
+            "detail": "Status, industry and size"
+          },
+          "blueprint-adottati": {
+            "label": "Set-up model",
+            "detail": "Status"
+          }
+        },
+        "self": {
+          "il-mio-profilo": {
+            "label": "Person",
+            "detail": "Position and unit"
+          },
+          "le-mie-attivita": {
+            "label": "Activity",
+            "detail": "Date"
+          }
+        }
+      },
+      "contatori": {
+        "attivi": "People in service",
+        "cessati": "Ended employments",
+        "posizioni": "Active positions",
+        "unita": "Organisational units",
+        "pending": "Awaiting a decision",
+        "tenant": "Active companies",
+        "utenti": "Active people",
+        "competenze": "Skills in the catalogue",
+        "correnti": "Current credentials",
+        "da_ruotare": "To rotate",
+        "algoritmi": "Algorithms in use"
+      },
+      "evento": {
+        "COURSE_COMPLETED": "Course completed: {{subject}}",
+        "CERTIFICATION_EARNED": "Certification earned: {{subject}}",
+        "HIRE": "Hired as {{subject}}"
+      }
     }
   },
   "visualizations": {
@@ -1579,6 +1775,15 @@
     "description": "Leave requests, tenant accrual policy and the per-balance transaction ledger. Read-only consultation.",
     "requests": "Leave requests",
     "accrualRules": "Accrual rules",
+    "accrualAmount": "{{amount}} days {{period}}",
+    "accrualPeriod": {
+      "MONTHLY": "per month",
+      "QUARTERLY": "per quarter",
+      "SEMIANNUAL": "per half-year",
+      "ANNUAL": "per year",
+      "PER_PAY_PERIOD": "per pay period",
+      "LUMP_SUM": "as a lump sum"
+    },
     "transactions": "Balance transactions",
     "error": "Failed to load.",
     "empty": "No records.",
@@ -1651,7 +1856,7 @@
       "dimension": "Dimension",
       "score": "Score",
       "horizon": "Horizon",
-      "value": "Value",
+      "value": "Value (0–100)",
       "rationale": "Rationale",
       "businessImpact": "Business impact",
       "flaggedAt": "Flagged",
@@ -1698,7 +1903,7 @@
       "code": "Code",
       "name": "Name",
       "position": "Position",
-      "value": "Value",
+      "value": "Position evaluation points",
       "recipient": "Recipient system",
       "status": "Status",
       "handedOff": "Handed off"
@@ -1872,7 +2077,9 @@
     "lavoroConserva": "Counting the rows beyond the retention period.",
     "errore": "Operation failed. Try again.",
     "esitoProva": "Trial: the erasure would touch {{count}} rows. Nothing was changed.",
+    "esitoProva_one": "Trial: the erasure would touch {{count}} row. Nothing was changed.",
     "esitoVero": "Erasure done: {{count}} rows processed.",
+    "esitoVero_one": "Erasure done: {{count}} row processed.",
     "parolaCancella": "ERASE",
     "parolaConserva": "APPLY",
     "confermaScrivi": "To run it for real type {{parola}}",
@@ -1881,13 +2088,16 @@
     "conservazioneSpiega": "Removes data beyond the retention period declared in the map. Try first, then apply.",
     "provaConservazione": "Try the retention",
     "esitoProvaConserva": "Trial: {{count}} rows are beyond the retention period. Nothing was changed.",
+    "esitoProvaConserva_one": "Trial: {{count}} row is beyond the retention period. Nothing was changed.",
     "esitoVeroConserva": "Retention applied: {{count}} rows processed.",
+    "esitoVeroConserva_one": "Retention applied: {{count}} row processed.",
     "applicaDavvero": "Apply for real (cannot be undone)",
     "giorni": "{{count}} days",
     "giorni_one": "{{count}} day",
     "registro": "Request register ({{mostrati}} of {{totale}})",
     "nessunaRichiesta": "No request recorded.",
     "mappa": "Personal data map ({{count}} tables)",
+    "mappa_one": "Personal data map ({{count}} table)",
     "strategie": {
       "DELETE": "deleted",
       "ANONYMIZE": "anonymised",
@@ -1904,9 +2114,11 @@
     }
   },
   "agentCaps": {
+    "negato": "The agent capability registry is visible to HR leadership and to tenant and platform administration: your profile does not have this mandate.",
     "titolo": "Agent capabilities",
     "descrizione": "What the agent may do, on which data, with which limit and how it is undone; and whether it acts asking for confirmation or freely.",
     "elenco": "Capabilities ({{count}})",
+    "elenco_one": "Capability ({{count}})",
     "erroreCarica": "Capabilities could not be loaded.",
     "nessuna": "No capability recorded.",
     "dettagli": "Details",
@@ -1952,5 +2164,141 @@
       "RIGA_SOSTITUTIVA": "replacement row"
     },
     "identita": "{{codice}} · v{{versione}} · {{agente}}"
+  },
+  "catalogoKpi": {
+    "titolo": "KPI templates",
+    "descrizione": "Which KPIs measure a process of the operating model and which an organization unit, and with what weight.",
+    "errore": "Could not read the KPI templates",
+    "erroreScrittura": "The change was not saved. Try again.",
+    "conto_one": "{{count}} link",
+    "conto_other": "{{count}} links",
+    "kpi": "KPI",
+    "peso": "Weight",
+    "pesoDa0a1": "Weight (0 to 1)",
+    "scegli": "Choose…",
+    "registra": "Save the link",
+    "togli": "Remove",
+    "confermaTogli": "Remove this link? It can be added back the same way.",
+    "processi": {
+      "titolo": "Process KPIs",
+      "processo": "Process"
+    },
+    "unita": {
+      "titolo": "Organization unit KPIs",
+      "unita": "Organization unit",
+      "daModello": "Unit template (applies to every tenant)"
+    },
+    "negato": "KPI templates are maintained by process and operating-model owners and HR management: your profile does not have this mandate."
+  },
+  "tassonomie": {
+    "titolo": "Taxonomies",
+    "descrizionePagina": "The catalogs shared by every tenant that describe occupations and enterprises: ISCO and CP occupations, ATECO and NACE economic activities with their correspondences, size bands and operating models. An entry is not removed: it is corrected.",
+    "professioni": "Occupations",
+    "schema": "Classification",
+    "cerca": "Search by name or code",
+    "errore": "Could not read the occupation catalog",
+    "erroreScrittura": "The change was not saved. Check that the code does not already exist and try again.",
+    "conto_one": "{{count}} entry",
+    "conto_other": "{{count}} entries, showing {{da}} to {{a}}",
+    "nome": "Name",
+    "codice": "Code",
+    "codiceSuperiore": "Parent entry code",
+    "descrizione": "Description",
+    "livello": "Level (1 to 10)",
+    "correggi": "Correct",
+    "chiudi": "Close",
+    "salva": "Save",
+    "nuova": "New entry in this classification",
+    "aggiungi": "Add the entry",
+    "precedenti": "Previous",
+    "successivi": "Next",
+    "attivita": "Economic activities",
+    "apri": "Open",
+    "corrispondenze": {
+      "titolo": "Correspondences with other classifications",
+      "conto_one": "{{count}} correspondence",
+      "conto_other": "{{count}} correspondences",
+      "cerca": "Search the corresponding class (at least 2 letters)",
+      "tipo": "Kind of correspondence",
+      "fiducia": "Confidence (0 to 1)",
+      "aggiungi": "Add the correspondence",
+      "errore": "The correspondence was not saved. It may already exist."
+    },
+    "imprese": {
+      "fasce": "Enterprise size bands",
+      "modelli": "Operating models",
+      "taglia": "Size",
+      "addetti": "Employees (from – to)",
+      "fatturato": "Revenue in euro (from – to)",
+      "addettiDa": "Employees from",
+      "addettiA": "Employees up to",
+      "fatturatoDa": "Revenue from (euro)",
+      "fatturatoA": "Revenue up to (euro)",
+      "contoModelli_one": "{{count}} operating model",
+      "contoModelli_other": "{{count}} operating models"
+    },
+    "negato": "The occupation and enterprise catalogs are maintained by platform administration: your profile does not have this mandate."
+  },
+  "datiRiferimento": {
+    "nomiFonti": {
+      "ESCO": "ESCO — EU occupation & skill taxonomy",
+      "ATECO_2025": "ATECO 2025 — ISTAT Italian economic activity classification",
+      "ESCO_SKILL_HIERARCHY": "ESCO skill hierarchy — group and broader skill of each skill"
+    },
+    "titolo": "Official reference data sources",
+    "descrizione": "The official taxonomies (ESCO, ATECO 2025, ESCO skill hierarchy) are refreshed from their published sources. A refresh inserts and updates, never deletes; if the source has not changed it stops at once.",
+    "fonti": "Sources",
+    "fonte": "Source",
+    "ultimoSuccesso": "Last successful refresh",
+    "ultimaCorsa": "Last run",
+    "mai": "Never",
+    "aggiorna": "Refresh now",
+    "inCorso": "Refreshing…",
+    "conferma": "Refresh «{{fonte}}» from the official source now? It may take a few minutes.",
+    "lavoro": "Refreshing «{{fonte}}»",
+    "lavoroDettaglio": "The published source is read and its entries are compared with the catalog. At the end, the number of inserted and updated entries appears here.",
+    "fatto": "«{{fonte}}» refreshed: {{totale}} entries read, {{inserite}} inserted, {{aggiornate}} updated.",
+    "invariata": "«{{fonte}}» has not changed since the last refresh: nothing to do.",
+    "erroreCorsa": "The refresh did not succeed. Try again later.",
+    "errore": "Could not read the reference data sources",
+    "storico": "Previous runs",
+    "contoCorse_one": "{{count}} run",
+    "contoCorse_other": "{{count}} runs",
+    "inizio": "Start",
+    "fine": "End",
+    "voci": "Entries read",
+    "inseriteAggiornate": "Inserted / updated",
+    "stato": "Status",
+    "negato": "Refreshing taxonomies from official sources belongs to the data steward and platform administration: your profile does not have this mandate."
+  },
+  "agentReq": {
+    "titolo": "Agent requests",
+    "descrizione": "The requests the agent proposes, with the cost estimate and the cap: each waits for a yes or a no before it starts.",
+    "elenco": "Requests ({{count}})",
+    "elenco_one": "Requests ({{count}})",
+    "erroreCarica": "The requests could not be loaded.",
+    "nessuna": "No requests.",
+    "filtroStato": "Status",
+    "tutte": "All statuses",
+    "stati": {
+      "IN_ATTESA": "Pending",
+      "ACCETTATA": "Accepted",
+      "RIFIUTATA": "Rejected"
+    },
+    "chi": "Asked by {{persona}} · {{perimetro}} · {{data}}",
+    "personaAssente": "person no longer present",
+    "spesa": "Estimate {{previsione}} · cap {{tetto}}",
+    "motivo": "Reason for rejection: {{motivo}}",
+    "accetta": "Accept",
+    "rifiuta": "Reject",
+    "motivoLabel": "Reason for rejection",
+    "confermaRifiuto": "Confirm rejection",
+    "vietato": "You are not allowed to decide this request.",
+    "giaDecisa": "The request has already been decided.",
+    "rifiutata": "Request not accepted by the service",
+    "errore": "Operation failed.",
+    "registroTitolo": "Cost and duration of agent calls",
+    "registroTotali": "{{chiamate}} calls · cost {{costo}} · duration {{durata}}",
+    "erroreRegistro": "The call log could not be loaded."
   }
 }

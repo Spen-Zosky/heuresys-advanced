@@ -176,6 +176,44 @@ describe("/v1/blueprint-processes/* integration", () => {
     expect(g.code).toBe(code);
   });
 
+  it("LIST filtered by variantVersionId → only that version's processes (2026-11-18: no sum of versions)", async () => {
+    const code = `${SUITE_PREFIX}_VER`;
+    const created = await suite.app.inject({
+      method: "POST",
+      url: "/v1/blueprint-processes",
+      headers: {
+        cookie: ch(platformS.cookies),
+        "x-csrf-token": platformS.csrfToken,
+        "content-type": "application/json",
+      },
+      payload: { variantId, code, name: "Version Process", ordinal: 3 },
+    });
+    expect(created.statusCode).toBe(201);
+    const c = created.json() as ProcessResponse & { variantVersionId: string | null };
+    createdProcessIds.push(c.blueprintProcessId);
+
+    // Una versione che non esiste: nessun processo, totale zero (il filtro c'è e viene applicato).
+    const none = await suite.app.inject({
+      method: "GET",
+      url: `/v1/blueprint-processes?variantId=${variantId}&variantVersionId=${randomUUID()}`,
+      headers: { cookie: ch(platformS.cookies) },
+    });
+    expect(none.statusCode).toBe(200);
+    expect((none.json() as { total: number }).total).toBe(0);
+
+    if (c.variantVersionId) {
+      const same = await suite.app.inject({
+        method: "GET",
+        url: `/v1/blueprint-processes?variantVersionId=${c.variantVersionId}&limit=500`,
+        headers: { cookie: ch(platformS.cookies) },
+      });
+      expect(same.statusCode).toBe(200);
+      const body = same.json() as { items: Array<ProcessResponse & { variantVersionId: string | null }>; total: number };
+      expect(body.items.some((x) => x.blueprintProcessId === c.blueprintProcessId)).toBe(true);
+      expect(body.items.every((x) => x.variantVersionId === c.variantVersionId)).toBe(true);
+    }
+  });
+
   it("GET /:id with a random uuid → 404 NOT_FOUND", async () => {
     const r = await suite.app.inject({
       method: "GET",

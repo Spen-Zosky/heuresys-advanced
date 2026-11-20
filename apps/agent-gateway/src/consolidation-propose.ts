@@ -67,6 +67,12 @@ const GRUPPI: Record<string, string> = {
   SKILLS: "competenze",
   PROCESSES: "processi aziendali, descritti anche dalle loro attività",
   INDICATORS_GOALS: "indicatori di prestazione e modelli di obiettivo",
+  CONTRACTS: "contratti collettivi (CCNL) e loro livelli di inquadramento",
+  OBLIGATIONS: "obblighi normativi",
+  TRAINING: "moduli formativi",
+  CAREERS: "percorsi di carriera",
+  INCENTIVES: "incentivi e regole di ricompensa",
+  ENGAGEMENTS: "commesse e progetti",
 };
 
 export class LottoNonValido extends Error {}

@@ -12,6 +12,14 @@
  */
 import { pool, withTransaction } from "../../db/client.js";
 import { misuraDistanza, type MisuraDistanza } from "./distanza.js";
+import {
+  approvaBozze,
+  componiAllineamento,
+  controllaBozza,
+  decisioniRegistrate,
+  salvaBozza,
+  scartaBozze,
+} from "./allineamento.js";
 import type { ActorContext } from "../../lib/actor.js";
 import { userHasPermission } from "../../middleware/rbac.js";
 import {
@@ -26,6 +34,11 @@ import {
   CONSOLIDATION_CERTAIN_THRESHOLD,
   CONSOLIDATION_GROUP_VALUES,
   nextConsolidationGroup,
+  type AlignmentApproveResult,
+  type AlignmentDiscardResult,
+  type AlignmentDraftBody,
+  type AlignmentDraftResult,
+  type AlignmentResponse,
   type ApplyChangesResult,
   type BulkDecideBody,
   type BulkDecideResult,
@@ -95,6 +108,15 @@ async function gruppiLeggibili(actor: ActorContext): Promise<ConsolidationGroup[
   const m = await mandatoDi(actor);
   if (m.gruppi.size === 0) throw new ForbiddenError("Nessun mandato sul consolidamento", "PERMISSION_DENIED");
   return [...m.gruppi.keys()];
+}
+
+/** La corsa deve essere del tenant di chi chiama (I5). */
+async function corsaDelTenant(tenantId: string, runId: string): Promise<void> {
+  const { rows } = await pool.query<{ id: string }>(
+    `SELECT blueprint_run_id AS id FROM sys.sys_blueprint_runs WHERE blueprint_run_id = $1 AND blueprint_run_tenant_id = $2`,
+    [runId, tenantId],
+  );
+  if (!rows[0]) throw new NotFoundError("Corsa non trovata", "BLUEPRINT_RUN_NOT_FOUND");
 }
 
 /** Lo stato ADR-0048 che una decisione dà alla voce (disegno §6). */
@@ -732,6 +754,70 @@ export const tenantConsolidationService = {
       await client.query("ROLLBACK").catch(() => undefined);
       client.release();
     }
+  },
+
+  /**
+   * La scheda «Allineamento» (piano 20261118): la distanza della corsa sui 24 domini con la proposta e le
+   * decisioni registrate per ogni voce. Come la distanza copre tutto il tenant, quindi la legge solo chi ha la
+   * lettura piena del consolidamento. Misura in una transazione READ ONLY; le decisioni si leggono dopo.
+   */
+  async alignment(actor: ActorContext, runId: string): Promise<AlignmentResponse> {
+    const m = await tenantConsolidationService.distance(actor, runId, { dettaglio: true });
+    const tenantId = tenantDi(actor);
+    const registrate = await decisioniRegistrate(pool, tenantId, runId);
+    const c = componiAllineamento(m, registrate);
+    return {
+      runId,
+      misurataIl: m.misurataIl,
+      puoDecidere: userHasPermission(actor, "consolidation:decide"),
+      domini: c.domini,
+      totale: m.totale,
+      decisioni: { bozze: c.bozze, approvate: c.approvate, superate: c.superate },
+    };
+  },
+
+  /** Salva le decisioni in bozza. Solo il Direttore HR: l'allineamento è una scelta su tutto il tenant. */
+  async alignmentDrafts(actor: ActorContext, runId: string, body: AlignmentDraftBody): Promise<AlignmentDraftResult> {
+    if (!userHasPermission(actor, "consolidation:decide")) {
+      throw new ForbiddenError("Solo il Direttore HR decide l'allineamento", "PERMISSION_DENIED");
+    }
+    const vista = await tenantConsolidationService.alignment(actor, runId);
+    const tenantId = tenantDi(actor);
+    const scartate: AlignmentDraftResult["scartate"] = [];
+    let salvate = 0;
+    await withTransaction(async (client) => {
+      for (const v of body.voci) {
+        const c = controllaBozza(vista.domini, v);
+        if (!c.ok) {
+          scartate.push({ chiave: v.chiave, motivo: c.motivo });
+          continue;
+        }
+        await salvaBozza(client, { tenantId, runId, userId: actor.userId, dominio: v.dominio, riga: c.riga, decisione: v.decisione });
+        salvate++;
+      }
+    });
+    return { salvate, scartate };
+  },
+
+  /** Il pulsante rosso: le bozze diventano decisioni approvate. Non cambia i dati del tenant. */
+  async alignmentApprove(actor: ActorContext, runId: string): Promise<AlignmentApproveResult> {
+    if (!userHasPermission(actor, "consolidation:decide")) {
+      throw new ForbiddenError("Solo il Direttore HR approva l'allineamento", "PERMISSION_DENIED");
+    }
+    await corsaDelTenant(tenantDi(actor), runId);
+    const quando = new Date();
+    const approvate = await withTransaction((client) => approvaBozze(client, tenantDi(actor), runId, actor.userId, quando));
+    return { approvate, approvateIl: quando.toISOString() };
+  },
+
+  /** Scarta le bozze non approvate; le decisioni già approvate restano. */
+  async alignmentDiscard(actor: ActorContext, runId: string): Promise<AlignmentDiscardResult> {
+    if (!userHasPermission(actor, "consolidation:decide")) {
+      throw new ForbiddenError("Solo il Direttore HR decide l'allineamento", "PERMISSION_DENIED");
+    }
+    await corsaDelTenant(tenantDi(actor), runId);
+    const scartate = await withTransaction((client) => scartaBozze(client, tenantDi(actor), runId));
+    return { scartate };
   },
 
   /** La corsa diventa il modello in uso del tenant. Solo il Direttore HR: è una scelta sul modello, non su una voce. */

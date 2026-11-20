@@ -70,6 +70,8 @@
       "learning": "Formazione",
       "learning_training-initiatives": "Iniziative formative",
       "admin_roles": "Ruoli",
+      "admin_agent-capabilities": "Capacità dell'agente",
+      "admin_agent-requests": "Richieste dell'agente",
       "admin_mfa-policy": "Politica di autenticazione a più fattori",
       "provenance": "Registro di provenienza",
       "generated-origins": "Registro delle righe generate",
@@ -163,7 +165,8 @@
     },
     "kpi": {
       "analytics": "Analisi",
-      "catalog": "Catalogo KPI"
+      "catalog": "Catalogo KPI",
+      "templates": "Modelli dei KPI"
     },
     "career": {
       "main": "Carriera",
@@ -182,15 +185,18 @@
     },
     "dati": {
       "provenance": "Registro di provenienza",
-      "gdpr": "Dati personali (GDPR)"
+      "gdpr": "Dati personali (GDPR)",
+      "tassonomie": "Tassonomie",
+      "riferimento": "Fonti ufficiali"
     },
     "permessi": {
       "roles": "Ruoli e permessi",
-      "agent": "Capacità dell'agente"
+      "agent": "Capacità dell'agente",
+      "requests": "Richieste dell'agente"
     }
   },
   "session": {
-    "error": "Errore sessione"
+    "error": "Non riesco a caricare la tua sessione. Riprova tra qualche istante."
   },
   "logout": "Esci",
   "language": {

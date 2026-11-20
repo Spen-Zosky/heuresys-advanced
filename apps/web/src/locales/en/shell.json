@@ -70,6 +70,8 @@
       "learning": "Learning",
       "learning_training-initiatives": "Training initiatives",
       "admin_roles": "Roles",
+      "admin_agent-capabilities": "Agent capabilities",
+      "admin_agent-requests": "Agent requests",
       "admin_mfa-policy": "MFA policy",
       "provenance": "Provenance ledger",
       "generated-origins": "Generated rows ledger",
@@ -163,7 +165,8 @@
     },
     "kpi": {
       "analytics": "Analytics",
-      "catalog": "KPI catalog"
+      "catalog": "KPI catalog",
+      "templates": "KPI templates"
     },
     "career": {
       "main": "Career",
@@ -182,15 +185,18 @@
     },
     "dati": {
       "provenance": "Provenance register",
-      "gdpr": "Personal data (GDPR)"
+      "gdpr": "Personal data (GDPR)",
+      "tassonomie": "Taxonomies",
+      "riferimento": "Official sources"
     },
     "permessi": {
       "roles": "Roles & permissions",
-      "agent": "Agent capabilities"
+      "agent": "Agent capabilities",
+      "requests": "Agent requests"
     }
   },
   "session": {
-    "error": "Session error"
+    "error": "Your session could not be loaded. Please try again in a moment."
   },
   "logout": "Sign out",
   "language": {

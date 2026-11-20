@@ -827,6 +827,52 @@
       "LOW": "Basso",
       "MEDIUM": "Medio",
       "HIGH": "Alto"
+    },
+    "blueprintOverrideInclusion": {
+      "IN": "Incluso",
+      "PARTIAL": "In parte",
+      "OUT": "Escluso"
+    },
+    "statoPropostaRicerca": {
+      "PENDING": "In attesa",
+      "PASSED": "Passata ai controlli",
+      "FAILED": "Respinta dai controlli",
+      "WARNING": "Con avviso",
+      "APPROVED": "Approvata",
+      "REJECTED": "Respinta",
+      "APPLIED": "Applicata"
+    },
+    "occupationClassScheme": {
+      "ISCO_08": "ISCO-08 (internazionale)",
+      "CP_2021": "CP 2021 (ISTAT)"
+    },
+    "activityClassScheme": {
+      "ATECO_2025": "ATECO 2025",
+      "NACE_REV_2_1": "NACE Rev. 2.1",
+      "ATECO_2007": "ATECO 2007",
+      "NACE_REV_2": "NACE Rev. 2",
+      "ATECO": "ATECO",
+      "NACE": "NACE"
+    },
+    "activityMappingKind": {
+      "EXACT": "Equivalente",
+      "NARROWER": "Più ristretta",
+      "BROADER": "Più ampia",
+      "RELATED": "Collegata",
+      "APPROXIMATE": "Approssimata"
+    },
+    "enterpriseSizeBandCode": {
+      "XS": "Micro",
+      "S": "Piccola",
+      "M": "Media",
+      "L": "Grande",
+      "XL": "Molto grande"
+    },
+    "referenceSyncRunStatus": {
+      "RUNNING": "In corso",
+      "COMPLETED": "Completata",
+      "FAILED": "Non riuscita",
+      "CANCELLED": "Annullata"
     }
   },
   "masked": "nascosto per il tuo profilo",
@@ -988,7 +1034,8 @@
       "motivo": "Il tuo profilo non comprende questi dati. Se ti servono per il tuo lavoro, chiedi a chi gestisce i ruoli nella tua azienda."
     },
     "codice": "Codice: {{codice}}.",
-    "nonDisponibile": "non disponibile"
+    "nonDisponibile": "non disponibile",
+    "perAssistenza": "Per l'assistenza"
   },
   "stepUp": {
     "title": "Conferma la tua identità",
@@ -1031,6 +1078,48 @@
     }
   },
   "agente": {
+    "nome": "Assistente",
+    "cronologia": "Conversazioni",
+    "mostraCronologia": "Mostra le conversazioni",
+    "nascondiCronologia": "Nascondi le conversazioni",
+    "massimizza": "Ingrandisci",
+    "riduci": "Riduci",
+    "ridimensiona": "Trascina per allargare o restringere la finestra",
+    "vuotoTitolo": "Come posso aiutarti?",
+    "vuotoTesto": "Fai una domanda sui dati e sulle persone che hai il permesso di vedere. Ciò che non puoi vedere resta {omissis}.",
+    "suggerimento1": "Riassumi ciò che mostra questa pagina.",
+    "suggerimento2": "Quante persone lavorano in ciascuna unità organizzativa?",
+    "suggerimento3": "Quali posizioni sono scoperte?",
+    "fasePensa": "Sto pensando…",
+    "faseConsulta": "Sto consultando i dati…",
+    "faseScrive": "Sto scrivendo la risposta…",
+    "faseDettaglio": "La risposta comparirà qui. Puoi chiudere la finestra: il lavoro continua e lo ritrovi fra le conversazioni.",
+    "invia": "Invia",
+    "ferma": "Smetti di seguire",
+    "domanda": "La tua domanda",
+    "domandaSegnaposto": "Scrivi una domanda…",
+    "aiutoInvio": "Invio per inviare, Maiusc+Invio per andare a capo",
+    "avvisoErrore": "La risposta si è interrotta per un errore. Riprova.",
+    "avvisoLimite": "La risposta si è fermata perché ha raggiunto il tempo massimo. Puoi continuare la conversazione.",
+    "apriContenuto": "Apri",
+    "copia": "Copia",
+    "copiato": "Copiato",
+    "scaricaCsv": "Scarica CSV",
+    "testo": "Testo",
+    "ispettoreTabella": "Tabella ({{righe}} righe)",
+    "ispettoreTesto": "Testo",
+    "ispettoreDiagramma": "Diagramma",
+    "ispettoreAiuto": "Trascina l'angolo in basso a destra per ridimensionare.",
+    "rifiutoTitolo": "Informazioni riservate",
+    "tu": "Tu",
+    "approvazioneTitolo": "L'assistente chiede la tua conferma",
+    "approvazioneScrittura": "Per completare la richiesta l'assistente deve modificare dei dati. Confermi?",
+    "approvazioneLettura": "La richiesta riguarda molte persone ({{persone}}). Confermi la lettura?",
+    "approvazioneLetturaSenzaNumero": "La richiesta riguarda molte persone. Confermi la lettura?",
+    "azione_crea-aggiorna": "Creare o aggiornare",
+    "azione_elimina": "Eliminare",
+    "azione_costruisci": "Costruire",
+    "azione_altro": "Modificare",
     "vistaCambiata": "Vista cambiata dall'assistente: {{cosa}} ({{righe}} righe).",
     "vistaAzzera": "Torna alla tabella intera",
     "comandoVista": "Comando della vista: {{nome}}",
@@ -1055,7 +1144,8 @@
     "approvalResolved": "Decisione inviata: {{decision}}",
     "errorRun": "Esecuzione fallita: {{message}}",
     "noSession": "Nessuna sessione: effettua il login per inoltrare i cookie al gateway.",
-    "contestoPagina": "Pagina «{{titolo}}» ({{percorso}})",
+    "contestoPagina": "Pagina «{{titolo}}»",
+    "contestoPaginaSenzaNome": "Pagina corrente",
     "apri": "Chiedi all'assistente",
     "chiudi": "Chiudi l'assistente",
     "reasonRequired": "Per negare serve un motivo: scrivilo e conferma.",
@@ -1087,6 +1177,8 @@
     "riga": "Dettaglio della riga"
   },
   "organigramma": {
+    "senzaCliente": "Nessun cliente nel tuo perimetro",
+    "senzaClienteMotivo": "Il tuo mandato non ha ancora clienti assegnati: l'organigramma mostra solo i clienti che ti sono assegnati.",
     "aggiorna": "Aggiorna",
     "aggiornando": "Aggiornamento…",
     "calcolato": "Calcolato dai dati vivi il {{quando}}",

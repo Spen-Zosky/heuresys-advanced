@@ -26,6 +26,7 @@ import { conVertice, gruppi, type Gruppo, type UnitaBlocco } from "@/lib/organig
 import { useOrganigramma, aBlocchi } from "./dati";
 import { useScheda } from "@/components/scheda-rapida";
 import { SchedePagina } from "@/components/schede-pagina";
+import { isApiError } from "@/lib/api/errors";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { OrganigrammaBlocchi } from "./blocchi";
 import { OrganigrammaNodi } from "./nodi";
@@ -57,8 +58,12 @@ export function VistaOrganigramma({
   };
 
   if (q.isLoading) return <StatoCaricamento />;
+  // 404 = nessun cliente nel perimetro di chi guarda (un mandato di piattaforma senza clienti assegnati): non è un guasto.
+  if (q.isError && isApiError(q.error) && q.error.status === 404)
+    return <StatoVuoto titolo={t("organigramma.senzaCliente")} motivo={t("organigramma.senzaClienteMotivo")} testId={`${testId}-senza-cliente`} />;
   if (q.isError) return <StatoErrore errore={q.error} titolo={t("organigramma.errore")} testId={`${testId}-errore`} onRiprova={() => void q.refetch()} />;
   const d = q.data!;
+  if (d.senzaCliente) return <StatoVuoto titolo={t("organigramma.senzaCliente")} motivo={t("organigramma.senzaClienteMotivo")} testId={`${testId}-senza-cliente`} />;
   if (!d.unita.length) return <StatoVuoto titolo={t("organigramma.vuoto")} testId={`${testId}-vuoto`} />;
 
   const persone = d.unita.reduce((s, u) => s + u.persone.length, 0);

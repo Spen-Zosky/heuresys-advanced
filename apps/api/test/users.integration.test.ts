@@ -556,52 +556,24 @@ describe("/v1/users/* integration (4-tier scope)", () => {
     return userId;
   }
 
-  it("PURGE: utente SENZA storia → 204 e la riga sparisce davvero", async () => {
+  // Ondata 5 (2026-11-19): il purge è RITIRATO (lib/rotte-ritirate.ts). La cancellazione di una
+  // persona si fa con la procedura GDPR, che lascia il registro della richiesta: la rotta risponde
+  // 410 con l'alternativa e la riga resta, anche per un utente senza storia.
+  it("PURGE: ritirato → 410 con l'alternativa GDPR, e la riga resta", async () => {
     const userId = await creaUsaEGetta("px_pulito");
-
     const r = await suite.app.inject({
       method: "DELETE",
       url: `/v1/users/${userId}/purge`,
       headers: { cookie: cookieHeader(platformS.cookies), "x-csrf-token": platformS.csrfToken },
     });
-    expect(r.statusCode).toBe(204);
-
-    // Non basta il 204: si guarda il database. Un 204 su una riga ancora
-    // presente sarebbe il difetto peggiore possibile qui.
-    const resta = await pool.query(`SELECT 1 FROM sys.sys_users WHERE user_id = $1`, [userId]);
-    expect(resta.rowCount).toBe(0);
-  });
-
-  it("PURGE: basta UNA riga di storia operativa → 409 USER_HAS_HISTORY, e l'utente resta", async () => {
-    const userId = await creaUsaEGetta("px_storia");
-    const tenantRow = await pool.query<{ tenant_id: string }>(
-      `SELECT tenant_id FROM sys.sys_tenancies WHERE tenant_code = 'RTL_BANK'`,
-    );
-
-    // UNA sola riga, nella più economica delle 10 tabelle che trattengono
-    // (ON DELETE RESTRICT verso sys_users). Il caso limite è proprio questo:
-    // non «tanta storia», ma il minimo indivisibile.
-    await pool.query(
-      `INSERT INTO audit.user_self_service_actions (action_user_id, action_tenant_id, action_type)
-       VALUES ($1, $2, 'PROFILE_UPDATE')`,
-      [userId, tenantRow.rows[0]!.tenant_id],
-    );
-
-    const r = await suite.app.inject({
-      method: "DELETE",
-      url: `/v1/users/${userId}/purge`,
-      headers: { cookie: cookieHeader(platformS.cookies), "x-csrf-token": platformS.csrfToken },
-    });
-    expect(r.statusCode).toBe(409);
-    const body = r.json() as { error: { code: string; message: string } };
-    expect(body.error.code).toBe("USER_HAS_HISTORY");
-    // L'errore deve DIRE chi trattiene, o chi lo riceve non sa che farsene.
-    expect(body.error.message).toContain("user_self_service_actions");
-
+    expect(r.statusCode).toBe(410);
+    const body = r.json() as { error: { code: string; details: { alternativa: string | null } } };
+    expect(body.error.code).toBe("ROUTE_RETIRED");
+    expect(body.error.details.alternativa).toBe("POST /v1/gdpr/users/:userId/erasure");
     const resta = await pool.query(`SELECT 1 FROM sys.sys_users WHERE user_id = $1`, [userId]);
     expect(resta.rowCount).toBe(1);
 
-    // La via canonica resta percorribile sulla stessa persona.
+    // La via canonica per togliere una persona dall'operatività resta percorribile.
     const soft = await suite.app.inject({
       method: "DELETE",
       url: `/v1/users/${userId}`,
@@ -615,14 +587,15 @@ describe("/v1/users/* integration (4-tier scope)", () => {
     expect(dopo.rows[0]!.user_status).toBe("DEACTIVATED");
   });
 
-  it("PURGE: su se stessi → 409 SELF_PURGE", async () => {
+  it("PURGE: anche su se stessi risponde 410, e nessuno sparisce", async () => {
     const r = await suite.app.inject({
       method: "DELETE",
       url: `/v1/users/${platformS.userId}/purge`,
       headers: { cookie: cookieHeader(platformS.cookies), "x-csrf-token": platformS.csrfToken },
     });
-    expect(r.statusCode).toBe(409);
-    expect((r.json() as { error: { code: string } }).error.code).toBe("SELF_PURGE");
+    expect(r.statusCode).toBe(410);
+    const resta = await pool.query(`SELECT 1 FROM sys.sys_users WHERE user_id = $1`, [platformS.userId]);
+    expect(resta.rowCount).toBe(1);
   });
 
   /* -------------------------------------------------- role grants */

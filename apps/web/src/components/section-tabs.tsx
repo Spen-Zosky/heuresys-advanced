@@ -57,6 +57,7 @@ const MERGE_GROUPS: ReadonlyArray<Group> = [
   { id: "kpi", tabs: [
     { href: "/analytics/kpi", key: "kpi.analytics" },
     { href: "/kpis", key: "kpi.catalog" },
+    { href: "/admin/catalogo-kpi", key: "kpi.templates" },
   ] },
   // Ondata 3 (2026-11-17): le valutazioni delle persone entrano come scheda di /performance.
   // Ondata 3 (2026-11-17): i diritti sui dati personali stanno accanto al registro di provenienza.
@@ -64,10 +65,13 @@ const MERGE_GROUPS: ReadonlyArray<Group> = [
   { id: "permessi", tabs: [
     { href: "/admin/roles", key: "permessi.roles" },
     { href: "/admin/agent-capabilities", key: "permessi.agent" },
+    { href: "/admin/agent-requests", key: "permessi.requests" },
   ] },
   { id: "dati", tabs: [
     { href: "/provenance", key: "dati.provenance" },
     { href: "/admin/gdpr", key: "dati.gdpr" },
+    { href: "/admin/tassonomie", key: "dati.tassonomie" },
+    { href: "/admin/dati-di-riferimento", key: "dati.riferimento" },
   ] },
   { id: "performance", tabs: [
     { href: "/performance", key: "performance.cycles" },
@@ -119,7 +123,11 @@ const PERMESSI_SCHEDE: Readonly<Record<string, string>> = {
   "/mentorship": "mentorship:read",
   "/assessments": "assessment:read",
   "/admin/gdpr": "gdpr:read",
+  "/admin/catalogo-kpi": "process_kpi_template:read",
+  "/admin/tassonomie": "occupation_classification:read",
+  "/admin/dati-di-riferimento": "reference_sync:read",
   "/admin/agent-capabilities": "agent_capability:read",
+  "/admin/agent-requests": "agent_request:read:all",
 };
 
 export function SectionTabs() {

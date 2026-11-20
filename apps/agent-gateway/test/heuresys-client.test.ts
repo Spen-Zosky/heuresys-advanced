@@ -4,6 +4,7 @@
  * in a header, and single-flight refresh on 401 (M-5).
  */
 import { describe, it, expect } from "vitest";
+import { EsitiLetture, MESSAGGIO_NON_AUTORIZZATO, OMISSIS, conOmissis } from "../src/omissis.js";
 import { HeuresysClient, INTESTAZIONE_ORIGINE, chiEDove, chiSei, chiediGettoneAgente, type FetchLike, type Session } from "../src/heuresys-client.js";
 
 const session: Session = {
@@ -77,9 +78,45 @@ describe("HeuresysClient auth/CSRF", () => {
   });
 
   it("throws on a non-401 error status", async () => {
-    const { fetchImpl } = recordingFetch(() => ({ ok: false, status: 403, body: {} }));
+    const { fetchImpl } = recordingFetch(() => ({ ok: false, status: 500, body: {} }));
     const c = new HeuresysClient({ baseUrl: "http://api", session, fetchImpl });
-    await expect(c.call("GET", "/positions")).rejects.toThrow(/403/);
+    await expect(c.call("GET", "/positions")).rejects.toThrow(/500/);
+    const scrittura = recordingFetch(() => ({ ok: false, status: 403, body: {} }));
+    const c2 = new HeuresysClient({ baseUrl: "http://api", session, fetchImpl: scrittura.fetchImpl });
+    await expect(c2.call("POST", "/skills", {})).rejects.toThrow(/403/);
+  });
+});
+
+describe("2026-11-18 — ciò che la persona non vede: {omissis} e letture negate", () => {
+  it("una GET negata (403) torna NON_AUTORIZZATO e si conta; il rifiuto scatta solo se tutto è negato", async () => {
+    const esiti = new EsitiLetture();
+    const { fetchImpl } = recordingFetch((url) =>
+      url.includes("/compensation") ? { ok: false, status: 403, body: {} } : { ok: true, status: 200, body: { items: [] } },
+    );
+    const c = new HeuresysClient({ baseUrl: "http://api", session, fetchImpl });
+    c.collegaEsiti(esiti);
+    expect(await c.call("GET", "/compensation")).toMatchObject({ esito: "NON_AUTORIZZATO" });
+    expect(esiti.rifiuto()).toBe(MESSAGGIO_NON_AUTORIZZATO);
+    await c.call("GET", "/positions");
+    expect(esiti.conteggio()).toEqual({ riuscite: 1, negate: 1 });
+    expect(esiti.rifiuto()).toBeNull();
+  });
+
+  it("i campi tolti dall'API tornano come {omissis}, anche annidati, e `masked` sparisce", async () => {
+    const { fetchImpl } = recordingFetch(() => ({
+      ok: true,
+      status: 200,
+      body: { items: [{ id: "1", nome: "Rossi, Mario", masked: ["salary", "rating"] }, { id: "2", nome: "Bianchi, Anna", salary: 1 }] },
+    }));
+    const c = new HeuresysClient({ baseUrl: "http://api", session, fetchImpl });
+    const out = await c.call<{ items: Array<Record<string, unknown>> }>("GET", "/people");
+    expect(out.items[0]).toEqual({ id: "1", nome: "Rossi, Mario", salary: OMISSIS, rating: OMISSIS });
+    expect(out.items[1]).toEqual({ id: "2", nome: "Bianchi, Anna", salary: 1 });
+  });
+
+  it("senza `masked` la risposta resta identica", () => {
+    const d = { a: [1, { b: "x" }], c: null };
+    expect(conOmissis(d)).toEqual(d);
   });
 });
 
@@ -180,5 +217,34 @@ describe("chiEDove: chi parla e in quale tenant, per l'ammissione all'assistente
   it("senza persona non c'è nessuno", async () => {
     const vuota = recordingFetch(() => ({ ok: true, status: 200, body: { tenantId: "t-1" } }));
     await expect(chiEDove("http://api", { cookieAccess: "X" }, vuota.fetchImpl)).resolves.toBeUndefined();
+  });
+});
+
+describe("filtri delle letture dalla specifica", () => {
+  it("espone i parametri di query di ogni GET (userId per le richieste di assenza) e li legge una volta sola", async () => {
+    const { fetchImpl, calls } = recordingFetch(() => ({
+      ok: true,
+      status: 200,
+      body: {
+        paths: {
+          "/v1/time-off/requests": {
+            get: { parameters: [{ in: "query", name: "userId", schema: { type: "string", format: "uuid" } }, { in: "query", name: "status", schema: { type: "string" } }] },
+          },
+          "/v1/skills": { get: { parameters: [] } },
+        },
+      },
+    }));
+    const c = new HeuresysClient({ baseUrl: "http://api", session, fetchImpl });
+    const m = await c.filtriDelleLetture();
+    await c.filtriDelleLetture();
+    expect(m.get("/v1/time-off/requests")).toEqual({ userId: "uuid", status: "string" });
+    expect(m.has("/v1/skills")).toBe(false); // CONTROPROVA: senza filtri non compare
+    expect(calls).toHaveLength(1);
+  });
+
+  it("senza specifica non lancia: descrizione senza filtri", async () => {
+    const { fetchImpl } = recordingFetch(() => ({ ok: false, status: 500 }));
+    const c = new HeuresysClient({ baseUrl: "http://api", session, fetchImpl });
+    expect((await c.filtriDelleLetture()).size).toBe(0);
   });
 });

@@ -83,6 +83,15 @@ git fetch origin --quiet --prune 2>/dev/null || { err "git fetch fallito — rip
 ARMED="$(git rev-parse --verify --quiet "origin/$ARM_REF" || true)"
 TIP="$(git rev-parse --verify --quiet "origin/$BRANCH" || true)"
 
+# --- 1b. blocco di main durante il rilascio (scripts/blocco-rilascio.sh, 2026-11-20). A ogni tick,
+#     prima di ogni uscita: toglie il blocco quando il commit armato e' in produzione (o e' scaduto)
+#     e ripubblica «rilascio-libero» sulle PR aperte se lo stato e' cambiato. Mai fatale.
+_blocco="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/blocco-rilascio.sh"
+if [ -f "$_blocco" ]; then
+  _in_prod="$(tr -d '[:space:]' < "$REPO_DIR/pg_dump_snapshots/LAST_GOOD_SHA" 2>/dev/null || true)"
+  bash "$_blocco" riconcilia "$_in_prod" || err "blocco-rilascio: riconcilia fallita (non blocca il deploy)"
+fi
+
 if [ -z "$ARMED" ]; then
   say "nessun deploy armato (origin/$ARM_REF non esiste) — niente da fare"
   exit 0

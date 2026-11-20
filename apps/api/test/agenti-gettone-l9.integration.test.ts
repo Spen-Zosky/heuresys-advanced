@@ -21,8 +21,13 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { senzaCacheDiSessione } from "./helpers/session-cache.js";
 import { pool } from "../src/db/client.js";
-import { COOKIES } from "../src/config/constants.js";
+import { COOKIES, type RoleCode } from "../src/config/constants.js";
 import { MANDATE_ROLES } from "../src/lib/scope/mandati.js";
+import { ruoliDellaRichiesta } from "../src/middleware/auth.js";
+import { ruoliDiLetturaPerAgente } from "../src/modules/agent-tokens/routes.js";
+import { MANDATI_MAI_ALL_AGENTE } from "../src/lib/scope/mandati.js";
+import { userHasPermission } from "../src/middleware/rbac.js";
+import * as crypto from "node:crypto";
 import { AGENT_TOKEN_TTL_SECONDS, type AgentTokenResponse } from "@heuresys/shared";
 import { unCapoConSottoposti, unSottopostoOrganizzativo, type Attore } from "./helpers/org-actors.js";
 
@@ -148,6 +153,56 @@ describe("L9 A-1 e ADR-0050 D6 — il gettone dice chi è l'agente e per conto d
       attore_tipo: "agente", persona: sotto.userId, agente: "assistente-hr", compito: "prova L9: tema",
       metodo: "PATCH", rotta: "/v1/me/preferences", stato: 200,
     });
+  });
+});
+
+describe("ADR-0050 D6 emendato (2026-11-18) — in lettura l'agente usa il perimetro pieno della persona", () => {
+  it("il gettone porta i ruoli pieni in `rl` e li dichiara in `readRoles`", async () => {
+    const persona = await accedi(capo.email);
+    const r = await gettone(persona, { agentCode: "assistente-hr", task: "prova D6: letture" });
+    expect(r.statusCode, r.body).toBe(201);
+    const g = r.json() as AgentTokenResponse;
+    const dellaPersona = t.app.jwt.decode<{ roles: string[] }>(persona.cookies.get(COOKIES.ACCESS)!)!.roles;
+    const attesi = dellaPersona.filter((x) => !MANDATI_MAI_ALL_AGENTE.has(x as RoleCode)).sort();
+    expect([...g.readRoles].sort()).toEqual(attesi);
+    expect((t.app.jwt.decode(g.token) as { rl: string[] }).rl.sort()).toEqual(attesi);
+  });
+
+  it("la custodia delle segnalazioni e la sicurezza non entrano mai nelle letture dell'agente", () => {
+    expect(ruoliDiLetturaPerAgente(["USER", "HRMS_MANAGER", "WHISTLEBLOWING_CUSTODIAN", "SECURITY_ADMIN", "PLATFORM_ADMIN"]).sort()).toEqual(
+      ["HRMS_MANAGER", "PLATFORM_ADMIN", "USER"],
+    );
+  });
+
+  it("un mandato in `rl` vale per le GET e non per le scritture", async () => {
+    const persona = await accedi(capo.email);
+    const base = t.app.jwt.decode<{ sub: string; tenant_id: string | null; roles: RoleCode[]; fam: string }>(
+      persona.cookies.get(COOKIES.ACCESS)!,
+    )!;
+    const senza = base.roles.filter((x) => !MANDATE_ROLES.has(x));
+    // Il gettone che l'API emetterebbe per una persona con HRMS_MANAGER: il mandato solo in `rl`.
+    const firmato = await t.app.jwt.sign(
+      {
+        sub: base.sub, tenant_id: base.tenant_id, roles: senza, rl: [...senza, "HRMS_MANAGER"],
+        jti: crypto.randomUUID(), fam: base.fam, agt: { cod: "assistente-hr", cmp: "prova D6: mandato in lettura" },
+      },
+      { expiresIn: "60s" },
+    );
+    const agente = dellAgente(persona, firmato);
+    const permessi = await chiama(agente, "GET", "/v1/me/permissions");
+    expect(permessi.statusCode, permessi.body).toBe(200);
+    const visti = new Set((permessi.json() as { permissions: string[] }).permissions);
+    const soloDelMandato = [...visti].filter((p) => !userHasPermission({ roles: senza }, p));
+    expect(soloDelMandato.length, "la GET non vede i permessi del mandato").toBeGreaterThan(0);
+  });
+
+  it("la scelta dei ruoli segue il metodo, e un gettone senza `rl` resta com'era", () => {
+    const scrittura: RoleCode[] = ["USER"];
+    const lettura: RoleCode[] = ["USER", "HRMS_MANAGER"];
+    expect(ruoliDellaRichiesta("GET", scrittura, lettura)).toEqual(lettura);
+    expect(ruoliDellaRichiesta("HEAD", scrittura, lettura)).toEqual(lettura);
+    for (const m of ["POST", "PATCH", "PUT", "DELETE"]) expect(ruoliDellaRichiesta(m, scrittura, lettura)).toEqual(scrittura);
+    expect(ruoliDellaRichiesta("GET", scrittura, undefined)).toEqual(scrittura);
   });
 });
 

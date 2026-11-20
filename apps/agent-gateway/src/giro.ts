@@ -23,8 +23,10 @@ import type { ContatorePersone } from "./persone-distinte.js";
 import type { ApprovalRequest, ApproveFn } from "./write-gate.js";
 import {
   fineDi,
+  misuraDi,
   riduci,
   sessioneDi,
+  type MisuraChiamata,
   type MotivoArresto,
   type RegistroConversazione,
   type StatoAttivita,
@@ -65,7 +67,26 @@ export interface GiroDeps {
    * potrebbe raccontarla (blocco I4: `notaSugliEsiti` sui comandi della vista). `null`, niente nota.
    */
   nota?: () => string | null;
+  /**
+   * A fine giro, il messaggio fisso quando la domanda era tutta su dati che la persona non può
+   * vedere (omissis.ts: almeno una lettura negata e nessuna riuscita). Lo decide il gateway, non
+   * il modello, e prende il posto della sua risposta. `null`, la risposta resta quella del modello.
+   */
+  rifiuto?: () => string | null;
+  /** Il posto della conversazione (limiti.ts): si sospende mentre il giro aspetta la persona. */
+  attesa?: { sospendi: () => void; riprendi: () => void };
+  /**
+   * A fine giro, la riga di costo e durata per il registro delle chiamate dell'agente
+   * (`POST /v1/agent-requests/calls`). Best effort: se non si scrive, il giro non cambia esito.
+   */
+  chiamata?: (c: ChiamataGiro) => Promise<void>;
   now?: () => number;
+}
+
+/** Una riga del registro di costo: com'è finito il giro, quanto è durato, quanto è costato. */
+export interface ChiamataGiro extends MisuraChiamata {
+  outcome: "OK" | "ERRORE" | "LIMITE";
+  durationMs: number;
 }
 
 /** Il margine prima della scadenza del gettone: l'ultima chiamata deve ancora valere. */
@@ -133,11 +154,19 @@ export async function eseguiGiro(d: GiroDeps): Promise<EsitoGiro> {
     registro.aggiungi([{ kind: "PROPOSTA", payload: { proposalId: approvalId, strumento: tool } }]);
     await registro.stato("IN_ATTESA");
     d.scrivi(evento("approval_required", payload));
-    const ok = await decided;
-    await registro.stato("IN_CORSO");
-    return ok;
+    // Mentre aspetta la persona il giro non lavora: non occupa il suo posto personale (limiti.ts).
+    d.attesa?.sospendi();
+    try {
+      const ok = await decided;
+      await registro.stato("IN_CORSO");
+      return ok;
+    } finally {
+      d.attesa?.riprendi();
+    }
   };
 
+  const avvio = now();
+  let misura: MisuraChiamata | undefined;
   let sessione = registro.conversazione.sdkSessionRef ?? undefined;
   let fine: ReturnType<typeof fineDi>;
   let errore = false;
@@ -156,6 +185,7 @@ export async function eseguiGiro(d: GiroDeps): Promise<EsitoGiro> {
         await registro.ricorda({ sdkSessionRef: nuova });
       }
       fine = fineDi(ev) ?? fine;
+      misura = misuraDi(ev) ?? misura;
       const visti = riduci(ev);
       if (visti.length > 0) {
         registro.aggiungi(visti);
@@ -182,6 +212,12 @@ export async function eseguiGiro(d: GiroDeps): Promise<EsitoGiro> {
     d.scrivi(evento("nota", { testo: nota }));
   }
 
+  const rifiuto = motivo === undefined && !errore ? (d.rifiuto?.() ?? null) : null;
+  if (rifiuto) {
+    registro.aggiungi([{ kind: "TESTO", payload: { testo: rifiuto, origine: "piattaforma", rifiuto: true } }]);
+    d.scrivi(evento("rifiuto", { testo: rifiuto }));
+  }
+
   let esito: EsitoGiro;
   if (motivo !== undefined) {
     registro.aggiungi([{ kind: "LIMITE", payload: { limite: motivo } }]);
@@ -195,9 +231,27 @@ export async function eseguiGiro(d: GiroDeps): Promise<EsitoGiro> {
   await registro.stato(esito.stato, {
     ...(esito.motivo ? { stopReason: esito.motivo } : {}),
     // Il risultato salvato porta la nota: chi lo rilegge non trova un «fatto» senza la correzione.
-    ...(fine?.risultato && esito.stato === "FATTA" ? { result: nota ? `${fine.risultato}\n\n${nota}` : fine.risultato } : {}),
+    ...(rifiuto && esito.stato === "FATTA"
+      ? { result: rifiuto }
+      : fine?.risultato && esito.stato === "FATTA"
+        ? { result: nota ? `${fine.risultato}\n\n${nota}` : fine.risultato }
+        : {}),
   });
   await registro.ricorda({ personsSeen: d.contatore.impronte() });
+  if (d.chiamata) {
+    try {
+      await d.chiamata({
+        inputTokens: 0,
+        outputTokens: 0,
+        costUsd: 0,
+        ...misura,
+        durationMs: Math.min(misura?.durationMs ?? Math.max(0, now() - avvio), 6 * 3_600_000),
+        outcome: motivo !== undefined ? "LIMITE" : errore || esito.stato === "FALLITA" ? "ERRORE" : "OK",
+      });
+    } catch (e) {
+      console.error(JSON.stringify({ level: "warn", phase: "agent-gateway-giro", msg: "chiamata non registrata", error: String(e) }));
+    }
+  }
   d.scrivi(evento("done", {}));
   return esito;
 }

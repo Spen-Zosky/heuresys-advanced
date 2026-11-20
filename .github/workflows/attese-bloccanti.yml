@@ -24,10 +24,20 @@ permissions:
   contents: read
 
 jobs:
+  # Seconda passata = doppione? Se l'albero e' gia' verde nella PR, su main i job si saltano
+  # (scripts/ci/tree-gia-verificato.sh). Ogni dubbio: la CI gira.
+  tree:
+    permissions:
+      contents: read
+      actions: read
+    uses: ./.github/workflows/tree-gia-verificato.yml
+    with:
+      workflow-file: attese-bloccanti.yml
   censimento:
+    needs: tree
     # Come state-lint (D-08): il runner sta sull'host di produzione, niente PR da fork.
-    if: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && !contains(github.event.pull_request.labels.*.name, 'defer-major') }}
-    runs-on: [self-hosted, oci-vm]
+    if: ${{ !cancelled() && needs.tree.outputs.skip != 'true' && ((github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && !contains(github.event.pull_request.labels.*.name, 'defer-major')) }}
+    runs-on: [self-hosted, off-prod]
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7

@@ -1923,7 +1923,7 @@ RT="$(mktemp -d)"
   echo b > b; git add b; git commit -qm B; git push -q origin HEAD:refs/heads/main
   git switch -q -c laterale; echo c > c; git add c; git commit -qm C; git push -q origin HEAD:refs/heads/laterale
   git switch -q --detach origin/main 2>/dev/null || git checkout -q main
-  touch "$RT/mark"
+  touch "$RT/dump"; echo "$RT/dump" > "$RT/mark"
 ) >/dev/null 2>&1
 W="$RT/w"; B="$(git -C "$W" rev-parse origin/main)"; C="$(git -C "$W" rev-parse laterale)"; A="$(git -C "$W" rev-parse origin/prod)"
 rl() { ( cd "$W" && RILASCIO_BACKUP_MARK="$RT/mark" RILASCIO_NO_RINNOVO=1 "$@" ) >/dev/null 2>&1; }
@@ -1939,7 +1939,10 @@ rl env RILASCIO_CI_STATO="6 6 0 0" bash scripts/rilascia.sh "$C"; e=$?
 touch -d '25 hours ago' "$RT/mark"
 rl env RILASCIO_CI_STATO="6 6 0 0" bash scripts/rilascia.sh "$B"; e=$?
 [ $e = 1 ] && prod_e "$A" && ok "rilascia: backup vecchio -> fermo" || fail "rilascia: backup vecchio non ferma (exit $e)"
-touch "$RT/mark"
+touch "$RT/mark"; touch -d '25 hours ago' "$RT/dump"
+rl env RILASCIO_CI_STATO="6 6 0 0" bash scripts/rilascia.sh "$B"; e=$?
+[ $e = 1 ] && prod_e "$A" && ok "rilascia: marcatore recente su dump vecchio -> fermo" || fail "rilascia: dump vecchio non ferma (exit $e)"
+touch "$RT/dump"
 rl env RILASCIO_CI_STATO="6 6 0 0" bash scripts/rilascia.sh "$B" --dry-run; e=$?
 [ $e = 0 ] && prod_e "$A" && ok "rilascia: dry-run verde non spinge" || fail "rilascia: dry-run (exit $e)"
 rl env RILASCIO_CI_STATO="6 6 0 0" bash scripts/rilascia.sh "$B"; e=$?

@@ -259,7 +259,7 @@ if [ -n "$_head" ] && [ "$_head" != "$SHA" ]; then
     _tocchi="$(git diff --name-only "$SHA..$_head" 2>/dev/null | grep -cE "$_re" || true)"
     if [ "${_tocchi:-0}" -gt 0 ]; then
       echo "  ⚠ HEAD ${_head:0:8} e' avanti di $_avanti commit NON armati, e $_tocchi file toccano path di DEPLOY:"
-      echo "    la produzione e' indietro rispetto al codice. Armare con: git push origin HEAD:refs/heads/prod"
+      echo "    la produzione e' indietro rispetto al codice. Armare con: bash scripts/rilascia.sh <sha>"
     else
       echo "  (HEAD ${_head:0:8} e' avanti di $_avanti commit NON armati — misurato: nessun file su path di deploy)"
     fi

@@ -9,9 +9,10 @@ import { pool } from "../../db/client.js";
 import type { ActorContext } from "../../lib/actor.js";
 import { NotFoundError } from "../../errors/index.js";
 import type { TenantProcessListQuery, TenantProcessListResponse, TenantProcessScheda } from "@heuresys/shared";
+import { haMandatoPiattaforma } from "../../lib/scope/mandati.js";
 import * as repo from "./repository.js";
 
-const tenantDi = (a: ActorContext): string | null => (a.roles.includes("PLATFORM_ADMIN") ? null : a.tenantId);
+const tenantDi = (a: ActorContext): string | null => (haMandatoPiattaforma(a) ? null : a.tenantId);
 
 export const processService = {
   async list(a: ActorContext, q: TenantProcessListQuery): Promise<TenantProcessListResponse> {

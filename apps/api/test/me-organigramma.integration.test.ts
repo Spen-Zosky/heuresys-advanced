@@ -101,6 +101,34 @@ describe("GET /v1/me/organigramma", () => {
   });
 });
 
+describe("GET /v1/me/organigramma — mandato di piattaforma senza clienti assegnati", () => {
+  // BLUEPRINT_MANAGER è un mandato di piattaforma «assegnato» (D9=B): senza clienti assegnati il perimetro è vuoto per scelta.
+  // Non è un errore: la risposta è 200 con un organigramma vuoto e `senzaCliente: true`, come la rubrica (che torna vuota), invece di 404 «Tenant».
+  const EMAIL_PIATTAFORMA = "paolo.barbieri@rtl-bank.org";
+  let t: TestApp;
+  let cookie = "";
+  beforeAll(async () => {
+    t = await buildTestApp();
+    const login = await loginRaw(t.app, EMAIL_PIATTAFORMA, TEST_PERSONA_PASSWORD);
+    cookie = login.cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+  });
+  afterAll(async () => { await t.app.close(); });
+
+  it("senza clienti assegnati risponde 200 con l'organigramma vuoto e lo stato esplicito", async () => {
+    const r = await t.app.inject({ method: "GET", url: "/v1/me/organigramma", headers: { cookie } });
+    expect(r.statusCode).toBe(200);
+    const b = r.json() as OrganigrammaResponse;
+    expect(b.senzaCliente).toBe(true);
+    expect(b.unita).toEqual([]);
+    expect(b.posizioni).toEqual([]);
+  });
+
+  it("un cliente chiesto per nome e fuori dal perimetro resta 404 (non si rende osservabile)", async () => {
+    const r = await t.app.inject({ method: "GET", url: `/v1/me/organigramma?tenantId=${randomUUID()}`, headers: { cookie } });
+    expect(r.statusCode).toBe(404);
+  });
+});
+
 describe("comporre (funzione pura)", () => {
   const u = (id: string, padreId: string | null, tipo = "DEPARTMENT") => ({
     id, codice: id, nome: id, tipo, relazione: "LINEA", padreId, responsabileId: null, responsabile: null,

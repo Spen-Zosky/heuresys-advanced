@@ -63,6 +63,7 @@ export function VistaOrganigramma({
     return <StatoVuoto titolo={t("organigramma.senzaCliente")} motivo={t("organigramma.senzaClienteMotivo")} testId={`${testId}-senza-cliente`} />;
   if (q.isError) return <StatoErrore errore={q.error} titolo={t("organigramma.errore")} testId={`${testId}-errore`} onRiprova={() => void q.refetch()} />;
   const d = q.data!;
+  if (d.senzaCliente) return <StatoVuoto titolo={t("organigramma.senzaCliente")} motivo={t("organigramma.senzaClienteMotivo")} testId={`${testId}-senza-cliente`} />;
   if (!d.unita.length) return <StatoVuoto titolo={t("organigramma.vuoto")} testId={`${testId}-vuoto`} />;
 
   const persone = d.unita.reduce((s, u) => s + u.persone.length, 0);

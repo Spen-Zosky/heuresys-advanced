@@ -76,6 +76,8 @@ export const OrganigrammaResponseSchema = z.object({
   calcolatoIl: z.string(),
   unita: z.array(OrganigrammaUnitaSchema),
   posizioni: z.array(OrganigrammaPosizioneSchema),
+  /** Vero quando il mandato di chi chiede non ha clienti nel perimetro (piattaforma «assegnata» senza clienti): organigramma vuoto per scelta, non un errore. */
+  senzaCliente: z.boolean().optional(),
   /** Incoerenze dei dati vivi che il disegno rende visibili, contate. */
   avvisi: z.object({
     posizioniSenzaRiporto: z.number().int(),

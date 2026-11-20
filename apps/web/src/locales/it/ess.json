@@ -949,5 +949,11 @@
       "DELEGATION_OWN_REQUEST": "Una richiesta che ti riguarda non si decide per conto d'altri.",
       "DELEGATION_NOT_IN_FORCE": "La delega non è in vigore."
     }
+  },
+  "faldone": {
+    "link": "Il mio faldone: tutti i miei dati",
+    "indietro": "Profilo",
+    "linkPersona": "Faldone: tutti i dati della persona",
+    "indietroPersona": "Scheda della persona"
   }
 }

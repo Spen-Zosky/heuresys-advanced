@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { Suspense } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -262,6 +264,11 @@ export default function MeProfilePage() {
         data-testid="me-profile-title"
         title={t("profile.title")}
         description={t("profile.description")}
+        actions={
+          <Link href="/me/faldone" data-testid="me-profile-faldone" className="text-sm underline-offset-2 hover:underline">
+            {t("faldone.link")}
+          </Link>
+        }
         badges={
           <Badge variant="secondary" data-testid="me-profile-email">
             {/* il proprio indirizzo nel proprio profilo è un dato, non un identificativo al posto del nome */}

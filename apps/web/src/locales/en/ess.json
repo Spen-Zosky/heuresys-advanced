@@ -949,5 +949,11 @@
       "DELEGATION_OWN_REQUEST": "A request that concerns you cannot be decided on someone else's behalf.",
       "DELEGATION_NOT_IN_FORCE": "The delegation is not in force."
     }
+  },
+  "faldone": {
+    "link": "My file: all my data",
+    "indietro": "Profile",
+    "linkPersona": "File: all data of the person",
+    "indietroPersona": "Person record"
   }
 }

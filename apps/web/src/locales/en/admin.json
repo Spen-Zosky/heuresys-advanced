@@ -2183,7 +2183,8 @@
       "titolo": "Organization unit KPIs",
       "unita": "Organization unit",
       "daModello": "Unit template (applies to every tenant)"
-    }
+    },
+    "negato": "KPI templates are maintained by process and operating-model owners and HR management: your profile does not have this mandate."
   },
   "tassonomie": {
     "titolo": "Taxonomies",
@@ -2231,7 +2232,8 @@
       "fatturatoA": "Revenue up to (euro)",
       "contoModelli_one": "{{count}} operating model",
       "contoModelli_other": "{{count}} operating models"
-    }
+    },
+    "negato": "The occupation and enterprise catalogs are maintained by platform administration: your profile does not have this mandate."
   },
   "datiRiferimento": {
     "titolo": "Official reference data sources",
@@ -2257,7 +2259,8 @@
     "fine": "End",
     "voci": "Entries read",
     "inseriteAggiornate": "Inserted / updated",
-    "stato": "Status"
+    "stato": "Status",
+    "negato": "Refreshing taxonomies from official sources belongs to the data steward and platform administration: your profile does not have this mandate."
   },
   "agentReq": {
     "titolo": "Agent requests",

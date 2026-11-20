@@ -18,7 +18,7 @@ import { Button, Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
 import type { ReferenceSyncRunListResponse, ReferenceSyncSourceKey, ReferenceSyncSourceListResponse, ReferenceSyncTriggerResponse } from "@heuresys/shared";
 import { PageHeader } from "@/components/intestazione-pagina";
 import { LavoroInCorso } from "@/components/lavoro-in-corso";
-import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
+import { StatoCaricamento, StatoErrore, StatoNegato, StatoVuoto } from "@/components/stato-pagina";
 import { StatusPill } from "@/components/status-pill";
 import { apiFetch } from "@/lib/api/fetch";
 import { testoPerLaPersona } from "@/lib/api/errors";
@@ -31,10 +31,12 @@ export default function DatiDiRiferimentoPage() {
   const enumLabel = useEnumLabel();
   const fmt = useFormat();
   const qc = useQueryClient();
-  const perms = useCurrentUserPermissions().data?.permissions ?? [];
+  const permessi = useCurrentUserPermissions();
+  const perms = permessi.data?.permissions ?? [];
+  const puoLeggere = perms.includes("reference_sync:read");
   const puoLanciare = perms.includes("reference_sync:trigger");
-  const fonti = useQuery({ queryKey: ["reference-sync", "sources"], queryFn: () => apiFetch<ReferenceSyncSourceListResponse>("/v1/reference-sync/sources") });
-  const corse = useQuery({ queryKey: ["reference-sync", "runs"], queryFn: () => apiFetch<ReferenceSyncRunListResponse>("/v1/reference-sync/runs") });
+  const fonti = useQuery({ queryKey: ["reference-sync", "sources"], queryFn: () => apiFetch<ReferenceSyncSourceListResponse>("/v1/reference-sync/sources"), enabled: puoLeggere });
+  const corse = useQuery({ queryKey: ["reference-sync", "runs"], queryFn: () => apiFetch<ReferenceSyncRunListResponse>("/v1/reference-sync/runs"), enabled: puoLeggere });
   const [esito, setEsito] = useState<ReferenceSyncTriggerResponse | null>(null);
   const lancia = useMutation({
     mutationFn: (source: ReferenceSyncSourceKey) => apiFetch<ReferenceSyncTriggerResponse>("/v1/reference-sync/runs", { method: "POST", body: { source } }),
@@ -44,6 +46,17 @@ export default function DatiDiRiferimentoPage() {
   const nomeFonte = new Map((fonti.data?.items ?? []).map((f) => [f.key as string, f.label]));
   const tono = (s: string) => (s === "COMPLETED" ? "success" : s === "FAILED" ? "danger" : s === "RUNNING" ? "info" : "neutral") as "success" | "danger" | "info" | "neutral";
 
+  // Il lavoro sulle fonti ufficiali è del custode dei dati e della piattaforma (reference_sync:read):
+  // a chi non ha quel mandato la pagina lo dice, senza chiamate che tornerebbero 403.
+  if (permessi.isLoading) return <main className="mx-auto max-w-6xl px-6 pb-8"><StatoCaricamento /></main>;
+  if (!puoLeggere) {
+    return (
+      <main data-testid="dati-riferimento-page" className="mx-auto max-w-6xl space-y-6 px-6 pb-8">
+        <PageHeader title={t("datiRiferimento.titolo")} description={t("datiRiferimento.descrizione")} />
+        <StatoNegato motivo={t("datiRiferimento.negato")} />
+      </main>
+    );
+  }
   return (
     <main data-testid="dati-riferimento-page" className="mx-auto max-w-6xl space-y-6 px-6 pb-8">
       <PageHeader title={t("datiRiferimento.titolo")} description={t("datiRiferimento.descrizione")} />

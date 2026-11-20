@@ -2183,7 +2183,8 @@
       "titolo": "KPI delle unità organizzative",
       "unita": "Unità organizzativa",
       "daModello": "Modello di unità (vale per tutti i tenant)"
-    }
+    },
+    "negato": "I modelli dei KPI li curano chi governa processi e modelli operativi e la direzione HR: il tuo profilo non ha questo mandato."
   },
   "tassonomie": {
     "titolo": "Tassonomie",
@@ -2231,7 +2232,8 @@
       "fatturatoA": "Fatturato fino a (euro)",
       "contoModelli_one": "{{count}} modello operativo",
       "contoModelli_other": "{{count}} modelli operativi"
-    }
+    },
+    "negato": "I cataloghi delle professioni e delle imprese li cura l'amministrazione della piattaforma: il tuo profilo non ha questo mandato."
   },
   "datiRiferimento": {
     "titolo": "Fonti ufficiali dei dati di riferimento",
@@ -2257,7 +2259,8 @@
     "fine": "Fine",
     "voci": "Voci lette",
     "inseriteAggiornate": "Inserite / aggiornate",
-    "stato": "Stato"
+    "stato": "Stato",
+    "negato": "L'aggiornamento delle tassonomie dalle fonti ufficiali è del custode dei dati e dell'amministrazione della piattaforma: il tuo profilo non ha questo mandato."
   },
   "agentReq": {
     "titolo": "Richieste dell'agente",

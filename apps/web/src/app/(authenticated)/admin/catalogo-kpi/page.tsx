@@ -16,7 +16,7 @@ import { useTranslation } from "react-i18next";
 import { Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
 import type { BlueprintProcess, KpiDefinition, OrganizationUnit, OrganizationUnitKpiTemplate, ProcessKpiTemplate } from "@heuresys/shared";
 import { PageHeader } from "@/components/intestazione-pagina";
-import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
+import { StatoCaricamento, StatoErrore, StatoNegato } from "@/components/stato-pagina";
 import { apiFetch } from "@/lib/api/fetch";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { useFormat } from "@/lib/format";
@@ -202,12 +202,17 @@ function PerUnita() {
 
 export default function CatalogoKpiPage() {
   const { t } = useTranslation("admin");
-  const perms = useCurrentUserPermissions().data?.permissions ?? [];
+  const permessi = useCurrentUserPermissions();
+  const perms = permessi.data?.permissions ?? [];
+  const processi = perms.includes("process_kpi_template:read");
+  const unita = perms.includes("organization_unit_kpi_template:read");
   return (
     <main data-testid="kpi-templates-page" className="mx-auto max-w-6xl space-y-6 px-6 pb-8">
       <PageHeader title={t("catalogoKpi.titolo")} description={t("catalogoKpi.descrizione")} />
-      {perms.includes("process_kpi_template:read") && <PerProcesso />}
-      {perms.includes("organization_unit_kpi_template:read") && <PerUnita />}
+      {permessi.isLoading && <StatoCaricamento />}
+      {permessi.isSuccess && !processi && !unita && <StatoNegato motivo={t("catalogoKpi.negato")} />}
+      {processi && <PerProcesso />}
+      {unita && <PerUnita />}
     </main>
   );
 }

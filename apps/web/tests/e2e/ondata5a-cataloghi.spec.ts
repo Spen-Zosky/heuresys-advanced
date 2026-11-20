@@ -96,3 +96,16 @@ test.describe("Cataloghi della piattaforma", () => {
     await expect(page.getByTestId("dati-riferimento-lancia").first()).toBeEnabled();
   });
 });
+
+test.describe("Chi non ha il mandato", () => {
+  test.use({ storageState: storageStateFor("hrManager") });
+
+  test("fonti ufficiali: la direzione HR vede il diniego, e la pagina non chiama le rotte che negherebbero", async ({ page }) => {
+    const negate: string[] = [];
+    page.on("response", (r) => { if (r.url().includes("/v1/reference-sync/") && r.status() === 403) negate.push(r.url()); });
+    await page.goto("/admin/dati-di-riferimento", { waitUntil: "domcontentloaded", timeout: 60_000 });
+    await expect(page.getByTestId("stato-negato")).toBeVisible({ timeout: 45_000 });
+    await expect(page.getByTestId("dati-riferimento-fonti")).toHaveCount(0);
+    expect(negate).toEqual([]);
+  });
+});

@@ -3,7 +3,10 @@
 // Un segmento [x] della rotta vale per un segmento qualunque dell'indirizzo.
 export const PAGINE_IDONEE_AGENTE: readonly string[] = [
   "/admin/agent-capabilities",
+  "/admin/catalogo-kpi",
+  "/admin/dati-di-riferimento",
   "/admin/gdpr",
+  "/admin/tassonomie",
   "/analytics/attendance",
   "/analytics/compensation",
   "/analytics/kpi",

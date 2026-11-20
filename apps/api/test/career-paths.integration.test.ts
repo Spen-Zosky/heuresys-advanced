@@ -122,6 +122,6 @@ describe("/v1/career-paths integration", () => {
       method: "DELETE", url: `/v1/career-paths/${pid}`,
       headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken },
     });
-    expect(del.statusCode).toBe(204);
+    expect(del.statusCode).toBe(410); // ondata 5: cancellazione ritirata, la riga resta
   });
 });

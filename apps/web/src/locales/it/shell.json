@@ -162,7 +162,8 @@
     },
     "kpi": {
       "analytics": "Analisi",
-      "catalog": "Catalogo KPI"
+      "catalog": "Catalogo KPI",
+      "templates": "Modelli dei KPI"
     },
     "career": {
       "main": "Carriera",
@@ -181,7 +182,9 @@
     },
     "dati": {
       "provenance": "Registro di provenienza",
-      "gdpr": "Dati personali (GDPR)"
+      "gdpr": "Dati personali (GDPR)",
+      "tassonomie": "Tassonomie",
+      "riferimento": "Fonti ufficiali"
     },
     "permessi": {
       "roles": "Ruoli e permessi",

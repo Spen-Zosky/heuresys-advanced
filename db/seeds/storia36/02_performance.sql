@@ -428,9 +428,9 @@ BEGIN
     d.w
   FROM sys.sys_performance_reviews pr
   JOIN (VALUES
-    ('KNOWLEDGE', 'Domain Knowledge',     1.20),
-    ('SKILL',     'Technical Execution',  1.00),
-    ('BEHAVIOR',  'Professional Conduct', 0.80)
+    ('KNOWLEDGE', 'Conoscenza del settore', 1.20),
+    ('SKILL',     'Esecuzione tecnica',     1.00),
+    ('BEHAVIOR',  'Condotta professionale', 0.80)
   ) AS d(dim, cname, w) ON true
   WHERE pr.review_natural_key LIKE 'STORIA36::C2::REV::%'
   ON CONFLICT DO NOTHING;

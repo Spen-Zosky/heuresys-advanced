@@ -1,0 +1,46 @@
+name: Rilascio libero (main fermo durante un rilascio armato)
+
+# 2026-11-20. Pubblica lo stato di commit «rilascio-libero» sulla testa della PR: failure se sulla VM
+# c'e' un rilascio armato non ancora DEPLOYATO (scripts/blocco-rilascio.sh), success altrimenti.
+# Copre le PR aperte o spinte DOPO l'armo; quelle gia' aperte le ripubblica `riconcilia`, chiamato da
+# rilascia.sh all'armo e da deploy-watch.sh a ogni tick. Con «rilascio-libero» fra i controlli
+# richiesti di main, nessuna PR si unisce mentre il rilascio aspetta di partire.
+#
+# Il job stesso riesce sempre: lo stato che conta e' quello pubblicato, non l'esito della corsa.
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: rilascio-libero-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pubblica-stato:
+    # Il job ha un nome diverso dallo stato «rilascio-libero» che pubblica: il controllo richiesto
+    # di main e' lo stato, e un job con lo stesso nome (sempre verde) lo confonderebbe.
+    name: pubblica-stato-rilascio
+    # D-08: il runner della VM sta sull'host di produzione, una PR da fork non ci gira mai.
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+    # Sulla VM, perche' il blocco e' un file della VM.
+    runs-on: [self-hosted, oci-vm]
+    timeout-minutes: 3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 1
+
+      - name: Stato del blocco di rilascio
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TESTA: ${{ github.event.pull_request.head.sha }}
+          BLOCCO_REPO: ${{ github.repository }}
+          BLOCCO_FILE: /home/ubuntu/.local/state/heuresys-advanced/rilascio-armato
+        run: bash scripts/blocco-rilascio.sh stato-pr "$TESTA"

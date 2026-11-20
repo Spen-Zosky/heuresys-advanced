@@ -1975,6 +1975,40 @@ rm -f "$TG/fx/actions/workflows/lint.yml/"*; : > "$TG/out"
     TREE_GIA_FIXTURE="$TG/fx" bash "$ROOT/scripts/ci/tree-gia-verificato.sh" ) >/dev/null 2>&1
 [ "$(cat "$TG/out")" = "skip=false" ] && ok "API muta -> la CI su main gira (fail-open verso il lavoro)" || fail "API muta salta"
 rm -rf "$TG"
+# ------------------------------------------- J. blocco-rilascio.sh (fixture, gh finto)
+section "blocco-rilascio.sh — main fermo da armo a DEPLOYATO, poi libero"
+BR="$(mktemp -d)"
+cat > "$BR/gh" <<'GHFINTO'
+#!/usr/bin/env bash
+echo "$*" >> "$BR_LOG"
+case "$*" in "pr list"*) printf '%s\n' aaa111 bbb222 ;; esac
+GHFINTO
+chmod +x "$BR/gh"
+br() { BR_LOG="$BR/log" BLOCCO_GH="$BR/gh" BLOCCO_FILE="$BR/stato/rilascio-armato" BLOCCO_REPO=o/r \
+       bash "$ROOT/scripts/blocco-rilascio.sh" "$@" >/dev/null 2>&1; }
+stati() { grep -c "statuses/.* state=$1 " "$BR/log" 2>/dev/null || true; }
+br attivo; [ $? = 1 ] && ok "senza blocco: attivo -> 1" || fail "senza blocco attivo non esce 1"
+: > "$BR/log"; br arma 1234567890abcdef
+br attivo; [ $? = 0 ] && ok "dopo arma: attivo -> 0" || fail "dopo arma attivo non esce 0"
+[ "$(stati failure)" = 2 ] && ok "arma: failure su tutte le PR aperte (2)" || fail "arma: failure pubblicati $(stati failure)"
+: > "$BR/log"; br riconcilia ffff000000000000
+[ ! -s "$BR/log" ] && ok "riconcilia senza cambi di stato: nessuna chiamata" || fail "riconcilia ripubblica senza cambi"
+br attivo; [ $? = 0 ] && ok "sha diverso in produzione: il blocco resta" || fail "blocco tolto con sha diverso"
+: > "$BR/log"; br riconcilia 1234567890abcdef
+br attivo; [ $? = 1 ] && ok "DEPLOYATO (sha armato in produzione): blocco tolto" || fail "DEPLOYATO non toglie il blocco"
+[ "$(stati success)" = 2 ] && ok "DEPLOYATO: success su tutte le PR aperte" || fail "DEPLOYATO: success pubblicati $(stati success)"
+br arma 1234567890abcdef; touch -d '3 hours ago' "$BR/stato/rilascio-armato"
+br attivo; [ $? = 1 ] && ok "blocco piu' vecchio della scadenza: non attivo" || fail "blocco scaduto ancora attivo"
+: > "$BR/log"; br riconcilia
+[ ! -f "$BR/stato/rilascio-armato" ] && [ "$(stati success)" = 2 ] && ok "riconcilia toglie il blocco scaduto e libera le PR" || fail "blocco scaduto non riconciliato"
+: > "$BR/log"; br stato-pr ccc333
+grep -q "statuses/ccc333 .*state=success" "$BR/log" && ok "stato-pr senza blocco -> success" || fail "stato-pr senza blocco"
+br arma 99; : > "$BR/log"; br stato-pr ccc333
+grep -q "statuses/ccc333 .*state=failure" "$BR/log" && ok "stato-pr con blocco -> failure" || fail "stato-pr con blocco"
+br togli prova
+br attivo; [ $? = 1 ] && ok "togli: blocco tolto a mano" || fail "togli non toglie"
+br boh; [ $? = 2 ] && ok "comando sconosciuto -> 2" || fail "comando sconosciuto non esce 2"
+rm -rf "$BR"
 # ---------------------------------------------------------------- summary
 printf '\n%d ok, %d failed\n' "$PASS" "$FAIL"
 [ "$FAIL" = 0 ]

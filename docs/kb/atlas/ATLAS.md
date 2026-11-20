@@ -1,6 +1,6 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `887d6466` (2026-11-20T04:40:54+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `b0aa6ab9` (2026-11-20T06:34:29+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
@@ -10,7 +10,7 @@
 | Route API | 740 |
 | Pagine web | 140 |
 | Schemi shared | 136 |
-| Tabelle DB | 425 (vuote: 40) |
+| Tabelle DB | 425 (vuote: 39) |
 | Viste / matview | 91 / 0 |
 | Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 330 |
 
@@ -88,7 +88,7 @@
 | organization-unit-history | /v1/organization-unit-history | 3 | 3 | 2 | 1 |
 | organization-unit-kpi-templates | /v1/organization-unit-kpi-templates | 4 | 3 | 3 | 1 |
 | organization-unit-processes | /v1/organization-unit-processes | 4 | 3 | 4 | 2 |
-| organization-units | /v1/organization-units | 5 | 4 | 1 | 1 |
+| organization-units | /v1/organization-units | 5 | 4 | 2 | 1 |
 | performance-reviews | /v1/performance-reviews | 2 | 1 | 3 | 2 |
 | platform-tenant-assignments | /v1/platform-tenant-assignments | 3 | 1 | 3 | 1 |
 | position-career-paths | /v1/position-career-paths | 4 | 3 | 3 | 1 |
@@ -158,7 +158,6 @@
 - `staging.mig349_esco_consolidamento_undo`
 - `staging.process_participants_regole_esclusi`
 - `staging.tenant_import_people`
-- `sys.sys_agent_call_log`
 - `sys.sys_agent_capabilities`
 - `sys.sys_agent_capability_activations`
 - `sys.sys_agent_capability_operations`

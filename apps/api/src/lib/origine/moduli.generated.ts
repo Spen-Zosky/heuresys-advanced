@@ -892,7 +892,8 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "/v1/organization-units"
     ],
     "tabelle": [
-      "sys_organization_units"
+      "sys_organization_units",
+      "sys_users"
     ]
   },
   "performance-reviews": {

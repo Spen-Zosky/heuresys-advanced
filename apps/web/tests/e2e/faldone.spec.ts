@@ -13,9 +13,14 @@ async function apriUnaSezione(page: Page): Promise<void> {
   await expect(page.getByTestId("faldone-pagina")).toBeVisible();
   await expect(page.getByTestId("faldone-totale-righe")).not.toHaveText("0");
   await expect(page.getByTestId("schede-pagina")).toBeVisible();
-  const sezione = page.getByTestId("faldone-sezione").filter({ has: page.getByTestId("faldone-apri") }).first();
+  // La sezione più piccola fra quelle in chiaro: si misura la pagina, non la velocità di una tabella enorme.
+  const apribili = page.locator('[data-testid="faldone-sezione"][data-visibilita="piena"]').filter({ has: page.getByTestId("faldone-apri") });
+  const n = await apribili.count();
+  const sezione = n > 0 ? apribili.nth(n - 1) : page.getByTestId("faldone-sezione").filter({ has: page.getByTestId("faldone-apri") }).last();
   await sezione.getByTestId("faldone-apri").click();
-  await expect(sezione.getByTestId("faldone-riga").first()).toBeVisible();
+  const esito = sezione.getByTestId("faldone-riga").or(sezione.getByTestId("stato-errore")).first();
+  await expect(esito).toBeVisible({ timeout: 30_000 });
+  await expect(sezione.getByTestId("stato-errore"), await sezione.innerText()).toHaveCount(0);
 }
 
 test.describe("faldone — la propria pagina", () => {

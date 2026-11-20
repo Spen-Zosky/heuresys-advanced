@@ -29,7 +29,6 @@ TENANT = {
     "sys_leads": "true",
     "sys_mentorship_programs": "program_tenant_id = '{T}'",
     "sys_okr_check_ins": "check_in_tenant_id = '{T}'",
-    "sys_okrs": "okr_tenant_id = '{T}'",
     "sys_overtime": "overtime_tenant_id = '{T}'",
     "sys_performance_review_competency_ratings": "rating_tenant_id = '{T}'",
     "sys_predictive_models": "model_tenant_id = '{T}'",
@@ -133,7 +132,7 @@ mappa("sys_goals", "goal_category", [
     ("development", "sviluppo"), ("sales", "vendite")])
 mappa("sys_goal_templates", "template_category", [
     ("development", "sviluppo"), ("learning", "apprendimento"), ("project", "progetto"), ("career", "carriera")])
-add("sys_okrs", "okr_department", "Company-wide", "Intera azienda")
+# «Company-wide» NON si traduce: e' il valore sentinella che la migrazione 000357 (riapplicata a ogni deploy) e il codice leggono per «OKR di tutta l'azienda».
 mappa("sys_kpi_targets", "kpi_target_unit", [("ratio", "rapporto"), ("score", "punteggio"), ("days", "giorni")])
 # --- KPI ---
 KPI1 = "Tempo di determinazione della posizione di liquidità giornaliera (daily cash position)"

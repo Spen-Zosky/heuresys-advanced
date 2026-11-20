@@ -489,7 +489,8 @@
           "QUADRO": "Manager",
           "IMPIEGATO": "Clerical",
           "OPERAIO": "Manual"
-        }
+        },
+        "otherVersion": "Agreements from model version {{n}}, not yet active for this tenant (being consolidated): minimums may change."
       }
     },
     "editing": {

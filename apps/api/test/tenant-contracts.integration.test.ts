@@ -35,6 +35,7 @@ describe("/v1/tenants/:id/contracts", () => {
     const r = await suite.app.inject({ method: "GET", url: `/v1/tenants/${t.rows[0]!.tenant_id}/contracts`, headers: { cookie } });
     expect(r.statusCode).toBe(200);
     const b = r.json() as { contracts: { levels: { annualMinimumEur: string | null }[]; gapLevelCodes: string[] }[]; summary: Record<string, number> };
+    expect(['ACTIVE', 'OTHER_VERSION']).toContain((b as unknown as { source: { kind: string } }).source.kind);
     expect(b.summary.contracts).toBe(b.contracts.length);
     expect(b.summary.levels).toBe(b.contracts.reduce((s, c) => s + c.levels.length, 0));
     expect(b.summary.levelsWithoutMinimum).toBe(b.contracts.reduce((s, c) => s + c.levels.filter((l) => l.annualMinimumEur === null).length, 0));

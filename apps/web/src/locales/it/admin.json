@@ -489,7 +489,8 @@
           "QUADRO": "Quadro",
           "IMPIEGATO": "Impiegato",
           "OPERAIO": "Operaio"
-        }
+        },
+        "otherVersion": "Contratti dalla versione {{n}} del modello, non ancora attiva per questo tenant (in consolidamento): i minimi possono cambiare."
       }
     },
     "editing": {

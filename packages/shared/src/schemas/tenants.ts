@@ -151,6 +151,12 @@ export const TenantContractsResponseSchema = z.object({
   tenantId: z.uuid(),
   industryCode: z.string(),
   industryName: z.string().nullable(),
+  /** Da dove vengono i contratti: la versione attiva del modello, oppure un'altra versione (non ancora attiva) che li porta. */
+  source: z.object({
+    kind: z.enum(["ACTIVE", "OTHER_VERSION"]),
+    versionNumber: z.number().int().nullable(),
+    versionStatus: z.string().nullable(),
+  }),
   contracts: z.array(TenantContractSchema),
   summary: z.object({
     contracts: z.number().int().min(0),

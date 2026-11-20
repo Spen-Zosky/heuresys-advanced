@@ -28,12 +28,14 @@ export async function contrattiDelTenant(q: DbConnector, tenantId: string): Prom
   const tenant = t.rows[0];
   if (!tenant) return null;
 
-  const versioni = await versioniAttiveDelTenant(q, tenantId);
+  let versioni = await versioniAttiveDelTenant(q, tenantId);
   // Come per la scala dei livelli: se le tabelle del contratto non ci sono su questo database, la scheda è vuota, non rotta.
   const presente = await q.query<{ ok: boolean }>(`SELECT to_regclass('sys.sys_blueprint_content_ccnl_levels') IS NOT NULL AS ok`);
   let ccnl: RigaCcnl[] = [];
   let livelli: RigaLivello[] = [];
-  if (presente.rows[0]?.ok && versioni.length > 0) {
+  let source: TenantContractsResponse["source"] = { kind: "ACTIVE", versionNumber: null, versionStatus: null };
+
+  const leggi = async (ids: string[]) => {
     ccnl = (await q.query<RigaCcnl>(
       `SELECT DISTINCT ON (blueprint_content_ccnl_code)
               blueprint_content_ccnl_code AS code, blueprint_content_ccnl_name AS name,
@@ -42,7 +44,7 @@ export async function contrattiDelTenant(q: DbConnector, tenantId: string): Prom
          FROM sys.sys_blueprint_content_ccnl
         WHERE blueprint_content_ccnl_version_id = ANY($1::uuid[])
         ORDER BY blueprint_content_ccnl_code, blueprint_content_ccnl_name`,
-      [versioni],
+      [ids],
     )).rows;
     livelli = (await q.query<RigaLivello>(
       `SELECT DISTINCT ON (blueprint_content_ccnl_level_ccnl_code, blueprint_content_ccnl_level_code)
@@ -54,8 +56,35 @@ export async function contrattiDelTenant(q: DbConnector, tenantId: string): Prom
         WHERE blueprint_content_ccnl_level_version_id = ANY($1::uuid[])
         ORDER BY blueprint_content_ccnl_level_ccnl_code, blueprint_content_ccnl_level_code,
                  blueprint_content_ccnl_level_annual_minimum_eur DESC NULLS LAST`,
-      [versioni],
+      [ids],
     )).rows;
+  };
+
+  if (presente.rows[0]?.ok) {
+    if (versioni.length > 0) await leggi(versioni);
+    if (ccnl.length === 0) {
+      // La versione attiva non porta contratti: si mostra la versione più recente, fra quelle delle stesse varianti attive del tenant,
+      // che li porta (per esempio quella in consolidamento), dichiarando la provenienza.
+      const alt = await q.query<{ id: string; numero: number; stato: string }>(
+        `SELECT vv.blueprint_variant_version_id AS id, vv.blueprint_variant_version_number AS numero,
+                vv.blueprint_variant_version_status AS stato
+           FROM sys.sys_blueprint_variant_versions vv
+          WHERE vv.blueprint_variant_version_variant_id IN (
+                  SELECT a.blueprint_activation_variant_id FROM sys.sys_blueprint_activations a
+                   WHERE a.blueprint_activation_tenant_id = $1 AND a.blueprint_activation_status = 'ACTIVE')
+            AND vv.blueprint_variant_version_id <> ALL($2::uuid[])
+            AND EXISTS (SELECT 1 FROM sys.sys_blueprint_content_ccnl c WHERE c.blueprint_content_ccnl_version_id = vv.blueprint_variant_version_id)
+          ORDER BY vv.blueprint_variant_version_number DESC
+          LIMIT 1`,
+        [tenantId, versioni],
+      );
+      const a = alt.rows[0];
+      if (a) {
+        await leggi([a.id]);
+        versioni = [a.id];
+        source = { kind: "OTHER_VERSION", versionNumber: Number(a.numero), versionStatus: a.stato };
+      }
+    }
   }
 
   // Persone con contratto in vigore, per livello nella forma normale (3A3L, QD2, Dirigente...).
@@ -99,6 +128,7 @@ export async function contrattiDelTenant(q: DbConnector, tenantId: string): Prom
     tenantId,
     industryCode: tenant.industry_code,
     industryName: tenant.industry_name,
+    source,
     contracts,
     summary: {
       contracts: contracts.length,

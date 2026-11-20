@@ -29,6 +29,11 @@ export function ContrattiTenant({ tenantId }: { tenantId: string }) {
         <CardHeader><CardTitle as="h2">{t("tenants.detail.contracts.title")}</CardTitle></CardHeader>
         <CardContent className="space-y-1 text-sm">
           <p>{t("tenants.detail.contracts.industry", { name: d.industryName ?? d.industryCode })}</p>
+          {d.source.kind === "OTHER_VERSION" && (
+            <p className="rounded-card border border-border px-3 py-2" data-testid="tenant-contracts-source">
+              {t("tenants.detail.contracts.otherVersion", { n: d.source.versionNumber ?? "" })}
+            </p>
+          )}
           <p data-testid="tenant-contracts-summary">
             {t("tenants.detail.contracts.summary", {
               contracts: fmt.numero(s.contracts), levels: fmt.numero(s.levels), gaps: fmt.numero(s.levelsWithoutMinimum),

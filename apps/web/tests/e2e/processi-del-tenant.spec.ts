@@ -21,9 +21,15 @@ test.describe("Processi del tenant — dati vivi", () => {
     await page.goto("/tenant-processes");
     await expect(page.getByTestId("tenant-processes-page")).toBeVisible();
     await expect(page.getByTestId("tenant-processes-count")).toContainText(new RegExp(`\\b${body.total}\\s+process`));
+    // Il database della CI può non avere processi del tenant: allora la pagina dice che non ce ne
+    // sono, e la tabella non c'è.
+    if (body.total === 0) {
+      await expect(page.getByTestId("tenant-processes-empty")).toBeVisible();
+      return;
+    }
     const heads = (await page.locator("main table thead th").allTextContents()).map((h) => h.trim().toLowerCase());
     expect(heads.slice(0, 5)).toEqual(["processo", "responsabile", "sottoprocessi", "attività", "unità"]);
-    if (body.total > 0) await expect(page.getByTestId("tenant-process-link").first()).toHaveText(body.items[0]!.name);
+    await expect(page.getByTestId("tenant-process-link").first()).toHaveText(body.items[0]!.name);
   });
 
   test("la scheda del processo: attività, flusso a corsie, grafo e finestra dell'attività", async ({ page, request }) => {

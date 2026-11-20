@@ -200,6 +200,45 @@ const NAV_TESTID: Record<string, string> = {
 
 const nienteDaAscoltare = () => () => {};
 
+/**
+ * Il menu nel cassetto del telefono (sotto `md` la barra laterale non c'e': `DashboardShell` la
+ * nasconde). Riusa i gruppi e le voci della barra, quindi lo stesso albero, ma senza la logica di
+ * compressione della barra. Un clic su un collegamento chiude il cassetto (Esc, che Radix ascolta).
+ */
+function MenuMobile({ groups }: { groups: NavGroup[] }) {
+  return (
+    <nav
+      data-testid="menu-mobile"
+      onClick={(e) => {
+        if ((e.target as HTMLElement).closest("a")) {
+          document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+        }
+      }}
+    >
+      {groups.map((g) => (
+        <div key={g.id} className="mb-3">
+          <p className="px-2 py-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{g.label}</p>
+          <ul className="space-y-0.5">
+            {g.customContent ??
+              (g.items ?? []).map((i) => (
+                <li key={i.id}>
+                  <a
+                    href={i.href}
+                    aria-current={i.active ? "page" : undefined}
+                    className="flex items-center gap-2 rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
+                  >
+                    {i.icon}
+                    <span className="truncate">{i.label}</span>
+                  </a>
+                </li>
+              ))}
+          </ul>
+        </div>
+      ))}
+    </nav>
+  );
+}
+
 export default function AuthenticatedLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { t, i18n } = useTranslation();
@@ -393,6 +432,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
             drawerClose: t("shell:ui.drawerClose"),
           }}
           commandPaletteContent={contenutoPalette}
+          mobileNav={<MenuMobile groups={groups} />}
           logo={<HeuresysWordmark variant="brand" size={24} />}
           // F-6 (L7): il collegamento del marchio ha già il suo nome accessibile («Heuresys —
           // pagina iniziale autenticata»); il distintivo «advanced» visibile ma fuori da quel

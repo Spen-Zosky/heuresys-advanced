@@ -117,12 +117,16 @@ export async function listCalls(q: Q, limit: number): Promise<AgentCall[]> {
   return rows.map(chiamata);
 }
 
-/** Vero se la richiesta esiste ed è del tenant dato: il registro non si lega a una richiesta altrui. */
-export async function requestInTenant(q: Q, id: string, tenantId: string): Promise<boolean> {
+/**
+ * La richiesta a cui legare una chiamata, se esiste, è del tenant dato ed è della persona che
+ * chiama: il registro non si lega a una richiesta altrui. Restituisce il suo tetto.
+ */
+export async function requestOfRequester(q: Q, id: string, tenantId: string, userId: string): Promise<{ capUsd: number } | null> {
   const { rows } = await q.query(
-    `SELECT 1 FROM sys.sys_agent_requests WHERE agent_request_id = $1 AND agent_request_tenant_id = $2`,
-    [id, tenantId]);
-  return rows.length === 1;
+    `SELECT agent_request_cap_usd FROM sys.sys_agent_requests
+      WHERE agent_request_id = $1 AND agent_request_tenant_id = $2 AND agent_request_requester_id = $3`,
+    [id, tenantId, userId]);
+  return rows[0] ? { capUsd: Number(rows[0].agent_request_cap_usd) } : null;
 }
 
 function chiamata(r: Record<string, unknown>): AgentCall {

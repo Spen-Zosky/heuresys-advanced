@@ -1350,6 +1350,7 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "/v1/tenants"
     ],
     "tabelle": [
+      "sys_blueprint_activations",
       "sys_blueprint_content_ccnl",
       "sys_blueprint_content_ccnl_levels",
       "sys_blueprint_variant_versions",

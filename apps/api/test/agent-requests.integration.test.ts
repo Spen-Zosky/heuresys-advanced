@@ -15,6 +15,8 @@ import { closePool, pool } from "../src/db/client.js";
 import { loadRolePermissionCache } from "../src/modules/auth/cache-loader.js";
 import { userHasPermission } from "../src/middleware/rbac.js";
 import type { ActorContext } from "../src/lib/actor.js";
+import { ForbiddenError } from "../src/errors/index.js";
+import { AGENT_CALL_LIMITS, CreateAgentCallBodySchema } from "@heuresys/shared";
 import type { RoleCode } from "../src/config/constants.js";
 import { agentRequestsService as svc, maxCapUsd } from "../src/modules/agent-requests/service.js";
 
@@ -154,17 +156,16 @@ describe("chi vede e chi decide", () => {
 });
 
 describe("il registro di costo e durata", () => {
-  it("una chiamata si registra, anche legata a una richiesta, e i totali sommano", async () => {
+  const chiamata = (o: Record<string, unknown> = {}) => ({
+    agentCode: "assistente-hr", model: "claude-sonnet-5-5", outcome: "OK" as const, durationMs: 1200,
+    inputTokens: 1000, outputTokens: 200, costUsd: 0.0123, ...o,
+  });
+
+  it("una chiamata si registra col gettone dell'agente, anche legata a una richiesta della persona, e i totali sommano", async () => {
     const r = await svc.create(anna, richiesta());
-    const c1 = await svc.recordCall(anna, {
-      agentCode: "assistente-hr", model: "claude-sonnet-5-5", outcome: "OK", durationMs: 1200,
-      inputTokens: 1000, outputTokens: 200, costUsd: 0.0123, requestId: r.id,
-    });
+    const c1 = await svc.recordCall(agente, chiamata({ requestId: r.id }));
     expect(c1.requestId).toBe(r.id);
-    await svc.recordCall(agente, {
-      agentCode: "assistente-hr", model: "claude-sonnet-5-5", outcome: "ERRORE", durationMs: 300,
-      inputTokens: 0, outputTokens: 0, costUsd: 0,
-    });
+    await svc.recordCall(agente, chiamata({ outcome: "ERRORE", durationMs: 300, inputTokens: 0, outputTokens: 0, costUsd: 0 }));
     const reg = await svc.listCalls(500);
     const nostre = reg.items.filter((x) => x.tenantId === anna.tenantId && x.agentCode === "assistente-hr");
     expect(nostre.length).toBeGreaterThanOrEqual(2);
@@ -172,10 +173,38 @@ describe("il registro di costo e durata", () => {
     expect(reg.totals.costUsd).toBeGreaterThanOrEqual(0.0123);
   });
 
-  it("non si lega a una richiesta che non c'è", async () => {
-    expect(await codiceDi(svc.recordCall(anna, {
-      agentCode: "assistente-hr", model: "m", outcome: "OK", durationMs: 1, inputTokens: 0, outputTokens: 0, costUsd: 0,
-      requestId: randomUUID(),
-    }))).toBe("NOT_FOUND");
+  it("una persona, anche autenticata, non scrive nel registro: 403", async () => {
+    const codice = await codiceDi(svc.recordCall(anna, chiamata()));
+    expect(codice).toBe("AGENT_CALL_AGENT_ONLY");
+    await expect(svc.recordCall(anna, chiamata())).rejects.toBeInstanceOf(ForbiddenError);
+  });
+
+  it("un gettone non registra per un altro agente: 403", async () => {
+    expect(await codiceDi(svc.recordCall(agente, chiamata({ agentCode: "altro-agente" })))).toBe("AGENT_CALL_AGENT_MISMATCH");
+  });
+
+  it("non si lega a una richiesta che non c'è, né a una di un'altra persona", async () => {
+    expect(await codiceDi(svc.recordCall(agente, chiamata({ requestId: randomUUID() })))).toBe("NOT_FOUND");
+    const diBruno = await svc.create(bruno, richiesta({ title: "Richiesta di un'altra persona" }));
+    expect(await codiceDi(svc.recordCall(agente, chiamata({ requestId: diBruno.id })))).toBe("NOT_FOUND");
+  });
+
+  it("il costo di una chiamata non supera il tetto della sua richiesta", async () => {
+    const r = await svc.create(anna, richiesta({ estimateUsd: 0.1, capUsd: 0.2 }));
+    expect(await codiceDi(svc.recordCall(agente, chiamata({ requestId: r.id, costUsd: 0.5 })))).toBe("AGENT_CALL_OVER_REQUEST_CAP");
+  });
+
+  it("i numeri di una chiamata hanno un limite: oltre, il contratto la rifiuta", () => {
+    const ok = CreateAgentCallBodySchema.safeParse(chiamata());
+    expect(ok.success).toBe(true);
+    for (const cattiva of [
+      { costUsd: AGENT_CALL_LIMITS.maxCostUsd + 1 },
+      { inputTokens: AGENT_CALL_LIMITS.maxTokens + 1 },
+      { outputTokens: AGENT_CALL_LIMITS.maxTokens + 1 },
+      { durationMs: AGENT_CALL_LIMITS.maxDurationMs + 1 },
+      { costUsd: -1 },
+    ]) {
+      expect(CreateAgentCallBodySchema.safeParse(chiamata(cattiva)).success, JSON.stringify(cattiva)).toBe(false);
+    }
   });
 });

@@ -8,9 +8,9 @@
 import { describe, it, expect } from "vitest";
 import { ApprovalRegistry } from "../src/approval-bridge.js";
 import { ContatorePersone } from "../src/persone-distinte.js";
-import { eseguiGiro, MARGINE_GETTONE_MS, type OpzioniEsecuzione, type RegistroGiro } from "../src/giro.js";
+import { eseguiGiro, MARGINE_GETTONE_MS, type ChiamataGiro, type OpzioniEsecuzione, type RegistroGiro } from "../src/giro.js";
 import type { Evento, MotivoArresto, StatoAttivita } from "../src/conversazione.js";
-import { riduci, fineDi, titoloDa } from "../src/conversazione.js";
+import { riduci, fineDi, misuraDi, titoloDa } from "../src/conversazione.js";
 
 const PERSONA = "11111111-1111-4111-8111-111111111111";
 const ALTRA = "22222222-2222-4222-8222-222222222222";
@@ -264,5 +264,50 @@ describe("titoloDa: il titolo è la domanda, non il contesto della pagina", () =
     );
     expect(titoloDa("una domanda senza contesto")).toBe("una domanda senza contesto");
     expect(titoloDa("")).toBe("Conversazione");
+  });
+});
+
+describe("T2 — il costo e la durata di ogni giro vanno nel registro delle chiamate", () => {
+  const conCosto = {
+    type: "result", subtype: "success", is_error: false, result: "ok", num_turns: 2,
+    duration_ms: 4321, total_cost_usd: 0.123456,
+    usage: { input_tokens: 1000, cache_read_input_tokens: 500, cache_creation_input_tokens: 100, output_tokens: 250 },
+  };
+
+  it("un giro riuscito registra costo, token e durata dell'SDK", async () => {
+    const reg = new RegistroFinto({ id: CONV, sdkSessionRef: null, personsSeen: [] });
+    const righe: ChiamataGiro[] = [];
+    const { d } = deps(reg, async function* () { yield testo("ciao"); yield conCosto; });
+    await eseguiGiro({ ...d, chiamata: async (c) => { righe.push(c); } });
+    expect(righe).toEqual([{ outcome: "OK", durationMs: 4321, inputTokens: 1600, outputTokens: 250, costUsd: 0.1235 }]);
+  });
+
+  it("un giro fermato dal limite si registra LIMITE, un errore ERRORE", async () => {
+    const reg = new RegistroFinto({ id: CONV, sdkSessionRef: null, personsSeen: [] });
+    const righe: ChiamataGiro[] = [];
+    const { d } = deps(reg, async function* () { throw new Error("guasto"); });
+    await eseguiGiro({ ...d, chiamata: async (c) => { righe.push(c); } });
+    expect(righe[0]?.outcome).toBe("ERRORE");
+    const reg2 = new RegistroFinto({ id: CONV, sdkSessionRef: null, personsSeen: [] });
+    const righe2: ChiamataGiro[] = [];
+    const { d: d2 } = deps(reg2, async function* (o) {
+      await new Promise((_r, rej) => o.abortController.signal.addEventListener("abort", () => rej(new Error("abort"))));
+      yield testo("mai");
+    }, { durataMs: 20, scadenzaGettone: Date.now() + 600_000 });
+    await eseguiGiro({ ...d2, chiamata: async (c) => { righe2.push(c); } });
+    expect(righe2[0]?.outcome).toBe("LIMITE");
+  });
+
+  it("se la riga non si scrive, il giro finisce lo stesso con il suo esito", async () => {
+    const reg = new RegistroFinto({ id: CONV, sdkSessionRef: null, personsSeen: [] });
+    const { d } = deps(reg, async function* () { yield testo("ciao"); yield conCosto; });
+    const esito = await eseguiGiro({ ...d, chiamata: async () => { throw new Error("POST /agent-requests/calls -> 403"); } });
+    expect(esito).toEqual({ stato: "FATTA" });
+  });
+
+  it("i numeri stanno nei limiti che l'API accetta, qualunque cosa dica l'evento", () => {
+    const m = misuraDi({ type: "result", duration_ms: 99 * 3_600_000, total_cost_usd: 999, usage: { input_tokens: 9e9, output_tokens: -5 } });
+    expect(m).toEqual({ durationMs: 6 * 3_600_000, inputTokens: 20_000_000, outputTokens: 0, costUsd: 10 });
+    expect(misuraDi({ type: "assistant" })).toBeUndefined();
   });
 });

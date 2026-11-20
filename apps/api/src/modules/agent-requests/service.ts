@@ -88,8 +88,20 @@ export const agentRequestsService = {
 
   async recordCall(actor: ActorContext, body: CreateAgentCallBody): Promise<AgentCall> {
     const proprietario = chi(actor);
-    if (body.requestId && !(await repo.requestInTenant(pool, body.requestId, proprietario.tenantId))) {
-      throw new NotFoundError("Agent request");
+    // Solo il gettone dell'agente scrive nel registro di costo, e solo col proprio codice: senza
+    // questo, qualunque persona autenticata potrebbe riempirlo di costi e token a piacere.
+    if (!actor.agente) {
+      throw new ForbiddenError("Only an agent token records an agent call", E.CALL_AGENT_ONLY);
+    }
+    if (body.agentCode !== actor.agente.codice) {
+      throw new ForbiddenError("The agent code does not match the token", E.CALL_AGENT_MISMATCH);
+    }
+    if (body.requestId) {
+      const r = await repo.requestOfRequester(pool, body.requestId, proprietario.tenantId, proprietario.userId);
+      if (!r) throw new NotFoundError("Agent request");
+      if (body.costUsd > r.capUsd) {
+        throw new UnprocessableEntityError(null, "The call cost exceeds the cap of its request", E.CALL_OVER_REQUEST_CAP);
+      }
     }
     return repo.createCall(pool, proprietario, body);
   },

@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import type { ActivityClassification, OccupationClassification } from "@heuresys/shared";
 import { ACTIVITY_CLASS_SCHEME_VALUES, OCCUPATION_CLASS_SCHEME_VALUES } from "@heuresys/shared";
 import { PageHeader } from "@/components/intestazione-pagina";
+import { StatoCaricamento, StatoNegato } from "@/components/stato-pagina";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { CatalogoClassi, type Catalogo } from "./catalogo-classi";
 import { Corrispondenze } from "./corrispondenze";
@@ -19,7 +20,8 @@ import { FasceDimensionali, ModelliOperativi } from "./cataloghi-impresa";
 
 export default function TassonomiePage() {
   const { t } = useTranslation("admin");
-  const perms = useCurrentUserPermissions().data?.permissions ?? [];
+  const permessi = useCurrentUserPermissions();
+  const perms = permessi.data?.permissions ?? [];
   const professioni: Catalogo = {
     chiave: "occupation-classifications", percorso: "/v1/occupation-classifications",
     schemi: OCCUPATION_CLASS_SCHEME_VALUES, dominioEnum: "occupationClassScheme",
@@ -39,6 +41,10 @@ export default function TassonomiePage() {
   return (
     <main data-testid="tassonomie-page" className="mx-auto max-w-6xl space-y-6 px-6 pb-8">
       <PageHeader title={t("tassonomie.titolo")} description={t("tassonomie.descrizionePagina")} />
+      {permessi.isLoading && <StatoCaricamento />}
+      {permessi.isSuccess && ![professioni.permessi.leggi, attivita.permessi.leggi, "operating_model:read"].some((p) => perms.includes(p)) && (
+        <StatoNegato motivo={t("tassonomie.negato")} />
+      )}
       {perms.includes(professioni.permessi.leggi) && <CatalogoClassi c={professioni} />}
       {perms.includes(attivita.permessi.leggi) && <CatalogoClassi c={attivita} dettaglio={(v) => <Corrispondenze voce={v} />} />}
       {perms.includes("enterprise_typing:read") && <FasceDimensionali />}

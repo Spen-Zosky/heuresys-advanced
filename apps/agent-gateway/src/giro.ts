@@ -23,8 +23,10 @@ import type { ContatorePersone } from "./persone-distinte.js";
 import type { ApprovalRequest, ApproveFn } from "./write-gate.js";
 import {
   fineDi,
+  misuraDi,
   riduci,
   sessioneDi,
+  type MisuraChiamata,
   type MotivoArresto,
   type RegistroConversazione,
   type StatoAttivita,
@@ -73,7 +75,18 @@ export interface GiroDeps {
   rifiuto?: () => string | null;
   /** Il posto della conversazione (limiti.ts): si sospende mentre il giro aspetta la persona. */
   attesa?: { sospendi: () => void; riprendi: () => void };
+  /**
+   * A fine giro, la riga di costo e durata per il registro delle chiamate dell'agente
+   * (`POST /v1/agent-requests/calls`). Best effort: se non si scrive, il giro non cambia esito.
+   */
+  chiamata?: (c: ChiamataGiro) => Promise<void>;
   now?: () => number;
+}
+
+/** Una riga del registro di costo: com'è finito il giro, quanto è durato, quanto è costato. */
+export interface ChiamataGiro extends MisuraChiamata {
+  outcome: "OK" | "ERRORE" | "LIMITE";
+  durationMs: number;
 }
 
 /** Il margine prima della scadenza del gettone: l'ultima chiamata deve ancora valere. */
@@ -152,6 +165,8 @@ export async function eseguiGiro(d: GiroDeps): Promise<EsitoGiro> {
     }
   };
 
+  const avvio = now();
+  let misura: MisuraChiamata | undefined;
   let sessione = registro.conversazione.sdkSessionRef ?? undefined;
   let fine: ReturnType<typeof fineDi>;
   let errore = false;
@@ -170,6 +185,7 @@ export async function eseguiGiro(d: GiroDeps): Promise<EsitoGiro> {
         await registro.ricorda({ sdkSessionRef: nuova });
       }
       fine = fineDi(ev) ?? fine;
+      misura = misuraDi(ev) ?? misura;
       const visti = riduci(ev);
       if (visti.length > 0) {
         registro.aggiungi(visti);
@@ -222,6 +238,20 @@ export async function eseguiGiro(d: GiroDeps): Promise<EsitoGiro> {
         : {}),
   });
   await registro.ricorda({ personsSeen: d.contatore.impronte() });
+  if (d.chiamata) {
+    try {
+      await d.chiamata({
+        inputTokens: 0,
+        outputTokens: 0,
+        costUsd: 0,
+        ...misura,
+        durationMs: Math.min(misura?.durationMs ?? Math.max(0, now() - avvio), 6 * 3_600_000),
+        outcome: motivo !== undefined ? "LIMITE" : errore || esito.stato === "FALLITA" ? "ERRORE" : "OK",
+      });
+    } catch (e) {
+      console.error(JSON.stringify({ level: "warn", phase: "agent-gateway-giro", msg: "chiamata non registrata", error: String(e) }));
+    }
+  }
   d.scrivi(evento("done", {}));
   return esito;
 }

@@ -77,6 +77,45 @@ export function riduci(evento: unknown): Evento[] {
   return [];
 }
 
+/** Ciò che costa un giro, come lo dice l'SDK nel suo evento finale. */
+export interface MisuraChiamata {
+  durationMs?: number;
+  inputTokens: number;
+  outputTokens: number;
+  costUsd: number;
+}
+
+/** I limiti con cui l'API accetta una riga del registro (`AGENT_CALL_LIMITS` di @heuresys/shared). */
+const LIMITE_COSTO_USD = 10;
+const LIMITE_TOKEN = 20_000_000;
+const LIMITE_DURATA_MS = 6 * 3_600_000;
+
+const intero = (v: unknown, max: number): number =>
+  typeof v === "number" && Number.isFinite(v) && v > 0 ? Math.min(Math.round(v), max) : 0;
+
+/**
+ * La misura del giro dall'evento `result` dell'SDK (costo, token, durata), già nei limiti che
+ * l'API pretende per una riga del registro. Pura. Senza un evento finale, niente misura.
+ */
+export function misuraDi(evento: unknown): MisuraChiamata | undefined {
+  if (!evento || typeof evento !== "object") return undefined;
+  const e = evento as { type?: unknown; duration_ms?: unknown; total_cost_usd?: unknown; usage?: Record<string, unknown> | null };
+  if (e.type !== "result") return undefined;
+  const u = e.usage ?? {};
+  const costo = typeof e.total_cost_usd === "number" && Number.isFinite(e.total_cost_usd) && e.total_cost_usd > 0
+    ? Math.min(Math.round(e.total_cost_usd * 10_000) / 10_000, LIMITE_COSTO_USD)
+    : 0;
+  return {
+    ...(typeof e.duration_ms === "number" ? { durationMs: intero(e.duration_ms, LIMITE_DURATA_MS) } : {}),
+    inputTokens: intero(
+      Number(u.input_tokens ?? 0) + Number(u.cache_creation_input_tokens ?? 0) + Number(u.cache_read_input_tokens ?? 0),
+      LIMITE_TOKEN,
+    ),
+    outputTokens: intero(u.output_tokens, LIMITE_TOKEN),
+    costUsd: costo,
+  };
+}
+
 /** L'identificativo di sessione che l'SDK annuncia all'avvio (`system`/`init`), se l'evento lo è. */
 export function sessioneDi(evento: unknown): string | undefined {
   if (!evento || typeof evento !== "object") return undefined;

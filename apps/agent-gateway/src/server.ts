@@ -493,6 +493,19 @@ const server = createServer(async (req, res) => {
           scrivi,
           nota: () => notaSugliEsiti(vista.esiti),
           rifiuto: () => esitiLetture.rifiuto(),
+          // Il costo e la durata del giro vanno nel registro delle chiamate dell'agente. Col gettone
+          // d'agente: l'API non accetta questa scrittura da nessun altro (403).
+          chiamata: async (c) => {
+            await clientRegistro.call("POST", "/agent-requests/calls", {
+              agentCode: AGENTE_ASSISTENTE,
+              model: MODELLO,
+              outcome: c.outcome,
+              durationMs: c.durationMs,
+              inputTokens: c.inputTokens,
+              outputTokens: c.outputTokens,
+              costUsd: c.costUsd,
+            });
+          },
           esegui: (o) =>
             runHrAgent(mandato, client, {
               approve: o.approve,

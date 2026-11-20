@@ -29,6 +29,19 @@ export const AGENT_REQUEST_ERRORS = {
   AGENT_CANNOT_DECIDE: "AGENT_REQUEST_AGENT_CANNOT_DECIDE",
   REJECT_REASON_REQUIRED: "AGENT_REQUEST_REJECT_REASON_REQUIRED",
   NOT_PENDING: "AGENT_REQUEST_NOT_PENDING",
+  /** Una chiamata la registra solo il gettone dell'agente: una persona o un altro mezzo non la scrivono. */
+  CALL_AGENT_ONLY: "AGENT_CALL_AGENT_ONLY",
+  /** Il codice dell'agente nel corpo non è quello del gettone. */
+  CALL_AGENT_MISMATCH: "AGENT_CALL_AGENT_MISMATCH",
+  /** Il costo di una chiamata supera il tetto della richiesta a cui si lega. */
+  CALL_OVER_REQUEST_CAP: "AGENT_CALL_OVER_REQUEST_CAP",
+} as const;
+
+/** I limiti di una riga del registro: oltre, il numero non è di una chiamata vera. */
+export const AGENT_CALL_LIMITS = {
+  maxDurationMs: 6 * 3_600_000,
+  maxTokens: 20_000_000,
+  maxCostUsd: AGENT_REQUEST_MAX_CAP_USD,
 } as const;
 
 const AGENT_CODE = z.string().regex(/^[a-z0-9][a-z0-9-]*$/).max(64);
@@ -90,10 +103,10 @@ export const CreateAgentCallBodySchema = z.object({
   agentCode: AGENT_CODE,
   model: z.string().trim().min(1).max(80),
   outcome: AgentCallOutcomeSchema,
-  durationMs: z.number().int().min(0).max(86_400_000),
-  inputTokens: z.number().int().min(0).max(100_000_000).default(0),
-  outputTokens: z.number().int().min(0).max(100_000_000).default(0),
-  costUsd: z.number().min(0).max(999999).multipleOf(0.0001).default(0),
+  durationMs: z.number().int().min(0).max(AGENT_CALL_LIMITS.maxDurationMs),
+  inputTokens: z.number().int().min(0).max(AGENT_CALL_LIMITS.maxTokens).default(0),
+  outputTokens: z.number().int().min(0).max(AGENT_CALL_LIMITS.maxTokens).default(0),
+  costUsd: z.number().min(0).max(AGENT_CALL_LIMITS.maxCostUsd).multipleOf(0.0001).default(0),
   requestId: z.uuid().optional(),
 });
 export type CreateAgentCallBody = z.infer<typeof CreateAgentCallBodySchema>;

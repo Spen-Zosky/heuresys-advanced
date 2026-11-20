@@ -49,13 +49,22 @@ jobs:
     needs: tree
     # Come state-lint (D-08): il runner sta sull'host di produzione, niente PR da fork.
     if: ${{ !cancelled() && needs.tree.outputs.skip != 'true' && ((github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && !contains(github.event.pull_request.labels.*.name, 'defer-major')) }}
-    runs-on: [self-hosted, oci-vm]
+    runs-on: [self-hosted, off-prod]
     timeout-minutes: 5
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 1
+
+      # build_origine_moduli.py importa yaml: il Debian dello Z420 non ha python3-yaml. Se manca, un
+      # ambiente della corsa con PyYAML fissato (niente pacchetti di sistema toccati).
+      - name: PyYAML
+        run: |
+          python3 -c "import yaml" 2>/dev/null && exit 0
+          python3 -m venv "$RUNNER_TEMP/py"
+          "$RUNNER_TEMP/py/bin/pip" install -q "pyyaml==6.0.2"
+          echo "$RUNNER_TEMP/py/bin" >> "$GITHUB_PATH"
 
       - name: Pagine idonee al pannello dell'agente (A-8)
         run: python3 docs/kb/tools/check_idoneita_agente.py --check-ts apps/web/src/lib/agente/pagine-idonee.generated.ts

@@ -40,8 +40,12 @@ describe("/v1/processes", () => {
     expect(body.total).toBe(db.rows[0]!.n);
     expect(body.items.length).toBe(body.total);
     for (const p of body.items) { expect(p.tenantId).toBe(RTL); expect(p.level).toBe(1); }
-    const nomi = body.items.map((p) => p.name);
-    expect(nomi).toEqual([...nomi].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0)));
+    // L'ordine lo fa l'API (R1/R5): lo stesso che dà il database con la sua collazione.
+    const ordine = await pool.query<{ id: string }>(
+      `SELECT tenant_process_id AS id FROM sys.sys_tenant_processes
+        WHERE tenant_process_tenant_id = $1 AND tenant_process_is_active AND tenant_process_level = 1
+        ORDER BY tenant_process_name, tenant_process_code`, [RTL]);
+    expect(body.items.map((p) => p.processId)).toEqual(ordine.rows.map((x) => x.id));
   });
 
   it("la scheda di un processo porta sottoprocessi e attività coerenti con i conteggi della sintesi", async () => {

@@ -28,6 +28,7 @@ const NOME_UTENTE = `COALESCE(nullif(concat_ws(', ', nullif(trim(u.user_last_nam
 const SINTESI = `
   SELECT tp.tenant_process_id AS "processId",
          tp.tenant_process_tenant_id AS "tenantId",
+         tn.tenant_name AS "tenantName",
          tp.tenant_process_code AS code,
          tp.tenant_process_name AS name,
          tp.tenant_process_description AS description,
@@ -53,6 +54,7 @@ const SINTESI = `
          (SELECT count(DISTINCT oup.org_unit_process_org_unit_id)::int FROM sys.sys_organization_unit_processes oup
            WHERE oup.org_unit_process_tenant_process_id = tp.tenant_process_id) AS "unitCount"
     FROM sys.sys_tenant_processes tp
+    JOIN sys.sys_tenancies tn ON tn.tenant_id = tp.tenant_process_tenant_id
     LEFT JOIN sys.sys_tenant_processes par ON par.tenant_process_id = tp.tenant_process_parent_id
     LEFT JOIN sys.sys_positions op ON op.position_id = tp.tenant_process_owner_position_id
     LEFT JOIN sys.sys_blueprint_process_registry bp ON bp.blueprint_process_id = tp.tenant_process_source_blueprint_process_id`;
@@ -64,7 +66,7 @@ export async function listProcesses(db: Db, tenantId: string | null, q: TenantPr
         AND tp.tenant_process_is_active
         AND ($2::int IS NULL OR tp.tenant_process_level = $2::int)
         AND ($3::uuid IS NULL OR tp.tenant_process_parent_id = $3::uuid)
-      ORDER BY tp.tenant_process_name, tp.tenant_process_code`,
+      ORDER BY tn.tenant_name, tp.tenant_process_name, tp.tenant_process_code`,
     [tenantId, q.level ?? null, q.parentId ?? null],
   );
   return r.rows;

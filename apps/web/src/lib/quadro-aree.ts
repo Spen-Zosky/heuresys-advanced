@@ -51,6 +51,7 @@ export const AREE_PER_ROTTA: Array<[string, AreaQuadro[]]> = [
   ["/blueprints", ["processi", "organizzazione"]],
   ["/tenant-blueprints", ["processi", "organizzazione"]],
   ["/processes", ["processi"]],
+  ["/tenant-processes", ["processi"]],
   ["/consolidation", ["processi", "organizzazione"]],
   ["/generated-origins", ["organizzazione", "persone"]],
   ["/provenance", ["organizzazione", "persone"]],

@@ -873,6 +873,35 @@
       "COMPLETED": "Completata",
       "FAILED": "Non riuscita",
       "CANCELLED": "Annullata"
+    },
+    "processUnitRole": {
+      "OWNER": "Responsabile",
+      "CONTRIBUTOR": "Contribuisce",
+      "CONSULTED": "Consultata",
+      "INFORMED": "Informata"
+    },
+    "processExecutorKind": {
+      "POSIZIONE": "Posizione",
+      "RUOLO": "Ruolo",
+      "AGENTE": "Agente"
+    },
+    "processWorkNature": {
+      "PERSONA": "Lavoro di persona",
+      "ASSISTITO_AI": "Assistito dall'IA",
+      "AUTOMATIZZABILE": "Automatizzabile",
+      "AGENTE_SUPERVISIONATO": "Agente supervisionato"
+    },
+    "processDeliveryModel": {
+      "INTERNO": "Interno",
+      "SERVIZIO_CONDIVISO": "Servizio condiviso",
+      "ESTERNO": "Esterno"
+    },
+    "projectStatus": {
+      "PLANNED": "Pianificato",
+      "ACTIVE": "In corso",
+      "ON_HOLD": "Sospeso",
+      "COMPLETED": "Concluso",
+      "CANCELLED": "Annullato"
     }
   },
   "masked": "nascosto per il tuo profilo",

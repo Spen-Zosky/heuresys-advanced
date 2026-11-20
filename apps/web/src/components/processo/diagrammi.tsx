@@ -1,0 +1,264 @@
+"use client";
+
+/**
+ * apps/web/src/components/processo/diagrammi.tsx — i disegni della scheda del processo (V5 del piano
+ * docs/piani/PIANO_processi-e-progetti-sistematici_20261118.md).
+ *
+ * Due disegni, sugli stessi dati di `GET /v1/processes/:id/scheda`, nella stessa area navigabile
+ * degli organigrammi (adatta all'apertura, rotella e +/−, doppio clic sul vuoto riadatta,
+ * trascinamento, doppio clic su un oggetto lo apre) e con l'esportazione in SVG:
+ *   · il FLUSSO A CORSIE: una corsia per unità (chi esegue), le attività in ordine da sinistra a
+ *     destra, una fascia per sottoprocesso in testa, le frecce fra un'attività e la successiva
+ *     dello stesso sottoprocesso. È il diagramma a blocchi del banco del datastore («corsie dei
+ *     ruoli»), ridisegnato con i dati del tenant;
+ *   · il GRAFO A NODI: processo → sottoprocessi → attività → unità, per colonne.
+ * Il testo che non sta in un riquadro va a capo su due righe e porta il titolo completo nel
+ * suggerimento: niente si perde in silenzio (R5).
+ */
+import { useMemo, useRef, type KeyboardEvent } from "react";
+import { useTranslation } from "react-i18next";
+import { Download } from "lucide-react";
+import type { TenantProcessScheda } from "@heuresys/shared";
+import { AreaNavigabile, ATTR_OGGETTO } from "@/components/organigramma/area-navigabile";
+import { svgEsportabile } from "@/components/organigramma/blocchi";
+
+type Attivita = TenantProcessScheda["activities"][number];
+
+const C = {
+  riquadro: "var(--card)",
+  fascia: "var(--muted)",
+  testo: "var(--foreground)",
+  tenue: "var(--muted-foreground)",
+  bordo: "var(--muted-foreground)",
+  forte: "var(--primary)",
+};
+
+/** Le attività nell'ordine in cui si leggono: prima quelle del processo, poi un sottoprocesso alla volta. */
+export function attivitaInOrdine(s: TenantProcessScheda): Attivita[] {
+  const ordine = new Map<string, number>([[s.process.processId, 0], ...s.subprocesses.map((p, i) => [p.processId, i + 1] as [string, number])]);
+  return [...s.activities].sort((a, b) => (ordine.get(a.processId) ?? 99) - (ordine.get(b.processId) ?? 99) || a.ordinal - b.ordinal);
+}
+
+/** Va a capo su al massimo due righe di `n` caratteri; l'ultima finisce con «…» se il testo è più lungo. */
+export function dueRighe(testo: string, n: number): string[] {
+  const parole = testo.split(/\s+/).filter(Boolean);
+  const righe: string[] = [];
+  let riga = "";
+  for (const p of parole) {
+    if ((riga + " " + p).trim().length <= n) riga = (riga + " " + p).trim();
+    else { if (riga) righe.push(riga); riga = p; }
+  }
+  if (riga) righe.push(riga);
+  if (righe.length <= 2) return righe.map((r) => (r.length > n ? `${r.slice(0, n - 1)}…` : r));
+  const seconda = righe.slice(1).join(" ");
+  return [righe[0]!.slice(0, n), `${seconda.slice(0, n - 1)}…`];
+}
+
+function useEsporta(nomeFile: string) {
+  const ref = useRef<SVGSVGElement>(null);
+  const esporta = () => {
+    if (!ref.current) return;
+    const blob = new Blob([svgEsportabile(ref.current)], { type: "image/svg+xml" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${nomeFile}.svg`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+  return { ref, esporta };
+}
+
+function BottoneEsporta({ onClick }: { onClick: () => void }) {
+  const { t } = useTranslation("common");
+  return (
+    <button type="button" onClick={onClick} className="ml-1 inline-flex items-center gap-1 rounded border border-border px-2 py-0.5 text-xs hover:bg-muted">
+      <Download className="h-3.5 w-3.5" />{t("organigramma.esportaSvg")}
+    </button>
+  );
+}
+
+const aprendo = (f: () => void) => ({
+  [ATTR_OGGETTO]: "",
+  tabIndex: 0,
+  role: "button",
+  style: { cursor: "pointer" },
+  onDoubleClick: (e: { stopPropagation: () => void }) => { e.stopPropagation(); f(); },
+  onKeyDown: (e: KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); f(); } },
+});
+
+/* ------------------------------------------------------------------ flusso a corsie */
+
+const LW = 170; // larghezza dell'etichetta di corsia
+const BW = 150, BH = 54, GX = 34, LH = 78, TOP = 34;
+
+export function FlussoCorsie({
+  scheda, senzaUnita, onApriAttivita, onApriUnita, nomeFile, ariaLabel, testId,
+}: {
+  scheda: TenantProcessScheda;
+  senzaUnita: string;
+  onApriAttivita: (id: string) => void;
+  onApriUnita?: (id: string) => void;
+  nomeFile: string;
+  ariaLabel: string;
+  testId?: string;
+}) {
+  const { ref, esporta } = useEsporta(nomeFile);
+  const d = useMemo(() => {
+    const att = attivitaInOrdine(scheda);
+    const corsie: Array<{ chiave: string; id: string | null; nome: string }> = [];
+    const indice = new Map<string, number>();
+    for (const a of att) {
+      const chiave = a.unitId ?? `x:${a.unitName ?? a.executorName ?? ""}`;
+      if (!indice.has(chiave)) { indice.set(chiave, corsie.length); corsie.push({ chiave, id: a.unitId, nome: a.unitName ?? a.executorName ?? senzaUnita }); }
+    }
+    const nomi = new Map([[scheda.process.processId, scheda.process.name], ...scheda.subprocesses.map((p) => [p.processId, p.name] as [string, string])]);
+    const fasce: Array<{ processId: string; nome: string; da: number; a: number }> = [];
+    att.forEach((a, i) => {
+      const f = fasce[fasce.length - 1];
+      if (f && f.processId === a.processId) f.a = i; else fasce.push({ processId: a.processId, nome: nomi.get(a.processId) ?? "", da: i, a: i });
+    });
+    const x = (i: number) => LW + 16 + i * (BW + GX);
+    const y = (corsia: number) => TOP + 10 + corsia * LH + (LH - BH) / 2;
+    const larghezza = Math.max(x(att.length) + 8, 480);
+    const altezza = TOP + 10 + corsie.length * LH + 10;
+    return { att, corsie, indice, fasce, x, y, larghezza, altezza };
+  }, [scheda, senzaUnita]);
+
+  return (
+    <AreaNavigabile larghezza={d.larghezza} altezza={d.altezza} ariaLabel={ariaLabel} {...(testId ? { testId } : {})} strumenti={<BottoneEsporta onClick={esporta} />}>
+      <svg ref={ref} role="group" aria-label={ariaLabel} width={d.larghezza} height={d.altezza} viewBox={`0 0 ${d.larghezza} ${d.altezza}`} fontFamily="Inter, Arial, Helvetica, sans-serif" className="block">
+        <defs>
+          <marker id="freccia-corsie" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" style={{ fill: C.bordo }} />
+          </marker>
+        </defs>
+        {d.fasce.map((f) => {
+          const x0 = d.x(f.da) - GX / 2 + 4, x1 = d.x(f.a) + BW + GX / 2 - 4;
+          return (
+            <g key={`${f.processId}-${f.da}`}>
+              <rect x={x0} y={4} width={x1 - x0} height={TOP - 4} rx={4} style={{ fill: C.fascia }} />
+              <text x={x0 + 8} y={TOP / 2 + 6} fontSize={12} fontWeight={600} style={{ fill: C.testo }}>
+                <title>{f.nome}</title>
+                {dueRighe(f.nome, Math.max(8, Math.floor((x1 - x0 - 16) / 7)))[0]}
+              </text>
+            </g>
+          );
+        })}
+        {d.corsie.map((c, i) => {
+          const y0 = TOP + 10 + i * LH;
+          return (
+            <g key={c.chiave} data-testid="corsia">
+              <rect x={0} y={y0} width={d.larghezza} height={LH} style={{ fill: i % 2 ? C.fascia : "transparent", fillOpacity: 0.35 }} />
+              <line x1={0} x2={d.larghezza} y1={y0} y2={y0} style={{ stroke: C.bordo, strokeOpacity: 0.3 }} />
+              <g {...(c.id && onApriUnita ? aprendo(() => onApriUnita(c.id!)) : {})}>
+                <title>{c.nome}</title>
+                {dueRighe(c.nome, 22).map((r, k) => (
+                  <text key={k} x={10} y={y0 + LH / 2 + (k - 0.5) * 15 + 4} fontSize={12} fontWeight={600} style={{ fill: C.testo }}>{r}</text>
+                ))}
+              </g>
+            </g>
+          );
+        })}
+        {d.att.map((a, i) => {
+          const nx = d.att[i + 1];
+          if (!nx || nx.processId !== a.processId) return null;
+          const c0 = d.indice.get(a.unitId ?? `x:${a.unitName ?? a.executorName ?? ""}`)!;
+          const c1 = d.indice.get(nx.unitId ?? `x:${nx.unitName ?? nx.executorName ?? ""}`)!;
+          const x0 = d.x(i) + BW, y0 = d.y(c0) + BH / 2, x1 = d.x(i + 1), y1 = d.y(c1) + BH / 2;
+          const xm = (x0 + x1) / 2;
+          return <path key={`f-${a.activityId}`} d={`M${x0},${y0} H${xm} V${y1} H${x1 - 2}`} fill="none" markerEnd="url(#freccia-corsie)" style={{ stroke: C.bordo, strokeWidth: 1.4 }} />;
+        })}
+        {d.att.map((a, i) => {
+          const c = d.indice.get(a.unitId ?? `x:${a.unitName ?? a.executorName ?? ""}`)!;
+          const x = d.x(i), y = d.y(c);
+          return (
+            <g key={a.activityId} data-testid="flusso-attivita" {...aprendo(() => onApriAttivita(a.activityId))}>
+              <title>{`${a.ordinal}. ${a.name}${a.executorName ? ` — ${a.executorName}` : ""}`}</title>
+              <rect x={x} y={y} width={BW} height={BH} rx={6} style={{ fill: C.riquadro, stroke: C.bordo, strokeWidth: 1 }} />
+              <text x={x + 8} y={y + 15} fontSize={10} style={{ fill: C.tenue }}>{a.ordinal}</text>
+              {dueRighe(a.name, 22).map((r, k) => (
+                <text key={k} x={x + 8} y={y + 30 + k * 13} fontSize={11} style={{ fill: C.testo }}>{r}</text>
+              ))}
+            </g>
+          );
+        })}
+      </svg>
+    </AreaNavigabile>
+  );
+}
+
+/* ------------------------------------------------------------------ grafo a nodi */
+
+const NW = 190, NH = 40, CX = 250, RY = 52;
+
+export function GrafoProcesso({
+  scheda, onApriAttivita, onApriUnita, onApriProcesso, nomeFile, ariaLabel, testId,
+}: {
+  scheda: TenantProcessScheda;
+  onApriAttivita: (id: string) => void;
+  onApriUnita?: (id: string) => void;
+  onApriProcesso: (id: string) => void;
+  nomeFile: string;
+  ariaLabel: string;
+  testId?: string;
+}) {
+  const { ref, esporta } = useEsporta(nomeFile);
+  const d = useMemo(() => {
+    const att = attivitaInOrdine(scheda);
+    const unita = [...new Map(att.filter((a) => a.unitId).map((a) => [a.unitId!, a.unitName ?? ""])).entries()].map(([id, nome]) => ({ id, nome }));
+    const colonne = [
+      [{ id: scheda.process.processId, nome: scheda.process.name, tipo: "processo" as const }],
+      scheda.subprocesses.map((p) => ({ id: p.processId, nome: p.name, tipo: "sottoprocesso" as const })),
+      att.map((a) => ({ id: a.activityId, nome: `${a.ordinal}. ${a.name}`, tipo: "attivita" as const })),
+      unita.map((u) => ({ id: u.id, nome: u.nome, tipo: "unita" as const })),
+    ].filter((c) => c.length > 0);
+    const righe = Math.max(...colonne.map((c) => c.length));
+    const altezza = righe * RY + 20;
+    const pos = new Map<string, { x: number; y: number }>();
+    colonne.forEach((col, ci) => {
+      const off = (altezza - col.length * RY) / 2;
+      col.forEach((n, ri) => pos.set(n.id, { x: 10 + ci * CX, y: off + ri * RY + (RY - NH) / 2 }));
+    });
+    const archi: Array<[string, string]> = [];
+    for (const s of scheda.subprocesses) archi.push([scheda.process.processId, s.processId]);
+    for (const a of att) {
+      archi.push([a.processId, a.activityId]);
+      if (a.unitId) archi.push([a.activityId, a.unitId]);
+    }
+    return { colonne, pos, archi, larghezza: 20 + colonne.length * CX - (CX - NW), altezza };
+  }, [scheda]);
+
+  const apri = (tipo: string, id: string) => {
+    if (tipo === "attivita") onApriAttivita(id);
+    else if (tipo === "unita") onApriUnita?.(id);
+    else if (tipo === "sottoprocesso") onApriProcesso(id);
+  };
+
+  return (
+    <AreaNavigabile larghezza={d.larghezza} altezza={d.altezza} ariaLabel={ariaLabel} {...(testId ? { testId } : {})} strumenti={<BottoneEsporta onClick={esporta} />}>
+      <svg ref={ref} role="group" aria-label={ariaLabel} width={d.larghezza} height={d.altezza} viewBox={`0 0 ${d.larghezza} ${d.altezza}`} fontFamily="Inter, Arial, Helvetica, sans-serif" className="block">
+        {d.archi.map(([da, a]) => {
+          const p = d.pos.get(da), q = d.pos.get(a);
+          if (!p || !q) return null;
+          const x0 = p.x + NW, y0 = p.y + NH / 2, x1 = q.x, y1 = q.y + NH / 2, xm = (x0 + x1) / 2;
+          return <path key={`${da}-${a}`} d={`M${x0},${y0} C${xm},${y0} ${xm},${y1} ${x1},${y1}`} fill="none" style={{ stroke: C.bordo, strokeOpacity: 0.55, strokeWidth: 1 }} />;
+        })}
+        {d.colonne.flat().map((n) => {
+          const p = d.pos.get(n.id)!;
+          const apribile = n.tipo !== "processo" && (n.tipo !== "unita" || Boolean(onApriUnita));
+          return (
+            <g key={`${n.tipo}-${n.id}`} data-testid={`grafo-${n.tipo}`} {...(apribile ? aprendo(() => apri(n.tipo, n.id)) : {})}>
+              <title>{n.nome}</title>
+              <rect x={p.x} y={p.y} width={NW} height={NH} rx={n.tipo === "unita" ? NH / 2 : 6}
+                style={{ fill: n.tipo === "processo" ? C.forte : C.riquadro, stroke: n.tipo === "processo" ? C.forte : C.bordo, strokeWidth: n.tipo === "sottoprocesso" ? 1.6 : 1 }} />
+              {dueRighe(n.nome, 27).map((r, k, tutte) => (
+                <text key={k} x={p.x + 10} y={p.y + NH / 2 + (k - (tutte.length - 1) / 2) * 13 + 4} fontSize={11}
+                  fontWeight={n.tipo === "attivita" ? 400 : 600} style={{ fill: n.tipo === "processo" ? "var(--primary-foreground)" : C.testo }}>{r}</text>
+              ))}
+            </g>
+          );
+        })}
+      </svg>
+    </AreaNavigabile>
+  );
+}

@@ -26,6 +26,7 @@ export const TenantProcessIdParamSchema = z.object({ id: z.uuid() });
 export const TenantProcessSummarySchema = z.object({
   processId: z.uuid(),
   tenantId: z.uuid(),
+  tenantName: z.string(),
   code: z.string(),
   name: z.string(),
   description: z.string().nullable(),

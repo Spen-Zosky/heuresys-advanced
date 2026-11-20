@@ -1637,5 +1637,61 @@
       "approvata": "Approvata",
       "allineata": "Allineata"
     }
+  },
+  "tassonomie": {
+    "titolo": "Navigatore dei cataloghi",
+    "descrizione": "Settori, professioni e competenze: si scende per livelli, si cerca per nome o per significato e si seguono i legami fra voci. Mostra solo ciò che advanced tiene per il tenant.",
+    "schede": {
+      "settori": "Settori",
+      "professioni": "Professioni",
+      "competenze": "Competenze",
+      "significato": "Ricerca per significato"
+    },
+    "filo": "Percorso",
+    "descrizioneFinestra": "Scheda della voce con percorso, voci collegate e corrispondenze.",
+    "catalogo": "Catalogo: {{catalogo}}",
+    "percorso": "Dove si trova",
+    "inCima": "È una voce di primo livello.",
+    "figli": "Voci sotto di lei ({{n}})",
+    "nessunFiglio": "Non ha voci sotto di sé.",
+    "corrispondenze": "Corrispondenze con altri cataloghi",
+    "nessunaCorrispondenza": "Nessuna corrispondenza registrata.",
+    "errore": "Impossibile leggere il catalogo",
+    "caricamento": "Caricamento in corso…",
+    "catalogoVuoto": "Questo catalogo non contiene voci.",
+    "radice": "Primo livello",
+    "cerca": "Cerca per codice o nome",
+    "risultati": "{{n}} risultati",
+    "scendi": "Scendi ({{n}})",
+    "nessunRisultato": "Nessun risultato.",
+    "cercaCompetenza": "Nome della competenza",
+    "cercaBottone": "Cerca",
+    "scriviCompetenza": "Scrivi almeno due lettere per cercare una competenza.",
+    "trovate": "{{n}} competenze trovate",
+    "senzaNome": "Competenza senza nome",
+    "sopra": "Competenze più generali",
+    "sotto": "Competenze più specifiche",
+    "nessunLegame": "Nessun legame registrato.",
+    "schemi": {
+      "ATECO_2025": "ATECO 2025",
+      "NACE_REV_2_1": "NACE Rev. 2.1",
+      "ATECO_2007": "ATECO 2007",
+      "NACE_REV_2": "NACE Rev. 2",
+      "ISCO_08": "ISCO-08",
+      "CP_2021": "Classificazione delle professioni 2021"
+    },
+    "tipoLegame": {
+      "EXACT": "Esatta",
+      "NARROWER": "Più specifica",
+      "BROADER": "Più generale",
+      "RELATED": "Collegata",
+      "APPROXIMATE": "Approssimata"
+    },
+    "tipoArco": {
+      "IS_A": "È un tipo di",
+      "PART_OF": "Fa parte di",
+      "RELATED": "Collegata",
+      "PREREQUISITE_OF": "Prerequisito di"
+    }
   }
 }

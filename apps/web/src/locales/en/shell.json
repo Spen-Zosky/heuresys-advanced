@@ -156,7 +156,8 @@
       "catalog": "Catalog",
       "gap": "Gap",
       "skillGap": "Skill gap",
-      "graph": "Graph"
+      "graph": "Graph",
+      "navigatore": "Navigator"
     },
     "comp": {
       "analytics": "Analytics",

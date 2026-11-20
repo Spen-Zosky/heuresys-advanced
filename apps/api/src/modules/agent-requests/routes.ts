@@ -2,9 +2,10 @@
  * apps/api/src/modules/agent-requests/routes.ts — tappa T2, migrazione 000501.
  *
  * `/v1/agent-requests`: le richieste dell'agente con previsione di spesa e tetto, e il registro di
- * costo e durata delle sue chiamate. Proporre, leggere le proprie e registrare una chiamata sono
- * aperti a ogni persona (e all'assistente per conto suo) con `agent_conversation:use:self`; decidere,
- * leggere la coda di tutti e il registro chiedono i permessi nuovi di PLATFORM_ADMIN.
+ * costo e durata delle sue chiamate. Proporre e leggere le proprie sono aperti a ogni persona (e
+ * all'assistente per conto suo) con `agent_conversation:use:self`; registrare una chiamata lo fa
+ * SOLO il gettone dell'agente, col proprio codice e per una richiesta della persona (403 altrimenti);
+ * decidere, leggere la coda di tutti e il registro chiedono i permessi nuovi di PLATFORM_ADMIN.
  */
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import {

@@ -150,4 +150,10 @@ DO $$ DECLARE r record; tot bigint; prima bigint; resto bigint; BEGIN
   END LOOP;
 END $$;
 COMMIT;
-SELECT 'J3b ok' esito, (SELECT count(*) FROM staging.rtl_allinea_testi_undo) voci_nel_giornale;""")
+SELECT 'J3b ok' esito, (SELECT count(*) FROM staging.rtl_allinea_testi_undo) voci_nel_giornale;
+-- Guardia vettori (classe J3, 19/11): se un testo con vettore e' cambiato e il vettore non e' stato ricalcolato, esce rosso. Rinviabile con -v vettori_rinvia=1 (lo fa applica.sh, che chiude con vettori.sh --verifica).
+\\if :{{?vettori_rinvia}}
+\\else
+DO $$ DECLARE n int; BEGIN SELECT count(*) INTO n FROM sys.v_embedding_impronta_non_combacia;
+  IF n > 0 THEN RAISE EXCEPTION 'J3b: % vettori non combaciano piu'' col testo, ricalcola: bash db/scripts/rtl-allinea/vettori.sh --ricalcola', n; END IF; END $$;
+\\endif""")

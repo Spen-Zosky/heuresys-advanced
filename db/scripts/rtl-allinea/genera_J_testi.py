@@ -328,6 +328,7 @@ FROM (SELECT user_timeline_event_id, user_timeline_event_summary, user_timeline_
     w("UPDATE sys.sys_leave_balance_transactions SET transaction_days_amount = -abs(transaction_days_amount) WHERE transaction_type='USAGE' AND transaction_days_amount>0;")
     w("COMMIT;")
     w("SELECT 'J ok' esito, (SELECT count(*) FROM staging.rtl_allinea_testi_undo) voci_nel_giornale, (SELECT coalesce(sum(righe),0) FROM staging.rtl_allinea_testi_undo) righe_tradotte;")
+    w("-- Guardia vettori (classe J3, 19/11): se un testo con vettore e' cambiato e il vettore non e' stato ricalcolato, esce rosso. Rinviabile con -v vettori_rinvia=1 (lo fa applica.sh, che chiude con vettori.sh --verifica).\n\\if :{?vettori_rinvia}\n\\else\nDO $$ DECLARE n int; BEGIN SELECT count(*) INTO n FROM sys.v_embedding_impronta_non_combacia;\n  IF n > 0 THEN RAISE EXCEPTION 'J: % vettori non combaciano piu'' col testo, ricalcola: bash db/scripts/rtl-allinea/vettori.sh --ricalcola', n; END IF; END $$;\n\\endif")
     print("\n".join(out))
 
 

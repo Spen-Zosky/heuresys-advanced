@@ -13,3 +13,9 @@ Prova: ripristina il dump «prima», `applica.sh` (corsa 1), poi `bash convergen
 ## J3 e J4 (15/11/2026)
 
 J3_testi_inglesi.sql (generato da genera_J3_testi.py) traduce i testi inglesi di RTL; J4_residui_prova.sql toglie i tre residui di prova. Idempotenti, con giornale (`staging.rtl_allinea_testi_undo`, `staging.rtl_residui_prova_undo`). Provati sul banco, NON applicati in produzione e non ancora in `applica.sh`: l inserimento nell ordine e la produzione sono una decisione di Enzo.
+
+## Vettori e J6/J6b (20/11/2026)
+
+Causa del blocco del rilascio: J3 e J3b (19/11, 12:08 UTC) hanno cambiato la descrizione di 26 righe di sys_skills (giornale staging.rtl_allinea_testi_undo) senza ricalcolare i vettori; la sentinella 000342 confronta l'impronta sha256 del testo con source_text_hash e li ha visti stantii.
+Guardia: `bash vettori.sh --verifica ["<psql>"]` (rosso se un vettore non combacia) e `--ricalcola` (pnpm embeddings:backfill, salto per impronta, poi verifica). J, J2, J3, J3b escono rossi se lasciano vettori stantii (si rinvia con `-v vettori_rinvia=1`, come fa applica.sh, che chiude con `vettori.sh --verifica`).
+J6 toglie da RTL le 54 righe di sys_user_skills della competenza «materiali avanzati»; J6b, dopo J6, ne toglie le 54 evidenze (giornali staging.rtl_competenze_fuori_industria_undo e staging.rtl_evidenze_fuori_industria_undo).

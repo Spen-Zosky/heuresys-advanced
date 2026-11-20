@@ -162,7 +162,8 @@
     },
     "kpi": {
       "analytics": "Analytics",
-      "catalog": "KPI catalog"
+      "catalog": "KPI catalog",
+      "templates": "KPI templates"
     },
     "career": {
       "main": "Career",
@@ -181,7 +182,9 @@
     },
     "dati": {
       "provenance": "Provenance register",
-      "gdpr": "Personal data (GDPR)"
+      "gdpr": "Personal data (GDPR)",
+      "tassonomie": "Taxonomies",
+      "riferimento": "Official sources"
     },
     "permessi": {
       "roles": "Roles & permissions",

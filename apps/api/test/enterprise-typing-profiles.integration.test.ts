@@ -174,14 +174,13 @@ describe("/v1/enterprise-typing-profiles/* integration", () => {
       method: "DELETE", url: `/v1/enterprise-typing-profiles/${id}`,
       headers: { cookie: ch(platformS.cookies), "x-csrf-token": platformS.csrfToken },
     });
-    expect(del.statusCode).toBe(204);
-    createdProfileId = null; // deleted — afterAll need not re-delete the profile row
+    // Ondata 5 (2026-11-18): la cancellazione è ritirata; la riga resta e la toglie afterAll.
+    expect(del.statusCode).toBe(410);
 
     const get = await suite.app.inject({
       method: "GET", url: `/v1/enterprise-typing-profiles/${id}`,
       headers: { cookie: ch(platformS.cookies) },
     });
-    expect(get.statusCode).toBe(404);
-    expect((get.json() as ErrBody).error.code).toBe("NOT_FOUND");
+    expect(get.statusCode).toBe(200);
   });
 });

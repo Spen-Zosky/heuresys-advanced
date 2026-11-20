@@ -100,6 +100,24 @@
    },
    "solaLettura": true
   },
+  "agent-requests": {
+   "base": "/agent-requests",
+   "data": "2026-11-05",
+   "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
+   "operations": {
+    "get": {
+     "method": "GET",
+     "path": "/",
+     "permission": null
+    },
+    "get_calls": {
+     "method": "GET",
+     "path": "/calls",
+     "permission": null
+    }
+   },
+   "solaLettura": true
+  },
   "analytics": {
    "base": "/analytics",
    "data": "2026-11-05",
@@ -2512,6 +2530,11 @@
     "get_by_id": {
      "method": "GET",
      "path": "/:id",
+     "permission": "tenant:read"
+    },
+    "get_by_id_contracts": {
+     "method": "GET",
+     "path": "/:id/contracts",
      "permission": "tenant:read"
     },
     "get_industry_codes": {

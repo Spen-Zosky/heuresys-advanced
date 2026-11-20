@@ -327,5 +327,36 @@
     "respingi": "Respingi",
     "daCorreggere": "Da correggere",
     "errore": "Decisione non registrata."
+  },
+  "famiglie": {
+    "titolo": "Famiglie e varianti dei modelli",
+    "hint": "Una famiglia raccoglie le varianti di un modello operativo (per esempio per taglia d'impresa). Una famiglia o una variante non si toglie: se ne corregge il nome o la descrizione.",
+    "conto_one": "{{count}} famiglia",
+    "conto_other": "{{count}} famiglie",
+    "senzaDescrizione": "Nessuna descrizione",
+    "correggi": "Correggi",
+    "chiudi": "Chiudi",
+    "salva": "Salva",
+    "nome": "Nome",
+    "descrizione": "Descrizione",
+    "codice": "Codice",
+    "nuova": "Nuova famiglia",
+    "aggiungi": "Aggiungi la famiglia",
+    "errore": "La modifica non è stata registrata. Controlla che il codice non esista già e riprova."
+  },
+  "varianti": {
+    "nuova": "Nuova variante",
+    "famiglia": "Famiglia",
+    "scegli": "Scegli…",
+    "fascia": "Fascia dimensionale",
+    "nessunaFascia": "Nessuna fascia",
+    "aggiungi": "Aggiungi la variante",
+    "errore": "La variante non è stata registrata. Controlla che il codice non esista già e riprova."
+  },
+  "processi": {
+    "correggi": "Correggi il processo «{{nome}}»",
+    "ordine": "Posizione nell'elenco",
+    "facoltativo": "Processo facoltativo",
+    "errore": "Il processo non è stato aggiornato. Riprova."
   }
 }

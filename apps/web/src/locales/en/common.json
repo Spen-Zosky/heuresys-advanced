@@ -841,6 +841,38 @@
       "APPROVED": "Approved",
       "REJECTED": "Rejected",
       "APPLIED": "Applied"
+    },
+    "occupationClassScheme": {
+      "ISCO_08": "ISCO-08 (international)",
+      "CP_2021": "CP 2021 (ISTAT)"
+    },
+    "activityClassScheme": {
+      "ATECO_2025": "ATECO 2025",
+      "NACE_REV_2_1": "NACE Rev. 2.1",
+      "ATECO_2007": "ATECO 2007",
+      "NACE_REV_2": "NACE Rev. 2",
+      "ATECO": "ATECO",
+      "NACE": "NACE"
+    },
+    "activityMappingKind": {
+      "EXACT": "Equivalent",
+      "NARROWER": "Narrower",
+      "BROADER": "Broader",
+      "RELATED": "Related",
+      "APPROXIMATE": "Approximate"
+    },
+    "enterpriseSizeBandCode": {
+      "XS": "Micro",
+      "S": "Small",
+      "M": "Medium",
+      "L": "Large",
+      "XL": "Very large"
+    },
+    "referenceSyncRunStatus": {
+      "RUNNING": "Running",
+      "COMPLETED": "Completed",
+      "FAILED": "Failed",
+      "CANCELLED": "Cancelled"
     }
   },
   "masked": "withheld for your profile",

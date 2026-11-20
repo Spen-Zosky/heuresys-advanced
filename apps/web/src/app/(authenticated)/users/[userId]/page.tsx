@@ -85,6 +85,7 @@ function MiniTable({ head, rows, empty }: { head: string[]; rows: ReactNode[][];
 export default function UserDetailPage() {
   const { t } = useTranslation("admin");
   const { t: tc } = useTranslation("common");
+  const { t: te } = useTranslation("ess");
   const f = useFormat();
   const enumLabel = useEnumLabel();
   const params = useParams<{ userId: string }>();
@@ -140,6 +141,11 @@ export default function UserDetailPage() {
         breadcrumbs={
           <Link href="/users" data-testid="user-back" className="text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
             {t("users.detail.back")}
+          </Link>
+        }
+        actions={
+          <Link href={`/users/${userId}/faldone`} data-testid="user-faldone" className="text-sm underline-offset-2 hover:underline">
+            {te("faldone.linkPersona")}
           </Link>
         }
         badges={

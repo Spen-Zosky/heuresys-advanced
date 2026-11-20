@@ -3,13 +3,19 @@ name: Rilascio libero (main fermo durante un rilascio armato)
 # 2026-11-20. Pubblica lo stato di commit «rilascio-libero» sulla testa della PR: failure se sulla VM
 # c'e' un rilascio armato non ancora DEPLOYATO (scripts/blocco-rilascio.sh), success altrimenti.
 # Copre le PR aperte o spinte DOPO l'armo; quelle gia' aperte le ripubblica `riconcilia`, chiamato da
-# rilascia.sh all'armo e da deploy-watch.sh a ogni tick. Con «rilascio-libero» fra i controlli
-# richiesti di main, nessuna PR si unisce mentre il rilascio aspetta di partire.
+# rilascia.sh all'armo e da deploy-watch.sh a ogni tick. «rilascio-libero» e' fra i controlli
+# richiesti di main: nessuna PR si unisce mentre il rilascio aspetta di partire.
 #
+# SICUREZZA. Gira sul runner della VM di produzione, perche' il blocco e' un file della VM, e ha il
+# permesso di scrivere stati. Per questo NON esegue niente della PR:
+#   - `pull_request_target`: il workflow e lo script sono quelli di main, non quelli della PR (con
+#     `pull_request` una PR potrebbe riscrivere entrambi e far girare il suo codice sulla VM);
+#   - il checkout e' la base (main), senza credenziali salvate;
+#   - della PR si usa solo lo sha della testa, come argomento.
 # Il job stesso riesce sempre: lo stato che conta e' quello pubblicato, non l'esito della corsa.
 
 on:
-  pull_request:
+  pull_request_target:
     branches: [main]
     types: [opened, synchronize, reopened]
 
@@ -18,7 +24,7 @@ permissions:
   statuses: write
 
 concurrency:
-  group: rilascio-libero-${{ github.ref }}
+  group: rilascio-libero-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
@@ -26,15 +32,15 @@ jobs:
     # Il job ha un nome diverso dallo stato «rilascio-libero» che pubblica: il controllo richiesto
     # di main e' lo stato, e un job con lo stesso nome (sempre verde) lo confonderebbe.
     name: pubblica-stato-rilascio
-    # D-08: il runner della VM sta sull'host di produzione, una PR da fork non ci gira mai.
-    if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
     # Sulla VM, perche' il blocco e' un file della VM.
     runs-on: [self-hosted, oci-vm]
     timeout-minutes: 3
     steps:
-      - name: Checkout
+      - name: Checkout della base (main), mai della PR
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
           fetch-depth: 1
 
       - name: Stato del blocco di rilascio
@@ -43,4 +49,6 @@ jobs:
           TESTA: ${{ github.event.pull_request.head.sha }}
           BLOCCO_REPO: ${{ github.repository }}
           BLOCCO_FILE: /home/ubuntu/.local/state/heuresys-advanced/rilascio-armato
-        run: bash scripts/blocco-rilascio.sh stato-pr "$TESTA"
+        run: |
+          case "$TESTA" in *[!0-9a-f]*|"") echo "sha della testa non valido"; exit 1 ;; esac
+          bash scripts/blocco-rilascio.sh stato-pr "$TESTA"

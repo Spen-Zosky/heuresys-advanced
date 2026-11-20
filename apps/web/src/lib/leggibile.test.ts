@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { costruisci } from "./leggibile-nucleo";
+import { costruisci, nomeOOmissis } from "./leggibile-nucleo";
 import { formati } from "./format";
 
 const rubrica = {
@@ -64,5 +64,12 @@ describe("riferimenti cliccabili (C12)", () => {
     r.nodo(p.email!.toUpperCase());
     r.nodo("testo qualunque");
     expect(visti).toEqual([`persona:${p.id}:${p.etichetta}`, `persona:${p.id}:${p.etichetta}`]);
+  });
+});
+
+describe("nomeOOmissis (C2): un identificativo fuori dalla rubrica non si mostra", () => {
+  it("dentro il perimetro il nome, fuori «{omissis}»", () => {
+    expect(nomeOOmissis(l, "08dfa814-de0a-4d93-b1c9-87b9badf1fff", "{omissis}")).toBe("Cassiere");
+    expect(nomeOOmissis(l, "d9e12877-0a83-48d1-948b-2dca7fcc5941", "{omissis}")).toBe("{omissis}");
   });
 });

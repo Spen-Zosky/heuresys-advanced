@@ -366,7 +366,7 @@ export async function createDocument(actor: ActorRef, input: DocCreateInput): Pr
          (version_tenant_id, version_document_id, version_number, version_title, version_body, version_body_format, version_author_user_id, version_change_note)
        VALUES ($1, $2, 1, $3, $4, $5, $6, $7)
        RETURNING version_id`,
-      [doc.tenantId, doc.documentId, input.title, input.body ?? null, input.bodyFormat, actor.userId, input.changeNote ?? "Initial version"],
+      [doc.tenantId, doc.documentId, input.title, input.body ?? null, input.bodyFormat, actor.userId, input.changeNote ?? "Versione iniziale"],
     );
     const versionId = verRes.rows[0]!.version_id;
     const updated = await client.query(

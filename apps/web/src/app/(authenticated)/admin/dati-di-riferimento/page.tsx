@@ -43,7 +43,9 @@ export default function DatiDiRiferimentoPage() {
     onMutate: () => setEsito(null),
     onSuccess: (r) => { setEsito(r); void qc.invalidateQueries({ queryKey: ["reference-sync"] }); },
   });
-  const nomeFonte = new Map((fonti.data?.items ?? []).map((f) => [f.key as string, f.label]));
+  // L'API manda l'etichetta tecnica in inglese: il nome per la persona è nel dizionario, per chiave di fonte (l'etichetta resta per le fonti nuove).
+  const etichettaFonte = (chiave: string, tecnica: string): string => t(`datiRiferimento.nomiFonti.${chiave}`, { defaultValue: tecnica });
+  const nomeFonte = new Map((fonti.data?.items ?? []).map((f) => [f.key as string, etichettaFonte(f.key, f.label)]));
   const tono = (s: string) => (s === "COMPLETED" ? "success" : s === "FAILED" ? "danger" : s === "RUNNING" ? "info" : "neutral") as "success" | "danger" | "info" | "neutral";
 
   // Il lavoro sulle fonti ufficiali è del custode dei dati e della piattaforma (reference_sync:read):
@@ -74,13 +76,13 @@ export default function DatiDiRiferimentoPage() {
               <tbody>
                 {fonti.data.items.map((f) => (
                   <tr key={f.key} className="border-t border-border" data-testid="dati-riferimento-fonte" data-source={f.key}>
-                    <td className="py-1">{f.label}</td>
+                    <td className="py-1">{nomeFonte.get(f.key) ?? f.label}</td>
                     <td>{f.watermark?.lastSucceededAt ? fmt.dataOra(f.watermark.lastSucceededAt) : t("datiRiferimento.mai")}</td>
                     <td>{f.lastRun ? <StatusPill tone={tono(f.lastRun.status)}>{enumLabel("referenceSyncRunStatus", f.lastRun.status)}</StatusPill> : "—"}</td>
                     <td className="text-right">
                       {puoLanciare && (
                         <Button type="button" size="sm" data-testid="dati-riferimento-lancia" disabled={lancia.isPending}
-                          onClick={() => { if (window.confirm(t("datiRiferimento.conferma", { fonte: f.label }))) lancia.mutate(f.key); }}>
+                          onClick={() => { if (window.confirm(t("datiRiferimento.conferma", { fonte: nomeFonte.get(f.key) ?? f.label }))) lancia.mutate(f.key); }}>
                           {lancia.isPending && lancia.variables === f.key ? t("datiRiferimento.inCorso") : t("datiRiferimento.aggiorna")}
                         </Button>
                       )}

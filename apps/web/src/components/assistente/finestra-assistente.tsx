@@ -96,8 +96,11 @@ function FinestraAssistente({ pathname, idonea }: { pathname: string; idonea: bo
     INTERROTTA: t("agente.statoINTERROTTA"),
   };
 
-  const titoloPagina = typeof document === "undefined" ? "" : document.title;
-  const contesto = dichiarato ?? t("agente.contestoPagina", { titolo: titoloPagina || pathname, percorso: pathname });
+  // Il nome della pagina in parole (C7, giro qa-web 18/11, come in pannello-agente.tsx): il titolo
+  // della finestra del browser è sempre «Heuresys» e l'indirizzo può portare un UUID. Si legge
+  // l'intestazione principale; senza, «Pagina corrente». L'indirizzo parte comunque al gateway.
+  const titoloPagina = typeof document === "undefined" ? "" : (document.querySelector("main h1")?.textContent ?? "").trim();
+  const contesto = dichiarato ?? (titoloPagina ? t("agente.contestoPagina", { titolo: titoloPagina }) : t("agente.contestoPaginaSenzaNome"));
   const occupato = agent.running || agent.approval !== null;
   const mostraSimbolo = idonea || aperto || occupato;
   const messaggi = messaggiDaRighe(agent.lines);

@@ -30,11 +30,17 @@ async function apriUnaSezione(page: Page): Promise<void> {
 test.describe("faldone — la propria pagina", () => {
   test.use({ storageState: storageStateFor("employee") });
 
-  test("dal Profilo al proprio faldone, con righe vive", async ({ page }) => {
+  test("dall'area personale al proprio faldone, con righe vive", async ({ page }) => {
+    await page.goto("/me");
+    await page.getByTestId("me-faldone").click();
+    await expect(page).toHaveURL(/\/me\/faldone$/);
+    await apriUnaSezione(page);
+  });
+
+  test("anche il Profilo porta al faldone", async ({ page }) => {
     await page.goto("/me/profile");
     await page.getByTestId("me-profile-faldone").click();
     await expect(page).toHaveURL(/\/me\/faldone$/);
-    await apriUnaSezione(page);
   });
 });
 

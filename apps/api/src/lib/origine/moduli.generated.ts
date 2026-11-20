@@ -1346,6 +1346,16 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_users"
     ]
   },
+  "tenant-processes": {
+    "prefissi": [
+      "/v1/tenant-processes"
+    ],
+    "tabelle": [
+      "sys_positions",
+      "sys_tenant_processes",
+      "sys_user_position_assignments"
+    ]
+  },
   "tenants": {
     "prefissi": [
       "/v1/tenants"

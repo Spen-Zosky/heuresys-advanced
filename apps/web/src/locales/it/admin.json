@@ -2258,5 +2258,35 @@
     "voci": "Voci lette",
     "inseriteAggiornate": "Inserite / aggiornate",
     "stato": "Stato"
+  },
+  "agentReq": {
+    "titolo": "Richieste dell'agente",
+    "descrizione": "Le richieste che l'agente propone, con la previsione di spesa e il tetto: ognuna aspetta un sì o un no prima di partire.",
+    "elenco": "Richieste ({{count}})",
+    "elenco_one": "Richieste ({{count}})",
+    "erroreCarica": "Non è stato possibile caricare le richieste.",
+    "nessuna": "Nessuna richiesta.",
+    "filtroStato": "Stato",
+    "tutte": "Tutti gli stati",
+    "stati": {
+      "IN_ATTESA": "In attesa",
+      "ACCETTATA": "Accettata",
+      "RIFIUTATA": "Rifiutata"
+    },
+    "chi": "Chiesta da {{persona}} · {{perimetro}} · {{data}}",
+    "personaAssente": "persona non più presente",
+    "spesa": "Previsione {{previsione}} · tetto {{tetto}}",
+    "motivo": "Motivo del rifiuto: {{motivo}}",
+    "accetta": "Accetta",
+    "rifiuta": "Rifiuta",
+    "motivoLabel": "Motivo del rifiuto",
+    "confermaRifiuto": "Conferma il rifiuto",
+    "vietato": "Non hai il permesso di decidere questa richiesta.",
+    "giaDecisa": "La richiesta è già stata decisa.",
+    "rifiutata": "Richiesta non accettata dal servizio",
+    "errore": "Operazione non riuscita.",
+    "registroTitolo": "Costo e durata delle chiamate dell'agente",
+    "registroTotali": "{{chiamate}} chiamate · costo {{costo}} · durata {{durata}}",
+    "erroreRegistro": "Non è stato possibile caricare il registro delle chiamate."
   }
 }

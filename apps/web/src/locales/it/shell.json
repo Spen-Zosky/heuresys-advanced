@@ -188,7 +188,8 @@
     },
     "permessi": {
       "roles": "Ruoli e permessi",
-      "agent": "Capacità dell'agente"
+      "agent": "Capacità dell'agente",
+      "requests": "Richieste dell'agente"
     }
   },
   "session": {

@@ -70,6 +70,8 @@
       "learning": "Learning",
       "learning_training-initiatives": "Training initiatives",
       "admin_roles": "Roles",
+      "admin_agent-capabilities": "Agent capabilities",
+      "admin_agent-requests": "Agent requests",
       "admin_mfa-policy": "MFA policy",
       "provenance": "Provenance ledger",
       "generated-origins": "Generated rows ledger",

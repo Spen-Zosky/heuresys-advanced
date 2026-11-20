@@ -1177,6 +1177,8 @@
     "riga": "Row detail"
   },
   "organigramma": {
+    "senzaCliente": "No client in your scope",
+    "senzaClienteMotivo": "Your mandate has no clients assigned yet: the org chart only shows the clients assigned to you.",
     "aggiorna": "Refresh",
     "aggiornando": "Refreshing…",
     "calcolato": "Computed from live data on {{quando}}",

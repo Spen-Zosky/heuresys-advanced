@@ -21,6 +21,15 @@ export interface Leggi {
   persona: (idOEmail: string | null | undefined) => string | null;
 }
 
+/**
+ * Il nome di un riferimento (persona, posizione, unità) da un identificativo. Se la rubrica del perimetro non lo conosce
+ * l'identificativo non si mostra mai: è fuori dal perimetro di chi guarda, e si scrive «{omissis}» (classe C2, giro del 20/11).
+ */
+export function nomeOOmissis(l: Leggi, id: string, omissis: string): string {
+  const nome = l.persona(id) ?? l.testo(id);
+  return UUID.test(nome.trim()) ? omissis : nome;
+}
+
 export type TipoRiferimento = "persona" | "posizione" | "unita";
 /** Rende un nome che apre la sua scheda (classe C12); senza, il nome resta testo. */
 export type Riferisci = (tipo: TipoRiferimento, id: string, etichetta: string) => ReactNode;

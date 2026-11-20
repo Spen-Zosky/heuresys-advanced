@@ -650,14 +650,15 @@
         "jobRole": "Ruolo professionale",
         "owner": "Proprietario della posizione",
         "reportsTo": "Riferisce a",
-        "listTruncated": "Il menù mostra {{shown}} posizioni su {{total}}.",
         "criticality": "Criticità",
         "economicWeight": "Peso economico",
         "effectiveFrom": "In vigore dal",
         "effectiveTo": "In vigore al"
       },
+      "omissis": "{omissis}",
       "dash": "—",
       "edit": {
+        "listTruncated": "Il menù mostra {{shown}} posizioni su {{total}}.",
         "cardTitle": "Posizione — modifica",
         "readOnly": "Non hai i permessi per modificare questa posizione.",
         "title": "Titolo",
@@ -843,6 +844,7 @@
     },
     "resources": {
       "agent_capability": "Capacità degli agenti",
+      "agent_request": "Richieste dell'agente",
       "agent_conversation": "Conversazioni con l'assistente",
       "analytics": "Analisi",
       "approval": "Approvazioni",
@@ -2112,6 +2114,7 @@
     }
   },
   "agentCaps": {
+    "negato": "Il registro delle capacità degli agenti lo vedono la direzione HR, l'amministrazione del cliente e della piattaforma: il tuo profilo non ha questo mandato.",
     "titolo": "Capacità dell'agente",
     "descrizione": "Che cosa l'agente può fare, su quali dati, con quale limite e come si annulla; e se agisce chiedendo conferma o in libertà.",
     "elenco": "Capacità ({{count}})",
@@ -2237,6 +2240,11 @@
     "negato": "I cataloghi delle professioni e delle imprese li cura l'amministrazione della piattaforma: il tuo profilo non ha questo mandato."
   },
   "datiRiferimento": {
+    "nomiFonti": {
+      "ESCO": "ESCO — tassonomia europea di professioni e competenze",
+      "ATECO_2025": "ATECO 2025 — classificazione ISTAT delle attività economiche",
+      "ESCO_SKILL_HIERARCHY": "Gerarchia delle competenze ESCO — gruppo e voce più ampia di ogni competenza"
+    },
     "titolo": "Fonti ufficiali dei dati di riferimento",
     "descrizione": "Le tassonomie ufficiali (ESCO, ATECO 2025, gerarchia delle competenze ESCO) si aggiornano dalle loro fonti pubblicate. Un aggiornamento inserisce e aggiorna, non cancella mai; se la fonte non è cambiata si ferma subito.",
     "fonti": "Fonti",

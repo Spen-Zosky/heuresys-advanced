@@ -64,6 +64,8 @@ export type Project = z.infer<typeof ProjectSchema>;
 /** ⚠ Anagrafica MINIMA, ed e' una scelta di I18, non una semplificazione: chi guida un
  *  progetto vede CHI ci lavora e con quale ruolo, mai i dati sensibili di quella persona. */
 export const ProjectMemberSchema = z.object({
+  /** l'appartenenza: chi porta una fase del piano si indica con questa (000503) */
+  memberId: z.uuid(),
   userId: z.uuid(),
   role: ProjectMemberRoleSchema,
   email: z.string().nullable(),

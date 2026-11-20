@@ -241,7 +241,10 @@ export const RESOURCE_SENZA_DATI_DI_PERSONA: Readonly<Record<string, string>> = 
     "`sys_organization_units` — che è PERSONAL perché porta il capo dell'unità " +
     "(`organization_unit_manager_user_id`) — ma non lo ESPONE: lo schema di risposta " +
     "(`OrgUnitProcessForOuSchema`) porta identificatori e nome/codice/ordinale del " +
-    "processo, e nessun campo di persona. Leggere una tabella non è mostrarla",
+    "processo, e nessun campo di persona. Leggere una tabella non è mostrarla. " +
+    "`/v1/processes` (V5, 2026-11-20) usa lo stesso permesso e della persona mostra solo il " +
+    "nome («Cognome, Nome») del titolare della posizione responsabile e dei partecipanti, come " +
+    "l'organigramma: nessun contatto, retribuzione, valutazione o altro dato di persona",
 };
 
 /**

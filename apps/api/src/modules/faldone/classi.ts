@@ -198,6 +198,7 @@ const TABELLE: Record<string, Riga> = {
   "sys.sys_approval_steps": ["ACTIVITY", "Lavoro e collaborazione", "Passi di approvazione"],
   "sys.sys_process_participants": ["ACTIVITY", "Lavoro e collaborazione", "Partecipazione ai processi"],
   "sys.sys_project_members": ["ACTIVITY", "Lavoro e collaborazione", "Partecipazione ai progetti"],
+  "sys.sys_project_phases": ["ACTIVITY", "Lavoro e collaborazione", "Fasi dei progetti che porta"],
   "sys.sys_inbox_notifications": ["ACTIVITY", "Lavoro e collaborazione", "Notifiche"],
   "sys.sys_notification_preferences": ["PERSONAL", "Lavoro e collaborazione", "Preferenze di notifica"],
   "sys.sys_content_documents": ["ACTIVITY", "Lavoro e collaborazione", "Documenti editoriali"],

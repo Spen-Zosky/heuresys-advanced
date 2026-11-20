@@ -34,6 +34,13 @@ function montaServer() {
 }
 
 describe("ricerca del catalogo in italiano", () => {
+  it("processo, sottoprocesso, progetto e Gantt portano alle schede di processi e progetti (V8)", () => {
+    const ids = ["processes", "blueprint-processes", "projects", "positions"];
+    expect(concettiPer("descrivimi il processo del credito", ids)).toEqual(["processes", "blueprint-processes"]);
+    expect(concettiPer("quali sottoprocessi ha", ids)).toEqual(["processes", "blueprint-processes"]);
+    expect(concettiPer("mostrami il Gantt del progetto", ids)).toEqual(["projects"]);
+  });
+
   it("retribuzione, malattia e persone portano ai concetti veri", () => {
     const ids = ["compensation", "time-off", "users", "positions"];
     expect(concettiPer("retribuzione annua", ids)).toEqual(["compensation"]);

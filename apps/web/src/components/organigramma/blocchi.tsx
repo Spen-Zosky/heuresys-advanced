@@ -33,7 +33,7 @@ const C = {
 };
 
 /** Sostituisce i `var(--x)` con i colori calcolati, così il file esportato si apre ovunque. */
-function svgEsportabile(svg: SVGSVGElement): string {
+export function svgEsportabile(svg: SVGSVGElement): string {
   const copia = svg.cloneNode(true) as SVGSVGElement;
   const radice = getComputedStyle(document.documentElement);
   copia.querySelectorAll<SVGElement>("[style]").forEach((el) => {

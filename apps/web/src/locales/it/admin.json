@@ -1118,7 +1118,7 @@
         },
         "process": {
           "processi-attivi": "Processi attivi",
-          "attivita-recenti": "Attività recenti",
+          "attivita-recenti": "Attività dei processi",
           "approvazioni-in-coda": "Approvazioni in coda"
         },
         "self": {
@@ -1143,12 +1143,12 @@
         "process": {
           "processi-attivi": {
             "label": "Processo",
-            "detail": "Tipo",
-            "value": "Unità"
+            "detail": "Sottoprocessi e unità",
+            "value": "Attività"
           },
           "attivita-recenti": {
             "label": "Attività",
-            "detail": "Data"
+            "detail": "Processo ed esecutore"
           }
         },
         "org": {

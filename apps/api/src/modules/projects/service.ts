@@ -32,8 +32,16 @@ import type {
   ProjectProgressBody,
   ProjectUpdateBody,
 } from "@heuresys/shared";
+import type {
+  ProjectDependencyCreateBody,
+  ProjectPhaseCreateBody,
+  ProjectPhaseUpdateBody,
+  ProjectScheda,
+} from "@heuresys/shared";
 import { resolveActivityScope } from "../../lib/scope/resolver.js";
 import * as repo from "./repository.js";
+import * as piano from "./piano.js";
+import * as processi from "../processes/repository.js";
 
 /** Vista piena sui progetti del tenant, dall'asse FUNZIONALE.
  *  `all` = piattaforma, `tenant` = mandato HR. Un ruolo manageriale che non guida nulla
@@ -150,5 +158,94 @@ export const projectsService = {
     const chiusa = await repo.closeMember(pool, id, userId, a.userId);
     if (!chiusa) throw new NotFoundError("Project member");
     return this.getById(a, id);
+  },
+
+  /** La scheda del progetto (V7): il progetto con i membri, il processo che serve, il piano e se
+   *  chi guarda può pianificarlo. Stesso confine di `getById`: fuori scope è 404. */
+  async scheda(a: ActorContext, id: string): Promise<ProjectScheda> {
+    const p = await progettoVisibile(a, id);
+    const [members, phases, dependencies, processId, canManage] = await Promise.all([
+      repo.loadProjectMembers(pool, id),
+      piano.loadPhases(pool, id),
+      piano.loadDependencies(pool, id),
+      piano.projectProcessId(pool, id),
+      puoGestire(a, id).then(() => true, () => false),
+    ]);
+    const process = processId ? await processi.findProcess(pool, p.tenantId, processId) : null;
+    return { project: { ...p, members }, process, phases, dependencies, canManage };
+  },
+
+  async addPhase(a: ActorContext, id: string, body: ProjectPhaseCreateBody): Promise<ProjectScheda> {
+    const p = await progettoVisibile(a, id);
+    await puoGestire(a, id);
+    await this.controllaFase(p.tenantId, id, body, null);
+    await piano.insertPhase(pool, id, p.tenantId, body);
+    return this.scheda(a, id);
+  },
+
+  async updatePhase(a: ActorContext, id: string, phaseId: string, body: ProjectPhaseUpdateBody): Promise<ProjectScheda> {
+    const p = await progettoVisibile(a, id);
+    await puoGestire(a, id);
+    const prima = await piano.findPhase(pool, id, phaseId);
+    if (!prima) throw new NotFoundError("Project phase");
+    await this.controllaFase(p.tenantId, id, { ...prima, ...body }, phaseId);
+    await piano.updatePhase(pool, id, phaseId, body);
+    return this.scheda(a, id);
+  },
+
+  async removePhase(a: ActorContext, id: string, phaseId: string): Promise<ProjectScheda> {
+    await progettoVisibile(a, id);
+    await puoGestire(a, id);
+    if (!(await piano.deletePhase(pool, id, phaseId))) throw new NotFoundError("Project phase");
+    return this.scheda(a, id);
+  },
+
+  async addDependency(a: ActorContext, id: string, body: ProjectDependencyCreateBody): Promise<ProjectScheda> {
+    const p = await progettoVisibile(a, id);
+    await puoGestire(a, id);
+    if (body.predecessorId === body.successorId) throw new ValidationError("Una fase non dipende da sé stessa");
+    const [pre, suc] = await Promise.all([piano.findPhase(pool, id, body.predecessorId), piano.findPhase(pool, id, body.successorId)]);
+    if (!pre || !suc) throw new NotFoundError("Project phase");
+    if (await piano.dipendenzaCircolare(pool, body.predecessorId, body.successorId)) {
+      throw new ConflictError("La dipendenza chiuderebbe un giro", "PROJECT_DEPENDENCY_CYCLE");
+    }
+    try {
+      await piano.insertDependency(pool, id, p.tenantId, body);
+    } catch (e) {
+      if (typeof e === "object" && e !== null && (e as { code?: string }).code === "23505") {
+        throw new ConflictError("La dipendenza esiste già", "PROJECT_DEPENDENCY_EXISTS");
+      }
+      throw e;
+    }
+    return this.scheda(a, id);
+  },
+
+  async removeDependency(a: ActorContext, id: string, dependencyId: string): Promise<ProjectScheda> {
+    await progettoVisibile(a, id);
+    await puoGestire(a, id);
+    if (!(await piano.deleteDependency(pool, id, dependencyId))) throw new NotFoundError("Project dependency");
+    return this.scheda(a, id);
+  },
+
+  /** Date coerenti, tappa su un giorno solo, riferimenti nello stesso progetto, niente cicli. */
+  async controllaFase(
+    tenantId: string, id: string,
+    f: { kind?: string | undefined; plannedStart?: string | null | undefined; plannedEnd?: string | null | undefined;
+         actualStart?: string | null | undefined; actualEnd?: string | null | undefined;
+         parentId?: string | null | undefined; ownerMemberId?: string | null | undefined; processStepId?: string | null | undefined },
+    phaseId: string | null,
+  ): Promise<void> {
+    if (f.plannedStart && f.plannedEnd && f.plannedEnd < f.plannedStart) throw new ValidationError("La fine pianificata precede l'inizio");
+    if (f.actualStart && f.actualEnd && f.actualEnd < f.actualStart) throw new ValidationError("La fine effettiva precede l'inizio");
+    if (f.kind === "MILESTONE" && f.plannedStart && f.plannedEnd && f.plannedStart !== f.plannedEnd) {
+      throw new ValidationError("Una tappa ha una data sola");
+    }
+    const errato = await piano.riferimentiValidi(pool, id, tenantId, {
+      parentId: f.parentId ?? null, ownerMemberId: f.ownerMemberId ?? null, processStepId: f.processStepId ?? null,
+    });
+    if (errato) throw new ValidationError(`Riferimento fuori dal progetto: ${errato}`);
+    if (phaseId && f.parentId && (f.parentId === phaseId || (await piano.creaCiclo(pool, phaseId, f.parentId)))) {
+      throw new ConflictError("Una fase non può stare dentro sé stessa", "PROJECT_PHASE_CYCLE");
+    }
   },
 };

@@ -873,6 +873,35 @@
       "COMPLETED": "Completed",
       "FAILED": "Failed",
       "CANCELLED": "Cancelled"
+    },
+    "processUnitRole": {
+      "OWNER": "Owner",
+      "CONTRIBUTOR": "Contributes",
+      "CONSULTED": "Consulted",
+      "INFORMED": "Informed"
+    },
+    "processExecutorKind": {
+      "POSIZIONE": "Position",
+      "RUOLO": "Role",
+      "AGENTE": "Agent"
+    },
+    "processWorkNature": {
+      "PERSONA": "Human work",
+      "ASSISTITO_AI": "AI-assisted",
+      "AUTOMATIZZABILE": "Automatable",
+      "AGENTE_SUPERVISIONATO": "Supervised agent"
+    },
+    "processDeliveryModel": {
+      "INTERNO": "In-house",
+      "SERVIZIO_CONDIVISO": "Shared service",
+      "ESTERNO": "External"
+    },
+    "projectStatus": {
+      "PLANNED": "Planned",
+      "ACTIVE": "In progress",
+      "ON_HOLD": "On hold",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
     }
   },
   "masked": "withheld for your profile",
@@ -1739,6 +1768,26 @@
       "feedback": {
         "termine": "feedback",
         "testo": "The response a person gives or receives on a piece of work, an interview or a period."
+      },
+      "processo": {
+        "termine": "process|processes|active processes",
+        "testo": "An ordered set of activities that produces a result for the organization. The tenant processes are the first-level processes; each one can contain subprocesses."
+      },
+      "sottoprocesso": {
+        "termine": "subprocess|subprocesses",
+        "testo": "A part of a process, with its own name, that groups some of its activities. It is not counted among the processes: it sits inside the process it belongs to."
+      },
+      "attivitaDiProcesso": {
+        "termine": "process activity|process activities",
+        "testo": "A step of a process, in the order it happens, with who performs it (unit, position, role or agent), what it receives and what it produces."
+      },
+      "processoDelModello": {
+        "termine": "model process|model processes",
+        "testo": "A process of the catalogue the tenant started from. The tenant adopts, merges or renames it into its own processes, so the two numbers can differ."
+      },
+      "partecipazioneUnita": {
+        "termine": "unit participation|unit role",
+        "testo": "How a unit takes part in the process: R performs, A is accountable for the result, C is consulted, I is informed."
       }
     }
   },

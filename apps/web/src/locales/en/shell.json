@@ -110,7 +110,8 @@
       "me_positions": "My positions",
       "me_performance": "My reviews",
       "me_kpis": "My KPIs",
-      "me_analytics": "My analytics"
+      "me_analytics": "My analytics",
+      "tenant-processes": "Processes"
     },
     "rami": {
       "dash_aree": "By area",

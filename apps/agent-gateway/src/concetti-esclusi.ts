@@ -77,8 +77,15 @@ export const SINONIMI: ReadonlyArray<readonly [string, readonly string[]]> = [
   ["valutazion", ["performance-reviews", "assessments", "review-cycles"]],
   ["obiettiv", ["goals", "okrs"]],
   ["formazion", ["learning-paths", "learning-modules", "training-initiatives"]],
-  ["processi", ["organization-unit-processes", "blueprint-processes"]],
+  // V8 del piano processi e progetti (2026-11-20): «processo» al singolare non conteneva la radice
+  // «processi», e i processi dell'azienda (`processes`, scheda con sottoprocessi, attività, unità e
+  // KPI) non erano fra i concetti; il piano del progetto (fasi, tappe, Gantt) sta in `projects`.
+  ["process", ["processes", "organization-unit-processes", "blueprint-processes"]],
+  ["sottoprocess", ["processes"]],
   ["progett", ["projects", "teams"]],
+  ["gantt", ["projects"]],
+  ["milestone", ["projects"]],
+  ["cronoprogramm", ["projects"]],
   ["sondagg", ["surveys", "engagement"]],
   ["successi", ["successor-candidates", "succession-pools", "position-succession-relevance"]],
   ["carrier", ["career-paths", "user-career-plans"]],

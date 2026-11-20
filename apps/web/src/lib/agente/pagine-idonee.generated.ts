@@ -101,6 +101,8 @@ export const PAGINE_IDONEE_AGENTE: readonly string[] = [
   "/tenant-blueprints/[id]",
   "/tenant-blueprints/[id]/versions/[n]/build",
   "/tenant-blueprints/[id]/versions/[n]/diff",
+  "/tenant-processes",
+  "/tenant-processes/[id]",
   "/tenants",
   "/tenants/[tenantId]",
   "/tenants/[tenantId]/enterprise-typing",

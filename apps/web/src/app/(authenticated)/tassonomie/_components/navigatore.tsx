@@ -54,6 +54,7 @@ function daProfessione(c: OccupationClassification): Codice {
 function useCatalogo(tipo: TipoCodice, scheme: string) {
   return useQuery({
     queryKey: ["tassonomie", tipo, scheme],
+    enabled: scheme !== "",
     staleTime: 5 * 60_000,
     queryFn: async (): Promise<Codice[]> => {
       const out: Codice[] = [];
@@ -243,7 +244,11 @@ function SchedaCompetenza({ competenza, apri }: { competenza: Extract<Passo, { t
   return (
     <div className="space-y-4">
       {competenza.description ? <p className="text-sm">{competenza.description}</p> : null}
-      {competenza.escoUri ? <p className="break-all text-xs text-muted-foreground">{competenza.escoUri}</p> : null}
+      {competenza.escoUri ? (
+        <a href={competenza.escoUri} target="_blank" rel="noopener noreferrer" className="text-xs underline underline-offset-2">
+          {t("tassonomie.apriEsco")}
+        </a>
+      ) : null}
       {legami.isError ? (
         <StatoErrore errore={legami.error} titolo={t("tassonomie.errore")} onRiprova={() => legami.refetch()} />
       ) : (
@@ -264,7 +269,21 @@ function SchedaCompetenza({ competenza, apri }: { competenza: Extract<Passo, { t
 export function NavigatoreCodici({ tipo }: { tipo: TipoCodice }) {
   const { t } = useTranslation("hr");
   const fmt = useFormat();
-  const [scheme, setScheme] = useState<string>(SCHEMI[tipo][0] ?? "");
+  const [sceltaScheme, setScheme] = useState<string | null>(null);
+  const popolati = useQuery({
+    queryKey: ["tassonomie", "schemi-popolati", tipo],
+    staleTime: 5 * 60_000,
+    queryFn: async (): Promise<string[]> => {
+      const totali = await Promise.all(
+        SCHEMI[tipo].map((sc) =>
+          apiFetch<{ total: number }>(`/v1/${RISORSA[tipo]}?${new URLSearchParams({ scheme: sc, limit: "1" }).toString()}`).then((r) => r.total),
+        ),
+      );
+      return SCHEMI[tipo].filter((_, i) => (totali[i] ?? 0) > 0);
+    },
+  });
+  const schemiVisibili = popolati.data ?? [];
+  const scheme = sceltaScheme && schemiVisibili.includes(sceltaScheme) ? sceltaScheme : schemiVisibili[0] ?? "";
   const [livello, setLivello] = useState<string | null>(null); // codice del nodo di cui si vedono i figli
   const [cerca, setCerca] = useState("");
   const [pila, setPila] = useState<Passo[]>([]);
@@ -300,7 +319,7 @@ export function NavigatoreCodici({ tipo }: { tipo: TipoCodice }) {
     <div className="space-y-3" data-testid={`tassonomie-${tipo}`}>
       <div className="flex flex-wrap items-center gap-2">
         <div role="tablist" className="flex gap-1">
-          {SCHEMI[tipo].map((s) => (
+          {schemiVisibili.map((s) => (
             <Button key={s} role="tab" aria-selected={s === scheme} size="sm" variant={s === scheme ? "default" : "outline"}
               onClick={() => { setScheme(s); setLivello(null); setCerca(""); }}>
               {t(`tassonomie.schemi.${s}`, { defaultValue: s })}
@@ -313,9 +332,11 @@ export function NavigatoreCodici({ tipo }: { tipo: TipoCodice }) {
         </div>
       </div>
 
-      {cat.isError ? (
+      {popolati.isError ? (
+        <StatoErrore errore={popolati.error} titolo={t("tassonomie.errore")} onRiprova={() => popolati.refetch()} />
+      ) : cat.isError ? (
         <StatoErrore errore={cat.error} titolo={t("tassonomie.errore")} onRiprova={() => cat.refetch()} />
-      ) : cat.isLoading ? (
+      ) : popolati.isLoading || cat.isLoading ? (
         <p className="text-sm text-muted-foreground" role="status">{t("tassonomie.caricamento")}</p>
       ) : tutti.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t("tassonomie.catalogoVuoto")}</p>

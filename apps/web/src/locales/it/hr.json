@@ -1767,6 +1767,7 @@
       "PART_OF": "Fa parte di",
       "RELATED": "Collegata",
       "PREREQUISITE_OF": "Prerequisito di"
-    }
+    },
+    "apriEsco": "Apri la voce nel catalogo ESCO"
   }
 }

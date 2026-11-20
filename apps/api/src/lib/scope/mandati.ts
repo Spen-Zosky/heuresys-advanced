@@ -103,6 +103,14 @@ export function haMandatoGdpr(actor: ActorContext): boolean {
   return actor.roles.some((r) => GDPR_MANDATE_ROLES.has(r));
 }
 
+/** Chi disegna i processi del tenant (ADR-0060, voce P3): cambia il responsabile di ogni processo,
+ *  non solo di quelli di cui regge la posizione. Si somma al mandato HR, che lo fa già. */
+export const PROCESS_DESIGN_ROLES: ReadonlySet<RoleCode> = new Set<RoleCode>(["BLUEPRINT_MANAGER"]);
+
+export function haMandatoDisegnoProcessi(actor: ActorContext): boolean {
+  return haMandatoHr(actor) || actor.roles.some((r) => PROCESS_DESIGN_ROLES.has(r));
+}
+
 /**
  * Il ruolo di ogni utente (regola di Enzo del 2026-10-31, invariante I17): «il ruolo user è
  * comune a ogni user e con /me ogni user accede a tutti i suoi dati». La risoluzione dei

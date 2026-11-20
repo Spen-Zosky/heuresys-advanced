@@ -18,7 +18,7 @@
  */
 import { pool, withTransaction } from "../../db/client.js";
 import type { ActorContext } from "../../lib/actor.js";
-import { haMandatoHr } from "../../lib/scope/mandati.js";
+import { haMandatoDisegnoProcessi } from "../../lib/scope/mandati.js";
 import { ForbiddenError, NotFoundError, ValidationError } from "../../errors/index.js";
 import type {
   TenantProcess, UpdateTenantProcessOwnerBody, UpdateTenantProcessOwnerResponse,
@@ -26,7 +26,7 @@ import type {
 import * as repo from "./repository.js";
 
 function cambiaTuttoIlTenant(actor: ActorContext): boolean {
-  return haMandatoHr(actor) || actor.roles.includes("BLUEPRINT_MANAGER");
+  return haMandatoDisegnoProcessi(actor);
 }
 
 export const tenantProcessesService = {

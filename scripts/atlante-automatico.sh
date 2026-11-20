@@ -59,6 +59,7 @@ if [ "$(cat "$ULTIMO" 2>/dev/null || true)" = "$TESTA" ]; then
   exit 0
 fi
 segna_guardato() { printf '%s\n' "$TESTA" > "$ULTIMO"; }
+SPINTA="$STATO_DIR/atlante-pr-spinta"
 
 # 0b. rilascio armato: main deve restare sul commit armato fino a DEPLOYATO (scripts/blocco-rilascio.sh).
 #     Si esce senza segnare il giro, cosi' il primo giro dopo il rilascio guarda di nuovo.
@@ -74,8 +75,17 @@ aperte="$(cd "$ROOT" && gh pr list --state open \
 if [ "$aperte" != "0" ]; then
   # Una PR rimasta aperta (per esempio perche' nel frattempo era stato armato un rilascio) si unisce
   # qui se la sua CI e' gia' tutta verde e non c'e' un rilascio armato; altrimenti si aspetta.
-  vecchia="$(cd "$ROOT" && gh pr list --state open --json number,headRefName,headRefOid \
-    -q '[.[] | select(.headRefName | startswith("atlante/"))][0] | "\(.number) \(.headRefOid)"')"
+  # Si unisce solo la PR che questo script ha spinto: la testa deve essere il commit segnato in
+  # $SPINTA al momento del push, e i file solo quelli generati. Un ramo atlante/* spinto da altri,
+  # o ritoccato dopo, resta da rivedere a mano.
+  vecchia="$(cd "$ROOT" && gh pr list --state open --json number,headRefName,headRefOid,isCrossRepository \
+    -q '[.[] | select(.headRefName | startswith("atlante/")) | select(.isCrossRepository | not)][0] | "\(.number) \(.headRefOid)"')"
+  fuori="$(cd "$ROOT" && gh pr view "${vecchia% *}" --json files -q '.files[].path' 2>/dev/null \
+    | grep -vE '^(docs/kb/atlas/|apps/api/src/lib/origine/moduli\.generated\.ts$)' || true)"
+  if [ "${vecchia#* }" != "$(cat "$SPINTA" 2>/dev/null || true)" ] || [ -n "$fuori" ]; then
+    log "PR #${vecchia% *} da un ramo atlante/* non spinta da questo script, o con file non generati: la lascio a mano"
+    exit 0
+  fi
   if (cd "$ROOT" && gh pr checks "${vecchia% *}" >/dev/null 2>&1) \
      && (cd "$ROOT" && gh pr merge "${vecchia% *}" --squash --delete-branch --match-head-commit "${vecchia#* }" >/dev/null 2>&1); then
     log "PR #${vecchia% *} rimasta aperta: CI verde, unita"
@@ -182,6 +192,7 @@ git add $GENERATI
 git commit -q -F "$msg" -- $GENERATI
 rm -f "$msg"
 git push -q -u origin "$ramo"
+git rev-parse HEAD > "$SPINTA"
 gh pr create --base main --head "$ramo" --title "docs(kb): rigenera l'atlante ($OGGI)" \
   --body "Rigenerazione automatica dell'atlante (scripts/atlante-automatico.sh, timer heuresys-advanced-atlante sulla VM). atlante_fresco.py: fresco; tabelle DB $prima -> $dopo. Lo script la unisce da solo quando tutta la sua CI e' verde."
 log "PR aperta dal ramo $ramo"

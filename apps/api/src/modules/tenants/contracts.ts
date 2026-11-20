@@ -64,17 +64,37 @@ export async function contrattiDelTenant(q: DbConnector, tenantId: string): Prom
     if (versioni.length > 0) await leggi(versioni);
     if (ccnl.length === 0) {
       // La versione attiva non porta contratti: si mostra la versione più recente, fra quelle delle stesse varianti attive del tenant,
-      // che li porta (per esempio quella in consolidamento), dichiarando la provenienza.
+      // che li porta (per esempio quella della corsa in consolidamento), dichiarando la provenienza.
+      // Ordine di preferenza: 1) le versioni delle corse e dei consolidamenti del tenant (il modello che il tenant sta
+      // confrontando), 2) le versioni delle varianti attive, 3) le varianti della stessa famiglia di quelle attive.
       const alt = await q.query<{ id: string; numero: number; stato: string }>(
-        `SELECT vv.blueprint_variant_version_id AS id, vv.blueprint_variant_version_number AS numero,
+        `WITH cand AS (
+           SELECT r.blueprint_run_variant_version_id AS vid, 1 AS tier FROM sys.sys_blueprint_runs r
+            WHERE r.blueprint_run_tenant_id = $1 AND r.blueprint_run_variant_version_id IS NOT NULL
+           UNION ALL
+           SELECT c.tenant_consolidation_variant_version_id, 1 FROM sys.sys_tenant_consolidations c
+            WHERE c.tenant_consolidation_tenant_id = $1
+           UNION ALL
+           SELECT vv.blueprint_variant_version_id, 2 FROM sys.sys_blueprint_variant_versions vv
+            WHERE vv.blueprint_variant_version_variant_id IN (
+                    SELECT a.blueprint_activation_variant_id FROM sys.sys_blueprint_activations a
+                     WHERE a.blueprint_activation_tenant_id = $1 AND a.blueprint_activation_status = 'ACTIVE')
+           UNION ALL
+           SELECT vv.blueprint_variant_version_id, 3 FROM sys.sys_blueprint_variant_versions vv
+             JOIN sys.sys_blueprint_variants bv ON bv.blueprint_variant_id = vv.blueprint_variant_version_variant_id
+            WHERE bv.blueprint_variant_family_id IN (
+                    SELECT v2.blueprint_variant_family_id FROM sys.sys_blueprint_variants v2
+                      JOIN sys.sys_blueprint_activations a ON a.blueprint_activation_variant_id = v2.blueprint_variant_id
+                     WHERE a.blueprint_activation_tenant_id = $1 AND a.blueprint_activation_status = 'ACTIVE')
+         )
+         SELECT vv.blueprint_variant_version_id AS id, vv.blueprint_variant_version_number AS numero,
                 vv.blueprint_variant_version_status AS stato
-           FROM sys.sys_blueprint_variant_versions vv
-          WHERE vv.blueprint_variant_version_variant_id IN (
-                  SELECT a.blueprint_activation_variant_id FROM sys.sys_blueprint_activations a
-                   WHERE a.blueprint_activation_tenant_id = $1 AND a.blueprint_activation_status = 'ACTIVE')
-            AND vv.blueprint_variant_version_id <> ALL($2::uuid[])
+           FROM cand
+           JOIN sys.sys_blueprint_variant_versions vv ON vv.blueprint_variant_version_id = cand.vid
+          WHERE vv.blueprint_variant_version_id <> ALL($2::uuid[])
+            AND vv.blueprint_variant_version_status <> 'RETIRED'
             AND EXISTS (SELECT 1 FROM sys.sys_blueprint_content_ccnl c WHERE c.blueprint_content_ccnl_version_id = vv.blueprint_variant_version_id)
-          ORDER BY vv.blueprint_variant_version_number DESC
+          ORDER BY cand.tier, vv.blueprint_variant_version_number DESC
           LIMIT 1`,
         [tenantId, versioni],
       );

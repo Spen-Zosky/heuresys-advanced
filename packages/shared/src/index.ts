@@ -78,6 +78,7 @@ export * from "./schemas/enterprise-typing-profiles.js";
 export * from "./schemas/blueprint-families.js";
 export * from "./schemas/blueprint-variants.js";
 export * from "./schemas/blueprint-processes.js";
+export * from "./schemas/tenant-processes.js";
 export * from "./schemas/blueprint-activations.js";
 export * from "./schemas/blueprint-overrides.js";
 export * from "./schemas/tenant-blueprints.js";

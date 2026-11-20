@@ -417,6 +417,11 @@
       "heuresys-source": "./src/schemas/blueprint-processes.ts",
       "default": "./dist/schemas/blueprint-processes.js"
     },
+    "./schemas/tenant-processes": {
+      "types": "./dist/schemas/tenant-processes.d.ts",
+      "heuresys-source": "./src/schemas/tenant-processes.ts",
+      "default": "./dist/schemas/tenant-processes.js"
+    },
     "./schemas/blueprint-activations": {
       "types": "./dist/schemas/blueprint-activations.d.ts",
       "heuresys-source": "./src/schemas/blueprint-activations.ts",

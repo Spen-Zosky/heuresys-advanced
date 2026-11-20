@@ -156,6 +156,7 @@ import { contentRoutes } from "./modules/content/routes.js";
 import { contentMediaRoutes } from "./modules/content/media-routes.js";
 import { contentBlueprintLinksRoutes } from "./modules/content-blueprint-links/routes.js";
 import { organizationUnitProcessesRoutes } from "./modules/organization-unit-processes/routes.js";
+import { processesRoutes } from "./modules/processes/routes.js";
 import { approvalsRoutes } from "./modules/approvals/routes.js";
 import { leadsRoutes } from "./modules/leads/routes.js";
 import { whistleblowingRoutes } from "./modules/whistleblowing/routes.js";
@@ -620,6 +621,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(contentMediaRoutes, { prefix: "/v1/content" });
   await app.register(contentBlueprintLinksRoutes, { prefix: "/v1/content-blueprint-links" });
   await app.register(organizationUnitProcessesRoutes, { prefix: "/v1/organization-unit-processes" });
+  await app.register(processesRoutes, { prefix: "/v1/processes" });
   await app.register(approvalsRoutes, { prefix: "/v1/approvals" });
   await app.register(leadsRoutes, { prefix: "/v1/leads" });
   await app.register(whistleblowingRoutes, { prefix: "/v1/whistleblowing" });

@@ -283,57 +283,72 @@ const companyAndamentoValutazioni: Fornitore = async (q, p) => {
  * PROCESSI (process) — 3 viste
  * ------------------------------------------------------------------ */
 
+/**
+ * V3 del piano processi e progetti (2026-11-20). «Processi attivi» sono i processi del tenant al
+ * primo livello (sys_tenant_processes, 000498): per RTL i 21 processi unici. Prima la vista contava i
+ * processi del modello, che sono un altro oggetto (il catalogo da cui il tenant parte, 23 per RTL), e
+ * nessuna pagina li chiamava allo stesso modo. Il dettaglio dice quanti sottoprocessi e quante unita'
+ * partecipano; il valore e' il numero di attivita' del processo.
+ */
 const processProcessiAttivi: Fornitore = async (q, p) => {
-  const r = await q.query<{ id: string; label: string; detail: string; value: string }>(
-    `SELECT bp.blueprint_process_id::text AS id,
-            bp.blueprint_process_name AS label,
-            -- Repertorio interfacce, R4: niente codice a video; il dettaglio dice se il processo è essenziale.
-            CASE WHEN bp.blueprint_process_is_optional THEN 'Facoltativo' ELSE 'Essenziale' END AS detail,
-            count(oup.organization_unit_process_id) AS value
-       FROM sys.sys_blueprint_process_registry bp
-       LEFT JOIN sys.sys_organization_unit_processes oup
-              ON oup.org_unit_process_blueprint_process_id = bp.blueprint_process_id
-             AND ($1::uuid IS NULL OR oup.org_unit_process_tenant_id = $1::uuid)
-      -- I processi del modello in vigore per il tenant, non l'intero registro: il registro e' unico per
-      -- versione (000463) e senza questo filtro la vista mescolava le versioni di tutti i modelli
-      -- (2026-11-18: 53 righe contro i 23 processi di RTL), con un conteggio diverso da ogni altra pagina.
-      WHERE $1::uuid IS NULL
-         OR bp.blueprint_process_variant_version_id IN (
-              SELECT a.blueprint_activation_variant_version_id FROM sys.sys_blueprint_activations a
-               WHERE a.blueprint_activation_tenant_id = $1::uuid AND a.blueprint_activation_status = 'ACTIVE')
-      GROUP BY 1, 2, 3 ORDER BY 4 DESC, 2 LIMIT 20`,
+  const r = await q.query<{ id: string; label: string; sotto: string; unita: string; value: string }>(
+    `SELECT tp.tenant_process_id::text AS id,
+            tp.tenant_process_name AS label,
+            (SELECT count(*) FROM sys.sys_tenant_processes c
+              WHERE c.tenant_process_parent_id = tp.tenant_process_id AND c.tenant_process_is_active) AS sotto,
+            (SELECT count(DISTINCT oup.org_unit_process_org_unit_id) FROM sys.sys_organization_unit_processes oup
+              WHERE oup.org_unit_process_tenant_process_id = tp.tenant_process_id) AS unita,
+            (SELECT count(*) FROM sys.sys_tenant_process_steps st
+              WHERE st.tenant_process_step_process_id = tp.tenant_process_id) AS value
+       FROM sys.sys_tenant_processes tp
+      WHERE ($1::uuid IS NULL OR tp.tenant_process_tenant_id = $1::uuid)
+        AND tp.tenant_process_level = 1 AND tp.tenant_process_is_active
+      ORDER BY tp.tenant_process_name`,
     [p.tenantId],
   );
+  const plurale = (k: number, uno: string, molti: string): string => `${k} ${k === 1 ? uno : molti}`;
   return elenco(
     r.rows.map((x) => ({
       id: s(x.id),
       label: s(x.label),
-      detail: s(x.detail),
+      detail: `${plurale(n(x.sotto), "sottoprocesso", "sottoprocessi")} · ${plurale(n(x.unita), "unità", "unità")}`,
       value: n(x.value),
     })),
   );
 };
 
+/**
+ * V3: la vista «Attivita' dei processi» mostra le attivita' vere dei processi (sys_tenant_process_steps),
+ * in ordine di processo e di passo, con chi le esegue. Prima si chiamava «Attivita' recenti» e mostrava
+ * gli eventi della storia delle persone (corsi, assunzioni): un altro oggetto con lo stesso nome, la
+ * confusione segnalata da Enzo il 2026-11-18. Il codice della vista resta `attivita-recenti` perche' e'
+ * la chiave delle classi di dato (000316); cambia il nome mostrato. Per un perimetro ristretto si vedono
+ * le attivita' delle sole unita' del perimetro. L'elenco e' intero: niente troncamento silenzioso (R5).
+ */
 const processAttivitaRecenti: Fornitore = async (q, p) => {
-  const r = await q.query<{ id: string; label: string; detail: string; occorso: string; giorno: string }>(
-    `SELECT e.user_timeline_event_id::text AS id,
-            e.user_timeline_event_summary AS label,
-            e.user_timeline_event_type AS detail,
-            to_char(e.user_timeline_event_occurred_at, 'DD/MM/YYYY') AS occorso,
-            to_char(e.user_timeline_event_occurred_at, 'YYYY-MM-DD') AS giorno
-       FROM sys.sys_user_timeline_events e
-       JOIN sys.sys_users su ON su.user_id = e.user_timeline_event_user_id
-      WHERE ($1::uuid IS NULL OR e.user_timeline_event_tenant_id = $1::uuid)
-        AND ${soloPersone("su")}
-        AND e.user_timeline_event_type <> ALL($2::text[])
-      ORDER BY e.user_timeline_event_occurred_at DESC NULLS LAST LIMIT 15`,
-    [p.tenantId, TIPI_EVENTO_RISERVATI],
+  const r = await q.query<{ id: string; label: string; processo: string; esecutore: string | null }>(
+    `SELECT st.tenant_process_step_id::text AS id,
+            st.tenant_process_step_name AS label,
+            tp.tenant_process_name AS processo,
+            coalesce(ou.organization_unit_name, pos.position_title, jr.job_role_name, st.tenant_process_step_executor_text) AS esecutore
+       FROM sys.sys_tenant_process_steps st
+       JOIN sys.sys_tenant_processes tp ON tp.tenant_process_id = st.tenant_process_step_process_id
+       LEFT JOIN sys.sys_organization_units ou ON ou.organization_unit_id = st.tenant_process_step_org_unit_id
+       LEFT JOIN sys.sys_positions pos ON pos.position_id = st.tenant_process_step_executor_position_id
+       LEFT JOIN sys.sys_job_roles jr ON jr.job_role_id = st.tenant_process_step_executor_job_role_id
+      WHERE ($1::uuid IS NULL OR st.tenant_process_step_tenant_id = $1::uuid)
+        AND tp.tenant_process_is_active
+        AND (cardinality($2::uuid[]) = 0 OR st.tenant_process_step_org_unit_id = ANY($2::uuid[]))
+      ORDER BY tp.tenant_process_name, st.tenant_process_step_ordinal`,
+    P(p),
   );
   return elenco(
-    r.rows.map((x) => rigaEvento(
-      { id: x.id, label: x.label, tipo: x.detail, giorno: x.giorno },
-      tipoRipetuto(x.label, x.detail) ? s(x.occorso) : `${etichettaEvento(x.detail)} · ${s(x.occorso)}`,
-    )),
+    r.rows.map((x) => ({
+      id: s(x.id),
+      label: s(x.label),
+      detail: x.esecutore ? `${s(x.processo)} · ${s(x.esecutore)}` : s(x.processo),
+      value: null,
+    })),
   );
 };
 
@@ -796,8 +811,8 @@ export const FORNITORI: Readonly<Record<string, Fornitore>> = Object.freeze({
   "company/copertura-competenze": conColonne(companyCoperturaCompetenze, { label: "Competenza", detail: "Livello", value: "Persone" }),
   "company/andamento-valutazioni": companyAndamentoValutazioni,
 
-  "process/processi-attivi": conColonne(processProcessiAttivi, { label: "Processo", detail: "Tipo", value: "Unità" }),
-  "process/attivita-recenti": conColonne(processAttivitaRecenti, { label: "Attività", detail: "Tipo e data" }),
+  "process/processi-attivi": conColonne(processProcessiAttivi, { label: "Processo", detail: "Sottoprocessi e unità", value: "Attività" }),
+  "process/attivita-recenti": conColonne(processAttivitaRecenti, { label: "Attività", detail: "Processo ed esecutore" }),
   "process/approvazioni-in-coda": processApprovazioniInCoda,
 
   "org/struttura-unita": conColonne(orgStrutturaUnita, { label: "Unità", detail: "Tipo", value: "Posizioni attive" }),

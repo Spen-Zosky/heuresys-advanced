@@ -244,7 +244,7 @@ SELECT d.dashboard_id, v.blocco, v.nome, v.ord
     ('company',  'andamento-valutazioni',  'Andamento delle valutazioni',     40),
     -- PROCESSI
     ('process',  'processi-attivi',        'Processi attivi',                 10),
-    ('process',  'attivita-recenti',       'Attivita'' recenti',              20),
+    ('process',  'attivita-recenti',       'Attivita'' dei processi',         20),
     ('process',  'approvazioni-in-coda',   'Approvazioni in coda',            30),
     -- ORGANIZZAZIONE
     ('org',      'struttura-unita',        'Struttura delle unita''',         10),
@@ -279,6 +279,16 @@ SELECT d.dashboard_id, v.blocco, v.nome, v.ord
    SELECT 1 FROM sys.sys_dashboard_blocks b
     WHERE b.dashboard_id = d.dashboard_id AND b.dashboard_block_code = v.blocco
  );
+
+-- 2026-11-20 (piano processi e progetti, V3): la vista mostra le attivita' dei processi, non gli eventi
+-- della storia delle persone, e si chiama cosi'. Il codice resta `attivita-recenti` (chiave delle classi
+-- di dato qui sotto); la riga gia' esistente prende il nome nuovo, perche' l'INSERT non la tocca (ADR-0035).
+UPDATE sys.sys_dashboard_blocks b
+   SET dashboard_block_name = 'Attivita'' dei processi'
+  FROM sys.sys_dashboards d
+ WHERE d.dashboard_id = b.dashboard_id AND d.dashboard_code = 'process'
+   AND b.dashboard_block_code = 'attivita-recenti'
+   AND b.dashboard_block_name IS DISTINCT FROM 'Attivita'' dei processi';
 
 INSERT INTO sys.sys_dashboard_block_data_classes (dashboard_block_id, data_class)
 SELECT b.dashboard_block_id, v.classe

@@ -1118,7 +1118,7 @@
         },
         "process": {
           "processi-attivi": "Active processes",
-          "attivita-recenti": "Recent activity",
+          "attivita-recenti": "Process activities",
           "approvazioni-in-coda": "Approvals in the queue"
         },
         "self": {
@@ -1143,12 +1143,12 @@
         "process": {
           "processi-attivi": {
             "label": "Process",
-            "detail": "Type",
-            "value": "Units"
+            "detail": "Subprocesses and units",
+            "value": "Activities"
           },
           "attivita-recenti": {
             "label": "Activity",
-            "detail": "Date"
+            "detail": "Process and performer"
           }
         },
         "org": {

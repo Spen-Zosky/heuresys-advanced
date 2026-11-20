@@ -69,18 +69,19 @@ export function buildHeuresysMcp(
     };
   };
 
-  const rd = (n: string, p: string) =>
-    tool(n, `GET ${p}`, {}, async () => ok(await client.call("GET", p)));
-  const rdId = (n: string, base: string) =>
-    tool(n, `GET ${base}/:id`, { id: z.string() }, async (a: { id: string }) =>
-      ok(await client.call("GET", `${base}/${encodeURIComponent(a.id)}`)),
-    );
   /** A-16: una lettura con filtri facoltativi in querystring (paginazione, soggetto, periodo). */
   const filtri = z.object({}).catchall(z.union([z.string(), z.number(), z.boolean()])).optional();
   const conQuery = (p: string, q?: Record<string, string | number | boolean>) => {
     const qs = new URLSearchParams(Object.entries(q ?? {}).map(([k, v]) => [k, String(v)] as [string, string])).toString();
     return qs ? `${p}?${qs}` : p;
   };
+  const rd = (n: string, p: string) =>
+    tool(n, `GET ${p} — filtri facoltativi in query (nomi in hrx_concept_describe)`, { query: filtri }, async (a: { query?: Record<string, string | number | boolean> }) =>
+      ok(await client.call("GET", conQuery(p, a.query))));
+  const rdId = (n: string, base: string) =>
+    tool(n, `GET ${base}/:id`, { id: z.string() }, async (a: { id: string }) =>
+      ok(await client.call("GET", `${base}/${encodeURIComponent(a.id)}`)),
+    );
   const rdQ = (n: string, descr: string, p: string) =>
     tool(n, `${descr} — GET ${p}`, { query: filtri }, async (a: { query?: Record<string, string | number | boolean> }) =>
       ok(await client.call("GET", conQuery(p, a.query))),
@@ -164,7 +165,19 @@ export function buildHeuresysMcp(
             if (Object.keys(ops).length === 0) {
               return ok({ conceptId: a.conceptId, known: false, operations: {} });
             }
-            return ok({ conceptId: a.conceptId, known: true, operations: ops });
+            // I filtri di query di ogni lettura (dal contratto dell'API): senza, il modello non sa
+            // che esiste, per esempio, `userId` e scarica 981 righe invece di chiedere quelle giuste.
+            const specifica = await client.filtriDelleLetture();
+            const radice = operations.baseOf(a.conceptId);
+            const conFiltri = Object.fromEntries(
+              Object.entries(ops).map(([id, op]) => {
+                const percorso = op.path === "/" ? "" : op.path.replace(/:([A-Za-z0-9_]+)/g, "{$1}");
+                const base = radice === "/" ? "" : radice;
+                const q = op.method.toUpperCase() === "GET" ? specifica.get(`/v1${base}${percorso}`) : undefined;
+                return [id, q ? { ...op, query: q } : op];
+              }),
+            );
+            return ok({ conceptId: a.conceptId, known: true, operations: conFiltri });
           },
         ),
         tool(

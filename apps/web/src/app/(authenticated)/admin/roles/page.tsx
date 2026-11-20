@@ -9,6 +9,7 @@ import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
 import { Check } from "lucide-react";
 import { apiFetch } from "../../../../lib/api/fetch";
 import { MandateActsQueue } from "./_components/mandate-acts-queue";
+import { DelegheAmministrazione } from "./_components/deleghe-amministrazione";
 
 interface RolePermItem {
   roleCode: string;
@@ -152,6 +153,8 @@ export default function AdminRolesPage() {
           )}
         </CardContent>
       </Card>
+
+      <DelegheAmministrazione />
     </main>
   );
 }

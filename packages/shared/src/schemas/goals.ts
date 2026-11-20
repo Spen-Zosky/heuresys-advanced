@@ -22,6 +22,8 @@ export const GoalSchema = z.object({
   tenantId: z.uuid(),
   naturalKey: z.string(),
   subjectUserId: z.uuid().nullable(),
+  /** C20 (giro qa-web 18/11): la persona a cui appartiene l'obiettivo, «Cognome, Nome» (R1) fatto dall'API. */
+  subjectName: z.string().nullable().optional(),
   ownerUserId: z.uuid().nullable(),
   parentGoalId: z.uuid().nullable(),
   templateId: z.uuid().nullable(),

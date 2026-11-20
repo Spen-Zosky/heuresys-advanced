@@ -20,7 +20,7 @@ import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { EmptyState, ErrorState, Spinner } from "@heuresys/ui";
 import { Inbox, Lock } from "lucide-react";
-import { isApiError, NetworkError, SessionExpiredError, testoPerLaPersona } from "@/lib/api/errors";
+import { isApiError, NetworkError, SessionExpiredError, testoErrore, testoPerLaPersona } from "@/lib/api/errors";
 
 export function StatoCaricamento({ etichetta, testId = "stato-caricamento" }: { etichetta?: string; testId?: string }) {
   const { t } = useTranslation();
@@ -32,7 +32,7 @@ export function StatoCaricamento({ etichetta, testId = "stato-caricamento" }: { 
       aria-busy="true"
       className="flex items-center gap-2 py-6 text-sm text-muted-foreground"
     >
-      <Spinner className="h-4 w-4" />
+      <Spinner className="h-4 w-4" label={etichetta ?? t("common:loading")} />
       <span>{etichetta ?? t("common:loading")}</span>
     </div>
   );
@@ -112,17 +112,32 @@ export function StatoErrore({
 }) {
   const { t } = useTranslation();
   if (isApiError(errore) && errore.status === 403) {
-    return <StatoNegato motivo={motivoNegato ?? errore.message} testId={testId} />;
+    return <StatoNegato motivo={motivoNegato ?? testoErrore(errore.status, errore.code)} testId={testId} />;
   }
   const codice = codiceErrore(errore);
-  const testo = testoPerLaPersona(errore) ?? t("common:error.loadHint");
+  // Giro 18/11 (G-RENDER): «non trovato» scriveva UUID e NOT_FOUND nel testo. Il messaggio e' in parole;
+  // il riferimento tecnico sta in una riga secondaria, chiusa, e solo per gli errori che l'assistenza
+  // deve poter cercare (server, rete): una pagina «non trovata» non ne ha bisogno.
+  const api = isApiError(errore) ? errore : null;
+  const testo = api ? testoErrore(api.status, api.code) : (testoPerLaPersona(errore) ?? t("common:error.loadHint"));
+  const perAssistenza = !api || api.status >= 500;
+  const dettagli = [
+    api?.requestId ? t("common:apiErrors.reference", { requestId: api.requestId }) : null,
+    codice ? t("common:stato.codice", { codice }) : null,
+  ].filter((x): x is string => x !== null);
   return (
     <div data-testid={testId} data-stato="errore" {...(codice ? { "data-codice": codice } : {})} role="alert">
       <ErrorState
         title={titolo ?? t("common:error.load")}
-        description={codice ? `${testo} ${t("common:stato.codice", { codice })}` : testo}
+        description={testo}
         {...(onRiprova ? { retry: onRiprova } : {})}
       />
+      {perAssistenza && dettagli.length > 0 ? (
+        <details className="mx-auto mt-1 max-w-md break-words px-4 text-center text-xs text-muted-foreground">
+          <summary className="cursor-pointer">{t("common:stato.perAssistenza")}</summary>
+          <p className="mt-1">{dettagli.join(" ")}</p>
+        </details>
+      ) : null}
     </div>
   );
 }

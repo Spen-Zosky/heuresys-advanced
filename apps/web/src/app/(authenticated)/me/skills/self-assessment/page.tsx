@@ -87,7 +87,7 @@ export default function MeSelfAssessmentPage() {
       </div>
 
       <Card>
-        <CardHeader><CardTitle>{t("selfAssessment.cardTitle")}</CardTitle></CardHeader>
+        <CardHeader><CardTitle as="h2">{t("selfAssessment.cardTitle")}</CardTitle></CardHeader>
         <CardContent>
           <form
             onSubmit={(e) => { void onSubmit(e); }}

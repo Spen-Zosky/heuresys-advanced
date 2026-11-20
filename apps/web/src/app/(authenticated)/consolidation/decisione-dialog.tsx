@@ -55,7 +55,7 @@ export function DecisioneDialog({
 
   return (
     <Dialog open onOpenChange={(aperta) => { if (!aperta) onChiudi(); }}>
-      <DialogContent className={MODALE.media} data-testid="consolidation-decision-dialog">
+      <DialogContent className={MODALE.media} data-testid="consolidation-decision-dialog" closeLabel={t("shell:ui.close")}>
         <DialogHeader>
           <DialogTitle>{t("consolidation.modal.title")}</DialogTitle>
           <DialogDescription>

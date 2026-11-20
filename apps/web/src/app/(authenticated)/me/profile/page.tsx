@@ -64,7 +64,7 @@ function AppearanceCard() {
 
   return (
     <Card>
-      <CardHeader><CardTitle>{t("profile.appearanceTitle")}</CardTitle></CardHeader>
+      <CardHeader><CardTitle as="h2">{t("profile.appearanceTitle")}</CardTitle></CardHeader>
       <CardContent>
         {prefs.isLoading ? (
           <StatoCaricamento />
@@ -155,7 +155,7 @@ function SettingsForm() {
 
   return (
     <Card>
-      <CardHeader><CardTitle>{t("profile.anagraficaTitle")}</CardTitle></CardHeader>
+      <CardHeader><CardTitle as="h2">{t("profile.anagraficaTitle")}</CardTitle></CardHeader>
       <CardContent>
         {profile.isLoading ? (
           <StatoCaricamento />

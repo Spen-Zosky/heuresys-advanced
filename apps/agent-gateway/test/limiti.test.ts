@@ -10,6 +10,8 @@ import {
   leggiLimiti,
   modelloAgenti,
   personeAmmesse,
+  ammessoAllAssistente,
+  tenantAmmessi,
 } from "../src/limiti.js";
 
 describe("modelloAgenti: il modello è fissato per nome", () => {
@@ -91,6 +93,47 @@ describe("ConversazioniAperte", () => {
     expect(c.entra("bruno")).toEqual({ ok: false, motivo: "PERSONA" });
     expect(c.entra("anna").ok).toBe(true);
   });
+
+  it("prova del 2026-11-20: due giri che aspettano la conferma non bloccano una conversazione nuova", () => {
+    const c = new ConversazioniAperte({ perPersona: 2, totali: 10 });
+    const a = c.entra("valentina");
+    const b = c.entra("valentina");
+    if (!a.ok || !b.ok) throw new Error("dovevano entrare");
+    expect(c.entra("valentina")).toEqual({ ok: false, motivo: "PERSONA" });
+    a.sospendi();
+    b.sospendi();
+    const terza = c.entra("valentina");
+    expect(terza.ok).toBe(true);
+    // Alla decisione i due giri riprendono anche oltre il limite: erano già ammessi.
+    a.riprendi();
+    b.riprendi();
+    expect(c.entra("valentina")).toEqual({ ok: false, motivo: "PERSONA" });
+    // Sospendere e riprendere due volte non sposta i conti; esci da sospeso non toglie due volte.
+    a.sospendi();
+    a.sospendi();
+    a.esci();
+    b.esci();
+    if (terza.ok) terza.esci();
+    expect(c.aperte).toBe(0);
+    expect(c.entra("valentina").ok).toBe(true);
+    expect(c.entra("valentina").ok).toBe(true);
+    expect(c.entra("valentina")).toEqual({ ok: false, motivo: "PERSONA" });
+  });
+
+  it("le sospese hanno un tetto: una persona non riempie il servizio di giri in attesa", () => {
+    const c = new ConversazioniAperte({ perPersona: 2, totali: 100 });
+    const aperte: Array<{ sospendi: () => void }> = [];
+    for (let i = 0; i < 10; i++) {
+      const g = c.entra("valentina");
+      if (!g.ok) break;
+      g.sospendi();
+      aperte.push(g);
+    }
+    // 2 sospese + 2 attive (le ultime due non si sospendono più): mai oltre 2 × perPersona.
+    expect(aperte.length).toBe(4);
+    expect(c.aperte).toBe(4);
+    expect(c.entra("valentina")).toEqual({ ok: false, motivo: "PERSONA" });
+  });
 });
 
 describe("personeAmmesse: solo chi è nominato (ADR-0056 D3)", () => {
@@ -121,5 +164,28 @@ describe("connettori dell'abbonamento: l'assistente non li vede", () => {
     const { ISOLAMENTO_MCP } = await import("../src/sdk-agent.js");
     expect(ISOLAMENTO_MCP.strictMcpConfig).toBe(true);
     expect(ISOLAMENTO_MCP.env.ENABLE_CLAUDEAI_MCP_SERVERS).toBe("false");
+  });
+});
+
+describe("ammessoAllAssistente: persona nominata o tenant nominato (ADR-0056 D3)", () => {
+  const env = { AGENT_GATEWAY_ALLOWED_USER_IDS: "enzo", AGENT_GATEWAY_ALLOWED_TENANT_IDS: "rtl, sys " };
+
+  it("senza elenchi non ammette nessuno", () => {
+    expect(tenantAmmessi({}).size).toBe(0);
+    expect(ammessoAllAssistente({ userId: "x", tenantId: "rtl" }, {})).toBe(false);
+  });
+
+  it("ammette la persona nominata anche senza tenant (mandato di piattaforma)", () => {
+    expect(ammessoAllAssistente({ userId: "enzo", tenantId: null }, env)).toBe(true);
+  });
+
+  it("ammette una persona di un tenant nominato: Enzo con l'utenza di una persona del tenant", () => {
+    expect(ammessoAllAssistente({ userId: "valentina", tenantId: "rtl" }, env)).toBe(true);
+    expect(ammessoAllAssistente({ userId: "admin", tenantId: "sys" }, env)).toBe(true);
+  });
+
+  it("rifiuta una persona di un tenant non nominato, e chi non ha tenant e non è nominato", () => {
+    expect(ammessoAllAssistente({ userId: "altro", tenantId: "cliente-nuovo" }, env)).toBe(false);
+    expect(ammessoAllAssistente({ userId: "altro", tenantId: null }, env)).toBe(false);
   });
 });

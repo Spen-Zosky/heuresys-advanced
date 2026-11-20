@@ -87,7 +87,7 @@ export function SkillAliasesPanel({ skillId }: { skillId: string }) {
   return (
     <Card data-testid="skill-aliases-panel">
       <CardHeader>
-        <CardTitle>
+        <CardTitle as="h2">
           {t("skills.relations.aliasesTitle")}
           <span className="ml-2 text-sm font-normal text-muted-foreground">{items.length}</span>
         </CardTitle>
@@ -104,7 +104,7 @@ export function SkillAliasesPanel({ skillId }: { skillId: string }) {
           <ul className="space-y-2" data-testid="skill-aliases-list">
             {items.map((a) => (
               <li key={a.aliasId} className="flex items-center gap-3 text-sm" data-testid="skill-alias-row">
-                <span className="font-medium text-foreground">{a.label}</span>
+                {canWrite ? <CorreggiSinonimo key={`${a.aliasId}-${a.label}`} aliasId={a.aliasId} etichetta={a.label} chiave={key} /> : <span className="font-medium text-foreground">{a.label}</span>}
                 {a.locale && <span className="text-xs uppercase text-muted-foreground">{a.locale}</span>}
                 {canDelete && (
                   <Button
@@ -225,7 +225,7 @@ export function SkillEdgesPanel({ skillId }: { skillId: string }) {
   return (
     <Card data-testid="skill-edges-panel">
       <CardHeader>
-        <CardTitle>
+        <CardTitle as="h2">
           {t("skills.relations.edgesTitle")}
           <span className="ml-2 text-sm font-normal text-muted-foreground">{righe.length}</span>
         </CardTitle>
@@ -344,5 +344,35 @@ export function SkillEdgesPanel({ skillId }: { skillId: string }) {
         )}
       </CardContent>
     </Card>
+  );
+}
+
+/** Un sinonimo scritto male si corregge sul posto (`PATCH /v1/skill-aliases/:id`, ondata 3 degli endpoint senza consumatori). */
+function CorreggiSinonimo({ aliasId, etichetta, chiave }: { aliasId: string; etichetta: string; chiave: readonly unknown[] }) {
+  const { t } = useTranslation("hr");
+  const qc = useQueryClient();
+  const [aperto, setAperto] = useState(false);
+  const [valore, setValore] = useState(etichetta);
+  const salva = useMutation({
+    mutationFn: () => apiFetch<SkillAlias>(`/v1/skill-aliases/${aliasId}`, { method: "PATCH", body: { label: valore.trim() } }),
+    onSuccess: () => { setAperto(false); void qc.invalidateQueries({ queryKey: chiave }); },
+  });
+  if (!aperto) {
+    return (
+      <span className="flex items-center gap-2">
+        <span className="font-medium text-foreground">{etichetta}</span>
+        <Button type="button" variant="outline" size="sm" data-testid="skill-alias-edit" onClick={() => setAperto(true)}>{t("skills.relations.correggi")}</Button>
+      </span>
+    );
+  }
+  return (
+    <span className="flex items-center gap-2">
+      <Input aria-label={t("skills.relations.aliasLabel")} data-testid="skill-alias-edit-label" className="w-48" value={valore} onChange={(e) => setValore(e.target.value)} />
+      <Button type="button" size="sm" data-testid="skill-alias-edit-save" disabled={!valore.trim() || valore.trim() === etichetta || salva.isPending} onClick={() => salva.mutate()}>
+        {salva.isPending ? t("common:saving") : t("skills.relations.salva")}
+      </Button>
+      <Button type="button" size="sm" variant="outline" onClick={() => setAperto(false)}>{t("skills.relations.annulla")}</Button>
+      {salva.isError && <span className="text-xs text-danger">{t("skills.relations.erroreCorreggi")}</span>}
+    </span>
   );
 }

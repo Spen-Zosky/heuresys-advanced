@@ -169,7 +169,7 @@ export default function ApprovalsPage() {
       </summary>
       <Card className="mt-3">
         <CardHeader>
-          <CardTitle>{t("approvals.create.cardTitle")}</CardTitle>
+          <CardTitle as="h2">{t("approvals.create.cardTitle")}</CardTitle>
         </CardHeader>
         <CardContent>
           <form

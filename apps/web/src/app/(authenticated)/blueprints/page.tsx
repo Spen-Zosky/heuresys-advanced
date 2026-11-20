@@ -17,6 +17,7 @@ import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { NomeOppure } from "@/components/senza-nome";
 import { useFormat } from "@/lib/format";
+import { FamiglieVarianti } from "./famiglie-varianti";
 
 interface VariantRow extends BlueprintVariant {
   famName: string | null;
@@ -232,6 +233,7 @@ export default function BlueprintsPage() {
       emptyDescription={t("list.emptyDescription")}
       caption={t("list.caption")}
       />
+      <FamiglieVarianti famiglie={families.data?.items ?? []} />
     </div>
   );
 }

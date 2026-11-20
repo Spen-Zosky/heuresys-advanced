@@ -45,6 +45,11 @@ const GATEWAY_URL = (
   process.env.NEXT_PUBLIC_AGENT_GATEWAY_URL ?? "http://localhost:8790"
 ).replace(/\/$/, "");
 
+/** Quante righe dello stream si tengono a video: una conversazione intera, non un giro solo. */
+const MAX_RIGHE = 600;
+/** Quante domande di una conversazione ripresa si rileggono dall'API. */
+const MAX_ATTIVITA = 20;
+
 /** Un'approvazione in attesa, emersa da un evento `approval_required`. */
 export interface PendingApproval {
   approvalId: string;
@@ -161,7 +166,8 @@ export function lineaDaEvento(e: { kind: string; payload: Record<string, unknown
   const p = e.payload;
   switch (e.kind) {
     case "TESTO":
-      return { kind: "message", text: typeof p.testo === "string" ? p.testo : "" };
+      // Il messaggio fisso di una domanda tutta su dati vietati (gateway, omissis.ts).
+      return { kind: p.rifiuto === true ? "rifiuto" : "message", text: typeof p.testo === "string" ? p.testo : "" };
     case "STRUMENTO":
       return { kind: "tool", text: typeof p.strumento === "string" ? p.strumento : "" };
     case "PROPOSTA":
@@ -287,8 +293,8 @@ export function useAgentStream(opzioni: OpzioniAgentStream = {}): UseAgentStream
   const pushLine = useCallback((kind: string, text: string) => {
     lineIdRef.current += 1;
     const id = lineIdRef.current;
-    // Tetto sul buffer reso: una corsa lunga non deve gonfiare il DOM.
-    setLines((prev) => [...prev.slice(-199), { id, kind, text }]);
+    // Tetto sul buffer reso: una conversazione lunga non deve gonfiare il DOM.
+    setLines((prev) => [...prev.slice(-(MAX_RIGHE - 1)), { id, kind, text }]);
   }, []);
 
   const handleSseBlock = useCallback(
@@ -325,6 +331,13 @@ export function useAgentStream(opzioni: OpzioniAgentStream = {}): UseAgentStream
           pushLine("page_command", `${c.nome} → ${esito.stato}${esito.dettaglio ? `: ${esito.dettaglio}` : ""}`);
           return;
         }
+      }
+      if (kind === "rifiuto") {
+        // Il gateway ha deciso che la domanda era tutta su dati vietati: il suo testo sostituisce
+        // la risposta del modello (lib/agente/messaggi.ts).
+        const testo = parseNota(data);
+        if (testo) pushLine("rifiuto", testo);
+        return;
       }
       if (kind === "nota") {
         const testo = parseNota(data);
@@ -389,8 +402,8 @@ export function useAgentStream(opzioni: OpzioniAgentStream = {}): UseAgentStream
       setRunning(true);
       setNotice(null);
       setApproval(null);
-      setLines([]);
-      lineIdRef.current = 0;
+      // La conversazione resta a video: la domanda si aggiunge sotto le precedenti.
+      pushLine("prompt", domandaDaPrompt(prompt).slice(0, MAX_RIGA));
 
       const controller = new AbortController();
       abortRef.current = controller;
@@ -450,7 +463,7 @@ export function useAgentStream(opzioni: OpzioniAgentStream = {}): UseAgentStream
         abortRef.current = null;
       }
     },
-    [running, handleSseBlock, conversationId],
+    [running, handleSseBlock, conversationId, pushLine],
   );
 
   const stop = useCallback(() => {
@@ -478,13 +491,19 @@ export function useAgentStream(opzioni: OpzioniAgentStream = {}): UseAgentStream
         const ultima = ultimaAttivita(c);
         const righe: StreamLine[] = [];
         let n = 0;
-        if (ultima) {
-          righe.push({ id: ++n, kind: "prompt", text: domandaDaPrompt(ultima.prompt).slice(0, 600) });
-          const dettaglio = await leggiAttivita(ultima.id);
-          for (const e of dettaglio.events) {
+        // L'intera conversazione, domanda dopo domanda (le ultime MAX_ATTIVITA), come in Claude.
+        const attivita = c.activities.slice(-MAX_ATTIVITA);
+        const dettagli = await Promise.all(attivita.map((a) => leggiAttivita(a.id)));
+        attivita.forEach((a, i) => {
+          righe.push({ id: ++n, kind: "prompt", text: domandaDaPrompt(a.prompt).slice(0, MAX_RIGA) });
+          for (const e of dettagli[i]?.events ?? []) {
             const l = lineaDaEvento(e);
-            righe.push({ id: ++n, kind: l.kind, text: l.kind === "message" ? l.text.slice(0, MAX_RIGA) : l.text.replace(/\s+/g, " ").slice(0, 600) });
+            const testuale = l.kind === "message" || l.kind === "rifiuto";
+            righe.push({ id: ++n, kind: l.kind, text: testuale ? l.text.slice(0, MAX_RIGA) : l.text.replace(/\s+/g, " ").slice(0, 600) });
           }
+        });
+        if (ultima) {
+          const dettaglio = dettagli[dettagli.length - 1] ?? (await leggiAttivita(ultima.id));
           const p = propostaDaDecidere(dettaglio.proposals);
           if (p) {
             setApproval({
@@ -498,7 +517,7 @@ export function useAgentStream(opzioni: OpzioniAgentStream = {}): UseAgentStream
           }
         }
         lineIdRef.current = n;
-        setLines(righe.slice(-200));
+        setLines(righe.slice(-MAX_RIGHE));
       } catch (err) {
         setNotice({ kind: "err", code: "conversationNotFound", params: { message: err instanceof Error ? err.message : String(err) } });
       }

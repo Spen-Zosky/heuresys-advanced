@@ -20,7 +20,7 @@ export function OrganigrammaCliente() {
   return (
     <Card data-testid="consolidation-organigramma">
       <CardHeader>
-        <CardTitle>
+        <CardTitle as="h2">
           <button type="button" className="flex items-center gap-2 text-left" onClick={() => setAperto((a) => !a)} aria-expanded={aperto}>
             <Icona className="h-4 w-4" aria-hidden />
             {t("organigramma.consolidamento.titolo")}

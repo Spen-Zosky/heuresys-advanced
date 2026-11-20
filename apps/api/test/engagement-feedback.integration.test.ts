@@ -121,10 +121,11 @@ describe("engagement-feedback API", () => {
     const patch = await suite.app.inject({ method: "PATCH", url: `/v1/engagement-feedback/${id}`, headers: hdrW, payload: { status: "reviewed" } });
     expect(patch.statusCode).toBe(200);
     expect((patch.json() as { status: string }).status).toBe("reviewed");
+    // Ondata 5 (2026-11-18): la cancellazione è RITIRATA (lib/rotte-ritirate.ts): 410, e la riga resta.
     const del = await suite.app.inject({ method: "DELETE", url: `/v1/engagement-feedback/${id}`, headers: { cookie: ch(tenantAdmin.cookies), "x-csrf-token": tenantAdmin.csrfToken } });
-    expect(del.statusCode).toBe(204);
+    expect(del.statusCode).toBe(410);
     const gone = await suite.app.inject({ method: "GET", url: `/v1/engagement-feedback/${id}`, headers: { cookie: ch(tenantAdmin.cookies) } });
-    expect(gone.statusCode).toBe(404);
+    expect(gone.statusCode).toBe(200);
   });
 
   it("full CRUD round-trip on an action plan (create -> patch -> delete)", async () => {
@@ -140,7 +141,7 @@ describe("engagement-feedback API", () => {
     expect(patch.statusCode).toBe(200);
     expect((patch.json() as { status: string }).status).toBe("in_progress");
     const del = await suite.app.inject({ method: "DELETE", url: `/v1/engagement-feedback/action-plans/${created.actionPlanId}`, headers: { cookie: ch(tenantAdmin.cookies), "x-csrf-token": tenantAdmin.csrfToken } });
-    expect(del.statusCode).toBe(204);
+    expect(del.statusCode).toBe(410); // ondata 5: cancellazione ritirata, la riga resta
   });
 
   it("USER cannot create (no engagement_feedback:create) -> 403", async () => {

@@ -66,7 +66,11 @@
         "PART_OF": "fa parte di",
         "RELATED": "è collegata a",
         "PREREQUISITE_OF": "è prerequisito di"
-      }
+      },
+      "correggi": "Correggi",
+      "salva": "Salva",
+      "annulla": "Annulla",
+      "erroreCorreggi": "Correzione non riuscita."
     }
   },
   "kpis": {
@@ -126,6 +130,7 @@
     "emptyDescription": "Non ci sono obiettivi per questo tenant",
     "caption": "Elenco obiettivi",
     "cols": {
+      "person": "Persona",
       "type": "Tipo",
       "priority": "Priorità",
       "progress": "Avanzamento",
@@ -213,6 +218,8 @@
       "emptyTitle": "Nessuna capability classificabile",
       "emptyDescription": "Il ranking si popola quando le posizioni dichiarano skill richieste.",
       "caption": "Capability essenziali (priorità d'investimento)",
+      "demandValue": "{{n}} (di cui {{critical}} critiche)",
+      "maturityCommon": "La maturità è {{value}} per tutte le competenze.",
       "cols": {
         "skill": "Competenza",
         "priority": "Priorità invest.",
@@ -236,13 +243,24 @@
       "L3": "Definito",
       "L4": "Gestito",
       "L5": "Ottimizzato"
+    },
+    "ricalcolo": {
+      "avvia": "Ricalcola capacità e maturità",
+      "inCorso": "Ricalcolo in corso…",
+      "conferma": "Ricalcolare capacità e maturità di tutte le unità? Può durare qualche minuto.",
+      "titolo": "Ricalcolo delle capacità",
+      "passo1": "Passo 1 di 2: composizione delle capacità di persone, posizioni e unità.",
+      "passo2": "Passo 2 di 2: maturità delle unità, che legge la composizione appena calcolata.",
+      "fatto": "Ricalcolo finito: {{count}} unità valutate.",
+      "fatto_one": "Ricalcolo finito: {{count}} unità valutata.",
+      "errore": "Ricalcolo non riuscito. Riprova."
     }
   },
   "processOwner": {
     "title": "Responsabile di processo",
     "description": "Catalogo dei processi del blueprint (navigazione del grafo, non runtime BPM).",
-    "count": "{{count}} processi",
-    "count_one": "{{count}} processo",
+    "count": "{{count}} processi del modello",
+    "count_one": "{{count}} processo del modello",
     "errorMessage": "Impossibile caricare i processi",
     "emptyTitle": "Nessun processo",
     "emptyDescription": "Non ci sono processi nel blueprint.",
@@ -277,6 +295,17 @@
         "CONTRIBUTOR": "Esecutore · R",
         "CONSULTED": "Consultato · C",
         "INFORMED": "Informato · I"
+      },
+      "assegna": {
+        "filtro": "Filtra le unità",
+        "unita": "Unità",
+        "scegli": "Scegli fra {{count}} unità",
+        "scegli_one": "Scegli fra {{count}} unità",
+        "invia": "Assegna",
+        "giaPresente": "Questa unità ha già un ruolo nel processo.",
+        "errore": "Assegnazione non riuscita. Riprova.",
+        "togli": "Togli",
+        "confermaTogli": "Togliere questa unità dal processo?"
       }
     }
   },
@@ -346,6 +375,46 @@
       "CONSOLIDATION_ALREADY_OPEN": "C'è già un consolidamento aperto.",
       "CONSOLIDATION_VERSION_INVALID": "Il modello di questa corsa non c'è più.",
       "PERMISSION_DENIED": "Non hai il mandato per questa operazione."
+    },
+    "distance": {
+      "loading": "Sto misurando la distanza dal modello…",
+      "error": "Non riesco a misurare la distanza dal modello.",
+      "title": "Distanza dal modello",
+      "summary": "{{rows}} righe confrontate: {{same}} uguali, {{partial}} parziali, {{different}} diverse, {{onlyModel}} solo nel modello, {{onlyTenant}} solo nella tua azienda.",
+      "domain": "Dominio",
+      "same": "Uguali",
+      "partial": "Parziali",
+      "different": "Diverse",
+      "onlyModel": "Solo modello",
+      "onlyTenant": "Solo azienda",
+      "lost": "{{count}} elementi del tenant rischiano di perdersi",
+      "lost_one": "{{count}} elemento del tenant rischia di perdersi",
+      "domains": {
+        "ateco": "Classificazione ATECO",
+        "classe": "Classe d'impresa",
+        "ccnl": "Contratti collettivi",
+        "processi": "Processi",
+        "unita": "Unità organizzative",
+        "organigramma": "Organigramma",
+        "obblighi": "Obblighi",
+        "ruoli": "Ruoli",
+        "copertura": "Copertura",
+        "inquadramento": "Inquadramento",
+        "fasi": "Fasi dei processi",
+        "skill": "Competenze",
+        "obiettivi": "Obiettivi",
+        "metriche": "Metriche",
+        "derivati": "Dati derivati",
+        "bersagli": "Bersagli",
+        "formazione": "Formazione",
+        "carriere": "Carriere",
+        "incentivi": "Incentivi",
+        "commesse": "Commesse",
+        "criticita": "Criticità",
+        "condizioni": "Condizioni",
+        "ruoli_funzionali": "Ruoli funzionali",
+        "utenti": "Utenti"
+      }
     }
   },
   "consolidation": {
@@ -372,7 +441,13 @@
       "POSITIONS_ROLES": "Posizioni e ruoli",
       "SKILLS": "Competenze",
       "PROCESSES": "Processi",
-      "INDICATORS_GOALS": "Indicatori e obiettivi"
+      "INDICATORS_GOALS": "Indicatori e obiettivi",
+      "CONTRACTS": "Contratti e livelli",
+      "OBLIGATIONS": "Obblighi normativi",
+      "TRAINING": "Formazione",
+      "CAREERS": "Carriere",
+      "INCENTIVES": "Incentivi",
+      "ENGAGEMENTS": "Commesse"
     },
     "open": "Aperto",
     "done": "Concluso",
@@ -540,6 +615,11 @@
       "result": "Fatto nella bozza: {{decided}} decisioni, {{cascaded}} in cascata, {{skipped}} saltate.",
       "resultUndo": "Tornate da decidere: {{count}}.",
       "resultUndo_one": "Tornata da decidere: {{count}}."
+    },
+    "tabs": {
+      "aria": "Consolidamento e allineamento",
+      "consolidation": "Consolidamento",
+      "alignment": "Allineamento"
     }
   },
   "gaps": {
@@ -616,7 +696,59 @@
     "poolsCaption": "Bacini di successione",
     "candidatesEmpty": "Nessun candidato registrato",
     "candidatesCaption": "Candidati alla successione",
-    "nomeInterno": "(nome non assegnato)"
+    "nomeInterno": "(nome non assegnato)",
+    "gestione": {
+      "vietato": "Non hai il permesso per questa modifica.",
+      "duplicato": "Esiste già una voce con questo codice o questo legame.",
+      "nonValido": "I dati non sono validi: controlla i campi.",
+      "errore": "Salvataggio non riuscito. Riprova.",
+      "cerca": "Cerca",
+      "scegliPosizione": "Scegli la posizione",
+      "posizione": "Posizione",
+      "percorsi": "Gestione dei percorsi di carriera",
+      "nome": "Nome",
+      "codice": "Codice",
+      "descrizione": "Descrizione",
+      "creaPercorso": "Crea il percorso",
+      "scegliPercorso": "Percorso da gestire",
+      "nessuno": "Nessuno",
+      "salva": "Salva",
+      "passi": "Passi del percorso",
+      "nessunPasso": "Nessun passo dichiarato.",
+      "mesi": "Durata tipica (mesi)",
+      "ordine": "Ordine",
+      "da": "Dalla posizione",
+      "a": "Alla posizione",
+      "aggiungiPasso": "Aggiungi il passo",
+      "posizioniCollegate": "Posizioni da cui parte il percorso",
+      "nessunaPosizione": "Nessuna posizione collegata.",
+      "collegaPosizione": "Collega una posizione",
+      "collega": "Collega",
+      "scollega": "Scollega",
+      "confermaScollega": "Scollegare questa posizione dal percorso?",
+      "bacini": "Gestione dei bacini di successione",
+      "creaBacino": "Crea il bacino",
+      "scegliBacino": "Bacino da gestire",
+      "rilevanza": "Rilevanza della posizione per la successione",
+      "rilevanzaOra": "Oggi: critica {{critica}}, orizzonte {{orizzonte}}.",
+      "rilevanzaAssente": "Rilevanza non ancora dichiarata.",
+      "si": "sì",
+      "no": "no",
+      "critica": "Posizione critica",
+      "orizzonte": "Orizzonte di prontezza",
+      "orizzonteNessuno": "Non dichiarato",
+      "togli": "Togli",
+      "confermaTogli": "Togliere la rilevanza dichiarata?",
+      "candidati": "Gestione dei candidati alla successione",
+      "aggiungiCandidato": "Aggiungi il candidato",
+      "scegliCandidato": "Candidato da gestire",
+      "persona": "Persona",
+      "confermaTogliCandidato": "Togliere questa persona dal bacino?",
+      "valutazione": "Registra una valutazione di prontezza",
+      "punteggio": "Punteggio (da -100 a 100)",
+      "registra": "Registra",
+      "registrata": "Valutazione registrata."
+    }
   },
   "compensation": {
     "title": "Retribuzioni",
@@ -743,7 +875,23 @@
       "end": "Fine",
       "seats": "Posti"
     },
-    "cohortNd": "ND"
+    "cohortNd": "ND",
+    "form": {
+      "nuova": "Nuova iniziativa di formazione",
+      "crea": "Crea",
+      "chiudi": "Chiudi",
+      "cercaCorso": "Cerca il corso",
+      "corso": "Corso",
+      "scegliCorso": "Scegli il corso",
+      "codice": "Codice dell'edizione",
+      "modifica": "Modifica: {{nome}}",
+      "modificaBreve": "Modifica",
+      "salva": "Salva",
+      "annulla": "Annulla",
+      "vietato": "Non hai il permesso di gestire le iniziative di formazione.",
+      "duplicato": "Esiste già un'iniziativa con questo codice.",
+      "errore": "Salvataggio non riuscito. Riprova."
+    }
   },
   "evidence": {
     "title": "Evidenze sottostanti",
@@ -973,7 +1121,11 @@
         "type": "Tipo",
         "period": "Periodo",
         "status": "Stato"
-      }
+      },
+      "confermaFase": "Portare il ciclo alla fase «{{fase}}»? Le persone coinvolte vedranno il cambiamento.",
+      "annulla": "Annulla il ciclo",
+      "passaA": "Passa a: {{fase}}",
+      "erroreFase": "Cambio di fase non riuscito."
     },
     "reviews": {
       "title": "Valutazioni",
@@ -1037,6 +1189,24 @@
       "MEMBER": "Membro",
       "CONTRIBUTOR": "Collaboratore",
       "OBSERVER": "Osservatore"
+    },
+    "gestione": {
+      "nuovo": "Nuovo progetto",
+      "crea": "Crea",
+      "chiudi": "Chiudi",
+      "nome": "Nome",
+      "codice": "Codice",
+      "titolo": "Gestione del progetto",
+      "salva": "Salva",
+      "avanzamento": "Avanzamento (%)",
+      "aggiungiPersone": "Aggiungi persone al progetto",
+      "ruolo": "Ruolo nel progetto",
+      "aggiungi": "Aggiungi",
+      "togli": "Togli",
+      "confermaTogli": "Togliere questa persona dal progetto?",
+      "vietato": "Non hai il permesso di gestire i progetti.",
+      "duplicato": "Esiste già un progetto con questo codice.",
+      "errore": "Salvataggio non riuscito. Riprova."
     }
   },
   "recruiting": {
@@ -1232,6 +1402,240 @@
       "offerError": "Offerta rifiutata dal server.",
       "noOffers": "Nessuna offerta.",
       "salaryMasked": "importo non visibile con il tuo mandato"
+    },
+    "correzioni": {
+      "candidato": "Dati del candidato",
+      "assunto": "Persona assunta (obbligatoria per «Assunto»)",
+      "salva": "Salva",
+      "salvato": "Salvato.",
+      "errore": "Salvataggio non riuscito. Riprova.",
+      "correggi": "Correggi",
+      "raccomandazione": "Raccomandazione",
+      "voto": "Voto (0-10)",
+      "annulla": "Annulla"
+    }
+  },
+  "mentorship": {
+    "titolo": "Mentoring",
+    "descrizione": "Programmi di mentoring, le coppie mentore e allievo e i loro incontri.",
+    "nessuno": "non indicato",
+    "omissis": "{omissis}",
+    "omissisAiuto": "Persona fuori dal tuo perimetro: il nome non si mostra.",
+    "programmi": "Programmi ({{count}})",
+    "programmi_one": "Programma ({{count}})",
+    "erroreCarica": "Non è stato possibile caricare il mentoring.",
+    "nessunProgramma": "Nessun programma di mentoring.",
+    "statoProgramma": "Stato del programma",
+    "nome": "Nome del programma",
+    "tipo": "Tipo",
+    "durataMesi": "Durata (mesi)",
+    "creaProgramma": "Crea il programma (in bozza)",
+    "mesi": "{{count}} mesi",
+    "mesi_one": "{{count}} mese",
+    "coppie": "Coppie mentore e allievo ({{count}})",
+    "coppie_one": "Coppia mentore e allievo ({{count}})",
+    "filtraProgramma": "Programma",
+    "tuttiProgrammi": "Tutti i programmi",
+    "senzaProgramma": "senza programma",
+    "statoCoppia": "Stato della coppia",
+    "frequenza": "Frequenza degli incontri",
+    "apriIncontri": "Incontri",
+    "chiudiIncontri": "Chiudi",
+    "nessunaCoppia": "Nessuna coppia.",
+    "statoIncontro": "Stato dell'incontro",
+    "voto": "Voto",
+    "senzaVoto": "—",
+    "minuti": "{{count}} minuti",
+    "minuti_one": "{{count}} minuto",
+    "nessunIncontro": "Nessun incontro.",
+    "quando": "Quando",
+    "durata": "Durata (minuti)",
+    "fissa": "Fissa l'incontro",
+    "errore": "Operazione non riuscita. Riprova.",
+    "tipi": {
+      "GENERAL": "Generale",
+      "LEADERSHIP": "Leadership",
+      "TECHNICAL": "Tecnico",
+      "MANAGEMENT": "Gestione",
+      "DEI": "Diversità e inclusione"
+    },
+    "statiProgramma": {
+      "DRAFT": "Bozza",
+      "ACTIVE": "Attivo",
+      "INACTIVE": "Sospeso",
+      "ARCHIVED": "Archiviato"
+    },
+    "statiCoppia": {
+      "PENDING": "Da avviare",
+      "ACTIVE": "Attiva",
+      "ON_HOLD": "In pausa",
+      "COMPLETED": "Conclusa",
+      "CANCELLED": "Annullata"
+    },
+    "frequenze": {
+      "WEEKLY": "Settimanale",
+      "BI_WEEKLY": "Ogni due settimane",
+      "MONTHLY": "Mensile",
+      "QUARTERLY": "Trimestrale",
+      "AD_HOC": "Quando serve"
+    },
+    "statiIncontro": {
+      "SCHEDULED": "Fissato",
+      "COMPLETED": "Svolto",
+      "CANCELLED": "Annullato",
+      "NO_SHOW": "Assente",
+      "RESCHEDULED": "Spostato"
+    }
+  },
+  "assessments": {
+    "titolo": "Valutazioni delle persone",
+    "descrizione": "Valutazioni del responsabile, a 360°, tra pari, di sé ed esterne, con i risultati per dimensione.",
+    "elenco": "Valutazioni ({{mostrati}} di {{totale}})",
+    "stato": "Stato",
+    "tutti": "Tutti",
+    "erroreCarica": "Non è stato possibile caricare le valutazioni.",
+    "nessuna": "Nessuna valutazione.",
+    "senzaPeriodo": "senza periodo",
+    "chiudi": "Chiudi",
+    "risultati": "Risultati",
+    "nessunRisultato": "Nessun risultato registrato.",
+    "dimensione": "Dimensione",
+    "punteggio": "Punteggio (0-100)",
+    "commento": "Commento",
+    "registraRisultato": "Registra il risultato",
+    "errore": "Operazione non riuscita. Riprova.",
+    "nuova": "Apri una valutazione",
+    "persona": "Persona valutata",
+    "tipo": "Tipo",
+    "dal": "Periodo dal",
+    "al": "Periodo al",
+    "apri": "Apri la valutazione",
+    "tipi": {
+      "MANAGER": "Del responsabile",
+      "THREE_SIXTY": "A 360°",
+      "PEER": "Tra pari",
+      "SELF": "Di sé",
+      "EXTERNAL": "Esterna"
+    },
+    "stati": {
+      "OPEN": "Aperta",
+      "IN_PROGRESS": "In corso",
+      "COMPLETED": "Conclusa",
+      "CANCELLED": "Annullata"
+    }
+  },
+  "consolidationVocabulary": {
+    "title": "Vocabolario comune",
+    "hint": "Le equivalenze fra il termine della tua azienda e quello del modello. Le approva la piattaforma.",
+    "row": "{{group}}: «{{tenant}}» corrisponde a «{{model}}»",
+    "statuses": {
+      "PROPOSTA": "Proposta",
+      "APPROVATA": "Approvata",
+      "RITIRATA": "Ritirata"
+    },
+    "approve": "Approva",
+    "withdraw": "Ritira"
+  },
+  "alignment": {
+    "title": "Allineamento al modello",
+    "description": "Tutte le 24 famiglie di dati della tua azienda messe a confronto con il modello della corsa, una voce alla volta. Per ogni voce l'agente propone una decisione: Unisco (stessa cosa con nomi diversi), Adotto (la prendiamo dal modello), Tengo (resta nostra), Tolgo (doppione o errore). Le decisioni si salvano in bozza e si approvano con il pulsante rosso: l'approvazione le registra, non cambia ancora i dati dell'azienda.",
+    "run": "Corsa del modello",
+    "measured": "Misura fatta il {{when}}",
+    "refresh": "Rimisura",
+    "measuring": "Misura della distanza in corso…",
+    "measuringDetail": "Confronto tutte le voci del modello con quelle dell'azienda: può richiedere qualche secondo.",
+    "saving": "Salvataggio delle decisioni in corso…",
+    "loadError": "Non riesco a leggere l'allineamento.",
+    "noRunsTitle": "Nessuna corsa del modello",
+    "noRuns": "Per allineare l'azienda serve una corsa del modello accolta nel registro delle corse, nella scheda Consolidamento.",
+    "pending": "Ci sono {{count}} decisioni in bozza non ancora approvate.",
+    "pending_one": "C'è 1 decisione in bozza non ancora approvata.",
+    "approve": "Approva le decisioni ({{count}})",
+    "approve_one": "Approva la decisione ({{count}})",
+    "discard": "Scarta le bozze",
+    "approveHint": "Approvare registra le decisioni nel database a nome tuo. I dati dell'azienda cambieranno dopo, con il motore dell'allineamento provato su una copia.",
+    "approved": "{{count}} decisioni approvate il {{when}}.",
+    "approved_one": "1 decisione approvata il {{when}}.",
+    "approvaTitle": "Approvare le decisioni in bozza?",
+    "approvaBody": "Le {{count}} decisioni in bozza diventano decisioni approvate, registrate a tuo nome. Nessun dato dell'azienda cambia adesso.",
+    "approvaBody_one": "La decisione in bozza diventa una decisione approvata, registrata a tuo nome. Nessun dato dell'azienda cambia adesso.",
+    "approvaConfirm": "Approva",
+    "scartaTitle": "Scartare le bozze?",
+    "scartaBody": "Le {{count}} decisioni in bozza si annullano; quelle già approvate restano come sono.",
+    "scartaBody_one": "La decisione in bozza si annulla; quelle già approvate restano come sono.",
+    "scartaConfirm": "Scarta",
+    "navAria": "Famiglie e domini dell'allineamento",
+    "overview": "Quadro d'insieme",
+    "cleanup": "Pulizia",
+    "cleanupDescription": "Le voci che l'agente propone di togliere: nomi che nell'azienda compaiono due volte nello stesso catalogo.",
+    "summary": "Su {{rows}} voci confrontate, {{same}} sono uguali, {{partial}} uguali in parte, {{different}} diverse, {{onlyModel}} solo nel modello e {{onlyTenant}} solo nell'azienda.",
+    "decisionsSummary": "Decisioni: {{drafts}} in bozza, {{approved}} approvate, {{stale}} su voci che non ci sono più.",
+    "families": {
+      "identita": "Identità",
+      "organizzazione": "Organizzazione",
+      "ruoli": "Ruoli",
+      "competenze": "Competenze",
+      "processi": "Processi",
+      "prestazione": "Prestazione",
+      "contratto": "Contratto",
+      "normativa": "Normativa",
+      "sviluppo": "Sviluppo",
+      "ricompensa": "Ricompensa",
+      "commesse": "Commesse",
+      "persone": "Persone",
+      "accesso": "Accesso"
+    },
+    "coverage": {
+      "GIRI": "Nei giri del consolidamento",
+      "MISURA": "Solo misurato"
+    },
+    "domainCounts": "{{rows}} voci: {{same}} uguali, {{partial}} parziali, {{different}} diverse, {{onlyModel}} solo nel modello, {{onlyTenant}} solo nell'azienda.",
+    "filterOutcome": "Esito",
+    "allOutcomes": "Tutti gli esiti",
+    "filterDecision": "Decisione",
+    "allDecisions": "Tutte le decisioni",
+    "search": "Cerca una voce",
+    "showEqual": "Mostra anche le uguali",
+    "shown": "{{count}} voci su {{total}}",
+    "shown_one": "{{count}} voce su {{total}}",
+    "acceptProposals": "Accetta le proposte di queste voci ({{count}})",
+    "acceptProposals_one": "Accetta la proposta di questa voce",
+    "rejected": "{{count}} voci non salvate: {{reason}}",
+    "rejected_one": "1 voce non salvata: {{reason}}",
+    "noRows": "Nessuna voce da decidere con questi filtri.",
+    "none": "Nessuna",
+    "choose": "Scegli…",
+    "decidedOf": "{{done}} su {{total}}",
+    "cols": {
+      "domain": "Dominio",
+      "model": "Voce del modello",
+      "tenant": "Voce dell'azienda",
+      "note": "Differenza",
+      "outcome": "Esito",
+      "proposal": "Proposta",
+      "decision": "Decisione",
+      "status": "Stato",
+      "decided": "Decise",
+      "coverage": "Copertura"
+    },
+    "outcomes": {
+      "uguale": "Uguale",
+      "parziale": "Parziale",
+      "diverso": "Diverso",
+      "solo_modello": "Solo nel modello",
+      "solo_tenant": "Solo nell'azienda"
+    },
+    "decisions": {
+      "UNISCO": "Unisco",
+      "ADOTTO": "Adotto",
+      "TENGO": "Tengo",
+      "TOLGO": "Tolgo"
+    },
+    "statuses": {
+      "daDecidere": "Da decidere",
+      "bozza": "In bozza",
+      "approvata": "Approvata",
+      "allineata": "Allineata"
     }
   }
 }

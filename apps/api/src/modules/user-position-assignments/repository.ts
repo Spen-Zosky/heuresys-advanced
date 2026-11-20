@@ -4,7 +4,9 @@
  * approvazione (approvals/effects/position-assignment.ts), non passano da qui (D4=B).
  */
 import type { Pool, PoolClient } from "pg";
+import { cognomeNomeSql } from "../../lib/nome-persona-sql.js";
 import type { UserPositionAssignmentListQuery } from "@heuresys/shared";
+import { toDateOnly } from "../../lib/date-only.js";
 
 export type DbConnector = Pool | PoolClient;
 
@@ -12,7 +14,7 @@ const SELECT = `
   SELECT a.user_position_assignment_id AS assignment_id,
          a.user_position_assignment_tenant_id AS tenant_id,
          a.user_position_assignment_user_id AS user_id,
-         u.user_display_name AS user_display_name,
+         ${cognomeNomeSql('u')} AS user_display_name,
          a.user_position_assignment_position_id AS position_id,
          p.position_title AS position_title,
          a.user_position_assignment_kind AS kind,
@@ -37,13 +39,20 @@ interface Row {
   position_title: string | null;
   kind: string;
   fte: string;
-  start_date: string;
-  end_date: string | null;
+  start_date: Date | string;
+  end_date: Date | string | null;
   status: string;
   notes: string | null;
   origine_dato: string;
-  created_at: string;
-  updated_at: string;
+  created_at: Date | string;
+  updated_at: Date | string;
+}
+
+/** Il driver `pg` consegna `date` e `timestamptz` come `Date`; il contratto vuole stringhe
+ *  (`startDate` di calendario, `createdAt` ISO). Senza questa conversione ogni lista con
+ *  almeno una riga violava il contratto e rispondeva 500 (giro del 2026-11-19). */
+function toIso(d: Date | string): string {
+  return d instanceof Date ? d.toISOString() : new Date(d).toISOString();
 }
 
 function toDto(r: Row) {
@@ -56,13 +65,13 @@ function toDto(r: Row) {
     positionTitle: r.position_title,
     kind: r.kind,
     fte: Number(r.fte),
-    startDate: r.start_date,
-    endDate: r.end_date,
+    startDate: toDateOnly(r.start_date)!,
+    endDate: toDateOnly(r.end_date),
     status: r.status,
     notes: r.notes,
     origineDato: r.origine_dato,
-    createdAt: r.created_at,
-    updatedAt: r.updated_at,
+    createdAt: toIso(r.created_at),
+    updatedAt: toIso(r.updated_at),
   };
 }
 

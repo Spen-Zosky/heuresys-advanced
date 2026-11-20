@@ -145,7 +145,7 @@ export async function listGaps(
   const off = params.length;
   const res = await q.query<Row>(
     `SELECT ${COLS},
-            (SELECT u.user_display_name FROM sys.sys_users u WHERE u.user_id = sys.sys_learning_gaps.learning_gap_user_id) AS user_name,
+            (SELECT COALESCE(NULLIF(concat_ws(', ', NULLIF(trim(u.user_last_name), ''), NULLIF(trim(u.user_first_name), '')), ''), u.user_display_name) FROM sys.sys_users u WHERE u.user_id = sys.sys_learning_gaps.learning_gap_user_id AND u.user_tenant_id = sys.sys_learning_gaps.learning_gap_tenant_id) AS user_name,
             (SELECT p.position_title FROM sys.sys_positions p WHERE p.position_id = sys.sys_learning_gaps.learning_gap_position_id) AS position_title,
             (SELECT s.skill_name FROM sys.sys_skills s WHERE s.skill_id = sys.sys_learning_gaps.learning_gap_skill_id) AS skill_name
        FROM sys.sys_learning_gaps ${whereClause}
@@ -370,7 +370,7 @@ const PLAN_COLS = `gap_closure_plan_id, gap_closure_plan_user_id, gap_closure_pl
   gap_closure_plan_milestones, gap_closure_plan_status, gap_closure_plan_owner_user_id,
   gap_closure_plan_target_completion_date::text AS gap_closure_plan_target_completion_date,
   created_at, updated_at,
-  (SELECT u.user_display_name FROM sys.sys_users u
+  (SELECT COALESCE(NULLIF(concat_ws(', ', NULLIF(trim(u.user_last_name), ''), NULLIF(trim(u.user_first_name), '')), ''), u.user_display_name) FROM sys.sys_users u
     WHERE u.user_id = gap_closure_plan_user_id AND u.user_tenant_id = gap_closure_plan_tenant_id) AS user_name`;
 
 export async function listClosurePlans(
@@ -431,7 +431,7 @@ export async function listAnalysisResults(
     `SELECT gap_analysis_result_id, gap_analysis_result_user_id, gap_analysis_result_position_id,
             gap_analysis_result_kind, gap_analysis_result_overall_score, gap_analysis_result_payload,
             gap_analysis_result_computed_at,
-            (SELECT u.user_display_name FROM sys.sys_users u
+            (SELECT COALESCE(NULLIF(concat_ws(', ', NULLIF(trim(u.user_last_name), ''), NULLIF(trim(u.user_first_name), '')), ''), u.user_display_name) FROM sys.sys_users u
               WHERE u.user_id = gap_analysis_result_user_id AND u.user_tenant_id = gap_analysis_result_tenant_id) AS user_name
        FROM sys.sys_gap_analysis_results ${wc}
       ORDER BY gap_analysis_result_computed_at DESC LIMIT $${lim} OFFSET $${off}`, params);

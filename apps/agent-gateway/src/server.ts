@@ -31,13 +31,14 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import { ApprovalRegistry, type ApprovalDecision } from "./approval-bridge.js";
 import { DbAuditSink, FileAuditSink, type AuditSink } from "./audit-sink.js";
 import { auditPool } from "./db-pool.js";
-import { HeuresysClient, chiSei, chiediGettoneAgente, registraDecisione } from "./heuresys-client.js";
+import { EsitiLetture } from "./omissis.js";
+import { HeuresysClient, chiEDove, chiSei, chiediGettoneAgente, registraDecisione } from "./heuresys-client.js";
 import { ConversazioneNonTrovata, ConversazioneOccupata, RegistroConversazione } from "./conversazione.js";
 import { eseguiGiro } from "./giro.js";
 import { PonteVista, RegistroEsiti, contestoPagina, leggiEsito, leggiPagina, notaSugliEsiti } from "./comandi-vista.js";
 import { ContatorePersone } from "./persone-distinte.js";
 import { caricaSoglie } from "./soglie-persone.js";
-import { ConversazioniAperte, leggiLimiti, modelloAgenti, personeAmmesse } from "./limiti.js";
+import { ConversazioniAperte, ammessoAllAssistente, leggiLimiti, modelloAgenti } from "./limiti.js";
 import { DbRegistroCapacita } from "./capacita.js";
 import { runHrAgent } from "./sdk-agent.js";
 import { servi, type RichiestaProposta } from "./research-propose.js";
@@ -356,15 +357,17 @@ const server = createServer(async (req, res) => {
         res.end(JSON.stringify({ error: "NO_SESSION", message: "forward hrx_access cookie" }));
         return;
       }
-      // ADR-0056 D3: solo le persone nominate. Chi non è riconosciuto o non è nell'elenco non
-      // arriva al modello (fail-closed: elenco vuoto = nessuno).
-      const chiParla = await chiSei(HEURESYS_API, { cookieAccess });
+      // ADR-0056 D3: solo le persone nominate, o le persone dei tenant nominati (Enzo che entra con
+      // l'utenza di una persona del tenant). Chi non è riconosciuto o non è ammesso non arriva al
+      // modello (fail-closed: elenchi vuoti = nessuno).
+      const chiParla = await chiEDove(HEURESYS_API, { cookieAccess });
       if (!chiParla) {
         res.writeHead(401, { "content-type": "application/json" });
         res.end(JSON.stringify({ error: "SESSION_NOT_RECOGNISED" }));
         return;
       }
-      if (!personeAmmesse().has(chiParla)) {
+      if (!ammessoAllAssistente(chiParla)) {
+        console.warn(`[agent] persona non ammessa: ${chiParla.userId} (tenant ${chiParla.tenantId ?? "piattaforma"})`);
         res.writeHead(403, { "content-type": "application/json" });
         res.end(JSON.stringify({ error: "PERSON_NOT_ADMITTED" }));
         return;
@@ -419,6 +422,9 @@ const server = createServer(async (req, res) => {
         // quello del registro no (le risposte del registro non sono letture dell'agente).
         const client = new HeuresysClient({ baseUrl: HEURESYS_API, session: gettone.session, agente: AGENTE_ASSISTENTE });
         const clientRegistro = new HeuresysClient({ baseUrl: HEURESYS_API, session: gettone.session, agente: AGENTE_ASSISTENTE });
+        // Le letture del giro (omissis.ts): se sono tutte negate, la risposta è il messaggio fisso.
+        const esitiLetture = new EsitiLetture();
+        client.collegaEsiti(esitiLetture);
 
         // ADR-0056 D4 (T6b): la conversazione e il giro stanno nel database, attraverso l'API.
         // Se non si riesce a salvarli il giro non parte: una conversazione che la persona non
@@ -486,6 +492,21 @@ const server = createServer(async (req, res) => {
           approvalTimeoutMs: APPROVAL_TIMEOUT_MS,
           scrivi,
           nota: () => notaSugliEsiti(vista.esiti),
+          rifiuto: () => esitiLetture.rifiuto(),
+          attesa: { sospendi: posto.sospendi, riprendi: posto.riprendi },
+          // Il costo e la durata del giro vanno nel registro delle chiamate dell'agente. Col gettone
+          // d'agente: l'API non accetta questa scrittura da nessun altro (403).
+          chiamata: async (c) => {
+            await clientRegistro.call("POST", "/agent-requests/calls", {
+              agentCode: AGENTE_ASSISTENTE,
+              model: MODELLO,
+              outcome: c.outcome,
+              durationMs: c.durationMs,
+              inputTokens: c.inputTokens,
+              outputTokens: c.outputTokens,
+              costUsd: c.costUsd,
+            });
+          },
           esegui: (o) =>
             runHrAgent(mandato, client, {
               approve: o.approve,

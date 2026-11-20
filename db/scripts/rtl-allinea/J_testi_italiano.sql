@@ -611,7 +611,7 @@ CREATE TEMP TABLE ev ON COMMIT DROP AS
 SELECT user_timeline_event_id id, user_timeline_event_summary vecchio,
  CASE
   WHEN s ~ '^Completed course: .* \([a-z_]+\)$' THEN 'Corso completato: ' || pg_temp.t_corso(regexp_replace(s,'^Completed course: (.*) \(([a-z_]+)\)$','\1')) || ' (' || pg_temp.t_cat(regexp_replace(s,'^Completed course: (.*) \(([a-z_]+)\)$','\2')) || ')'
-  WHEN s ~ '^Certification earned: ' THEN 'Certificazione conseguita: ' || substr(s, 24)
+  WHEN s ~ '^Certification earned: ' THEN 'Certificazione conseguita: ' || substr(s, 23)
   WHEN s ~ '^Hired as ' THEN 'Assunto come ' || pg_temp.t_titolo(substr(s, 10))
   WHEN s ~ '^level_realignment: Reassignment to CCNL_CRED_2024 tabellare levels \(.*\)$' THEN 'Riallineamento di livello: assegnazione ai livelli tabellari del CCNL Credito 2024 (' || pg_temp.t_titolo(regexp_replace(s,'^.*\((.*)\)$','\1')) || ')'
   WHEN s ~ '^salary_recalculation: ' THEN 'Ricalcolo della retribuzione: livello tabellare, scatti di anzianità e adeguamento individuale'
@@ -633,3 +633,9 @@ UPDATE sys.sys_leave_balance_transactions SET transaction_days_amount = abs(tran
 UPDATE sys.sys_leave_balance_transactions SET transaction_days_amount = -abs(transaction_days_amount) WHERE transaction_type='USAGE' AND transaction_days_amount>0;
 COMMIT;
 SELECT 'J ok' esito, (SELECT count(*) FROM staging.rtl_allinea_testi_undo) voci_nel_giornale, (SELECT coalesce(sum(righe),0) FROM staging.rtl_allinea_testi_undo) righe_tradotte;
+-- Guardia vettori (classe J3, 19/11): se un testo con vettore e' cambiato e il vettore non e' stato ricalcolato, esce rosso. Rinviabile con -v vettori_rinvia=1 (lo fa applica.sh, che chiude con vettori.sh --verifica).
+\if :{?vettori_rinvia}
+\else
+DO $$ DECLARE n int; BEGIN SELECT count(*) INTO n FROM sys.v_embedding_impronta_non_combacia;
+  IF n > 0 THEN RAISE EXCEPTION 'J: % vettori non combaciano piu'' col testo, ricalcola: bash db/scripts/rtl-allinea/vettori.sh --ricalcola', n; END IF; END $$;
+\endif

@@ -13,6 +13,7 @@ import type {
   EngagementPulseResponse,
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { RiscontriEPiani } from "./riscontri-piani";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 import { useEnumLabel } from "@/lib/enum-labels";
@@ -115,7 +116,7 @@ export default function EngagementPage() {
       {/* Pulse trend */}
       <Card data-testid="engagement-pulse">
         <CardHeader>
-          <CardTitle>{t("engagement.pulse.cardTitle")}</CardTitle>
+          <CardTitle as="h2">{t("engagement.pulse.cardTitle")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {pulse.isLoading ? (
@@ -156,6 +157,7 @@ export default function EngagementPage() {
           )}
         </CardContent>
       </Card>
+      <RiscontriEPiani />
     </main>
   );
 }

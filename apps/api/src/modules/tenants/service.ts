@@ -25,8 +25,10 @@ import type {
   CreateTenantBody,
   UpdateTenantBody,
   IndustryCode,
+  TenantContractsResponse,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
+import { contrattiDelTenant } from "./contracts.js";
 
 /**
  * For non-platform actors a tenantId is required to enforce ownership; if
@@ -81,6 +83,13 @@ export const tenantsService = {
     const tenant = await repo.findTenantById(pool, id);
     if (!tenant) throw new NotFoundError("Tenant");
     return tenant;
+  },
+
+  async contracts(actor: ActorContext, id: string): Promise<TenantContractsResponse> {
+    if (!puoVedereCliente(actor, id)) throw new NotFoundError("Tenant");
+    const r = await contrattiDelTenant(pool, id);
+    if (!r) throw new NotFoundError("Tenant");
+    return r;
   },
 
   async create(_actor: ActorContext, body: CreateTenantBody): Promise<Tenant> {

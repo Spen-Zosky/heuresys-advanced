@@ -206,6 +206,14 @@ export const DashboardBlockRowSchema = z.object({
   label: z.string(),
   detail: z.string().nullable(),
   value: z.number().nullable(),
+  /**
+   * C22: negli elenchi di eventi, il tipo e il soggetto da cui il web compone la frase nella lingua
+   * di chi guarda («Corso completato: …» / «Course completed: …»), e il giorno in ISO. Assenti,
+   * la riga e' la sola `label`.
+   */
+  kind: z.string().optional(),
+  subject: z.string().optional(),
+  occurredAt: z.string().optional(),
 });
 export type DashboardBlockRow = z.infer<typeof DashboardBlockRowSchema>;
 

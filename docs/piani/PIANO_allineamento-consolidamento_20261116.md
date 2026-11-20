@@ -93,7 +93,7 @@ Serve Enzo: l'accettazione dell'ADR (A1); le scelte sugli aumenti di livello seg
 
 Vuoto all'apertura. Ciò che emerge durante l'esecuzione si scrive qui e si propone a Enzo una volta, come «fuori da questo ciclo: lo vuoi nel prossimo?».
 
-- S1 (2026-11-16, voce A2): `apps/api/src/modules/tenant-consolidation/sorgenti.ts` legge l'indirizzo ESCO delle competenze del modello dai metadati, vuoti per 443 competenze su 443, invece che dalla colonna `blueprint_content_skill_esco_uri`, piena per 443 su 443; lo stesso per `job_role_code` ed `esco_occupation_uri` delle posizioni (vuoti per 109 su 109). Il giro zero per chiave del consolidamento non abbina mai per ESCO. Query in `docs/piani/allineamento-consolidamento/A2_distanza_RTL_20261116.md`, sezione «Scoperta».
+- S1 (2026-11-16, voce A2): `apps/api/src/modules/tenant-consolidation/sorgenti.ts` legge l'indirizzo ESCO delle competenze del modello dai metadati, vuoti per 443 competenze su 443, invece che dalla colonna `blueprint_content_skill_esco_uri`, piena per 443 su 443; lo stesso per `job_role_code` ed `esco_occupation_uri` delle posizioni (vuoti per 109 su 109). Il giro zero per chiave del consolidamento non abbina mai per ESCO. Query in `docs/piani/allineamento-consolidamento/A2_distanza_RTL_20261116.md`, sezione «Scoperta». Corretta il 2026-11-18 dal piano `PIANO_scheda-allineamento_20261118.md`, voce SA4: i giri leggono le colonne, i metadati restano come ripiego.
 
 ## Chiusura
 

@@ -315,20 +315,30 @@ describe("#57 F3 — organizational health index", () => {
     expect(campione).not.toBe(Number(fermo[0]?.n));
   });
 
-  it("la scala delle risposte è 1..10: se comparisse una rilevazione 1..5 la normalizzazione mentirebbe", async () => {
-    // La scala non è dichiarata da nessuna parte (niente CHECK, `survey_question_options` è
-    // vuota): il codice normalizza rating su 1..10 perché è ciò che i dati mostrano. Questa
-    // è la prova che quel presupposto regge ancora — e l'avviso se un giorno smette.
-    const { rows } = await pool.query<{ titolo: string; massimo: string }>(
+  it("la scala delle risposte è 1..10 dove la domanda non ne dichiara un'altra, e nessun voto la supera", async () => {
+    // Fino alla 000497 la scala non era dichiarata da nessuna parte e il codice normalizzava su
+    // 1..10 perché è ciò che i dati mostravano. Dalla 000497 i sondaggi del modello vecchio
+    // (scala 5) stanno qui con la scala scritta in `survey_question_options.scale`, e la lettura
+    // la usa. Le due prove: senza scala dichiarata resta vero 1..10; con la scala, nessun voto la supera.
+    const senza = await pool.query<{ titolo: string; massimo: string }>(
       `SELECT s.survey_title AS titolo, max(r.survey_response_rating_value)::text AS massimo
          FROM sys.sys_survey_responses r
          JOIN sys.sys_surveys s ON s.survey_id = r.survey_response_survey_id
          JOIN sys.sys_survey_questions q ON q.survey_question_id = r.survey_response_question_id
         WHERE q.survey_question_type = 'rating' AND r.survey_response_rating_value IS NOT NULL
+          AND NOT COALESCE(q.survey_question_options ? 'scale', false)
         GROUP BY s.survey_title
        HAVING max(r.survey_response_rating_value) <= 5`,
     );
-    expect(rows.map((r) => `${r.titolo} (max ${r.massimo})`)).toEqual([]);
+    expect(senza.rows.map((r) => `${r.titolo} (max ${r.massimo})`)).toEqual([]);
+    const oltre = await pool.query<{ n: string }>(
+      `SELECT count(*)::text AS n
+         FROM sys.sys_survey_responses r
+         JOIN sys.sys_survey_questions q ON q.survey_question_id = r.survey_response_question_id
+        WHERE q.survey_question_options->>'scale' ~ '^[0-9]+$'
+          AND r.survey_response_rating_value > (q.survey_question_options->>'scale')::int`,
+    );
+    expect(Number(oltre.rows[0]!.n)).toBe(0);
   });
 
   it("is deterministic: two calls give the same scores", async () => {

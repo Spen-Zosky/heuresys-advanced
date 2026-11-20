@@ -96,13 +96,14 @@ describe("/v1/career-path-steps integration", () => {
     expect((r.json() as { error: { code: string } }).error.code).toBe("NOT_FOUND");
   });
 
-  it("Parent path with steps cannot be deleted → 409 CAREER_PATH_HAS_STEPS", async () => {
+  it("Parent path with steps cannot be deleted → 410 ROUTE_RETIRED (ondata 5)", async () => {
     const r = await suite.app.inject({
       method: "DELETE", url: `/v1/career-paths/${pathId}`,
       headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken },
     });
-    expect(r.statusCode).toBe(409);
-    expect((r.json() as { error: { code: string } }).error.code).toBe("CAREER_PATH_HAS_STEPS");
+    // Ondata 5 (2026-11-18): la cancellazione è ritirata prima ancora del controllo d'uso.
+    expect(r.statusCode).toBe(410);
+    expect((r.json() as { error: { code: string } }).error.code).toBe("ROUTE_RETIRED");
   });
 
   it("PATCH duration then DELETE step", async () => {
@@ -127,6 +128,6 @@ describe("/v1/career-path-steps integration", () => {
       method: "DELETE", url: `/v1/career-path-steps/${sid}`,
       headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken },
     });
-    expect(del.statusCode).toBe(204);
+    expect(del.statusCode).toBe(410); // ondata 5: cancellazione ritirata, la riga resta
   });
 });

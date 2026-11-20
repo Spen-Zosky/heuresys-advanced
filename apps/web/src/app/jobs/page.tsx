@@ -49,7 +49,7 @@ export default function PublicJobsPage() {
         {error ? (
           <p className="text-sm text-danger" data-testid="jobs-error">{t("jobs.error")}</p>
         ) : data === null ? (
-          <div className="flex justify-center py-12" data-testid="jobs-loading"><Spinner /></div>
+          <div className="flex justify-center py-12" data-testid="jobs-loading"><Spinner label={t("shell:ui.loading")} /></div>
         ) : data.items.length === 0 ? (
           <EmptyState data-testid="jobs-empty" title={t("jobs.emptyTitle")} description={t("jobs.emptyDesc")} />
         ) : (

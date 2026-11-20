@@ -19,6 +19,9 @@
     "formTitle": "Compila il sondaggio",
     "submit": "Invia risposte",
     "submitting": "Invio…",
+    "ratingPlaceholder": "0 – 10",
+    "ratingScale": "Dai un voto da 0 a 10.",
+    "submitHint": "Rispondi ad almeno una domanda per poter inviare.",
     "submitSuccess": "Risposte inviate.",
     "submitError": "Invio non riuscito."
   },
@@ -296,12 +299,24 @@
     "emptyDesc": "Non hai notifiche al momento.",
     "feedTitle": "Notifiche",
     "messages": {
-      "APPROVAL_REMINDER": { "subject": "Approvazione in attesa: {{title}}", "body": "Una richiesta di approvazione assegnata a te ha superato la scadenza. Aprila per decidere." },
-      "APPROVAL_OVERDUE": { "subject": "Approvazione scaduta: {{title}}", "body": "Una richiesta che hai aperto è ferma da {{cycles}} cicli senza decisione dell'approvatore." },
+      "APPROVAL_REMINDER": {
+        "subject": "Approvazione in attesa: {{title}}",
+        "body": "Una richiesta di approvazione assegnata a te ha superato la scadenza. Aprila per decidere."
+      },
+      "APPROVAL_OVERDUE": {
+        "subject": "Approvazione scaduta: {{title}}",
+        "body": "Una richiesta che hai aperto è ferma da {{cycles}} cicli senza decisione dell'approvatore."
+      },
       "GAP_CLOSURE_DUE": {
         "subject": "Gap di competenze da colmare",
         "body": "È stato rilevato un gap di competenze per la tua posizione ({{segment}}).",
-        "segment": { "MAJOR_GAP": "gap rilevante", "MODERATE_GAP": "gap moderato", "MINOR_GAP": "gap lieve", "ALIGNED": "allineato", "UNKNOWN": "gap da valutare" }
+        "segment": {
+          "MAJOR_GAP": "gap rilevante",
+          "MODERATE_GAP": "gap moderato",
+          "MINOR_GAP": "gap lieve",
+          "ALIGNED": "allineato",
+          "UNKNOWN": "gap da valutare"
+        }
       }
     },
     "approvals": {
@@ -669,7 +684,56 @@
     "confirmCardTitle": "Conferma il nuovo metodo di verifica",
     "confirmInstruction": "Per sicurezza ti abbiamo inviato un codice di conferma via email a {{email}}. Inseriscilo per attivare il nuovo metodo.",
     "confirmCodeLabel": "Codice di conferma ricevuto via email",
-    "confirmVerifiedActive": "Metodo di verifica confermato e attivo"
+    "confirmVerifiedActive": "Metodo di verifica confermato e attivo",
+    "privacy": {
+      "notificheTitolo": "Come ricevi gli avvisi",
+      "tipo": "Avviso",
+      "nellApp": "Nell'applicazione",
+      "email": "Per email",
+      "erroreCarica": "Non è stato possibile caricare le preferenze.",
+      "erroreSalva": "Salvataggio non riuscito. Riprova.",
+      "titolo": "Privacy: consensi e i tuoi dati",
+      "dal": "ultima modifica {{data}}",
+      "dato": "Dato",
+      "nonDato": "Non dato",
+      "togli": "Togli il consenso",
+      "dai": "Dai il consenso",
+      "esporta": "Scarica i miei dati",
+      "esportando": "Preparazione dei dati…",
+      "esportaSpiega": "Un file con tutti i dati che la piattaforma conserva su di te (GDPR, articoli 15 e 20).",
+      "esportato": "File scaricato.",
+      "erroreEsporta": "Esportazione non riuscita. Riprova.",
+      "tipi": {
+        "TRAINING_DEADLINE": "Scadenze della formazione",
+        "ASSESSMENT_REQUEST": "Richieste di valutazione",
+        "MANAGER_FEEDBACK_READY": "Riscontro del responsabile pronto",
+        "CAREER_TARGET_STATUS": "Obiettivi di carriera",
+        "GAP_CLOSURE_DUE": "Azioni sui divari di competenza",
+        "SYSTEM": "Avvisi di sistema",
+        "APPROVAL_REQUEST": "Richieste di approvazione",
+        "APPROVAL_REMINDER": "Promemoria di approvazione",
+        "APPROVAL_OVERDUE": "Approvazioni in ritardo"
+      },
+      "finalita": {
+        "ANALYTICS_PROFILING": "Analisi e profilazione",
+        "MARKETING_COMMUNICATIONS": "Comunicazioni promozionali",
+        "INTERNAL_PHOTO_USE": "Uso interno della fotografia",
+        "THIRD_PARTY_SHARING": "Condivisione con terzi"
+      }
+    },
+    "recupero": {
+      "titolo": "Codici di recupero",
+      "restano": "Ti restano {{count}} codici di recupero.",
+      "restano_one": "Ti resta {{count}} codice di recupero.",
+      "erroreCarica": "Non è stato possibile leggere i codici di recupero.",
+      "spiega": "Servono per entrare se perdi il dispositivo del secondo fattore. Rigenerarli annulla quelli vecchi.",
+      "conferma": "Generare nuovi codici? Quelli che hai ora smetteranno di funzionare.",
+      "generando": "Generazione…",
+      "genera": "Genera nuovi codici",
+      "errore": "Generazione non riuscita. Riprova.",
+      "unaVolta": "Conservali adesso: non verranno mostrati di nuovo.",
+      "salvati": "Li ho conservati"
+    }
   },
   "skills": {
     "title": "Le mie skill",

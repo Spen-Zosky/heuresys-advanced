@@ -16,6 +16,7 @@
  * non si salva, sarebbe peggio di un campo numerico onesto.
  */
 
+import { Codice } from "@/components/codice";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -133,7 +134,7 @@ export function LearningPathsPanel() {
   });
 
   const columns: DataColumn<LearningPath>[] = [
-    { header: t("shared.code"), cell: (p) => <span className="font-mono text-xs">{p.code}</span> },
+    { header: t("shared.code"), cell: (p) => <Codice value={p.code} /> },
     { header: t("shared.name"), cell: (p) => <span className="font-medium text-foreground">{p.name}</span> },
     {
       header: t("learning.paths.targetOutcome"),
@@ -164,7 +165,7 @@ export function LearningPathsPanel() {
     <>
       <Card data-testid="learning-paths-panel">
         <CardHeader>
-          <CardTitle className="flex items-center justify-between gap-3">
+          <CardTitle as="h2" className="flex items-center justify-between gap-3">
             <span>
               {t("learning.paths.title")}
               <span className="ml-2 text-sm font-normal text-muted-foreground" data-testid="learning-paths-count">
@@ -437,7 +438,7 @@ function LearningPathStepsPanel({ path }: { path: LearningPath }) {
   return (
     <Card data-testid="learning-path-steps-panel">
       <CardHeader>
-        <CardTitle>
+        <CardTitle as="h2">
           {t("learning.steps.title")}
           <span className="ml-2 text-sm font-normal text-muted-foreground">
             {path.name} · {items.length}

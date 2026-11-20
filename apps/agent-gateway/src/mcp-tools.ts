@@ -16,6 +16,8 @@ import { z } from "zod";
 import type { HeuresysClient } from "./heuresys-client.js";
 import type { AtlasOperationResolver } from "./atlas-resolver.js";
 import type { PonteVista } from "./comandi-vista.js";
+import { caricaEsclusi, concettiPer } from "./concetti-esclusi.js";
+import { letturaNegata } from "./omissis.js";
 
 /**
  * Sostituisce i `:segnaposto` del percorso con i parametri, e rifiuta ciò che non torna.
@@ -49,7 +51,12 @@ export function bindPath(template: string, params: Record<string, unknown>): str
 // passa. Il test `mcp-tools-list.test.ts` chiama `tools/list` sul server VERO: se torna a
 // lanciare, e' lui a dirlo, non la prova live. Dal 2026-10-30 (SDK 0.3.314, zod 4.6.7) il
 // crash non si riproduce piu' e la controprova lo verifica; qui si resta su `catchall`.
-export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOperationResolver, vista?: PonteVista) {
+export function buildHeuresysMcp(
+  client: HeuresysClient,
+  operations?: AtlasOperationResolver,
+  vista?: PonteVista,
+  esclusi: Record<string, string> = caricaEsclusi(),
+) {
   // A-14: l'agente sa da dove viene ciò che legge. Se l'API ha dichiarato l'origine del dato
   // (nativo, importato, ibrido, misto), la risposta la porta in un secondo blocco.
   const ok = (d: unknown) => {
@@ -62,18 +69,19 @@ export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOpera
     };
   };
 
-  const rd = (n: string, p: string) =>
-    tool(n, `GET ${p}`, {}, async () => ok(await client.call("GET", p)));
-  const rdId = (n: string, base: string) =>
-    tool(n, `GET ${base}/:id`, { id: z.string() }, async (a: { id: string }) =>
-      ok(await client.call("GET", `${base}/${a.id}`)),
-    );
   /** A-16: una lettura con filtri facoltativi in querystring (paginazione, soggetto, periodo). */
   const filtri = z.object({}).catchall(z.union([z.string(), z.number(), z.boolean()])).optional();
   const conQuery = (p: string, q?: Record<string, string | number | boolean>) => {
     const qs = new URLSearchParams(Object.entries(q ?? {}).map(([k, v]) => [k, String(v)] as [string, string])).toString();
     return qs ? `${p}?${qs}` : p;
   };
+  const rd = (n: string, p: string) =>
+    tool(n, `GET ${p} — filtri facoltativi in query (nomi in hrx_concept_describe)`, { query: filtri }, async (a: { query?: Record<string, string | number | boolean> }) =>
+      ok(await client.call("GET", conQuery(p, a.query))));
+  const rdId = (n: string, base: string) =>
+    tool(n, `GET ${base}/:id`, { id: z.string() }, async (a: { id: string }) =>
+      ok(await client.call("GET", `${base}/${encodeURIComponent(a.id)}`)),
+    );
   const rdQ = (n: string, descr: string, p: string) =>
     tool(n, `${descr} — GET ${p}`, { query: filtri }, async (a: { query?: Record<string, string | number | boolean> }) =>
       ok(await client.call("GET", conQuery(p, a.query))),
@@ -113,19 +121,31 @@ export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOpera
     ? [
         tool(
           "hrx_concepts_search",
-          "Elenca i concetti di dominio che l'agente puo' interrogare (perimetri aperti). " +
-            "Filtro testuale facoltativo. Ritorna id e operazioni disponibili.",
+          "Elenca i concetti di dominio che l'agente puo' interrogare. Filtro testuale facoltativo, " +
+            "anche in italiano (retribuzione, ferie, persone, segnalazioni…). Ritorna id e operazioni; " +
+            "i concetti vietati alla persona compaiono con accesso NON_AUTORIZZATO. Senza corrispondenze " +
+            "ritorna l'elenco completo degli id.",
           { query: z.string().optional() },
           async (a: { query?: string }) => {
-            const q = (a.query ?? "").trim().toLowerCase();
-            const ids = operations
-              .conceptIds()
-              .filter((id) => q === "" || id.toLowerCase().includes(q));
+            const tutti = operations.conceptIds();
+            // Prova dal vivo del 2026-11-20: la ricerca confrontava solo gli id inglesi, e una
+            // domanda in italiano concludeva che i dati «non si possono leggere».
+            const testoDi = (id: string) =>
+              Object.values(operations.operationsOf(id)).map((o) => `${o.path} ${o.permission ?? ""}`).join(" ");
+            const trovati = concettiPer(a.query ?? "", tutti, testoDi);
+            const vietati = (a.query ?? "").trim() === "" ? [] : concettiPer(a.query ?? "", Object.keys(esclusi));
+            // Una ricerca che porta SOLO a concetti vietati è una lettura negata: il rifiuto fisso
+            // lo decide il gateway (omissis.ts), non il modello.
+            if (vietati.length > 0 && trovati.length === 0) client.segnaLetturaNegata();
             return ok({
-              concepts: ids.map((id) => ({
+              concepts: (trovati.length > 0 || vietati.length > 0 ? trovati : tutti).map((id) => ({
                 conceptId: id,
                 operations: Object.keys(operations.operationsOf(id)).sort(),
               })),
+              ...(vietati.length > 0
+                ? { vietati: vietati.map((id) => ({ conceptId: id, accesso: "NON_AUTORIZZATO", ...letturaNegata() })) }
+                : {}),
+              ...(trovati.length === 0 && vietati.length === 0 ? { nota: "nessuna corrispondenza: ecco tutti i concetti" } : {}),
             });
           },
         ),
@@ -135,31 +155,52 @@ export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOpera
             "e permesso richiesto. Cio' che non compare qui non e' invocabile.",
           { conceptId: z.string() },
           async (a: { conceptId: string }) => {
+            if (Object.prototype.hasOwnProperty.call(esclusi, a.conceptId)) {
+              client.segnaLetturaNegata();
+              return ok({ conceptId: a.conceptId, known: true, accesso: "NON_AUTORIZZATO", ...letturaNegata() });
+            }
             const ops = operations.operationsOf(a.conceptId);
             // Un concetto ignoto NON e' un elenco vuoto: la differenza fra «non esiste» e
             // «esiste e non fa nulla» e' esattamente cio' che il modello deve poter dire.
             if (Object.keys(ops).length === 0) {
               return ok({ conceptId: a.conceptId, known: false, operations: {} });
             }
-            return ok({ conceptId: a.conceptId, known: true, operations: ops });
+            // I filtri di query di ogni lettura (dal contratto dell'API): senza, il modello non sa
+            // che esiste, per esempio, `userId` e scarica 981 righe invece di chiedere quelle giuste.
+            const specifica = await client.filtriDelleLetture();
+            const radice = operations.baseOf(a.conceptId);
+            const conFiltri = Object.fromEntries(
+              Object.entries(ops).map(([id, op]) => {
+                const percorso = op.path === "/" ? "" : op.path.replace(/:([A-Za-z0-9_]+)/g, "{$1}");
+                const base = radice === "/" ? "" : radice;
+                const q = op.method.toUpperCase() === "GET" ? specifica.get(`/v1${base}${percorso}`) : undefined;
+                return [id, q ? { ...op, query: q } : op];
+              }),
+            );
+            return ok({ conceptId: a.conceptId, known: true, operations: conFiltri });
           },
         ),
         tool(
           "hrx_entity_query",
           "Esegue un'operazione dichiarata da hrx_concept_describe. Il metodo e il percorso " +
             "li decide la mappa, non questo input: dichiararsi in lettura non cambia cio' che " +
-            "l'operazione e'. params riempie i segnaposto del percorso; query va in querystring.",
+            "l'operazione e'. params riempie i segnaposto del percorso; query va in querystring; body e' il " +
+            "corpo di una scrittura dichiarata, che passa sempre dall'approvazione della persona.",
           {
             conceptId: z.string(),
             operationId: z.string(),
             params: z.object({}).catchall(z.union([z.string(), z.number(), z.boolean()])).optional(),
             query: z.object({}).catchall(z.union([z.string(), z.number(), z.boolean()])).optional(),
+            // Ondata 4: il corpo di una scrittura dichiarata (POST/PATCH/PUT). Su una GET si scarta.
+            // La scrittura passa comunque dall'approvazione della persona, che vede questo corpo.
+            body: z.object({}).catchall(z.any()).optional(),
           },
           async (a: {
             conceptId: string;
             operationId: string;
             params?: Record<string, string | number | boolean>;
             query?: Record<string, string | number | boolean>;
+            body?: Record<string, unknown>;
           }) => {
             const op = operations.operationsOf(a.conceptId)[a.operationId];
             // Ridondante col gate, e deve restarlo: il gate e' la guardia di sicurezza, questo
@@ -174,8 +215,11 @@ export function buildHeuresysMcp(client: HeuresysClient, operations?: AtlasOpera
             const qs = new URLSearchParams(
               Object.entries(a.query ?? {}).map(([k, v]) => [k, String(v)] as [string, string]),
             ).toString();
-            const base = `/${a.conceptId}${percorso === "/" ? "" : percorso}`;
-            return ok(await client.call(op.method, qs ? `${base}?${qs}` : base));
+            const radice = operations.baseOf(a.conceptId);
+            const base = `${radice === "/" ? "" : radice}${percorso === "/" ? "" : percorso}` || "/";
+            const url = qs ? `${base}?${qs}` : base;
+            const scrive = op.method.toUpperCase() !== "GET";
+            return ok(scrive ? await client.call(op.method, url, a.body ?? {}) : await client.call(op.method, url));
           },
         ),
       ]

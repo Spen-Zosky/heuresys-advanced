@@ -127,6 +127,10 @@ SELECT u.user_tenant_id,
   FROM stage_user_skills st
   JOIN sys.sys_skills s ON s.skill_esco_uri = st.esco_uri
   JOIN sys.sys_users  u ON u.user_external_code = 'LEGACY_EMP::' || st.employee_id::text
+ -- RTL Bank (J6, 2026-11-19, I21): le competenze che una banca non ha (materiali avanzati, sosta, produzione alimentare)
+ -- sono fuori industria e non si riportano, come nella derivazione dei requisiti (000096).
+ WHERE NOT (u.user_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+            AND (s.skill_name IN ('materiali avanzati', 'regolamentazione della sosta') OR s.skill_name ~* 'produzione alimentare'))
  -- A user may hold the same ESCO skill twice in the legacy; keep the HIGHEST level.
  -- Compared by RANK, not with GREATEST(): these are varchars, so GREATEST would order
  -- them alphabetically and silently prefer 'NOVICE' over 'EXPERT'.

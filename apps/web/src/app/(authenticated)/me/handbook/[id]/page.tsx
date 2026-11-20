@@ -114,7 +114,7 @@ export default function MeHandbookDetailPage() {
       {attachments.length > 0 && (
         <Card data-testid="handbook-attachments">
           <CardHeader>
-            <CardTitle>{t("handbook.attachments")}</CardTitle>
+            <CardTitle as="h2">{t("handbook.attachments")}</CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="divide-y divide-border">

@@ -87,7 +87,7 @@ export default function ApprovalDetailPage() {
   const busy = decide.isPending || apply.isPending;
 
   // L10 A-8 — il contesto che il pannello comune dell'agente mostra e manda al gateway.
-  useContestoAgente(d ? t("approvals.detail.agent.context", { title: d.title, id }) : null);
+  useContestoAgente(d ? t("approvals.detail.agent.context", { title: d.title }) : null);
 
   return (
     <main data-testid="approval-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
@@ -127,7 +127,7 @@ export default function ApprovalDetailPage() {
           {canDecide && myPendingStep && (
             <Card data-testid="approval-my-action">
               <CardHeader>
-                <CardTitle>{t("approvals.detail.yourDecisionTitle")}</CardTitle>
+                <CardTitle as="h2">{t("approvals.detail.yourDecisionTitle")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div>
@@ -159,7 +159,7 @@ export default function ApprovalDetailPage() {
           {canApply && d.status === "APPROVED" && (
             <Card data-testid="approval-apply-card">
               <CardHeader>
-                <CardTitle>{t("approvals.detail.applyTitle")}</CardTitle>
+                <CardTitle as="h2">{t("approvals.detail.applyTitle")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <Button type="button" data-testid="approval-apply" disabled={busy} onClick={() => apply.mutate()}>
@@ -182,7 +182,7 @@ export default function ApprovalDetailPage() {
           {/* Step ledger */}
           <Card data-testid="approval-step-ledger">
             <CardHeader>
-              <CardTitle>{t("approvals.detail.ledgerTitle")}</CardTitle>
+              <CardTitle as="h2">{t("approvals.detail.ledgerTitle")}</CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="divide-y divide-border rounded-card border border-border">

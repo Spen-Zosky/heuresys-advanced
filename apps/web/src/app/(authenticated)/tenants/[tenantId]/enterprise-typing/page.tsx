@@ -158,7 +158,7 @@ export default function EnterpriseTypingPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{profilo ? t("enterpriseTyping.cardTitleSaved") : t("enterpriseTyping.cardTitleNew")}</CardTitle>
+          <CardTitle as="h2">{profilo ? t("enterpriseTyping.cardTitleSaved") : t("enterpriseTyping.cardTitleNew")}</CardTitle>
         </CardHeader>
         <CardContent>
           {profili.isError ? (

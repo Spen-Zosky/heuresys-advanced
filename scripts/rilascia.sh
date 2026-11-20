@@ -14,6 +14,8 @@
 #   G1  il commit e' su origin/main (uguale o antenato della punta)
 #   G2  origin/prod e' antenato del commit: solo avanzamento, mai force-push
 #   G3  CI: almeno una corsa sul commit, tutte concluse, nessuna bocciata
+#       (dal 2026-11-19, se l'albero del commit e' gia' verde nella PR, la corsa su main
+#       salta i job e risulta verde: scripts/ci/tree-gia-verificato.sh; G3 non cambia)
 #   G4  backup di heuresys_advanced verificato da meno di 24 ore
 #       (marcatore di ~/.claude/tools/backup-verificato.sh; se e' vecchio lo rinnova)
 # Dopo: l'atto e' arma-deploy.sh (uno solo, #217 I4); il rollout lo fa
@@ -90,4 +92,11 @@ if [ -n "$DRY" ]; then echo "[rilascio] DRY-RUN — guardie verdi, armerei origi
 
 # L'atto e' uno solo (#217 I4): arma-deploy.sh, sul commit verificato.
 bash "$ROOT/scripts/arma-deploy.sh" --sha "$SHA" --why "${WHY:-rilascio $SHORT dal thread, guardie G1-G4 verdi}"
+# Main resta fermo fino a DEPLOYATO (scripts/blocco-rilascio.sh, 2026-11-20): il deploy parte solo se
+# origin/main e' ancora il commit armato. Non e' una guardia del rilascio: se il blocco non si scrive
+# il rilascio resta armato, e lo si dice.
+if [ -f "$ROOT/scripts/blocco-rilascio.sh" ]; then
+  bash "$ROOT/scripts/blocco-rilascio.sh" arma "$SHA" \
+    || echo "[rilascio] ATTENZIONE: blocco di main non scritto, nessuno fermerà le unioni fino a DEPLOYATO" >&2
+fi
 echo "[rilascio] ora: bash scripts/verifica-deploy.sh (atteso DEPLOYATO su $SHORT) e la prova dal vivo"

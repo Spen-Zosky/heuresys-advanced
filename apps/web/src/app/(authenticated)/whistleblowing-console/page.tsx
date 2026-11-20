@@ -116,14 +116,15 @@ export default function WhistleblowingConsolePage() {
         header: t("whistleblowingConsole.columns.category"),
         cell: (r) => <EnumStatusBadge domain="whistleblowingCategory" value={r.category} />,
       },
-      {
-        header: t("whistleblowingConsole.columns.status"),
-        cell: (r) => <EnumStatusBadge domain="whistleblowingStatus" value={r.status} />,
-      },
       { header: t("whistleblowingConsole.columns.subject"), cell: (r) => <span className="text-foreground">{r.subject}</span> },
       {
         header: t("whistleblowingConsole.columns.submittedAt"),
         cell: (r) => <span className="text-xs text-muted-foreground">{fmt.data(r.submittedAt)}</span>,
+      },
+      // R3: lo stato è l'ultima colonna.
+      {
+        header: t("whistleblowingConsole.columns.status"),
+        cell: (r) => <EnumStatusBadge domain="whistleblowingStatus" value={r.status} />,
       },
     ],
     [t, fmt],
@@ -199,7 +200,7 @@ export default function WhistleblowingConsolePage() {
       {selectedId && (
         <Card data-testid="wb-console-detail">
           <CardHeader>
-            <CardTitle>
+            <CardTitle as="h2">
               {detail.data ? (
                 <span className="flex flex-wrap items-center gap-2">
                   <span className="font-mono text-sm">{detail.data.trackingCode}</span>

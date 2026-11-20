@@ -200,12 +200,12 @@ describe("/v1/occupation-classifications/* integration", () => {
       method: "DELETE", url: `/v1/occupation-classifications/${id}`,
       headers: { cookie: ch(platformS.cookies), "x-csrf-token": platformS.csrfToken },
     });
-    expect(deleted.statusCode).toBe(204);
+    expect(deleted.statusCode).toBe(410); // ondata 5: cancellazione ritirata, la riga resta
 
     const gone = await suite.app.inject({
       method: "GET", url: `/v1/occupation-classifications/${id}`,
       headers: { cookie: ch(platformS.cookies) },
     });
-    expect(gone.statusCode).toBe(404);
+    expect(gone.statusCode).toBe(200);
   });
 });

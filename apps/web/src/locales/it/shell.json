@@ -70,6 +70,8 @@
       "learning": "Formazione",
       "learning_training-initiatives": "Iniziative formative",
       "admin_roles": "Ruoli",
+      "admin_agent-capabilities": "Capacità dell'agente",
+      "admin_agent-requests": "Richieste dell'agente",
       "admin_mfa-policy": "Politica di autenticazione a più fattori",
       "provenance": "Registro di provenienza",
       "generated-origins": "Registro delle righe generate",
@@ -162,21 +164,38 @@
     },
     "kpi": {
       "analytics": "Analisi",
-      "catalog": "Catalogo KPI"
+      "catalog": "Catalogo KPI",
+      "templates": "Modelli dei KPI"
     },
     "career": {
       "main": "Carriera",
-      "readiness": "Readiness successione"
+      "readiness": "Readiness successione",
+      "mentorship": "Mentoring"
     },
     "recruiting": {
       "pipeline": "Fasi della selezione",
       "requisitions": "Richieste",
       "postings": "Annunci",
       "candidates": "Candidati"
+    },
+    "performance": {
+      "cycles": "Cicli e valutazioni",
+      "assessments": "Valutazioni delle persone"
+    },
+    "dati": {
+      "provenance": "Registro di provenienza",
+      "gdpr": "Dati personali (GDPR)",
+      "tassonomie": "Tassonomie",
+      "riferimento": "Fonti ufficiali"
+    },
+    "permessi": {
+      "roles": "Ruoli e permessi",
+      "agent": "Capacità dell'agente",
+      "requests": "Richieste dell'agente"
     }
   },
   "session": {
-    "error": "Errore sessione"
+    "error": "Non riesco a caricare la tua sessione. Riprova tra qualche istante."
   },
   "logout": "Esci",
   "language": {
@@ -238,5 +257,24 @@
     "body": "La pagina «{{pagina}}» non fa parte del tuo profilo, quindi non ti mostriamo dati a metà. Se ti serve per il tuo lavoro, chiedi a chi gestisce i ruoli nella tua azienda.",
     "bodyGenerico": "Questa pagina non fa parte del tuo profilo, quindi non ti mostriamo dati a metà. Se ti serve per il tuo lavoro, chiedi a chi gestisce i ruoli nella tua azienda.",
     "home": "Torna alla tua pagina iniziale"
+  },
+  "ui": {
+    "loading": "Caricamento",
+    "close": "Chiudi",
+    "dragCard": "Trascina la scheda: {{title}}",
+    "navigation": "Navigazione",
+    "navigationAria": "Navigazione principale",
+    "toggleSidebar": "Comprimi o espandi la barra laterale",
+    "content": "Contenuto pagina",
+    "menuOpen": "Apri il menu del contesto globale",
+    "breadcrumb": "Percorso di navigazione",
+    "theme": "Alterna tema chiaro e scuro",
+    "userMenu": "Menu utente: {{username}}",
+    "languageSwitch": "{{lang}} — cambia lingua tra italiano e inglese",
+    "paletteSearch": "Cerca tenant, log, audit…",
+    "paletteEmpty": "Nessun comando configurato",
+    "drawerTitle": "Menu di navigazione",
+    "drawerClose": "Chiudi",
+    "website": "heuresys.com — apri il sito pubblico di Heuresys (nuova scheda)"
   }
 }

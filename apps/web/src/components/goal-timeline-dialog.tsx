@@ -13,7 +13,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  Timeline,
   type TimelineEvent,
   formatDateTime,
 } from "@heuresys/ui";
@@ -49,7 +48,8 @@ function toneForMilestone(status: string): TimelineEvent["tone"] {
 
 function toTimelineEvents(events: GoalTimelineEvent[], t: TFunction, locale: string, enumLabel: EnumLabelFn): TimelineEvent[] {
   return events.map((e) => {
-    const time = formatDateTime(e.at, locale);
+    // `time` resta l ISO: la data si scrive nella lingua della persona al momento del disegno (vedi LineaDelTempo)
+    const time = e.at;
     if (e.kind === "UPDATE") {
       const u = e.update;
       const delta =
@@ -91,6 +91,37 @@ function toTimelineEvents(events: GoalTimelineEvent[], t: TFunction, locale: str
   });
 }
 
+const TONO: Record<NonNullable<TimelineEvent["tone"]>, string> = {
+  primary: "bg-primary text-primary-fg",
+  success: "bg-success text-success-fg",
+  warning: "bg-warning text-warning-fg",
+  destructive: "bg-destructive text-destructive-fg",
+  muted: "bg-muted text-muted-fg",
+};
+
+/**
+ * Giro 18/11 (G-RENDER): la `Timeline` di @heuresys/ui rilegge `time` con `new Date(...)` e lo scrive
+ * nella lingua del browser; passandole una data gia' scritta mostrava «Invalid Date». Qui `time` e' l'ISO
+ * e la data si scrive con la lingua della persona. (Difetto di @heuresys/ui da segnalare al repo ux-design-shared.)
+ */
+function LineaDelTempo({ events, vuoto, locale }: { events: TimelineEvent[]; vuoto: string; locale: string }) {
+  if (events.length === 0) return <p className="p-6 text-center text-sm text-muted-foreground">{vuoto}</p>;
+  return (
+    <ol className="relative ml-4 border-l border-border">
+      {events.map((e) => (
+        <li key={e.id} className="relative pb-6 pl-6">
+          <span aria-hidden="true" className={`absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full ring-2 ring-background ${TONO[e.tone ?? "primary"]}`}>
+            <span className="h-1.5 w-1.5 rounded-full bg-current" />
+          </span>
+          <time dateTime={e.time} className="text-xs text-muted-foreground">{formatDateTime(e.time, locale)}</time>
+          <h4 className="text-sm font-medium">{e.title}</h4>
+          {e.description ? <p className="text-xs text-muted-foreground">{e.description}</p> : null}
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 export function GoalTimelineDialog({
   goalId,
   goalTitle,
@@ -127,7 +158,7 @@ export function GoalTimelineDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={MODALE.media}>
+      <DialogContent className={MODALE.media} closeLabel={t("shell:ui.close")}>
         <DialogHeader>
           <DialogTitle>{t("goals.timeline.title")}</DialogTitle>
           <DialogDescription>{goalTitle}</DialogDescription>
@@ -139,7 +170,7 @@ export function GoalTimelineDialog({
           <StatoErrore errore={timeline.error} titolo={t("goals.timeline.error")} testId="goal-timeline-error" onRiprova={() => void timeline.refetch()} />
         ) : (
           <div data-testid="goal-timeline">
-            <Timeline events={events} emptyMessage={t("goals.timeline.empty")} />
+            <LineaDelTempo events={events} vuoto={t("goals.timeline.empty")} locale={i18n.language} />
           </div>
         )}
 

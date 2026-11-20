@@ -17,6 +17,7 @@
  * Column names verified live against the seed (S974).
  */
 import type { Pool, PoolClient } from "pg";
+import { cognomeNomeSql } from "../../lib/nome-persona-sql.js";
 import { ANALYTICS_ROW_CAP, guardResultCap } from "../../lib/result-cap.js";
 import { soloPersone } from "../../lib/scope/persone.js";
 
@@ -102,7 +103,7 @@ export async function extractFlightRiskFeatures(
   const sc = userScopeClause(scope);
   const sql = `
     WITH scoped AS (
-      SELECT DISTINCT u.user_id, u.user_tenant_id, u.user_display_name
+      SELECT DISTINCT u.user_id, u.user_tenant_id, ${cognomeNomeSql('u')} AS user_display_name
       FROM sys.sys_users u
       ${PRIMARY_ASSIGNMENT_JOIN}
       WHERE u.user_status = 'ACTIVE' AND (${sc.sql})
@@ -143,18 +144,18 @@ export async function extractFlightRiskFeatures(
     -- appropriate for a risk signal that is inherently relative-to-peers. The [0,1] percentile
     -- is mapped back to [1,5] so the scorer's normEngagement((5-avg)/4) is unchanged.
     eng_src AS (
-      -- source 1: engagement_survey_responses (native 1-5, jsonb-array shape). The dual-shape
-      -- guard stays: an API-created default '{}' (object) yields zero elements instead of
-      -- aborting the whole recompute with "cannot extract elements from an object".
-      SELECT r.response_subject_user_id AS user_id, 'eng'::text AS src,
-             avg(COALESCE((e->>'value')::numeric, (e->>'rating')::numeric)) AS v
-      FROM sys.sys_engagement_survey_responses r
-      CROSS JOIN LATERAL jsonb_array_elements(
-        CASE WHEN jsonb_typeof(r.response_answers) = 'array'
-             THEN r.response_answers ELSE '[]'::jsonb END
-      ) e
-      WHERE ((e->>'question_type') = 'rating' OR (e ? 'rating'))
-        AND COALESCE((e->>'value')::numeric, (e->>'rating')::numeric) IS NOT NULL
+      -- source 1: the engagement responses of the old model (native 1-5). Since 000497 they live
+      -- in survey_responses, one row per answer, under the DA_ESRESP:: keys, and the question
+      -- carries its scale; they stay a SEPARATE source so the per-source percentile below keeps
+      -- comparing a 1-5 vote with 1-5 votes only (voce 3c: values unchanged, normalized on read).
+      SELECT r.survey_response_subject_user_id AS user_id, 'eng'::text AS src,
+             avg(r.survey_response_rating_value::numeric) AS v
+      FROM sys.sys_survey_responses r
+      JOIN sys.sys_survey_questions q ON q.survey_question_id = r.survey_response_question_id
+      WHERE r.survey_response_natural_key LIKE 'DA\\_ESRESP::%'
+        AND q.survey_question_type = 'rating'
+        AND r.survey_response_rating_value IS NOT NULL
+        AND r.survey_response_subject_user_id IS NOT NULL
       GROUP BY 1
       UNION ALL
       -- source 2: survey_responses rating (1-10 rating mixed with NPS, structured column)
@@ -163,6 +164,7 @@ export async function extractFlightRiskFeatures(
       FROM sys.sys_survey_responses
       WHERE survey_response_rating_value IS NOT NULL
         AND survey_response_subject_user_id IS NOT NULL
+        AND survey_response_natural_key NOT LIKE 'DA\\_ESRESP::%'
       GROUP BY 1
       UNION ALL
       -- source 3: pulse checks (native 1-5) — mood + satisfaction, averaged per row then per user
@@ -306,7 +308,7 @@ const ACTIVE_SCORE_JOIN_SELECT = `
   SELECT DISTINCT ON (fr.flight_risk_score_user_id)
          fr.flight_risk_score_user_id   AS user_id,
          fr.flight_risk_score_tenant_id AS tenant_id,
-         u.user_display_name            AS display_name,
+         ${cognomeNomeSql('u')} AS display_name,
          fr.flight_risk_score_value     AS value,
          fr.flight_risk_score_band      AS band,
          fr.flight_risk_score_model_version AS model_version,
@@ -438,7 +440,7 @@ export async function extractReadinessFeatures(
   const np = sc.params.length;
   const sql = `
     WITH scoped AS (
-      SELECT DISTINCT u.user_id, u.user_tenant_id, u.user_display_name
+      SELECT DISTINCT u.user_id, u.user_tenant_id, ${cognomeNomeSql('u')} AS user_display_name
       FROM sys.sys_users u
       ${PRIMARY_ASSIGNMENT_JOIN}
       WHERE u.user_status = 'ACTIVE' AND (${sc.sql})
@@ -520,7 +522,7 @@ export async function extractSkillGapFeatures(
   const sc = userScopeClause(scope);
   const sql = `
     WITH scoped AS (
-      SELECT DISTINCT u.user_id, u.user_tenant_id, u.user_display_name
+      SELECT DISTINCT u.user_id, u.user_tenant_id, ${cognomeNomeSql('u')} AS user_display_name
       FROM sys.sys_users u
       ${PRIMARY_ASSIGNMENT_JOIN}
       WHERE u.user_status = 'ACTIVE' AND (${sc.sql})
@@ -634,7 +636,7 @@ export async function readReadinessScores(q: DbConnector, scope: ScopeFilter): P
     `SELECT DISTINCT ON (sr.succession_readiness_score_user_id, sr.succession_readiness_score_position_id)
             sr.succession_readiness_score_user_id   AS user_id,
             sr.succession_readiness_score_tenant_id AS tenant_id,
-            u.user_display_name                     AS display_name,
+            ${cognomeNomeSql('u')} AS display_name,
             sr.succession_readiness_score_position_id AS position_id,
             p.position_code, p.position_title,
             sr.succession_readiness_score_value         AS value,
@@ -676,7 +678,7 @@ export async function readSkillGapScores(q: DbConnector, scope: ScopeFilter): Pr
     `SELECT DISTINCT ON (sg.skill_gap_score_user_id)
             sg.skill_gap_score_user_id   AS user_id,
             sg.skill_gap_score_tenant_id AS tenant_id,
-            u.user_display_name          AS display_name,
+            ${cognomeNomeSql('u')} AS display_name,
             sg.skill_gap_score_position_id AS position_id,
             p.position_code, p.position_title,
             sg.skill_gap_score_value         AS value,

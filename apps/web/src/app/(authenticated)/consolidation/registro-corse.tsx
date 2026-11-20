@@ -15,6 +15,7 @@ import { ApiError } from "@/lib/api/errors";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill, type StatusTone } from "@/components/status-pill";
 import { useFormat } from "@/lib/format";
+import { DistanzaCorsa } from "./distanza-corsa";
 
 // Il registro delle corse del modello (mig 000489, `/v1/consolidation-runs`). La pagina parte dalla
 // corsa caricata più di recente; da qui si sceglie con quale corsa (cioè con quale modello) fare un
@@ -128,7 +129,7 @@ export function RegistroCorse({
   return (
     <Card data-testid="consolidation-runs">
       <CardHeader>
-        <CardTitle className="flex flex-wrap items-center gap-3">
+        <CardTitle as="h2" className="flex flex-wrap items-center gap-3">
           <span>{t("consolidationRuns.title")}</span>
           {runs.data ? <Badge variant="secondary">{t("consolidationRuns.count", { count: elenco.length })}</Badge> : null}
         </CardTitle>
@@ -213,6 +214,8 @@ export function RegistroCorse({
                 </tbody>
               </table>
             ) : null}
+
+            {corsa.variantVersionId ? <DistanzaCorsa runId={corsa.runId} /> : null}
 
             <div className="flex flex-wrap gap-2">
               {canRun && corsa.variantVersionId ? (

@@ -13,6 +13,7 @@ import type {
 } from "@heuresys/shared";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
+import { StatoErrore } from "@/components/stato-pagina";
 import { useEnumLabel, type EnumLabelFn } from "@/lib/enum-labels";
 import { useFormat, type Formati } from "@/lib/format";
 import { NomeOppure } from "@/components/senza-nome";
@@ -137,13 +138,17 @@ export default function TalentReviewPage() {
     return map;
   }, [nineBox.rows]);
 
-  const kpis: KpiCardData[] = useMemo(() => [
-    { label: t("talentReview.kpi.assessed"), value: f.numero(nineBox.total) },
-    { label: t("talentReview.kpi.fit"), value: f.numero(fit.total) },
-    { label: t("talentReview.kpi.readiness"), value: f.numero(readiness.total) },
-    { label: t("talentReview.kpi.succession"), value: f.numero(succession.total) },
-    { label: t("talentReview.kpi.criticalPositions"), value: f.numero(criticalPositions.total) },
-  ], [nineBox.total, fit.total, readiness.total, succession.total, criticalPositions.total, t, f]);
+  // Giro 18/11 (G-RENDER): con i dati trattenuti (serve la conferma del secondo fattore, o il profilo non
+  // li comprende) la pagina scriveva «0» e una griglia vuota, come se nessuno fosse valutato. Una lettura
+  // che l'API nega non e' zero: si scrive «—» e la griglia dice perche' non c'e'.
+  const num = (q: { total: number; query: { isError: boolean } }): string => (q.query.isError ? "—" : f.numero(q.total));
+  const kpis: KpiCardData[] = [
+    { label: t("talentReview.kpi.assessed"), value: num(nineBox) },
+    { label: t("talentReview.kpi.fit"), value: num(fit) },
+    { label: t("talentReview.kpi.readiness"), value: num(readiness) },
+    { label: t("talentReview.kpi.succession"), value: num(succession) },
+    { label: t("talentReview.kpi.criticalPositions"), value: num(criticalPositions) },
+  ];
 
   return (
     <main data-testid="talent-review-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
@@ -157,9 +162,12 @@ export default function TalentReviewPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t("talentReview.nineBox.title")}</CardTitle>
+          <CardTitle as="h2">{t("talentReview.nineBox.title")}</CardTitle>
         </CardHeader>
         <CardContent>
+          {nineBox.query.isError ? (
+            <StatoErrore errore={nineBox.query.error} testId="talent-nine-box-error" onRiprova={() => void nineBox.query.refetch()} />
+          ) : (
           <div className="flex items-stretch gap-3">
             {/* y-axis label */}
             <div className="flex items-center">
@@ -221,6 +229,7 @@ export default function TalentReviewPage() {
               </div>
             </div>
           </div>
+          )}
         </CardContent>
       </Card>
 

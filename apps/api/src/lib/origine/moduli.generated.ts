@@ -54,6 +54,16 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_agent_proposals"
     ]
   },
+  "agent-requests": {
+    "prefissi": [
+      "/v1/agent-requests"
+    ],
+    "tabelle": [
+      "sys_agent_call_log",
+      "sys_agent_requests",
+      "sys_users"
+    ]
+  },
   "agent-tokens": {
     "prefissi": [
       "/v1/auth/agent-tokens"
@@ -463,6 +473,15 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "v_source_lineage_normalizzata"
     ]
   },
+  "faldone": {
+    "prefissi": [
+      "/v1/faldone",
+      "/v1/me/faldone"
+    ],
+    "tabelle": [
+      "sys_users"
+    ]
+  },
   "gdpr": {
     "prefissi": [
       "/v1/gdpr"
@@ -493,7 +512,8 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_goal_milestones",
       "sys_goal_templates",
       "sys_goal_updates",
-      "sys_goals"
+      "sys_goals",
+      "sys_users"
     ]
   },
   "hierarchy-levels": {
@@ -520,7 +540,6 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
     "tabelle": [
       "sys_attendance",
       "sys_compensation_bands",
-      "sys_engagement_survey_responses",
       "sys_flight_risk_scores",
       "sys_job_role_embeddings",
       "sys_position_compensation_profiles",
@@ -528,6 +547,7 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_pulse_checks",
       "sys_skill_gap_scores",
       "sys_succession_readiness_scores",
+      "sys_survey_questions",
       "sys_survey_responses",
       "sys_user_kpi_evidence",
       "sys_user_position_assignments",
@@ -758,7 +778,8 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_mentor_match_scores",
       "sys_mentorship_programs",
       "sys_mentorship_sessions",
-      "sys_mentorships"
+      "sys_mentorships",
+      "sys_users"
     ]
   },
   "mfa-policy": {
@@ -871,7 +892,8 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "/v1/organization-units"
     ],
     "tabelle": [
-      "sys_organization_units"
+      "sys_organization_units",
+      "sys_users"
     ]
   },
   "performance-reviews": {
@@ -1213,6 +1235,7 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
     ],
     "tabelle": [
       "sys_activity_classifications",
+      "sys_alignment_decisions",
       "sys_auth_permissions",
       "sys_auth_role_permissions",
       "sys_auth_roles",
@@ -1328,9 +1351,16 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "/v1/tenants"
     ],
     "tabelle": [
+      "sys_blueprint_activations",
+      "sys_blueprint_content_ccnl",
+      "sys_blueprint_content_ccnl_levels",
+      "sys_blueprint_runs",
       "sys_blueprint_variant_versions",
+      "sys_blueprint_variants",
       "sys_industry_codes",
-      "sys_tenancies"
+      "sys_tenancies",
+      "sys_tenant_consolidations",
+      "sys_user_contracts"
     ]
   },
   "time-off": {

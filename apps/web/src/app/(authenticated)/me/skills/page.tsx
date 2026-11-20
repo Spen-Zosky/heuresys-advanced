@@ -109,7 +109,7 @@ export default function MeSkillsPage() {
 
       {/* Evidence trail — append-only history (assessments, manager reviews) */}
       <Card>
-        <CardHeader><CardTitle>{t("skills.evidenceTitle")}</CardTitle></CardHeader>
+        <CardHeader><CardTitle as="h2">{t("skills.evidenceTitle")}</CardTitle></CardHeader>
         <CardContent className="p-0">
           {evidence.isLoading ? (
             <StatoCaricamento />

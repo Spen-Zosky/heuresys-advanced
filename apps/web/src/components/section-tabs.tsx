@@ -55,10 +55,32 @@ const MERGE_GROUPS: ReadonlyArray<Group> = [
   { id: "kpi", tabs: [
     { href: "/analytics/kpi", key: "kpi.analytics" },
     { href: "/kpis", key: "kpi.catalog" },
+    { href: "/admin/catalogo-kpi", key: "kpi.templates" },
+  ] },
+  // Ondata 3 (2026-11-17): le valutazioni delle persone entrano come scheda di /performance.
+  // Ondata 3 (2026-11-17): i diritti sui dati personali stanno accanto al registro di provenienza.
+  // Ondata 3 (2026-11-17): le capacità dell'agente sono i suoi permessi, accanto a quelli delle persone.
+  { id: "permessi", tabs: [
+    { href: "/admin/roles", key: "permessi.roles" },
+    { href: "/admin/agent-capabilities", key: "permessi.agent" },
+    { href: "/admin/agent-requests", key: "permessi.requests" },
+  ] },
+  { id: "dati", tabs: [
+    { href: "/provenance", key: "dati.provenance" },
+    { href: "/admin/gdpr", key: "dati.gdpr" },
+    { href: "/admin/tassonomie", key: "dati.tassonomie" },
+    { href: "/admin/dati-di-riferimento", key: "dati.riferimento" },
+  ] },
+  { id: "performance", tabs: [
+    { href: "/performance", key: "performance.cycles" },
+    { href: "/assessments", key: "performance.assessments" },
   ] },
   { id: "career", tabs: [
     { href: "/career-succession", key: "career.main" },
     { href: "/insights/succession-readiness", key: "career.readiness" },
+    // Ondata 3 degli endpoint senza consumatori (2026-11-17): il mentoring entra come scheda
+    // della carriera, che e' il suo posto, invece di aggiungere una voce di menu.
+    { href: "/mentorship", key: "career.mentorship" },
   ] },
   // #54 F4: il cluster del recruiting. La voce di sidebar e' `/recruiting` (mig 000406); le
   // altre tre sono schede della pagina principale, come vuole la regola S1009 — ed e' cio'
@@ -90,8 +112,21 @@ function matchHref(pathname: string, href: string): boolean {
  * /v1/analytics/*, che chiede `analytics:view` su ogni rotta (apps/api/src/modules/analytics/routes.ts).
  */
 export function permessoDellaScheda(href: string): string | null {
-  return href.startsWith("/analytics/") ? "analytics:view" : null;
+  if (href.startsWith("/analytics/")) return "analytics:view";
+  // Le schede nate dall'ondata 3 leggono da un modulo con un permesso suo (apps/api/src/modules/*/routes.ts).
+  return PERMESSI_SCHEDE[href] ?? null;
 }
+
+const PERMESSI_SCHEDE: Readonly<Record<string, string>> = {
+  "/mentorship": "mentorship:read",
+  "/assessments": "assessment:read",
+  "/admin/gdpr": "gdpr:read",
+  "/admin/catalogo-kpi": "process_kpi_template:read",
+  "/admin/tassonomie": "occupation_classification:read",
+  "/admin/dati-di-riferimento": "reference_sync:read",
+  "/admin/agent-capabilities": "agent_capability:read",
+  "/admin/agent-requests": "agent_request:read:all",
+};
 
 export function SectionTabs() {
   const pathname = usePathname() ?? "";

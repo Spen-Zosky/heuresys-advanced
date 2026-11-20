@@ -18,6 +18,11 @@ import { pool } from "../../db/client.js";
 import { requirePermission, userHasPermission } from "../../middleware/rbac.js";
 import { ForbiddenError, UnauthorizedError } from "../../errors/index.js";
 import {
+  AlignmentApproveResultSchema,
+  AlignmentDiscardResultSchema,
+  AlignmentDraftBodySchema,
+  AlignmentDraftResultSchema,
+  AlignmentResponseSchema,
   ConfirmCertainBodySchema,
   BulkDecideBodySchema,
   BulkDecideResultSchema,
@@ -246,6 +251,32 @@ export const consolidationRunRoutes: FastifyPluginAsyncZod = async (app) => {
     dettaglio: req.query.dettaglio === "true",
     ...(req.query.dominio ? { dominio: req.query.dominio } : {}),
   }));
+
+  // La scheda «Allineamento» (piano 20261118): leggere segue la distanza; salvare, approvare e scartare le decisioni
+  // è del Direttore HR, e il servizio lo ricontrolla. Nessuna di queste rotte cambia i dati del tenant.
+  app.get("/:runId/alignment", {
+    config: conf,
+    preHandler: [LEGGE],
+    schema: { params: BlueprintRunIdParamSchema, response: { 200: AlignmentResponseSchema } },
+  }, async (req) => svc.alignment(actor(req), req.params.runId));
+
+  app.put("/:runId/alignment/drafts", {
+    config: conf,
+    preHandler: [app.verifyCsrf, DECIDE],
+    schema: { params: BlueprintRunIdParamSchema, body: AlignmentDraftBodySchema, response: { 200: AlignmentDraftResultSchema } },
+  }, async (req) => svc.alignmentDrafts(actor(req), req.params.runId, req.body));
+
+  app.post("/:runId/alignment/approve", {
+    config: conf,
+    preHandler: [app.verifyCsrf, DECIDE],
+    schema: { params: BlueprintRunIdParamSchema, response: { 200: AlignmentApproveResultSchema } },
+  }, async (req) => svc.alignmentApprove(actor(req), req.params.runId));
+
+  app.post("/:runId/alignment/discard", {
+    config: conf,
+    preHandler: [app.verifyCsrf, DECIDE],
+    schema: { params: BlueprintRunIdParamSchema, response: { 200: AlignmentDiscardResultSchema } },
+  }, async (req) => svc.alignmentDiscard(actor(req), req.params.runId));
 
   app.post("/:runId/definitive", {
     config: conf,

@@ -13,8 +13,10 @@ import { FieldGrid } from "@/components/detail-panel";
 import { StatusBadge, StatusPill } from "@/components/status-pill";
 import { MaskedCell, isMasked } from "@/components/masked-cell";
 import { PositionEditor } from "./_components/position-editor";
+import { TitolariPosizione } from "./_components/titolari-posizione";
 import { Riferimento } from "@/components/scheda-rapida";
 import { useLeggibile } from "@/lib/leggibile";
+import { nomeOOmissis } from "@/lib/leggibile-nucleo";
 
 interface PositionDetail {
   positionId: string;
@@ -40,7 +42,7 @@ interface PositionDetail {
 export default function PositionDetailPage() {
   const { t } = useTranslation("admin");
   const leggi = useLeggibile();
-  const nome = (id: string) => leggi.persona(id) ?? leggi.testo(id);
+  const nome = (id: string) => nomeOOmissis(leggi, id, t("positions.detail.omissis"));
   const params = useParams<{ positionId: string }>();
   const positionId = params.positionId;
   const position = useQuery({
@@ -102,7 +104,7 @@ export default function PositionDetailPage() {
       </nav>
 
       <Card>
-        <CardHeader><CardTitle>{t("positions.detail.cardTitle")}</CardTitle></CardHeader>
+        <CardHeader><CardTitle as="h2">{t("positions.detail.cardTitle")}</CardTitle></CardHeader>
         <CardContent>
           <FieldGrid
             testId="position-fields"
@@ -119,6 +121,8 @@ export default function PositionDetailPage() {
           />
         </CardContent>
       </Card>
+
+      <TitolariPosizione positionId={positionId} />
 
       {/* Sopra si LEGGE la posizione, qui la si RIDISEGNA: legami scelti per
           nome da elenchi veri, non incollando identificativi (#44). */}

@@ -78,7 +78,7 @@
         "title": "Assistente su questa richiesta",
         "description": "Strumento di sviluppo: chiedi all'agente qualcosa su questa richiesta di approvazione. Tool e input di eventuali scritture sono già oscurati dal gateway.",
         "contextLabel": "Contesto",
-        "context": "Richiesta di approvazione «{{title}}» ({{id}})",
+        "context": "Richiesta di approvazione «{{title}}»",
         "promptLabel": "Istruzione",
         "promptPlaceholder": "Es. Riassumi lo stato di questa richiesta di approvazione.",
         "run": "Esegui",
@@ -147,6 +147,9 @@
       "category": "Categoria",
       "responses": "Risposte",
       "avg": "Media",
+      "avgScale": "Media (scala 0–10)",
+      "allOfType": "Tutte le domande sono di tipo «{{tipo}}»",
+      "eachResponses": "{{n}} risposte per domanda",
       "emptyTitle": "Nessuna domanda",
       "emptyDescription": "Questo sondaggio non ha domande.",
       "caption": "Risultati per domanda",
@@ -155,7 +158,54 @@
     "emptyTitle": "Nessun sondaggio",
     "emptyDescription": "Non ci sono sondaggi.",
     "caption": "Sondaggi",
-    "errorMessage": "Impossibile caricare i sondaggi."
+    "errorMessage": "Impossibile caricare i sondaggi.",
+    "riscontri": {
+      "titolo": "Riscontri sul clima e piani d'azione",
+      "mostra": "Mostra",
+      "tutti": "Tutti",
+      "conteggio": "{{mostrati}} di {{totale}}",
+      "nessuno": "Nessun riscontro in questo stato.",
+      "statoDi": "Stato del riscontro",
+      "categoriaLabel": "Tipo di riscontro",
+      "messaggio": "Riscontro ricevuto",
+      "registra": "Registra",
+      "errore": "Operazione non riuscita. Riprova.",
+      "stato": {
+        "new": "Nuovo",
+        "reviewed": "Letto",
+        "actioned": "Preso in carico",
+        "archived": "Archiviato"
+      },
+      "categoria": {
+        "concern": "Preoccupazione",
+        "recognition": "Riconoscimento",
+        "suggestion": "Proposta",
+        "other": "Altro"
+      }
+    },
+    "piani": {
+      "titolo": "Piani d'azione",
+      "nessuno": "Nessun piano d'azione.",
+      "statoDi": "Stato del piano",
+      "entro": "entro il {{data}}",
+      "titoloLabel": "Titolo del piano",
+      "prioritaLabel": "Priorità",
+      "scadenza": "Scadenza",
+      "daRiscontro": "Nasce dal riscontro",
+      "nessunRiscontro": "Nessuno",
+      "crea": "Crea il piano",
+      "stato": {
+        "planned": "Pianificato",
+        "in_progress": "In corso",
+        "completed": "Concluso"
+      },
+      "priorita": {
+        "low": "Bassa",
+        "medium": "Media",
+        "high": "Alta",
+        "critical": "Critica"
+      }
+    }
   },
   "users": {
     "title": "Utenti",
@@ -354,6 +404,18 @@
         "history": "Storia",
         "manage": "Gestione"
       }
+    },
+    "sessioni": {
+      "titolo": "Sessioni aperte ({{count}})",
+      "titolo_one": "Sessione aperta ({{count}})",
+      "nessuna": "Nessuna sessione aperta.",
+      "dispositivo": "{{browser}} su {{sistema}}",
+      "ultimo": "ultimo accesso {{data}}",
+      "scade": "scade {{data}}",
+      "conferma": "Chiudere tutte le sessioni di questa persona? Dovrà accedere di nuovo.",
+      "chiudiTutte": "Chiudi tutte le sessioni",
+      "chiuse": "Sessioni chiuse.",
+      "errore": "Operazione non riuscita. Riprova."
     }
   },
   "tenants": {
@@ -380,7 +442,8 @@
       "tabs": {
         "overview": "Panoramica",
         "typing": "Tipologia d'impresa",
-        "users": "Utenti"
+        "users": "Utenti",
+        "contracts": "Contratti"
       },
       "overviewTitle": "Anagrafica",
       "typingTitle": "Profili Enterprise Typing",
@@ -402,7 +465,33 @@
       "typingEmployees_one": "{{n}} dipendente",
       "typingEmpty": "Nessun profilo di tipizzazione registrato.",
       "usersHint": "La lista utenti completa è gestita nella pagina dedicata.",
-      "usersLink": "Apri /users →"
+      "usersLink": "Apri /users →",
+      "contracts": {
+        "title": "Contratti collettivi del tenant",
+        "industry": "Settore del tenant: {{name}}.",
+        "summary": "{{contracts}} contratti, {{levels}} livelli, {{gaps}} senza minimo; {{people}} persone con contratto in vigore.",
+        "gapWarning": "{{n}} livelli non hanno il minimo tabellare: vanno completati nel modello.",
+        "outsideWarning": "{{n}} persone hanno un livello che i contratti del modello non contengono.",
+        "scope": "Ambito",
+        "parties": "Parti firmatarie",
+        "effective": "Decorrenza",
+        "level": "Livello",
+        "category": "Categoria",
+        "minimum": "Minimo annuo",
+        "people": "Persone",
+        "state": "Stato",
+        "gap": "Minimo mancante",
+        "complete": "Completo",
+        "empty": "Nessun contratto collettivo nel modello attivo di questo tenant.",
+        "loadError": "Impossibile caricare i contratti.",
+        "categories": {
+          "DIRIGENTE": "Dirigente",
+          "QUADRO": "Quadro",
+          "IMPIEGATO": "Impiegato",
+          "OPERAIO": "Operaio"
+        },
+        "otherVersion": "Contratti dalla versione {{n}} del modello, non ancora attiva per questo tenant (in consolidamento): i minimi possono cambiare."
+      }
     },
     "editing": {
       "createTitle": "Nuova azienda cliente",
@@ -422,6 +511,24 @@
       "archived": "Azienda archiviata.",
       "archiveError": "Non è stato possibile archiviare l'azienda.",
       "noPermission": "Non hai i permessi per modificare le aziende clienti."
+    },
+    "gestione": {
+      "modifica": "Modifica i dati del tenant",
+      "nome": "Nome",
+      "paese": "Paese (codice di due lettere)",
+      "nonDichiarata": "Non dichiarata",
+      "salva": "Salva",
+      "salvato": "Salvato.",
+      "errore": "Operazione non riuscita. Riprova.",
+      "confermaStato": "Portare il tenant allo stato «{{stato}}»? Cambia l'accesso di tutte le sue persone.",
+      "assegnazioni": "Chi della piattaforma segue questo tenant",
+      "assegnazioniSpiega": "Ritirare un'assegnazione la chiude con la data di oggi: la storia resta.",
+      "dal": "dal {{data}}",
+      "ritira": "Ritira",
+      "confermaRitira": "Ritirare questa assegnazione?",
+      "nessunaAssegnazione": "Nessuna assegnazione attiva.",
+      "assegnaPersona": "Assegna una persona della piattaforma",
+      "assegna": "Assegna"
     }
   },
   "enterpriseTyping": {
@@ -548,8 +655,10 @@
         "effectiveFrom": "In vigore dal",
         "effectiveTo": "In vigore al"
       },
+      "omissis": "{omissis}",
       "dash": "—",
       "edit": {
+        "listTruncated": "Il menù mostra {{shown}} posizioni su {{total}}.",
         "cardTitle": "Posizione — modifica",
         "readOnly": "Non hai i permessi per modificare questa posizione.",
         "title": "Titolo",
@@ -572,18 +681,23 @@
       }
     },
     "kpis": {
-      "title": "KPI richiesti",
+      "title": "Indicatori richiesti",
       "back": "← Posizione",
-      "count": "{{count}} KPI associati",
-      "count_one": "{{count}} KPI associato",
+      "count": "{{count}} indicatori associati",
+      "count_one": "{{count}} indicatore associato",
       "cardTitle": "Requisiti",
-      "empty": "Nessun KPI richiesto dichiarato.",
-      "caption": "KPI richiesti dalla posizione",
+      "empty": "Nessun indicatore richiesto dichiarato.",
+      "caption": "Indicatori richiesti dalla posizione",
       "columns": {
         "code": "Codice",
-        "kpi": "KPI",
+        "kpi": "Indicatore",
         "weight": "Peso",
-        "template": "Template"
+        "template": "Obiettivo di riferimento"
+      },
+      "soglia": {
+        "min": "Minimo",
+        "target": "Obiettivo",
+        "stretch": "Massimo"
       }
     },
     "learning": {
@@ -631,17 +745,17 @@
       }
     },
     "skills": {
-      "title": "Skill richieste",
+      "title": "Competenze richieste",
       "back": "← Posizione",
-      "count": "{{count}} skill associate",
-      "count_one": "{{count}} skill associata",
+      "count": "{{count}} competenze associate",
+      "count_one": "{{count}} competenza associata",
       "cardTitle": "Requisiti",
-      "empty": "Nessuna skill richiesta dichiarata.",
-      "caption": "Skill richieste dalla posizione",
+      "empty": "Nessuna competenza richiesta dichiarata.",
+      "caption": "Competenze richieste dalla posizione",
       "columns": {
         "code": "Codice",
-        "skill": "Skill",
-        "proficiency": "Proficiency",
+        "skill": "Competenza",
+        "proficiency": "Livello richiesto",
         "weight": "Peso"
       }
     },
@@ -661,6 +775,45 @@
       "INACTIVE": "Non attive",
       "tenant": "Tenant",
       "allTenants": "Tutti"
+    },
+    "requisiti": {
+      "nuovaCompetenza": "Aggiungi una competenza richiesta",
+      "nuovoIndicatore": "Aggiungi un indicatore richiesto",
+      "aggiungi": "Aggiungi",
+      "chiudi": "Chiudi",
+      "cerca": "Cerca nel catalogo",
+      "voce": "Voce del catalogo",
+      "scegli": "Scegli una voce",
+      "salva": "Salva",
+      "togli": "Togli",
+      "confermaTogli": "Togliere questo requisito dalla posizione?",
+      "vietato": "Non hai il permesso di modificare la posizione.",
+      "giaPresente": "Questa voce è già un requisito della posizione.",
+      "errore": "Salvataggio non riuscito. Riprova."
+    },
+    "titolari": {
+      "titolo": "Chi occupa la posizione",
+      "spiegazione": "Assegnare, terminare o trasferire un incarico crea una richiesta di approvazione: l'incarico cambia solo quando è approvata.",
+      "vuoto": "Nessun incarico attivo su questa posizione.",
+      "fte": "quota {{fte}}",
+      "dal": "dal {{data}}",
+      "termina": "Termina",
+      "trasferisci": "Trasferisci",
+      "cercaPosizione": "Cerca la posizione",
+      "nuovaPosizione": "Nuova posizione",
+      "scegliPosizione": "Scegli la posizione",
+      "dataFine": "Ultimo giorno",
+      "dataInizio": "Dal giorno",
+      "proponi": "Proponi",
+      "annulla": "Annulla",
+      "nuovoTitolare": "Proponi un nuovo titolare",
+      "tipo": "Tipo di incarico",
+      "quota": "Quota di tempo (0-1)",
+      "inviata": "Proposta inviata: la trovi tra le approvazioni.",
+      "avviso": "Avviso sulla gerarchia dei livelli nell'unità {{unita}}: {{posto}}. Non blocca la proposta.",
+      "vietato": "Non hai il permesso di proporre questo cambiamento.",
+      "conflitto": "C'è già una proposta o un incarico che lo impedisce.",
+      "errore": "Invio non riuscito. Riprova."
     }
   },
   "roles": {
@@ -691,6 +844,7 @@
     },
     "resources": {
       "agent_capability": "Capacità degli agenti",
+      "agent_request": "Richieste dell'agente",
       "agent_conversation": "Conversazioni con l'assistente",
       "analytics": "Analisi",
       "approval": "Approvazioni",
@@ -828,6 +982,49 @@
       "sessions_manage": "gestire le sessioni",
       "update_self": "modificare i propri dati",
       "upload_self": "caricare i propri file"
+    },
+    "deleghe": {
+      "titolo": "Deleghe del tenant",
+      "delegante": "Chi delega",
+      "delegato": "A chi",
+      "oggetto": "Che cosa",
+      "gruppi": "Gruppi del consolidamento",
+      "dal": "Dal",
+      "al": "Al (facoltativo)",
+      "motivo": "Motivo",
+      "registra": "Registra la delega",
+      "vuoto": "Nessuna delega registrata.",
+      "periodo": "Periodo",
+      "senzaFine": "senza fine",
+      "revoca": "Revoca",
+      "confermaRevoca": "Revocare questa delega?",
+      "stato": "Stato",
+      "revocata": "Revocata",
+      "inVigore": "In vigore",
+      "nonInVigore": "Non in vigore",
+      "vietato": "Non hai il permesso di gestire le deleghe.",
+      "conflitto": "Esiste già una delega uguale in vigore.",
+      "nonValida": "La delega non è valida: controlla persone, oggetto e date.",
+      "errore": "Salvataggio non riuscito. Riprova.",
+      "ambito": {
+        "APPROVALS": "Tutte le approvazioni",
+        "FULL": "Mandato pieno",
+        "CONSOLIDATION": "Consolidamento con il prototipo",
+        "PROCESS_STEP": "Passo di processo"
+      },
+      "gruppo": {
+        "ORGANIZATION": "Organizzazione",
+        "POSITIONS_ROLES": "Posizioni e ruoli",
+        "SKILLS": "Competenze",
+        "PROCESSES": "Processi",
+        "INDICATORS_GOALS": "Indicatori e obiettivi",
+        "CONTRACTS": "Contratti e livelli",
+        "OBLIGATIONS": "Obblighi normativi",
+        "TRAINING": "Formazione",
+        "CAREERS": "Carriere",
+        "INCENTIVES": "Incentivi",
+        "ENGAGEMENTS": "Commesse"
+      }
     }
   },
   "dashboard": {
@@ -878,6 +1075,157 @@
       "datiIrraggiungibili": "Dati della dashboard non raggiungibili",
       "nonDisponibileTitolo": "Dashboard non disponibile",
       "nonDisponibileTesto": "Questa dashboard non esiste o non rientra nei tuoi permessi."
+    },
+    "catalogo": {
+      "famiglie": {
+        "branch": "Dashboard Filiale",
+        "company": "Dashboard Azienda",
+        "hr": "Dashboard Direzione HR",
+        "org": "Dashboard Organizzazione",
+        "platform": "Dashboard Piattaforma",
+        "process": "Dashboard Processi",
+        "self": "Dashboard Self-Service",
+        "tenant": "Dashboard Gestione del tenant"
+      },
+      "viste": {
+        "branch": {
+          "organico-filiale": "Organico della filiale",
+          "attivita-filiale": "Attività della filiale",
+          "competenze-filiale": "Competenze della filiale"
+        },
+        "company": {
+          "headcount": "Organico complessivo",
+          "andamento-organico": "Andamento dell'organico",
+          "copertura-competenze": "Copertura delle competenze",
+          "andamento-valutazioni": "Andamento delle valutazioni"
+        },
+        "hr": {
+          "organico": "Organico",
+          "retribuzioni": "Retribuzioni",
+          "valutazioni": "Valutazioni",
+          "formazione": "Formazione",
+          "assenze": "Assenze e permessi"
+        },
+        "org": {
+          "struttura-unita": "Struttura delle unità",
+          "posizioni-scoperte": "Posizioni scoperte",
+          "catena-di-riporto": "Catena di riporto"
+        },
+        "platform": {
+          "salute-sistema": "Salute del sistema",
+          "credenziali-e-accessi": "Credenziali e accessi",
+          "job-e-corse": "Job e corse pianificate"
+        },
+        "process": {
+          "processi-attivi": "Processi attivi",
+          "attivita-recenti": "Attività recenti",
+          "approvazioni-in-coda": "Approvazioni in coda"
+        },
+        "self": {
+          "il-mio-profilo": "Il mio profilo",
+          "le-mie-attivita": "Le mie attività",
+          "la-mia-formazione": "La mia formazione"
+        },
+        "tenant": {
+          "configurazione-tenant": "Configurazione del tenant",
+          "blueprint-adottati": "Blueprint adottati",
+          "utenti-del-tenant": "Utenti del tenant"
+        }
+      },
+      "colonne": {
+        "company": {
+          "copertura-competenze": {
+            "label": "Competenza",
+            "detail": "Livello",
+            "value": "Persone"
+          }
+        },
+        "process": {
+          "processi-attivi": {
+            "label": "Processo",
+            "detail": "Tipo",
+            "value": "Unità"
+          },
+          "attivita-recenti": {
+            "label": "Attività",
+            "detail": "Data"
+          }
+        },
+        "org": {
+          "struttura-unita": {
+            "label": "Unità",
+            "detail": "Tipo",
+            "value": "Posizioni attive"
+          },
+          "posizioni-scoperte": {
+            "label": "Posizione scoperta",
+            "detail": "Unità"
+          },
+          "catena-di-riporto": {
+            "label": "Unità",
+            "detail": "Responsabile",
+            "value": "Unità dipendenti"
+          }
+        },
+        "branch": {
+          "organico-filiale": {
+            "label": "Filiale",
+            "value": "Persone"
+          },
+          "attivita-filiale": {
+            "label": "Attività",
+            "detail": "Data"
+          },
+          "competenze-filiale": {
+            "label": "Competenza",
+            "value": "Persone"
+          }
+        },
+        "platform": {
+          "job-e-corse": {
+            "label": "Corsa",
+            "detail": "Stato e inizio"
+          }
+        },
+        "tenant": {
+          "configurazione-tenant": {
+            "label": "Tenant",
+            "detail": "Stato, settore e dimensione"
+          },
+          "blueprint-adottati": {
+            "label": "Modello di impianto",
+            "detail": "Stato"
+          }
+        },
+        "self": {
+          "il-mio-profilo": {
+            "label": "Persona",
+            "detail": "Posizione e unità"
+          },
+          "le-mie-attivita": {
+            "label": "Attività",
+            "detail": "Data"
+          }
+        }
+      },
+      "contatori": {
+        "attivi": "Persone in servizio",
+        "cessati": "Rapporti conclusi",
+        "posizioni": "Posizioni attive",
+        "unita": "Unità organizzative",
+        "pending": "In attesa di una decisione",
+        "tenant": "Aziende attive",
+        "utenti": "Persone attive",
+        "competenze": "Competenze a catalogo",
+        "correnti": "Credenziali correnti",
+        "da_ruotare": "Da ruotare",
+        "algoritmi": "Algoritmi in uso"
+      },
+      "evento": {
+        "COURSE_COMPLETED": "Corso completato: {{subject}}",
+        "CERTIFICATION_EARNED": "Certificazione conseguita: {{subject}}",
+        "HIRE": "Assunto come {{subject}}"
+      }
     }
   },
   "visualizations": {
@@ -1055,7 +1403,11 @@
       "colName": "Nome",
       "colSlug": "Indirizzo breve",
       "colActions": "Azioni",
-      "delete": "Elimina"
+      "delete": "Elimina",
+      "modifica": "Modifica",
+      "salva": "Salva",
+      "annulla": "Annulla",
+      "erroreModifica": "Modifica non riuscita."
     },
     "detail": {
       "back": "← Contenuti",
@@ -1423,6 +1775,15 @@
     "description": "Richieste di assenza, policy di maturazione del tenant e registro delle transazioni per saldo. Consultazione in sola lettura.",
     "requests": "Richieste di assenza",
     "accrualRules": "Regole di maturazione",
+    "accrualAmount": "{{amount}} giorni {{period}}",
+    "accrualPeriod": {
+      "MONTHLY": "al mese",
+      "QUARTERLY": "a trimestre",
+      "SEMIANNUAL": "a semestre",
+      "ANNUAL": "all'anno",
+      "PER_PAY_PERIOD": "a periodo di paga",
+      "LUMP_SUM": "in un'unica soluzione"
+    },
     "transactions": "Transazioni saldo",
     "error": "Errore di caricamento.",
     "empty": "Nessun record.",
@@ -1495,7 +1856,7 @@
       "dimension": "Dimensione",
       "score": "Punteggio",
       "horizon": "Orizzonte",
-      "value": "Valore",
+      "value": "Valore (0–100)",
       "rationale": "Motivazione",
       "businessImpact": "Impatto business",
       "flaggedAt": "Segnalata",
@@ -1542,12 +1903,25 @@
       "code": "Codice",
       "name": "Nome",
       "position": "Posizione",
-      "value": "Valore",
+      "value": "Punti di valutazione della posizione",
       "recipient": "Sistema destinatario",
       "status": "Stato",
       "handedOff": "Consegnato"
     },
-    "rewardGates": "Cancelli di premio"
+    "rewardGates": "Cancelli di premio",
+    "nuova": {
+      "titolo": "Nuova raccomandazione retributiva",
+      "apri": "Nuova",
+      "chiudi": "Chiudi",
+      "persona": "Persona",
+      "dal": "Periodo dal",
+      "al": "Periodo al",
+      "importo": "Importo (euro)",
+      "motivazione": "Motivazione",
+      "registra": "Registra la proposta",
+      "vietato": "Non hai il permesso di registrare raccomandazioni.",
+      "errore": "Registrazione non riuscita. Riprova."
+    }
   },
   "whistleblowingConsole": {
     "title": "Segnalazioni whistleblowing",
@@ -1688,5 +2062,243 @@
       "CONFIRMED": "Confermate",
       "SUPERSEDED": "Sostituite"
     }
+  },
+  "gdpr": {
+    "titolo": "Dati personali (GDPR)",
+    "descrizione": "Esportazione e cancellazione dei dati di una persona, corsa di conservazione, registro delle richieste e mappa dei dati.",
+    "persona": "I dati di una persona",
+    "scegliPersona": "Persona",
+    "esporta": "Esporta i suoi dati",
+    "esportando": "Esportazione…",
+    "provaCancellazione": "Prova la cancellazione",
+    "lavoro": "Operazione sui dati personali",
+    "lavoroCancella": "Conto delle righe che la cancellazione toccherebbe, tabella per tabella.",
+    "lavoroEsporta": "Raccolta di tutti i dati della persona in un file.",
+    "lavoroConserva": "Conto delle righe oltre il periodo di conservazione.",
+    "errore": "Operazione non riuscita. Riprova.",
+    "esitoProva": "Prova: la cancellazione toccherebbe {{count}} righe. Niente è stato cambiato.",
+    "esitoProva_one": "Prova: la cancellazione toccherebbe {{count}} riga. Niente è stato cambiato.",
+    "esitoVero": "Cancellazione eseguita: {{count}} righe trattate.",
+    "esitoVero_one": "Cancellazione eseguita: {{count}} riga trattata.",
+    "parolaCancella": "CANCELLA",
+    "parolaConserva": "APPLICA",
+    "confermaScrivi": "Per eseguirla davvero scrivi {{parola}}",
+    "cancellaDavvero": "Cancella davvero (non si disfa)",
+    "conservazione": "Corsa di conservazione",
+    "conservazioneSpiega": "Toglie i dati oltre il periodo di conservazione dichiarato nella mappa. Prima si prova, poi si applica.",
+    "provaConservazione": "Prova la conservazione",
+    "esitoProvaConserva": "Prova: {{count}} righe sono oltre il periodo di conservazione. Niente è stato cambiato.",
+    "esitoProvaConserva_one": "Prova: {{count}} riga è oltre il periodo di conservazione. Niente è stato cambiato.",
+    "esitoVeroConserva": "Conservazione applicata: {{count}} righe trattate.",
+    "esitoVeroConserva_one": "Conservazione applicata: {{count}} riga trattata.",
+    "applicaDavvero": "Applica davvero (non si disfa)",
+    "giorni": "{{count}} giorni",
+    "giorni_one": "{{count}} giorno",
+    "registro": "Registro delle richieste ({{mostrati}} di {{totale}})",
+    "nessunaRichiesta": "Nessuna richiesta registrata.",
+    "mappa": "Mappa dei dati personali ({{count}} tabelle)",
+    "mappa_one": "Mappa dei dati personali ({{count}} tabella)",
+    "strategie": {
+      "DELETE": "si cancella",
+      "ANONYMIZE": "si rende anonimo",
+      "RETAIN": "si conserva"
+    },
+    "tipi": {
+      "EXPORT": "Esportazione",
+      "ERASURE": "Cancellazione",
+      "RETENTION_RUN": "Conservazione"
+    },
+    "statiRichiesta": {
+      "COMPLETED": "Eseguita",
+      "DRY_RUN": "Prova"
+    }
+  },
+  "agentCaps": {
+    "negato": "Il registro delle capacità degli agenti lo vedono la direzione HR, l'amministrazione del cliente e della piattaforma: il tuo profilo non ha questo mandato.",
+    "titolo": "Capacità dell'agente",
+    "descrizione": "Che cosa l'agente può fare, su quali dati, con quale limite e come si annulla; e se agisce chiedendo conferma o in libertà.",
+    "elenco": "Capacità ({{count}})",
+    "elenco_one": "Capacità ({{count}})",
+    "erroreCarica": "Non è stato possibile caricare le capacità.",
+    "nessuna": "Nessuna capacità registrata.",
+    "dettagli": "Dettagli",
+    "chiudi": "Chiudi",
+    "limiti": "Al massimo {{volume}} righe per giro · si annulla con {{annullamento}}",
+    "nessunaOperazione": "Nessuna operazione dichiarata.",
+    "classe": "classe {{classe}}",
+    "classeLabel": "Classe",
+    "concetto": "Concetto",
+    "operazione": "Operazione",
+    "metodo": "Metodo",
+    "aggiungiOperazione": "Aggiungi l'operazione",
+    "pubblica": "Pubblica",
+    "confermaPubblica": "Pubblicare la capacità? Da quel momento l'agente la può usare, con conferma.",
+    "ritira": "Ritira",
+    "confermaRitira": "Ritirare la capacità? L'agente smette di poterla usare.",
+    "modo": "Modo per questo tenant",
+    "ragione": "Ragione della decisione",
+    "decidi": "Decidi",
+    "vietato": "Non hai il permesso per questa operazione.",
+    "duplicata": "Esiste già una capacità con questo codice.",
+    "rifiutata": "Rifiutata dall'API",
+    "errore": "Operazione non riuscita. Riprova.",
+    "nuova": "Nuova capacità (in bozza)",
+    "codice": "Codice",
+    "agente": "Agente",
+    "volume": "Limite di righe per giro",
+    "descrizioneLabel": "Descrizione",
+    "annullamento": "Come si annulla",
+    "riferimentoAnnullamento": "Riferimento dell'annullamento",
+    "creaBozza": "Crea la bozza",
+    "stati": {
+      "BOZZA": "Bozza",
+      "PUBBLICATA": "Pubblicata",
+      "RITIRATA": "Ritirata"
+    },
+    "modi": {
+      "CONFERMA": "Con conferma",
+      "LIBERA": "In libertà"
+    },
+    "annullamenti": {
+      "GIORNALE_UNDO": "giornale di annullamento",
+      "RIGA_SOSTITUTIVA": "riga sostitutiva"
+    },
+    "identita": "{{codice}} · v{{versione}} · {{agente}}"
+  },
+  "catalogoKpi": {
+    "titolo": "Modelli dei KPI",
+    "descrizione": "Quali KPI misurano un processo del modello operativo e quali un'unità organizzativa, e con quale peso.",
+    "errore": "Non è stato possibile leggere i modelli dei KPI",
+    "erroreScrittura": "La modifica non è stata registrata. Riprova.",
+    "conto_one": "{{count}} abbinamento",
+    "conto_other": "{{count}} abbinamenti",
+    "kpi": "KPI",
+    "peso": "Peso",
+    "pesoDa0a1": "Peso (da 0 a 1)",
+    "scegli": "Scegli…",
+    "registra": "Registra l'abbinamento",
+    "togli": "Togli",
+    "confermaTogli": "Togliere questo abbinamento? Lo si può rimettere con lo stesso gesto.",
+    "processi": {
+      "titolo": "KPI dei processi",
+      "processo": "Processo"
+    },
+    "unita": {
+      "titolo": "KPI delle unità organizzative",
+      "unita": "Unità organizzativa",
+      "daModello": "Modello di unità (vale per tutti i tenant)"
+    },
+    "negato": "I modelli dei KPI li curano chi governa processi e modelli operativi e la direzione HR: il tuo profilo non ha questo mandato."
+  },
+  "tassonomie": {
+    "titolo": "Tassonomie",
+    "descrizionePagina": "I cataloghi validi per tutti i tenant con cui si descrivono professioni e imprese: professioni ISCO e CP, attività economiche ATECO e NACE con le loro corrispondenze, fasce dimensionali e modelli operativi. Una voce non si toglie: si corregge.",
+    "professioni": "Professioni",
+    "schema": "Classificazione",
+    "cerca": "Cerca per nome o codice",
+    "errore": "Non è stato possibile leggere il catalogo delle professioni",
+    "erroreScrittura": "La modifica non è stata registrata. Controlla che il codice non esista già e riprova.",
+    "conto_one": "{{count}} voce",
+    "conto_other": "{{count}} voci, mostrate da {{da}} a {{a}}",
+    "nome": "Nome",
+    "codice": "Codice",
+    "codiceSuperiore": "Codice della voce superiore",
+    "descrizione": "Descrizione",
+    "livello": "Livello (da 1 a 10)",
+    "correggi": "Correggi",
+    "chiudi": "Chiudi",
+    "salva": "Salva",
+    "nuova": "Nuova voce in questa classificazione",
+    "aggiungi": "Aggiungi la voce",
+    "precedenti": "Precedenti",
+    "successivi": "Successivi",
+    "attivita": "Attività economiche",
+    "apri": "Apri",
+    "corrispondenze": {
+      "titolo": "Corrispondenze con le altre classificazioni",
+      "conto_one": "{{count}} corrispondenza",
+      "conto_other": "{{count}} corrispondenze",
+      "cerca": "Cerca la classe corrispondente (almeno 2 lettere)",
+      "tipo": "Tipo di corrispondenza",
+      "fiducia": "Fiducia (da 0 a 1)",
+      "aggiungi": "Aggiungi la corrispondenza",
+      "errore": "La corrispondenza non è stata registrata. Forse esiste già."
+    },
+    "imprese": {
+      "fasce": "Fasce dimensionali delle imprese",
+      "modelli": "Modelli operativi",
+      "taglia": "Taglia",
+      "addetti": "Addetti (da – a)",
+      "fatturato": "Fatturato in euro (da – a)",
+      "addettiDa": "Addetti da",
+      "addettiA": "Addetti fino a",
+      "fatturatoDa": "Fatturato da (euro)",
+      "fatturatoA": "Fatturato fino a (euro)",
+      "contoModelli_one": "{{count}} modello operativo",
+      "contoModelli_other": "{{count}} modelli operativi"
+    },
+    "negato": "I cataloghi delle professioni e delle imprese li cura l'amministrazione della piattaforma: il tuo profilo non ha questo mandato."
+  },
+  "datiRiferimento": {
+    "nomiFonti": {
+      "ESCO": "ESCO — tassonomia europea di professioni e competenze",
+      "ATECO_2025": "ATECO 2025 — classificazione ISTAT delle attività economiche",
+      "ESCO_SKILL_HIERARCHY": "Gerarchia delle competenze ESCO — gruppo e voce più ampia di ogni competenza"
+    },
+    "titolo": "Fonti ufficiali dei dati di riferimento",
+    "descrizione": "Le tassonomie ufficiali (ESCO, ATECO 2025, gerarchia delle competenze ESCO) si aggiornano dalle loro fonti pubblicate. Un aggiornamento inserisce e aggiorna, non cancella mai; se la fonte non è cambiata si ferma subito.",
+    "fonti": "Fonti",
+    "fonte": "Fonte",
+    "ultimoSuccesso": "Ultimo aggiornamento riuscito",
+    "ultimaCorsa": "Ultima corsa",
+    "mai": "Mai",
+    "aggiorna": "Aggiorna ora",
+    "inCorso": "Aggiornamento in corso…",
+    "conferma": "Aggiornare adesso «{{fonte}}» dalla fonte ufficiale? Può durare alcuni minuti.",
+    "lavoro": "Aggiornamento di «{{fonte}}» in corso",
+    "lavoroDettaglio": "Si legge la fonte pubblicata e si confrontano le voci con il catalogo. Alla fine qui compare quante voci sono state inserite e aggiornate.",
+    "fatto": "«{{fonte}}» aggiornata: {{totale}} voci lette, {{inserite}} inserite, {{aggiornate}} aggiornate.",
+    "invariata": "«{{fonte}}» è invariata dall'ultimo aggiornamento: non c'era niente da fare.",
+    "erroreCorsa": "L'aggiornamento non è riuscito. Riprova più tardi.",
+    "errore": "Non è stato possibile leggere le fonti dei dati di riferimento",
+    "storico": "Corse precedenti",
+    "contoCorse_one": "{{count}} corsa",
+    "contoCorse_other": "{{count}} corse",
+    "inizio": "Inizio",
+    "fine": "Fine",
+    "voci": "Voci lette",
+    "inseriteAggiornate": "Inserite / aggiornate",
+    "stato": "Stato",
+    "negato": "L'aggiornamento delle tassonomie dalle fonti ufficiali è del custode dei dati e dell'amministrazione della piattaforma: il tuo profilo non ha questo mandato."
+  },
+  "agentReq": {
+    "titolo": "Richieste dell'agente",
+    "descrizione": "Le richieste che l'agente propone, con la previsione di spesa e il tetto: ognuna aspetta un sì o un no prima di partire.",
+    "elenco": "Richieste ({{count}})",
+    "elenco_one": "Richieste ({{count}})",
+    "erroreCarica": "Non è stato possibile caricare le richieste.",
+    "nessuna": "Nessuna richiesta.",
+    "filtroStato": "Stato",
+    "tutte": "Tutti gli stati",
+    "stati": {
+      "IN_ATTESA": "In attesa",
+      "ACCETTATA": "Accettata",
+      "RIFIUTATA": "Rifiutata"
+    },
+    "chi": "Chiesta da {{persona}} · {{perimetro}} · {{data}}",
+    "personaAssente": "persona non più presente",
+    "spesa": "Previsione {{previsione}} · tetto {{tetto}}",
+    "motivo": "Motivo del rifiuto: {{motivo}}",
+    "accetta": "Accetta",
+    "rifiuta": "Rifiuta",
+    "motivoLabel": "Motivo del rifiuto",
+    "confermaRifiuto": "Conferma il rifiuto",
+    "vietato": "Non hai il permesso di decidere questa richiesta.",
+    "giaDecisa": "La richiesta è già stata decisa.",
+    "rifiutata": "Richiesta non accettata dal servizio",
+    "errore": "Operazione non riuscita.",
+    "registroTitolo": "Costo e durata delle chiamate dell'agente",
+    "registroTotali": "{{chiamate}} chiamate · costo {{costo}} · durata {{durata}}",
+    "erroreRegistro": "Non è stato possibile caricare il registro delle chiamate."
   }
 }

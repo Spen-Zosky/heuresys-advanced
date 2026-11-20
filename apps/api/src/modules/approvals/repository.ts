@@ -8,6 +8,7 @@
  * tenant — enforced in the service). All multi-row writes run inside withTransaction.
  */
 import type { PoolClient } from "pg";
+import { cognomeNomeSql } from "../../lib/nome-persona-sql.js";
 import { pool } from "../../db/client.js";
 
 export type DbConnector = typeof pool | PoolClient;
@@ -264,8 +265,8 @@ export async function findRequestDetail(
   const stepRes = await q.query(
     `SELECT ${STEP_COLS_S},
             COALESCE(u.user_email, s.approval_step_approver_snapshot) AS approver_email,
-            u.user_display_name AS approver_name,
-            d.user_display_name AS decided_by_name
+            ${cognomeNomeSql('u')} AS approver_name,
+            ${cognomeNomeSql('d')} AS decided_by_name
        FROM sys.sys_approval_steps s
        LEFT JOIN sys.sys_users u ON u.user_id = s.approval_step_approver_user_id
        LEFT JOIN sys.sys_users d ON d.user_id = s.approval_step_decided_by

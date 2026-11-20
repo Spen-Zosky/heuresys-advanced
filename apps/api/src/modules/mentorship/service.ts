@@ -60,6 +60,21 @@ async function resolveReadAllowList(a: ActorContext): Promise<string[] | undefin
   }
 }
 
+/**
+ * Regola {omissis}: il nome di una persona fuori dal perimetro organizzativo di chi legge non esce
+ * mai in una risposta. Vale per ogni risposta che porta una coppia (creazione, modifica), non solo
+ * per l'elenco: chi crea o modifica una coppia con una controparte fuori dalla sua catena vede il
+ * suo id, che ha scritto lui, ma non il nome.
+ */
+async function mascheraNomi<T extends { tenantId: string; mentorUserId: string | null; menteeUserId: string | null; mentorName: string | null; menteeName: string | null }>(
+  a: ActorContext, m: T,
+): Promise<T> {
+  const mentorOk = !m.mentorUserId || (await canReadOrgTarget(pool, a, m.mentorUserId, m.tenantId));
+  const menteeOk = !m.menteeUserId || (await canReadOrgTarget(pool, a, m.menteeUserId, m.tenantId));
+  if (mentorOk && menteeOk) return m;
+  return { ...m, mentorName: mentorOk ? m.mentorName : null, menteeName: menteeOk ? m.menteeName : null };
+}
+
 export const mentorshipService = {
   // ── Programs ──
   async listPrograms(a: ActorContext, query: MentorshipProgramListQuery) {
@@ -92,7 +107,20 @@ export const mentorshipService = {
 
   // ── Pairings ──
   async listMentorships(a: ActorContext, query: MentorshipListQuery) {
-    return repo.listMentorships(pool, listTenantFilter(a), await resolveReadAllowList(a), query);
+    const allow = await resolveReadAllowList(a);
+    const res = await repo.listMentorships(pool, listTenantFilter(a), allow, query);
+    if (!allow) return res;
+    // La lista mostra una coppia se ALMENO una delle due persone è nel perimetro (OR): il nome
+    // dell'altra, fuori dalla catena, non si rivela. La pagina lo mostra come {omissis}.
+    const visibili = new Set(allow);
+    return {
+      ...res,
+      items: res.items.map((m) => ({
+        ...m,
+        mentorName: m.mentorUserId && !visibili.has(m.mentorUserId) ? null : m.mentorName,
+        menteeName: m.menteeUserId && !visibili.has(m.menteeUserId) ? null : m.menteeName,
+      })),
+    };
   },
   async getMentorship(a: ActorContext, id: string) {
     const m = await repo.findMentorshipById(pool, id);
@@ -109,7 +137,7 @@ export const mentorshipService = {
       throw new ValidationError({ menteeUserId: "must differ from mentorUserId" }, "Mentor and mentee must be different");
     }
     const tenantId = resolveWriteTenant(a, body.tenantId);
-    return repo.insertMentorship(pool, tenantId, body);
+    return mascheraNomi(a, await repo.insertMentorship(pool, tenantId, body));
   },
   async updateMentorship(a: ActorContext, id: string, patch: UpdateMentorshipBody) {
     const m = await repo.findMentorshipById(pool, id);
@@ -122,7 +150,7 @@ export const mentorshipService = {
     }
     const updated = await repo.updateMentorshipPartial(pool, id, patch);
     if (!updated) throw new NotFoundError("Mentorship");
-    return updated;
+    return mascheraNomi(a, updated);
   },
   async deleteMentorship(a: ActorContext, id: string): Promise<void> {
     const m = await repo.findMentorshipById(pool, id);

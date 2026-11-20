@@ -101,6 +101,51 @@ describe("GET /v1/me/organigramma", () => {
   });
 });
 
+describe("GET /v1/me/organigramma — mandato di piattaforma senza clienti assegnati", () => {
+  // BLUEPRINT_MANAGER è un mandato di piattaforma «assegnato» (D9=B): senza clienti assegnati il perimetro è vuoto per scelta.
+  // Non è un errore: la risposta è 200 con un organigramma vuoto e `senzaCliente: true`, come la rubrica (che torna vuota), invece di 404 «Tenant».
+  // La persona non e' fissa: il database di sviluppo e quello della CI hanno persone diverse nel ruolo. Si prende la prima che ne ha il mandato.
+  let EMAIL_PIATTAFORMA = "";
+  let t: TestApp;
+  let cookie = "";
+  beforeAll(async () => {
+    t = await buildTestApp();
+    const ruolo = await pool.query<{ user_email: string }>(
+      `SELECT u.user_email FROM sys.sys_user_auth_roles ur
+         JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+         JOIN sys.sys_users u ON u.user_id = ur.user_auth_role_user_id
+        WHERE r.auth_role_code = 'BLUEPRINT_MANAGER' AND ur.user_auth_role_revoked_at IS NULL AND u.user_status = 'ACTIVE'
+        ORDER BY u.user_email LIMIT 1`,
+    );
+    expect(ruolo.rowCount).toBeGreaterThan(0);
+    EMAIL_PIATTAFORMA = ruolo.rows[0]!.user_email;
+    // Nessun cliente assegnato: la revoca si annulla con la transazione del file.
+    await pool.query(
+      `UPDATE sys.sys_platform_user_tenant_assignments SET platform_user_tenant_assignment_revoked_at = now()
+        WHERE platform_user_tenant_assignment_revoked_at IS NULL
+          AND platform_user_tenant_assignment_user_id = (SELECT user_id FROM sys.sys_users WHERE user_email = $1)`,
+      [EMAIL_PIATTAFORMA],
+    );
+    const login = await loginRaw(t.app, EMAIL_PIATTAFORMA, TEST_PERSONA_PASSWORD);
+    cookie = login.cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+  });
+  afterAll(async () => { await t.app.close(); });
+
+  it("senza clienti assegnati risponde 200 con l'organigramma vuoto e lo stato esplicito", async () => {
+    const r = await t.app.inject({ method: "GET", url: "/v1/me/organigramma", headers: { cookie } });
+    expect(r.statusCode).toBe(200);
+    const b = r.json() as OrganigrammaResponse;
+    expect(b.senzaCliente).toBe(true);
+    expect(b.unita).toEqual([]);
+    expect(b.posizioni).toEqual([]);
+  });
+
+  it("un cliente chiesto per nome e fuori dal perimetro resta 404 (non si rende osservabile)", async () => {
+    const r = await t.app.inject({ method: "GET", url: `/v1/me/organigramma?tenantId=${randomUUID()}`, headers: { cookie } });
+    expect(r.statusCode).toBe(404);
+  });
+});
+
 describe("comporre (funzione pura)", () => {
   const u = (id: string, padreId: string | null, tipo = "DEPARTMENT") => ({
     id, codice: id, nome: id, tipo, relazione: "LINEA", padreId, responsabileId: null, responsabile: null,

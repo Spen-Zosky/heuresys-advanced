@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -15,7 +14,8 @@ import { useEnumLabel } from "@/lib/enum-labels";
 import { EChartsCard } from "../../_charts-client";
 import { useFormat } from "@/lib/format";
 
-/** Bar of avgRating per rated question (rating/nps only). */
+/** Bar of avgRating per rated question (rating/nps only), riportata alla scala 10 in lettura:
+ *  i sondaggi trasferiti dal modello vecchio votano su 5 (voce 3c), e il valore salvato non cambia. */
 function ratingsBarOption(questions: EngagementQuestionResult[], label: string) {
   const rated = questions.filter((q) => q.avgRating != null);
   return {
@@ -23,7 +23,7 @@ function ratingsBarOption(questions: EngagementQuestionResult[], label: string) 
     grid: { left: 40, right: 20, top: 30, bottom: 80 },
     xAxis: { type: "category" as const, data: rated.map((q) => q.text.slice(0, 24)), axisLabel: { interval: 0, rotate: 35, fontSize: 10 } },
     yAxis: { type: "value" as const, name: label, max: 10 },
-    series: [{ type: "bar" as const, data: rated.map((q) => q.avgRating) }],
+    series: [{ type: "bar" as const, data: rated.map((q) => (q.scale && q.scale !== 10 ? Math.round(((q.avgRating ?? 0) * 1000) / q.scale) / 100 : q.avgRating)) }],
   };
 }
 
@@ -40,19 +40,30 @@ export default function EngagementResultsPage() {
     enabled: Boolean(surveyId),
   });
 
-  const columns: DataColumn<EngagementQuestionResult>[] = useMemo(
-    () => [
-      { header: t("engagement.results.question"), cell: (q) => <span className="font-medium text-foreground">{q.text}</span> },
-      { header: t("engagement.results.type"), cell: (q) => <span className="text-muted-foreground">{enumLabel("questionType", q.type)}</span> },
-      { header: t("engagement.results.category"), cell: (q) => <span className="text-muted-foreground">{enumLabel("surveyCategory", q.category)}</span> },
-      { header: t("engagement.results.responses"), cell: (q) => <span className="text-muted-foreground">{q.responseCount}</span> },
-      { header: t("engagement.results.avg"), cell: (q) => <span className="text-muted-foreground">{q.avgRating != null ? fmt.numeroFisso(q.avgRating, 2) : "—"}</span> },
-    ],
-    [t, enumLabel, fmt],
-  );
-
   const d = results.data;
   const hasRated = (d?.questions ?? []).some((q) => q.avgRating != null);
+
+  // C15 (giro qa-web 18/11): una colonna che ha lo stesso valore su tutte le righe non dice niente
+  // (Tipo sempre «Valutazione», Risposte sempre 100): si toglie, e il valore comune va nel sottotitolo.
+  // La media porta la sua scala nell'intestazione.
+  const domande = d?.questions ?? [];
+  const costante = <K,>(f: (q: EngagementQuestionResult) => K) => domande.length > 1 && domande.every((q) => f(q) === f(domande[0]!));
+  const tipoCostante = costante((q) => q.type);
+  const categoriaCostante = costante((q) => q.category);
+  const risposteCostanti = costante((q) => q.responseCount);
+  const columns: DataColumn<EngagementQuestionResult>[] = [
+    { header: t("engagement.results.question"), cell: (q) => <span className="font-medium text-foreground">{q.text}</span> },
+    ...(tipoCostante ? [] : [{ header: t("engagement.results.type"), cell: (q: EngagementQuestionResult) => <span className="text-muted-foreground">{enumLabel("questionType", q.type)}</span> }]),
+    ...(categoriaCostante ? [] : [{ header: t("engagement.results.category"), cell: (q: EngagementQuestionResult) => <span className="text-muted-foreground">{enumLabel("surveyCategory", q.category)}</span> }]),
+    ...(risposteCostanti ? [] : [{ header: t("engagement.results.responses"), cell: (q: EngagementQuestionResult) => <span className="text-muted-foreground">{q.responseCount}</span> }]),
+    // La scala la dichiara ogni domanda (000497): la media si legge «x / scala».
+    { header: t("engagement.results.avg"), cell: (q) => <span className="text-muted-foreground">{q.avgRating != null ? `${fmt.numeroFisso(q.avgRating, 2)} / ${q.scale ?? 10}` : "—"}</span> },
+  ];
+  const sottotitolo = [
+    t("engagement.results.subtitle", { count: domande.length }),
+    ...(tipoCostante && domande[0] ? [t("engagement.results.allOfType", { tipo: enumLabel("questionType", domande[0].type) })] : []),
+    ...(risposteCostanti && domande[0] ? [t("engagement.results.eachResponses", { n: domande[0].responseCount })] : []),
+  ].join(" · ");
 
   return (
     <main data-testid="engagement-results-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
@@ -73,7 +84,7 @@ export default function EngagementResultsPage() {
         />
       ) : (
         <>
-          <PageHeader data-testid="engagement-results-title" title={d.title} description={t("engagement.results.subtitle", { count: d.questions.length })} />
+          <PageHeader data-testid="engagement-results-title" title={d.title} description={sottotitolo} />
 
           <div data-testid="engagement-results-table">
             <EntityTable<EngagementQuestionResult> originPath={"/v1/engagement/surveys"}
@@ -94,7 +105,7 @@ export default function EngagementResultsPage() {
           {hasRated && (
             <Card data-testid="engagement-results-chart">
               <CardHeader>
-                <CardTitle>{t("engagement.results.chartTitle")}</CardTitle>
+                <CardTitle as="h2">{t("engagement.results.chartTitle")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <EChartsCard option={ratingsBarOption(d.questions, t("engagement.results.avg"))} height={360} ariaLabel={t("engagement.results.chartTitle")} />

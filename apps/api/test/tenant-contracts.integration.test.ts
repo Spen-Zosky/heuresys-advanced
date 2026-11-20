@@ -52,17 +52,17 @@ describe("/v1/tenants/:id/contracts", () => {
       `INSERT INTO sys.sys_blueprint_families (blueprint_family_code, blueprint_family_name, blueprint_family_description)
        VALUES ($1, 'Prova contratti', 'Prova') RETURNING blueprint_family_id AS id`, [cod]);
     try {
-      const mkVer = async (codice: string) => {
+      const mkVer = async (codice: string, stato: string) => {
         const v = await pool.query<{ id: string }>(
           `INSERT INTO sys.sys_blueprint_variants (blueprint_variant_family_id, blueprint_variant_code, blueprint_variant_name, blueprint_variant_description)
            VALUES ($1, $2, 'Prova', 'Prova') RETURNING blueprint_variant_id AS id`, [fam.rows[0]!.id, `${cod}_${codice}`]);
         const ver = await pool.query<{ id: string }>(
           `INSERT INTO sys.sys_blueprint_variant_versions (blueprint_variant_version_variant_id, blueprint_variant_version_number, blueprint_variant_version_status)
-           VALUES ($1, 2, 'DRAFT') RETURNING blueprint_variant_version_id AS id`, [v.rows[0]!.id]);
+           VALUES ($1, 2, $2) RETURNING blueprint_variant_version_id AS id`, [v.rows[0]!.id, stato]);
         return { variante: v.rows[0]!.id, versione: ver.rows[0]!.id };
       };
-      const attiva = await mkVer("ATTIVA");
-      const altra = await mkVer("ALTRA");
+      const attiva = await mkVer("ATTIVA", "PUBLISHED");
+      const altra = await mkVer("ALTRA", "DRAFT");
       await pool.query(
         `INSERT INTO sys.sys_blueprint_activations (blueprint_activation_tenant_id, blueprint_activation_variant_id, blueprint_activation_variant_version_id, blueprint_activation_status)
          VALUES ($1, $2, $3, 'ACTIVE')`, [tenantId, attiva.variante, attiva.versione]);

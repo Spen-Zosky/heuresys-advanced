@@ -58,7 +58,7 @@ describe("/v1/tenants/:id/contracts", () => {
            VALUES ($1, $2, 'Prova', 'Prova') RETURNING blueprint_variant_id AS id`, [fam.rows[0]!.id, `${cod}_${codice}`]);
         const ver = await pool.query<{ id: string }>(
           `INSERT INTO sys.sys_blueprint_variant_versions (blueprint_variant_version_variant_id, blueprint_variant_version_number, blueprint_variant_version_status)
-           VALUES ($1, 1, 'DRAFT') RETURNING blueprint_variant_version_id AS id`, [v.rows[0]!.id]);
+           VALUES ($1, 2, 'DRAFT') RETURNING blueprint_variant_version_id AS id`, [v.rows[0]!.id]);
         return { variante: v.rows[0]!.id, versione: ver.rows[0]!.id };
       };
       const attiva = await mkVer("ATTIVA");

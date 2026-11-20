@@ -70,8 +70,49 @@ function primiId(corpo: unknown, segmento: string): string[] {
   return out;
 }
 
+/** Il database della corsa non ha il modello con i contratti, e il difetto delle date compare solo con la riga: la prova
+ *  porta con se' un tenant con un contratto datato in una versione non attiva (rollback a fine file, come ogni fixture). */
+async function seminaTenantConContratti(): Promise<string> {
+  const cod = `T_GUARD_${Math.random().toString(16).slice(2, 10)}`;
+  const ind = await pool.query<{ c: string }>(`SELECT tenant_industry_code AS c FROM sys.sys_tenancies WHERE tenant_industry_code IS NOT NULL LIMIT 1`);
+  const ten = await pool.query<{ id: string }>(
+    `INSERT INTO sys.sys_tenancies (tenant_code, tenant_name, tenant_status, tenant_industry_code)
+     VALUES ($1, 'Guardia risposte', 'ACTIVE', $2) RETURNING tenant_id AS id`, [cod, ind.rows[0]?.c ?? null]);
+  const tenantId = ten.rows[0]!.id;
+  const fam = await pool.query<{ id: string }>(
+    `INSERT INTO sys.sys_blueprint_families (blueprint_family_code, blueprint_family_name, blueprint_family_description)
+     VALUES ($1, 'Guardia', 'Guardia') RETURNING blueprint_family_id AS id`, [cod]);
+  const ver = async (codice: string, stato: string) => {
+    const v = await pool.query<{ id: string }>(
+      `INSERT INTO sys.sys_blueprint_variants (blueprint_variant_family_id, blueprint_variant_code, blueprint_variant_name, blueprint_variant_description)
+       VALUES ($1, $2, 'Guardia', 'Guardia') RETURNING blueprint_variant_id AS id`, [fam.rows[0]!.id, `${cod}_${codice}`]);
+    const vv = await pool.query<{ id: string }>(
+      `INSERT INTO sys.sys_blueprint_variant_versions (blueprint_variant_version_variant_id, blueprint_variant_version_number, blueprint_variant_version_status)
+       VALUES ($1, 2, $2) RETURNING blueprint_variant_version_id AS id`, [v.rows[0]!.id, stato]);
+    return { variante: v.rows[0]!.id, versione: vv.rows[0]!.id };
+  };
+  const attiva = await ver("ATTIVA", "PUBLISHED");
+  const altra = await ver("ALTRA", "DRAFT");
+  await pool.query(
+    `INSERT INTO sys.sys_blueprint_activations (blueprint_activation_tenant_id, blueprint_activation_variant_id, blueprint_activation_variant_version_id, blueprint_activation_status)
+     VALUES ($1, $2, $3, 'ACTIVE')`, [tenantId, attiva.variante, attiva.versione]);
+  await pool.query(
+    `INSERT INTO sys.sys_blueprint_content_ccnl (blueprint_content_ccnl_version_id, blueprint_content_ccnl_code, blueprint_content_ccnl_name, blueprint_content_ccnl_effective)
+     VALUES ($1, 'CCNL_G', 'Contratto della guardia', DATE '2024-01-01')`, [altra.versione]);
+  await pool.query(
+    `INSERT INTO sys.sys_blueprint_content_ccnl_levels (blueprint_content_ccnl_level_version_id, blueprint_content_ccnl_level_ccnl_code,
+       blueprint_content_ccnl_level_code, blueprint_content_ccnl_level_name, blueprint_content_ccnl_level_annual_minimum_eur)
+     VALUES ($1, 'CCNL_G', 'CCNL_G_L1', 'Livello 1', 30000)`, [altra.versione]);
+  await pool.query(
+    `INSERT INTO sys.sys_blueprint_runs (blueprint_run_tenant_id, blueprint_run_code, blueprint_run_package_version, blueprint_run_package_hash,
+       blueprint_run_variant_version_id, blueprint_run_model_label, blueprint_run_model_loaded_at)
+     VALUES ($1, 'RG', 1, repeat('a', 64), $2, 'Guardia', now())`, [tenantId, altra.versione]);
+  return tenantId;
+}
+
 let t: TestApp;
 let rtlId = "";
+let provaId = "";
 const attori: Array<{ nome: string; s: S }> = [];
 
 describe("nessuna risposta fuori contratto con dati veri", () => {
@@ -82,6 +123,7 @@ describe("nessuna risposta fuori contratto con dati veri", () => {
     );
     if (!rtl) throw new Error("il tenant RTL_BANK non esiste piu': la prova non ha piu' dati veri da leggere");
     rtlId = rtl.id;
+    provaId = await seminaTenantConContratti();
     attori.push({ nome: "PLATFORM_ADMIN", s: await login(t, (await platformAdmin()).email) });
     attori.push({ nome: "TENANT_ADMIN RTL", s: await login(t, (await tenantAdmin({ tenantId: rtl.id })).email) });
     try {
@@ -127,7 +169,7 @@ describe("nessuna risposta fuori contratto con dati veri", () => {
             chiamate++;
             const ids = r.status === 200 ? primiId(r.corpo, prefisso.split("/").pop() ?? "") : [];
             // Il tenant con dati veri (RTL) c'e' sempre fra gli identificativi provati sotto /tenants.
-            if (prefisso === "/v1/tenants" && !ids.includes(rtlId)) ids.push(rtlId);
+            if (prefisso === "/v1/tenants") for (const x of [rtlId, provaId]) if (!ids.includes(x)) ids.push(x);
             idDa.set(prefisso, ids);
           }
           urls = (idDa.get(prefisso) ?? []).map((id) => rotta.replace(parametri[0]!, id));

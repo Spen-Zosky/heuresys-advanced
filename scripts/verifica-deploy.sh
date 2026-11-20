@@ -48,6 +48,21 @@ if [ -z "$SHA" ]; then
   SHA="$(git rev-parse HEAD 2>/dev/null)"
   SHA_ORIGINE="HEAD — ATTENZIONE: refs/heads/$ARM_REF non leggibile, il confronto puo' essere improprio"
 fi
+# Uno sha corto passato a mano (`verifica-deploy.sh 767b8c3b`, come lo stampa rilascia.sh) si
+# espande nello sha completo: la CI e gli host lo confrontano per intero, e un prefisso dava
+# «0 corse» e «fermo su» su un rilascio gia' in produzione, cioe' un falso IN-VOLO (20/11/2026).
+if [ -n "$SHA" ] && [ "${#SHA}" -lt 40 ]; then
+  _pieno="$(git rev-parse --verify --quiet "${SHA}^{commit}" 2>/dev/null || true)"
+  if [ -z "$_pieno" ]; then
+    git fetch --quiet origin main "$ARM_REF" 2>/dev/null || true
+    _pieno="$(git rev-parse --verify --quiet "${SHA}^{commit}" 2>/dev/null || true)"
+  fi
+  if [ -z "$_pieno" ]; then
+    echo "verifica-deploy: lo sha «$SHA» non si risolve in un commit (serve lo sha completo o un fetch)" >&2
+    exit 2
+  fi
+  SHA="$_pieno"
+fi
 SHORT="${SHA:0:8}"
 ATTESA_MAX="${ATTESA_MAX:-0}"
 PROD_URL="${PROD_URL:-https://www.heuresys.com}"
@@ -82,7 +97,9 @@ esito() { printf '  %-22s %s\n' "$1" "$2"; }
 # cinque verdi mentre la sesta è rossa (misurato: 10 corse per un solo sha).
 ci_conta() {
   command -v gh >/dev/null || return 1
-  gh run list --branch main --limit 30 --json status,conclusion,headSha \
+  # `--commit`: le ultime 30 corse di main coprono pochi commit (circa 10 workflow per commit),
+  # e uno sha di tre commit fa ne usciva, con lo stesso falso «nessuna corsa».
+  gh run list --branch main --commit "$SHA" --limit 100 --json status,conclusion,headSha \
     --jq "[.[] | select(.headSha==\"$SHA\")] | \"\(length) \([.[]|select(.conclusion==\"success\")]|length) \([.[]|select(.status!=\"completed\")]|length) \([.[]|select(.conclusion==\"failure\")]|length)\"" 2>/dev/null
 }
 

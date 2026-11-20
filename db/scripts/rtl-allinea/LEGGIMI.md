@@ -23,3 +23,5 @@ J6 toglie da RTL le 54 righe di sys_user_skills della competenza «materiali ava
 ## J3c e l'origine di J (20/11/2026)
 
 J3c (generato da genera_J3c_testi_residui.py) traduce i testi inglesi o misti restanti di RTL: motivazioni di assenza e straordinario, commenti del clima, competenze e commenti delle valutazioni, sedi delle calibrazioni, ostacoli e passi dei check-in, categorie degli obiettivi, sondaggi e modelli, programmi di mentoring, modelli predittivi, KPI, nota di prima versione dei contenuti. Ripara anche 419 righe di sys_user_timeline_events a cui J aveva tolto la prima lettera del nome della certificazione (substr(s, 24) al posto di substr(s, 23): corretto in J). Lo stesso modello di J3b: valori esatti, solo RTL, giornale staging.rtl_allinea_testi_undo, guardia vettori in coda. Non e' in applica.sh.
+
+J7_mansioni_famiglia_livello.sql compila famiglia e livello di 11 mansioni RTL-* e 1 PROTO-* del catalogo dove c'e' una fonte (omonimo RTL-ROLE-* o analogia dichiarata nel file), con giornale staging.rtl_mansioni_famiglia_undo. Restano vuote RTL-CC, il livello di RTL-HRBP e 23 PROTO-* del profilo: la scelta e' di chi cura il catalogo.

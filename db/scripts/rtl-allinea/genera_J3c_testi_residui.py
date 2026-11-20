@@ -26,7 +26,6 @@ TENANT = {
     "sys_goals": "goal_tenant_id = '{T}'",
     "sys_kpi_definitions": "kpi_definition_tenant_id = '{T}'",
     "sys_kpi_targets": "kpi_target_tenant_id = '{T}'",
-    "sys_leads": "true",
     "sys_mentorship_programs": "program_tenant_id = '{T}'",
     "sys_okr_check_ins": "check_in_tenant_id = '{T}'",
     "sys_overtime": "overtime_tenant_id = '{T}'",
@@ -145,7 +144,7 @@ add("sys_kpi_definitions", "kpi_definition_formula", "(numero giorni con daily c
 # --- formazione, documenti, contatti ---
 mappa("sys_user_education_records", "user_education_field_of_study", [("Business Administration", "Economia Aziendale"), ("Computer Science", "Informatica")])
 add("sys_content_versions", "version_change_note", "Initial version", "Versione iniziale")
-add("sys_leads", "lead_message", "Please contact me with more information.", "Vi chiedo di contattarmi per avere maggiori informazioni.")
+# sys_leads: il testo inglese e' nel campo ruolo che una persona ha scritto nel modulo del sito (lead_role), non un dato RTL: non si riscrive.
 # --- riparazione: primo carattere perso da J (substr(s, 24) al posto di substr(s, 23)) ---
 for nome, ente in [
     ("Scrum Master Certified", "Scrum Alliance"), ("Financial Risk Manager (FRM)", "GARP"), ("Antiriciclaggio AML Specialist", "AICOM"),

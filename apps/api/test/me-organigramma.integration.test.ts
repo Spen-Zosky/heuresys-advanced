@@ -109,6 +109,21 @@ describe("GET /v1/me/organigramma — mandato di piattaforma senza clienti asseg
   let cookie = "";
   beforeAll(async () => {
     t = await buildTestApp();
+    // Il test non dipende da come e' popolato il database: la persona deve avere il mandato e NESSUN cliente assegnato (la revoca si annulla con la transazione del file).
+    const ruolo = await pool.query(
+      `SELECT 1 FROM sys.sys_user_auth_roles ur
+         JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+         JOIN sys.sys_users u ON u.user_id = ur.user_auth_role_user_id
+        WHERE u.user_email = $1 AND r.auth_role_code = 'BLUEPRINT_MANAGER' AND ur.user_auth_role_revoked_at IS NULL`,
+      [EMAIL_PIATTAFORMA],
+    );
+    expect(ruolo.rowCount).toBeGreaterThan(0);
+    await pool.query(
+      `UPDATE sys.sys_platform_user_tenant_assignments SET platform_user_tenant_assignment_revoked_at = now()
+        WHERE platform_user_tenant_assignment_revoked_at IS NULL
+          AND platform_user_tenant_assignment_user_id = (SELECT user_id FROM sys.sys_users WHERE user_email = $1)`,
+      [EMAIL_PIATTAFORMA],
+    );
     const login = await loginRaw(t.app, EMAIL_PIATTAFORMA, TEST_PERSONA_PASSWORD);
     cookie = login.cookies.map((c) => `${c.name}=${c.value}`).join("; ");
   });

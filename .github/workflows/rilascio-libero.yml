@@ -22,7 +22,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  rilascio-libero:
+  pubblica-stato:
+    # Il job ha un nome diverso dallo stato «rilascio-libero» che pubblica: il controllo richiesto
+    # di main e' lo stato, e un job con lo stesso nome (sempre verde) lo confonderebbe.
+    name: pubblica-stato-rilascio
     # D-08: il runner della VM sta sull'host di produzione, una PR da fork non ci gira mai.
     if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
     # Sulla VM, perche' il blocco e' un file della VM.

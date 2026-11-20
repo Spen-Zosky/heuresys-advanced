@@ -104,20 +104,22 @@ describe("GET /v1/me/organigramma", () => {
 describe("GET /v1/me/organigramma — mandato di piattaforma senza clienti assegnati", () => {
   // BLUEPRINT_MANAGER è un mandato di piattaforma «assegnato» (D9=B): senza clienti assegnati il perimetro è vuoto per scelta.
   // Non è un errore: la risposta è 200 con un organigramma vuoto e `senzaCliente: true`, come la rubrica (che torna vuota), invece di 404 «Tenant».
-  const EMAIL_PIATTAFORMA = "paolo.barbieri@rtl-bank.org";
+  // La persona non e' fissa: il database di sviluppo e quello della CI hanno persone diverse nel ruolo. Si prende la prima che ne ha il mandato.
+  let EMAIL_PIATTAFORMA = "";
   let t: TestApp;
   let cookie = "";
   beforeAll(async () => {
     t = await buildTestApp();
-    // Il test non dipende da come e' popolato il database: la persona deve avere il mandato e NESSUN cliente assegnato (la revoca si annulla con la transazione del file).
-    const ruolo = await pool.query(
-      `SELECT 1 FROM sys.sys_user_auth_roles ur
+    const ruolo = await pool.query<{ user_email: string }>(
+      `SELECT u.user_email FROM sys.sys_user_auth_roles ur
          JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
          JOIN sys.sys_users u ON u.user_id = ur.user_auth_role_user_id
-        WHERE u.user_email = $1 AND r.auth_role_code = 'BLUEPRINT_MANAGER' AND ur.user_auth_role_revoked_at IS NULL`,
-      [EMAIL_PIATTAFORMA],
+        WHERE r.auth_role_code = 'BLUEPRINT_MANAGER' AND ur.user_auth_role_revoked_at IS NULL AND u.user_status = 'ACTIVE'
+        ORDER BY u.user_email LIMIT 1`,
     );
     expect(ruolo.rowCount).toBeGreaterThan(0);
+    EMAIL_PIATTAFORMA = ruolo.rows[0]!.user_email;
+    // Nessun cliente assegnato: la revoca si annulla con la transazione del file.
     await pool.query(
       `UPDATE sys.sys_platform_user_tenant_assignments SET platform_user_tenant_assignment_revoked_at = now()
         WHERE platform_user_tenant_assignment_revoked_at IS NULL

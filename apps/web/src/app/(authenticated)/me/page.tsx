@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
+import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/intestazione-pagina";
 import { StatoCaricamento } from "@/components/stato-pagina";
@@ -28,7 +29,15 @@ export default function MeLandingPage() {
   ];
   return (
     <main data-testid="me-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
-      <PageHeader title={t("landing.title")} description={t("landing.description")} />
+      <PageHeader
+        title={t("landing.title")}
+        description={t("landing.description")}
+        actions={
+          <Link href="/me/faldone" data-testid="me-faldone" className="text-sm underline-offset-2 hover:underline">
+            {t("faldone.link")}
+          </Link>
+        }
+      />
       <Suspense fallback={<StatoCaricamento />}>
         <ProfileTabs tabs={tabs} ariaLabel={t("landing.tabs.aria")} />
       </Suspense>

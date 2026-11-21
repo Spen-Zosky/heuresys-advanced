@@ -103,7 +103,7 @@ import { ContestoAgenteProvider } from "../../lib/agente/contesto";
 import { SchedeProvider } from "@/components/scheda-rapida";
 import { CorpoGruppo, useScorrimentoMenu } from "../../components/menu-laterale";
 import { BarraLaterale } from "../../components/barra-laterale";
-import { inizialeMaiuscola } from "@/lib/menu-testi";
+import { applicaOrdine, inizialeMaiuscola } from "@/lib/menu-testi";
 import { ReteDiPagina } from "../../lib/leggibile";
 import { alberoDelGruppo, ramoDi, type VoceMenu } from "../../lib/menu-albero";
 
@@ -341,11 +341,16 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
       customContent: <CorpoGruppo id={`nav-${sub}`} albero={alberoDelGruppo(items)} attiva={activeRoute} icone={iconaDi} />,
     }));
 
+  // L'ordine dei gruppi scelto dalla persona (preferenze sul server) vale anche per il menu mobile e
+  // per la ricerca Ctrl+K, non solo per la barra a sinistra (che lo applica da sé, in `BarraLaterale`).
+  const ordinePersonale = applicaOrdine(groups.map((g) => g.id), prefs.data?.sidebarOrder ?? null);
+  const gruppiPersonali = ordinePersonale.map((id) => groups.find((g) => g.id === id)).filter((g): g is NavGroup => !!g);
+
   // D1 (giro qa-web 18/11): la ricerca in alto (Ctrl+K) si apriva su «Nessun comando configurato». Ora offre le
   // pagine a cui la persona ha accesso, le stesse del menu laterale (il registro già filtra per mandato), con
   // l'etichetta del menu nella lingua scelta e raggruppate come nel menu.
   const contenutoPalette = [...byGroup.entries()]
-    .sort(([, a], [, b]) => minOrder(a) - minOrder(b))
+    .sort(([a], [b]) => ordinePersonale.indexOf(`nav-${a}`) - ordinePersonale.indexOf(`nav-${b}`))
     .map(([sub, items]) => (
       <CommandPalette.Group key={`pal-${sub}`} heading={t(`shell:nav.groups.${sub === "me" ? "me_area" : sub}`, { defaultValue: sub })}>
         {[...items].sort((a, b) => a.ordine - b.ordine).map((v) => (
@@ -434,7 +439,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
             drawerClose: t("shell:ui.drawerClose"),
           }}
           commandPaletteContent={contenutoPalette}
-          mobileNav={<MenuMobile groups={groups} />}
+          mobileNav={<MenuMobile groups={gruppiPersonali} />}
           logo={<HeuresysWordmark variant="brand" size={24} />}
           // F-6 (L7): il collegamento del marchio ha già il suo nome accessibile («Heuresys —
           // pagina iniziale autenticata»); il distintivo «advanced» visibile ma fuori da quel

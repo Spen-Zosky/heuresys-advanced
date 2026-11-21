@@ -59,45 +59,64 @@ describe("/v1/me/preferences (WS-4 P1)", () => {
   it("GET returns the brand defaults when no row exists (dark / balanced / it)", async () => {
     const r = await getPrefs(suite, employeeS);
     expect(r.statusCode).toBe(200);
-    expect(r.json()).toEqual({ theme: "dark", palette: "balanced", locale: "it" });
+    expect(r.json()).toEqual({ theme: "dark", palette: "balanced", locale: "it", sidebarOrder: null });
   });
 
   it("PATCH persists theme+palette; a fresh GET reflects it (server source-of-truth)", async () => {
     const p = await patchPrefs(suite, employeeS, { theme: "light", palette: "cool-ocean" });
     expect(p.statusCode).toBe(200);
     // locale stays the default 'it' (no row existed, INSERT fills the brand default).
-    expect(p.json()).toEqual({ theme: "light", palette: "cool-ocean", locale: "it" });
+    expect(p.json()).toEqual({ theme: "light", palette: "cool-ocean", locale: "it", sidebarOrder: null });
 
     const r = await getPrefs(suite, employeeS);
     expect(r.statusCode).toBe(200);
-    expect(r.json()).toEqual({ theme: "light", palette: "cool-ocean", locale: "it" });
+    expect(r.json()).toEqual({ theme: "light", palette: "cool-ocean", locale: "it", sidebarOrder: null });
   });
 
   it("partial PATCH (theme only) does NOT reset the stored palette", async () => {
     const p = await patchPrefs(suite, employeeS, { theme: "dark" });
     expect(p.statusCode).toBe(200);
     // palette stays cool-ocean + locale stays it from the previous test
-    expect(p.json()).toEqual({ theme: "dark", palette: "cool-ocean", locale: "it" });
+    expect(p.json()).toEqual({ theme: "dark", palette: "cool-ocean", locale: "it", sidebarOrder: null });
 
     const r = await getPrefs(suite, employeeS);
-    expect(r.json()).toEqual({ theme: "dark", palette: "cool-ocean", locale: "it" });
+    expect(r.json()).toEqual({ theme: "dark", palette: "cool-ocean", locale: "it", sidebarOrder: null });
   });
 
   it("PATCH persists locale (en); a fresh GET reflects it (i18n Fase 0b)", async () => {
-    const p = await patchPrefs(suite, employeeS, { locale: "en" });
+    const p = await patchPrefs(suite, employeeS, { locale: "en", sidebarOrder: null });
     expect(p.statusCode).toBe(200);
     // only locale flips; theme+palette keep the prior stored values (partial update).
-    expect(p.json()).toEqual({ theme: "dark", palette: "cool-ocean", locale: "en" });
+    expect(p.json()).toEqual({ theme: "dark", palette: "cool-ocean", locale: "en", sidebarOrder: null });
 
     const r = await getPrefs(suite, employeeS);
-    expect(r.json()).toEqual({ theme: "dark", palette: "cool-ocean", locale: "en" });
+    expect(r.json()).toEqual({ theme: "dark", palette: "cool-ocean", locale: "en", sidebarOrder: null });
   });
 
   it("partial PATCH (theme only) does NOT reset the stored locale", async () => {
     const p = await patchPrefs(suite, employeeS, { theme: "light" });
     expect(p.statusCode).toBe(200);
     // locale stays 'en' from the previous test
-    expect(p.json()).toEqual({ theme: "light", palette: "cool-ocean", locale: "en" });
+    expect(p.json()).toEqual({ theme: "light", palette: "cool-ocean", locale: "en", sidebarOrder: null });
+  });
+
+  it("PATCH sidebarOrder persists the order; omitting it keeps it; null restores the standard order", async () => {
+    const ordine = ["nav-people", "nav-dashboards", "nav-organization"];
+    const p = await patchPrefs(suite, employeeS, { sidebarOrder: ordine });
+    expect(p.statusCode).toBe(200);
+    expect(p.json().sidebarOrder).toEqual(ordine);
+    const altro = await patchPrefs(suite, employeeS, { theme: "light" });
+    expect(altro.json().sidebarOrder).toEqual(ordine);
+    expect((await getPrefs(suite, employeeS)).json().sidebarOrder).toEqual(ordine);
+    const reset = await patchPrefs(suite, employeeS, { sidebarOrder: null });
+    expect(reset.statusCode).toBe(200);
+    expect(reset.json().sidebarOrder).toBeNull();
+    expect((await getPrefs(suite, employeeS)).json().sidebarOrder).toBeNull();
+  });
+
+  it("PATCH with an invalid sidebarOrder → 400", async () => {
+    const p = await patchPrefs(suite, employeeS, { sidebarOrder: "nav-people" });
+    expect(p.statusCode).toBe(400);
   });
 
   it("unauthenticated GET → 401", async () => {

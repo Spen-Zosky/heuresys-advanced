@@ -9,7 +9,6 @@ import {
   CommandPalette,
   DashboardShell,
   DashboardHeader,
-  DashboardSidebar,
   DashboardFooter,
   HeuresysWordmark,
   HeuresysLogoBadge,
@@ -90,7 +89,7 @@ import {
   Workflow,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useCurrentUser, useLogout, useMyInterfaces, useUpdateMyPreferences } from "../../lib/api/auth";
+import { useCurrentUser, useLogout, useMyInterfaces, useMyPreferences, useUpdateMyPreferences } from "../../lib/api/auth";
 import { isApiError, SessionExpiredError } from "../../lib/api/errors";
 import { setLocale } from "../../lib/i18n";
 import { primaryRoleOf } from "../../lib/role-precedence";
@@ -103,6 +102,8 @@ import { PannelloAgente } from "../../components/assistente/finestra-assistente"
 import { ContestoAgenteProvider } from "../../lib/agente/contesto";
 import { SchedeProvider } from "@/components/scheda-rapida";
 import { CorpoGruppo, useScorrimentoMenu } from "../../components/menu-laterale";
+import { BarraLaterale } from "../../components/barra-laterale";
+import { inizialeMaiuscola } from "@/lib/menu-testi";
 import { ReteDiPagina } from "../../lib/leggibile";
 import { alberoDelGruppo, ramoDi, type VoceMenu } from "../../lib/menu-albero";
 
@@ -247,6 +248,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
   const ifaces = useMyInterfaces();
   const logout = useLogout();
   const updatePrefs = useUpdateMyPreferences();
+  const prefs = useMyPreferences();
   // C14, React #418 su quasi ogni pagina (giro 11/11): identità, menu e permessi partono dalla
   // copia della scheda (sessionStorage, V-12), che il server non vede. Il server disegnava
   // «Caricamento», il primo disegno del client la pagina intera: HTML diverso, idratazione
@@ -323,7 +325,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
       const etichetta = i18n.language === "en"
         ? t(`shell:nav.voci.${i.route.replace(/^\//, "").replace(/\//g, "_")}`, { defaultValue: i.label })
         : i.label;
-      const voce = { id: i.code, label: etichetta, href: i.route, icona: i.icon ?? null, ordine: i.order, ramo, ...(NAV_TESTID[i.code] ? { testId: NAV_TESTID[i.code] } : {}) };
+      const voce = { id: i.code, label: inizialeMaiuscola(etichetta), href: i.route, icona: i.icon ?? null, ordine: i.order, ramo, ...(NAV_TESTID[i.code] ? { testId: NAV_TESTID[i.code] } : {}) };
       const arr = byGroup.get(gruppo);
       if (arr) arr.push(voce);
       else byGroup.set(gruppo, [voce]);
@@ -443,8 +445,13 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
         />
       }
       sidebar={
-        <DashboardSidebar
+        <BarraLaterale
           groups={groups}
+          ordineSalvato={prefs.data?.sidebarOrder ?? null}
+          onCambiaOrdine={(sidebarOrder) => updatePrefs.mutate({ sidebarOrder })}
+          etichettaManiglia={(gruppo) => t("shell:ui.moveGroup", { gruppo })}
+          suggerimentoManiglia={t("shell:ui.moveGroupHint")}
+          etichettaRipristina={t("shell:ui.restoreOrder")}
           title={t("shell:ui.navigation")}
           ariaLabel={t("shell:ui.navigationAria")}
           toggleLabel={t("shell:ui.toggleSidebar")}

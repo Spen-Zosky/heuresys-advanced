@@ -154,7 +154,7 @@ function Corpo({ passo, ix, blocchi }: { passo: Passo; ix: Indici; blocchi: Unit
           <Riga etichetta={t("schedaRapida.unita")}>{rif("unita", p.unitaId)}</Riga>
           <Riga etichetta={t("schedaRapida.riportaA")}>{rif("posizione", p.riportaAId)}</Riga>
           <Riga etichetta={t("schedaRapida.criticita")}>{p.criticita ? enumLabel("positionCriticality", p.criticita) : null}</Riga>
-          <Riga etichetta={t("schedaRapida.codice")}>{p.codice ? <span className="font-mono text-xs text-muted-foreground">{p.codice}</span> : null}</Riga>
+          <Riga etichetta={t("schedaRapida.codice")}>{p.codice ? <span className="font-mono text-xs text-muted-foreground" data-grezzo>{p.codice}</span> : null}</Riga>
         </dl>
         <Elenco titolo={t("schedaRapida.leRiportano")} voci={riporti.map((r) => ({ tipo: "posizione", id: r.id, nome: r.titolo, nota: r.titolare }))} />
         <div className="mt-4 text-right">

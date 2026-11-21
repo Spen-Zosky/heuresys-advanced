@@ -327,7 +327,7 @@ export function NavigatoreCodici({ tipo }: { tipo: TipoCodice }) {
               {filo.map((c) => (
                 <span key={c.id} className="flex items-center gap-1">
                   <ChevronRight className="h-3 w-3" aria-hidden />
-                  <button type="button" className="underline-offset-2 hover:underline" onClick={() => setLivello(c.code)}>{c.code} · {c.name}</button>
+                  <button type="button" className="underline-offset-2 hover:underline" onClick={() => setLivello(c.code)}><span data-grezzo>{c.code}</span> · {c.name}</button>
                 </span>
               ))}
             </nav>
@@ -340,7 +340,7 @@ export function NavigatoreCodici({ tipo }: { tipo: TipoCodice }) {
               return (
                 <li key={c.id} className="flex items-center gap-2 px-3 py-2 text-sm">
                   <button type="button" className="flex-1 text-left hover:underline" onClick={() => scheda(c)}>
-                    <span className="mr-2 font-mono text-xs text-muted-foreground">{c.code}</span>{c.name}
+                    <span className="mr-2 font-mono text-xs text-muted-foreground" data-grezzo>{c.code}</span>{c.name}
                   </button>
                   {n > 0 && q.length < 2 ? (
                     <Button size="sm" variant="outline" onClick={() => setLivello(c.code)}>

@@ -1,6 +1,6 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `7949c1b1` (2026-11-21T00:39:30+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `3dd374df` (2026-11-21T02:32:20+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
@@ -10,7 +10,7 @@
 | Route API | 750 |
 | Pagine web | 145 |
 | Schemi shared | 138 |
-| Tabelle DB | 429 (vuote: 39) |
+| Tabelle DB | 431 (vuote: 41) |
 | Viste / matview | 91 / 0 |
 | Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 336 |
 
@@ -192,6 +192,8 @@
 - `sys.sys_occupation_classification_mappings`
 - `sys.sys_platform_user_tenant_assignments`
 - `sys.sys_platform_vocabulary_equivalences`
+- `sys.sys_project_dependencies`
+- `sys.sys_project_phases`
 
 ## Key counts live
 
@@ -202,7 +204,7 @@
 - roles: **24**
 - permissions: **252**
 - role_permission_mappings: **1341**
-- ui_interfaces_active: **78**
+- ui_interfaces_active: **79**
 - skills: **14032**
 
 ## Anomalie shared exports

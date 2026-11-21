@@ -50,6 +50,10 @@ Censimento: `git grep -lE 'POSTGRES_USER|POSTGRES_PASSWORD|PGUSER|PGPASSWORD|DAT
 
 Prova dal vivo sulla VM (2026-11-21, sessione senza la password del proprietario nell'ambiente, `PGPORT=5432`): i 13 strumenti con accesso al database girano senza un solo errore di permesso o di autenticazione (`grep -ciE 'permission denied|password authentication|no password'` = 0); le uscite 1/2 sono rossi di contenuto già noti (sentinelle, verifiche incrociate), non di accesso.
 
+Misura richiesta dalla revisione (2026-11-21, sola lettura, come `heuresys_agenti`): `select schemaname, count(*) from pg_stat_user_tables where schemaname not in ('sys','audit','staging','reference_sync') group by 1` → nessuna riga; fuori dai quattro schemi ci sono solo 2 viste in `public`, leggibili dal ruolo. `build_atlas.py` completo come `heuresys_agenti`: exit 0, «432 tabelle DB», 0 errori di permesso (i file generati sono stati rimessi com'erano). Nessun permesso da aggiungere.
+
+Ripiego: finché la tappa 3 non è applicata, se il file della credenziale manca o è rovinato i due aiuti tornano al proprietario e lo dicono solo su stderr; dopo lo spostamento della password il ripiego fallisce l'autenticazione, quindi il difetto si chiude da sé.
+
 ### Restano al proprietario `heuresys` (DDL legittimo o fuori dal perimetro degli agenti)
 
 | file | perché |
@@ -61,6 +65,7 @@ Prova dal vivo sulla VM (2026-11-21, sessione senza la password del proprietario
 | `db/scripts/ci-rehearsal.sh`, `ci-rehearsal-census.sh`, `ci-db-usa-e-getta.sh`, `scripts/clone-vm-db.sh`, `db/scripts/onda2/prova-*.sh`, `db/scripts/pacchetto/prova-*.sh` | creano e distruggono copie usa-e-getta |
 | `db/scripts/validate_database.*` | `pg_dump --schema-only` e confronto dello schema, sul gemello |
 | `db/scripts/seed-*.ts`, `provision-*.ts`, `encrypt-totp-secrets.ts`, `stop-deriving-totp.ts`, `verify-separazione-totp.ts`, `sospendi-collaudo.ts`, `db/scripts/pacchetto/*.mjs` | seed e provisioning: portano a uno stato dichiarato; vanno rivisti uno per uno in un giro a parte |
+| `docs/kb/tools/build_menu.py`, `check_completezza_self.py`, `check_exposure.py`, `check_pagine_orfane.py`, `status_dashboard.py` | hanno `-U heuresys` e la porta 5433 scritti nel codice: girano dal PC via tunnel. Nota: `chi_ripara.py` importa `_pg_agenti` e poi chiama `check_exposure.py`; dove la credenziale degli agenti esiste (VM) quella chiamata parte come `heuresys` con la password degli agenti e fallisce, ma sulla VM la porta 5433 non risponde comunque |
 | `scripts/turno/dopo-presa-debian.sh`, `scripts/verifica-cloni.sh`, `scripts/db-health-graph.sh`, `scripts/session-boot.ps1`, `scripts/setup-tunnel-automation.ps1` | girano sul PC o sulla Debian via tunnel, dove la credenziale degli agenti non c'è |
 | `scripts/propagate-secret-rotation.sh`, `deploy/postgres/assegna-password-*.sh`, `prova-identita-app.sh` | gestiscono le credenziali stesse |
 | `apps/api/src/**`, `apps/agent-gateway/src/**` | servizi: in produzione usano già `heuresys_app` (`POSTGRES_APP_USER`) |

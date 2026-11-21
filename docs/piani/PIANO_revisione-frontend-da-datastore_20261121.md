@@ -2,7 +2,9 @@
 
 Data: 2026-11-21. Stato: **da approvare** (Enzo). Thread: «Pianificare la revisione del frontend di advanced».
 
-> **Prossimo passo da eseguire: P2**, diagramma per fasi nella scheda del processo (`/tenant-processes/[id]`), dopo che Enzo ha visto P1 (in corso in un thread a parte). Modello da cui partire: la finestra del processo nella Mappa della console del datastore (schermata `5_processi_mappa_modale.png` in Drive `gdrive-hr:Heuresys/revisione-frontend-20261121/schermate/`): fasi in colonne con numero e codice APQC, una corsia per unità (responsabile in grigio), in ogni riquadro i ruoli che la eseguono, riquadro pieno = esegue, tratteggiato = consultata, riga di legenda sotto, pulsanti «Esporta SVG» e «Schermo intero». In advanced esistono già `FlussoCorsie` e `GrafoProcesso` (`components/processo/diagrammi.tsx`) e lo schermo intero di `components/organigramma/area-navigabile.tsx`: si riusano, non si rifanno. Subito dopo, se Enzo è d'accordo, **D1** (nessun testo troncato), che è il passo più piccolo della sezione 7.
+> **Ordine dei prossimi passi (aggiornato 2026-11-21 sera, dopo il rilievo di advanced della sezione 8).** P1 (matrice processi × unità) è in produzione, con la correzione per il mandato di piattaforma (#379, #380). Poi, uno alla volta: **P2** diagramma per fasi nella scheda del processo; **P26** righe che aprono qualcosa in `/organization` (la scheda dell'unità esiste già: è il passo più economico); **P3** processo come scheda a cascata; **P4** competenza e mansione (`/skills`, `/job-catalog`, `/positions/[id]/skills`); **P5** indicatore e obiettivo (`/kpis`, `/goals`, `/okrs`); **D1** nessun testo troncato. Il difetto della finestra intitolata «0» in `/processes` va al thread delle pagine, non è un passo della mappa. Modello per P2: la finestra del processo nella Mappa della console del datastore (`5_processi_mappa_modale.png` in Drive `gdrive-hr:Heuresys/revisione-frontend-20261121/schermate/`): fasi in colonne con numero e codice APQC, una corsia per unità (responsabile in grigio), in ogni riquadro i ruoli che la eseguono, pieno = esegue, tratteggiato = consultata, legenda sotto, «Esporta SVG» e «Schermo intero»; si riusano `FlussoCorsie` e `GrafoProcesso` (`components/processo/diagrammi.tsx`) e lo schermo intero di `components/organigramma/area-navigabile.tsx`.
+>
+> **Regola aggiunta dopo P1**: ogni passo si prova dal vivo con **due** persone, una del tenant (es. HRMS_MANAGER di RTL) e un utente di piattaforma (`PLATFORM_ADMIN`). P1 era uscito con la matrice vuota per il mandato di piattaforma, ed Enzo l'ha visto così.
 
 ## 1. Metodo (Enzo, 2026-11-21)
 
@@ -208,3 +210,28 @@ Base: i fogli di stile delle due interfacce (`heuresys-datastore/apps/console/sr
 | D5 | Riga di fatti misurati sotto il titolo delle pagine di dettaglio (processo, unità, posizione) | `/tenant-processes/[id]`, `/positions/[id]` | sotto il titolo «N unità · N ruoli · N persone» | dopo le schermate di advanced |
 | D7 | Conteggio nel titolo di ogni scheda («Posizioni (109)») e riquadro di dettaglio che, vuoto, dice che cosa fare | `/positions/[id]`, `/tenant-processes/[id]`, `/organization` | la scheda vuota mostra «(0)» prima di aprirla | pronto |
 | D6 | Stato espresso dalla forma del bordo oltre che dalla parola, dove ci sono griglie di stati | tabelle con colonna stato, barre di avanzamento | in stampa in bianco e nero lo stato si distingue | dopo le schermate di advanced |
+
+## 8. Advanced dal vivo (2026-11-21 sera)
+
+Fonte: rilievo in produzione come Valentina Conti (HRMS_MANAGER di RTL), sola lettura, consegnato in Drive `gdrive-hr:Heuresys/revisione-frontend-20261121/advanced/`: `pagine.tsv` (23 pagine), `LEGGIMI.txt`, 72 schermate a pagina intera.
+
+**Che cosa si apre al clic, pagina per pagina.**
+
+| comportamento | pagine | confronto con il datastore |
+|---|---|---|
+| cascata profonda (6 livelli provati), ma solo fra persona, posizione e unità | `/tenant-processes`, `/tenant-processes/[id]`, `/positions`, `/positions/[id]` | nel datastore ogni oggetto è apribile; qui processo, competenza, indicatore, modulo, percorso non lo sono: confermati P3–P8 |
+| la riga apre una finestra a un livello, senza nomi apribili dentro | `/processes` (titolo «0»: difetto), `/positions/[id]/learning`, `/goals`, `/okrs`, `/career-succession`, `/talent-review` | nel datastore il dettaglio ha i rimandi agli altri oggetti; qui la finestra è un vicolo cieco: P21 e P3–P8 |
+| **la riga non fa niente** | `/organization`, `/job-catalog`, `/skills`, `/kpis`, `/learning`, `/consolidation`, `/positions/[id]/skills` | nel datastore ogni riga di ogni tabella apre il suo dettaglio: è la differenza più visibile |
+| porta a un'altra pagina | `/tenants/[id]`, `/tenant-blueprints` | equivalente |
+
+**Dati.** I conteggi visibili non sono confrontabili uno a uno con la corsa (advanced pagina a 25 righe; tenant RTL e corsa tjb non sono la stessa azienda), ma due vuoti sono netti: `/positions/[id]/kpis` mostra 0 indicatori sulla posizione provata, mentre la corsa ne lega 327 ai ruoli tramite obiettivi e terne; `/projects` mostra 0 righe, mentre la corsa ha 4 flussi di commessa bancari. Il primo è un vuoto di dati del tenant (si guarda con il consolidamento prima di disegnare P5), il secondo va guardato: o i progetti di RTL non ci sono, o la pagina non li legge.
+
+**Grafici.** Il rilievo conta disegni solo nell'organigramma (4). La scheda del processo ha le schede «Flusso a corsie» e «Grafo», ma il rilievo non vi conta disegni: da riguardare sulle schermate `04-tenant-processes-un-processo-scheda-4.png` e `-5.png` prima di P2.
+
+**Design, conferme e smentite della sezione 7.** La scheda del processo porta già il conteggio nel titolo delle schede («Attività 8», «Unità e ruoli 5», «Indicatori e competenze 2»): D7 c'è già lì e va solo esteso alle altre pagine di dettaglio. Le intestazioni delle tabelle sono in maiuscolo in tutte le pagine (`PROCESSO | RESPONSABILE | …`), il datastore le scrive in minuscolo con iniziale maiuscola: non è una regola di Enzo, si lascia com'è.
+
+**Passo nuovo.**
+
+| Passo | Contenuto | Dove si vede | Come si prova | Stato |
+|---|---|---|---|---|
+| P26 | Ogni riga di tabella apre il suo dettaglio; prima `/organization` (la scheda dell'unità esiste già), poi le altre sei pagine insieme al tipo di oggetto del loro passo (P4 competenze e mansioni, P5 indicatori, P7 moduli e percorsi) | `/organization` | clic su un'unità: si apre la sua scheda, con persone e posizioni apribili | pronto |

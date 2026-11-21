@@ -85,31 +85,31 @@ Prima stesura dal codice di entrambi i repo, 2026-11-21; ogni riga si verifica d
 
 | # corsa | passo del datastore | che cosa mostra | pagine di advanced con le stesse informazioni | esito | passo della mappa | stato |
 |---|---|---|---|---|---|---|
-| 1 | Attività (ATECO) | codici ATECO dell'impresa con NACE e fonti | `/tenants/[id]`, `/tenants/[id]/enterprise-typing`, `/tassonomie` (settori) | integrare: la voce ATECO del tenant apribile a cascata con il suo ramo e le fonti | P4-bis | da verificare dal vivo |
-| 2 | Classe e sedi | classe dimensionale, addetti, sedi | `/tenants/[id]/enterprise-typing`, `/organization` | integrare: sedi come oggetti apribili (unità e persone per sede) | da aprire | da verificare |
-| 3 | CCNL e istituti | contratti, livelli, minimi, istituti, fonti, riscontro dei minimi | scheda Contratti di `/tenants/[id]` | integrare: istituti, fonti, minimi a una data, tranche | P19 | da verificare |
+| 1 | Attività (ATECO) | codici ATECO dell'impresa con NACE e fonti | `/tenants/[id]`, `/tenants/[id]/enterprise-typing`, `/tassonomie` (settori) | integrare: la voce ATECO del tenant apribile a cascata con il suo ramo e le fonti | P4-bis | rilevato dal vivo; lato advanced da verificare |
+| 2 | Classe e sedi | classe dimensionale, addetti, sedi | `/tenants/[id]/enterprise-typing`, `/organization` | integrare: sedi come oggetti apribili (unità e persone per sede) | da aprire | rilevato dal vivo; lato advanced da verificare |
+| 3 | CCNL e istituti | contratti, livelli, minimi, istituti, fonti, riscontro dei minimi | scheda Contratti di `/tenants/[id]` | integrare: istituti, fonti, minimi a una data, tranche | P19 | rilevato dal vivo; lato advanced da verificare |
 | 4 | Processi di business | elenco con tipo, codice APQC, sedi, motivo, fonti; **mappa processi × unità R/E/C** | `/tenant-processes`, `/processes`, `/process-owner` | implementare la mappa; integrare motivo e fonti | **P1** (in corso in un thread a parte), P3 | in corso |
-| 5 | Unità organizzative | unità con genere, sede, processi e ruolo nel processo | `/organization`, scheda unità a cascata | integrare: nella scheda dell'unità i processi con R/E/C e i ruoli | P3 | da verificare |
-| 6 | Organigramma | albero con padre, livello, addetti; disegno | `/organization/org-chart` | equivalente (piano organigrammi del 14–15/11) | — | da verificare |
-| 7 | Obblighi normativi | norme, ambito, figure dovute | nessuna pagina trovata | implementare, se i dati ci sono nel tenant (indagine) | da aprire | indagine |
-| 8 | Ruoli organizzativi | ruoli con unità, livello, persone, processi presidiati | `/positions`, `/job-catalog`, scheda posizione | integrare: la scheda della posizione con processi presidiati, livello, competenze, criticità | P4 | da verificare |
-| 9 | Copertura degli obblighi | per obbligo le posizioni che lo coprono e il ruolo mancante | nessuna | implementare insieme al 7 | da aprire | indagine |
-| 10 | Livello CCNL per ruolo | livello, categoria e motivo per ogni ruolo | scheda Contratti (persone per livello), `/positions` | integrare: il livello come oggetto apribile | P6 | da verificare |
+| 5 | Unità organizzative | unità con genere, sede, processi e ruolo nel processo | `/organization`, scheda unità a cascata | integrare: nella scheda dell'unità i processi con R/E/C e i ruoli | P3 | rilevato dal vivo; lato advanced da verificare |
+| 6 | Organigramma | albero con padre, livello, addetti; disegno | `/organization/org-chart` | equivalente (piano organigrammi del 14–15/11) | — | rilevato dal vivo; lato advanced da verificare |
+| 7 | Obblighi normativi | norme, ambito, figure dovute | nessuna pagina trovata | dati solo nel modello (`sys_blueprint_content_obligations`), dipende dal consolidamento (6.3) | P23 | rilevato dal vivo |
+| 8 | Ruoli organizzativi | ruoli con unità, livello, persone, processi presidiati | `/positions`, `/job-catalog`, scheda posizione | integrare: la scheda della posizione con processi presidiati, livello, competenze, criticità | P4 | rilevato dal vivo; lato advanced da verificare |
+| 9 | Copertura degli obblighi | per obbligo le posizioni che lo coprono e il ruolo mancante | nessuna | come il 7: dati solo nel modello, dipende dal consolidamento | P23 | rilevato dal vivo |
+| 10 | Livello CCNL per ruolo | livello, categoria e motivo per ogni ruolo | scheda Contratti (persone per livello), `/positions` | integrare: il livello come oggetto apribile | P6 | rilevato dal vivo; lato advanced da verificare |
 | 11 | Fasi dei processi | fasi per processo; diagramma per fasi | `/tenant-processes/[id]` | implementare il diagramma per fasi | P2 | da fare |
-| 12 | Skill per ruolo | competenze ESCO per ruolo, essenziali o facoltative | `/positions/[id]/skills`, `/skills`, `/gaps` | integrare: competenza apribile a cascata | P4 | da verificare |
-| 13 | Obiettivi | terne processo-unità-ruolo e obiettivi | `/goals`, `/okrs`, `/performance` | integrare: obiettivo legato a processo e unità, apribile | P5 | da verificare |
-| 14 | Metriche | indicatori per obiettivo | `/kpis`, `/admin/catalogo-kpi`, `/positions/[id]/kpis` | integrare | P5 | da verificare |
-| 15 | Campi derivati | riporti e campi calcolati | linee di riporto nella scheda posizione | non applicabile come pagina; i riporti sono già nella scheda | — | da verificare |
-| 16 | Bersagli degli indicatori | valori obiettivo per indicatore | `/kpis` | integrare | P5 | da verificare |
-| 17 | Formazione | percorsi per ruolo | `/learning`, `/learning/training-initiatives`, `/positions/[id]/learning` | da confrontare dal vivo | — | da verificare |
-| 18 | Carriere | percorsi di carriera | `/career-succession`, `/me/career` | da confrontare dal vivo | — | da verificare |
-| 19 | Incentivi e welfare | incentivi e welfare per categoria | nessuna pagina trovata | implementare se i dati ci sono (indagine) | da aprire | indagine |
-| 20 | Flussi di commessa | flussi di lavoro per commessa | `/projects` (solo in parte) | probabilmente non applicabile a una banca; da decidere | — | indagine |
-| 21 | Criticità dei ruoli | criticità e motivo per ruolo | `/positions` (colonna), `/talent-review`, `/insights/succession-readiness` | integrare nella scheda della posizione | P4 | da verificare |
-| 22 | Condizioni degli istituti CCNL | condizioni per istituto | scheda Contratti | integrare insieme al 3 | P19 | da verificare |
+| 12 | Skill per ruolo | competenze ESCO per ruolo, essenziali o facoltative | `/positions/[id]/skills`, `/skills`, `/gaps` | integrare: competenza apribile a cascata | P4 | rilevato dal vivo; lato advanced da verificare |
+| 13 | Obiettivi | terne processo-unità-ruolo e obiettivi | `/goals`, `/okrs`, `/performance` | integrare: obiettivo legato a processo e unità, apribile | P5 | rilevato dal vivo; lato advanced da verificare |
+| 14 | Metriche | indicatori per obiettivo | `/kpis`, `/admin/catalogo-kpi`, `/positions/[id]/kpis` | integrare | P5 | rilevato dal vivo; lato advanced da verificare |
+| 15 | Campi derivati | riporti e campi calcolati | linee di riporto nella scheda posizione | non applicabile come pagina; i riporti sono già nella scheda | — | rilevato dal vivo; lato advanced da verificare |
+| 16 | Bersagli degli indicatori | valori obiettivo per indicatore | `/kpis` | integrare | P5 | rilevato dal vivo; lato advanced da verificare |
+| 17 | Formazione | percorsi per ruolo | `/learning`, `/learning/training-initiatives`, `/positions/[id]/learning` | da confrontare dal vivo | — | rilevato dal vivo; lato advanced da verificare |
+| 18 | Carriere | percorsi di carriera | `/career-succession`, `/me/career` | da confrontare dal vivo | — | rilevato dal vivo; lato advanced da verificare |
+| 19 | Incentivi e welfare | incentivi e welfare per categoria | nessuna pagina trovata | dati solo nel modello (`sys_blueprint_content_incentives`), dipende dal consolidamento (6.3) | P24 | rilevato dal vivo |
+| 20 | Flussi di commessa | flussi di lavoro per commessa | `/projects` (solo in parte) | da confrontare con `/projects`: la corsa ha 4 flussi bancari reali (6.3) | da aprire | rilevato dal vivo |
+| 21 | Criticità dei ruoli | criticità e motivo per ruolo | `/positions` (colonna), `/talent-review`, `/insights/succession-readiness` | integrare nella scheda della posizione | P4 | rilevato dal vivo; lato advanced da verificare |
+| 22 | Condizioni degli istituti CCNL | condizioni per istituto | scheda Contratti | integrare insieme al 3 | P19 | rilevato dal vivo; lato advanced da verificare |
 | 23 | Traduzioni in inglese | testi in inglese | — | non applicabile (advanced è in italiano) | — | chiuso |
-| 24 | Prove di lettura | verifiche di costruzione | `/consolidation` (in parte) | non applicabile come pagina del tenant | — | da verificare |
-| 25 | Pacchetto per advanced | il pacchetto che advanced importa | `/tenant-blueprints`, `/consolidation` | equivalente | — | da verificare |
+| 24 | Prove di lettura | verifiche di costruzione | `/consolidation` (in parte) | non applicabile come pagina del tenant | — | rilevato dal vivo; lato advanced da verificare |
+| 25 | Pacchetto per advanced | il pacchetto che advanced importa | `/tenant-blueprints`, `/consolidation` | equivalente | — | rilevato dal vivo; lato advanced da verificare |
 | v0.3 | Strategia | strategia dell'impresa | `/org-director`, `/org-director/vrio` | da confrontare su una corsa a 31 passi | — | indagine |
 | v0.3 | Capability | capacità e maturità | `/org-director` (ricalcolo capacità e maturità) | da confrontare | — | indagine |
 | v0.3 | Mestieri | mestieri per competenze | `/job-catalog` | da confrontare | — | indagine |

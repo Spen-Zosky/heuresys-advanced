@@ -81,7 +81,7 @@ Che cosa vuol dire per advanced: la «cascata» del datastore ha **due forme**, 
 
 ### 6.2 La tabella dei passi
 
-Prima stesura dal codice di entrambi i repo, 2026-11-21; ogni riga si verifica dal vivo prima di diventare un passo esecutivo, e la colonna «stato» dice a che punto è.
+Prima stesura dal codice di entrambi i repo, 2026-11-21; ogni riga si verifica dal vivo prima di diventare un passo esecutivo, e la colonna «stato» dice a che punto è. Il rilievo dal vivo della sezione 6.3 (2026-11-21 sera) verifica la colonna «che cosa mostra» per tutti i 25 passi presenti: dove le due sezioni divergono vale la 6.3. Attenzione alla numerazione: qui «# corsa» è l'ordine v0.2 (1–25), la console numera sulla barra a 31 (tabella di corrispondenza nella 6.3).
 
 | # corsa | passo del datastore | che cosa mostra | pagine di advanced con le stesse informazioni | esito | passo della mappa | stato |
 |---|---|---|---|---|---|---|
@@ -118,3 +118,53 @@ Prima stesura dal codice di entrambi i repo, 2026-11-21; ogni riga si verifica d
 | v0.3 | Principi | principi dell'organizzazione | nessuna trovata | indagine | — | indagine |
 
 Passi della mappa nati da questo confronto, da aggiungere alla sezione 3 quando arrivano al loro turno: **P21** salto all'elenco filtrato con il dettaglio della riga a lato (seconda forma della cascata); **P22** sedi come oggetti apribili; **P23** obblighi normativi e copertura (se i dati ci sono); **P24** incentivi e welfare (se i dati ci sono).
+
+### 6.3 Rilievo dal vivo della corsa della banca (2026-11-21)
+
+Fonte: rilievo fatto sulla VM con il browser sulla console (porta 3107), corsa `p20261010010521tjb` (banca retail, 10/10/2026), consegnato in Drive `gdrive-hr:Heuresys/revisione-frontend-20261121/`: `passi.tsv` (104 righe, una per passo e scheda), `LEGGIMI.txt`, `schermate/` (105 immagini 1440×900). Le altre due corse della banca (`p20261006161114sbx`, `p20261004222646792`) hanno gli stessi 25 passi su 25.
+
+**Numerazione.** La barra mostra 31 caselle; la corsa ne ha 25 e le sei vuote sono i passi v0.3. Corrispondenza «v0.2 → barra»: 1→1, 2→2, 3→4, 4→5, 5→7, 6→8, 7→9, 8→10, 9→11, 10→12, 11→13, 12→14, 13→16, 14→18, 15→19, 16→20, 17→21, 18→22, 19→23, 20→24, 21→25, 22→26, 23→29, 24→30, 25→31. Le caselle 3, 6, 15, 17, 27, 28 sono i passi v0.3 (strategia, capability, mestieri, decisioni, agenti, principi), vuote su tutte e tre le corse: le sei righe v0.3 della tabella 6.2 restano senza un caso dal vivo finché non esiste una corsa a 31.
+
+**Che cosa è risultato vero, e che cosa correggere nella 6.1.**
+- La struttura è identica per tutti i passi: «Riepilogo» (fatti: stato, durata, costo, chiamate, chiuso, origine; avvisi; bottoni verso i passi collegati, da 2 a 20), una scheda per tabella con il conteggio, «Esecuzioni». In più «Organigramma» (31 riquadri SVG, schermo intero, esporta SVG) nei passi unità e organigramma, e «Mappa e diagrammi» (30 processi) nei passi processi e fasi.
+- **Il dettaglio della riga non è una finestra modale**: è un pannello fisso a destra, con tutti i campi della riga (da 2 a 369), gli elenchi annidati chiusi e, per i valori complessi, il JSON grezzo.
+- **La cascata della corsa è il salto, non la finestra sopra la finestra**: un valore che è un codice di un altro passo (R001, U01, P01, O001, M001, OBB_…, FOR_…, CAR_…, INC_…, COM_…) porta a quel passo, apre la tabella filtrata e seleziona la riga. Profondità 1 per salto, ma i salti si concatenano e il tasto Indietro del browser ripercorre il cammino. Provato su 22 tabelle.
+- **L'unica finestra modale** è nella Mappa: il clic su un processo apre il diagramma per fasi con le corsie dei ruoli, con precedente/successivo, schermo intero ed esporta SVG; non apre altre finestre dentro di sé.
+- La finestra sopra la finestra con 8 tipi di oggetto è del **banco** (`ispeziona.mjs`), non della corsa. Quindi il modello di ispezionabilità da portare in advanced è la **somma** delle due: la scheda a cascata del banco (P3–P8) e il salto all'elenco filtrato della corsa (P21).
+- **Limiti della corsa da non copiare**: i valori-codice cliccabili visibili sono pochi (da 0 a 5 per riga), il resto sta negli elenchi chiusi (167 nel caso degli incentivi, 34 nelle commesse); i nomi dei campi sono quelli tecnici (`senzaRiscontro`, `gradoAziendale`, `occupazioniEsco`); i valori complessi sono in JSON grezzo. In advanced queste tre cose violano le regole dell'interfaccia (niente sigle, solo italiano, dati leggibili): si porta la logica, non la resa.
+- Grafici: solo SVG (organigramma, fasi, corsie dei ruoli) e la matrice processi × unità con E/C.
+- Dati: la console legge `/dati/corsa/<id>/passo/<chiave>[?tabella&pagina&q&ordina&verso]` e `/dati/corsa/<id>/processi`; a monte il servizio 3101 (`/v1/banco/prototipi`, `/banco/api/datastore/prototipi/<id>`, `/banco/api/datastore/stato?prototipo=`, `/v1/banco/pacchetto/sezioni-v03`).
+
+**Che cosa contiene ogni passo** (righe per tabella, corsa della banca; tra parentesi i campi del dettaglio):
+
+| barra | passo | tabelle (righe) | salto provato | nota per advanced |
+|---|---|---|---|---|
+| 1 | Attività (ATECO) | proposte 3 (8), domande 0 | — | confronto con la scheda ATECO del tenant |
+| 2 | Classe e sedi | sedi 5 (4) | — | le sedi sono un elenco piatto anche qui: P22 resta valido ma non ha un modello da copiare |
+| 4 | CCNL e istituti | ccnl 2 (144, 8 elenchi) | — | 144 campi in JSON: in advanced serve una vista per livelli, minimi e istituti (P19) |
+| 5 | Processi | processi 30 (15); Mappa 30 | P01 → processi | P1 (matrice) e P2 (diagramma) confermati |
+| 7 | Unità | unità 31 (17); Organigramma 31 | U01 → organigramma | |
+| 8 | Organigramma | unità 31 (26); Organigramma 31 | U01 → organigramma | equivalente in advanced |
+| 9 | Obblighi | obblighi 20 (15) | OBB_SIC_RSPP → obblighi | dati presenti nel datastore |
+| 10 | Ruoli | ruoli 109 (16), correzioniGerarchia 0 | R001 → ruoli | 5 codici cliccabili per riga, il più collegato |
+| 11 | Copertura | obblighi 20 (17) | OBB_SIC_RSPP → obblighi | |
+| 12 | Livello CCNL per ruolo | assegnazioni 109 (4), prepostiSuccursale 3 (6), due vuote | R001, R045 → ruoli | |
+| 13 | Fasi | processi 30 (40); Mappa | P01 → processi | 14 codici per riga, quasi tutti chiusi |
+| 14 | Skill per ruolo | perRuolo 109 (105) | R001 → ruoli | 105 campi per ruolo: base per P4 |
+| 16 | Obiettivi | terne 125 (5), obiettivi 247 (10) | T001, O001 | la terna processo-unità-ruolo è il ponte per P5 |
+| 18 | Metriche | metriche 327 (12) | M001 → metriche | |
+| 19 | Campi derivati | riporto 109, pesiObiettivi 247, tipiCompetenze 443, responsabiliProcesso 30 | R001, P01 | |
+| 20 | Bersagli | bersagli 327 (5) | M001 → metriche | |
+| 21 | Formazione | moduli 30 (9) | FOR_RSPP_INIZIALE | i moduli rimandano agli obblighi |
+| 22 | Carriere | percorsi 9 (14) | CAR_001 | |
+| 23 | Incentivi e welfare | schemi 5 (13) | INC_VAP | 167 rimandi agli obiettivi, tutti chiusi |
+| 24 | Commesse | commesse 4 (14) | COM_FIDO_RETAIL | 4 flussi bancari (es. fido retail): il passo **si applica** alla banca, la 6.2 lo dava per probabilmente non applicabile |
+| 25 | Criticità | criticità 109 (3) | R001 → ruoli | |
+| 26 | Condizioni istituti | ccnl 2 (129) | — | |
+| 29 | Traduzioni | solo Riepilogo (4.482 valori) | — | non applicabile |
+| 30 | Prove di lettura | prove 384 (4) | — | non applicabile come pagina del tenant |
+| 31 | Pacchetto | 14 sezioni del pacchetto, conteggi 14, **riferimentiRotti 16** | U01, P01, R001, O001, M001… | 16 riferimenti rotti nel pacchetto: difetto del datastore da segnalare alla sua sessione |
+
+**Esito delle tre indagini aperte nella 6.2 (obblighi, copertura, incentivi).** I dati esistono nel datastore (20 obblighi, 5 schemi di incentivi) e il pacchetto li porta in advanced, ma in advanced arrivano solo **al livello del modello**: `sys.sys_blueprint_content_obligations`, `sys_blueprint_content_obligation_positions`, `sys_blueprint_content_incentives`, letti oggi solo dal consolidamento (`apps/api/src/modules/tenant-consolidation/sorgenti.ts`, `distanza.ts`). Nel tenant non c'è una tabella né una pagina. Quindi P23 e P24 non sono passi di interfaccia: prima serve portare obblighi e incentivi nel tenant (un gradino del consolidamento), poi la pagina. Restano in mappa come «dipende dal consolidamento».
+
+**Correzioni alla 6.2 che ne discendono**: riga 20 (Flussi di commessa) da «probabilmente non applicabile» a «da confrontare con `/projects`: 4 flussi bancari reali»; righe 7, 9, 19 da «indagine» a «dati solo nel modello, dipende dal consolidamento»; tutte le altre righe da «da verificare dal vivo» a «rilevato dal vivo nel datastore; lato advanced da verificare con un login RTL».

@@ -154,6 +154,13 @@ export async function loadUnits(db: Db, tenantId: string, ids: string[]): Promis
   return [...perUnita.values()];
 }
 
+/** Un numero dal testo del database, o null se manca o non è un numero (mai NaN nel contratto). */
+function numeroO(v: string | null): number | null {
+  if (v === null || v.trim() === "") return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
 /** I KPI del processo: quelli del processo del modello da cui viene (sys_process_kpi_templates). */
 export async function loadKpis(db: Db, tenantId: string, modelProcessIds: string[]): Promise<TenantProcessScheda["kpis"]> {
   if (modelProcessIds.length === 0) return [];
@@ -161,7 +168,13 @@ export async function loadKpis(db: Db, tenantId: string, modelProcessIds: string
     `SELECT DISTINCT ON (k.kpi_definition_id)
             k.kpi_definition_id AS "kpiId", k.kpi_definition_name AS name,
             k.kpi_definition_description AS description, k.kpi_definition_unit AS unit,
-            t.process_kpi_template_default_target AS t, t.process_kpi_template_default_weight AS w
+            -- Il target del modello è jsonb: un numero, oppure {valore, unita, direzione} con il
+            -- valore come testo. Number() sull'oggetto dava NaN e la scheda rispondeva 500 (20/11/2026).
+            CASE jsonb_typeof(t.process_kpi_template_default_target)
+              WHEN 'number' THEN t.process_kpi_template_default_target #>> '{}'
+              WHEN 'object' THEN t.process_kpi_template_default_target ->> 'valore'
+            END AS t,
+            t.process_kpi_template_default_weight AS w
        FROM sys.sys_process_kpi_templates t
        JOIN sys.sys_kpi_definitions k ON k.kpi_definition_id = t.process_kpi_template_kpi_id
       WHERE t.process_kpi_template_process_id = ANY($2::uuid[])
@@ -172,8 +185,8 @@ export async function loadKpis(db: Db, tenantId: string, modelProcessIds: string
   return r.rows
     .map((x) => ({
       kpiId: x.kpiId, name: x.name, description: x.description, unit: x.unit,
-      defaultTarget: x.t === null ? null : Number(x.t),
-      defaultWeight: x.w === null ? null : Number(x.w),
+      defaultTarget: numeroO(x.t),
+      defaultWeight: numeroO(x.w),
     }))
     .sort((a, b) => a.name.localeCompare(b.name, "it"));
 }

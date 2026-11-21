@@ -851,12 +851,73 @@ INSERT INTO tmp_testi_italiani VALUES
   ('sys_blueprint_content_perimeters', 'blueprint_content_perimeter_name', '664ef5ac-667a-4dd6-8bdd-c7a7623808fe'::uuid, 'Percentage of value of materials and services purchased spent on direct services (excluding logistics and packaging)', 'Valore degli acquisti speso in servizi diretti (esclusi logistica e imballaggi) (%)', 'name'),
   ('sys_blueprint_families', 'blueprint_family_description', '1657a996-224b-4ade-9cdc-bc1c50b03b76'::uuid, 'Retail and commercial banking blueprint family.', 'Famiglia di modelli per banca retail e commerciale.', 'description');
 
--- (1) l'inglese resta come traduzione «en» dove non c'è ancora
+-- (1) l'inglese resta come traduzione «en» dove non c'è ancora: solo per i campi registrati come
+--     traducibili (sys_translatable_field) e solo se la riga esiste in questo database, così non
+--     nasce nessuna traduzione orfana (sys.v_reference_translation_orphans) né su una copia ridotta.
 INSERT INTO sys.sys_reference_translations (entity_table, entity_id, field, locale, text, source)
-SELECT s.tabella, s.chiave, s.campo, 'en', s.en, 'MANUAL'
+SELECT s.tabella, s.chiave, f.field, 'en', s.en, 'MANUAL'
   FROM tmp_testi_italiani s
- WHERE NOT EXISTS (SELECT 1 FROM sys.sys_reference_translations r
-                    WHERE r.entity_table = s.tabella AND r.entity_id = s.chiave AND r.field = s.campo AND r.locale = 'en');
+  JOIN sys.sys_auth_permissions x ON x.auth_permission_id = s.chiave
+  JOIN sys.sys_translatable_field f ON f.entity_table = s.tabella AND f.entity_field_column = s.colonna
+ WHERE s.tabella = 'sys_auth_permissions' AND s.colonna = 'auth_permission_name'
+   AND NOT EXISTS (SELECT 1 FROM sys.sys_reference_translations r
+                    WHERE r.entity_table = s.tabella AND r.entity_id = s.chiave AND r.field = f.field AND r.locale = 'en');
+INSERT INTO sys.sys_reference_translations (entity_table, entity_id, field, locale, text, source)
+SELECT s.tabella, s.chiave, f.field, 'en', s.en, 'MANUAL'
+  FROM tmp_testi_italiani s
+  JOIN sys.sys_auth_roles x ON x.auth_role_id = s.chiave
+  JOIN sys.sys_translatable_field f ON f.entity_table = s.tabella AND f.entity_field_column = s.colonna
+ WHERE s.tabella = 'sys_auth_roles' AND s.colonna = 'auth_role_description'
+   AND NOT EXISTS (SELECT 1 FROM sys.sys_reference_translations r
+                    WHERE r.entity_table = s.tabella AND r.entity_id = s.chiave AND r.field = f.field AND r.locale = 'en');
+INSERT INTO sys.sys_reference_translations (entity_table, entity_id, field, locale, text, source)
+SELECT s.tabella, s.chiave, f.field, 'en', s.en, 'MANUAL'
+  FROM tmp_testi_italiani s
+  JOIN sys.sys_blueprint_content_job_roles x ON x.blueprint_content_job_role_id = s.chiave
+  JOIN sys.sys_translatable_field f ON f.entity_table = s.tabella AND f.entity_field_column = s.colonna
+ WHERE s.tabella = 'sys_blueprint_content_job_roles' AND s.colonna = 'blueprint_content_job_role_name'
+   AND NOT EXISTS (SELECT 1 FROM sys.sys_reference_translations r
+                    WHERE r.entity_table = s.tabella AND r.entity_id = s.chiave AND r.field = f.field AND r.locale = 'en');
+INSERT INTO sys.sys_reference_translations (entity_table, entity_id, field, locale, text, source)
+SELECT s.tabella, s.chiave, f.field, 'en', s.en, 'MANUAL'
+  FROM tmp_testi_italiani s
+  JOIN sys.sys_blueprint_content_perimeters x ON x.blueprint_content_perimeter_id = s.chiave
+  JOIN sys.sys_translatable_field f ON f.entity_table = s.tabella AND f.entity_field_column = s.colonna
+ WHERE s.tabella = 'sys_blueprint_content_perimeters' AND s.colonna = 'blueprint_content_perimeter_name'
+   AND NOT EXISTS (SELECT 1 FROM sys.sys_reference_translations r
+                    WHERE r.entity_table = s.tabella AND r.entity_id = s.chiave AND r.field = f.field AND r.locale = 'en');
+INSERT INTO sys.sys_reference_translations (entity_table, entity_id, field, locale, text, source)
+SELECT s.tabella, s.chiave, f.field, 'en', s.en, 'MANUAL'
+  FROM tmp_testi_italiani s
+  JOIN sys.sys_blueprint_families x ON x.blueprint_family_id = s.chiave
+  JOIN sys.sys_translatable_field f ON f.entity_table = s.tabella AND f.entity_field_column = s.colonna
+ WHERE s.tabella = 'sys_blueprint_families' AND s.colonna = 'blueprint_family_description'
+   AND NOT EXISTS (SELECT 1 FROM sys.sys_reference_translations r
+                    WHERE r.entity_table = s.tabella AND r.entity_id = s.chiave AND r.field = f.field AND r.locale = 'en');
+INSERT INTO sys.sys_reference_translations (entity_table, entity_id, field, locale, text, source)
+SELECT s.tabella, s.chiave, f.field, 'en', s.en, 'MANUAL'
+  FROM tmp_testi_italiani s
+  JOIN sys.sys_kpi_definitions x ON x.kpi_definition_id = s.chiave
+  JOIN sys.sys_translatable_field f ON f.entity_table = s.tabella AND f.entity_field_column = s.colonna
+ WHERE s.tabella = 'sys_kpi_definitions' AND s.colonna = 'kpi_definition_description'
+   AND NOT EXISTS (SELECT 1 FROM sys.sys_reference_translations r
+                    WHERE r.entity_table = s.tabella AND r.entity_id = s.chiave AND r.field = f.field AND r.locale = 'en');
+INSERT INTO sys.sys_reference_translations (entity_table, entity_id, field, locale, text, source)
+SELECT s.tabella, s.chiave, f.field, 'en', s.en, 'MANUAL'
+  FROM tmp_testi_italiani s
+  JOIN sys.sys_kpi_definitions x ON x.kpi_definition_id = s.chiave
+  JOIN sys.sys_translatable_field f ON f.entity_table = s.tabella AND f.entity_field_column = s.colonna
+ WHERE s.tabella = 'sys_kpi_definitions' AND s.colonna = 'kpi_definition_name'
+   AND NOT EXISTS (SELECT 1 FROM sys.sys_reference_translations r
+                    WHERE r.entity_table = s.tabella AND r.entity_id = s.chiave AND r.field = f.field AND r.locale = 'en');
+INSERT INTO sys.sys_reference_translations (entity_table, entity_id, field, locale, text, source)
+SELECT s.tabella, s.chiave, f.field, 'en', s.en, 'MANUAL'
+  FROM tmp_testi_italiani s
+  JOIN sys.sys_kpi_metric_definitions x ON x.kpi_metric_definition_id = s.chiave
+  JOIN sys.sys_translatable_field f ON f.entity_table = s.tabella AND f.entity_field_column = s.colonna
+ WHERE s.tabella = 'sys_kpi_metric_definitions' AND s.colonna = 'kpi_metric_definition_name'
+   AND NOT EXISTS (SELECT 1 FROM sys.sys_reference_translations r
+                    WHERE r.entity_table = s.tabella AND r.entity_id = s.chiave AND r.field = f.field AND r.locale = 'en');
 
 -- (3) il giornale, prima di scrivere: solo dove il valore è ancora l'inglese
 INSERT INTO staging.testi_italiani_20261121_undo (tabella, colonna, chiave, prima, dopo) SELECT s.tabella, s.colonna, s.chiave, s.en, s.it FROM tmp_testi_italiani s JOIN sys.sys_auth_permissions x ON x.auth_permission_id = s.chiave AND x.auth_permission_name = s.en WHERE s.tabella = 'sys_auth_permissions' AND s.colonna = 'auth_permission_name' ON CONFLICT DO NOTHING;

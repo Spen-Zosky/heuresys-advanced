@@ -225,7 +225,7 @@ function FinestraAssistente({ pathname, idonea }: { pathname: string; idonea: bo
                 {cronologia ? <PanelLeftClose className="h-4 w-4" aria-hidden /> : <History className="h-4 w-4" aria-hidden />}
               </IconButton>
               <AgentSymbol className="h-5 w-5 shrink-0" />
-              <h2 id="agente-titolo" data-testid="agente-title" className="truncate text-sm font-semibold">
+              <h2 id="agente-titolo" data-testid="agente-title" className="break-words text-sm font-semibold">
                 {t("agente.nome")}
               </h2>
             </div>
@@ -280,7 +280,7 @@ function FinestraAssistente({ pathname, idonea }: { pathname: string; idonea: bo
                           }}
                           className={`w-full rounded-md px-2 py-2 text-left text-sm transition-colors hover:bg-muted disabled:opacity-60 ${scelta ? "bg-muted font-medium" : ""}`}
                         >
-                          <span className="line-clamp-2">{titoloLeggibile(c.title)}</span>
+                          <span className="break-words">{titoloLeggibile(c.title)}</span>
                           <span className="mt-0.5 block text-xs text-muted-foreground">
                             {c.lastActivityStatus ? `${stati[c.lastActivityStatus]} · ` : ""}
                             {quando(c.updatedAt)}
@@ -294,7 +294,7 @@ function FinestraAssistente({ pathname, idonea }: { pathname: string; idonea: bo
             )}
 
             <div data-testid="agente-page" className="flex min-w-0 flex-1 flex-col">
-              <p data-testid="agente-context" className="truncate border-b border-border px-4 py-1.5 text-xs text-muted-foreground" title={contesto}>
+              <p data-testid="agente-context" className="break-words border-b border-border px-4 py-1.5 text-xs text-muted-foreground" title={contesto}>
                 {contesto}
               </p>
               <div

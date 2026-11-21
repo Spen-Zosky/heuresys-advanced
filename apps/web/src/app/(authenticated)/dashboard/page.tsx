@@ -155,7 +155,7 @@ export default function DashboardPage() {
             <ul data-testid="dashboard-deadlines" className="divide-y divide-border overflow-hidden rounded-card border border-border bg-card">
               {w.upcomingLearningDeadlines.map((d) => (
                 <li key={d.learningGapId} data-testid="deadline-item" className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm">
-                  <span className="truncate">
+                  <span className="min-w-0 break-words">
                     {d.userDisplayName} — {d.skillName ?? t("dashboard.gapGeneral")}
                   </span>
                   <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium uppercase ${SEVERITY_CLASS[d.severity] ?? "bg-muted text-muted-foreground"}`}>

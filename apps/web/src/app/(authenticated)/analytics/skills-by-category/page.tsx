@@ -36,7 +36,7 @@ function categoryHeatmapOption(d: SkillsByCategoryAnalyticsResponse, etichetta: 
     yAxis: {
       type: "category" as const,
       data: y,
-      axisLabel: { color: AXIS_COLOR, width: 160, overflow: "truncate" as const },
+      axisLabel: { color: AXIS_COLOR, width: 160, overflow: "break" as const },
       axisLine: { lineStyle: { color: GRID_COLOR } },
       splitArea: { show: true },
     },

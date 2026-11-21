@@ -46,7 +46,7 @@ export function DocumentsTab() {
             {items.map((d) => (
               <li key={d.userDocumentId} className="flex items-center justify-between gap-4 py-2">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-foreground">{d.title}</p>
+                  <p className="break-words text-sm font-medium text-foreground">{d.title}</p>
                   <p className="text-xs text-muted-foreground">{enumLabel("documentKind", d.kind)}{d.mimeType ? ` · ${d.mimeType}` : ""}</p>
                 </div>
                 <span className="shrink-0 text-xs text-muted-foreground">

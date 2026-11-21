@@ -163,6 +163,9 @@ cd "$COPIA"
 # allineati» diventa rosso su main appena l'atlante cambia (19/11, #313 poi #315).
 GENERATI="docs/kb/atlas apps/api/src/lib/origine/moduli.generated.ts"
 python3 docs/kb/tools/build_origine_moduli.py >/dev/null
+# Le operazioni che l'agente sa chiamare derivano dall'atlante (#254): senza, una rotta nuova
+# entra nell'atlante ma l'agente non la vede (21/11, schede di processi e progetti, #349).
+python3 docs/kb/tools/build_agent_operations.py >/dev/null
 python3 docs/kb/tools/check_idoneita_agente.py --check-ts apps/web/src/lib/agente/pagine-idonee.generated.ts >/dev/null \
   || { log "pagine-idonee.generated.ts non e' allineato all'atlante e non lo rigenero io: mi fermo"; exit 1; }
 

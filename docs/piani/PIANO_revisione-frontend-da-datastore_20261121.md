@@ -60,3 +60,55 @@ Ordine raccomandato: prima ciò che Enzo ha indicato come più visibile (process
 ## 5. Esiti dei passi
 
 (vuoto)
+
+## 6. Confronto passo per passo con la corsa della banca (lavoro continuo)
+
+Metodo chiesto da Enzo il 2026-11-21: si parte dal datastore, che ha meno dati e una forma chiusa, e si percorre la corsa della banca passo per passo; per ogni passo si guarda che cosa mostra il pannello a destra e con quale logica, si cercano le pagine di advanced che trattano le stesse informazioni e si decide l'esito. Correzioni al metodo: le parti trasversali (scheda a cascata, tabelle, area dei disegni) si costruiscono una volta sola, la prima volta che servono; l'ordine di esecuzione segue il valore visibile, non l'ordine della corsa. Esiti possibili: **integrare** (advanced ha la pagina, manca una parte), **sostituire** (la soluzione del datastore è migliore e prende il posto), **implementare** (advanced non ha niente), **equivalente**, **non applicabile** (strumento di chi costruisce il modello, senza controparte nel tenant).
+
+Quanti passi: la lista è una sola, `src/passi/forma_del_banco.ts` del datastore, `PASSI_DELLA_CASCATA`: 31 passi; le corse del contratto v0.2 (come quella della banca del 10/10) ne hanno 25, senza `strategia`, `capability`, `mestieri`, `decisioni`, `agenti`, `principi`.
+
+### 6.1 La logica comune del pannello di una corsa
+
+Da `apps/console/src/app/traccia-datastore/corsa/[id]/vista.tsx`, uguale per ogni passo: la barra dei passi con lo stato di ciascuno; il titolo «n. passo — stato»; una scheda «Riepilogo» con i fatti del passo, da quali passi dipende e quali lo usano; **una scheda per ogni elenco** che il passo produce, con filtro; il **dettaglio della riga fisso a lato** (l'elenco resta visibile); i valori annidati che si aprono a richiesta; i **valori che nominano un oggetto di un altro passo diventano collegamenti** a quel passo, già filtrato su quell'oggetto; le schede «Organigramma» e «Mappa e diagrammi» dove il passo ha unità o processi; passo, scheda e filtro nell'indirizzo, con il tasto Indietro del browser che ripercorre il cammino. Nel banco (`apps/banco/public/ispeziona.mjs`) in più ogni identificativo nel testo diventa una scheda a cascata.
+
+Che cosa vuol dire per advanced: la «cascata» del datastore ha **due forme**, la finestra sopra la finestra (che advanced ha per tre tipi) e il **salto all'elenco filtrato** di un altro dominio con il dettaglio a lato (che advanced non ha). I passi P3–P8 coprono la prima; per la seconda serve un passo trasversale in più (P21 qui sotto).
+
+### 6.2 La tabella dei passi
+
+Prima stesura dal codice di entrambi i repo, 2026-11-21; ogni riga si verifica dal vivo prima di diventare un passo esecutivo, e la colonna «stato» dice a che punto è.
+
+| # corsa | passo del datastore | che cosa mostra | pagine di advanced con le stesse informazioni | esito | passo della mappa | stato |
+|---|---|---|---|---|---|---|
+| 1 | Attività (ATECO) | codici ATECO dell'impresa con NACE e fonti | `/tenants/[id]`, `/tenants/[id]/enterprise-typing`, `/tassonomie` (settori) | integrare: la voce ATECO del tenant apribile a cascata con il suo ramo e le fonti | P4-bis | da verificare dal vivo |
+| 2 | Classe e sedi | classe dimensionale, addetti, sedi | `/tenants/[id]/enterprise-typing`, `/organization` | integrare: sedi come oggetti apribili (unità e persone per sede) | da aprire | da verificare |
+| 3 | CCNL e istituti | contratti, livelli, minimi, istituti, fonti, riscontro dei minimi | scheda Contratti di `/tenants/[id]` | integrare: istituti, fonti, minimi a una data, tranche | P19 | da verificare |
+| 4 | Processi di business | elenco con tipo, codice APQC, sedi, motivo, fonti; **mappa processi × unità R/E/C** | `/tenant-processes`, `/processes`, `/process-owner` | implementare la mappa; integrare motivo e fonti | **P1** (in corso in un thread a parte), P3 | in corso |
+| 5 | Unità organizzative | unità con genere, sede, processi e ruolo nel processo | `/organization`, scheda unità a cascata | integrare: nella scheda dell'unità i processi con R/E/C e i ruoli | P3 | da verificare |
+| 6 | Organigramma | albero con padre, livello, addetti; disegno | `/organization/org-chart` | equivalente (piano organigrammi del 14–15/11) | — | da verificare |
+| 7 | Obblighi normativi | norme, ambito, figure dovute | nessuna pagina trovata | implementare, se i dati ci sono nel tenant (indagine) | da aprire | indagine |
+| 8 | Ruoli organizzativi | ruoli con unità, livello, persone, processi presidiati | `/positions`, `/job-catalog`, scheda posizione | integrare: la scheda della posizione con processi presidiati, livello, competenze, criticità | P4 | da verificare |
+| 9 | Copertura degli obblighi | per obbligo le posizioni che lo coprono e il ruolo mancante | nessuna | implementare insieme al 7 | da aprire | indagine |
+| 10 | Livello CCNL per ruolo | livello, categoria e motivo per ogni ruolo | scheda Contratti (persone per livello), `/positions` | integrare: il livello come oggetto apribile | P6 | da verificare |
+| 11 | Fasi dei processi | fasi per processo; diagramma per fasi | `/tenant-processes/[id]` | implementare il diagramma per fasi | P2 | da fare |
+| 12 | Skill per ruolo | competenze ESCO per ruolo, essenziali o facoltative | `/positions/[id]/skills`, `/skills`, `/gaps` | integrare: competenza apribile a cascata | P4 | da verificare |
+| 13 | Obiettivi | terne processo-unità-ruolo e obiettivi | `/goals`, `/okrs`, `/performance` | integrare: obiettivo legato a processo e unità, apribile | P5 | da verificare |
+| 14 | Metriche | indicatori per obiettivo | `/kpis`, `/admin/catalogo-kpi`, `/positions/[id]/kpis` | integrare | P5 | da verificare |
+| 15 | Campi derivati | riporti e campi calcolati | linee di riporto nella scheda posizione | non applicabile come pagina; i riporti sono già nella scheda | — | da verificare |
+| 16 | Bersagli degli indicatori | valori obiettivo per indicatore | `/kpis` | integrare | P5 | da verificare |
+| 17 | Formazione | percorsi per ruolo | `/learning`, `/learning/training-initiatives`, `/positions/[id]/learning` | da confrontare dal vivo | — | da verificare |
+| 18 | Carriere | percorsi di carriera | `/career-succession`, `/me/career` | da confrontare dal vivo | — | da verificare |
+| 19 | Incentivi e welfare | incentivi e welfare per categoria | nessuna pagina trovata | implementare se i dati ci sono (indagine) | da aprire | indagine |
+| 20 | Flussi di commessa | flussi di lavoro per commessa | `/projects` (solo in parte) | probabilmente non applicabile a una banca; da decidere | — | indagine |
+| 21 | Criticità dei ruoli | criticità e motivo per ruolo | `/positions` (colonna), `/talent-review`, `/insights/succession-readiness` | integrare nella scheda della posizione | P4 | da verificare |
+| 22 | Condizioni degli istituti CCNL | condizioni per istituto | scheda Contratti | integrare insieme al 3 | P19 | da verificare |
+| 23 | Traduzioni in inglese | testi in inglese | — | non applicabile (advanced è in italiano) | — | chiuso |
+| 24 | Prove di lettura | verifiche di costruzione | `/consolidation` (in parte) | non applicabile come pagina del tenant | — | da verificare |
+| 25 | Pacchetto per advanced | il pacchetto che advanced importa | `/tenant-blueprints`, `/consolidation` | equivalente | — | da verificare |
+| v0.3 | Strategia | strategia dell'impresa | `/org-director`, `/org-director/vrio` | da confrontare su una corsa a 31 passi | — | indagine |
+| v0.3 | Capability | capacità e maturità | `/org-director` (ricalcolo capacità e maturità) | da confrontare | — | indagine |
+| v0.3 | Mestieri | mestieri per competenze | `/job-catalog` | da confrontare | — | indagine |
+| v0.3 | Decisioni | decisioni per processo | nessuna trovata | indagine | — | indagine |
+| v0.3 | Agenti | agenti previsti per processo | `/admin/agent-capabilities` | da confrontare | — | indagine |
+| v0.3 | Principi | principi dell'organizzazione | nessuna trovata | indagine | — | indagine |
+
+Passi della mappa nati da questo confronto, da aggiungere alla sezione 3 quando arrivano al loro turno: **P21** salto all'elenco filtrato con il dettaglio della riga a lato (seconda forma della cascata); **P22** sedi come oggetti apribili; **P23** obblighi normativi e copertura (se i dati ci sono); **P24** incentivi e welfare (se i dati ci sono).

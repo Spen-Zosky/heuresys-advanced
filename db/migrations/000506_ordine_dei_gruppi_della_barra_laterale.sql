@@ -1,4 +1,4 @@
--- 000505_ordine_dei_gruppi_della_barra_laterale.sql
+-- 000506_ordine_dei_gruppi_della_barra_laterale.sql
 -- Enzo, 2026-11-21: la persona riordina i gruppi della barra laterale (maniglia + linea di
 -- inserimento) e la scelta la segue su ogni login e su ogni dispositivo. L'ordine vive accanto
 -- alle altre preferenze di interfaccia (tema, palette, lingua): server = fonte di verità.

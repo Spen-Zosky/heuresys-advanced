@@ -18,7 +18,11 @@ import type { TFunction } from "i18next";
 import type { TenantProcessListResponse, TenantProcessSummary } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { useFormat } from "@/lib/format";
-import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
+import { EntityTable, type DataColumn } from "@/components/data-table-panel";
+import { PageHeader } from "@/components/intestazione-pagina";
+import { SchedePagina } from "@/components/schede-pagina";
+import { MatriceProcessi } from "@/components/processo/matrice-processi";
+import { Badge } from "@heuresys/ui";
 import { NomeOppure } from "@/components/senza-nome";
 
 function buildColumns(t: TFunction, numero: (v: number) => string, conTenant: boolean): DataColumn<TenantProcessSummary>[] {
@@ -65,23 +69,8 @@ export default function TenantProcessesPage() {
   const righe = useMemo(() => (q.data?.items ?? []).filter((p) => !tenant || p.tenantId === tenant), [q.data, tenant]);
   const columns = useMemo(() => buildColumns(t, (v) => fmt.numero(v), conTenant), [t, fmt, conTenant]);
 
-  return (
-    <DataTablePanel<TenantProcessSummary>
-      pageTestId="tenant-processes-page"
-      titleTestId="tenant-processes-title"
-      countTestId="tenant-processes-count"
-      title={t("processiDelTenant.title")}
-      description={t("processiDelTenant.description")}
-      count={q.data ? t("processiDelTenant.count", { count: righe.length }) : undefined}
-      actions={conTenant ? (
-        <label className="flex items-center gap-2 text-xs">
-          <span className="text-muted-foreground">{t("processiDelTenant.columns.tenant")}</span>
-          <select value={tenant} onChange={(e) => setTenant(e.target.value)} className="rounded border border-border bg-background px-2 py-1" data-testid="tenant-processes-tenant">
-            <option value="">{t("processiDelTenant.tutti")}</option>
-            {tenants.map(([id, nome]) => <option key={id} value={id}>{nome}</option>)}
-          </select>
-        </label>
-      ) : undefined}
+  const tabella = (
+    <EntityTable<TenantProcessSummary>
       isLoading={q.isLoading}
       isError={q.isError}
       error={q.error}
@@ -95,5 +84,31 @@ export default function TenantProcessesPage() {
       emptyDescription={t("processiDelTenant.emptyDescription")}
       caption={t("processiDelTenant.caption")}
     />
+  );
+
+  return (
+    <main data-testid="tenant-processes-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+      <PageHeader
+        data-testid="tenant-processes-title"
+        title={t("processiDelTenant.title")}
+        description={t("processiDelTenant.description")}
+        badges={q.data ? <Badge variant="secondary" data-testid="tenant-processes-count">{t("processiDelTenant.count", { count: righe.length })}</Badge> : undefined}
+        actions={conTenant ? (
+          <label className="flex items-center gap-2 text-xs">
+            <span className="text-muted-foreground">{t("processiDelTenant.columns.tenant")}</span>
+            <select value={tenant} onChange={(e) => setTenant(e.target.value)} className="rounded border border-border bg-background px-2 py-1" data-testid="tenant-processes-tenant">
+              <option value="">{t("processiDelTenant.tutti")}</option>
+              {tenants.map(([id, nome]) => <option key={id} value={id}>{nome}</option>)}
+            </select>
+          </label>
+        ) : undefined}
+      />
+      <SchedePagina
+        schede={[
+          { id: "elenco", titolo: t("processiDelTenant.matrice.elenco"), conteggio: q.data ? righe.length : null, contenuto: tabella },
+          { id: "matrice", titolo: t("processiDelTenant.matrice.scheda"), contenuto: <MatriceProcessi tenantId={conTenant ? (tenant || tenants[0]?.[0]) : undefined} /> },
+        ]}
+      />
+    </main>
   );
 }

@@ -4,7 +4,7 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
-import { TenantProcessListResponseSchema, TenantProcessSchedaSchema } from "@heuresys/shared";
+import { TenantProcessListResponseSchema, TenantProcessMatrixResponseSchema, TenantProcessSchedaSchema } from "@heuresys/shared";
 
 /**
  * V4 del piano processi e progetti — /v1/processes e /v1/processes/:id/scheda, letti dal vivo come
@@ -89,5 +89,30 @@ describe("/v1/processes", () => {
     if (!altro.rows[0]) return; // nessun processo fuori da RTL: il caso non si presenta
     const r = await t.app.inject({ method: "GET", url: `/v1/processes/${altro.rows[0].id}/scheda`, headers: { cookie } });
     expect(r.statusCode).toBe(404);
+  });
+});
+
+describe("/v1/processes/matrice", () => {
+  it("senza sessione risponde 401", async () => {
+    const r = await t.app.inject({ method: "GET", url: "/v1/processes/matrice" });
+    expect(r.statusCode).toBe(401);
+  });
+
+  it("le celle coincidono con le partecipazioni del database e ogni cella ha il suo processo e la sua unità", async () => {
+    const r = await t.app.inject({ method: "GET", url: "/v1/processes/matrice", headers: { cookie } });
+    expect(r.statusCode).toBe(200);
+    const body = TenantProcessMatrixResponseSchema.parse(r.json());
+    expect(body.tenantId).toBe(RTL);
+    const db = await pool.query<{ n: number }>(
+      `SELECT count(*)::int AS n FROM (
+         SELECT DISTINCT oup.org_unit_process_tenant_process_id, oup.org_unit_process_org_unit_id
+           FROM sys.sys_organization_unit_processes oup
+           JOIN sys.sys_tenant_processes tp ON tp.tenant_process_id = oup.org_unit_process_tenant_process_id AND tp.tenant_process_is_active
+          WHERE oup.org_unit_process_tenant_id = $1) x`, [RTL]);
+    expect(body.cells.length).toBe(db.rows[0]!.n);
+    const processi = new Set(body.processes.map((p) => p.processId));
+    const unita = new Set(body.units.map((u) => u.unitId));
+    for (const c of body.cells) { expect(processi.has(c.processId)).toBe(true); expect(unita.has(c.unitId)).toBe(true); }
+    expect(new Set(body.cells.map((c) => `${c.processId}|${c.unitId}`)).size).toBe(body.cells.length);
   });
 });

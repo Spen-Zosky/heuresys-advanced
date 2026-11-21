@@ -437,6 +437,25 @@
       "chiudi": "Close",
       "nessuno": "—"
     },
-    "tutti": "All"
+    "tutti": "All",
+    "matrice": {
+      "titolo": "Process × unit matrix",
+      "scheda": "Process × unit matrix",
+      "elenco": "List",
+      "spiega": "R = responsible (filled), E = executing (grey), C = consulted (dashed), I = informed (light). The E/C column counts executing and consulted units. Hover a column header for the unit's full name; click a process code to open its sheet.",
+      "numeri": "{{processi}} processes · {{unita}} units involved · {{celle}} participations",
+      "processo": "Process",
+      "eCTitolo": "Executing units / consulted units",
+      "piede": "processes followed (R + E)",
+      "apri": "Open the process sheet",
+      "errore": "Could not load the process matrix.",
+      "vuota": "No process has participating units yet: the matrix has nothing to show.",
+      "ruolo": {
+        "OWNER": "Responsible",
+        "CONTRIBUTOR": "Executing",
+        "CONSULTED": "Consulted",
+        "INFORMED": "Informed"
+      }
+    }
   }
 }

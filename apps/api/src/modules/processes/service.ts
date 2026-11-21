@@ -8,7 +8,7 @@
 import { pool } from "../../db/client.js";
 import type { ActorContext } from "../../lib/actor.js";
 import { NotFoundError } from "../../errors/index.js";
-import type { TenantProcessListQuery, TenantProcessListResponse, TenantProcessScheda } from "@heuresys/shared";
+import type { TenantProcessListQuery, TenantProcessListResponse, TenantProcessMatrixQuery, TenantProcessMatrixResponse, TenantProcessScheda } from "@heuresys/shared";
 import { haMandatoPiattaforma } from "../../lib/scope/mandati.js";
 import * as repo from "./repository.js";
 
@@ -18,6 +18,13 @@ export const processService = {
   async list(a: ActorContext, q: TenantProcessListQuery): Promise<TenantProcessListResponse> {
     const items = await repo.listProcesses(pool, tenantDi(a), q);
     return { items, total: items.length };
+  },
+
+  /** La matrice processi × unità. Un mandato di piattaforma sceglie il tenant; gli altri vedono il proprio. */
+  async matrice(a: ActorContext, q: TenantProcessMatrixQuery): Promise<TenantProcessMatrixResponse> {
+    const tenantId = haMandatoPiattaforma(a) ? (q.tenantId ?? a.tenantId) : a.tenantId;
+    if (tenantId === null) return { tenantId: null, processes: [], units: [], cells: [] };
+    return repo.loadMatrix(pool, tenantId);
   },
 
   async scheda(a: ActorContext, id: string): Promise<TenantProcessScheda> {

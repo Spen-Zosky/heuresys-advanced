@@ -190,6 +190,13 @@ Base: i fogli di stile delle due interfacce (`heuresys-datastore/apps/console/sr
 - Disegni in **scala di grigi**: riquadri bianchi con bordo nero, corsia del responsabile in grigio, testo secondario grigio. Nessun colore di stato.
 - Densità alta e tipografia piccola nei disegni, titoli in grassetto con codice e nome («P01 · Definizione del modello…»).
 
+**Conferme dalle schermate rifatte a pagina intera (2026-11-21, 106 file).** Viste `10_ruoli_t-ruoli.png` e `5_processi_mappa.png`, oltre alla finestra del processo:
+- le schede portano il **conteggio nel titolo** («ruoli (109)», «correzioniGerarchia (0)», «Esecuzioni (1)»), così una scheda vuota si riconosce prima di aprirla;
+- la tabella è densa (righe da una linea, bordi sottili, nessuna ombra), con **ordinamento su ogni colonna** (simbolo ↕ nell'intestazione), filtro sopra, «righe 1-50 di 109» e «indietro / pagina 1 di 3 / avanti» **sopra e sotto** la tabella;
+- il riquadro «Dettaglio» a destra, quando nessuna riga è scelta, **dice che cosa fare** («Scegli una riga della tabella per vederla intera qui») invece di restare vuoto;
+- la matrice processi × unità ha le intestazioni delle unità **ruotate in verticale** con il nome intero, R pieno nero, E grigio, C tratteggiato, la colonna E/C con i conteggi e la legenda in parole sopra: è il modello visivo di P1;
+- **difetti da non portare**: intestazioni in inglese o tecniche («Headcount», «correzioniGerarchia»), unità indicate con il codice (U01) invece che con il nome, livelli in maiuscolo («DIRIGENTE»), colonna «sì/no». In advanced tutte e quattro violano le regole dell'interfaccia.
+
 **Passi di design.**
 
 | Passo | Contenuto | Dove si vede | Come si prova | Stato |
@@ -199,4 +206,5 @@ Base: i fogli di stile delle due interfacce (`heuresys-datastore/apps/console/sr
 | D3 | Legenda in parole sotto ogni disegno e ogni griglia di stati | organigrammi, diagrammi dei processi, matrice di P1 | ogni disegno dice che cosa vuol dire pieno, tratteggiato, spesso | pronto; nasce con P1 e P2 e si estende agli altri disegni |
 | D4 | «Esporta SVG» accanto a «Schermo intero» su ogni disegno | organigrammi, diagrammi dei processi | il file SVG si scarica e si apre | pronto; si unisce a P9 |
 | D5 | Riga di fatti misurati sotto il titolo delle pagine di dettaglio (processo, unità, posizione) | `/tenant-processes/[id]`, `/positions/[id]` | sotto il titolo «N unità · N ruoli · N persone» | dopo le schermate di advanced |
+| D7 | Conteggio nel titolo di ogni scheda («Posizioni (109)») e riquadro di dettaglio che, vuoto, dice che cosa fare | `/positions/[id]`, `/tenant-processes/[id]`, `/organization` | la scheda vuota mostra «(0)» prima di aprirla | pronto |
 | D6 | Stato espresso dalla forma del bordo oltre che dalla parola, dove ci sono griglie di stati | tabelle con colonna stato, barre di avanzamento | in stampa in bianco e nero lo stato si distingue | dopo le schermate di advanced |

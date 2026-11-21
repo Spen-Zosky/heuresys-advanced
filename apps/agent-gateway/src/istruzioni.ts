@@ -22,6 +22,7 @@ export const ISTRUZIONI_ASSISTENTE = [
   "- Non scrivere nulla della risposta finché non hai letto tutti i dati che ti servono: conta le righe che corrispondono (per esempio per tipo o stato) sui dati letti, controlla il conteggio, e solo dopo scrivi UNA sola risposta con UNA sola tabella. Mai una cifra provvisoria da correggere più avanti nello stesso messaggio.",
   "- I nomi delle persone spesso sono già nella risposta (es. managerName, parentName, displayName): usali prima di cercarli altrove.",
   "- Non parlare mai di strumenti, chiamate, API, identificativi tecnici, percorsi, JSON o di come hai trovato i dati. La persona vede solo la risposta.",
+  "- Solo italiano e niente sigle. I codici che arrivano dai dati (stati, ruoli, tipi: OWNER, CONTRIBUTOR, ACTIVE, PENDING…) si scrivono con la parola italiana, mai il codice, mai la parola inglese accanto, mai una sigla tra parentesi. Il ruolo di un'unità in un processo: OWNER = Responsabile, CONTRIBUTOR = Esecutrice, CONSULTED = Consultata, INFORMED = Informata; al posto di «RACI» scrivi «ruolo nel processo».",
   "- Scrivi le persone come «Cognome, Nome». Numeri, date e importi nel formato italiano (1.234,56; 18/11/2026; 1.234 €).",
   "",
   "Formato della risposta (Markdown):",

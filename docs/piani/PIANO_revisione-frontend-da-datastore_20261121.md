@@ -67,6 +67,12 @@ Metodo chiesto da Enzo il 2026-11-21: si parte dal datastore, che ha meno dati e
 
 Quanti passi: la lista è una sola, `src/passi/forma_del_banco.ts` del datastore, `PASSI_DELLA_CASCATA`: 31 passi; le corse del contratto v0.2 (come quella della banca del 10/10) ne hanno 25, senza `strategia`, `capability`, `mestieri`, `decisioni`, `agenti`, `principi`.
 
+Regole aggiunte dopo la revisione critica del metodo (2026-11-21):
+- il confronto è **a due vie**: se advanced è già pari o migliore non si tocca; se le due soluzioni divergono decide Enzo; a fine giro si fa anche il giro inverso, le pagine di advanced che non corrispondono a nessun passo;
+- ogni riga dice anche **da dove arrivano i dati** (rotta del datastore e rotta `/v1` di advanced): una vista portata senza la sua fonte dati in advanced è inutile, e quel caso diventa un'indagine prima del passo;
+- i passi esecutivi restano piccoli, come vuole Enzo, ma due passi che cadono sulla stessa pagina di advanced si possono unire in una PR se insieme restano di poche ore: la CI ha un solo esecutore e ogni PR costa la sua coda;
+- formato fissato con un pilota su due passi della corsa (uno semplice, uno complesso), poi esteso a tutti.
+
 ### 6.1 La logica comune del pannello di una corsa
 
 Da `apps/console/src/app/traccia-datastore/corsa/[id]/vista.tsx`, uguale per ogni passo: la barra dei passi con lo stato di ciascuno; il titolo «n. passo — stato»; una scheda «Riepilogo» con i fatti del passo, da quali passi dipende e quali lo usano; **una scheda per ogni elenco** che il passo produce, con filtro; il **dettaglio della riga fisso a lato** (l'elenco resta visibile); i valori annidati che si aprono a richiesta; i **valori che nominano un oggetto di un altro passo diventano collegamenti** a quel passo, già filtrato su quell'oggetto; le schede «Organigramma» e «Mappa e diagrammi» dove il passo ha unità o processi; passo, scheda e filtro nell'indirizzo, con il tasto Indietro del browser che ripercorre il cammino. Nel banco (`apps/banco/public/ispeziona.mjs`) in più ogni identificativo nel testo diventa una scheda a cascata.

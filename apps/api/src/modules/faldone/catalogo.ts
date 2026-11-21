@@ -99,6 +99,9 @@ const SQL_COLONNE = `
     LEFT JOIN pg_attribute ra ON ra.attrelid = fk.confrelid AND ra.attnum = fk.confcol
    WHERE c.relkind IN ('r', 'p') AND NOT c.relispartition
      AND n.nspname IN ('sys', 'audit', 'staging', 'reference_sync')
+     -- Solo ciò che l'API può leggere: una tabella creata da uno script senza il grant all'app
+     -- (un giornale staging.*_undo) faceva rispondere 500 a ogni faldone (20/11/2026).
+     AND has_table_privilege(c.oid, 'SELECT')
    ORDER BY 1, a.attnum`;
 
 /** La colonna leggibile di una tabella riferita: titolo, nome, etichetta, poi codice. */

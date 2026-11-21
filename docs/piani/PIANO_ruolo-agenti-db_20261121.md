@@ -65,3 +65,17 @@ Prova dal vivo sulla VM (2026-11-21, sessione senza la password del proprietario
 | `scripts/propagate-secret-rotation.sh`, `deploy/postgres/assegna-password-*.sh`, `prova-identita-app.sh` | gestiscono le credenziali stesse |
 | `apps/api/src/**`, `apps/agent-gateway/src/**` | servizi: in produzione usano già `heuresys_app` (`POSTGRES_APP_USER`) |
 | `apps/api/scripts/*.mjs`, `apps/*/test/**`, `cowork_reserved/**`, `db/seeds/rtl-rebuild/00_extract_legacy_subset.sh`, `db/scripts/extract_users_employees_legacy.sh`, `db/scripts/import-d1-user-skills.sh`, `docs/archive/**`, `.programmi/**` | prove locali, test, ingestione legacy chiusa (ADR-0038), archivio |
+
+## Tappa 3 — la password del proprietario esce dall'ambiente degli agenti (PR separata, sì di Enzo 21/11 19:52)
+
+| id | cosa | chi | fatta quando |
+|---|---|---|---|
+| B2.3a | `deploy/postgres/env-proprietario.sh`: incluso dopo il file d'ambiente, prende la password da `~/.config/heuresys-proprietario/db.env` (600) se c'è | io | file nel repo, prova su file finti verde |
+| B2.3b | `db/scripts/migrate.sh`, `migrate-if-pending.sh` (la usa il deploy), `storia36.sh` lo includono | io | `bash -n` verde; CI verde |
+| B2.3c | `deploy/postgres/come-proprietario.sh <cmd>`: seed e provisioning con DDL legittimo | io | file nel repo |
+| B2.3d | `apps/api/src/lib/inbox-stream.ts` ascolta come `heuresys_app` dove `POSTGRES_APP_USER` è impostata, come il pool: senza, con la password del proprietario vuota il canale delle notifiche cadrebbe | io | CI verde |
+| B2.3e | `deploy/postgres/sposta-password-proprietario.sh`: sposta la password nel file nuovo e lascia `POSTGRES_PASSWORD=` vuota nel file d'ambiente (lo schema dell'API la pretende presente). Guardie: la password deve entrare prima, il file nuovo deve entrare prima di svuotare il vecchio, post-condizione; `--verifica` solo legge; `--ritorna` è il rollback | io lo scrivo; lo esegue un thread dopo unione e rilascio, con il sì di Enzo | prova su file finti: password che non entra → niente spostato, exit 1 |
+
+Simulazione: l'ordine conta. Prima si uniscono e si rilasciano #377, la PR della tappa 2 e questa; poi, sulla VM, `bash deploy/postgres/sposta-password-proprietario.sh`, poi `--verifica` e una `pnpm db:migrate:vm` a vuoto per dimostrare che le migrazioni entrano ancora. Se lo spostamento venisse prima del rilascio, il deploy successivo non troverebbe la password e si fermerebbe rosso (non distruttivo). Il percorso del rilascio include ancora `.env` via collegamento (`scripts/rilascio-copia.sh`), quindi basta un file solo.
+
+Non si chiude qui: la stessa separazione sul gemello e sui PC (propagazione, decisione di Enzo); gli script elencati come «seed e provisioning» vanno lanciati con `come-proprietario.sh` dopo lo spostamento.

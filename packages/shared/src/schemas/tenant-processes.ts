@@ -154,3 +154,28 @@ export const UpdateTenantProcessOwnerResponseSchema = z.object({
   previousOwnerPositionId: z.uuid().nullable(),
 });
 export type UpdateTenantProcessOwnerResponse = z.infer<typeof UpdateTenantProcessOwnerResponseSchema>;
+
+/**
+ * La matrice processi × unità (GET /v1/processes/matrice): righe = processi (e sottoprocessi sotto il
+ * loro processo), colonne = unità che partecipano ad almeno un processo, celle = il ruolo RACI
+ * dell'unità nel processo. Stessa mappa della corsa del datastore, sui dati vivi del tenant.
+ */
+export const TenantProcessMatrixQuerySchema = z.object({
+  /** solo per un mandato di piattaforma; gli altri vedono il proprio tenant */
+  tenantId: z.uuid().optional(),
+});
+export type TenantProcessMatrixQuery = z.infer<typeof TenantProcessMatrixQuerySchema>;
+
+export const TenantProcessMatrixResponseSchema = z.object({
+  tenantId: z.uuid().nullable(),
+  processes: z.array(z.object({
+    processId: z.uuid(),
+    code: z.string(),
+    name: z.string(),
+    level: z.number().int().min(1).max(2),
+    parentId: z.uuid().nullable(),
+  })),
+  units: z.array(z.object({ unitId: z.uuid(), name: z.string(), code: z.string().nullable() })),
+  cells: z.array(z.object({ processId: z.uuid(), unitId: z.uuid(), role: TenantProcessUnitRoleSchema })),
+});
+export type TenantProcessMatrixResponse = z.infer<typeof TenantProcessMatrixResponseSchema>;

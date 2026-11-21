@@ -10,6 +10,8 @@ import {
   TenantProcessIdParamSchema,
   TenantProcessListQuerySchema,
   TenantProcessListResponseSchema,
+  TenantProcessMatrixQuerySchema,
+  TenantProcessMatrixResponseSchema,
   TenantProcessSchedaSchema,
 } from "@heuresys/shared";
 import { processService } from "./service.js";
@@ -20,6 +22,11 @@ export const processesRoutes: FastifyPluginAsyncZod = async (app) => {
     "/",
     { preHandler: [requirePermission("organization_unit_processes:read")], schema: { querystring: TenantProcessListQuerySchema, response: { 200: TenantProcessListResponseSchema } } },
     async (req) => processService.list(actor(req), req.query),
+  );
+  app.get(
+    "/matrice",
+    { preHandler: [requirePermission("organization_unit_processes:read")], schema: { querystring: TenantProcessMatrixQuerySchema, response: { 200: TenantProcessMatrixResponseSchema } } },
+    async (req) => processService.matrice(actor(req), req.query),
   );
   app.get(
     "/:id/scheda",

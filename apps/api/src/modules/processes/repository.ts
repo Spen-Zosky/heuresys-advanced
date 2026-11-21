@@ -14,6 +14,7 @@ import { pool } from "../../db/client.js";
 import type {
   TenantProcessActivity,
   TenantProcessListQuery,
+  TenantProcessMatrixResponse,
   TenantProcessScheda,
   TenantProcessSummary,
   TenantProcessUnit,
@@ -237,4 +238,46 @@ export async function loadProjects(db: Db, tenantId: string, ids: string[]): Pro
     [tenantId, ids],
   );
   return r.rows;
+}
+
+/**
+ * La matrice processi × unità del tenant: i processi attivi (i sottoprocessi subito sotto il loro
+ * processo), le unità che partecipano ad almeno un processo e, per ogni coppia, il ruolo più forte
+ * (OWNER > CONTRIBUTOR > CONSULTED > INFORMED).
+ */
+export async function loadMatrix(db: Db, tenantId: string): Promise<TenantProcessMatrixResponse> {
+  const [pr, ce] = await Promise.all([
+    db.query<TenantProcessMatrixResponse["processes"][number]>(
+      `SELECT tp.tenant_process_id AS "processId", tp.tenant_process_code AS code, tp.tenant_process_name AS name,
+              tp.tenant_process_level::int AS level, tp.tenant_process_parent_id AS "parentId"
+         FROM sys.sys_tenant_processes tp
+        WHERE tp.tenant_process_tenant_id = $1::uuid AND tp.tenant_process_is_active
+        ORDER BY coalesce((SELECT p.tenant_process_name FROM sys.sys_tenant_processes p WHERE p.tenant_process_id = tp.tenant_process_parent_id), tp.tenant_process_name),
+                 tp.tenant_process_level, tp.tenant_process_name, tp.tenant_process_code`,
+      [tenantId],
+    ),
+    db.query<TenantProcessMatrixResponse["cells"][number] & { unitName: string; unitCode: string | null }>(
+      `SELECT DISTINCT ON (oup.org_unit_process_tenant_process_id, oup.org_unit_process_org_unit_id)
+              oup.org_unit_process_tenant_process_id AS "processId",
+              oup.org_unit_process_org_unit_id AS "unitId",
+              oup.org_unit_process_role AS role,
+              ou.organization_unit_name AS "unitName",
+              ou.organization_unit_code AS "unitCode"
+         FROM sys.sys_organization_unit_processes oup
+         JOIN sys.sys_tenant_processes tp ON tp.tenant_process_id = oup.org_unit_process_tenant_process_id AND tp.tenant_process_is_active
+         JOIN sys.sys_organization_units ou ON ou.organization_unit_id = oup.org_unit_process_org_unit_id
+        WHERE oup.org_unit_process_tenant_id = $1::uuid
+        ORDER BY oup.org_unit_process_tenant_process_id, oup.org_unit_process_org_unit_id,
+                 CASE oup.org_unit_process_role WHEN 'OWNER' THEN 1 WHEN 'CONTRIBUTOR' THEN 2 WHEN 'CONSULTED' THEN 3 ELSE 4 END`,
+      [tenantId],
+    ),
+  ]);
+  const unita = new Map<string, { unitId: string; name: string; code: string | null }>();
+  for (const c of ce.rows) unita.set(c.unitId, { unitId: c.unitId, name: c.unitName, code: c.unitCode });
+  return {
+    tenantId,
+    processes: pr.rows,
+    units: [...unita.values()].sort((a, b) => a.name.localeCompare(b.name, "it") || a.unitId.localeCompare(b.unitId)),
+    cells: ce.rows.map((c) => ({ processId: c.processId, unitId: c.unitId, role: c.role })),
+  };
 }

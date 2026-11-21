@@ -1,67 +1,62 @@
-# Piano generale di revisione del frontend di advanced, con le soluzioni del frontend del datastore
+# Revisione del frontend di advanced con le soluzioni del datastore: mappa a passi piccoli
 
-Data: 2026-11-21. Stato del piano: **da approvare** (Enzo). Thread: «Pianificare la revisione del frontend di advanced».
+Data: 2026-11-21. Stato: **da approvare** (Enzo). Thread: «Pianificare la revisione del frontend di advanced».
 
-## 1. Mandato e metodo
+## 1. Metodo (Enzo, 2026-11-21)
 
-Enzo (2026-11-21): portare nel frontend di advanced (`apps/web`) le soluzioni già presenti nel frontend del datastore (`apps/console` e le pagine di `apps/web` che la console riusa), partendo da un'analisi e da un piano diviso in capitoli. Ogni capitolo si implementa **uno alla volta e per intero**: PR, CI verde, unione, rilascio, prova dal vivo nel browser; Enzo lo vede e lo prova subito, poi si passa al successivo.
+Niente piano da realizzare tutto insieme. Questo file è solo la **mappa**: elenca passi piccoli e autonomi, ciascuno visibile nel browser e rilasciabile da solo in poche ore (una pagina o un elemento per volta). Un passo alla volta, ciascuno in un thread nuovo: PR, CI verde, unione, rilascio, prova dal vivo, link a Enzo per vederlo. Solo dopo il suo sguardo si apre il passo seguente. L'ordine si può cambiare a ogni passo.
 
-Regole che ogni capitolo rispetta: vincolo agentico (ogni soluzione si espone anche all'assistente, non solo alla persona), dati vivi da `/v1/*` (niente mock), regole UI di Enzo (solo italiano, numeri it-IT, persone «Cognome, Nome», tab orizzontali, stato in ultima colonna, niente sigle, dati cliccabili con finestre a cascata, attese visibili, scala di grigi nei disegni), componenti riusabili in `@heuresys/ui` quando sono davvero generici, composizione applicativa in `apps/web`.
+Ogni passo rispetta: vincolo agentico (ciò che vede la persona lo vede e lo usa anche l'assistente), dati vivi da `/v1/*`, regole UI di Enzo (italiano, numeri it-IT, «Cognome, Nome», tab orizzontali, stato in ultima colonna, niente sigle, attese visibili, scala di grigi nei disegni, nessun testo troncato), componenti generici in `@heuresys/ui`, composizione in `apps/web`.
 
-Che cosa non si chiude in questa sessione: tutta l'implementazione. Questa sessione consegna solo il piano; nessun capitolo parte senza il sì di Enzo.
+## 2. Che cosa ha il datastore e advanced no (sintesi dell'inventario)
 
-## 2. Come è stato fatto l'inventario
+Letto il codice di `main` dei due repo il 2026-11-21 (datastore `4ae203c`, advanced `8587974`). Le affermazioni «manca» poggiano su ricerche nel codice; ogni passo le ricontrolla in apertura.
 
-Letto il codice di `main` dei due repo il 2026-11-21: datastore `4ae203c` (`apps/console/src/app`, 89 file, e le pagine di `apps/web/src/app` che la console riesporta: cataloghi, cerca, contratti, attese), advanced `8587974` (`apps/web/src`, 145 pagine). Riletta l'analisi del 18/11 (`analisi-console/CONSOLE_DATASTORE_IDEE_PER_HEURESYS_20261118.md` nella cartella del progetto) e verificato voce per voce che cosa è già arrivato in advanced da allora. Le affermazioni «manca in advanced» poggiano su ricerche nel codice (`grep`) e non su una prova dal vivo; ogni capitolo comincia ricontrollandole.
+- **Ispezionabilità a cascata** (fondativa). Nel datastore ogni identificativo che compare in pagina o dentro una scheda diventa cliccabile da sé e apre una finestra sopra la precedente: otto tipi di oggetto nel banco (processo, unità, ruolo, terna processo-unità-ruolo, obiettivo, metrica, obbligo normativo, livello del contratto, `apps/banco/public/ispeziona.mjs`), con sezioni contate, diagrammi dentro la scheda (fasi, corsie, struttura sotto l'unità), fonti. In advanced la cascata copre **tre tipi** (persona, posizione, unità: `components/scheda-rapida.tsx`, `TipoScheda`), si attiva solo dove il nome passa dalla rete di leggibilità, e le schede sono meno articolate (niente diagrammi del processo, niente obiettivi o metriche collegati, niente fonti). Processi, attività, competenze, mansioni, obiettivi, KPI, progetti, contratti e livelli non si aprono a cascata. Le finestre sono già ridimensionabili (`lib/modale.ts`).
+- **Processi**. Il datastore ha la **mappa processi × unità** (responsabile, esecutrici, consultate, conteggio E/C, clic sul processo), il diagramma per fasi, l'elenco con motivo e fonti. Advanced ha l'elenco dei processi del tenant e, nella scheda, corsie e grafo a nodi (`components/processo/diagrammi.tsx`); la mappa d'insieme e il diagramma per fasi mancano. I dati per la mappa ci sono nello schema: ruolo RACI dell'unità nel processo (`sys_organization_unit_processes`, `TenantProcessUnitRoleSchema`); quanti ne ha RTL si misura nel passo P1.
+- **Catena dei passi**. Sono 31 passi (contratto v0.3); le corse fatte con la v0.2 ne hanno 25 (mancano strategia, capability, mestieri, decisioni, agenti, principi). La console lo dice in modo incoerente: menu e guida «31», tabella «Prototipi e corse» «25» (difetto del datastore, va segnalato al suo repo). La vista per livelli con «legge da / lo usano / si rifanno a catena» non ha un equivalente in advanced.
+- **Tabelle**. Nel datastore ogni elenco si ordina, si filtra, si raggruppa, si confronta, si esporta in CSV (ciò che si vede) e conserva la vista nell'indirizzo. In advanced la tabella comune (`components/data-table-panel.tsx`) lo fa solo su comando dell'assistente.
+- **Altro**: schermo intero nei disegni, attesa visibile anche sulle letture (`attesa-globale.tsx` copre solo le scritture), ricerca per significato con istogramma dei punteggi, guida «Aiuto» di pagina, contratti a una data.
+- **Design**: confronto dal vivo con schermate affiancate in corso; i passi di design si aggiungono alla tabella quando arriva, senza fermare i primi passi.
 
-## 3. Già coperto in advanced: non si rifà
+Già coperto in advanced, non si rifà: corsie e grafo dei processi, Gantt, organigrammi con Esporta SVG, coda dell'agente con previsione di spesa, navigatore delle tassonomie, contratti del tenant con lacune, consolidamento e confronto corse, Ctrl+K, menu senza ricarica, schede nell'indirizzo, stato dei servizi, riordino della barra laterale (PR #369).
 
-| soluzione del datastore | dove sta già in advanced |
-|---|---|
-| Viste dei processi (corsie, grafo a nodi, Esporta SVG) | `components/processo/diagrammi.tsx`, PR #349 |
-| Gantt e dipendenze dei progetti | `components/progetto/gantt.tsx`, PR #349 |
-| Organigramma SVG, area navigabile, Esporta SVG | `components/organigramma/*` |
-| Proposta con previsione e tetto di spesa, sì o no, registro dei costi | `/admin/agent-requests`, PR #318 |
-| Navigatore dei cataloghi (settori, professioni, competenze) | `/tassonomie`, PR #357 e precedenti |
-| Contratti del tenant con livelli, minimi e lacune | scheda Contratti di `/tenants/[id]`, PR #321 |
-| Confronta corse, vuoti rispetto al completo | `/consolidation` (distanza, registro corse, vocabolario) |
-| Ricerca delle pagine con Ctrl+K | `CommandPalette` nel layout autenticato |
-| Clic nel menu senza ricaricare la pagina | `components/menu-laterale.tsx` con i `Link` di Next |
-| Scheda attiva conservata nell'indirizzo | `components/schede-pagina.tsx` |
-| Quadro «servizi: risponde / non risponde» | `/system-health` |
-| Gruppi della barra laterale riordinabili | thread «Riordinare i gruppi della sidebar», PR #369 (non si tocca) |
-| Cambio di lingua IT/EN della console | non si porta: advanced è solo in italiano per regola |
+## 3. I passi
 
-## 4. I capitoli
+Ordine raccomandato: prima ciò che Enzo ha indicato come più visibile (processi), poi la cascata un tipo alla volta, poi le tabelle una funzione alla volta.
 
-Ordine raccomandato: prima ciò che migliora molte pagine con un solo intervento centrale (C1, C2), poi i ritocchi rapidi (C3, C4), poi le pagine singole (C5–C7). C8 è una proposta da decidere.
+| # | passo (uno per PR, poche ore) | dove si vede | come si prova dal browser | stato |
+|---|---|---|---|---|
+| P1 | Mappa processi × unità: righe i processi, colonne le unità, R/E/C nelle celle, conteggio E/C, nome intero dell'unità al passaggio, clic sul processo che ne apre la scheda | `/tenant-processes`, nuova scheda «Mappa» | Come Valentina Conti: apri Processi, scheda Mappa; leggi chi è responsabile di un processo, passa sopra un'intestazione, clicca un processo | **primo passo** |
+| P2 | Diagramma per fasi nella scheda del processo, accanto a corsie e grafo | `/tenant-processes/[id]` | Apri un processo con fasi: diagramma, schermo pieno della modale, Esporta SVG | da fare |
+| P3 | Cascata: la scheda del **processo** (quadro, unità coinvolte con il loro ruolo, attività, diagrammi) apribile ovunque compaia un processo, anche dentro altre schede | tutte le pagine che nominano un processo | Da una persona apri la sua unità, dall'unità un processo, dal processo un'altra unità: le schede si impilano, il filo riporta indietro | da fare |
+| P4 | Cascata: **competenza** e **mansione** | Competenze, Posizioni, Faldone | Da una posizione apri una competenza richiesta e da lì le altre posizioni che la chiedono | da fare |
+| P5 | Cascata: **obiettivo** e **KPI** | Obiettivi, KPI, scheda del processo | Da un processo apri un obiettivo e la sua metrica | da fare |
+| P6 | Cascata: **livello del contratto** | Contratti del tenant, persone | Da una persona apri il suo livello e i minimi | da fare |
+| P7 | Cascata: **progetto** e fase | Progetti, Faldone | Da una persona apri un suo progetto e una fase | da fare |
+| P8 | Identificativi cliccabili da sé: ogni nome di oggetto noto, anche nel testo libero e dentro le schede, diventa apribile senza scriverlo pagina per pagina | trasversale | Apri una scheda con testo descrittivo: i nomi citati si aprono | da fare |
+| P9 | Schermo intero nei disegni (organigrammi, processi, Gantt), Esc per uscire | area navigabile comune | Apri organigramma e un processo, «Schermo intero» | da fare |
+| P10 | Tabelle: ordinare cliccando l'intestazione (la stessa vista che usa l'assistente) | tutte le tabelle | Su Utenti ordina per cognome e poi chiedi all'assistente un altro ordine | da fare |
+| P11 | Tabelle: filtro con casella di testo e «righe 1–25 di 312» | tutte le tabelle | Su Utenti filtra «Milano» | da fare |
+| P12 | Tabelle: esporta in CSV ciò che si vede | tutte le tabelle | Esporta dopo un filtro: il file ha solo le righe filtrate | da fare |
+| P13 | Tabelle: vista conservata nell'indirizzo | tutte le tabelle | Copia l'indirizzo, riaprilo: stessa vista | da fare |
+| P14 | Tabelle: raggruppa per una colonna | tutte le tabelle | Su Posizioni raggruppa per unità | da fare |
+| P15 | Metti a confronto due o più righe | tutte le tabelle | Su Posizioni spunta tre righe, «Confronta» | da fare |
+| P16 | Attesa visibile anche quando la pagina legge (barra in cima, segno al centro dopo mezzo secondo) | trasversale | Rete lenta in DevTools: si vede sempre il lavoro in corso | da fare |
+| P17 | Ricerca per significato: istogramma dei punteggi con taglio mobile | Competenze | Cerca una frase e sposta il taglio | da fare |
+| P18 | Guida «Aiuto» in finestra, letta anche dall'assistente: prima pagina Consolidamento | Consolidamento | «Aiuto» accanto al titolo, poi una domanda all'assistente | da fare |
+| P19 | Contratti: minimi a una data e tranche del rinnovo (prima si verifica che i dati ci siano) | Contratti del tenant | Scegli una data passata | da fare |
+| P20 | Catena della costruzione del tenant per livelli, con dipendenze e rifacimenti a catena | Costruzione del blueprint | Clic su un passo: da chi dipende, chi lo usa | da decidere (tocca il consolidamento) |
+| D… | Passi di design dal confronto con schermate affiancate | — | — | in arrivo |
 
-| # | capitolo | cosa porta dal datastore | file toccati in advanced (previsti) | come si prova dal browser | stato |
-|---|---|---|---|---|---|
-| C1 | Tabelle che si lavorano | Gli «otto criteri» delle tabelle del datastore (`web/src/app/vista.tsx`, `contratti/strumenti.ts`, `console/.../tabelle.tsx`): ordinare cliccando l'intestazione, filtrare con una casella di testo, raggruppare per una colonna, esportare in CSV **ciò che si vede**, la vista conservata nell'indirizzo (un link riapre la stessa vista), «righe 1–25 di 312» sopra la tabella, intestazione ferma mentre si scorre, comandi di pagina sopra e sotto. Oggi in advanced la tabella si ordina e si filtra solo chiedendolo all'assistente. Agentico: persona e assistente lavorano sulla **stessa** vista (lo stato di `useTabellaAgente`), così ciò che fa uno lo vede l'altro | `components/data-table-panel.tsx`, `lib/agente/use-tabella-agente.ts`, un modulo puro nuovo per ordina/filtra/raggruppa/esporta con le sue prove, `locales/it/common.json` | Come Valentina Conti su «Utenti»: ordina per cognome, filtra «Milano», raggruppa per sede, esporta (il file ha solo le righe filtrate), copia l'indirizzo e riaprilo in un'altra scheda (stessa vista); poi chiedi all'assistente «ordina per ruolo» e guarda i comandi della tabella cambiare. Ripetere su due altre pagine (Posizioni, Approvazioni) | da approvare |
-| C2 | Metti a confronto | Dal datastore (cataloghi, contratti): si spuntano due o più righe e una finestra le affianca colonna per colonna, con le differenze segnate. Vale per ogni tabella di C1; l'assistente può proporre il confronto | `components/data-table-panel.tsx`, un componente di confronto in `components/`, `scheda-rapida.tsx` per aprire le voci dal confronto | Su «Posizioni» spunta tre posizioni, «Confronta»: le colonne affiancate, le differenze evidenti, ogni persona o unità si apre a cascata | da approvare (dopo C1) |
-| C3 | Schermo intero per i disegni | Il pulsante «Schermo intero» dei disegni della console (organigramma e processi della corsa). In advanced le aree navigabili hanno adatta, zoom ed Esporta SVG ma non lo schermo intero | `components/organigramma/area-navigabile.tsx` (una volta sola, vale per organigrammi, processi e Gantt), `components/progetto/gantt.tsx` se non usa l'area navigabile | Apri l'organigramma, un processo e un progetto: «Schermo intero», zoom e trascinamento funzionano anche lì, Esc torna alla pagina | da approvare |
-| C4 | Attesa visibile anche quando si legge | L'indicatore unico del datastore (`web/src/app/attivita.tsx`): ogni chiamata in corso accende una barra in cima e, dopo circa mezzo secondo, un segno al centro; più una prova che rifiuta le attese vuote. In advanced la barra in cima c'è solo per le scritture (`attesa-globale.tsx`) | `components/attesa-globale.tsx`, layout autenticato, una prova in `apps/web/src` | In DevTools rallenta la rete («Slow 4G»), cambia pagina, filtra, apri una scheda: c'è sempre il segno di lavoro in corso e niente lampeggia sulle risposte veloci | da approvare |
-| C5 | Ricerca per significato che si legge | Dal datastore (`cerca/ricerca.tsx`, `cerca/istogramma.tsx`, `concetto.tsx`, `grafo.tsx`): l'istogramma dei punteggi con un taglio da spostare (si vede dove i risultati crollano), il pannello che apre una voce accanto all'elenco senza perderlo, con la sua provenienza, e il vicinato della voce disegnato. Taglio e filtri lavorano su ciò che è già arrivato: nessuna chiamata a pagamento in più | `components/semantic-search-panel.tsx`, `app/(authenticated)/tassonomie/_components/navigatore.tsx` | Su «Competenze» cerca «gestione del rischio di credito»: istogramma, sposta il taglio, apri una voce nel pannello accanto, guarda il vicinato e la provenienza | da approvare; da verificare prima quali campi di provenienza dà `/v1/matching/search` |
-| C6 | Guida di pagina «Aiuto» | La guida della console (`nuovo-prototipo/guida/`): un pulsante «Aiuto» accanto al titolo, una finestra ridimensionabile che si chiude con Esc, testo in markdown con diagrammi (flusso, nuvola, rete) i cui nodi portano al paragrafo giusto. Agentico: lo stesso testo lo legge l'assistente come conoscenza della pagina | un componente `guida-pagina` in `components/`, `components/intestazione-pagina.tsx`, le guide in markdown accanto alle pagine; prime tre pagine: Consolidamento, Costruzione del tenant, Richieste dell'agente | Apri «Consolidamento», «Aiuto»: la guida si legge, si ridimensiona, i nodi del diagramma portano al punto; poi chiedi all'assistente «come si approva una decisione qui?» e la risposta segue la guida | da approvare |
-| C7 | Contratti del tenant più profondi | Dal datastore (`contratti/vista.tsx`): i minimi a una data scelta, le tranche del rinnovo, il confronto fra contratti (via C2). Ordinare e raggruppare arrivano già da C1 | `app/(authenticated)/tenants/[tenantId]/contratti-tenant.tsx`; forse l'API dei contratti se le tranche non sono già esposte | Su RTL Bank, scheda Contratti: scegli una data passata e vedi i minimi di allora; apri le tranche del rinnovo del credito | da approvare; prima un'indagine sui dati (le tranche ci sono nel tenant?) |
-| C8 | Catena delle dipendenze e analisi d'impatto | La «Catena dei 31 passi» della console (`catene/passi/catena-passi.tsx`): i passi per livello, un clic dice da chi dipende un passo, chi lo usa e che cosa si rifà a catena se cambia. In advanced servirebbe alla costruzione del tenant e all'analisi d'impatto della tappa T2 | `app/(authenticated)/tenant-blueprints/[id]/versions/[n]/build/page.tsx`, probabilmente un endpoint che dica le dipendenze | Apri la costruzione di una versione del blueprint di RTL, clicca un passo: dipendenze, utilizzatori e catena | da decidere: tocca il lavoro del consolidamento; Enzo sceglie se farlo qui o lì |
+## 4. Come si chiude un passo
 
-## 5. Come si chiude un capitolo
+1. In apertura si ricontrolla che il passo manchi ancora e che i dati ci siano (se mancano, il passo lo dice subito a Enzo invece di partire).
+2. Una PR con le prove viste rosse prima e verdi dopo; CI verde; unione.
+3. Rilascio armato dal thread «Verificare e correggere tutte le pagine di advanced», esito con `scripts/verifica-deploy.sh`.
+4. Prova dal vivo in produzione con la persona indicata; esito, ora e link scritti nella sezione 5.
+5. Link a Enzo per vederlo; il passo seguente parte in un thread nuovo.
 
-1. Ricontrollo in apertura che ciò che il capitolo porta manchi ancora in `main`.
-2. Una PR sola per capitolo, con le prove (unitarie per le funzioni pure, E2E sulla pagina) viste rosse prima e verdi dopo.
-3. CI verde, unione in `main`.
-4. Rilascio armato dal thread «Verificare e correggere tutte le pagine di advanced» (`scripts/rilascia.sh`), esito letto con `scripts/verifica-deploy.sh`.
-5. Prova dal vivo in produzione con la persona indicata nella colonna «come si prova», con comando, esito e ora scritti in fondo a questo file.
-6. Messaggio a Enzo con il link alla pagina da provare; la riga passa a «fatto» solo dopo la prova dal vivo.
+## 5. Esiti dei passi
 
-## 6. Domande a Enzo
-
-- Approvare il piano e l'ordine (C1 → C7), oppure cambiare ordine.
-- Soluzioni specifiche del datastore che ha già in mente e che qui mancano: si aggiungono come capitoli.
-- C8: farlo qui o lasciarlo al lavoro sul consolidamento.
-
-## 7. Esiti dei capitoli
-
-(vuoto: si compila capitolo per capitolo)
+(vuoto)

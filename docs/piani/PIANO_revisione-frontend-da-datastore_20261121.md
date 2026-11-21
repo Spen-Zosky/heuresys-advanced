@@ -2,6 +2,8 @@
 
 Data: 2026-11-21. Stato: **da approvare** (Enzo). Thread: «Pianificare la revisione del frontend di advanced».
 
+> **Prossimo passo da eseguire: P2**, diagramma per fasi nella scheda del processo (`/tenant-processes/[id]`), dopo che Enzo ha visto P1 (in corso in un thread a parte). Modello da cui partire: la finestra del processo nella Mappa della console del datastore (schermata `5_processi_mappa_modale.png` in Drive `gdrive-hr:Heuresys/revisione-frontend-20261121/schermate/`): fasi in colonne con numero e codice APQC, una corsia per unità (responsabile in grigio), in ogni riquadro i ruoli che la eseguono, riquadro pieno = esegue, tratteggiato = consultata, riga di legenda sotto, pulsanti «Esporta SVG» e «Schermo intero». In advanced esistono già `FlussoCorsie` e `GrafoProcesso` (`components/processo/diagrammi.tsx`) e lo schermo intero di `components/organigramma/area-navigabile.tsx`: si riusano, non si rifanno. Subito dopo, se Enzo è d'accordo, **D1** (nessun testo troncato), che è il passo più piccolo della sezione 7.
+
 ## 1. Metodo (Enzo, 2026-11-21)
 
 Niente piano da realizzare tutto insieme. Questo file è solo la **mappa**: elenca passi piccoli e autonomi, ciascuno visibile nel browser e rilasciabile da solo in poche ore (una pagina o un elemento per volta). Un passo alla volta, ciascuno in un thread nuovo: PR, CI verde, unione, rilascio, prova dal vivo, link a Enzo per vederlo. Solo dopo il suo sguardo si apre il passo seguente. L'ordine si può cambiare a ogni passo.
@@ -47,7 +49,7 @@ Ordine raccomandato: prima ciò che Enzo ha indicato come più visibile (process
 | P18 | Guida «Aiuto» in finestra, letta anche dall'assistente: prima pagina Consolidamento | Consolidamento | «Aiuto» accanto al titolo, poi una domanda all'assistente | da fare |
 | P19 | Contratti: minimi a una data e tranche del rinnovo (prima si verifica che i dati ci siano) | Contratti del tenant | Scegli una data passata | da fare |
 | P20 | Catena della costruzione del tenant per livelli, con dipendenze e rifacimenti a catena | Costruzione del blueprint | Clic su un passo: da chi dipende, chi lo usa | da decidere (tocca il consolidamento) |
-| D… | Passi di design dal confronto con schermate affiancate | — | — | in arrivo |
+| D1–D6 | Passi di design: vedi sezione 7 | — | — | D1–D4 pronti per l'esecuzione; D5–D6 dopo le schermate di advanced |
 
 ## 4. Come si chiude un passo
 
@@ -168,3 +170,33 @@ Fonte: rilievo fatto sulla VM con il browser sulla console (porta 3107), corsa `
 **Esito delle tre indagini aperte nella 6.2 (obblighi, copertura, incentivi).** I dati esistono nel datastore (20 obblighi, 5 schemi di incentivi) e il pacchetto li porta in advanced, ma in advanced arrivano solo **al livello del modello**: `sys.sys_blueprint_content_obligations`, `sys_blueprint_content_obligation_positions`, `sys_blueprint_content_incentives`, letti oggi solo dal consolidamento (`apps/api/src/modules/tenant-consolidation/sorgenti.ts`, `distanza.ts`). Nel tenant non c'è una tabella né una pagina. Quindi P23 e P24 non sono passi di interfaccia: prima serve portare obblighi e incentivi nel tenant (un gradino del consolidamento), poi la pagina. Restano in mappa come «dipende dal consolidamento».
 
 **Correzioni alla 6.2 che ne discendono**: riga 20 (Flussi di commessa) da «probabilmente non applicabile» a «da confrontare con `/projects`: 4 flussi bancari reali»; righe 7, 9, 19 da «indagine» a «dati solo nel modello, dipende dal consolidamento»; tutte le altre righe da «da verificare dal vivo» a «rilevato dal vivo nel datastore; lato advanced da verificare con un login RTL».
+
+## 7. Confronto di design (dal codice, 2026-11-21)
+
+Base: i fogli di stile delle due interfacce (`heuresys-datastore/apps/console/src/app/globals.css`, `heuresys-datastore/apps/web/src/app/interazione.css`; `heuresys-advanced/apps/web/src/app/globals.css`, `theme-overrides.css`) e la schermata della finestra del processo. Le schermate dei pannelli dei passi del datastore vanno rifatte a pagina intera (quelle consegnate mostrano solo la cima della pagina: le schede di uno stesso passo hanno lo stesso peso in byte), e quelle di advanced arrivano dal thread delle pagine dopo il rilascio in corso: D5 e D6 si confermano su quelle.
+
+**Che cosa è uguale.** Le due interfacce usano lo stesso design system (`@heuresys/ui`; console 1.4.0, advanced 1.6.0) e lo stesso tema di marca (`@heuresys/ui/theme`): colori, caratteri, spaziature di base, barra laterale e intestazione vengono dalla stessa libreria. La differenza di aspetto che si vede non nasce dai token: nasce da **quattro regole globali** che il datastore ha scritto nel proprio foglio di stile e advanced no, e da **come le pagine compongono** i pezzi.
+
+**Le regole globali del datastore che advanced non ha.**
+1. **Nessun testo troncato**: `.truncate` è neutralizzata per tutta l'interfaccia (il testo va a capo). In advanced la classe `truncate` compare 13 volte (2 nella vetrina) e 4 grafici tagliano le etichette (`grep -rn "truncate" --include=*.tsx apps/web/src`, 2026-11-21), tra cui la scheda a cascata (`components/scheda-rapida.tsx:110`), il menu laterale (`app/(authenticated)/layout.tsx:231`), il titolo dell'assistente e dell'ispettore, i membri del progetto; e i grafici tagliano le etichette degli assi (`overflow: "truncate"` in `analytics/skills`, `analytics/org-network`, `analytics/skills-by-category`). È già una regola UI di Enzo, quindi è un difetto, non una scelta di gusto.
+2. **Tinta al passaggio del mouse su tutto ciò che si clicca o si ispeziona**, posata come strato sopra lo sfondo (un pulsante scuro si schiarisce, uno chiaro si scurisce), e nei disegni SVG il nodo si scurisce con un alone (regola dell'Amministratore di Sistema del 2026-10-26). Advanced dichiara che l'affordance al passaggio «è inclusa in `@heuresys/ui`»: da verificare dal vivo che copra anche righe di tabella, nodi dei disegni e valori cliccabili.
+3. **La manina su ogni elemento cliccabile**, con un solo elenco di selettori (pulsanti, schede, voci di menu, collegamenti, righe con `cursor-pointer`, nodi SVG con `data-a`).
+4. **La barra di attività** in cima su ogni attesa, letture comprese. In advanced compare solo sulle scritture (`components/attesa-globale.tsx`): è già il passo P16.
+
+**Come compongono le pagine (dalla schermata della finestra del processo).**
+- Sotto il titolo una **riga di fatti misurati** separati da «·» (es. «158 addetti · 5 sedi · 25 passi accettati su 25»; «1 unità coinvolte · 3 ruoli · 3 persone»), al posto delle schede di numeri grandi.
+- Ogni disegno e ogni griglia di stati porta una **riga di legenda** sotto di sé, in parole («Riquadro pieno = fase eseguita…; tratteggio = unità consultata»; «Pieno: accettato · bordo spesso: aspetta una decisione · grigio: da rifare · tratteggiato: assente»). Lo stato si legge dalla forma del bordo (pieno, spesso, tratteggiato, grigio) e non dal colore: funziona in scala di grigi e in stampa.
+- Ogni disegno ha la sua **barra con «Esporta SVG» e «Schermo intero»** in alto a destra.
+- Disegni in **scala di grigi**: riquadri bianchi con bordo nero, corsia del responsabile in grigio, testo secondario grigio. Nessun colore di stato.
+- Densità alta e tipografia piccola nei disegni, titoli in grassetto con codice e nome («P01 · Definizione del modello…»).
+
+**Passi di design.**
+
+| Passo | Contenuto | Dove si vede | Come si prova | Stato |
+|---|---|---|---|---|
+| D1 | Nessun testo troncato: regola globale come nel datastore e tolti i `truncate` dei componenti; nei grafici le etichette vanno a capo invece di tagliarsi | ovunque; subito nella scheda a cascata, nel menu laterale e in `/analytics/skills` | una persona o un'etichetta lunga si legge per intero | pronto |
+| D2 | Tinta al passaggio e manina su tutto ciò che si clicca, righe di tabella e nodi dei disegni compresi (se la libreria non li copre già) | `/positions`, `/organization/org-chart` | passando sopra una riga o un nodo cambia colore e compare la manina | pronto, prima la verifica dal vivo |
+| D3 | Legenda in parole sotto ogni disegno e ogni griglia di stati | organigrammi, diagrammi dei processi, matrice di P1 | ogni disegno dice che cosa vuol dire pieno, tratteggiato, spesso | pronto; nasce con P1 e P2 e si estende agli altri disegni |
+| D4 | «Esporta SVG» accanto a «Schermo intero» su ogni disegno | organigrammi, diagrammi dei processi | il file SVG si scarica e si apre | pronto; si unisce a P9 |
+| D5 | Riga di fatti misurati sotto il titolo delle pagine di dettaglio (processo, unità, posizione) | `/tenant-processes/[id]`, `/positions/[id]` | sotto il titolo «N unità · N ruoli · N persone» | dopo le schermate di advanced |
+| D6 | Stato espresso dalla forma del bordo oltre che dalla parola, dove ci sono griglie di stati | tabelle con colonna stato, barre di avanzamento | in stampa in bianco e nero lo stato si distingue | dopo le schermate di advanced |

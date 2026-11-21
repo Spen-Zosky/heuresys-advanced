@@ -26,6 +26,7 @@ import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pa
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { MaskedCell } from "@/components/masked-cell";
 import { useFormat, type Formati } from "@/lib/format";
+import { intestazione } from "@/lib/faldone-parole";
 
 const PAGINA = 100;
 /** Le colonne che stanno in tabella; le altre si leggono nella scheda della riga (C12). */
@@ -46,35 +47,6 @@ const VISIBILITA: Record<FaldoneSezione["visibilita"], string> = {
   parziale: "Visibile in parte",
   omissis: "Non visibile",
 };
-
-/* --- le intestazioni: il nome della colonna detto in italiano, senza il prefisso della tabella --- */
-const PAROLE: Record<string, string> = {
-  id: "", user: "persona", users: "persone", created: "creato", updated: "aggiornato", deleted: "eliminato",
-  at: "il", by: "da", on: "il", date: "data", start: "inizio", end: "fine", from: "da", to: "a",
-  status: "stato", type: "tipo", kind: "tipo", name: "nome", title: "titolo", code: "codice",
-  description: "descrizione", notes: "note", note: "nota", comment: "commento", comments: "commenti",
-  amount: "importo", currency: "valuta", value: "valore", score: "punteggio", level: "livello",
-  rating: "giudizio", reason: "motivo", is: "", has: "", active: "attivo", primary: "principale",
-  position: "posizione", unit: "unità", org: "organizzazione", manager: "responsabile",
-  tenant: "tenant", period: "periodo", year: "anno", month: "mese", hours: "ore", days: "giorni",
-  approved: "approvato", submitted: "inviato", shared: "comunicato", acknowledged: "presa visione",
-  reviewer: "valutatore", subject: "valutato", target: "destinatario", owner: "titolare",
-  email: "email", phone: "telefono", address: "indirizzo", city: "città", country: "paese",
-  skill: "competenza", course: "corso", goal: "obiettivo", review: "valutazione", feedback: "feedback",
-  request: "richiesta", requested: "richiesto", count: "numero", total: "totale", percent: "percento",
-  effective: "decorrenza", expires: "scadenza", expiry: "scadenza", issued: "rilascio", completed: "completato",
-};
-
-export function intestazione(colonna: string, tabella: string): string {
-  const radice = tabella.replace(/^.*\.sys_/, "").replace(/s$/, "");
-  const parti = colonna.split("_");
-  const pref = radice.split("_");
-  let i = 0;
-  while (i < pref.length && i < parti.length - 1 && parti[i] === pref[i]) i += 1;
-  const tradotte = parti.slice(i).map((p) => PAROLE[p] ?? p).filter((p) => p !== "");
-  const testo = (tradotte.length > 0 ? tradotte : parti).join(" ");
-  return testo.charAt(0).toUpperCase() + testo.slice(1);
-}
 
 function valore(v: unknown, tipo: string, fmt: Formati): ReactNode {
   if (v === FALDONE_OMISSIS) return <MaskedCell />;

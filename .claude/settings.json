@@ -72,6 +72,15 @@
             "timeout": 30
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${CLAUDE_PROJECT_DIR:-.}\" && sh scripts/hooks/qualita-stop.sh",
+            "timeout": 60
+          }
+        ]
       }
     ],
     "SubagentStop": [
@@ -81,6 +90,18 @@
             "type": "command",
             "command": "cd \"${CLAUDE_PROJECT_DIR:-.}\" && sh scripts/hooks/hook.sh stop-gate",
             "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${CLAUDE_PROJECT_DIR:-.}\" && sh scripts/hooks/qualita-lint.sh",
+            "timeout": 45
           }
         ]
       }

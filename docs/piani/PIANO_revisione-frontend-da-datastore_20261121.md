@@ -165,7 +165,7 @@ Fonte: rilievo fatto sulla VM con il browser sulla console (porta 3107), corsa `
 | 26 | Condizioni istituti | ccnl 2 (129) | — | |
 | 29 | Traduzioni | solo Riepilogo (4.482 valori) | — | non applicabile |
 | 30 | Prove di lettura | prove 384 (4) | — | non applicabile come pagina del tenant |
-| 31 | Pacchetto | 14 sezioni del pacchetto, conteggi 14, **riferimentiRotti 16** | U01, P01, R001, O001, M001… | 16 riferimenti rotti nel pacchetto: difetto del datastore da segnalare alla sua sessione |
+| 31 | Pacchetto | 14 sezioni del pacchetto, conteggi 14, riferimentiRotti 16 | U01, P01, R001, O001, M001… | riferimentiRotti elenca le 16 categorie di controllo, tutte a 0 (`riferimentiRottiTotale` = 0 su questa e sulle altre corse della banca): nessun difetto. Da notare per advanced: una tabella di controlli a zero va mostrata come «0 su 16 controlli», non come 16 righe |
 
 **Esito delle tre indagini aperte nella 6.2 (obblighi, copertura, incentivi).** I dati esistono nel datastore (20 obblighi, 5 schemi di incentivi) e il pacchetto li porta in advanced, ma in advanced arrivano solo **al livello del modello**: `sys.sys_blueprint_content_obligations`, `sys_blueprint_content_obligation_positions`, `sys_blueprint_content_incentives`, letti oggi solo dal consolidamento (`apps/api/src/modules/tenant-consolidation/sorgenti.ts`, `distanza.ts`). Nel tenant non c'è una tabella né una pagina. Quindi P23 e P24 non sono passi di interfaccia: prima serve portare obblighi e incentivi nel tenant (un gradino del consolidamento), poi la pagina. Restano in mappa come «dipende dal consolidamento».
 

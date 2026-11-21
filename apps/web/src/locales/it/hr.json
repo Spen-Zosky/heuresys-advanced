@@ -272,29 +272,29 @@
       "code": "Codice",
       "name": "Processo",
       "kind": "Tipo",
-      "actions": "RACI"
+      "actions": "Ruoli delle unità"
     },
     "raci": {
-      "view": "Vedi RACI",
-      "title": "RACI — {{process}}",
-      "titleIdle": "Drill-down RACI",
-      "subtitle": "Unità organizzative assegnate al processo e relativo ruolo RACI.",
-      "hint": "Seleziona un processo per vedere le unità organizzative assegnate e il loro ruolo RACI.",
+      "view": "Vedi i ruoli",
+      "title": "Ruoli delle unità — {{process}}",
+      "titleIdle": "Ruoli delle unità nel processo",
+      "subtitle": "Unità organizzative assegnate al processo e ruolo di ciascuna.",
+      "hint": "Seleziona un processo per vedere le unità organizzative assegnate e il loro ruolo.",
       "count": "{{count}} unità",
       "count_one": "{{count}} unità",
-      "caption": "Assegnazioni RACI del processo",
-      "errorMessage": "Impossibile caricare le assegnazioni RACI",
+      "caption": "Ruoli delle unità nel processo",
+      "errorMessage": "Impossibile caricare i ruoli delle unità",
       "empty": "Nessuna unità organizzativa assegnata a questo processo.",
       "cols": {
         "unit": "Unità organizzativa",
         "code": "Codice",
-        "role": "Ruolo RACI"
+        "role": "Ruolo nel processo"
       },
       "roles": {
-        "OWNER": "Responsabile · A",
-        "CONTRIBUTOR": "Esecutore · R",
-        "CONSULTED": "Consultato · C",
-        "INFORMED": "Informato · I"
+        "OWNER": "Responsabile",
+        "CONTRIBUTOR": "Esecutrice",
+        "CONSULTED": "Consultata",
+        "INFORMED": "Informata"
       },
       "assegna": {
         "filtro": "Filtra le unità",

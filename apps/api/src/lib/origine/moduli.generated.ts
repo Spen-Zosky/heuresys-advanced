@@ -364,13 +364,13 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_assessments",
       "sys_auth_credentials",
       "sys_blueprint_activations",
-      "sys_blueprint_process_registry",
       "sys_blueprint_variants",
       "sys_compensation_recommendations",
       "sys_dashboard_block_data_classes",
       "sys_dashboard_blocks",
       "sys_dashboards",
       "sys_industry_codes",
+      "sys_job_roles",
       "sys_learning_gaps",
       "sys_learning_paths",
       "sys_organization_unit_processes",
@@ -379,6 +379,8 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_skills",
       "sys_tenancies",
       "sys_tenant_blueprints",
+      "sys_tenant_process_steps",
+      "sys_tenant_processes",
       "sys_time_off_requests",
       "sys_user_learning_assignments",
       "sys_user_pay_slips",
@@ -977,13 +979,40 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_process_kpi_templates"
     ]
   },
+  "processes": {
+    "prefissi": [
+      "/v1/processes"
+    ],
+    "tabelle": [
+      "sys_approval_requests",
+      "sys_blueprint_process_registry",
+      "sys_job_roles",
+      "sys_kpi_definitions",
+      "sys_organization_unit_processes",
+      "sys_organization_units",
+      "sys_position_skill_requirements",
+      "sys_positions",
+      "sys_process_kpi_templates",
+      "sys_process_participants",
+      "sys_projects",
+      "sys_skills",
+      "sys_tenancies",
+      "sys_tenant_process_steps",
+      "sys_tenant_processes",
+      "sys_user_position_assignments",
+      "sys_users"
+    ]
+  },
   "projects": {
     "prefissi": [
       "/v1/projects"
     ],
     "tabelle": [
+      "sys_project_dependencies",
       "sys_project_members",
+      "sys_project_phases",
       "sys_projects",
+      "sys_tenant_process_steps",
       "sys_users"
     ]
   },

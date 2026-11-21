@@ -1,18 +1,18 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `eb6312a4` (2026-11-21T16:49:24+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `857b8b75` (2026-11-21T22:54:15+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
 | Layer | Valore |
 |---|---|
 | Moduli API | 125 |
-| Route API | 750 |
+| Route API | 751 |
 | Pagine web | 145 |
 | Schemi shared | 138 |
-| Tabelle DB | 431 (vuote: 41) |
+| Tabelle DB | 432 (vuote: 41) |
 | Viste / matview | 91 / 0 |
-| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 336 |
+| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 337 |
 
 ## Moduli API
 
@@ -96,7 +96,7 @@
 | positions | /v1/positions | 16 | 4 | 16 | 4 |
 | predictions | /v1/predictions | 4 | 1 | 2 | 3 |
 | process-kpi-templates | /v1/process-kpi-templates | 4 | 3 | 3 | 1 |
-| processes | /v1/processes | 2 | 1 | 17 | 5 |
+| processes | /v1/processes | 3 | 1 | 17 | 5 |
 | projects | /v1/projects | 13 | 3 | 6 | 1 |
 | provenance | /v1/provenance | 2 | 1 | 1 | 1 |
 | public-job-postings | /v1/public | 2 | 0 | 2 | 1 |

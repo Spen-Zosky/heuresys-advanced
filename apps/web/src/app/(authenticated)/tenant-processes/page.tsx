@@ -106,7 +106,9 @@ export default function TenantProcessesPage() {
       <SchedePagina
         schede={[
           { id: "elenco", titolo: t("processiDelTenant.matrice.elenco"), conteggio: q.data ? righe.length : null, contenuto: tabella },
-          { id: "matrice", titolo: t("processiDelTenant.matrice.scheda"), contenuto: <MatriceProcessi tenantId={conTenant ? (tenant || tenants[0]?.[0]) : undefined} /> },
+          // La matrice chiede sempre il tenant dei processi in elenco: un mandato di piattaforma con un
+          // solo tenant in elenco (RTL) senza il parametro riceveva quella del proprio tenant, vuota.
+          { id: "matrice", titolo: t("processiDelTenant.matrice.scheda"), contenuto: <MatriceProcessi tenantId={tenant || tenants[0]?.[0]} /> },
         ]}
       />
     </main>

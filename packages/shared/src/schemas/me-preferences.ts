@@ -27,6 +27,9 @@ export const ME_LOCALES = ["it", "en"] as const;
 export const MeLocaleSchema = z.enum(ME_LOCALES);
 export type MeLocale = z.infer<typeof MeLocaleSchema>;
 
+/** Gli id dei gruppi della barra laterale nell'ordine scelto (il registro ne dichiara una dozzina). */
+export const SidebarOrderSchema = z.array(z.string().min(1).max(64)).max(40);
+
 export const ME_PREFERENCE_DEFAULTS = {
   theme: "dark",
   palette: "balanced",
@@ -38,6 +41,8 @@ export const UserPreferenceSchema = z.object({
   theme: MeThemeSchema,
   palette: MePaletteSchema,
   locale: MeLocaleSchema,
+  /** Ordine dei gruppi della barra laterale scelto dalla persona; `null` = ordine standard. */
+  sidebarOrder: SidebarOrderSchema.nullable(),
 });
 export type UserPreference = z.infer<typeof UserPreferenceSchema>;
 
@@ -47,8 +52,10 @@ export const UpdateUserPreferenceBodySchema = z
     theme: MeThemeSchema.optional(),
     palette: MePaletteSchema.optional(),
     locale: MeLocaleSchema.optional(),
+    /** `null` = «Ripristina ordine standard». */
+    sidebarOrder: SidebarOrderSchema.nullable().optional(),
   })
-  .refine((b) => b.theme !== undefined || b.palette !== undefined || b.locale !== undefined, {
-    error: "At least one of theme / palette / locale required",
+  .refine((b) => b.theme !== undefined || b.palette !== undefined || b.locale !== undefined || b.sidebarOrder !== undefined, {
+    error: "At least one of theme / palette / locale / sidebarOrder required",
   });
 export type UpdateUserPreferenceBody = z.infer<typeof UpdateUserPreferenceBodySchema>;

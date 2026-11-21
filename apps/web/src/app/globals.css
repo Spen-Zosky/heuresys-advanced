@@ -52,6 +52,55 @@
   color: var(--muted-foreground);
 }
 
+/* Barra laterale (Enzo, 2026-11-21): i gruppi sono separati da una sottile riga orizzontale; il
+   titolo del gruppo è in maiuscolo (lo fa `uppercase` sul pulsante), le voci hanno la sola
+   iniziale maiuscola (`lib/menu-testi.ts`). Il riordino mostra una linea continua fra due gruppi. */
+.sidebar-group {
+  position: relative;
+  padding-block: 0.375rem;
+}
+.sidebar-group + .sidebar-group {
+  border-top: 1px solid var(--border);
+}
+.sidebar-drop-line {
+  position: absolute;
+  inset-inline: 0;
+  top: -1px;
+  height: 2px;
+  border-radius: 1px;
+  background: transparent;
+  pointer-events: none;
+}
+.sidebar-drop-line[data-visibile] {
+  background: var(--primary);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary) 35%, transparent);
+  z-index: 1;
+}
+.sidebar-drop-line-fine {
+  position: relative;
+  top: 0;
+  margin-top: 0.25rem;
+}
+.sidebar-group[data-trascinato] {
+  opacity: 0.45;
+}
+nav[data-trascinamento] {
+  cursor: grabbing;
+  user-select: none;
+}
+.sidebar-group-handle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+body[data-sidebar="collapsed"] aside .sidebar-group-handle {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-group[data-trascinato] {
+    opacity: 0.6;
+  }
+}
+
 html,
 body {
   background-color: var(--background);

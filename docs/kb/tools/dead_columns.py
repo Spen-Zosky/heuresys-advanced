@@ -29,6 +29,9 @@ import re
 import subprocess
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _pg_agenti  # noqa: E402,F401  B2: il database si legge come heuresys_agenti
+
 # docs/kb/tools/ -> la radice del repo e' tre livelli sopra (derivata, non scritta).
 QUI = os.path.dirname(os.path.abspath(__file__))
 REPO = os.environ.get("HRX_REPO", os.path.dirname(os.path.dirname(os.path.dirname(QUI))))

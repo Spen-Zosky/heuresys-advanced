@@ -22,6 +22,9 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 ENV_FILE="${ENV_FILE:-$ROOT/.env}"
 # shellcheck disable=SC1090
 [ -f "$ENV_FILE" ] && { set -a; . "$ENV_FILE"; set +a; }
+# B2: righe si, struttura no — il giro scrive come heuresys_agenti
+# shellcheck disable=SC1091
+. "$ROOT/deploy/postgres/env-agenti.sh"
 
 export PGPASSWORD="${POSTGRES_PASSWORD:-}"
 PSQL=(psql -h "${POSTGRES_HOST:-localhost}" -p "${POSTGRES_PORT:-5432}" \

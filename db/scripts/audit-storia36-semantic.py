@@ -47,6 +47,9 @@ import sys
 from datetime import date
 from pathlib import Path
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "docs", "kb", "tools"))
+import _pg_agenti  # noqa: E402,F401  B2: il database si legge come heuresys_agenti
+
 REPO = Path(__file__).resolve().parents[2]
 OUT = REPO / "docs" / "kb" / "storia36" / "AUDIT_FINALE.md"
 WAIVERS = REPO / "db" / "scripts" / "audit-storia36-empty-tables.txt"

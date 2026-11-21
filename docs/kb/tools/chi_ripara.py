@@ -79,6 +79,9 @@ import sys
 from dataclasses import dataclass, field
 from typing import Callable, Optional
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _pg_agenti  # noqa: E402,F401  B2: il database si legge come heuresys_agenti
+
 QUI = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, QUI)
 import completezza_tenant as ct  # noqa: E402 — riuso, non reinvento (RIFERIMENTO, misura, confronta)

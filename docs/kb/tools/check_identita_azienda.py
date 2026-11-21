@@ -48,6 +48,9 @@ import os
 import subprocess
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _pg_agenti  # noqa: E402,F401  B2: il database si legge come heuresys_agenti
+
 PSQL = [
     "psql",
     "-h", os.environ.get("PGHOST", "localhost"),

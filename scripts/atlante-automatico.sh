@@ -149,6 +149,9 @@ ENV_FILE="${ENV_FILE:-$ROOT/.env}"
   # shellcheck disable=SC1090
   . "$ENV_FILE"
   set +a
+  # B2: l'atlante legge come heuresys_agenti
+  # shellcheck disable=SC1091
+  . "$ROOT/deploy/postgres/env-agenti.sh"
   export PGPASSWORD="${POSTGRES_PASSWORD:-}"
   export ATLAS_PGHOST="${POSTGRES_HOST:-localhost}" ATLAS_PGPORT="${POSTGRES_PORT:-5432}"
   export ATLAS_PGUSER="${POSTGRES_USER:-heuresys}" ATLAS_PGDATABASE="${POSTGRES_DB:-heuresys_advanced}"

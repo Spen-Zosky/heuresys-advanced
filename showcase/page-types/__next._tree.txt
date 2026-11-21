@@ -1,0 +1,5 @@
+:HL["/heuresys-advanced/_next/static/chunks/1npsbt8g_a_9r.css","style"]
+3:[["children",{"s":"__PAGE__","h":160}]]
+2:[["children",{"s":"page-types","h":96,"c":"$Q3"}]]
+1:[["children",{"s":"showcase","h":96,"c":"$Q2"}]]
+0:{"b":"p7FfRMqamIsvzH7s30WIo","t":{"t":{"s":"","h":80,"c":"$Q1"}}}

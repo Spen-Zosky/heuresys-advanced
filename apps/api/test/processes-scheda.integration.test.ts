@@ -4,6 +4,7 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
+import { platformAdmin } from "./helpers/actors.js";
 import { TenantProcessListResponseSchema, TenantProcessMatrixResponseSchema, TenantProcessSchedaSchema } from "@heuresys/shared";
 
 /**
@@ -114,5 +115,21 @@ describe("/v1/processes/matrice", () => {
     const unita = new Set(body.units.map((u) => u.unitId));
     for (const c of body.cells) { expect(processi.has(c.processId)).toBe(true); expect(unita.has(c.unitId)).toBe(true); }
     expect(new Set(body.cells.map((c) => `${c.processId}|${c.unitId}`)).size).toBe(body.cells.length);
+  });
+
+  it("un mandato di piattaforma senza tenant riceve la matrice del tenant che l'elenco gli mostra, non quella vuota del proprio", async () => {
+    const attore = await platformAdmin();
+    const login = await loginRaw(t.app, attore.email);
+    const suo = login.cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+    const elenco = TenantProcessListResponseSchema.parse(
+      (await t.app.inject({ method: "GET", url: "/v1/processes?level=1", headers: { cookie: suo } })).json());
+    const atteso = elenco.items[0]?.tenantId ?? attore.tenantId;
+    const r = await t.app.inject({ method: "GET", url: "/v1/processes/matrice", headers: { cookie: suo } });
+    expect(r.statusCode).toBe(200);
+    const body = TenantProcessMatrixResponseSchema.parse(r.json());
+    expect(body.tenantId).toBe(atteso);
+    const conTenant = TenantProcessMatrixResponseSchema.parse(
+      (await t.app.inject({ method: "GET", url: `/v1/processes/matrice?tenantId=${atteso}`, headers: { cookie: suo } })).json());
+    expect(body.cells.length).toBe(conTenant.cells.length);
   });
 });

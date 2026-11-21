@@ -20,9 +20,18 @@ export const processService = {
     return { items, total: items.length };
   },
 
-  /** La matrice processi × unità. Un mandato di piattaforma sceglie il tenant; gli altri vedono il proprio. */
+  /**
+   * La matrice processi × unità. Un mandato di piattaforma sceglie il tenant; gli altri vedono il proprio.
+   * Senza scelta, un mandato di piattaforma riceve la matrice del primo tenant che ha processi, quello
+   * che l'elenco gli mostra: il suo tenant (Heuresys) non ne ha, e ripiegare lì dava una matrice
+   * vuota accanto a un elenco pieno (2026-11-21).
+   */
   async matrice(a: ActorContext, q: TenantProcessMatrixQuery): Promise<TenantProcessMatrixResponse> {
-    const tenantId = haMandatoPiattaforma(a) ? (q.tenantId ?? a.tenantId) : a.tenantId;
+    let tenantId = haMandatoPiattaforma(a) ? (q.tenantId ?? null) : a.tenantId;
+    if (haMandatoPiattaforma(a) && !tenantId) {
+      const visti = await repo.listProcesses(pool, null, { level: 1 } as TenantProcessListQuery);
+      tenantId = visti[0]?.tenantId ?? a.tenantId;
+    }
     if (tenantId === null) return { tenantId: null, processes: [], units: [], cells: [] };
     return repo.loadMatrix(pool, tenantId);
   },

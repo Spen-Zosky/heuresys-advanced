@@ -35,4 +35,9 @@ describe("glossario nella lingua della pagina (S-06, S-07)", () => {
     expect(spiegazioneDi("Scope", "en")).toBeDefined();
     expect(spiegazioneDi("Workflow", "it")).toBeDefined();
   });
+  it("ADR-0061: «processo del modello» e «processo del tenant» sono due voci distinte", () => {
+    expect(spiegazioneDi("Processo del modello", "it")?.testo).toMatch(/riutilizzabile/);
+    expect(spiegazioneDi("Processo del tenant", "it")?.testo).toMatch(/questa azienda/);
+    expect(spiegazioneDi("Tenant process", "en")?.testo).toMatch(/this company/);
+  });
 });

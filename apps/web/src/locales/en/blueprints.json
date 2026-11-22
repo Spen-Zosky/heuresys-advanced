@@ -54,7 +54,7 @@
   },
   "processes": {
     "title": "Process catalogue",
-    "description": "The processes of the tenant's blueprint, in value-chain order.",
+    "description": "The catalogue of the sector model (blueprint) processes of the tenant, in value-chain order: these are the reusable definitions. The processes the company actually runs are in «Processes».",
     "count": "{{count}} model processes",
     "count_one": "{{count}} model process",
     "error": "Unable to load the processes.",
@@ -67,7 +67,60 @@
       "optional": "Type"
     },
     "optionalYes": "Optional",
-    "optionalNo": "Core"
+    "optionalNo": "Core",
+    "pubblicabilita": {
+      "colonna": "Publishability",
+      "conteggio": "{{n}} of 8 criteria",
+      "titolo": "Publishability: {{nome}}",
+      "pubblicabile": "The process meets all eight criteria: it can be published as a reusable model.",
+      "nonPubblicabile": "The process meets {{n}} criteria out of 8. For each one, what the model still lacks.",
+      "colonne": {
+        "criterio": "Criterion",
+        "manca": "What is missing",
+        "esito": "Met"
+      },
+      "si": "Yes",
+      "no": "No",
+      "nota": "This is a report, not a block: it shows where the description of processes is still incomplete. Gaps that appear in every process are parts of the model not yet built, closed by the next steps.",
+      "criteri": {
+        "c1": "Stable identity and version, with verifiable boundaries and results",
+        "c2": "Distinguishes mandatory, configurable, derived and not applicable values",
+        "c3": "States responsibilities, decisions, exceptions and controls",
+        "c4": "Indicators with formula, unit, source, period and missing-data handling",
+        "c5": "Declares dependencies, compatible variants and configuration constraints",
+        "c6": "Keeps provenance, approvals and change history",
+        "c7": "Lets you rebuild version and configuration of every run",
+        "c8": "Separates identifiers, readable codes and translatable names"
+      },
+      "mancanze": {
+        "codice": "the code",
+        "versione": "the version",
+        "descrizione": "the description",
+        "risultato": "a result declared in the activities",
+        "confini": "the event that starts and the condition that ends the process",
+        "valori_non_distinti": "the model does not yet distinguish mandatory, configurable and derived values",
+        "attivita": "the activities",
+        "esecutore": "who performs some activities",
+        "decisioni": "the decisions",
+        "eccezioni": "the exceptions",
+        "controlli": "the controls",
+        "kpi": "the indicators",
+        "formula": "the formula of some indicators",
+        "unita": "the unit of some indicators",
+        "fonte": "the data source of the indicators",
+        "finestra": "the measurement period",
+        "dati_mancanti": "how missing data is handled",
+        "dipendenze": "dependencies on other processes",
+        "varianti": "compatible variants",
+        "vincoli": "configuration constraints",
+        "provenienza": "the provenance of some activities",
+        "approvazioni": "the approvals",
+        "storia": "the change history",
+        "esecuzioni": "the link between each run and the model version",
+        "denominazione": "the name",
+        "traduzione": "the name in other languages"
+      }
+    }
   },
   "brownfield": {
     "title": "Brownfield adaptation",
@@ -361,7 +414,7 @@
   },
   "processiDelTenant": {
     "title": "Processes",
-    "description": "The company's processes, each with its subprocesses, activities, who performs them and the units that take part.",
+    "description": "The company's processes, that is the model adapted to this tenant, each with its subprocesses, activities, who performs them and the units that take part.",
     "count": "{{count}} processes",
     "count_one": "{{count}} process",
     "error": "Unable to load the processes.",
@@ -388,7 +441,8 @@
         "flusso": "Swimlane flow",
         "grafo": "Graph",
         "indicatori": "Indicators and skills",
-        "collegati": "Approvals and projects"
+        "collegati": "Approvals and projects",
+        "classificazione": "Classification"
       },
       "scopo": "Purpose",
       "senzaScopo": "The purpose of the process is not described.",
@@ -420,7 +474,8 @@
         "skill": "Skill",
         "positions": "Positions requiring it",
         "project": "Project",
-        "status": "Status"
+        "status": "Status",
+        "apqc": "APQC correspondence"
       },
       "nessunaAttivita": "The process has no activities.",
       "nessunaUnita": "No unit takes part in the process.",
@@ -455,6 +510,98 @@
         "CONTRIBUTOR": "Executing",
         "CONSULTED": "Consulted",
         "INFORMED": "Informed"
+      }
+    },
+    "classificazione": {
+      "nota": "How the process is classified, one independent dimension per row: {{assegnate}} of {{totale}} facets assigned. Every value carries the criterion it was chosen with.",
+      "colonne": {
+        "faccetta": "Facet",
+        "valori": "Values",
+        "criterio": "Criterion",
+        "stato": "Status"
+      },
+      "nessunValore": "Not yet classified",
+      "stato": {
+        "proposta": "Proposed by the agent, to approve",
+        "approvata": "Decided by a person"
+      },
+      "modifica": "Edit",
+      "esamina": "Review",
+      "approva": "Approve",
+      "salva": "Save",
+      "annulla": "Cancel",
+      "salvataggio": "Saving…",
+      "criterio": "Criterion",
+      "criterioAiuto": "Why these values: the rule or fact that justifies them. Required if you choose at least one value.",
+      "propostaAgente": "These values are a proposal by the agent: check them, correct them if needed and approve them. They become your decision.",
+      "errore": "Unable to save the classification.",
+      "faccette": {
+        "FINALITA": {
+          "nome": "Purpose",
+          "domanda": "What the process is for, for the company"
+        },
+        "BENEFICIARIO": {
+          "nome": "Beneficiary",
+          "domanda": "Who receives the result (even more than one)"
+        },
+        "PERIMETRO": {
+          "nome": "Scope",
+          "domanda": "How many units or companies it crosses"
+        },
+        "MODALITA": {
+          "nome": "Way of working",
+          "domanda": "Whether steps are set in advance or decided case by case"
+        },
+        "ATTIVAZIONE": {
+          "nome": "Trigger",
+          "domanda": "What starts the process"
+        },
+        "TECNOLOGIA": {
+          "nome": "Technology participation",
+          "domanda": "How much work systems and agents do"
+        },
+        "STANDARDIZZAZIONE": {
+          "nome": "Standardisation",
+          "domanda": "Whether it is the same everywhere, configurable, sector-specific or only for this company"
+        }
+      },
+      "approvaTutte": "Approve all proposals ({{n}} facets)",
+      "approvazioneInCorso": "Approving…"
+    },
+    "apqc": {
+      "voce": "item {{codice}}",
+      "daDichiarare": "type to be declared",
+      "proposta": "agent proposal",
+      "dichiara": "Declare",
+      "modifica": "Edit",
+      "esamina": "Review",
+      "titolo": "Correspondence with the APQC item",
+      "domanda": "How closely does the activity “{{attivita}}” match the APQC item {{codice}} it comes from?",
+      "propostaAgente": "The type is an agent proposal: confirm or correct it and save to approve it.",
+      "criterio": "Criterion",
+      "criterioAiuto": "Why the correspondence is of this type: what the activity does more or less than the item.",
+      "errore": "Saving failed. Try again.",
+      "annulla": "Cancel",
+      "salva": "Save",
+      "approva": "Approve",
+      "salvataggio": "Saving…",
+      "tipi": {
+        "ESATTO": {
+          "nome": "Exact",
+          "descrizione": "The activity does exactly what the item describes, no more and no less."
+        },
+        "PIU_AMPIO": {
+          "nome": "Broader",
+          "descrizione": "The activity includes the item and does more."
+        },
+        "PIU_RISTRETTO": {
+          "nome": "Narrower",
+          "descrizione": "The activity covers only part of what the item describes."
+        },
+        "PARZIALE": {
+          "nome": "Partial",
+          "descrizione": "The activity and the item overlap only in part: each does something the other does not."
+        }
       }
     }
   }

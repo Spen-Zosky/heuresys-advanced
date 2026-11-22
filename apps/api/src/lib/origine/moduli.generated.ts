@@ -195,9 +195,12 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "/v1/blueprint-processes"
     ],
     "tabelle": [
+      "sys_blueprint_content_process_steps",
       "sys_blueprint_process_registry",
       "sys_blueprint_variant_versions",
-      "sys_blueprint_variants"
+      "sys_blueprint_variants",
+      "sys_kpi_definitions",
+      "sys_process_kpi_templates"
     ]
   },
   "blueprint-variants": {
@@ -997,6 +1000,7 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_projects",
       "sys_skills",
       "sys_tenancies",
+      "sys_tenant_process_step_mappings",
       "sys_tenant_process_steps",
       "sys_tenant_processes",
       "sys_user_position_assignments",
@@ -1381,6 +1385,10 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
     ],
     "tabelle": [
       "sys_positions",
+      "sys_process_facet_values",
+      "sys_tenant_process_facets",
+      "sys_tenant_process_step_mappings",
+      "sys_tenant_process_steps",
       "sys_tenant_processes",
       "sys_user_position_assignments"
     ]

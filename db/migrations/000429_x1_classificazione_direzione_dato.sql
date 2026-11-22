@@ -373,7 +373,10 @@ VALUES
   ('sys_agent_requests', 'nativo', 'EMENDATO per la mig 000501 (tappa T2): richieste dell''agente con previsione di spesa e tetto, scritte solo dall''API'),
   ('sys_agent_call_log', 'nativo', 'EMENDATO per la mig 000501 (tappa T2): registro di costo e durata delle chiamate dell''agente, scritto solo dall''API'),
   ('sys_project_phases', 'nativo', 'EMENDATO per la mig 000503 (V6 processi e progetti): fasi, attivita'' e tappe del piano di un progetto, scritte solo dall''API'),
-  ('sys_project_dependencies', 'nativo', 'EMENDATO per la mig 000503 (V6 processi e progetti): dipendenze fra le fasi di un progetto, scritte solo dall''API');
+  ('sys_project_dependencies', 'nativo', 'EMENDATO per la mig 000503 (V6 processi e progetti): dipendenze fra le fasi di un progetto, scritte solo dall''API'),
+  ('sys_process_facet_values', 'infrastruttura', 'EMENDATO per la mig 000507 (ADR-0061 D4): vocabolario chiuso delle faccette dei processi, catalogo di piattaforma, nessun dato di un tenant'),
+  ('sys_tenant_process_facets', 'nativo', 'EMENDATO per la mig 000507 (ADR-0061 D4): valori delle faccette di un processo del tenant, scritti solo dall''API'),
+  ('sys_tenant_process_step_mappings', 'nativo', 'EMENDATO per la mig 000509 (ADR-0061 D7): corrispondenza delle attivita'' del tenant con APQC, scritta solo dall''API');
 
 INSERT INTO sys.sys_classificazione_direzione_dato (tabella, stato, motivo)
 SELECT tabella, stato, motivo FROM _classificazione_000429
@@ -397,15 +400,15 @@ BEGIN
   -- database vuoto le due misure coincidono (315); su uno gia' popolato le righe in piu'
   -- appartengono ad altri file e non sono un errore di questo.
   SELECT count(*) INTO n_dich FROM _classificazione_000429;
-  IF n_dich <> 322 THEN
-    RAISE EXCEPTION '000429: il file dichiara % righe di classificazione, attese 322', n_dich;
+  IF n_dich <> 325 THEN
+    RAISE EXCEPTION '000429: il file dichiara % righe di classificazione, attese 325', n_dich;
   END IF;
 
   SELECT count(*) INTO n_proprie
     FROM _classificazione_000429 d
     JOIN sys.sys_classificazione_direzione_dato c ON c.tabella = d.tabella AND c.stato = d.stato;
-  IF n_proprie <> 322 THEN
-    RAISE EXCEPTION '000429: attese 322 righe di classificazione di questo file, trovate %', n_proprie;
+  IF n_proprie <> 325 THEN
+    RAISE EXCEPTION '000429: attese 325 righe di classificazione di questo file, trovate %', n_proprie;
   END IF;
 
   SELECT count(*) INTO n_non_class FROM sys.v_tabelle_non_classificate;
@@ -419,14 +422,16 @@ BEGIN
   SELECT count(*) FILTER (WHERE stato = 'infrastruttura') INTO n_infra     FROM _classificazione_000429;
   -- 77/131 da ADR-0060 P3: sys_tenant_processes passa da importato a ibrido (era 76/132).
   -- 69 nativo da 000503: sys_project_phases e sys_project_dependencies (era 67).
-  IF n_ibrido <> 77 OR n_nativo <> 69 OR n_importato <> 131 OR n_infra <> 45 THEN
-    RAISE EXCEPTION '000429: conteggio inatteso — ibrido=% nativo=% importato=% infrastruttura=% (attesi 77/69/131/45)',
+  -- 70 nativo e 46 infrastruttura da 000507: sys_tenant_process_facets e sys_process_facet_values.
+  -- 71 nativo da 000509: sys_tenant_process_step_mappings.
+  IF n_ibrido <> 77 OR n_nativo <> 71 OR n_importato <> 131 OR n_infra <> 46 THEN
+    RAISE EXCEPTION '000429: conteggio inatteso — ibrido=% nativo=% importato=% infrastruttura=% (attesi 77/71/131/46)',
       n_ibrido, n_nativo, n_importato, n_infra;
   END IF;
 
   SELECT count(*) INTO n_tot FROM sys.sys_classificazione_direzione_dato;
   n_altre := n_tot - n_proprie;
-  RAISE NOTICE '000429: 322 tabelle classificate (77 ibrido, 69 nativo, 131 importato, 45 infrastruttura); altre righe gia'' presenti, di altri file: %; v_tabelle_non_classificate a zero.', n_altre;
+  RAISE NOTICE '000429: 325 tabelle classificate (77 ibrido, 71 nativo, 131 importato, 46 infrastruttura); altre righe gia'' presenti, di altri file: %; v_tabelle_non_classificate a zero.', n_altre;
 END $$;
 
 COMMIT;

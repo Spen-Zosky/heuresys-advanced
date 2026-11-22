@@ -258,7 +258,7 @@
   },
   "processOwner": {
     "title": "Responsabile di processo",
-    "description": "Catalogo dei processi del blueprint (navigazione del grafo, non runtime BPM).",
+    "description": "I processi del modello (blueprint) con le unità che vi partecipano e i loro ruoli: navigazione del grafo, non esecuzione del lavoro.",
     "count": "{{count}} processi del modello",
     "count_one": "{{count}} processo del modello",
     "errorMessage": "Impossibile caricare i processi",

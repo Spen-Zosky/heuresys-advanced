@@ -58,4 +58,69 @@ test.describe("Processi del tenant — dati vivi", () => {
     await expect(page.getByTestId("grafo-attivita")).toHaveCount(scheda.activities.length);
     await expect(page.getByTestId("grafo-processo")).toHaveCount(1);
   });
+
+  test("ADR-0061, passo 1: ogni pagina dei processi dice quale oggetto conta e spiega i cinque sensi", async ({ page }) => {
+    for (const [url, oggetto, nome] of [
+      ["/tenant-processes", "configurazione", "Processo del tenant"],
+      ["/processes", "blueprint", "Processo del modello"],
+    ] as const) {
+      await page.goto(url);
+      const riga = page.getByTestId("oggetto-contato");
+      await expect(riga).toHaveAttribute("data-oggetto", oggetto);
+      await expect(page.getByTestId("oggetto-contato-nome")).toHaveText(nome);
+      await page.getByTestId("oggetto-contato-apri").click();
+      const finestra = page.getByTestId("sensi-del-processo");
+      await expect(finestra).toBeVisible();
+      await expect(finestra.locator("[data-testid^=sensi-oggetto-]")).toHaveCount(5);
+      await expect(page.getByTestId(`sensi-oggetto-${oggetto}`)).toHaveAttribute("data-qui", "si");
+      await expect(page.getByTestId("sensi-del-processo-livelli").locator("tbody tr")).toHaveCount(5);
+      await page.keyboard.press("Escape");
+    }
+  });
+  test("ADR-0061, passo 2: la scheda del processo ha la classificazione per faccette", async ({ page, request }) => {
+    const body = (await (await request.get("/api/v1/processes?level=1")).json()) as { items: Sintesi[] };
+    const p = body.items[0];
+    test.skip(!p, "RTL non ha processi attivi");
+    const f = await request.get(`/api/v1/tenant-processes/${p!.processId}/faccette`);
+    expect(f.ok()).toBeTruthy();
+    const faccette = (await f.json()) as { canEdit: boolean; items: Array<{ facet: string; status: string }> };
+    await page.goto(`/tenant-processes/${p!.processId}`);
+    await page.getByRole("tab", { name: /Classificazione/ }).click();
+    await expect(page.getByTestId("classificazione-riga")).toHaveCount(7);
+    await expect(page.getByTestId("classificazione-valore")).toHaveCount(faccette.items.length);
+    // Le proposte dell'agente si approvano anche in blocco: il pulsante c'è solo se ce ne sono.
+    const conProposte = faccette.canEdit && faccette.items.some((x) => x.status === "PROPOSTA");
+    await expect(page.getByTestId("classificazione-approva-tutte")).toHaveCount(conProposte ? 1 : 0);
+  });
+  test("ADR-0061, passo 3: il catalogo del modello dice quanti criteri di pubblicazione soddisfa ogni processo", async ({ page }) => {
+    await page.goto("/processes");
+    await expect(page.getByTestId("processes-page")).toBeVisible();
+    const righe = page.getByTestId("processes-row");
+    test.skip((await righe.count()) === 0, "nessun processo del modello in elenco");
+    const apri = page.getByTestId("pubblicabilita-apri").first();
+    await expect(apri).toBeVisible();
+    await apri.click();
+    await expect(page.getByTestId("pubblicabilita-finestra")).toBeVisible();
+    await expect(page.getByTestId("pubblicabilita-criterio")).toHaveCount(8);
+    await expect(page.getByTestId("pubblicabilita-criterio").nth(1)).toHaveAttribute("data-soddisfatto", "no");
+  });
+
+  test("ADR-0061, passo 4: le attività dicono la voce APQC e il tipo di corrispondenza", async ({ page, request }) => {
+    const body = (await (await request.get("/api/v1/processes?level=1")).json()) as { items: Sintesi[] };
+    let trovato: { pid: string; n: number } | null = null;
+    for (const x of body.items.slice(0, 25)) {
+      const sc = (await (await request.get(`/api/v1/processes/${x.processId}/scheda`)).json()) as { activities: { apqcCode: string | null }[] };
+      const n = sc.activities.filter((a) => a.apqcCode).length;
+      if (n > 0) { trovato = { pid: x.processId, n }; break; }
+    }
+    test.skip(!trovato, "nessuna attività con voce APQC");
+    await page.goto(`/tenant-processes/${trovato!.pid}`);
+    await page.getByRole("tab", { name: /attivit/i }).first().click();
+    await expect(page.getByTestId("apqc-cella")).toHaveCount(trovato!.n);
+    const modifica = page.getByTestId("apqc-modifica").first();
+    await expect(modifica).toBeVisible();
+    await modifica.click();
+    await expect(page.getByTestId("apqc-finestra")).toBeVisible();
+    await expect(page.getByTestId("apqc-scelta")).toHaveCount(4);
+  });
 });

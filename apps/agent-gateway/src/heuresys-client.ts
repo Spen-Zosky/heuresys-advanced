@@ -34,6 +34,15 @@ export type FetchLike = (
   headers?: { get(name: string): string | null };
 }>;
 
+/** Ciò che il gateway legge della specifica OpenAPI dell'API: i filtri delle letture e i corpi delle scritture. */
+interface OperazioneSpecifica {
+  parameters?: Array<{ in?: string; name?: string; schema?: { type?: string; format?: string } }>;
+  requestBody?: { content?: Record<string, { schema?: unknown }> };
+}
+type SpecificaApi = {
+  paths?: Record<string, Partial<Record<"get" | "post" | "put" | "patch" | "delete", OperazioneSpecifica>>>;
+};
+
 /** A-14: l'intestazione con cui l'API dichiara l'origine del dato (`DATA_ORIGIN_HEADER` in @heuresys/shared). */
 export const INTESTAZIONE_ORIGINE = "x-heuresys-data-origin";
 
@@ -143,7 +152,21 @@ export class HeuresysClient {
     return typeof dati === "object" && dati !== null ? this.origini.get(dati) : undefined;
   }
 
-  private filtriCache: Promise<Map<string, Record<string, string>>> | undefined;
+  private specificaCache: Promise<SpecificaApi | null> | undefined;
+
+  /** La specifica OpenAPI dell'API (generata dai contratti Zod), letta una volta sola. Non lancia. */
+  private specifica(): Promise<SpecificaApi | null> {
+    this.specificaCache ??= (async () => {
+      try {
+        const res = await this.fetchImpl(`${this.baseUrl}/openapi.json`, { method: "GET", headers: this.headers("GET") });
+        if (!res.ok) return null;
+        return (await res.json()) as SpecificaApi;
+      } catch {
+        return null;
+      }
+    })();
+    return this.specificaCache;
+  }
 
   /**
    * I filtri di query di ogni lettura, ricavati dalla specifica OpenAPI dell'API (generata dai
@@ -151,28 +174,42 @@ export class HeuresysClient {
    * Il modello non può indovinare i nomi dei filtri: li legge da qui (hrx_concept_describe).
    * Non lancia: senza specifica la descrizione resta senza filtri, come prima.
    */
-  filtriDelleLetture(): Promise<Map<string, Record<string, string>>> {
-    this.filtriCache ??= (async () => {
-      const mappa = new Map<string, Record<string, string>>();
-      try {
-        const res = await this.fetchImpl(`${this.baseUrl}/openapi.json`, { method: "GET", headers: this.headers("GET") });
-        if (!res.ok) return mappa;
-        const spec = (await res.json()) as {
-          paths?: Record<string, { get?: { parameters?: Array<{ in?: string; name?: string; schema?: { type?: string; format?: string } }> } }>;
-        };
-        for (const [percorso, voce] of Object.entries(spec.paths ?? {})) {
-          const filtri: Record<string, string> = {};
-          for (const prm of voce.get?.parameters ?? []) {
-            if (prm.in === "query" && prm.name) filtri[prm.name] = prm.schema?.format ?? prm.schema?.type ?? "string";
-          }
-          if (Object.keys(filtri).length > 0) mappa.set(percorso, filtri);
-        }
-      } catch {
-        /* nessuna specifica: nessun filtro dichiarato */
+  async filtriDelleLetture(): Promise<Map<string, Record<string, string>>> {
+    const mappa = new Map<string, Record<string, string>>();
+    const spec = await this.specifica();
+    for (const [percorso, voce] of Object.entries(spec?.paths ?? {})) {
+      const filtri: Record<string, string> = {};
+      for (const prm of voce.get?.parameters ?? []) {
+        if (prm.in === "query" && prm.name) filtri[prm.name] = prm.schema?.format ?? prm.schema?.type ?? "string";
       }
-      return mappa;
-    })();
-    return this.filtriCache;
+      if (Object.keys(filtri).length > 0) mappa.set(percorso, filtri);
+    }
+    return mappa;
+  }
+
+  /**
+   * ADR-0061 passo 10, difetto del 2026-11-22: il corpo di ogni scrittura, dal contratto dell'API.
+   * Chiave `"PUT /v1/tenant-processes/{id}/faccette/{facet}"`, valore lo schema JSON del corpo.
+   * Senza, il modello indovina la forma (`code` invece di `codes` + `criterion`) e la scrittura
+   * approvata dalla persona torna 400. Non lancia: senza specifica non c'è nessun corpo dichiarato.
+   */
+  async corpiDelleScritture(): Promise<Map<string, unknown>> {
+    const mappa = new Map<string, unknown>();
+    const spec = await this.specifica();
+    for (const [percorso, voce] of Object.entries(spec?.paths ?? {})) {
+      for (const metodo of ["post", "put", "patch"] as const) {
+        const schema = voce[metodo]?.requestBody?.content?.["application/json"]?.schema;
+        if (schema !== undefined) mappa.set(`${metodo.toUpperCase()} ${percorso}`, schema);
+      }
+    }
+    return mappa;
+  }
+
+  private readonly scrittureFallite: string[] = [];
+
+  /** Gli esiti delle scritture non salvate dall'ultima consultazione, già in parole per la persona. */
+  consumaScrittureFallite(): string[] {
+    return this.scrittureFallite.splice(0);
   }
 
   async call<T = unknown>(method: string, path: string, body?: unknown): Promise<T> {
@@ -197,9 +234,24 @@ export class HeuresysClient {
       return letturaNegata() as T;
     }
     if (!res.ok) {
-      throw new Error(`${method} ${path} -> ${res.status}`);
+      // Il motivo dell'API (per esempio il campo del corpo che non va) torna al modello: senza,
+      // vede solo «400» e non sa né correggere né spiegare alla persona che cosa non è andato.
+      let testo = "";
+      try {
+        testo = await res.text();
+      } catch {
+        /* nessun corpo leggibile: resta lo stato */
+      }
+      const motivo = testo ? `: ${testo.slice(0, 800)}` : "";
+      if (lettura) throw new Error(`${method} ${path} -> ${res.status}${motivo}`);
+      const perLaPersona = messaggioScritturaNonSalvata(res.status, codiceErrore(testo));
+      // Difetto del 2026-11-22: dopo un consenso e un rifiuto l'assistente può chiudere il giro
+      // senza dire niente. Il gateway tiene l'esito e, se il modello tace, lo dice lui (sdk-agent).
+      this.scrittureFallite.push(perLaPersona);
+      throw new Error(`${method} ${path} -> ${res.status} (scrittura NON eseguita). Di' alla persona: «${perLaPersona}»${motivo}`);
     }
     if (lettura) this.esiti?.riuscita();
+    else this.scrittureFallite.length = 0; // una scrittura riuscita dopo un rifiuto lo supera
     const grezzi = (await res.json()) as unknown;
     // A-14: l'origine del dato del modulo che ha risposto (nativo, importato, ibrido, misto),
     // legata alla risposta stessa: chi la passa all'agente la ritrova senza indovinarla.
@@ -231,6 +283,37 @@ export class HeuresysClient {
  * Restituisce la sessione da dare al client (senza `cookieRefresh`: niente rinnovo), oppure
  * l'esito dell'API quando il gettone è rifiutato.
  */
+/** Il codice d'errore dell'API (`{ error: { code } }`), se il corpo lo porta. */
+function codiceErrore(testo: string): string | undefined {
+  try {
+    const c = (JSON.parse(testo) as { error?: { code?: unknown } }).error?.code;
+    return typeof c === "string" ? c : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Che cosa dire alla persona quando una scrittura che ha approvato non è salvata. Difetti del
+ * 2026-11-22: «ti manca il permesso» a chi il potere lo ha per mandato, e «puoi farla dalla
+ * pagina» a chi non lo ha affatto. ADR-0050 D6: l'assistente scrive senza i mandati della persona,
+ * e l'API distingue i due casi (`AGENT_MANDATE_ONLY` contro `FORBIDDEN`/`PERMISSION_DENIED`).
+ */
+export function messaggioScritturaNonSalvata(stato: number, codice: string | undefined): string {
+  if (codice === "AGENT_MANDATE_ONLY") {
+    return "La modifica non è stata salvata. Hai questo potere grazie al tuo incarico, e l'assistente non può usarlo per tuo conto: puoi farla tu dalla pagina.";
+  }
+  if (stato === 403) {
+    return "La modifica non è stata salvata: il tuo profilo non permette questa modifica. Può farla chi ha la responsabilità di questi dati.";
+  }
+  if (stato === 400 || stato === 422) {
+    return "La modifica non è stata salvata: i dati preparati non sono stati accettati.";
+  }
+  if (stato === 404) return "La modifica non è stata salvata: l'elemento da modificare non è stato trovato.";
+  if (stato === 409) return "La modifica non è stata salvata: nel frattempo i dati sono cambiati.";
+  return "La modifica non è stata salvata per un errore del sistema.";
+}
+
 export interface RichiestaGettone {
   agentCode: string;
   task: string;

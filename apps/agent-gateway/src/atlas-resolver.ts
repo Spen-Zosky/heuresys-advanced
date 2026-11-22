@@ -77,11 +77,31 @@ interface OperationsFile {
 /** Il percorso di default, relativo alla radice del repo. */
 export const DEFAULT_OPERATIONS_PATH = "docs/kb/atlas/agent-operations.json";
 
+/**
+ * ADR-0061 passo 10, difetto del 2026-11-22: lo schema del corpo di ogni scrittura, generato dai
+ * contratti Zod (`apps/api/scripts/genera-corpi-scritture-agente.mts`). Sta accanto al catalogo e
+ * non dipende dalla specifica OpenAPI dell'API, che in produzione è spenta di proposito.
+ */
+export const DEFAULT_BODIES_PATH = "docs/kb/atlas/agent-write-bodies.json";
+
+type CorpiDelleScritture = Record<string, Record<string, { schema: string; body: unknown }>>;
+
+function leggiCorpi(path: string): CorpiDelleScritture {
+  try {
+    const p = isAbsolute(path) ? path : resolvePath(repoRoot(), path);
+    return (JSON.parse(readFileSync(p, "utf8")) as { corpi?: CorpiDelleScritture }).corpi ?? {};
+  } catch {
+    return {};
+  }
+}
+
 export class AtlasOperationResolver implements OperationResolver {
   private readonly concepts: Record<string, ConceptEntry>;
+  private readonly corpi: CorpiDelleScritture;
 
-  private constructor(concepts: Record<string, ConceptEntry>) {
+  private constructor(concepts: Record<string, ConceptEntry>, corpi: CorpiDelleScritture = {}) {
     this.concepts = concepts;
+    this.corpi = corpi;
   }
 
   /**
@@ -90,12 +110,12 @@ export class AtlasOperationResolver implements OperationResolver {
    * spento non è più sicuro di uno che nega. Il chiamante può distinguere i due casi con
    * `isEmpty()`, e deve dirlo nei log invece di tacerlo.
    */
-  static load(path: string = DEFAULT_OPERATIONS_PATH): AtlasOperationResolver {
+  static load(path: string = DEFAULT_OPERATIONS_PATH, bodiesPath: string = DEFAULT_BODIES_PATH): AtlasOperationResolver {
     try {
       const p = isAbsolute(path) ? path : resolvePath(repoRoot(), path);
       const raw = readFileSync(p, "utf8");
       const parsed = JSON.parse(raw) as OperationsFile;
-      return new AtlasOperationResolver(parsed.concepts ?? {});
+      return new AtlasOperationResolver(parsed.concepts ?? {}, leggiCorpi(bodiesPath));
     } catch {
       return new AtlasOperationResolver({});
     }
@@ -129,6 +149,11 @@ export class AtlasOperationResolver implements OperationResolver {
   baseOf(conceptId: string): string {
     const b = this.concepts[conceptId]?.base;
     return b && b.startsWith("/") ? b.replace(/\/$/, "") || "/" : `/${conceptId}`;
+  }
+
+  /** Lo schema JSON del corpo di una scrittura dichiarata, o `undefined` se non è dichiarato. */
+  bodyOf(conceptId: string, operationId: string): unknown {
+    return this.corpi[conceptId]?.[operationId]?.body;
   }
 
   /** Il metodo, o `undefined` se la coppia non esiste. L'ignoto non è una lettura. */

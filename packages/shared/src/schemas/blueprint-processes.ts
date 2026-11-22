@@ -60,3 +60,36 @@ export const UpdateBlueprintProcessBodySchema = z.object({
 export type UpdateBlueprintProcessBody = z.infer<typeof UpdateBlueprintProcessBodySchema>;
 
 export const BlueprintProcessIdParamSchema = z.object({ id: z.uuid() });
+
+// ---------------------------------------------------------------------------------------------
+// ADR-0061 D10, passo 3: il controllo di pubblicazione dei processi del modello. Sola lettura: per
+// ogni processo gli otto criteri, soddisfatti o no, e che cosa manca (codici stabili, tradotti nella
+// pagina). È un rapporto, non un cancello (raccomandazione Q3 accettata da Enzo il 2026-11-22).
+// ---------------------------------------------------------------------------------------------
+export const PublishabilityQuerySchema = z.object({ variantVersionId: z.uuid() });
+export type PublishabilityQuery = z.infer<typeof PublishabilityQuerySchema>;
+
+export const PublishabilityCriterionSchema = z.object({
+  numero: z.number().int().min(1).max(8),
+  soddisfatto: z.boolean(),
+  mancanze: z.array(z.string()),
+});
+export type PublishabilityCriterion = z.infer<typeof PublishabilityCriterionSchema>;
+
+export const ProcessPublishabilitySchema = z.object({
+  processId: z.uuid(),
+  code: z.string(),
+  name: z.string(),
+  soddisfatti: z.number().int(),
+  pubblicabile: z.boolean(),
+  criteri: z.array(PublishabilityCriterionSchema),
+});
+export type ProcessPublishability = z.infer<typeof ProcessPublishabilitySchema>;
+
+export const PublishabilityResponseSchema = z.object({
+  variantVersionId: z.uuid(),
+  total: z.number().int(),
+  pubblicabili: z.number().int(),
+  items: z.array(ProcessPublishabilitySchema),
+});
+export type PublishabilityResponse = z.infer<typeof PublishabilityResponseSchema>;

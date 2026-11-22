@@ -1961,6 +1961,11 @@
      "method": "GET",
      "path": "/:id/scheda",
      "permission": "organization_unit_processes:read"
+    },
+    "get_matrice": {
+     "method": "GET",
+     "path": "/matrice",
+     "permission": "organization_unit_processes:read"
     }
    },
    "solaLettura": true

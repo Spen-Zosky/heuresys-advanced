@@ -35,6 +35,11 @@ set -euo pipefail
 STATO_DIR="${HOME}/.local/state/heuresys-advanced"
 BLOCCO_FILE="${BLOCCO_FILE:-$STATO_DIR/rilascio-armato}"
 ULTIMO_FILE="${BLOCCO_FILE}.pubblicato"
+# Traccia d'autorizzazione: la scrive `arma`, la legge `autorizza` (deploy-watch). E' un file a parte
+# perche' `togli` serve per unire su main durante il rilascio e non deve cancellare la prova che
+# quello sha e' stato armato da rilascia.sh (22/11: la prova dal vivo della #387 e' fallita cosi').
+# Sparisce solo quando lo sha e' in produzione (riconcilia) o dopo BLOCCO_SCADENZA.
+AUTORIZZA_FILE="${BLOCCO_FILE}.autorizzato"
 SCADENZA="${BLOCCO_SCADENZA:-7200}"
 REPO="${BLOCCO_REPO:-Spen-Zosky/heuresys-advanced}"
 GH="${BLOCCO_GH:-gh}"
@@ -79,6 +84,7 @@ case "$cmd" in
     sha="${1:?arma vuole lo sha armato}"
     mkdir -p "$(dirname "$BLOCCO_FILE")"
     printf '%s %s\n' "$sha" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$BLOCCO_FILE"
+    cp -f "$BLOCCO_FILE" "$AUTORIZZA_FILE"
     say "blocco scritto: rilascio armato su ${sha:0:8}, main fermo fino a DEPLOYATO (scade fra ${SCADENZA}s)"
     "$0" riconcilia
     ;;
@@ -93,13 +99,23 @@ case "$cmd" in
     attivo
     ;;
   autorizza)
-    # esce 0 se il blocco c'e', non e' scaduto e nomina esattamente questo sha: e' la traccia
-    # che rilascia.sh ha armato proprio quel commit (usata da deploy-watch quando main e' avanzata)
+    # esce 0 se la traccia d'autorizzazione c'e', non e' scaduta e nomina esattamente questo sha:
+    # rilascia.sh ha armato proprio quel commit (usata da deploy-watch quando main e' avanzata).
+    # Non dipende dal blocco: `togli` lo cancella per far unire le PR, la traccia resta.
     sha="${1:?autorizza vuole uno sha}"
-    attivo && [ "$(sha_bloccato)" = "$sha" ]
+    [ -f "$AUTORIZZA_FILE" ] \
+      && [ $(( $(date +%s) - $(stat -c %Y "$AUTORIZZA_FILE") )) -lt "$SCADENZA" ] \
+      && [ "$(awk 'NR==1 {print $1}' "$AUTORIZZA_FILE")" = "$sha" ]
     ;;
   riconcilia)
     in_prod="${1:-}"
+    if [ -f "$AUTORIZZA_FILE" ]; then
+      if [ -n "$in_prod" ] && [ "$(awk 'NR==1 {print $1}' "$AUTORIZZA_FILE")" = "$in_prod" ]; then
+        rm -f "$AUTORIZZA_FILE"
+      elif [ $(( $(date +%s) - $(stat -c %Y "$AUTORIZZA_FILE") )) -ge "$SCADENZA" ]; then
+        rm -f "$AUTORIZZA_FILE"
+      fi
+    fi
     if [ -f "$BLOCCO_FILE" ]; then
       if [ -n "$in_prod" ] && [ "$(sha_bloccato)" = "$in_prod" ]; then
         rm -f "$BLOCCO_FILE"; say "blocco tolto: ${in_prod:0:8} e' in produzione (DEPLOYATO)"

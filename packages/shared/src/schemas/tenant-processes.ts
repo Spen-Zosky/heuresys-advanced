@@ -52,6 +52,15 @@ export const TenantProcessListResponseSchema = z.object({
 });
 export type TenantProcessListResponse = z.infer<typeof TenantProcessListResponseSchema>;
 
+export const StepApqcKindSchema = z.enum(["ESATTO", "PIU_AMPIO", "PIU_RISTRETTO", "PARZIALE"]);
+export const StepApqcMatchSchema = z.object({
+  kind: StepApqcKindSchema,
+  criterion: z.string(),
+  source: z.enum(["PERSONA", "AGENTE"]),
+  status: z.enum(["PROPOSTA", "APPROVATA"]),
+});
+export type StepApqcMatch = z.infer<typeof StepApqcMatchSchema>;
+
 export const TenantProcessActivitySchema = z.object({
   activityId: z.uuid(),
   /** il processo (o sottoprocesso) a cui l'attività appartiene */
@@ -71,6 +80,10 @@ export const TenantProcessActivitySchema = z.object({
   workNature: z.string().nullable(),
   deliveryModel: z.string().nullable(),
   typicalHoursPerCycle: z.number().nullable(),
+  /** ADR-0061 D7: il codice APQC da cui l'attività viene (metadati del riempimento), se c'è */
+  apqcCode: z.string().nullable(),
+  /** ADR-0061 D7: il tipo di corrispondenza dichiarato; nullo = da dichiarare */
+  apqcMatch: StepApqcMatchSchema.nullable(),
 });
 export type TenantProcessActivity = z.infer<typeof TenantProcessActivitySchema>;
 
@@ -179,3 +192,68 @@ export const TenantProcessMatrixResponseSchema = z.object({
   cells: z.array(z.object({ processId: z.uuid(), unitId: z.uuid(), role: TenantProcessUnitRoleSchema })),
 });
 export type TenantProcessMatrixResponse = z.infer<typeof TenantProcessMatrixResponseSchema>;
+
+// ---------------------------------------------------------------------------------------------
+// ADR-0061 D4, passo 2 (000507): le faccette di un processo del tenant. Vocabolario chiuso di
+// piattaforma; ogni valore assegnato porta il criterio, la fonte (persona o agente) e lo stato
+// (proposta dell'agente o approvata da chi ha il potere).
+// ---------------------------------------------------------------------------------------------
+export const ProcessFacetSchema = z.enum(["FINALITA", "BENEFICIARIO", "PERIMETRO", "MODALITA", "ATTIVAZIONE", "TECNOLOGIA", "STANDARDIZZAZIONE"]);
+export type ProcessFacet = z.infer<typeof ProcessFacetSchema>;
+export const ProcessFacetSourceSchema = z.enum(["PERSONA", "AGENTE"]);
+export const ProcessFacetStatusSchema = z.enum(["PROPOSTA", "APPROVATA"]);
+
+export const ProcessFacetValueSchema = z.object({
+  facet: ProcessFacetSchema,
+  code: z.string(),
+  ordinal: z.number().int(),
+  label: z.string(),
+  description: z.string(),
+});
+export type ProcessFacetValue = z.infer<typeof ProcessFacetValueSchema>;
+
+export const ProcessFacetVocabularyResponseSchema = z.object({ items: z.array(ProcessFacetValueSchema) });
+export type ProcessFacetVocabularyResponse = z.infer<typeof ProcessFacetVocabularyResponseSchema>;
+
+export const TenantProcessFacetSchema = z.object({
+  facet: ProcessFacetSchema,
+  code: z.string(),
+  label: z.string(),
+  criterion: z.string(),
+  source: ProcessFacetSourceSchema,
+  status: ProcessFacetStatusSchema,
+  updatedAt: z.string(),
+});
+export type TenantProcessFacet = z.infer<typeof TenantProcessFacetSchema>;
+
+export const TenantProcessFacetsResponseSchema = z.object({
+  processId: z.uuid(),
+  canEdit: z.boolean(),
+  items: z.array(TenantProcessFacetSchema),
+});
+export type TenantProcessFacetsResponse = z.infer<typeof TenantProcessFacetsResponseSchema>;
+
+export const TenantProcessFacetParamSchema = z.object({ id: z.uuid(), facet: ProcessFacetSchema });
+export type TenantProcessFacetParam = z.infer<typeof TenantProcessFacetParamSchema>;
+
+/** Sostituisce i valori di una faccetta: la lista vuota la toglie. Il criterio è obbligatorio se ci sono valori. */
+export const PutTenantProcessFacetBodySchema = z.object({
+  codes: z.array(z.string().min(1).max(32)).max(10),
+  criterion: z.string().trim().max(2000).default(""),
+}).refine((b) => b.codes.length === 0 || b.criterion.length > 0, { message: "Il criterio è obbligatorio", path: ["criterion"] });
+export type PutTenantProcessFacetBody = z.infer<typeof PutTenantProcessFacetBodySchema>;
+
+// ADR-0061 D7, passo 4 (000509): dichiarare il tipo di corrispondenza di un'attività con APQC.
+export const StepApqcParamSchema = z.object({ id: z.uuid(), stepId: z.uuid() });
+export type StepApqcParam = z.infer<typeof StepApqcParamSchema>;
+export const PutStepApqcBodySchema = z.object({
+  kind: StepApqcKindSchema,
+  criterion: z.string().trim().min(1).max(2000),
+});
+export type PutStepApqcBody = z.infer<typeof PutStepApqcBodySchema>;
+export const PutStepApqcResponseSchema = z.object({
+  activityId: z.uuid(),
+  apqcCode: z.string(),
+  apqcMatch: StepApqcMatchSchema,
+});
+export type PutStepApqcResponse = z.infer<typeof PutStepApqcResponseSchema>;

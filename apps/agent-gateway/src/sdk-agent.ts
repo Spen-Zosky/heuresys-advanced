@@ -12,7 +12,7 @@
  * write-gate.ts (SDK-free, unit-tested); here it is only bridged to the SDK.
  */
 import { randomUUID } from "node:crypto";
-import { query } from "@anthropic-ai/claude-agent-sdk";
+import { query, type SDKMessage } from "@anthropic-ai/claude-agent-sdk";
 import { buildHeuresysMcp } from "./mcp-tools.js";
 import { ISTRUZIONI_ASSISTENTE } from "./istruzioni.js";
 
@@ -173,8 +173,34 @@ export async function* runHrAgent(
   // una conversazione interrotta e' esattamente quella su cui si vuole sapere quante persone
   // erano state lette. Senza il `finally` il freno sarebbe cieco proprio sull'abbandono.
   try {
-    for await (const event of iterator) yield event; // stream to the webapp
+    for await (const event of iterator) {
+      // Difetto del 2026-11-22: dopo un consenso e una scrittura rifiutata il modello poteva
+      // chiudere il giro senza una parola. Se tace, l'esito lo dice il gateway, prima della fine.
+      if (haTesto(event)) client.consumaScrittureFallite();
+      if (isRisultato(event)) {
+        const taciute = client.consumaScrittureFallite();
+        if (taciute.length > 0) yield esitoDelGateway(taciute);
+      }
+      yield event; // stream to the webapp
+    }
   } finally {
     await registraChiusuraConversazione(audit, principal, contatore);
   }
+}
+
+/** Vero se l'evento è un messaggio dell'assistente con almeno un blocco di testo non vuoto. */
+function haTesto(evento: unknown): boolean {
+  const e = evento as { type?: unknown; message?: { content?: unknown } } | null;
+  return !!e && e.type === "assistant" && Array.isArray(e.message?.content) &&
+    (e.message.content as Array<{ type?: unknown; text?: unknown }>).some((b) => b?.type === "text" && typeof b.text === "string" && b.text.trim() !== "");
+}
+
+function isRisultato(evento: unknown): boolean {
+  return !!evento && typeof evento === "object" && (evento as { type?: unknown }).type === "result";
+}
+
+/** Il messaggio con cui il gateway dice l'esito che il modello ha taciuto, nella forma di un evento dell'assistente. */
+export function esitoDelGateway(messaggi: readonly string[]): SDKMessage {
+  const testo = [...new Set(messaggi)].join("\n\n");
+  return { type: "assistant", message: { role: "assistant", content: [{ type: "text", text: testo }] }, parent_tool_use_id: null, session_id: "" } as unknown as SDKMessage;
 }

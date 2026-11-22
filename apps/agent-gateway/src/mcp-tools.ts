@@ -152,7 +152,8 @@ export function buildHeuresysMcp(
         tool(
           "hrx_concept_describe",
           "Descrive un concetto: l'elenco CHIUSO delle sue operazioni, con metodo, percorso " +
-            "e permesso richiesto. Cio' che non compare qui non e' invocabile.",
+            "e permesso richiesto, i filtri di una lettura (query) e lo schema del corpo di una scrittura (body). " +
+            "Cio' che non compare qui non e' invocabile.",
           { conceptId: z.string() },
           async (a: { conceptId: string }) => {
             if (Object.prototype.hasOwnProperty.call(esclusi, a.conceptId)) {
@@ -168,13 +169,21 @@ export function buildHeuresysMcp(
             // I filtri di query di ogni lettura (dal contratto dell'API): senza, il modello non sa
             // che esiste, per esempio, `userId` e scarica 981 righe invece di chiedere quelle giuste.
             const specifica = await client.filtriDelleLetture();
+            // ADR-0061 passo 10 (difetto del 2026-11-22): il corpo di ogni scrittura, dal contratto.
+            const corpi = await client.corpiDelleScritture();
             const radice = operations.baseOf(a.conceptId);
             const conFiltri = Object.fromEntries(
               Object.entries(ops).map(([id, op]) => {
                 const percorso = op.path === "/" ? "" : op.path.replace(/:([A-Za-z0-9_]+)/g, "{$1}");
                 const base = radice === "/" ? "" : radice;
-                const q = op.method.toUpperCase() === "GET" ? specifica.get(`/v1${base}${percorso}`) : undefined;
-                return [id, q ? { ...op, query: q } : op];
+                const metodo = op.method.toUpperCase();
+                const q = metodo === "GET" ? specifica.get(`/v1${base}${percorso}`) : undefined;
+                // Prima il corpo generato dai contratti Zod (agent-write-bodies.json), che non
+                // dipende dalla specifica OpenAPI, spenta in produzione; la specifica resta ripiego.
+                const corpo = metodo === "GET"
+                  ? undefined
+                  : (operations.bodyOf(a.conceptId, id) ?? corpi.get(`${metodo} /v1${base}${percorso}`));
+                return [id, { ...op, ...(q ? { query: q } : {}), ...(corpo !== undefined ? { body: corpo } : {}) }];
               }),
             );
             return ok({ conceptId: a.conceptId, known: true, operations: conFiltri });
@@ -185,7 +194,10 @@ export function buildHeuresysMcp(
           "Esegue un'operazione dichiarata da hrx_concept_describe. Il metodo e il percorso " +
             "li decide la mappa, non questo input: dichiararsi in lettura non cambia cio' che " +
             "l'operazione e'. params riempie i segnaposto del percorso; query va in querystring; body e' il " +
-            "corpo di una scrittura dichiarata, che passa sempre dall'approvazione della persona.",
+            "corpo di una scrittura dichiarata e segue ESATTAMENTE lo schema `body` di hrx_concept_describe; " +
+            "la scrittura passa sempre dall'approvazione della persona. Se dopo l'approvazione la chiamata " +
+            "fallisce, la scrittura NON e' avvenuta: dillo alla persona con chiarezza e con il motivo, " +
+            "prima di proporre altro.",
           {
             conceptId: z.string(),
             operationId: z.string(),

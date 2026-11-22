@@ -566,6 +566,14 @@ if [ -f "$CG" ] && [ -f "$DW" ]; then
   out="$(CI_GATE_FIXTURE="$F/red.json" dw)"; rc=$?
   { [ "$rc" = 1 ] && <<<"$out" grep -q 'NON VERDE'; } \
     && ok "deploy-watch: main avanzata + traccia, ma CI rossa sullo sha armato => non deploya" || fail "deploy-watch punta avanzata CI rossa ($rc: $out)"
+  # 22/11: `togli` (serve per unire su main durante il rilascio) non deve cancellare la prova dell'armo
+  BLOCCO_FILE="$W/.blocco-prova" BLOCCO_GH=true bash "$W/scripts/blocco-rilascio.sh" togli "per unire" >/dev/null 2>&1 || true
+  out="$(CI_GATE_FIXTURE="$F/green.json" dw)"; rc=$?
+  { [ "$rc" = 0 ] && <<<"$out" grep -q 'deploy dello sha armato'; } \
+    && ok "deploy-watch: blocco tolto per unire, traccia d'autorizzazione intatta => deploya LO SHA ARMATO" || fail "deploy-watch dopo togli ($rc: $out)"
+  BLOCCO_FILE="$W/.blocco-prova" BLOCCO_GH=true bash "$W/scripts/blocco-rilascio.sh" riconcilia "$SHA2" >/dev/null 2>&1 || true
+  BLOCCO_FILE="$W/.blocco-prova" BLOCCO_GH=true bash "$W/scripts/blocco-rilascio.sh" autorizza "$SHA2" \
+    && fail "autorizza dopo DEPLOYATO dovrebbe uscire 1" || ok "traccia d'autorizzazione tolta quando lo sha e' in produzione"
   BLOCCO_FILE="$W/.blocco-prova" BLOCCO_GH=true bash "$W/scripts/blocco-rilascio.sh" togli prova >/dev/null 2>&1 || true
   git -C "$W" push -qf origin "$SHA1:refs/heads/prod"        # ripristina lo stato che i test seguenti si aspettano
 

@@ -1,18 +1,18 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `bf0c89c3` (2026-11-22T05:41:23+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `77414294` (2026-11-22T07:33:46+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
 | Layer | Valore |
 |---|---|
 | Moduli API | 125 |
-| Route API | 751 |
+| Route API | 755 |
 | Pagine web | 145 |
 | Schemi shared | 138 |
 | Tabelle DB | 432 (vuote: 41) |
 | Viste / matview | 91 / 0 |
-| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 337 |
+| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 341 |
 
 ## Moduli API
 
@@ -34,7 +34,7 @@
 | blueprint-activations | /v1/blueprint-activations | 5 | 3 | 4 | 1 |
 | blueprint-families | /v1/blueprint-families | 5 | 4 | 4 | 1 |
 | blueprint-overrides | /v1/blueprint-overrides | 4 | 3 | 3 | 1 |
-| blueprint-processes | /v1/blueprint-processes | 5 | 4 | 3 | 1 |
+| blueprint-processes | /v1/blueprint-processes | 6 | 4 | 6 | 1 |
 | blueprint-variants | /v1/blueprint-variants | 5 | 4 | 3 | 1 |
 | branches | /v1/branches | 2 | 2 | 1 | 2 |
 | calibration-sessions | /v1/calibration-sessions | 3 | 1 | 4 | 1 |
@@ -126,7 +126,7 @@
 | tenant-consolidation | /v1/consolidation-runs, /v1/consolidation-vocabulary, /v1/tenant-consolidations | 28 | 3 | 65 | 2 |
 | tenant-import-runs | /v1/tenant-import-runs | 5 | 2 | 15 | 1 |
 | tenant-materialization | /v1/tenant-materialization | 2 | 1 | 18 | 1 |
-| tenant-processes | /v1/tenant-processes | 2 | 2 | 3 | 1 |
+| tenant-processes | /v1/tenant-processes | 5 | 2 | 5 | 1 |
 | tenants | /v1/tenants | 8 | 4 | 10 | 1 |
 | time-off | /v1/time-off | 3 | 1 | 7 | 2 |
 | training-initiatives | /v1/training-initiatives | 4 | 4 | 3 | 1 |

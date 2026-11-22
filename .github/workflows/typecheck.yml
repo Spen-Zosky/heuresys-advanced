@@ -48,7 +48,7 @@ jobs:
     # checkout reaches the runner. Plus: skip Dependabot defer-major PRs (single
     # runner churn — DEBT_REGISTER D-09). Push events have no PR context → run.
     if: ${{ !cancelled() && needs.tree.outputs.skip != 'true' && ((github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && !contains(github.event.pull_request.labels.*.name, 'defer-major')) }}
-    runs-on: [self-hosted, off-prod]
+    runs-on: [self-hosted, leggero]
     timeout-minutes: 10
     steps:
       - name: Checkout

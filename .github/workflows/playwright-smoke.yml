@@ -14,6 +14,7 @@ on:
       - "packages/shared/**"
       - "playwright.config.ts"
       - "tests/**"
+      - "!apps/api/src/lib/origine/moduli.generated.ts"
       - ".github/workflows/playwright-smoke.yml"
   pull_request:
     branches: [main]
@@ -22,6 +23,8 @@ on:
     paths-ignore:
       - "docs/**"
       - "**/*.md"
+      # file derivato dall'atlante, rigenerato dal timer (vedi test-integration.yml)
+      - "apps/api/src/lib/origine/moduli.generated.ts"
   workflow_dispatch: {}
 
 permissions:

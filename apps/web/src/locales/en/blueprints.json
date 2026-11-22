@@ -443,7 +443,7 @@
       "scheda": "Process × unit matrix",
       "elenco": "List",
       "spiega": "R = responsible (filled), E = executing (grey), C = consulted (dashed), I = informed (light). The E/C column counts executing and consulted units. Hover a column header for the unit's full name; click a process code to open its sheet.",
-      "numeri": "{{processi}} processes · {{unita}} units involved · {{celle}} participations",
+      "numeri": "{{processi}} processes and {{sottoprocessi}} subprocesses · {{unita}} units involved · {{celle}} participations",
       "processo": "Process",
       "eCTitolo": "Executing units / consulted units",
       "piede": "processes followed (R + E)",

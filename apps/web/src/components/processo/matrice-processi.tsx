@@ -52,7 +52,7 @@ export function MatriceProcessi({ tenantId }: { tenantId?: string }) {
   return (
     <section data-testid="matrice-processi" className="space-y-2">
       <p className="text-xs text-muted-foreground">{m("spiega")}</p>
-      <p className="text-xs text-muted-foreground">{m("numeri", { processi: fmt.numero(d.processes.length), unita: fmt.numero(d.units.length), celle: fmt.numero(d.cells.length) })}</p>
+      <p className="text-xs text-muted-foreground">{m("numeri", { processi: fmt.numero(d.processes.filter((p) => p.level !== 2).length), sottoprocessi: fmt.numero(d.processes.filter((p) => p.level === 2).length), unita: fmt.numero(d.units.length), celle: fmt.numero(d.cells.length) })}</p>
       <div className="max-h-[70vh] overflow-auto rounded-lg border border-border bg-card">
         <table className="border-collapse text-[11px] text-foreground">
           <caption className="sr-only">{m("titolo")}</caption>

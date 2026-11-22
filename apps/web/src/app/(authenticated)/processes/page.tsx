@@ -9,10 +9,12 @@ import { apiFetch } from "@/lib/api/fetch";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { OggettoContato } from "@/components/processo/oggetto-contato";
+import { CellaPubblicabilita, usePubblicabilita } from "@/components/processo/pubblicabilita";
+import type { ProcessPublishability } from "@heuresys/shared";
 import { StatusPill } from "@/components/status-pill";
 import { useVersioneAttiva } from "@/lib/versione-attiva";
 
-function buildColumns(t: TFunction): DataColumn<BlueprintProcess>[] {
+function buildColumns(t: TFunction, pubb: Map<string, ProcessPublishability>): DataColumn<BlueprintProcess>[] {
   return [
     { header: t("processes.columns.ordinal"), cell: (p) => <span className="text-xs text-muted-foreground">{p.ordinal}</span> },
     // Repertorio interfacce (B3): il nome del processo, non il suo codice (R2, R4); il tipo in parole,
@@ -22,6 +24,8 @@ function buildColumns(t: TFunction): DataColumn<BlueprintProcess>[] {
       header: t("processes.columns.optional"),
       cell: (p) => <StatusPill tone={p.isOptional ? "warning" : "neutral"}>{p.isOptional ? t("processes.optionalYes") : t("processes.optionalNo")}</StatusPill>,
     },
+    // ADR-0061 D10, passo 3: quanti degli otto criteri di pubblicazione il processo soddisfa.
+    { header: t("processes.pubblicabilita.colonna"), cell: (p) => <CellaPubblicabilita voce={pubb.get(p.blueprintProcessId)} /> },
   ];
 }
 
@@ -46,7 +50,8 @@ export default function ProcessesPage() {
     enabled: !attive.isLoading,
   });
 
-  const columns = useMemo(() => buildColumns(t), [t]);
+  const pubb = usePubblicabilita(processes.rows.map((p) => p.variantVersionId ?? "").filter(Boolean));
+  const columns = useMemo(() => buildColumns(t, pubb), [t, pubb]);
 
   return (
     <DataTablePanel<BlueprintProcess>

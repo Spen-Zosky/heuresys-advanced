@@ -2573,12 +2573,12 @@
     "put_by_id_attivita_by_stepid_apqc": {
      "method": "PUT",
      "path": "/:id/attivita/:stepId/apqc",
-     "permission": "bpm_process:update"
+     "permission": null
     },
     "put_by_id_faccette_by_facet": {
      "method": "PUT",
      "path": "/:id/faccette/:facet",
-     "permission": "bpm_process:update"
+     "permission": null
     }
    },
    "solaLettura": false

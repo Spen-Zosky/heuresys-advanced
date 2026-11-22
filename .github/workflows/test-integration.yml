@@ -55,7 +55,15 @@ jobs:
     uses: ./.github/workflows/tree-gia-verificato.yml
     with:
       workflow-file: test-integration.yml
-  test-integration:
+  # 2026-11-22: la suite si divide in due metà (vitest --shard) che girano insieme se ci sono due runner
+  # pesanti liberi; ognuna ha il suo database usa-e-getta. Il job `test-integration` in fondo
+  # mantiene il nome che i controlli richiesti e il cancello del rilascio conoscono.
+  test-integration-meta:
+    name: test-integration-meta (${{ matrix.shard }}/2)
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
     needs: tree
     # Security (D-08): self-hosted runner (off-prod twin on the LAN) — a fork PR
     # must NEVER execute on it. Run only for push/workflow_dispatch or same-repo
@@ -96,7 +104,7 @@ jobs:
       # tolta alla fine (db/scripts/ci-db-usa-e-getta.sh, «Ricostruisci e isola», Enzo 2026-11-18).
       # Da qui in poi POSTGRES_DB e POSTGRES_DATABASE puntano alla copia; il passo dopo lo verifica.
       - name: Database usa-e-getta della corsa
-        run: bash db/scripts/ci-db-usa-e-getta.sh crea "integrazione"
+        run: bash db/scripts/ci-db-usa-e-getta.sh crea "integrazione${{ matrix.shard }}"
 
       - name: I passi usano il database della corsa
         run: bash db/scripts/ci-db-usa-e-getta.sh controlla
@@ -171,7 +179,7 @@ jobs:
 
       - name: Run vitest integration suite
         working-directory: apps/api
-        run: pnpm exec vitest run --reporter=verbose --no-coverage
+        run: pnpm exec vitest run --reporter=verbose --no-coverage --shard=${{ matrix.shard }}/2
 
       # Il diario del cancello dell'agente nel database (#253, 000452, 000482). Gira qui, e non
       # nel job di lint, perche' qui il database e' heuresys_ci e la catena e' gia' applicata:
@@ -184,10 +192,26 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
-          name: vitest-failures-${{ github.run_id }}
+          name: vitest-failures-${{ github.run_id }}-${{ matrix.shard }}
           path: apps/api/.vitest-cache/
           retention-days: 7
 
       - name: Togli il database della corsa
         if: always()
         run: bash db/scripts/ci-db-usa-e-getta.sh rimuovi
+
+  # Riassunto con il nome di sempre: verde solo se tutte e due le metà sono verdi (o saltate perche'
+  # l'albero era gia' verificato). Gira sulla VM, e' un controllo di una riga.
+  test-integration:
+    needs: [tree, test-integration-meta]
+    if: ${{ always() }}
+    runs-on: [self-hosted, oci-vm]
+    timeout-minutes: 2
+    steps:
+      - name: Esito delle due metà
+        env:
+          ESITO: ${{ needs.test-integration-meta.result }}
+          SALTA: ${{ needs.tree.outputs.skip }}
+        run: |
+          echo "metà: $ESITO (albero già verificato: $SALTA)"
+          case "$ESITO" in success|skipped) ;; *) exit 1 ;; esac

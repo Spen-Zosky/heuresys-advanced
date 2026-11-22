@@ -58,4 +58,23 @@ test.describe("Processi del tenant — dati vivi", () => {
     await expect(page.getByTestId("grafo-attivita")).toHaveCount(scheda.activities.length);
     await expect(page.getByTestId("grafo-processo")).toHaveCount(1);
   });
+
+  test("ADR-0061, passo 1: ogni pagina dei processi dice quale oggetto conta e spiega i cinque sensi", async ({ page }) => {
+    for (const [url, oggetto, nome] of [
+      ["/tenant-processes", "configurazione", "Processo del tenant"],
+      ["/processes", "blueprint", "Processo del modello"],
+    ] as const) {
+      await page.goto(url);
+      const riga = page.getByTestId("oggetto-contato");
+      await expect(riga).toHaveAttribute("data-oggetto", oggetto);
+      await expect(page.getByTestId("oggetto-contato-nome")).toHaveText(nome);
+      await page.getByTestId("oggetto-contato-apri").click();
+      const finestra = page.getByTestId("sensi-del-processo");
+      await expect(finestra).toBeVisible();
+      await expect(finestra.locator("[data-testid^=sensi-oggetto-]")).toHaveCount(5);
+      await expect(page.getByTestId(`sensi-oggetto-${oggetto}`)).toHaveAttribute("data-qui", "si");
+      await expect(page.getByTestId("sensi-del-processo-livelli").locator("tbody tr")).toHaveCount(5);
+      await page.keyboard.press("Escape");
+    }
+  });
 });

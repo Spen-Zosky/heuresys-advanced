@@ -54,7 +54,7 @@
   },
   "processes": {
     "title": "Catalogo dei processi",
-    "description": "I processi del modello di impianto del tenant, nell'ordine della catena del valore.",
+    "description": "Il catalogo dei processi del modello (blueprint) di settore del tenant, nell'ordine della catena del valore: sono le definizioni riutilizzabili. I processi con cui lavora l'azienda stanno in «Processi».",
     "count": "{{count}} processi del modello",
     "count_one": "{{count}} processo del modello",
     "error": "Impossibile caricare i processi.",
@@ -361,7 +361,7 @@
   },
   "processiDelTenant": {
     "title": "Processi",
-    "description": "I processi dell'azienda, ciascuno con i suoi sottoprocessi, le attività, chi le esegue e le unità che vi partecipano.",
+    "description": "I processi dell'azienda, cioè il modello adattato a questo tenant, ciascuno con i suoi sottoprocessi, le attività, chi le esegue e le unità che vi partecipano.",
     "count": "{{count}} processi",
     "count_one": "{{count}} processo",
     "error": "Impossibile caricare i processi.",

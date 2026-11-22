@@ -21,6 +21,7 @@ import { useFormat } from "@/lib/format";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { MODALE } from "@/lib/modale";
 import { PageHeader } from "@/components/intestazione-pagina";
+import { OggettoContato } from "@/components/processo/oggetto-contato";
 import { SchedePagina } from "@/components/schede-pagina";
 import { Riferimento, useScheda } from "@/components/scheda-rapida";
 import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
@@ -233,6 +234,7 @@ export default function TenantProcessPage() {
           </span>
         }
       />
+      <OggettoContato oggetto="configurazione" />
       <SchedePagina
         schede={[
           { id: "descrizione", titolo: t("processiDelTenant.scheda.tabs.descrizione"), contenuto: descrizione },

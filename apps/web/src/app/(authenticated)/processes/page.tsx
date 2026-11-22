@@ -8,6 +8,7 @@ import type { BlueprintActivation, BlueprintProcess } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
+import { OggettoContato } from "@/components/processo/oggetto-contato";
 import { StatusPill } from "@/components/status-pill";
 import { useVersioneAttiva } from "@/lib/versione-attiva";
 
@@ -68,6 +69,8 @@ export default function ProcessesPage() {
       emptyTitle={t("processes.emptyTitle")}
       emptyDescription={t("processes.emptyDescription")}
       caption={t("processes.caption")}
-    />
+    >
+      <OggettoContato oggetto="blueprint" />
+    </DataTablePanel>
   );
 }

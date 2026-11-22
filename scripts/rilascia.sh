@@ -11,6 +11,7 @@
 # promesse del chiamante: le controlla lo script, e se una manca non spinge niente.
 #
 # Guardie, tutte prima di spingere (nessuna si scavalca con un flag):
+#   G0  la cartella e' allineata a origin/main (ff-only, altrimenti ferma)
 #   G1  il commit e' su origin/main (uguale o antenato della punta)
 #   G2  origin/prod e' antenato del commit: solo avanzamento, mai force-push
 #   G3  CI: almeno una corsa sul commit, tutte concluse, nessuna bocciata
@@ -51,6 +52,16 @@ if [ -n "${RILASCIO_CI_STATO:-}${RILASCIO_BACKUP_MARK:-}${RILASCIO_NO_RINNOVO:-}
 fi
 
 git fetch --quiet origin main prod 2>/dev/null || rosso "origin non risponde (fetch di main e prod)"
+# G0 — la cartella da cui gira lo script e' allineata a origin/main (22/11/2026): arma-deploy.sh
+# e blocco-rilascio.sh (il tag di autorizzazione per il gemello) sono quelli di QUESTA cartella;
+# se e' indietro girano versioni vecchie e il tag puo' mancare. Si prova un ff-only; se non
+# riesce (rami divergenti, modifiche che confliggono) si ferma con il comando da lanciare.
+if ! git merge-base --is-ancestor origin/main HEAD 2>/dev/null; then
+  git merge --ff-only --quiet origin/main >/dev/null 2>&1 \
+    && echo "[rilascio] G0: cartella portata a origin/main ($(git rev-parse --short HEAD)) — rilancio lo script aggiornato" \
+    && exec bash "$ROOT/scripts/rilascia.sh" "$SHA_IN" ${WHY:+--why "$WHY"} ${DRY:+--dry-run}
+  rosso "G0: la cartella non e' allineata a origin/main e il fast-forward non riesce: lancia 'git merge --ff-only origin/main' (o riallinea la cartella) e riprova"
+fi
 SHA="$(git rev-parse --verify -q "${SHA_IN}^{commit}" 2>/dev/null)" || rosso "commit sconosciuto: $SHA_IN"
 SHORT="$(git rev-parse --short "$SHA")"
 

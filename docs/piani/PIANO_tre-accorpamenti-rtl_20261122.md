@@ -8,9 +8,9 @@ Fuori da questo ciclo: gli altri sei accorpamenti, che restano come sono; le att
 |---|---|---|---|---|
 | T1 | `db/scripts/processi/separa-tre-accorpamenti.sql` e la sua inversa, con prova a secco | Claude | le due prove a secco (andata, e andata più ritorno in una transazione annullata) danno i numeri attesi | fatta |
 | T2 | La mappa di `colloca-sottoprocessi.sql` dice P04 sotto 02 e P20 sotto 05 | Claude | una nuova corsa dello script non trova stati inattesi | fatta |
-| T3 | CI verde e revisione del codice da un thread nuovo; rilievi 1-5 della revisione corretti | coordinatore, Claude | PR unita | in corso |
-| T4 | Backup verificato, poi `-v applica=1` in produzione | Claude | NOTICE «fatto: 21 processi di primo livello e 24 sottoprocessi attivi, 3 descrizioni ritirate, 3 creati, 0 difetti» | da fare |
-| T5 | Verifica dal vivo | Claude | la matrice di `/tenant-processes` scrive «21 processi e 24 sottoprocessi» | da fare |
+| T3 | CI verde e revisione del codice da un thread nuovo; rilievi 1-5 della revisione corretti | coordinatore, Claude | PR unita | fatta (#415, 2026-11-22) |
+| T4 | Backup verificato, poi `-v applica=1` in produzione | Claude | NOTICE «fatto: 21 processi di primo livello e 24 sottoprocessi attivi, 3 descrizioni ritirate, 3 creati, 0 difetti» | fatta (2026-11-22, la seconda corsa dice «GIÀ APPLICATO») |
+| T5 | Verifica dal vivo | Claude | la matrice di `/tenant-processes` scrive «21 processi e 24 sottoprocessi» | fatta: la query della matrice (`loadMatrix`) dà 21 e 24, sentinella dei genitori a 0 |
 
 ## Simulazione
 
@@ -34,3 +34,5 @@ bash ~/.claude/tools/backup-verificato.sh heuresys_advanced
 psql -h localhost -p 5432 -d heuresys_advanced -X -f db/scripts/processi/separa-tre-accorpamenti.sql              # prova a secco
 psql -h localhost -p 5432 -d heuresys_advanced -X -v applica=1 -f db/scripts/processi/separa-tre-accorpamenti.sql # applica
 ```
+
+CICLO CHIUSO — 5/5 voci fatte, non resta niente.

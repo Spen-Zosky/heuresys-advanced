@@ -211,14 +211,13 @@ Numbered SQL files in `db/migrations/000001_*.sql..` (the `000035` gap is cosmet
 - **TS strict mode quirks**: `tsconfig.base.json` has `noUncheckedIndexedAccess: true` plus `noUnusedLocals` / `noUnusedParameters`. Array index access and `Map.get()` return `T | undefined` — narrow explicitly. Unused params must be prefixed `_` (e.g. `(_req, reply) =>`). `exactOptionalPropertyTypes` is intentionally **off** to keep Zod-inferred types ergonomic.
 - **Module work follows the 7-step pattern above + atomic commit.** Don't split a module across commits.
 - Commit prefix style is established: `feat(api): MVP-1 5.1.X — <module> module (...)`, `chore(db): seed — ...`, `docs(handoff): ...`, `test(api): ...`. Follow the existing log style.
-- **Never `git push`** without an explicit ask from the user. Local commits on `main` are pre-authorized for this project (see `memory/feedback_full_autonomy.md`); pushes are not.
+- Commit and push to `main` are authorized in every session: production only moves through `refs/heads/prod` with `scripts/rilascia.sh`.
 - **Update `HANDOFF.md`** at the end of any session that ships modules or changes live state — it's the cross-session handoff doc.
 - The repo runs on Windows. PowerShell 5.1 quirks apply (absolute exe paths, no `-ArgumentList @()` with string arrays, `cmd.exe` not on PATH). Most automation has `.sh` siblings for SSH-into-VM use.
 
 ## Autonomia operativa cross-tool (R23 globale — project enforcement)
 
-Global rule **R23** (`~/.Codex/AGENTS.md`) applies: zero avoidable delegation + proactive tool loading + self-diagnose fallback + no user-executable instructions when autonomously executable + evidence-not-suggestion. **Project-level specifics — preferred tools per task, self-hosted CI runner, tunnel handling, test-verification level → `docs/kb/xtras/AUTONOMY_R23_PROJECT.md`.** Two rules to keep top-of-mind:
-- **Push authorization is session-scoped**: the historical "never `git push` without explicit ask" is the default; once you authorize autonomous push in a session it holds until revoked, and a **new session resets to "ask"**.
+Global rule **R23** (`~/.Codex/AGENTS.md`) applies: zero avoidable delegation + proactive tool loading + self-diagnose fallback + no user-executable instructions when autonomously executable + evidence-not-suggestion. **Project-level specifics — preferred tools per task, self-hosted CI runner, tunnel handling, test-verification level → `docs/kb/xtras/AUTONOMY_R23_PROJECT.md`.** One rule to keep top-of-mind:
 - **A red CI is an error Codex MUST fix** (R3), never hand back to the user — consult `gh run list`/`gh run watch` as evidence (R23/e).
 
 Cross-reference: R6 (global no-delega base), R22 (CLASSE A/B decision), R23 (autonomy comprehensive), R3 (correggere ogni errore), R12 (git safety cross-project).

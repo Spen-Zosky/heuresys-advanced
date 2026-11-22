@@ -34,10 +34,16 @@ let client: Client | null = null;
 let connecting: Promise<void> | null = null;
 let logger: FastifyBaseLogger | null = null;
 
+// Stessa identita' del pool (db/client.ts): dove `POSTGRES_APP_USER` e' impostata
+// (produzione) si ascolta come `heuresys_app`. Il proprietario non serve a LISTEN,
+// e la sua password non sta piu' nell'ambiente dei servizi (B2 tappa 3).
 function connectionString(): string {
   const { POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD } = process.env;
-  return `postgresql://${encodeURIComponent(POSTGRES_USER ?? "")}:${encodeURIComponent(
-    POSTGRES_PASSWORD ?? "",
+  const { POSTGRES_APP_USER, POSTGRES_APP_PASSWORD } = process.env;
+  const user = POSTGRES_APP_USER ?? POSTGRES_USER ?? "";
+  const password = POSTGRES_APP_USER ? (POSTGRES_APP_PASSWORD ?? "") : (POSTGRES_PASSWORD ?? "");
+  return `postgresql://${encodeURIComponent(user)}:${encodeURIComponent(
+    password,
   )}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}`;
 }
 

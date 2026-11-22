@@ -43,6 +43,9 @@ usage() {
 [[ -f "$ENV_FILE" ]] || { err ".env non trovato: $ENV_FILE"; exit 1; }
 set -a; # shellcheck disable=SC1090
 source "$ENV_FILE"; set +a
+# B2 tappa 3: la password del proprietario sta fuori dall'ambiente degli agenti
+# shellcheck disable=SC1091
+. "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/deploy/postgres/env-proprietario.sh"
 : "${POSTGRES_HOST:?POSTGRES_HOST mancante in .env}"
 : "${POSTGRES_PORT:?POSTGRES_PORT mancante in .env}"
 : "${POSTGRES_DB:?POSTGRES_DB mancante in .env}"

@@ -13,6 +13,9 @@ MIG_DIR="$(cd "$(dirname "$0")/../migrations" && pwd 2>/dev/null || echo "$(dirn
 
 # shellcheck disable=SC1090
 set -a; source "$ENV_FILE"; set +a
+# B2 tappa 3: la password del proprietario sta fuori dall'ambiente degli agenti
+# shellcheck disable=SC1091
+. "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/deploy/postgres/env-proprietario.sh"
 
 : "${POSTGRES_HOST:?missing}"
 : "${POSTGRES_PORT:?missing}"

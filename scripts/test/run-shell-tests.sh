@@ -555,11 +555,11 @@ if [ -f "$CG" ] && [ -f "$DW" ]; then
   out="$(CI_GATE_FIXTURE="$F/green.json" dw)"; rc=$?
   { [ "$rc" = 0 ] && <<<"$out" grep -q 'non e. piu. quella autorizzata' && ! <<<"$out" grep -q 'partirebbe'; } \
     && ok "deploy-watch: main avanzata e nessuna traccia di rilascio => NON deploya (regola di prima)" || fail "deploy-watch punta senza traccia ($rc: $out)"
-  BLOCCO_FILE="$W/.blocco-prova" BLOCCO_GH=true bash "$W/scripts/blocco-rilascio.sh" arma "$SHA1" >/dev/null 2>&1       # traccia su un altro sha
+  BLOCCO_FILE="$W/.blocco-prova" BLOCCO_GH=true BLOCCO_GIT_DIR="$W" bash "$W/scripts/blocco-rilascio.sh" arma "$SHA1" >/dev/null 2>&1       # traccia su un altro sha
   out="$(CI_GATE_FIXTURE="$F/green.json" dw)"; rc=$?
   { [ "$rc" = 0 ] && <<<"$out" grep -q 'non e. piu. quella autorizzata' && ! <<<"$out" grep -q 'partirebbe'; } \
     && ok "deploy-watch: traccia di un altro sha => NON deploya" || fail "deploy-watch traccia altro sha ($rc: $out)"
-  BLOCCO_FILE="$W/.blocco-prova" BLOCCO_GH=true bash "$W/scripts/blocco-rilascio.sh" arma "$SHA2" >/dev/null 2>&1
+  BLOCCO_FILE="$W/.blocco-prova" BLOCCO_GH=true BLOCCO_GIT_DIR="$W" bash "$W/scripts/blocco-rilascio.sh" arma "$SHA2" >/dev/null 2>&1
   out="$(CI_GATE_FIXTURE="$F/green.json" dw)"; rc=$?
   { [ "$rc" = 0 ] && <<<"$out" grep -q 'deploy dello sha armato' && <<<"$out" grep -q "partirebbe: vm-deploy.sh su ${SHA2:0:8}"; } \
     && ok "deploy-watch: main avanzata + traccia sullo sha armato + antenato + CI verde => deploya LO SHA ARMATO" || fail "deploy-watch punta avanzata ($rc: $out)"
@@ -571,6 +571,15 @@ if [ -f "$CG" ] && [ -f "$DW" ]; then
   out="$(CI_GATE_FIXTURE="$F/green.json" dw)"; rc=$?
   { [ "$rc" = 0 ] && <<<"$out" grep -q 'deploy dello sha armato'; } \
     && ok "deploy-watch: blocco tolto per unire, traccia d'autorizzazione intatta => deploya LO SHA ARMATO" || fail "deploy-watch dopo togli ($rc: $out)"
+  # 22/11 gemello: un'altra macchina non ha il file locale, ma vede il tag sul remoto scritto da `arma`
+  git -C "$W" tag -d "rilascio/$SHA2" >/dev/null 2>&1
+  out="$(BLOCCO_FILE="$W/.altra-macchina" BLOCCO_GH=true CI_GATE_FIXTURE="$F/green.json" DEPLOY_WATCH_DRYRUN=1 REPO_DIR="$W" bash "$W/scripts/deploy-watch.sh" 2>&1)"; rc=$?
+  { [ "$rc" = 0 ] && <<<"$out" grep -q 'deploy dello sha armato'; } \
+    && ok "deploy-watch: macchina senza file locale, tag rilascio/<sha> sul remoto => deploya LO SHA ARMATO" || fail "deploy-watch gemello via tag ($rc: $out)"
+  git -C "$W" tag -d "rilascio/$SHA2" >/dev/null 2>&1; git -C "$W" push -q origin ":refs/tags/rilascio/$SHA2" >/dev/null 2>&1
+  out="$(BLOCCO_FILE="$W/.altra-macchina" BLOCCO_GH=true CI_GATE_FIXTURE="$F/green.json" DEPLOY_WATCH_DRYRUN=1 REPO_DIR="$W" bash "$W/scripts/deploy-watch.sh" 2>&1)"; rc=$?
+  { [ "$rc" = 0 ] && <<<"$out" grep -q 'non e. piu. quella autorizzata'; } \
+    && ok "deploy-watch: macchina senza file locale e senza tag => NON deploya" || fail "deploy-watch gemello senza tag ($rc: $out)"
   BLOCCO_FILE="$W/.blocco-prova" BLOCCO_GH=true bash "$W/scripts/blocco-rilascio.sh" riconcilia "$SHA2" >/dev/null 2>&1 || true
   BLOCCO_FILE="$W/.blocco-prova" BLOCCO_GH=true bash "$W/scripts/blocco-rilascio.sh" autorizza "$SHA2" \
     && fail "autorizza dopo DEPLOYATO dovrebbe uscire 1" || ok "traccia d'autorizzazione tolta quando lo sha e' in produzione"
@@ -2017,7 +2026,7 @@ echo "$*" >> "$BR_LOG"
 case "$*" in "pr list"*) printf '%s\n' aaa111 bbb222 ;; esac
 GHFINTO
 chmod +x "$BR/gh"
-br() { BR_LOG="$BR/log" BLOCCO_GH="$BR/gh" BLOCCO_FILE="$BR/stato/rilascio-armato" BLOCCO_REPO=o/r \
+br() { BR_LOG="$BR/log" BLOCCO_GH="$BR/gh" BLOCCO_FILE="$BR/stato/rilascio-armato" BLOCCO_REPO=o/r BLOCCO_TAG_REMOTE= \
        bash "$ROOT/scripts/blocco-rilascio.sh" "$@" >/dev/null 2>&1; }
 stati() { grep -c "statuses/.* state=$1 " "$BR/log" 2>/dev/null || true; }
 br attivo; [ $? = 1 ] && ok "senza blocco: attivo -> 1" || fail "senza blocco attivo non esce 1"

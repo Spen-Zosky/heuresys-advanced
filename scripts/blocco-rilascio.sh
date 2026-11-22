@@ -40,6 +40,12 @@ ULTIMO_FILE="${BLOCCO_FILE}.pubblicato"
 # quello sha e' stato armato da rilascia.sh (22/11: la prova dal vivo della #387 e' fallita cosi').
 # Sparisce solo quando lo sha e' in produzione (riconcilia) o dopo BLOCCO_SCADENZA.
 AUTORIZZA_FILE="${BLOCCO_FILE}.autorizzato"
+# Traccia sul remoto (22/11, il gemello linux-pc non vedeva il file della VM e restava fermo su a13e62d1):
+# `arma` scrive anche un tag annotato `rilascio/<sha>` su origin, e `autorizza` lo legge da li' quando
+# il file locale non c'e'. Cosi' ogni macchina che guarda origin vede se quello sha e' stato armato da
+# rilascia.sh. BLOCCO_TAG_REMOTE vuoto = nessun tag (test).
+TAG_REMOTE="${BLOCCO_TAG_REMOTE-origin}"
+GITD="${BLOCCO_GIT_DIR:-.}"   # il repo dove vivono i tag (default: la cartella corrente)
 SCADENZA="${BLOCCO_SCADENZA:-7200}"
 REPO="${BLOCCO_REPO:-Spen-Zosky/heuresys-advanced}"
 GH="${BLOCCO_GH:-gh}"
@@ -85,6 +91,12 @@ case "$cmd" in
     mkdir -p "$(dirname "$BLOCCO_FILE")"
     printf '%s %s\n' "$sha" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$BLOCCO_FILE"
     cp -f "$BLOCCO_FILE" "$AUTORIZZA_FILE"
+    if [ -n "$TAG_REMOTE" ]; then
+      { git -C "$GITD" tag -f -a -m "rilascio armato da rilascia.sh" "rilascio/$sha" "$sha" \
+        && git -C "$GITD" push -q -f "$TAG_REMOTE" "refs/tags/rilascio/$sha"; } >/dev/null 2>&1 \
+        && say "traccia sul remoto: tag rilascio/${sha:0:8}" \
+        || say "ATTENZIONE: tag rilascio/${sha:0:8} non scritto sul remoto (le altre macchine non vedranno l'autorizzazione)"
+    fi
     say "blocco scritto: rilascio armato su ${sha:0:8}, main fermo fino a DEPLOYATO (scade fra ${SCADENZA}s)"
     "$0" riconcilia
     ;;
@@ -103,9 +115,16 @@ case "$cmd" in
     # rilascia.sh ha armato proprio quel commit (usata da deploy-watch quando main e' avanzata).
     # Non dipende dal blocco: `togli` lo cancella per far unire le PR, la traccia resta.
     sha="${1:?autorizza vuole uno sha}"
-    [ -f "$AUTORIZZA_FILE" ] \
-      && [ $(( $(date +%s) - $(stat -c %Y "$AUTORIZZA_FILE") )) -lt "$SCADENZA" ] \
-      && [ "$(awk 'NR==1 {print $1}' "$AUTORIZZA_FILE")" = "$sha" ]
+    if [ -f "$AUTORIZZA_FILE" ] \
+       && [ $(( $(date +%s) - $(stat -c %Y "$AUTORIZZA_FILE") )) -lt "$SCADENZA" ] \
+       && [ "$(awk 'NR==1 {print $1}' "$AUTORIZZA_FILE")" = "$sha" ]; then
+      exit 0
+    fi
+    # altra macchina (o file perso): vale il tag sul remoto, se e' fresco
+    [ -n "$TAG_REMOTE" ] || exit 1
+    git -C "$GITD" fetch -q "$TAG_REMOTE" "+refs/tags/rilascio/$sha:refs/tags/rilascio/$sha" 2>/dev/null || exit 1
+    t="$(git -C "$GITD" for-each-ref --format='%(taggerdate:unix)' "refs/tags/rilascio/$sha")"
+    [ -n "$t" ] && [ $(( $(date +%s) - t )) -lt "$SCADENZA" ]
     ;;
   riconcilia)
     in_prod="${1:-}"

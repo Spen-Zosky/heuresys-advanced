@@ -96,7 +96,7 @@ bash "$ROOT/scripts/arma-deploy.sh" --sha "$SHA" --why "${WHY:-rilascio $SHORT d
 # origin/main e' ancora il commit armato. Non e' una guardia del rilascio: se il blocco non si scrive
 # il rilascio resta armato, e lo si dice.
 if [ -f "$ROOT/scripts/blocco-rilascio.sh" ]; then
-  bash "$ROOT/scripts/blocco-rilascio.sh" arma "$SHA" \
+  BLOCCO_GIT_DIR="$ROOT" bash "$ROOT/scripts/blocco-rilascio.sh" arma "$SHA" \
     || echo "[rilascio] ATTENZIONE: blocco di main non scritto, nessuno fermerà le unioni fino a DEPLOYATO" >&2
 fi
 echo "[rilascio] ora: bash scripts/verifica-deploy.sh (atteso DEPLOYATO su $SHORT) e la prova dal vivo"

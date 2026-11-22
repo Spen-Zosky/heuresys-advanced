@@ -2079,6 +2079,10 @@ br arma 1234567890abcdef; touch -d '3 hours ago' "$BR/stato/rilascio-armato"
 br attivo; [ $? = 1 ] && ok "blocco piu' vecchio della scadenza: non attivo" || fail "blocco scaduto ancora attivo"
 : > "$BR/log"; br riconcilia
 [ ! -f "$BR/stato/rilascio-armato" ] && [ "$(stati success)" = 2 ] && ok "riconcilia toglie il blocco scaduto e libera le PR" || fail "blocco scaduto non riconciliato"
+# 22/11: macchina dove gh non risponde (gemello): riconcilia non deve fallire ne' registrare lo stato
+printf '#!/bin/sh\nexit 1\n' > "$BR/gh-rotto"; chmod +x "$BR/gh-rotto"
+BLOCCO_FILE="$BR/stato-gh-rotto" BLOCCO_GH="$BR/gh-rotto" bash scripts/blocco-rilascio.sh riconcilia ffff000000000000 >/dev/null 2>&1; e=$?
+[ $e = 0 ] && [ ! -f "$BR/stato-gh-rotto.pubblicato" ] && ok "riconcilia con gh che non risponde: esce 0 e riprova al giro dopo" || fail "riconcilia con gh rotto (exit $e)"
 : > "$BR/log"; br stato-pr ccc333
 grep -q "statuses/ccc333 .*state=success" "$BR/log" && ok "stato-pr senza blocco -> success" || fail "stato-pr senza blocco"
 br arma 99; : > "$BR/log"; br stato-pr ccc333

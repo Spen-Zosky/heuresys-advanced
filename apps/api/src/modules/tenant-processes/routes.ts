@@ -1,14 +1,15 @@
 /**
- * apps/api/src/modules/tenant-processes/routes.ts — 5 rotte: lettura di un processo del tenant e
+ * apps/api/src/modules/tenant-processes/routes.ts — 6 rotte: lettura di un processo del tenant e
  * cambio del suo responsabile (ADR-0060, piano delle applet, voce P3); vocabolario delle faccette,
- * faccette di un processo e loro scrittura (ADR-0061 D4, passo 2).
+ * faccette di un processo e loro scrittura (ADR-0061 D4, passo 2); tipo di corrispondenza di
+ * un'attività con APQC (ADR-0061 D7, passo 4).
  */
 import { actorFromRequest as actor } from "../../lib/actor.js";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import {
   TenantProcessIdParamSchema, TenantProcessSchema,
   ProcessFacetVocabularyResponseSchema, TenantProcessFacetsResponseSchema, TenantProcessFacetParamSchema,
-  PutTenantProcessFacetBodySchema,
+  PutTenantProcessFacetBodySchema, StepApqcParamSchema, PutStepApqcBodySchema, PutStepApqcResponseSchema,
   UpdateTenantProcessOwnerBodySchema, UpdateTenantProcessOwnerResponseSchema,
 } from "@heuresys/shared";
 import { tenantProcessesService } from "./service.js";
@@ -43,4 +44,9 @@ export const tenantProcessesRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [app.verifyCsrf, requirePermission("bpm_process:update")],
     schema: { params: TenantProcessFacetParamSchema, body: PutTenantProcessFacetBodySchema, response: { 200: TenantProcessFacetsResponseSchema } },
   }, async (req) => tenantProcessesService.putFacet(actor(req), req.params.id, req.params.facet, req.body));
+
+  app.put("/:id/attivita/:stepId/apqc", {
+    preHandler: [app.verifyCsrf, requirePermission("bpm_process:update")],
+    schema: { params: StepApqcParamSchema, body: PutStepApqcBodySchema, response: { 200: PutStepApqcResponseSchema } },
+  }, async (req) => tenantProcessesService.putActivityMapping(actor(req), req.params, req.body));
 };

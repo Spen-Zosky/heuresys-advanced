@@ -21,7 +21,7 @@ import type { ActorContext } from "../../lib/actor.js";
 import { haMandatoDisegnoProcessi } from "../../lib/scope/mandati.js";
 import { ForbiddenError, NotFoundError, ValidationError } from "../../errors/index.js";
 import type {
-  ProcessFacet, ProcessFacetVocabularyResponse, PutTenantProcessFacetBody, TenantProcess,
+  StepApqcParam, ProcessFacet, ProcessFacetVocabularyResponse, PutStepApqcBody, PutStepApqcResponse, PutTenantProcessFacetBody, TenantProcess,
   TenantProcessFacetsResponse, UpdateTenantProcessOwnerBody, UpdateTenantProcessOwnerResponse,
 } from "@heuresys/shared";
 import { userHasPermission } from "../../middleware/rbac.js";
@@ -29,6 +29,13 @@ import * as repo from "./repository.js";
 
 function cambiaTuttoIlTenant(actor: ActorContext): boolean {
   return haMandatoDisegnoProcessi(actor);
+}
+
+/** Il perimetro di scrittura sul processo: tutto il tenant per chi lo disegna, il proprio per chi lo presidia. */
+async function nelPerimetro(c: repo.DbConnector, actor: ActorContext, ownerPositionId: string | null, messaggio: string): Promise<void> {
+  if (cambiaTuttoIlTenant(actor)) return;
+  const presidia = ownerPositionId !== null && (await repo.holdsPosition(c, actor.userId, ownerPositionId));
+  if (!presidia) throw new ForbiddenError(messaggio, "PERMISSION_DENIED");
 }
 
 export const tenantProcessesService = {
@@ -119,5 +126,28 @@ export const tenantProcessesService = {
       await repo.replaceFacet(c, attuale.tenantId, id, facet, codes, body.criterion);
     });
     return this.facets(actor, id);
+  },
+
+  // ADR-0061 D7, passo 4 (000509): il tipo di corrispondenza di un'attività con la voce APQC da cui
+  // viene. Il codice non lo sceglie chi scrive: è quello dei metadati dell'attività (la provenienza).
+  async putActivityMapping(
+    actor: ActorContext, p: StepApqcParam, body: PutStepApqcBody,
+  ): Promise<PutStepApqcResponse> {
+    return withTransaction(async (c) => {
+      const attuale = await repo.lockOwner(c, p.id);
+      if (!attuale || attuale.tenantId !== actor.tenantId) throw new NotFoundError("TenantProcess");
+      await nelPerimetro(c, actor, attuale.ownerPositionId, "Puoi dichiarare le corrispondenze solo dei processi che presidi");
+      const step = await repo.stepOfProcess(c, p.id, p.stepId);
+      if (!step || step.tenantId !== actor.tenantId) throw new NotFoundError("TenantProcessActivity");
+      if (!step.apqcCode) {
+        throw new ValidationError([{ path: ["stepId"], message: "L'attività non viene da una voce APQC" }], "L'attività non viene da una voce APQC");
+      }
+      await repo.upsertStepMapping(c, attuale.tenantId, p.stepId, step.apqcCode, body.kind, body.criterion);
+      return {
+        activityId: p.stepId,
+        apqcCode: step.apqcCode,
+        apqcMatch: { kind: body.kind, criterion: body.criterion, source: "PERSONA" as const, status: "APPROVATA" as const },
+      };
+    });
   },
 };

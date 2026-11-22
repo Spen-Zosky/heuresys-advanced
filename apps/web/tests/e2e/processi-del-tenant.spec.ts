@@ -101,4 +101,23 @@ test.describe("Processi del tenant — dati vivi", () => {
     await expect(page.getByTestId("pubblicabilita-criterio")).toHaveCount(8);
     await expect(page.getByTestId("pubblicabilita-criterio").nth(1)).toHaveAttribute("data-soddisfatto", "no");
   });
+
+  test("ADR-0061, passo 4: le attività dicono la voce APQC e il tipo di corrispondenza", async ({ page, request }) => {
+    const body = (await (await request.get("/api/v1/processes?level=1")).json()) as { items: Sintesi[] };
+    let trovato: { pid: string; n: number } | null = null;
+    for (const x of body.items.slice(0, 25)) {
+      const sc = (await (await request.get(`/api/v1/processes/${x.processId}/scheda`)).json()) as { activities: { apqcCode: string | null }[] };
+      const n = sc.activities.filter((a) => a.apqcCode).length;
+      if (n > 0) { trovato = { pid: x.processId, n }; break; }
+    }
+    test.skip(!trovato, "nessuna attività con voce APQC");
+    await page.goto(`/tenant-processes/${trovato!.pid}`);
+    await page.getByRole("tab", { name: /attivit/i }).first().click();
+    await expect(page.getByTestId("apqc-cella")).toHaveCount(trovato!.n);
+    const modifica = page.getByTestId("apqc-modifica").first();
+    await expect(modifica).toBeVisible();
+    await modifica.click();
+    await expect(page.getByTestId("apqc-finestra")).toBeVisible();
+    await expect(page.getByTestId("apqc-scelta")).toHaveCount(4);
+  });
 });

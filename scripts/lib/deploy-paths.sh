@@ -31,3 +31,11 @@ DEPLOY_PATHS_RE='^(apps|packages|db/migrations|db/scripts|scripts|deploy)/'
 # Piu' stretta: solo cio' che cambia la FORMA o il CONTENUTO del database rende obsoleto il
 # clone del gemello. Un cambiamento di codice non lo tocca.
 CLONE_DB_PATHS_RE='^db/(migrations|seeds)/'
+
+# Percorsi che non richiedono un deploy ma FANNO PARTIRE un workflow che il cancello legge
+# (oggi: l'atlante rigenerato rifa' verde «Atlas freshness»). deploy-watch li interroga come
+# i percorsi di deploy, perche' il loro esito e' l'ultimo del workflow nella finestra: se non
+# contassero, restava «il piu' recente» il rosso del commit di codice prima, e il gemello
+# rispondeva «CI non verde — resto zitto» a un albero ormai verde (22/11). Va tenuto uguale
+# ai `paths:` dei workflow che hanno un percorso di sola documentazione.
+CI_EXTRA_PATHS_RE='^docs/kb/atlas/'

@@ -177,7 +177,7 @@ say "armato ${ARMED:0:8}, in produzione ${LAST_GOOD:0:8} — verifico la CI"
 SHAS="$ARMED"
 if git merge-base --is-ancestor "$LAST_GOOD" "$ARMED" 2>/dev/null; then
   for c in $(git rev-list "$LAST_GOOD..$ARMED" 2>/dev/null | grep -v "^$ARMED$" || true); do
-    [ -n "$(git diff --name-only "$c^" "$c" 2>/dev/null | grep -E "$DEPLOY_PATHS_RE" || true)" ] || continue
+    [ -n "$(git diff --name-only "$c^" "$c" 2>/dev/null | grep -E "$DEPLOY_PATHS_RE|$CI_EXTRA_PATHS_RE" || true)" ] || continue
     SHAS="$SHAS $c"
   done
 else

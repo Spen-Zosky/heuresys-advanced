@@ -65,7 +65,7 @@
 | [0057](adr/0057_il_modello_dei_ruoli.md) | Il modello dei ruoli: il comando si calcola, il funzionale si decide | ACCETTATO il 2026-11-10 da Enzo Spenuso, alle 15:16 UTC | Il modello dei ruoli: il comando si calcola, il funzionale si decide *(dal titolo)* | 2026-11-10 |
 | [0059](adr/0059_allineamento_e_consolidamento_due_modi.md) | Allineamento e Consolidamento: due modi dello stesso motore | ACCETTATO il 2026-11-16 da Enzo Spenuso, alle 01:35 UTC | Allineamento e Consolidamento: due modi dello stesso motore *(dal titolo)* | 2026-11-16 |
 | [0060](adr/0060_le_applet_dell_assistente.md) | Le applet dell'assistente: il lavoro che l'assistente costruisce e svolge, entro i permessi di chi lo chiede | ACCETTATO il 2026-11-18 da Enzo Spenuso, alle 15:50 UTC | Le applet dell'assistente: il lavoro che l'assistente costruisce e svolge, entro i permessi di chi lo chiede *(dal titolo)* | 2026-11-18 |
-| [0061](adr/0061_tassonomia_e_metamodel_dei_processi.md) | Tassonomia multidimensionale e metamodel dei processi | PROPOSTO il 2026-11-22. Lo accetta Enzo Spenuso | Tassonomia multidimensionale e metamodel dei processi *(dal titolo)* | 2026-11-22 |
+| [0061](adr/0061_tassonomia_e_metamodel_dei_processi.md) | Tassonomia multidimensionale e metamodel dei processi | ACCETTATO il 2026-11-22 da Enzo Spenuso, alle 03:21 UTC | Tassonomia multidimensionale e metamodel dei processi *(dal titolo)* | 2026-11-22 |
 
 ## Conventions
 

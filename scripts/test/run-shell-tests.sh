@@ -1991,6 +1991,13 @@ rl env RILASCIO_CI_STATO="6 6 0 0" bash scripts/rilascia.sh "$B"; e=$?
 [ $e = 1 ] && prod_e "$C" && ok "rilascia: servirebbe un force-push -> fermo" || fail "rilascia: non fast-forward non ferma (exit $e)"
 ( cd "$ROOT" && RILASCIO_CI_STATO="6 6 0 0" ARMA_DRYRUN=1 bash scripts/rilascia.sh HEAD --dry-run ) >/dev/null 2>&1; e=$?
 [ $e = 1 ] && ok "rilascia: variabili di test su origin reale -> fermo" || fail "rilascia: variabili di test accettate su origin reale (exit $e)"
+# G0 (22/11): cartella indietro rispetto a origin/main => ff-only e si prosegue; divergente => fermo
+git -C "$W" reset -q --hard "$A" 2>/dev/null; git -C "$RT/origin.git" update-ref refs/heads/prod "$A"
+rl env RILASCIO_CI_STATO="6 6 0 0" bash scripts/rilascia.sh "$B" --dry-run; e=$?
+[ $e = 0 ] && [ "$(git -C "$W" rev-parse HEAD)" = "$B" ] && ok "rilascia G0: cartella indietro => ff-only e prosegue" || fail "rilascia G0 ff-only (exit $e)"
+git -C "$W" reset -q --hard "$A"; echo x > "$W/x"; git -C "$W" add x; git -C "$W" -c user.email=t@t -c user.name=t commit -qm locale
+rl env RILASCIO_CI_STATO="6 6 0 0" bash scripts/rilascia.sh "$B"; e=$?
+[ $e = 1 ] && prod_e "$A" && ok "rilascia G0: cartella divergente => fermo, prod non si muove" || fail "rilascia G0 divergente (exit $e)"
 rm -rf "$RT"
 # ------------------------------------------- I. tree-gia-verificato.sh (fixture)
 section "tree-gia-verificato.sh — la seconda passata di CI e' un doppione solo a albero uguale"

@@ -21,8 +21,10 @@ import type { ActorContext } from "../../lib/actor.js";
 import { haMandatoDisegnoProcessi } from "../../lib/scope/mandati.js";
 import { ForbiddenError, NotFoundError, ValidationError } from "../../errors/index.js";
 import type {
-  TenantProcess, UpdateTenantProcessOwnerBody, UpdateTenantProcessOwnerResponse,
+  ProcessFacet, ProcessFacetVocabularyResponse, PutTenantProcessFacetBody, TenantProcess,
+  TenantProcessFacetsResponse, UpdateTenantProcessOwnerBody, UpdateTenantProcessOwnerResponse,
 } from "@heuresys/shared";
+import { userHasPermission } from "../../middleware/rbac.js";
 import * as repo from "./repository.js";
 
 function cambiaTuttoIlTenant(actor: ActorContext): boolean {
@@ -73,5 +75,49 @@ export const tenantProcessesService = {
     const process = await repo.findProcessById(pool, id);
     if (!process) throw new NotFoundError("TenantProcess");
     return { process, previousOwnerPositionId: previous };
+  },
+
+  // ADR-0061 D4, passo 2 (000507): le faccette. Leggere vuole `bpm_process:read` e il processo del
+  // proprio tenant; scrivere vuole `bpm_process:update` e lo stesso perimetro del responsabile: il
+  // mandato HR e chi disegna i processi su tutto il tenant, il responsabile solo sui processi che
+  // presidia. Una scrittura della persona è una decisione (fonte PERSONA, stato APPROVATA).
+
+  async facetVocabulary(): Promise<ProcessFacetVocabularyResponse> {
+    return { items: await repo.facetVocabulary(pool) };
+  },
+
+  async facets(actor: ActorContext, id: string): Promise<TenantProcessFacetsResponse> {
+    const p = await repo.findProcessById(pool, id);
+    if (!p || p.tenantId !== actor.tenantId) throw new NotFoundError("TenantProcess");
+    const canEdit = userHasPermission(actor, "bpm_process:update")
+      && (cambiaTuttoIlTenant(actor) || (p.ownerPositionId !== null && (await repo.holdsPosition(pool, actor.userId, p.ownerPositionId))));
+    return { processId: id, canEdit, items: await repo.processFacets(pool, id) };
+  },
+
+  async putFacet(
+    actor: ActorContext, id: string, facet: ProcessFacet, body: PutTenantProcessFacetBody,
+  ): Promise<TenantProcessFacetsResponse> {
+    const codes = [...new Set(body.codes)];
+    await withTransaction(async (c) => {
+      const attuale = await repo.lockOwner(c, id);
+      if (!attuale || attuale.tenantId !== actor.tenantId) throw new NotFoundError("TenantProcess");
+      if (!cambiaTuttoIlTenant(actor)) {
+        const presidia = attuale.ownerPositionId !== null
+          && (await repo.holdsPosition(c, actor.userId, attuale.ownerPositionId));
+        if (!presidia) {
+          throw new ForbiddenError("Puoi classificare solo i processi che presidi", "PERMISSION_DENIED");
+        }
+      }
+      const noti = await repo.knownFacetCodes(c, facet, codes);
+      const ignoti = codes.filter((x) => !noti.includes(x));
+      if (ignoti.length > 0) {
+        throw new ValidationError(
+          [{ path: ["codes"], message: `Valori non previsti per questa faccetta: ${ignoti.join(", ")}` }],
+          "Valori non previsti per questa faccetta",
+        );
+      }
+      await repo.replaceFacet(c, attuale.tenantId, id, facet, codes, body.criterion);
+    });
+    return this.facets(actor, id);
   },
 };

@@ -179,3 +179,53 @@ export const TenantProcessMatrixResponseSchema = z.object({
   cells: z.array(z.object({ processId: z.uuid(), unitId: z.uuid(), role: TenantProcessUnitRoleSchema })),
 });
 export type TenantProcessMatrixResponse = z.infer<typeof TenantProcessMatrixResponseSchema>;
+
+// ---------------------------------------------------------------------------------------------
+// ADR-0061 D4, passo 2 (000507): le faccette di un processo del tenant. Vocabolario chiuso di
+// piattaforma; ogni valore assegnato porta il criterio, la fonte (persona o agente) e lo stato
+// (proposta dell'agente o approvata da chi ha il potere).
+// ---------------------------------------------------------------------------------------------
+export const ProcessFacetSchema = z.enum(["FINALITA", "BENEFICIARIO", "PERIMETRO", "MODALITA", "ATTIVAZIONE", "TECNOLOGIA", "STANDARDIZZAZIONE"]);
+export type ProcessFacet = z.infer<typeof ProcessFacetSchema>;
+export const ProcessFacetSourceSchema = z.enum(["PERSONA", "AGENTE"]);
+export const ProcessFacetStatusSchema = z.enum(["PROPOSTA", "APPROVATA"]);
+
+export const ProcessFacetValueSchema = z.object({
+  facet: ProcessFacetSchema,
+  code: z.string(),
+  ordinal: z.number().int(),
+  label: z.string(),
+  description: z.string(),
+});
+export type ProcessFacetValue = z.infer<typeof ProcessFacetValueSchema>;
+
+export const ProcessFacetVocabularyResponseSchema = z.object({ items: z.array(ProcessFacetValueSchema) });
+export type ProcessFacetVocabularyResponse = z.infer<typeof ProcessFacetVocabularyResponseSchema>;
+
+export const TenantProcessFacetSchema = z.object({
+  facet: ProcessFacetSchema,
+  code: z.string(),
+  label: z.string(),
+  criterion: z.string(),
+  source: ProcessFacetSourceSchema,
+  status: ProcessFacetStatusSchema,
+  updatedAt: z.string(),
+});
+export type TenantProcessFacet = z.infer<typeof TenantProcessFacetSchema>;
+
+export const TenantProcessFacetsResponseSchema = z.object({
+  processId: z.uuid(),
+  canEdit: z.boolean(),
+  items: z.array(TenantProcessFacetSchema),
+});
+export type TenantProcessFacetsResponse = z.infer<typeof TenantProcessFacetsResponseSchema>;
+
+export const TenantProcessFacetParamSchema = z.object({ id: z.uuid(), facet: ProcessFacetSchema });
+export type TenantProcessFacetParam = z.infer<typeof TenantProcessFacetParamSchema>;
+
+/** Sostituisce i valori di una faccetta: la lista vuota la toglie. Il criterio è obbligatorio se ci sono valori. */
+export const PutTenantProcessFacetBodySchema = z.object({
+  codes: z.array(z.string().min(1).max(32)).max(10),
+  criterion: z.string().trim().max(2000).default(""),
+}).refine((b) => b.codes.length === 0 || b.criterion.length > 0, { message: "Il criterio è obbligatorio", path: ["criterion"] });
+export type PutTenantProcessFacetBody = z.infer<typeof PutTenantProcessFacetBodySchema>;

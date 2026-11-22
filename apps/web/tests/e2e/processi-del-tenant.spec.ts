@@ -77,4 +77,16 @@ test.describe("Processi del tenant — dati vivi", () => {
       await page.keyboard.press("Escape");
     }
   });
+  test("ADR-0061, passo 2: la scheda del processo ha la classificazione per faccette", async ({ page, request }) => {
+    const body = (await (await request.get("/api/v1/processes?level=1")).json()) as { items: Sintesi[] };
+    const p = body.items[0];
+    test.skip(!p, "RTL non ha processi attivi");
+    const f = await request.get(`/api/v1/tenant-processes/${p!.processId}/faccette`);
+    expect(f.ok()).toBeTruthy();
+    const faccette = (await f.json()) as { items: Array<{ facet: string }> };
+    await page.goto(`/tenant-processes/${p!.processId}`);
+    await page.getByRole("tab", { name: /Classificazione/ }).click();
+    await expect(page.getByTestId("classificazione-riga")).toHaveCount(7);
+    await expect(page.getByTestId("classificazione-valore")).toHaveCount(faccette.items.length);
+  });
 });

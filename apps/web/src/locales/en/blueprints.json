@@ -388,7 +388,8 @@
         "flusso": "Swimlane flow",
         "grafo": "Graph",
         "indicatori": "Indicators and skills",
-        "collegati": "Approvals and projects"
+        "collegati": "Approvals and projects",
+        "classificazione": "Classification"
       },
       "scopo": "Purpose",
       "senzaScopo": "The purpose of the process is not described.",
@@ -455,6 +456,60 @@
         "CONTRIBUTOR": "Executing",
         "CONSULTED": "Consulted",
         "INFORMED": "Informed"
+      }
+    },
+    "classificazione": {
+      "nota": "How the process is classified, one independent dimension per row: {{assegnate}} of {{totale}} facets assigned. Every value carries the criterion it was chosen with.",
+      "colonne": {
+        "faccetta": "Facet",
+        "valori": "Values",
+        "criterio": "Criterion",
+        "stato": "Status"
+      },
+      "nessunValore": "Not yet classified",
+      "stato": {
+        "proposta": "Proposed by the agent, to approve",
+        "approvata": "Decided by a person"
+      },
+      "modifica": "Edit",
+      "esamina": "Review",
+      "approva": "Approve",
+      "salva": "Save",
+      "annulla": "Cancel",
+      "salvataggio": "Saving…",
+      "criterio": "Criterion",
+      "criterioAiuto": "Why these values: the rule or fact that justifies them. Required if you choose at least one value.",
+      "propostaAgente": "These values are a proposal by the agent: check them, correct them if needed and approve them. They become your decision.",
+      "errore": "Unable to save the classification.",
+      "faccette": {
+        "FINALITA": {
+          "nome": "Purpose",
+          "domanda": "What the process is for, for the company"
+        },
+        "BENEFICIARIO": {
+          "nome": "Beneficiary",
+          "domanda": "Who receives the result (even more than one)"
+        },
+        "PERIMETRO": {
+          "nome": "Scope",
+          "domanda": "How many units or companies it crosses"
+        },
+        "MODALITA": {
+          "nome": "Way of working",
+          "domanda": "Whether steps are set in advance or decided case by case"
+        },
+        "ATTIVAZIONE": {
+          "nome": "Trigger",
+          "domanda": "What starts the process"
+        },
+        "TECNOLOGIA": {
+          "nome": "Technology participation",
+          "domanda": "How much work systems and agents do"
+        },
+        "STANDARDIZZAZIONE": {
+          "nome": "Standardisation",
+          "domanda": "Whether it is the same everywhere, configurable, sector-specific or only for this company"
+        }
       }
     }
   }

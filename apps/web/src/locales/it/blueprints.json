@@ -564,7 +564,9 @@
           "nome": "Standardizzazione",
           "domanda": "Se è uguale ovunque, parametrizzabile, di settore o solo di questa azienda"
         }
-      }
+      },
+      "approvaTutte": "Approva tutte le proposte ({{n}} faccette)",
+      "approvazioneInCorso": "Approvazione in corso…"
     },
     "apqc": {
       "voce": "voce {{codice}}",

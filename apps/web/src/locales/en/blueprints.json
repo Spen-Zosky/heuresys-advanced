@@ -564,7 +564,9 @@
           "nome": "Standardisation",
           "domanda": "Whether it is the same everywhere, configurable, sector-specific or only for this company"
         }
-      }
+      },
+      "approvaTutte": "Approve all proposals ({{n}} facets)",
+      "approvazioneInCorso": "Approving…"
     },
     "apqc": {
       "voce": "item {{codice}}",

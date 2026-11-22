@@ -83,11 +83,14 @@ test.describe("Processi del tenant — dati vivi", () => {
     test.skip(!p, "RTL non ha processi attivi");
     const f = await request.get(`/api/v1/tenant-processes/${p!.processId}/faccette`);
     expect(f.ok()).toBeTruthy();
-    const faccette = (await f.json()) as { items: Array<{ facet: string }> };
+    const faccette = (await f.json()) as { canEdit: boolean; items: Array<{ facet: string; status: string }> };
     await page.goto(`/tenant-processes/${p!.processId}`);
     await page.getByRole("tab", { name: /Classificazione/ }).click();
     await expect(page.getByTestId("classificazione-riga")).toHaveCount(7);
     await expect(page.getByTestId("classificazione-valore")).toHaveCount(faccette.items.length);
+    // Le proposte dell'agente si approvano anche in blocco: il pulsante c'è solo se ce ne sono.
+    const conProposte = faccette.canEdit && faccette.items.some((x) => x.status === "PROPOSTA");
+    await expect(page.getByTestId("classificazione-approva-tutte")).toHaveCount(conProposte ? 1 : 0);
   });
   test("ADR-0061, passo 3: il catalogo del modello dice quanti criteri di pubblicazione soddisfa ogni processo", async ({ page }) => {
     await page.goto("/processes");

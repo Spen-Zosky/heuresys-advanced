@@ -3,7 +3,7 @@
  * ADR-0060, piano delle applet, voce P3.
  */
 import type { Pool, PoolClient } from "pg";
-import type { TenantProcess } from "@heuresys/shared";
+import type { ProcessFacetValue, TenantProcess, TenantProcessFacet } from "@heuresys/shared";
 
 export type DbConnector = Pool | PoolClient;
 
@@ -93,5 +93,78 @@ export async function setOwner(
       WHERE tenant_process_id = $1
         AND tenant_process_owner_position_id IS DISTINCT FROM $2`,
     [id, ownerPositionId, actorId],
+  );
+}
+
+// ---------------------------------------------------------------------------------------------
+// ADR-0061 D4, passo 2 (000507): le faccette di un processo del tenant.
+// ---------------------------------------------------------------------------------------------
+
+export async function facetVocabulary(q: DbConnector): Promise<ProcessFacetValue[]> {
+  const r = await q.query<ProcessFacetValue>(
+    `SELECT process_facet_value_facet AS facet, process_facet_value_code AS code,
+            process_facet_value_ordinal::int AS ordinal, process_facet_value_label_it AS label,
+            process_facet_value_description_it AS description
+       FROM sys.sys_process_facet_values
+      ORDER BY array_position(ARRAY['FINALITA','BENEFICIARIO','PERIMETRO','MODALITA','ATTIVAZIONE','TECNOLOGIA','STANDARDIZZAZIONE']::text[], process_facet_value_facet::text),
+               process_facet_value_ordinal`,
+  );
+  return r.rows;
+}
+
+export async function processFacets(q: DbConnector, processId: string): Promise<TenantProcessFacet[]> {
+  const r = await q.query<TenantProcessFacet>(
+    `SELECT f.tenant_process_facet_facet AS facet, f.tenant_process_facet_value_code AS code,
+            v.process_facet_value_label_it AS label, f.tenant_process_facet_criterion AS criterion,
+            f.tenant_process_facet_source AS source, f.tenant_process_facet_status AS status,
+            to_char(f.updated_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS "updatedAt"
+       FROM sys.sys_tenant_process_facets f
+       JOIN sys.sys_process_facet_values v
+         ON v.process_facet_value_facet = f.tenant_process_facet_facet
+        AND v.process_facet_value_code = f.tenant_process_facet_value_code
+      WHERE f.tenant_process_facet_process_id = $1
+      ORDER BY array_position(ARRAY['FINALITA','BENEFICIARIO','PERIMETRO','MODALITA','ATTIVAZIONE','TECNOLOGIA','STANDARDIZZAZIONE']::text[], f.tenant_process_facet_facet::text),
+               v.process_facet_value_ordinal`,
+    [processId],
+  );
+  return r.rows;
+}
+
+/** I codici del vocabolario che esistono per la faccetta, fra quelli chiesti. */
+export async function knownFacetCodes(q: DbConnector, facet: string, codes: readonly string[]): Promise<string[]> {
+  const r = await q.query<{ code: string }>(
+    `SELECT process_facet_value_code AS code FROM sys.sys_process_facet_values
+      WHERE process_facet_value_facet = $1 AND process_facet_value_code = ANY($2::text[])`,
+    [facet, codes],
+  );
+  return r.rows.map((x) => x.code);
+}
+
+/**
+ * Sostituisce i valori di una faccetta per un processo: le righe che non servono più si tolgono, le
+ * altre si scrivono come decisione della persona (fonte PERSONA, stato APPROVATA). Approvare una
+ * proposta dell'agente è la stessa scrittura con i codici proposti.
+ */
+export async function replaceFacet(
+  q: DbConnector, tenantId: string, processId: string, facet: string, codes: readonly string[], criterion: string,
+): Promise<void> {
+  await q.query(
+    `DELETE FROM sys.sys_tenant_process_facets
+      WHERE tenant_process_facet_process_id = $1 AND tenant_process_facet_facet = $2
+        AND NOT (tenant_process_facet_value_code = ANY($3::text[]))`,
+    [processId, facet, codes],
+  );
+  if (codes.length === 0) return;
+  await q.query(
+    `INSERT INTO sys.sys_tenant_process_facets
+       (tenant_process_facet_tenant_id, tenant_process_facet_process_id, tenant_process_facet_facet,
+        tenant_process_facet_value_code, tenant_process_facet_criterion, tenant_process_facet_source,
+        tenant_process_facet_status)
+     SELECT $1, $2, $3, c, $5, 'PERSONA', 'APPROVATA' FROM unnest($4::text[]) AS c
+     ON CONFLICT (tenant_process_facet_process_id, tenant_process_facet_facet, tenant_process_facet_value_code)
+     DO UPDATE SET tenant_process_facet_criterion = EXCLUDED.tenant_process_facet_criterion,
+                   tenant_process_facet_source = 'PERSONA', tenant_process_facet_status = 'APPROVATA',
+                   updated_at = now()`,
+    [tenantId, processId, facet, codes, criterion],
   );
 }

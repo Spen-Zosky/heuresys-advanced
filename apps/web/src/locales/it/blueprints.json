@@ -388,7 +388,8 @@
         "flusso": "Flusso a corsie",
         "grafo": "Grafo",
         "indicatori": "Indicatori e competenze",
-        "collegati": "Approvazioni e progetti"
+        "collegati": "Approvazioni e progetti",
+        "classificazione": "Classificazione"
       },
       "scopo": "Scopo",
       "senzaScopo": "Lo scopo del processo non è descritto.",
@@ -455,6 +456,60 @@
         "CONTRIBUTOR": "Esecutrice",
         "CONSULTED": "Consultata",
         "INFORMED": "Informata"
+      }
+    },
+    "classificazione": {
+      "nota": "Come si classifica il processo, una dimensione indipendente per riga: {{assegnate}} di {{totale}} faccette assegnate. Ogni valore porta il criterio con cui è stato scelto.",
+      "colonne": {
+        "faccetta": "Faccetta",
+        "valori": "Valori",
+        "criterio": "Criterio",
+        "stato": "Stato"
+      },
+      "nessunValore": "Non ancora classificato",
+      "stato": {
+        "proposta": "Proposta dall'agente, da approvare",
+        "approvata": "Decisa da una persona"
+      },
+      "modifica": "Modifica",
+      "esamina": "Esamina",
+      "approva": "Approva",
+      "salva": "Salva",
+      "annulla": "Annulla",
+      "salvataggio": "Salvataggio in corso…",
+      "criterio": "Criterio",
+      "criterioAiuto": "Perché questi valori: la regola o il fatto che li giustifica. Obbligatorio se scegli almeno un valore.",
+      "propostaAgente": "Questi valori sono una proposta dell'agente: controllali, correggili se serve e approvali. Diventano una decisione tua.",
+      "errore": "Impossibile salvare la classificazione.",
+      "faccette": {
+        "FINALITA": {
+          "nome": "Finalità",
+          "domanda": "A che cosa serve il processo per l'azienda"
+        },
+        "BENEFICIARIO": {
+          "nome": "Beneficiario",
+          "domanda": "Chi riceve il risultato (anche più di uno)"
+        },
+        "PERIMETRO": {
+          "nome": "Perimetro",
+          "domanda": "Quante unità o aziende attraversa"
+        },
+        "MODALITA": {
+          "nome": "Modalità di lavoro",
+          "domanda": "Se i passi sono stabiliti prima o si decidono caso per caso"
+        },
+        "ATTIVAZIONE": {
+          "nome": "Attivazione",
+          "domanda": "Che cosa fa partire il processo"
+        },
+        "TECNOLOGIA": {
+          "nome": "Partecipazione tecnologica",
+          "domanda": "Quanto lavoro fanno sistemi e agenti"
+        },
+        "STANDARDIZZAZIONE": {
+          "nome": "Standardizzazione",
+          "domanda": "Se è uguale ovunque, parametrizzabile, di settore o solo di questa azienda"
+        }
       }
     }
   }

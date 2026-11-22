@@ -22,6 +22,7 @@ import { useEnumLabel } from "@/lib/enum-labels";
 import { MODALE } from "@/lib/modale";
 import { PageHeader } from "@/components/intestazione-pagina";
 import { OggettoContato } from "@/components/processo/oggetto-contato";
+import { ClassificazioneProcesso, useFaccetteProcesso } from "@/components/processo/classificazione-processo";
 import { SchedePagina } from "@/components/schede-pagina";
 import { Riferimento, useScheda } from "@/components/scheda-rapida";
 import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
@@ -78,6 +79,8 @@ export default function TenantProcessPage() {
     () => new Map(s ? [[s.process.processId, s.process.name], ...s.subprocesses.map((p) => [p.processId, p.name] as [string, string])] : []),
     [s],
   );
+  // ADR-0061 D4: la classificazione per faccette. Chi non ha `bpm_process:read` non vede la scheda.
+  const faccette = useFaccetteProcesso(id ?? "");
 
   if (q.isLoading) return <main className="px-6 pb-8"><StatoCaricamento testId="tenant-process-loading" /></main>;
   if (q.isError || !s) {
@@ -238,6 +241,10 @@ export default function TenantProcessPage() {
       <SchedePagina
         schede={[
           { id: "descrizione", titolo: t("processiDelTenant.scheda.tabs.descrizione"), contenuto: descrizione },
+          {
+            id: "classificazione", titolo: t("processiDelTenant.scheda.tabs.classificazione"), nascosta: !faccette.data,
+            contenuto: faccette.data ? <ClassificazioneProcesso processId={p.processId} faccette={faccette.data} /> : null,
+          },
           { id: "attivita", titolo: t("processiDelTenant.scheda.tabs.attivita"), conteggio: att.length, contenuto: attivita },
           { id: "unita", titolo: t("processiDelTenant.scheda.tabs.unita"), conteggio: s.units.length, contenuto: unitaRuoli },
           {

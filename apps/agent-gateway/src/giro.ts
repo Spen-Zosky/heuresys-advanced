@@ -68,6 +68,12 @@ export interface GiroDeps {
    */
   nota?: () => string | null;
   /**
+   * Le frasi per la persona sulle scritture approvate e non salvate (difetto del 2026-11-22).
+   * Le scrive sempre il gateway, dopo il testo del modello, qualunque cosa il modello abbia detto:
+   * l'esito di una scrittura non lo sceglie il modello.
+   */
+  scrittureNonSalvate?: () => readonly string[];
+  /**
    * A fine giro, il messaggio fisso quando la domanda era tutta su dati che la persona non può
    * vedere (omissis.ts: almeno una lettura negata e nessuna riuscita). Lo decide il gateway, non
    * il modello, e prende il posto della sua risposta. `null`, la risposta resta quella del modello.
@@ -206,7 +212,8 @@ export async function eseguiGiro(d: GiroDeps): Promise<EsitoGiro> {
 
   // La nota del gateway viene dopo il testo del modello e prima della fine, anche se il giro si è
   // fermato: un comando non confermato resta tale qualunque cosa sia successo dopo.
-  const nota = d.nota?.() ?? null;
+  const parti = [d.nota?.() ?? null, ...new Set(d.scrittureNonSalvate?.() ?? [])].filter((x): x is string => !!x && x.trim() !== "");
+  const nota = parti.length > 0 ? parti.join("\n\n") : null;
   if (nota) {
     registro.aggiungi([{ kind: "TESTO", payload: { testo: nota, origine: "piattaforma" } }]);
     d.scrivi(evento("nota", { testo: nota }));

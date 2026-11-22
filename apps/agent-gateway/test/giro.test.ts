@@ -311,3 +311,59 @@ describe("T2 — il costo e la durata di ogni giro vanno nel registro delle chia
     expect(misuraDi({ type: "assistant" })).toBeUndefined();
   });
 });
+
+describe("2026-11-22 — dopo il consenso, l'esito di una scrittura non salvata lo scrive il gateway", () => {
+  // Il giro vero: proposta, consenso della persona, PUT rifiutata dall'API, e il modello che parla
+  // d'altro («chi ha il permesso può salvare…») o tace. In entrambi i casi la persona deve leggere
+  // la frase del gateway, nello stream e riaprendo la conversazione (registro).
+  async function giroConRifiuto(codice: string, parlaIlModello: boolean) {
+    const { HeuresysClient, messaggioScritturaNonSalvata } = await import("../src/heuresys-client.js");
+    const client = new HeuresysClient({
+      baseUrl: "http://api",
+      session: { cookieAccess: "a", csrfToken: "c" } as never,
+      fetchImpl: async () => ({ ok: false, status: 403, json: async () => ({}), text: async () => JSON.stringify({ error: { code: codice } }) }),
+    });
+    const reg = new RegistroFinto({ id: CONV, sdkSessionRef: null, personsSeen: [] });
+    const { d, scritti } = deps(reg, async function* (o) {
+      const attesa = o.approve({ tool: "mcp__heuresys__hrx_entity_query", input: {}, classe: "write" });
+      await new Promise((r) => setTimeout(r, 5));
+      d.approvals.resolveAs(reg.proposte[0]?.proposalId as string, "allow", PERSONA);
+      expect(await attesa).toBe(true);
+      await client.call("PUT", "/tenant-processes/p-1/faccette/PERIMETRO", { codes: ["INTERFUNZIONALE"], criterion: "x" }).catch(() => undefined);
+      if (parlaIlModello) yield testo("Chi ha il permesso di modificare i processi può salvare; se vuoi preparo il testo.");
+      yield risultato(parlaIlModello ? "preparo il testo" : "");
+    }, { scrittureNonSalvate: () => client.consumaScrittureFallite() });
+    await eseguiGiro(d);
+    return { reg, scritti: scritti.join(""), frase: messaggioScritturaNonSalvata(403, codice) };
+  }
+
+  for (const [codice, attesa] of [["FORBIDDEN", "chi ha la responsabilità"], ["AGENT_MANDATE_ONLY", "puoi farla tu dalla pagina"]] as const) {
+    for (const parla of [false, true]) {
+      it(`${codice}, modello ${parla ? "che parla d'altro" : "muto"}: la frase c'è, nello stream e nel registro`, async () => {
+        const { reg, scritti, frase } = await giroConRifiuto(codice, parla);
+        expect(frase).toContain(attesa);
+        // Fallisce se dopo il consenso non c'è testo del gateway: è il difetto da non ripetere.
+        expect(scritti).toContain("event: nota");
+        expect(scritti).toContain(frase);
+        expect(reg.eventi.some((e) => e.kind === "TESTO" && (e.payload as { testo?: string }).testo?.includes(frase))).toBe(true);
+        if (codice === "FORBIDDEN") expect(scritti).not.toContain("dalla pagina");
+      });
+    }
+  }
+
+  it("CONTROPROVA: una scrittura riuscita dopo il consenso non lascia nessuna nota", async () => {
+    const { HeuresysClient } = await import("../src/heuresys-client.js");
+    const client = new HeuresysClient({
+      baseUrl: "http://api",
+      session: { cookieAccess: "a", csrfToken: "c" } as never,
+      fetchImpl: async () => ({ ok: true, status: 200, json: async () => ({}), text: async () => "{}" }),
+    });
+    const reg = new RegistroFinto({ id: CONV, sdkSessionRef: null, personsSeen: [] });
+    const { d, scritti } = deps(reg, async function* () {
+      await client.call("PUT", "/tenant-processes/p-1/faccette/PERIMETRO", {});
+      yield risultato("fatto");
+    }, { scrittureNonSalvate: () => client.consumaScrittureFallite() });
+    await eseguiGiro(d);
+    expect(scritti.join("")).not.toContain("event: nota");
+  });
+});

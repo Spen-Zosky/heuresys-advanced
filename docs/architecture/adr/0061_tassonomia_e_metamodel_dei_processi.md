@@ -1,6 +1,6 @@
 # ADR-0061 — Tassonomia multidimensionale e metamodel dei processi
 
-- **Status**: PROPOSTO il 2026-11-22. Lo accetta Enzo Spenuso
+- **Status**: ACCETTATO il 2026-11-22 da Enzo Spenuso, alle 03:21 UTC (04:21 ora di Roma), nel thread «Scrivere l'ADR su tassonomia e metamodel dei processi»: «l'ADR è accettato, con le tre raccomandazioni in esso definite e diventa subito operativo». Proposto lo stesso giorno
 - **Date**: 2026-11-22
 - **Redatto da**: Claude Code, thread «Scrivere l'ADR su tassonomia e metamodel dei processi»
 - **Richiesta**: Enzo Spenuso, 2026-11-22 alle 03:09 UTC (04:09 ora di Roma): ha incollato un testo di progettazione («tassonomia multidimensionale associata a un metamodel») e ha chiesto di farne un file `.md` con infografica ricca nella documentazione del repo, domandando se fosse un ADR. Lo è: fissa la forma con cui Heuresys descrive, classifica, riusa e configura i processi, e vincola i lavori che verranno
@@ -672,11 +672,11 @@ I nomi delle colonne nelle interrogazioni sono quelli dello schema alla data di 
 5. **Una variante per ogni differenza fra tenant.** Scartata: moltiplica le varianti e le fa divergere; la regola di D6 tiene le differenze di valore nella configurazione.
 6. **Costruire tutto il metamodel in un unico lavoro.** Scartata per regola di Enzo (passi piccoli, 2026-11-21) e per il rischio di dati vuoti (§5).
 
-## §10 — Criteri per accettare questo ADR
+## §10 — Accettazione e scelte registrate
 
-L'ADR è accettato da Enzo; l'accettazione vale per la forma di D1-D10 e non per il calendario di §7. Per cambiare una decisione si scrive un nuovo ADR che dichiara di superare questo (convenzione di `docs/architecture/ADR_INDEX.md`). Le questioni che Enzo può voler decidere prima di accettare:
+L'ADR è accettato da Enzo; l'accettazione vale per la forma di D1-D10 e non per il calendario di §7. Per cambiare una decisione si scrive un nuovo ADR che dichiara di superare questo (convenzione di `docs/architecture/ADR_INDEX.md`). Enzo ha accettato l'ADR il 2026-11-22 con le raccomandazioni qui sotto, che diventano le scelte registrate:
 
-| # | questione | raccomandazione |
+| # | questione | scelta registrata |
 |---|---|---|
 | Q1 | I compiti L5 entrano subito come tabella o solo dove servono (passo 5)? | solo dove servono, un caso reale per volta |
 | Q2 | Il primo passo è il glossario unico (passo 1) o il controllo di pubblicazione (passo 3)? | glossario unico: costa poco, si vede subito nel browser e toglie la confusione sui conteggi |

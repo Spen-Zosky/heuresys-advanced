@@ -92,6 +92,12 @@ case "$cmd" in
   attivo)
     attivo
     ;;
+  autorizza)
+    # esce 0 se il blocco c'e', non e' scaduto e nomina esattamente questo sha: e' la traccia
+    # che rilascia.sh ha armato proprio quel commit (usata da deploy-watch quando main e' avanzata)
+    sha="${1:?autorizza vuole uno sha}"
+    attivo && [ "$(sha_bloccato)" = "$sha" ]
+    ;;
   riconcilia)
     in_prod="${1:-}"
     if [ -f "$BLOCCO_FILE" ]; then
@@ -120,6 +126,6 @@ case "$cmd" in
     fi
     ;;
   *)
-    echo "uso: blocco-rilascio.sh arma <sha> | togli [motivo] | attivo | riconcilia [sha] | stato-pr <sha>" >&2
+    echo "uso: blocco-rilascio.sh arma <sha> | togli [motivo] | attivo | autorizza <sha> | riconcilia [sha] | stato-pr <sha>" >&2
     exit 2 ;;
 esac

@@ -1381,6 +1381,8 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
     ],
     "tabelle": [
       "sys_positions",
+      "sys_process_facet_values",
+      "sys_tenant_process_facets",
       "sys_tenant_processes",
       "sys_user_position_assignments"
     ]

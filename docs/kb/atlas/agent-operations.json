@@ -2554,6 +2554,16 @@
      "method": "GET",
      "path": "/:id",
      "permission": "bpm_process:read"
+    },
+    "get_by_id_faccette": {
+     "method": "GET",
+     "path": "/:id/faccette",
+     "permission": "bpm_process:read"
+    },
+    "get_faccette_vocabolario": {
+     "method": "GET",
+     "path": "/faccette/vocabolario",
+     "permission": "bpm_process:read"
     }
    },
    "solaLettura": true

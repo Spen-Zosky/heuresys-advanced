@@ -205,6 +205,13 @@ export class HeuresysClient {
     return mappa;
   }
 
+  private readonly scrittureFallite: string[] = [];
+
+  /** Gli esiti delle scritture non salvate dall'ultima consultazione, già in parole per la persona. */
+  consumaScrittureFallite(): string[] {
+    return this.scrittureFallite.splice(0);
+  }
+
   async call<T = unknown>(method: string, path: string, body?: unknown): Promise<T> {
     const url = `${this.baseUrl}/v1${path}`;
     const doFetch = () =>
@@ -229,22 +236,22 @@ export class HeuresysClient {
     if (!res.ok) {
       // Il motivo dell'API (per esempio il campo del corpo che non va) torna al modello: senza,
       // vede solo «400» e non sa né correggere né spiegare alla persona che cosa non è andato.
-      let motivo = "";
+      let testo = "";
       try {
-        const testo = await res.text();
-        if (testo) motivo = `: ${testo.slice(0, 800)}`;
+        testo = await res.text();
       } catch {
         /* nessun corpo leggibile: resta lo stato */
       }
-      // ADR-0050 D6: in scrittura il gettone dell'assistente porta i ruoli della persona SENZA i
-      // mandati. Un 403 qui non vuol dire che la persona non abbia il potere: spesso lo ha per
-      // mandato (per esempio HR), e allora la modifica la fa lei dalla pagina (difetto del 2026-11-22).
-      const mandato = !lettura && res.status === 403
-        ? " — l'assistente scrive con i permessi della persona SENZA i suoi mandati (ADR-0050 D6): se la persona ha questo potere per mandato, la modifica la fa lei dalla pagina; non dirle che le manca il permesso"
-        : "";
-      throw new Error(`${method} ${path} -> ${res.status}${lettura ? "" : " (scrittura NON eseguita)"}${mandato}${motivo}`);
+      const motivo = testo ? `: ${testo.slice(0, 800)}` : "";
+      if (lettura) throw new Error(`${method} ${path} -> ${res.status}${motivo}`);
+      const perLaPersona = messaggioScritturaNonSalvata(res.status, codiceErrore(testo));
+      // Difetto del 2026-11-22: dopo un consenso e un rifiuto l'assistente può chiudere il giro
+      // senza dire niente. Il gateway tiene l'esito e, se il modello tace, lo dice lui (sdk-agent).
+      this.scrittureFallite.push(perLaPersona);
+      throw new Error(`${method} ${path} -> ${res.status} (scrittura NON eseguita). Di' alla persona: «${perLaPersona}»${motivo}`);
     }
     if (lettura) this.esiti?.riuscita();
+    else this.scrittureFallite.length = 0; // una scrittura riuscita dopo un rifiuto lo supera
     const grezzi = (await res.json()) as unknown;
     // A-14: l'origine del dato del modulo che ha risposto (nativo, importato, ibrido, misto),
     // legata alla risposta stessa: chi la passa all'agente la ritrova senza indovinarla.
@@ -276,6 +283,37 @@ export class HeuresysClient {
  * Restituisce la sessione da dare al client (senza `cookieRefresh`: niente rinnovo), oppure
  * l'esito dell'API quando il gettone è rifiutato.
  */
+/** Il codice d'errore dell'API (`{ error: { code } }`), se il corpo lo porta. */
+function codiceErrore(testo: string): string | undefined {
+  try {
+    const c = (JSON.parse(testo) as { error?: { code?: unknown } }).error?.code;
+    return typeof c === "string" ? c : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Che cosa dire alla persona quando una scrittura che ha approvato non è salvata. Difetti del
+ * 2026-11-22: «ti manca il permesso» a chi il potere lo ha per mandato, e «puoi farla dalla
+ * pagina» a chi non lo ha affatto. ADR-0050 D6: l'assistente scrive senza i mandati della persona,
+ * e l'API distingue i due casi (`AGENT_MANDATE_ONLY` contro `FORBIDDEN`/`PERMISSION_DENIED`).
+ */
+export function messaggioScritturaNonSalvata(stato: number, codice: string | undefined): string {
+  if (codice === "AGENT_MANDATE_ONLY") {
+    return "La modifica non è stata salvata. Hai questo potere grazie al tuo incarico, e l'assistente non può usarlo per tuo conto: puoi farla tu dalla pagina.";
+  }
+  if (stato === 403) {
+    return "La modifica non è stata salvata: il tuo profilo non permette questa modifica. Può farla chi ha la responsabilità di questi dati.";
+  }
+  if (stato === 400 || stato === 422) {
+    return "La modifica non è stata salvata: i dati preparati non sono stati accettati.";
+  }
+  if (stato === 404) return "La modifica non è stata salvata: l'elemento da modificare non è stato trovato.";
+  if (stato === 409) return "La modifica non è stata salvata: nel frattempo i dati sono cambiati.";
+  return "La modifica non è stata salvata per un errore del sistema.";
+}
+
 export interface RichiestaGettone {
   agentCode: string;
   task: string;

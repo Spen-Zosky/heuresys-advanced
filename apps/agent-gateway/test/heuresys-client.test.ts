@@ -5,7 +5,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { EsitiLetture, MESSAGGIO_NON_AUTORIZZATO, OMISSIS, conOmissis } from "../src/omissis.js";
-import { HeuresysClient, INTESTAZIONE_ORIGINE, chiEDove, chiSei, chiediGettoneAgente, type FetchLike, type Session } from "../src/heuresys-client.js";
+import { HeuresysClient, INTESTAZIONE_ORIGINE, messaggioScritturaNonSalvata, chiEDove, chiSei, chiediGettoneAgente, type FetchLike, type Session } from "../src/heuresys-client.js";
 
 const session: Session = {
   cookieAccess: "ACCESS",
@@ -96,7 +96,17 @@ describe("HeuresysClient auth/CSRF", () => {
     // Un 403 in scrittura non è «ti manca il permesso»: l'assistente scrive senza i mandati (ADR-0050 D6).
     const negata = recordingFetch(() => ({ ok: false, status: 403, body: { error: { code: "FORBIDDEN" } } }));
     const c3 = new HeuresysClient({ baseUrl: "http://api", session, fetchImpl: negata.fetchImpl });
-    await expect(c3.call("PUT", "/tenant-processes/p-1/faccette/PERIMETRO", {})).rejects.toThrow(/SENZA i suoi mandati/);
+    // Senza il codice del mandato il 403 vuol dire che la persona non ha il permesso: niente «dalla pagina».
+    const senzaPermesso = c3.call("PUT", "/tenant-processes/p-1/faccette/PERIMETRO", {});
+    await expect(senzaPermesso).rejects.toThrow(/chi ha la responsabilità/);
+    await expect(c3.call("PUT", "/tenant-processes/p-1/faccette/PERIMETRO", {})).rejects.not.toThrow(/dalla pagina/);
+    // Con AGENT_MANDATE_ONLY la persona il potere ce l'ha per incarico: solo allora «dalla pagina».
+    const mandato = recordingFetch(() => ({ ok: false, status: 403, body: { error: { code: "AGENT_MANDATE_ONLY" } } }));
+    const c4 = new HeuresysClient({ baseUrl: "http://api", session, fetchImpl: mandato.fetchImpl });
+    await expect(c4.call("PUT", "/tenant-processes/p-1/faccette/PERIMETRO", {})).rejects.toThrow(/puoi farla tu dalla pagina/);
+    // La frase rifiutata resta da dire finché il modello non scrive testo; una scrittura riuscita la azzera.
+    expect(c4.consumaScrittureFallite()).toEqual([messaggioScritturaNonSalvata(403, "AGENT_MANDATE_ONLY")]);
+    expect(c4.consumaScrittureFallite()).toEqual([]);
     await expect(c3.call("POST", "/skills", {})).rejects.toThrow(/scrittura NON eseguita/);
     // CONTROPROVA: una lettura fallita non si dichiara scrittura.
     await expect(c.call("GET", "/tenant-processes/p-1")).rejects.not.toThrow(/scrittura/);
@@ -283,5 +293,15 @@ describe("filtri delle letture dalla specifica", () => {
     const c = new HeuresysClient({ baseUrl: "http://api", session, fetchImpl });
     expect((await c.filtriDelleLetture()).size).toBe(0);
     expect((await c.corpiDelleScritture()).size).toBe(0);
+  });
+});
+
+describe("2026-11-22 — dopo una scrittura negata l'assistente non resta muto", () => {
+  it("esitoDelGateway produce un messaggio dell'assistente con la frase per la persona", async () => {
+    const { esitoDelGateway } = await import("../src/sdk-agent.js");
+    const frase = messaggioScritturaNonSalvata(403, "FORBIDDEN");
+    const evento = esitoDelGateway([frase]) as unknown as { type: string; message: { content: Array<{ type: string; text: string }> } };
+    expect(evento.type).toBe("assistant");
+    expect(evento.message.content[0]?.text).toContain(frase);
   });
 });

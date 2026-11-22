@@ -26,7 +26,7 @@ import { MANDATE_ROLES } from "../src/lib/scope/mandati.js";
 import { ruoliDellaRichiesta } from "../src/middleware/auth.js";
 import { ruoliDiLetturaPerAgente } from "../src/modules/agent-tokens/routes.js";
 import { MANDATI_MAI_ALL_AGENTE } from "../src/lib/scope/mandati.js";
-import { userHasPermission } from "../src/middleware/rbac.js";
+import { requirePermission, userHasPermission, userPermissionCodes } from "../src/middleware/rbac.js";
 import * as crypto from "node:crypto";
 import { AGENT_TOKEN_TTL_SECONDS, type AgentTokenResponse } from "@heuresys/shared";
 import { unCapoConSottoposti, unSottopostoOrganizzativo, type Attore } from "./helpers/org-actors.js";
@@ -194,6 +194,31 @@ describe("ADR-0050 D6 emendato (2026-11-18) — in lettura l'agente usa il perim
     const visti = new Set((permessi.json() as { permissions: string[] }).permissions);
     const soloDelMandato = [...visti].filter((p) => !userHasPermission({ roles: senza }, p));
     expect(soloDelMandato.length, "la GET non vede i permessi del mandato").toBeGreaterThan(0);
+  });
+
+  it("una scrittura negata dice se la persona ha il permesso solo per mandato (AGENT_MANDATE_ONLY) o non lo ha", async () => {
+    // Un permesso che HRMS_MANAGER ha e USER no, letto dalla mappa viva dei permessi.
+    const soloMandato = userPermissionCodes({ roles: ["HRMS_MANAGER"] }).find((p) => !userHasPermission({ roles: ["USER"] }, p));
+    expect(soloMandato, "HRMS_MANAGER deve avere almeno un permesso che USER non ha").toBeTruthy();
+    const nega = requirePermission(soloMandato!);
+    const richiesta = (ruoliPieni: RoleCode[] | undefined) => ({
+      user: {
+        userId: "u", tenantId: "t", roles: ["USER"] as RoleCode[],
+        agente: { codice: "assistente-hr", compito: "prova D6", permessi: null, ...(ruoliPieni ? { ruoliPieni } : {}) },
+      },
+    });
+    const esito = async (ruoliPieni: RoleCode[] | undefined) => {
+      try {
+        await (nega as unknown as (req: unknown, reply: unknown) => Promise<void>)(richiesta(ruoliPieni), {});
+        return "PASSA";
+      } catch (e) {
+        return (e as { code: string }).code;
+      }
+    };
+    expect(await esito(["USER", "HRMS_MANAGER"])).toBe("AGENT_MANDATE_ONLY");
+    // CONTROPROVE: senza il mandato fra i ruoli pieni, o con un gettone senza `rl`, resta FORBIDDEN.
+    expect(await esito(["USER"])).toBe("FORBIDDEN");
+    expect(await esito(undefined)).toBe("FORBIDDEN");
   });
 
   it("la scelta dei ruoli segue il metodo, e un gettone senza `rl` resta com'era", () => {

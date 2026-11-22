@@ -29,7 +29,8 @@ CREATE TEMP TABLE mappa(figlio text PRIMARY KEY, genitore text NOT NULL) ON COMM
 INSERT INTO mappa VALUES
   ('P01','00'),('P02','00'),('P06','00'),
   ('P03','11'),
-  ('P04','10'),('P05','10'),
+  ('P05','10'),
+  ('P04','02'),  -- 2026-11-22: era sotto 10; da separa-tre-accorpamenti.sql è sotto 02
   ('P07','12'),
   ('P08','15'),('P09','15'),('P10','15'),
   ('P11','01'),
@@ -37,7 +38,8 @@ INSERT INTO mappa VALUES
   ('P17','04'),
   ('P15','13'),('P16','13'),
   ('P18','14'),('P19','14'),
-  ('P20','09'),('P21','09'),
+  ('P20','05'),  -- 2026-11-22: era sotto 09 in questa mappa; da separa-tre-accorpamenti.sql è sotto 05
+  ('P21','09'),
   ('P22','17'),('P23','17'),('P24','17'),('P25','17'),('P28','17'),
   ('P26','16'),
   ('P27','18'),

@@ -110,7 +110,7 @@ function rendiLeggibile(option: RawProps["option"], locale: string): RawProps["o
       if (label.formatter === undefined) label.formatter = num;
     } else if (tipo === "category") {
       if (label.width === undefined) label.width = 200;
-      if (label.overflow === undefined) label.overflow = "truncate";
+      if (label.overflow === undefined) label.overflow = "break";
     }
     ax.axisLabel = label;
     return ax;

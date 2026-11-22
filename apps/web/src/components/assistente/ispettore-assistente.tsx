@@ -78,7 +78,7 @@ export function IspettoreAssistente({
       >
         <div className="flex items-center justify-between gap-2 pr-8">
           <div className="min-w-0">
-            <DialogTitle className="truncate text-base">{titolo}</DialogTitle>
+            <DialogTitle className="break-words text-base">{titolo}</DialogTitle>
             <DialogDescription className="text-xs">{t("agente.ispettoreAiuto")}</DialogDescription>
           </div>
           <div className="flex shrink-0 items-center gap-1">

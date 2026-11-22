@@ -88,7 +88,7 @@ function barreOption(rows: RigaBarra[], seriesName: string, colore: string, scop
     yAxis: {
       type: "category" as const,
       data: ordinate.map(nome),
-      axisLabel: { color: AXIS_COLOR, width: 300, overflow: "truncate" as const },
+      axisLabel: { color: AXIS_COLOR, width: 300, overflow: "break" as const },
       axisLine: { lineStyle: { color: GRID_COLOR } },
     },
     series: [

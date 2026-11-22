@@ -120,7 +120,7 @@ export function ContentMediaPanel({ documentId, canEdit }: { documentId: string;
                   <a
                     href={`/api/v1/content/media/${m.mediaId}`}
                     data-testid="content-media-download"
-                    className="block truncate text-sm font-medium underline-offset-2 hover:underline"
+                    className="block break-words text-sm font-medium underline-offset-2 hover:underline"
                   >
                     {m.filename}
                   </a>

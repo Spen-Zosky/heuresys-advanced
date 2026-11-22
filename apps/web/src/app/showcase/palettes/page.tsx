@@ -160,8 +160,8 @@ function SwatchGroup({ title, items }: { title: string; items: Swatch[] }) {
               style={{ backgroundColor: s.hex }}
             />
             <div className="min-w-0">
-              <p className="truncate text-xs font-medium text-[var(--card-foreground)]">{s.role}</p>
-              <p className="truncate text-[10px] font-mono text-[var(--muted-foreground)]">{s.hex}</p>
+              <p className="break-words text-xs font-medium text-[var(--card-foreground)]">{s.role}</p>
+              <p className="break-words text-[10px] font-mono text-[var(--muted-foreground)]">{s.hex}</p>
             </div>
           </li>
         ))}

@@ -16,7 +16,7 @@ python docs/kb/tools/chiudi.py --livello onda --dimostrazioni "<cmd>" ...   # al
 python docs/kb/tools/chiudi.py --livello rilascio                # legge un rilascio armato; senza, non fa niente
 ```
 
-Il livello **leggero è la chiusura normale**: restano i Passi A, B, D e E di questo file per scrivere stato e registro (giudizio di chi ha lavorato), poi `chiudi` misura e dice SI o NO in cinque righe (`VERIFICA`, `DEPOSITO`, `PROPAGAZIONE`, `PROVE`, `ROSSI`) e accoda una riga a `.handoff/close-log.ndjson`. I Passi F (propagazione), G (lettura dalle macchine) e l'armamento **non fanno parte** di leggero né di onda: sono del rilascio, e il rilascio è di Enzo. `chiudi` non esegue mai `scripts/close-propagate.sh`, non arma e non muove `refs/heads/prod`. La prova rosso/verde è `python docs/kb/tools/test_chiudi.py`.
+Il livello **leggero è la chiusura normale**: restano i Passi A, B, D e E di questo file per scrivere stato e registro (giudizio di chi ha lavorato), poi `chiudi` misura e dice SI o NO in cinque righe (`VERIFICA`, `DEPOSITO`, `PROPAGAZIONE`, `PROVE`, `ROSSI`) e accoda una riga a `.handoff/close-log.ndjson`. I Passi F, G e l'armamento **non fanno parte** di leggero né di onda: girano quando il lavoro comprende un rilascio, che i thread eseguono da sé con `scripts/rilascia.sh` nelle condizioni della delega del 13/11; la propagazione di ciò che è su `main` è l'ultimo passo del lavoro e non si chiede. `chiudi` non esegue mai `scripts/close-propagate.sh`, non arma e non muove `refs/heads/prod`. La prova rosso/verde è `python docs/kb/tools/test_chiudi.py`.
 
 ---
 
@@ -201,8 +201,8 @@ MSYS_NO_PATHCONV=1 bash scripts/align-clones.sh all --delta --resilient --auto-d
 - Legge il marker `.session-align.marker`; deploya VM/linux-pc solo se i commit hanno toccato
   `apps|packages|db|scripts|deploy`; consuma il marker.
 - Opt-out deploy: `HEURESYS_CLOSE_NODEPLOY=1`.
-- Riporta cosa è stato propagato, gli host saltati e ogni `marketplace_sha DRIFT` (versioni plugin —
-  aggiornamento manuale di Enzo per macchina, design §13.2).
+- Riporta cosa è stato propagato e gli host saltati; un `marketplace_sha DRIFT` si corregge nello
+  stesso lavoro con la skill `allinea-ecosistema`, e nel rapporto va l'esito per macchina.
 
 ---
 

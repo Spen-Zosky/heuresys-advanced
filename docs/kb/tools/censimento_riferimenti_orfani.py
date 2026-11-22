@@ -44,6 +44,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _pg_agenti  # noqa: E402,F401  B2: il database si legge come heuresys_agenti
+
 REPO = Path(__file__).resolve().parents[3]
 MIGRAZIONI = REPO / "db" / "migrations"
 

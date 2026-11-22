@@ -49,6 +49,9 @@ import re
 import subprocess
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _pg_agenti  # noqa: E402,F401  B2: il database si legge come heuresys_agenti
+
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 DOMINI_TS = os.path.join(REPO, "apps", "api", "src", "modules", "research", "domains")
 PONTE_TS = os.path.join(REPO, "apps", "api", "src", "modules", "research", "ponte.ts")

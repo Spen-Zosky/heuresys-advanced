@@ -31,3 +31,42 @@ Obiettivo: gli agenti scrivono nel database di produzione con un ruolo che non p
 1. Spostare ogni script esistente da `heuresys` a `heuresys_agenti`: molti fanno DDL legittimo (migrazioni, seed). Va deciso script per script.
 2. Impedire fisicamente che un agente usi la password del proprietario: oggi lo fanno solo `enzo-guard` e il blocco di lettura del `.env`; il database non può distinguere chi sta dietro `heuresys`. Soluzione piena (decisione di Enzo): la password del proprietario esce dall'ambiente degli agenti e resta al solo script di rilascio.
 3. Propagazione ai PC.
+
+## Tappa 2 — gli script degli agenti su `heuresys_agenti` (PR separata, sì di Enzo 21/11 19:52)
+
+Come: due aiuti gemelli, `deploy/postgres/env-agenti.sh` (bash, da includere dopo il file d'ambiente del repo) e `docs/kb/tools/_pg_agenti.py` (Python, importato), leggono `~/.config/claude-agenti/db-agenti.env` e portano `POSTGRES_USER`, `POSTGRES_PASSWORD`, `PGUSER`, `PGPASSWORD`, `ATLAS_PGUSER` su `heuresys_agenti`. Dove il file manca (PC via tunnel, gemello) lo dicono su stderr e lasciano l'ambiente com'era: la propagazione della credenziale è una decisione di Enzo.
+
+Censimento: `git grep -lE 'POSTGRES_USER|POSTGRES_PASSWORD|PGUSER|PGPASSWORD|DATABASE_URL|-U heuresys'` sui file `.sh .py .ps1 .mjs .ts .js .json`, fuori da `node_modules`.
+
+### Passano a `heuresys_agenti` (leggono o scrivono solo righe; nessuna istruzione di struttura, misurato con grep)
+
+| file | cosa fa |
+|---|---|
+| `docs/kb/tools/build_atlas.py`, `build_soglie_agente.py`, `censimento_riferimenti_orfani.py`, `check_domini_ricercabili.py`, `check_embedding_coverage.py`, `check_identita_azienda.py`, `check_pagine_raggiungibili.py`, `check_permessi_inutili.py`, `check_tenant_contamination.py`, `chi_ripara.py`, `chi_sorveglia.py`, `completezza_tenant.py`, `db_health.py`, `dead_columns.py`, `exposure_columns.py`, `verifica_incrociata.py` | controlli e misure in sola lettura |
+| `db/scripts/audit-storia36-semantic.py` | controllo in sola lettura della storia RTL |
+| `scripts/auth-housekeeping.sh` | DELETE dei token scaduti e degli eventi di login vecchi |
+| `scripts/gdpr-retention-sweep.sh` | DELETE per conservazione GDPR |
+| `scripts/atlante-automatico.sh` | lettura per l'atlante |
+
+Prova dal vivo sulla VM (2026-11-21, sessione senza la password del proprietario nell'ambiente, `PGPORT=5432`): i 13 strumenti con accesso al database girano senza un solo errore di permesso o di autenticazione (`grep -ciE 'permission denied|password authentication|no password'` = 0); le uscite 1/2 sono rossi di contenuto già noti (sentinelle, verifiche incrociate), non di accesso.
+
+Misura richiesta dalla revisione (2026-11-21, sola lettura, come `heuresys_agenti`): `select schemaname, count(*) from pg_stat_user_tables where schemaname not in ('sys','audit','staging','reference_sync') group by 1` → nessuna riga; fuori dai quattro schemi ci sono solo 2 viste in `public`, leggibili dal ruolo. `build_atlas.py` completo come `heuresys_agenti`: exit 0, «432 tabelle DB», 0 errori di permesso (i file generati sono stati rimessi com'erano). Nessun permesso da aggiungere.
+
+Ripiego: finché la tappa 3 non è applicata, se il file della credenziale manca o è rovinato i due aiuti tornano al proprietario e lo dicono solo su stderr; dopo lo spostamento della password il ripiego fallisce l'autenticazione, quindi il difetto si chiude da sé.
+
+### Restano al proprietario `heuresys` (DDL legittimo o fuori dal perimetro degli agenti)
+
+| file | perché |
+|---|---|
+| `db/scripts/migrate.sh`, `migrate.ps1`, `migrate-if-pending.sh` | migrazioni: creano e cambiano la struttura |
+| `scripts/rilascia.sh`, `scripts/vm-deploy.sh` e la catena di rilascio | applicano le migrazioni |
+| `db/scripts/storia36.sh` | `CREATE OR REPLACE` delle funzioni della storia |
+| `db/scripts/setup_oci_vm_database.sh`, `create_local_database.*`, `reset_local_database.*`, `scripts/setup-local-pg.sh`, `scripts/provision-ci-runner-linuxpc.sh` | creano database, ruoli, estensioni |
+| `db/scripts/ci-rehearsal.sh`, `ci-rehearsal-census.sh`, `ci-db-usa-e-getta.sh`, `scripts/clone-vm-db.sh`, `db/scripts/onda2/prova-*.sh`, `db/scripts/pacchetto/prova-*.sh` | creano e distruggono copie usa-e-getta |
+| `db/scripts/validate_database.*` | `pg_dump --schema-only` e confronto dello schema, sul gemello |
+| `db/scripts/seed-*.ts`, `provision-*.ts`, `encrypt-totp-secrets.ts`, `stop-deriving-totp.ts`, `verify-separazione-totp.ts`, `sospendi-collaudo.ts`, `db/scripts/pacchetto/*.mjs` | seed e provisioning: portano a uno stato dichiarato; vanno rivisti uno per uno in un giro a parte |
+| `docs/kb/tools/build_menu.py`, `check_completezza_self.py`, `check_exposure.py`, `check_pagine_orfane.py`, `status_dashboard.py` | hanno `-U heuresys` e la porta 5433 scritti nel codice: girano dal PC via tunnel. Nota: `chi_ripara.py` importa `_pg_agenti` e poi chiama `check_exposure.py`; dove la credenziale degli agenti esiste (VM) quella chiamata parte come `heuresys` con la password degli agenti e fallisce, ma sulla VM la porta 5433 non risponde comunque |
+| `scripts/turno/dopo-presa-debian.sh`, `scripts/verifica-cloni.sh`, `scripts/db-health-graph.sh`, `scripts/session-boot.ps1`, `scripts/setup-tunnel-automation.ps1` | girano sul PC o sulla Debian via tunnel, dove la credenziale degli agenti non c'è |
+| `scripts/propagate-secret-rotation.sh`, `deploy/postgres/assegna-password-*.sh`, `prova-identita-app.sh` | gestiscono le credenziali stesse |
+| `apps/api/src/**`, `apps/agent-gateway/src/**` | servizi: in produzione usano già `heuresys_app` (`POSTGRES_APP_USER`) |
+| `apps/api/scripts/*.mjs`, `apps/*/test/**`, `cowork_reserved/**`, `db/seeds/rtl-rebuild/00_extract_legacy_subset.sh`, `db/scripts/extract_users_employees_legacy.sh`, `db/scripts/import-d1-user-skills.sh`, `docs/archive/**`, `.programmi/**` | prove locali, test, ingestione legacy chiusa (ADR-0038), archivio |

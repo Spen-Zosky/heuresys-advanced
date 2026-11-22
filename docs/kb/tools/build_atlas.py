@@ -40,6 +40,9 @@ import subprocess
 import sys
 from collections import OrderedDict
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _pg_agenti  # noqa: E402,F401  B2: il database si legge come heuresys_agenti
+
 REPO = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."))
 API_MODULES = os.path.join(REPO, "apps", "api", "src", "modules")
 API_APP = os.path.join(REPO, "apps", "api", "src", "app.ts")

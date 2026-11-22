@@ -37,6 +37,9 @@ import re
 import subprocess
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _pg_agenti  # noqa: E402,F401  B2: il database si legge come heuresys_agenti
+
 # Lo script vive in docs/kb/tools/ -> la radice del repo e' tre livelli sopra.
 # Derivata dalla posizione del file, non da un path scritto a mano: sopravvive
 # al clone su VM/linux-pc, dove la cartella madre ha un altro nome.

@@ -8,7 +8,9 @@
  *  · un valore fuori vocabolario risponde 400; senza criterio 400;
  *  · senza `bpm_process:update` la rotta è negata (403 FORBIDDEN); un PROCESS_OWNER che non presidia
  *    il processo riceve 403 PERMISSION_DENIED e vede `canEdit` falso;
- *  · un processo inesistente risponde 404; senza CSRF 403.
+ *  · un processo inesistente risponde 404; senza CSRF 403;
+ *  · chi regge la posizione responsabile del processo lo classifica anche senza PROCESS_OWNER
+ *    (decisione di Enzo del 2026-11-22): il potere viene dal dato, non dal ruolo.
  * Le scritture si annullano a fine file (isolamento transazionale, `.claude/rules/tests.md`).
  */
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
@@ -52,6 +54,7 @@ let hrms: Session;
 let plain: Session;
 let owner: Session;
 let processId = "";
+let processoDiTommaso = "";
 
 async function grant(email: string, role: string): Promise<void> {
   await pool.query(
@@ -94,6 +97,23 @@ beforeAll(async () => {
      RETURNING tenant_process_id AS id`,
     [a.tenant_id, `D4-PROVA-${Date.now()}`, a.position_id]);
   processId = ins.rows[0]!.id;
+
+  // Un secondo processo, il cui responsabile è una posizione che Tommaso regge oggi: lui, con il
+  // solo ruolo USER, ne è il responsabile in carica.
+  const sua = await pool.query<{ position_id: string }>(
+    `SELECT a.user_position_assignment_position_id AS position_id
+       FROM sys.sys_user_position_assignments a
+       JOIN sys.sys_users u ON u.user_id = a.user_position_assignment_user_id AND u.user_email = $1
+      WHERE a.user_position_assignment_status = 'ACTIVE' LIMIT 1`,
+    [TOMMASO]);
+  if (!sua.rows[0]) throw new Error("Tommaso Fiore non regge nessuna posizione attiva");
+  const ins2 = await pool.query<{ id: string }>(
+    `INSERT INTO sys.sys_tenant_processes
+       (tenant_process_tenant_id, tenant_process_code, tenant_process_name, tenant_process_owner_position_id, origine_dato)
+     VALUES ($1, $2, 'Processo di prova del responsabile in carica (ADR-0061)', $3, 'NATIVO')
+     RETURNING tenant_process_id AS id`,
+    [a.tenant_id, `D4-RESP-${Date.now()}`, sua.rows[0].position_id]);
+  processoDiTommaso = ins2.rows[0]!.id;
 
   plain = await login(suite, TOMMASO);          // USER, senza bpm_process:update
   await grant(ANTONIO, "HRMS_MANAGER");
@@ -155,6 +175,19 @@ describe("ADR-0061 D4 — le faccette di un processo del tenant", () => {
     const g = await getFacets(suite, owner, processId);
     expect(g.statusCode).toBe(200);
     expect((g.json() as { canEdit: boolean }).canEdit).toBe(false);
+  });
+
+  it("il responsabile in carica classifica il proprio processo anche senza PROCESS_OWNER (Enzo, 2026-11-22)", async () => {
+    const g = await getFacets(suite, plain, processoDiTommaso);
+    expect(g.statusCode).toBe(200);
+    expect((g.json() as { canEdit: boolean }).canEdit).toBe(true);
+    const r = await putFacet(suite, plain, processoDiTommaso, "PERIMETRO", { codes: ["INTERFUNZIONALE"], criterion: "Attraversa più direzioni" });
+    expect(r.statusCode).toBe(200);
+    const items = (r.json() as { items: Array<{ facet: string; code: string; source: string; status: string }> }).items;
+    expect(items.find((x) => x.facet === "PERIMETRO")).toMatchObject({ code: "INTERFUNZIONALE", source: "PERSONA", status: "APPROVATA" });
+    // CONTROPROVA: sullo stesso profilo, un processo che non presidia resta negato e non modificabile.
+    expect(codeOf(await putFacet(suite, plain, processId, "PERIMETRO", { codes: ["INTERFUNZIONALE"], criterion: "x" }))).toBe("FORBIDDEN");
+    expect(((await getFacets(suite, plain, processId)).json() as { canEdit: boolean }).canEdit).toBe(false);
   });
 
   it("un processo inesistente risponde 404; senza CSRF la scrittura è rifiutata", async () => {

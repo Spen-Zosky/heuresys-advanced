@@ -38,6 +38,17 @@ async function nelPerimetro(c: repo.DbConnector, actor: ActorContext, ownerPosit
   if (!presidia) throw new ForbiddenError(messaggio, "PERMISSION_DENIED");
 }
 
+/**
+ * Vero se chi chiama regge oggi la posizione responsabile del processo, nel proprio tenant.
+ * Decisione di Enzo del 2026-11-22 (ADR-0061): il potere di classificare un processo viene
+ * dall'esserne il responsabile in carica, anche senza PROCESS_OWNER, e segue i cambi di persona.
+ */
+export async function presidiaIlProcesso(actor: ActorContext, id: string): Promise<boolean> {
+  const p = await repo.findProcessById(pool, id);
+  if (!p || p.tenantId !== actor.tenantId || p.ownerPositionId === null) return false;
+  return repo.holdsPosition(pool, actor.userId, p.ownerPositionId);
+}
+
 export const tenantProcessesService = {
   async getById(actor: ActorContext, id: string): Promise<TenantProcess> {
     const p = await repo.findProcessById(pool, id);
@@ -96,8 +107,10 @@ export const tenantProcessesService = {
   async facets(actor: ActorContext, id: string): Promise<TenantProcessFacetsResponse> {
     const p = await repo.findProcessById(pool, id);
     if (!p || p.tenantId !== actor.tenantId) throw new NotFoundError("TenantProcess");
-    const canEdit = userHasPermission(actor, "bpm_process:update")
-      && (cambiaTuttoIlTenant(actor) || (p.ownerPositionId !== null && (await repo.holdsPosition(pool, actor.userId, p.ownerPositionId))));
+    // Il mandato e chi disegna i processi su tutto il tenant (con il permesso); il responsabile in
+    // carica sul proprio processo, con o senza PROCESS_OWNER (decisione di Enzo del 2026-11-22).
+    const canEdit = (userHasPermission(actor, "bpm_process:update") && cambiaTuttoIlTenant(actor))
+      || (p.ownerPositionId !== null && (await repo.holdsPosition(pool, actor.userId, p.ownerPositionId)));
     return { processId: id, canEdit, items: await repo.processFacets(pool, id) };
   },
 

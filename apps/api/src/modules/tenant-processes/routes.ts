@@ -12,8 +12,12 @@ import {
   PutTenantProcessFacetBodySchema, StepApqcParamSchema, PutStepApqcBodySchema, PutStepApqcResponseSchema,
   UpdateTenantProcessOwnerBodySchema, UpdateTenantProcessOwnerResponseSchema,
 } from "@heuresys/shared";
-import { tenantProcessesService } from "./service.js";
-import { requirePermission } from "../../middleware/rbac.js";
+import { presidiaIlProcesso, tenantProcessesService } from "./service.js";
+import { requirePermission, requirePermissionOr } from "../../middleware/rbac.js";
+import type { FastifyRequest } from "fastify";
+
+/** Classificare un processo: il permesso, oppure esserne il responsabile in carica (Enzo, 2026-11-22). */
+const presidia = (req: FastifyRequest) => presidiaIlProcesso(actor(req), (req.params as { id: string }).id);
 
 export const tenantProcessesRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/:id", {
@@ -41,12 +45,12 @@ export const tenantProcessesRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => tenantProcessesService.facets(actor(req), req.params.id));
 
   app.put("/:id/faccette/:facet", {
-    preHandler: [app.verifyCsrf, requirePermission("bpm_process:update")],
+    preHandler: [app.verifyCsrf, requirePermissionOr("bpm_process:update", presidia)],
     schema: { params: TenantProcessFacetParamSchema, body: PutTenantProcessFacetBodySchema, response: { 200: TenantProcessFacetsResponseSchema } },
   }, async (req) => tenantProcessesService.putFacet(actor(req), req.params.id, req.params.facet, req.body));
 
   app.put("/:id/attivita/:stepId/apqc", {
-    preHandler: [app.verifyCsrf, requirePermission("bpm_process:update")],
+    preHandler: [app.verifyCsrf, requirePermissionOr("bpm_process:update", presidia)],
     schema: { params: StepApqcParamSchema, body: PutStepApqcBodySchema, response: { 200: PutStepApqcResponseSchema } },
   }, async (req) => tenantProcessesService.putActivityMapping(actor(req), req.params, req.body));
 };

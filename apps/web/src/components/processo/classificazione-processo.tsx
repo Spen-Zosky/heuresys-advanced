@@ -45,10 +45,39 @@ export function ClassificazioneProcesso({ processId, faccette }: { processId: st
     return m;
   }, [faccette.items]);
   const assegnate = FACCETTE.filter((f) => perFaccetta.has(f)).length;
+  // Le proposte dell'agente si approvano anche tutte insieme (decisione in blocco): una scrittura per
+  // faccetta, con i valori e il criterio proposti, come se si premesse «Approva» su ciascuna.
+  const proposte = FACCETTE.filter((f) => (perFaccetta.get(f) ?? []).some((v) => v.status === "PROPOSTA"));
+  const qc = useQueryClient();
+  const approvaTutte = useMutation({
+    mutationFn: async () => {
+      let ultima: TenantProcessFacetsResponse | null = null;
+      for (const f of proposte) {
+        const valori = perFaccetta.get(f) ?? [];
+        ultima = await apiFetch<TenantProcessFacetsResponse>(`/v1/tenant-processes/${processId}/faccette/${f}`, {
+          method: "PUT",
+          body: { codes: valori.map((v) => v.code), criterion: valori[0]?.criterion ?? "" },
+        });
+      }
+      return ultima;
+    },
+    onSettled: (r) => {
+      if (r) qc.setQueryData(["tenant-processes", processId, "faccette"], r);
+      void qc.invalidateQueries({ queryKey: ["tenant-processes", processId, "faccette"] });
+    },
+  });
 
   return (
     <div className="space-y-3" data-testid="classificazione-processo">
-      <p className="text-xs text-muted-foreground">{k("nota", { assegnate, totale: FACCETTE.length })}</p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs text-muted-foreground">{k("nota", { assegnate, totale: FACCETTE.length })}</p>
+        {faccette.canEdit && proposte.length > 0 ? (
+          <Button size="sm" onClick={() => approvaTutte.mutate()} disabled={approvaTutte.isPending} data-testid="classificazione-approva-tutte">
+            {approvaTutte.isPending ? k("approvazioneInCorso") : k("approvaTutte", { n: proposte.length })}
+          </Button>
+        ) : null}
+      </div>
+      {approvaTutte.isError ? <p className="text-xs text-destructive">{k("errore")}</p> : null}
       <div className="overflow-x-auto rounded-md border border-border">
         <table className="w-full text-sm" data-testid="classificazione-tabella">
           <thead className="bg-muted/50 text-left text-xs text-muted-foreground">

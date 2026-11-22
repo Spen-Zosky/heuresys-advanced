@@ -144,10 +144,15 @@ case "$cmd" in
     fi
     stato="$(stato_corrente)"
     if [ "$(cat "$ULTIMO_FILE" 2>/dev/null || true)" != "$stato" ]; then
-      pubblica_tutte "$stato"
-      mkdir -p "$(dirname "$ULTIMO_FILE")"
-      printf '%s\n' "$stato" > "$ULTIMO_FILE"
-      say "«$CONTESTO» ripubblicato sulle PR aperte: $stato"
+      # gh puo' non rispondere (macchina senza accesso a GitHub, come il gemello linux-pc: 22/11):
+      # non e' un errore del rilascio. Non si registra lo stato, cosi' si riprova al giro dopo.
+      if pubblica_tutte "$stato"; then
+        mkdir -p "$(dirname "$ULTIMO_FILE")"
+        printf '%s\n' "$stato" > "$ULTIMO_FILE"
+        say "«$CONTESTO» ripubblicato sulle PR aperte: $stato"
+      else
+        say "«$CONTESTO» non ripubblicato (gh non risponde su questa macchina): riprovo al prossimo giro"
+      fi
     fi
     ;;
   stato-pr)

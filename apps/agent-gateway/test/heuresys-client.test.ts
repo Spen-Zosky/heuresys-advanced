@@ -85,6 +85,17 @@ describe("HeuresysClient auth/CSRF", () => {
     const c2 = new HeuresysClient({ baseUrl: "http://api", session, fetchImpl: scrittura.fetchImpl });
     await expect(c2.call("POST", "/skills", {})).rejects.toThrow(/403/);
   });
+
+  it("una scrittura rifiutata dice che non è avvenuta e porta il motivo dell'API (difetto del 2026-11-22)", async () => {
+    const motivo = { code: "VALIDATION_ERROR", message: "body/codes: Required" };
+    const { fetchImpl } = recordingFetch(() => ({ ok: false, status: 400, body: motivo }));
+    const c = new HeuresysClient({ baseUrl: "http://api", session, fetchImpl });
+    const errore = c.call("PUT", "/tenant-processes/p-1/faccette/PERIMETRO", { code: "INTERFUNZIONALE" });
+    await expect(errore).rejects.toThrow(/400 \(scrittura NON eseguita\)/);
+    await expect(c.call("PUT", "/tenant-processes/p-1/faccette/PERIMETRO", {})).rejects.toThrow(/body\/codes: Required/);
+    // CONTROPROVA: una lettura fallita non si dichiara scrittura.
+    await expect(c.call("GET", "/tenant-processes/p-1")).rejects.not.toThrow(/scrittura/);
+  });
 });
 
 describe("2026-11-18 — ciò che la persona non vede: {omissis} e letture negate", () => {
@@ -242,9 +253,30 @@ describe("filtri delle letture dalla specifica", () => {
     expect(calls).toHaveLength(1);
   });
 
+  it("espone lo schema del corpo di ogni scrittura (codes + criterion per le faccette) e legge la specifica una volta sola", async () => {
+    const corpo = { type: "object", required: ["codes", "criterion"], properties: { codes: { type: "array", items: { type: "string" } }, criterion: { type: "string" } } };
+    const { fetchImpl, calls } = recordingFetch(() => ({
+      ok: true,
+      status: 200,
+      body: {
+        paths: {
+          "/v1/tenant-processes/{id}/faccette/{facet}": { put: { requestBody: { content: { "application/json": { schema: corpo } } } } },
+          "/v1/tenant-processes/{id}": { get: { parameters: [{ in: "query", name: "x", schema: { type: "string" } }] } },
+        },
+      },
+    }));
+    const c = new HeuresysClient({ baseUrl: "http://api", session, fetchImpl });
+    const corpi = await c.corpiDelleScritture();
+    await c.filtriDelleLetture();
+    expect(corpi.get("PUT /v1/tenant-processes/{id}/faccette/{facet}")).toEqual(corpo);
+    expect(corpi.has("GET /v1/tenant-processes/{id}")).toBe(false); // CONTROPROVA: una lettura non ha corpo
+    expect(calls).toHaveLength(1);
+  });
+
   it("senza specifica non lancia: descrizione senza filtri", async () => {
     const { fetchImpl } = recordingFetch(() => ({ ok: false, status: 500 }));
     const c = new HeuresysClient({ baseUrl: "http://api", session, fetchImpl });
     expect((await c.filtriDelleLetture()).size).toBe(0);
+    expect((await c.corpiDelleScritture()).size).toBe(0);
   });
 });

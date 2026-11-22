@@ -474,7 +474,8 @@
         "skill": "Skill",
         "positions": "Positions requiring it",
         "project": "Project",
-        "status": "Status"
+        "status": "Status",
+        "apqc": "APQC correspondence"
       },
       "nessunaAttivita": "The process has no activities.",
       "nessunaUnita": "No unit takes part in the process.",
@@ -562,6 +563,42 @@
         "STANDARDIZZAZIONE": {
           "nome": "Standardisation",
           "domanda": "Whether it is the same everywhere, configurable, sector-specific or only for this company"
+        }
+      }
+    },
+    "apqc": {
+      "voce": "item {{codice}}",
+      "daDichiarare": "type to be declared",
+      "proposta": "agent proposal",
+      "dichiara": "Declare",
+      "modifica": "Edit",
+      "esamina": "Review",
+      "titolo": "Correspondence with the APQC item",
+      "domanda": "How closely does the activity “{{attivita}}” match the APQC item {{codice}} it comes from?",
+      "propostaAgente": "The type is an agent proposal: confirm or correct it and save to approve it.",
+      "criterio": "Criterion",
+      "criterioAiuto": "Why the correspondence is of this type: what the activity does more or less than the item.",
+      "errore": "Saving failed. Try again.",
+      "annulla": "Cancel",
+      "salva": "Save",
+      "approva": "Approve",
+      "salvataggio": "Saving…",
+      "tipi": {
+        "ESATTO": {
+          "nome": "Exact",
+          "descrizione": "The activity does exactly what the item describes, no more and no less."
+        },
+        "PIU_AMPIO": {
+          "nome": "Broader",
+          "descrizione": "The activity includes the item and does more."
+        },
+        "PIU_RISTRETTO": {
+          "nome": "Narrower",
+          "descrizione": "The activity covers only part of what the item describes."
+        },
+        "PARZIALE": {
+          "nome": "Partial",
+          "descrizione": "The activity and the item overlap only in part: each does something the other does not."
         }
       }
     }

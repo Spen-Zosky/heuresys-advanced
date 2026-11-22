@@ -23,6 +23,7 @@ import { MODALE } from "@/lib/modale";
 import { PageHeader } from "@/components/intestazione-pagina";
 import { OggettoContato } from "@/components/processo/oggetto-contato";
 import { ClassificazioneProcesso, useFaccetteProcesso } from "@/components/processo/classificazione-processo";
+import { CorrispondenzaApqc } from "@/components/processo/corrispondenza-apqc";
 import { SchedePagina } from "@/components/schede-pagina";
 import { Riferimento, useScheda } from "@/components/scheda-rapida";
 import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
@@ -159,7 +160,7 @@ export default function TenantProcessPage() {
     <Tabella
       testId="tenant-process-attivita"
       vuoto={t("processiDelTenant.scheda.nessunaAttivita")}
-      intestazioni={[k("ordinal"), k("activity"), ...(conSotto ? [k("subprocess")] : []), k("input"), k("output"), k("unit"), k("executor"), k("nature"), k("delivery"), k("hours")]}
+      intestazioni={[k("ordinal"), k("activity"), ...(conSotto ? [k("subprocess")] : []), k("input"), k("output"), k("unit"), k("executor"), k("nature"), k("delivery"), k("hours"), k("apqc")]}
       righe={att.map((a) => [
         <span key="o" className="tabular-nums text-xs text-muted-foreground">{a.ordinal}</span>,
         <button key="n" type="button" className="text-left font-medium hover:underline" onClick={() => setAperta(a.activityId)}>{a.name}</button>,
@@ -171,6 +172,7 @@ export default function TenantProcessPage() {
         enumLabel("processWorkNature", a.workNature),
         enumLabel("processDeliveryModel", a.deliveryModel),
         <span key="h" className="tabular-nums">{a.typicalHoursPerCycle === null ? "—" : fmt.numero(a.typicalHoursPerCycle, 1)}</span>,
+        <CorrispondenzaApqc key="apqc" processId={p.processId} attivita={a} canEdit={faccette.data?.canEdit ?? false} />,
       ])}
     />
   );

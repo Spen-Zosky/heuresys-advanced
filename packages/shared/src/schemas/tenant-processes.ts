@@ -52,6 +52,15 @@ export const TenantProcessListResponseSchema = z.object({
 });
 export type TenantProcessListResponse = z.infer<typeof TenantProcessListResponseSchema>;
 
+export const StepApqcKindSchema = z.enum(["ESATTO", "PIU_AMPIO", "PIU_RISTRETTO", "PARZIALE"]);
+export const StepApqcMatchSchema = z.object({
+  kind: StepApqcKindSchema,
+  criterion: z.string(),
+  source: z.enum(["PERSONA", "AGENTE"]),
+  status: z.enum(["PROPOSTA", "APPROVATA"]),
+});
+export type StepApqcMatch = z.infer<typeof StepApqcMatchSchema>;
+
 export const TenantProcessActivitySchema = z.object({
   activityId: z.uuid(),
   /** il processo (o sottoprocesso) a cui l'attività appartiene */
@@ -71,6 +80,10 @@ export const TenantProcessActivitySchema = z.object({
   workNature: z.string().nullable(),
   deliveryModel: z.string().nullable(),
   typicalHoursPerCycle: z.number().nullable(),
+  /** ADR-0061 D7: il codice APQC da cui l'attività viene (metadati del riempimento), se c'è */
+  apqcCode: z.string().nullable(),
+  /** ADR-0061 D7: il tipo di corrispondenza dichiarato; nullo = da dichiarare */
+  apqcMatch: StepApqcMatchSchema.nullable(),
 });
 export type TenantProcessActivity = z.infer<typeof TenantProcessActivitySchema>;
 
@@ -229,3 +242,18 @@ export const PutTenantProcessFacetBodySchema = z.object({
   criterion: z.string().trim().max(2000).default(""),
 }).refine((b) => b.codes.length === 0 || b.criterion.length > 0, { message: "Il criterio è obbligatorio", path: ["criterion"] });
 export type PutTenantProcessFacetBody = z.infer<typeof PutTenantProcessFacetBodySchema>;
+
+// ADR-0061 D7, passo 4 (000509): dichiarare il tipo di corrispondenza di un'attività con APQC.
+export const StepApqcParamSchema = z.object({ id: z.uuid(), stepId: z.uuid() });
+export type StepApqcParam = z.infer<typeof StepApqcParamSchema>;
+export const PutStepApqcBodySchema = z.object({
+  kind: StepApqcKindSchema,
+  criterion: z.string().trim().min(1).max(2000),
+});
+export type PutStepApqcBody = z.infer<typeof PutStepApqcBodySchema>;
+export const PutStepApqcResponseSchema = z.object({
+  activityId: z.uuid(),
+  apqcCode: z.string(),
+  apqcMatch: StepApqcMatchSchema,
+});
+export type PutStepApqcResponse = z.infer<typeof PutStepApqcResponseSchema>;

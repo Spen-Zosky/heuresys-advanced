@@ -99,8 +99,15 @@ export async function loadActivities(db: Db, ids: string[]): Promise<TenantProce
             st.tenant_process_step_executor_job_role_id AS "executorJobRoleId",
             st.tenant_process_step_work_nature AS "workNature",
             st.tenant_process_step_delivery_model AS "deliveryModel",
-            st.tenant_process_step_typical_hours_per_cycle AS "typicalHoursPerCycle"
+            st.tenant_process_step_typical_hours_per_cycle AS "typicalHoursPerCycle",
+            nullif(st.tenant_process_step_metadata->>'apqc', '') AS "apqcCode",
+            CASE WHEN m.tenant_process_step_mapping_id IS NULL THEN NULL
+                 ELSE jsonb_build_object('kind', m.tenant_process_step_mapping_kind, 'criterion', m.tenant_process_step_mapping_criterion,
+                                         'source', m.tenant_process_step_mapping_source, 'status', m.tenant_process_step_mapping_status)
+            END AS "apqcMatch"
        FROM sys.sys_tenant_process_steps st
+       LEFT JOIN sys.sys_tenant_process_step_mappings m
+              ON m.tenant_process_step_mapping_step_id = st.tenant_process_step_id AND m.tenant_process_step_mapping_scheme = 'APQC_PCF'
        JOIN sys.sys_tenant_processes tp ON tp.tenant_process_id = st.tenant_process_step_process_id
        LEFT JOIN sys.sys_organization_units ou ON ou.organization_unit_id = st.tenant_process_step_org_unit_id
        LEFT JOIN sys.sys_positions pos ON pos.position_id = st.tenant_process_step_executor_position_id

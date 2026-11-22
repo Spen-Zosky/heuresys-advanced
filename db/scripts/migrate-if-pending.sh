@@ -25,6 +25,9 @@ esac
 [ -f "$ENV_FILE" ] || { echo "[migrate-if-pending] .env not found at $ENV_FILE" >&2; exit 1; }
 # shellcheck disable=SC1090
 set -a; . "$ENV_FILE"; set +a
+# B2 tappa 3: la password del proprietario sta fuori dall'ambiente degli agenti
+# shellcheck disable=SC1091
+. "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/deploy/postgres/env-proprietario.sh"
 : "${POSTGRES_HOST:?}"; : "${POSTGRES_PORT:?}"; : "${POSTGRES_DB:?}"; : "${POSTGRES_USER:?}"; : "${POSTGRES_PASSWORD:?}"
 export PGPASSWORD="$POSTGRES_PASSWORD"
 PSQL=(psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -tAq)

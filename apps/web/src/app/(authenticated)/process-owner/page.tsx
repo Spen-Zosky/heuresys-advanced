@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { Badge, Button } from "@heuresys/ui";
 import { PageHeader } from "@/components/intestazione-pagina";
+import { OggettoContato } from "@/components/processo/oggetto-contato";
 import type { BlueprintActivation, OrgUnitProcessForProcess, OrgUnitProcessesForProcessResponse, OrgUnitProcessRole } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
@@ -113,6 +114,7 @@ export default function ProcessOwnerPage() {
         description={t("processOwner.description")}
         badges={processes.query.data ? <Badge variant="secondary" data-testid="process-owner-count">{t("processOwner.count", { count: processes.total })}</Badge> : undefined}
       />
+      <OggettoContato oggetto="blueprint" />
       <EntityTable<ProcessRow>
         isLoading={processes.query.isLoading} isError={processes.query.isError} error={processes.query.error} errorMessage={t("processOwner.errorMessage")}
         rows={rows} server={processes.server} rowKey={(p) => p.blueprintProcessId} rowTestId="process-owner-row" columns={processColumns}

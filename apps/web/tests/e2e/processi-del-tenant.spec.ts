@@ -89,4 +89,16 @@ test.describe("Processi del tenant — dati vivi", () => {
     await expect(page.getByTestId("classificazione-riga")).toHaveCount(7);
     await expect(page.getByTestId("classificazione-valore")).toHaveCount(faccette.items.length);
   });
+  test("ADR-0061, passo 3: il catalogo del modello dice quanti criteri di pubblicazione soddisfa ogni processo", async ({ page }) => {
+    await page.goto("/processes");
+    await expect(page.getByTestId("processes-page")).toBeVisible();
+    const righe = page.getByTestId("processes-row");
+    test.skip((await righe.count()) === 0, "nessun processo del modello in elenco");
+    const apri = page.getByTestId("pubblicabilita-apri").first();
+    await expect(apri).toBeVisible();
+    await apri.click();
+    await expect(page.getByTestId("pubblicabilita-finestra")).toBeVisible();
+    await expect(page.getByTestId("pubblicabilita-criterio")).toHaveCount(8);
+    await expect(page.getByTestId("pubblicabilita-criterio").nth(1)).toHaveAttribute("data-soddisfatto", "no");
+  });
 });

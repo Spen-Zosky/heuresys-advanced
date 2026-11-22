@@ -11,10 +11,15 @@ import type {
   CreateBlueprintProcessBody, UpdateBlueprintProcessBody,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
+import { pubblicabilita } from "./pubblicabilita.js";
 
 export const blueprintProcessesService = {
   async list(_actor: ActorContext, query: BlueprintProcessListQuery) {
     return repo.listProcesses(pool, query);
+  },
+  /** ADR-0061 D10: gli otto criteri per ogni processo della versione; sola lettura. */
+  async pubblicabilita(_actor: ActorContext, variantVersionId: string) {
+    return pubblicabilita(pool, variantVersionId);
   },
   async getById(_actor: ActorContext, id: string): Promise<BlueprintProcess> {
     const t = await repo.findProcessById(pool, id);

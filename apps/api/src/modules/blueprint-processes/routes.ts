@@ -7,6 +7,7 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import {
   BlueprintProcessSchema, BlueprintProcessListQuerySchema, BlueprintProcessListResponseSchema,
   CreateBlueprintProcessBodySchema, UpdateBlueprintProcessBodySchema, BlueprintProcessIdParamSchema,
+  PublishabilityQuerySchema, PublishabilityResponseSchema,
 } from "@heuresys/shared";
 import { blueprintProcessesService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
@@ -18,6 +19,12 @@ export const blueprintProcessesRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [requirePermission("blueprint:read")],
     schema: { querystring: BlueprintProcessListQuerySchema, response: { 200: BlueprintProcessListResponseSchema } },
   }, async (req) => blueprintProcessesService.list(actor(req), req.query));
+  // ADR-0061 D10, passo 3: il controllo di pubblicazione dei processi di una versione del modello.
+  app.get("/pubblicabilita", {
+    config: { catalogGate: "open" },
+    preHandler: [requirePermission("blueprint:read")],
+    schema: { querystring: PublishabilityQuerySchema, response: { 200: PublishabilityResponseSchema } },
+  }, async (req) => blueprintProcessesService.pubblicabilita(actor(req), req.query.variantVersionId));
   app.get("/:id", {
     // ADR-0039: registro dei processi di modello: struttura, aperta a ogni settore (I21)
     config: { catalogGate: "open" },

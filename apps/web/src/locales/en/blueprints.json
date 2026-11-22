@@ -54,7 +54,7 @@
   },
   "processes": {
     "title": "Process catalogue",
-    "description": "The processes of the tenant's blueprint, in value-chain order.",
+    "description": "The catalogue of the sector model (blueprint) processes of the tenant, in value-chain order: these are the reusable definitions. The processes the company actually runs are in «Processes».",
     "count": "{{count}} model processes",
     "count_one": "{{count}} model process",
     "error": "Unable to load the processes.",
@@ -361,7 +361,7 @@
   },
   "processiDelTenant": {
     "title": "Processes",
-    "description": "The company's processes, each with its subprocesses, activities, who performs them and the units that take part.",
+    "description": "The company's processes, that is the model adapted to this tenant, each with its subprocesses, activities, who performs them and the units that take part.",
     "count": "{{count}} processes",
     "count_one": "{{count}} process",
     "error": "Unable to load the processes.",

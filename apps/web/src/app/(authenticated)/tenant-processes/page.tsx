@@ -20,6 +20,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { useFormat } from "@/lib/format";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { PageHeader } from "@/components/intestazione-pagina";
+import { OggettoContato } from "@/components/processo/oggetto-contato";
 import { SchedePagina } from "@/components/schede-pagina";
 import { MatriceProcessi } from "@/components/processo/matrice-processi";
 import { Badge } from "@heuresys/ui";
@@ -103,6 +104,7 @@ export default function TenantProcessesPage() {
           </label>
         ) : undefined}
       />
+      <OggettoContato oggetto="configurazione" />
       <SchedePagina
         schede={[
           { id: "elenco", titolo: t("processiDelTenant.matrice.elenco"), conteggio: q.data ? righe.length : null, contenuto: tabella },

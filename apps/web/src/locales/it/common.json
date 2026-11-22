@@ -1782,12 +1782,16 @@
         "testo": "Un passo di un processo, nell'ordine in cui si svolge, con chi lo esegue (unità, posizione, ruolo o agente), che cosa riceve e che cosa produce."
       },
       "processoDelModello": {
-        "termine": "processo del modello|processi del modello",
-        "testo": "Un processo del catalogo da cui il tenant è partito. Il tenant lo adotta, lo accorpa o lo rinomina nei suoi processi; per questo i due numeri possono essere diversi."
+        "termine": "processo del modello|blueprint di processo",
+        "testo": "La definizione riutilizzabile di un processo, valida per un settore e indipendente dalla singola azienda. Si adatta a un tenant con la configurazione."
       },
       "partecipazioneUnita": {
         "termine": "partecipazione dell'unità|ruolo dell'unità",
         "testo": "Come un'unità partecipa al processo: R esegue, A risponde del risultato, C è consultata, I è informata."
+      },
+      "processoDelTenant": {
+        "termine": "processo del tenant|processo dell'azienda",
+        "testo": "Il processo del modello come lo vive questa azienda: con il suo responsabile, i suoi sottoprocessi, le sue attività e le unità che vi partecipano."
       }
     }
   },
@@ -1888,5 +1892,98 @@
     "siSbloccaAllaFine": "La pagina si sblocca quando il lavoro è finito.",
     "applicazione": "Applicazione in corso…",
     "giroInSottofondo": "Il giro continua anche se chiudi la pagina; l'esito arriva qui."
+  },
+  "sensiDelProcesso": {
+    "etichetta": "Questa pagina conta",
+    "apri": "Che cosa vuol dire «processo»",
+    "titolo": "Le cinque cose che chiamiamo «processo»",
+    "introduzione": "Heuresys tiene separate cinque cose diverse che nel parlare comune si chiamano tutte «processo». Ogni pagina che conta processi dice quale delle cinque conta, così due numeri diversi non sembrano un errore.",
+    "definizione": "Un processo di business è un insieme coordinato di attività, decisioni e interazioni, attivato da eventi o condizioni, che usa risorse e informazioni per produrre risultati verificabili per beneficiari identificati, entro responsabilità, vincoli e criteri di prestazione definiti.",
+    "colonne": {
+      "oggetto": "Che cos'è",
+      "domanda": "Risponde alla domanda",
+      "nonE": "Non è",
+      "dove": "Dove si vede"
+    },
+    "questaPagina": "questa pagina",
+    "oggetti": {
+      "tassonomia": {
+        "nome": "Classificazione",
+        "domanda": "Dove si colloca il processo e come lo si classifica",
+        "nonE": "Una descrizione del flusso di lavoro",
+        "dove": "In arrivo: dominio, famiglia e caratteristiche di ogni processo"
+      },
+      "metamodello": {
+        "nome": "Schema descrittivo",
+        "domanda": "Con quali elementi si descrive un processo e come sono collegati",
+        "nonE": "Un processo concreto",
+        "dove": "Le schede dei processi seguono questo schema"
+      },
+      "blueprint": {
+        "nome": "Processo del modello",
+        "domanda": "Qual è la definizione riutilizzabile di un processo, valida per un settore",
+        "nonE": "Il modo in cui una singola azienda lo vive",
+        "dove": "Catalogo dei processi; Responsabile di processo"
+      },
+      "configurazione": {
+        "nome": "Processo del tenant",
+        "domanda": "Come il processo del modello si adatta a questa azienda: responsabile, sottoprocessi, attività, unità",
+        "nonE": "La definizione del modello",
+        "dove": "Processi"
+      },
+      "istanza": {
+        "nome": "Esecuzione",
+        "domanda": "Che cosa è successo in una singola esecuzione del processo",
+        "nonE": "La definizione del processo",
+        "dove": "Richieste di approvazione e progetti legati a un processo"
+      }
+    },
+    "livelli": {
+      "titolo": "I cinque livelli: dove si colloca il processo",
+      "nota": "I livelli dicono come il lavoro si scompone, non in che ordine si svolge. Il numero «processo» o «sottoprocesso» dentro un tenant dice solo quanto un processo è annidato in un altro: un sottoprocesso resta un processo del terzo livello.",
+      "colonne": {
+        "livello": "Livello",
+        "oggetto": "Oggetto",
+        "definizione": "Definizione",
+        "esempio": "Esempio"
+      },
+      "righe": {
+        "l1": {
+          "livello": "Primo",
+          "oggetto": "Dominio di processo",
+          "definizione": "Grande ambito di gestione aziendale",
+          "esempio": "Gestire il capitale umano"
+        },
+        "l2": {
+          "livello": "Secondo",
+          "oggetto": "Famiglia di processi",
+          "definizione": "Processi con finalità correlate",
+          "esempio": "Acquisire e inserire persone"
+        },
+        "l3": {
+          "livello": "Terzo",
+          "oggetto": "Processo",
+          "definizione": "Trasformazione con confini, risultato e responsabilità definiti",
+          "esempio": "Gestire la selezione"
+        },
+        "l4": {
+          "livello": "Quarto",
+          "oggetto": "Attività",
+          "definizione": "Unità significativa di lavoro del processo",
+          "esempio": "Valutare i candidati"
+        },
+        "l5": {
+          "livello": "Quinto",
+          "oggetto": "Compito",
+          "definizione": "Azione descritta al livello operativo necessario",
+          "esempio": "Registrare l'esito del colloquio"
+        }
+      }
+    },
+    "catena": {
+      "titolo": "Dal ruolo alla persona",
+      "testo": "Il processo del modello nomina ruoli di processo; il processo del tenant li lega a posizioni; la persona si ricava da chi occupa la posizione alla data. Nessun processo nomina direttamente una persona."
+    },
+    "chiudi": "Chiudi"
   }
 }

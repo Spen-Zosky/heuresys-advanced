@@ -258,7 +258,7 @@
   },
   "processOwner": {
     "title": "Process owner",
-    "description": "Blueprint process catalog (graph navigation, not BPM runtime).",
+    "description": "The model (blueprint) processes with the units that take part and their roles: graph navigation, not execution of the work.",
     "count": "{{count}} model processes",
     "count_one": "{{count}} model process",
     "errorMessage": "Failed to load processes",

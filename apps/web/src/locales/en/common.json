@@ -1782,12 +1782,16 @@
         "testo": "A step of a process, in the order it happens, with who performs it (unit, position, role or agent), what it receives and what it produces."
       },
       "processoDelModello": {
-        "termine": "model process|model processes",
-        "testo": "A process of the catalogue the tenant started from. The tenant adopts, merges or renames it into its own processes, so the two numbers can differ."
+        "termine": "model process|process blueprint",
+        "testo": "The reusable definition of a process, valid for a sector and independent of any single company. It is adapted to a tenant through configuration."
       },
       "partecipazioneUnita": {
         "termine": "unit participation|unit role",
         "testo": "How a unit takes part in the process: R performs, A is accountable for the result, C is consulted, I is informed."
+      },
+      "processoDelTenant": {
+        "termine": "tenant process|company process",
+        "testo": "The model process as this company lives it: with its owner, subprocesses, activities and the units that take part."
       }
     }
   },
@@ -1888,5 +1892,98 @@
     "siSbloccaAllaFine": "The page unlocks when the work is done.",
     "applicazione": "Applying…",
     "giroInSottofondo": "The run continues even if you close the page; the result arrives here."
+  },
+  "sensiDelProcesso": {
+    "etichetta": "This page counts",
+    "apri": "What «process» means",
+    "titolo": "The five things we call «process»",
+    "introduzione": "Heuresys keeps apart five different things that everyday language calls «process». Every page that counts processes says which of the five it counts, so two different numbers do not look like an error.",
+    "definizione": "A business process is a coordinated set of activities, decisions and interactions, triggered by events or conditions, that uses resources and information to produce verifiable results for identified beneficiaries, within defined responsibilities, constraints and performance criteria.",
+    "colonne": {
+      "oggetto": "What it is",
+      "domanda": "Answers the question",
+      "nonE": "It is not",
+      "dove": "Where you see it"
+    },
+    "questaPagina": "this page",
+    "oggetti": {
+      "tassonomia": {
+        "nome": "Classification",
+        "domanda": "Where the process sits and how it is classified",
+        "nonE": "A description of the work flow",
+        "dove": "Coming: domain, family and characteristics of every process"
+      },
+      "metamodello": {
+        "nome": "Descriptive schema",
+        "domanda": "Which elements describe a process and how they are linked",
+        "nonE": "A concrete process",
+        "dove": "Process cards follow this schema"
+      },
+      "blueprint": {
+        "nome": "Model process",
+        "domanda": "What is the reusable definition of a process, valid for a sector",
+        "nonE": "How a single company lives it",
+        "dove": "Process catalogue; Process owner"
+      },
+      "configurazione": {
+        "nome": "Tenant process",
+        "domanda": "How the model process is adapted to this company: owner, subprocesses, activities, units",
+        "nonE": "The model definition",
+        "dove": "Processes"
+      },
+      "istanza": {
+        "nome": "Execution",
+        "domanda": "What happened in a single run of the process",
+        "nonE": "The definition of the process",
+        "dove": "Approval requests and projects linked to a process"
+      }
+    },
+    "livelli": {
+      "titolo": "The five levels: where the process sits",
+      "nota": "Levels say how work breaks down, not in which order it happens. «Process» or «subprocess» inside a tenant only says how deeply a process is nested in another: a subprocess is still a third-level process.",
+      "colonne": {
+        "livello": "Level",
+        "oggetto": "Object",
+        "definizione": "Definition",
+        "esempio": "Example"
+      },
+      "righe": {
+        "l1": {
+          "livello": "First",
+          "oggetto": "Process domain",
+          "definizione": "Large area of business management",
+          "esempio": "Manage human capital"
+        },
+        "l2": {
+          "livello": "Second",
+          "oggetto": "Process family",
+          "definizione": "Processes with related purposes",
+          "esempio": "Acquire and onboard people"
+        },
+        "l3": {
+          "livello": "Third",
+          "oggetto": "Process",
+          "definizione": "Transformation with defined boundaries, result and responsibility",
+          "esempio": "Manage recruitment"
+        },
+        "l4": {
+          "livello": "Fourth",
+          "oggetto": "Activity",
+          "definizione": "Meaningful unit of work of the process",
+          "esempio": "Assess candidates"
+        },
+        "l5": {
+          "livello": "Fifth",
+          "oggetto": "Task",
+          "definizione": "Action described at the operational level needed",
+          "esempio": "Record the interview outcome"
+        }
+      }
+    },
+    "catena": {
+      "titolo": "From role to person",
+      "testo": "The model process names process roles; the tenant process binds them to positions; the person comes from who holds the position at the date. No process names a person directly."
+    },
+    "chiudi": "Close"
   }
 }

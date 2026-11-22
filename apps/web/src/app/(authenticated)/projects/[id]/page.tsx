@@ -106,7 +106,7 @@ export default function ProjectDetailPage() {
               <li key={m.userId} className="flex items-center justify-between py-3"
                   data-testid="project-member-row">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium" data-testid="member-name">
+                  <p className="break-words text-sm font-medium" data-testid="member-name">
                     <NomeOppure nome={m.fullName} id={m.userId} />
                   </p>
                   <p className="text-xs text-muted-foreground">

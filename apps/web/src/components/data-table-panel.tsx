@@ -4,6 +4,7 @@ import { MODALE } from "@/lib/modale";
 import type { KeyboardEvent, ReactNode } from "react";
 import { useState } from "react";
 import { Badge, Button, DataTableWithCrossHair, Dialog, DialogContent, DialogDescription, DialogTitle } from "@heuresys/ui";
+import { colonnaTitolo } from "@/lib/titolo-riga";
 import { PageHeader } from "@/components/intestazione-pagina";
 import { useTranslation } from "react-i18next";
 import type { ServerPagination } from "@/lib/hooks/use-paginated-list";
@@ -199,7 +200,7 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
     visibleRows.length > 0 && c.header !== "" && visibleRows.every((r) => cellaVuota(c.cell(r)));
   const primarie = colonne.filter((c) => !eSecondaria(c) && !vuotaOvunque(c));
   const inTabella = primarie.filter((c) => c.header !== "").length >= 2 ? primarie : colonne;
-  const titoloRiga = inTabella.find((c) => c.header !== "") ?? colonne[0];
+  const titoloRiga = rigaAperta !== null ? colonnaTitolo(inTabella, rigaAperta) : undefined;
   const from = total === 0 ? 0 : start + 1;
   const to = end;
   const goToPage = (i: number) =>

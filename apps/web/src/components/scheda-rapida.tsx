@@ -107,7 +107,7 @@ function Elenco({ titolo, voci }: { titolo: string; voci: Array<{ tipo: TipoSche
         {voci.map((v) => (
           <li key={v.id} className="flex items-baseline justify-between gap-3 text-sm">
             <Riferimento tipo={v.tipo} id={v.id}>{v.nome}</Riferimento>
-            {v.nota ? <span className="truncate text-xs text-muted-foreground">{v.nota}</span> : null}
+            {v.nota ? <span className="min-w-0 break-words text-right text-xs text-muted-foreground">{v.nota}</span> : null}
           </li>
         ))}
       </ul>

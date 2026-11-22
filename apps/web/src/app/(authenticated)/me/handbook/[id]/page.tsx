@@ -123,7 +123,7 @@ export default function MeHandbookDetailPage() {
                   <a
                     href={`${ESS_MEDIA_PREFIX}${m.mediaId}`}
                     data-testid="handbook-attachment-link"
-                    className="block truncate text-sm font-medium underline-offset-2 hover:underline"
+                    className="block break-words text-sm font-medium underline-offset-2 hover:underline"
                   >
                     {m.filename}
                   </a>

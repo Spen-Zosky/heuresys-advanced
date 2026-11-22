@@ -229,7 +229,7 @@ function MenuMobile({ groups }: { groups: NavGroup[] }) {
                     className="flex items-center gap-2 rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
                   >
                     {i.icon}
-                    <span className="truncate">{i.label}</span>
+                    <span className="min-w-0 break-words">{i.label}</span>
                   </a>
                 </li>
               ))}
@@ -462,7 +462,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
           toggleLabel={t("shell:ui.toggleSidebar")}
           footerSlot={
             <div className="space-y-2 border-t border-border px-3 py-3">
-              <p data-testid="app-user-email" title={user.email} className="truncate text-xs text-muted-foreground">
+              <p data-testid="app-user-email" title={user.email} className="break-all text-xs text-muted-foreground">
                 {user.email}
               </p>
               <Button

@@ -613,6 +613,7 @@
   },
   "orgChart": {
     "title": "Organigramma",
+    "cliente": "Cliente",
     "back": "← Organizzazione",
     "description": "Le unità del cliente con le persone che ci lavorano, calcolate dai dati di oggi: a blocchi come un organigramma classico, oppure ad albero di nodi."
   },

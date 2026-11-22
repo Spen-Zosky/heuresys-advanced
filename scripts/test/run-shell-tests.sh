@@ -676,6 +676,35 @@ if [ -f "$CG" ] && [ -f "$DW" ]; then
   { [ "$rc" = 0 ] && <<<"$out" grep -q 'partirebbe'; } \
     && ok "D-87: in volo a monte SUPERATO dal verde dello stesso workflow a valle => deploya" \
     || fail "D-87 in volo superato ($rc: $out)"
+
+  # --- 22/11 ATLANTE: il commit che rigenera docs/kb/atlas/ non tocca percorsi di deploy, ma
+  #     fa ripartire «atlas-freshness». Se la finestra non lo interroga, l'ultimo esito di quel
+  #     workflow resta il rosso del commit di codice sotto e il gemello tace per sempre.
+  printf '%s' '{"workflow_runs":[{"name":"atlas-freshness","status":"completed","conclusion":"failure"}]}' > "$F/af_red.json"
+  printf '%s' '{"workflow_runs":[{"name":"atlas-freshness","status":"completed","conclusion":"success"}]}' > "$F/af_green.json"
+  echo cod2 > "$W/apps/w.ts"; git -C "$W" add -A >/dev/null; git -C "$W" commit -qm "codice, atlante vecchio"
+  SHA_AF_ROSSO="$(git -C "$W" rev-parse HEAD)"
+  mkdir -p "$W/docs/kb/atlas"; echo nuovo > "$W/docs/kb/atlas/a.md"; git -C "$W" add -A >/dev/null; git -C "$W" commit -qm "atlante rigenerato"
+  SHA_AF_ATLANTE="$(git -C "$W" rev-parse HEAD)"
+  echo doc > "$W/docs/z.md"; git -C "$W" add -A >/dev/null; git -C "$W" commit -qm "solo documenti"
+  SHA_AF_ARMATO="$(git -C "$W" rev-parse HEAD)"
+  git -C "$W" push -q origin HEAD:refs/heads/main
+  git -C "$W" push -qf origin HEAD:refs/heads/prod
+  printf '%s\n' "$SHA_FIX" > "$W/pg_dump_snapshots/LAST_GOOD_SHA"
+  rm -f "$W/.deploy-watch-state"
+  cp "$F/sl_green.json" "$F/persha/$SHA_AF_ARMATO.json"
+  cp "$F/af_red.json"   "$F/persha/$SHA_AF_ROSSO.json"
+  cp "$F/af_green.json" "$F/persha/$SHA_AF_ATLANTE.json"
+  out="$(CI_GATE_FIXTURE="$F/persha" dw)"; rc=$?
+  { [ "$rc" = 0 ] && <<<"$out" grep -q 'partirebbe'; } \
+    && ok "atlante: rosso di atlas-freshness superato dal commit che rigenera l'atlante => deploya" \
+    || fail "atlante rosso superato ($rc: $out)"
+  cp "$F/af_red.json" "$F/persha/$SHA_AF_ATLANTE.json"       # l'atlante rigenerato e' ancora rosso: deve fermarsi
+  rm -f "$W/.deploy-watch-state"
+  out="$(CI_GATE_FIXTURE="$F/persha" dw)"; rc=$?
+  { [ "$rc" = 1 ] && <<<"$out" grep -q 'NON VERDE'; } \
+    && ok "atlante: atlas-freshness rosso anche sul commit dell'atlante => non deploya" \
+    || fail "atlante ancora rosso ($rc: $out)"
   rm -rf "$F"
 else
   fail "$CG o $DW mancante"

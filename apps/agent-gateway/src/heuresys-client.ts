@@ -236,7 +236,13 @@ export class HeuresysClient {
       } catch {
         /* nessun corpo leggibile: resta lo stato */
       }
-      throw new Error(`${method} ${path} -> ${res.status}${lettura ? "" : " (scrittura NON eseguita)"}${motivo}`);
+      // ADR-0050 D6: in scrittura il gettone dell'assistente porta i ruoli della persona SENZA i
+      // mandati. Un 403 qui non vuol dire che la persona non abbia il potere: spesso lo ha per
+      // mandato (per esempio HR), e allora la modifica la fa lei dalla pagina (difetto del 2026-11-22).
+      const mandato = !lettura && res.status === 403
+        ? " — l'assistente scrive con i permessi della persona SENZA i suoi mandati (ADR-0050 D6): se la persona ha questo potere per mandato, la modifica la fa lei dalla pagina; non dirle che le manca il permesso"
+        : "";
+      throw new Error(`${method} ${path} -> ${res.status}${lettura ? "" : " (scrittura NON eseguita)"}${mandato}${motivo}`);
     }
     if (lettura) this.esiti?.riuscita();
     const grezzi = (await res.json()) as unknown;

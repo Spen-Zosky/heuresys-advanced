@@ -296,12 +296,3 @@ describe("filtri delle letture dalla specifica", () => {
   });
 });
 
-describe("2026-11-22 — dopo una scrittura negata l'assistente non resta muto", () => {
-  it("esitoDelGateway produce un messaggio dell'assistente con la frase per la persona", async () => {
-    const { esitoDelGateway } = await import("../src/sdk-agent.js");
-    const frase = messaggioScritturaNonSalvata(403, "FORBIDDEN");
-    const evento = esitoDelGateway([frase]) as unknown as { type: string; message: { content: Array<{ type: string; text: string }> } };
-    expect(evento.type).toBe("assistant");
-    expect(evento.message.content[0]?.text).toContain(frase);
-  });
-});

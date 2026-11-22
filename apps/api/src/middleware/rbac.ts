@@ -135,3 +135,26 @@ export function requirePermission(
   // (lib/scope/gate.ts, D-51) can map every route to its RBAC resource.
   return Object.assign(handler, { permissionCode });
 }
+
+/**
+ * Il permesso, oppure un potere che viene dal dato e non dal ruolo. Decisione di Enzo del
+ * 2026-11-22 (ADR-0061): chi è il responsabile in carica di un processo lo classifica anche se il
+ * suo profilo non porta il permesso, così il potere segue da sé i cambi di responsabile. Se il
+ * permesso manca e `alternativa` dice no, il diniego è quello di `requirePermission`, con i suoi
+ * codici. Il codice del permesso resta sul gestore per il cancello di avvio (lib/scope/gate.ts).
+ */
+export function requirePermissionOr(
+  permissionCode: string,
+  alternativa: (req: FastifyRequest) => Promise<boolean>,
+): preHandlerAsyncHookHandler {
+  const base = requirePermission(permissionCode);
+  const handler: preHandlerAsyncHookHandler = async function (this: unknown, req, reply) {
+    try {
+      await base.call(this as never, req, reply);
+    } catch (e) {
+      if (!(e instanceof ForbiddenError) || (e as { code?: string }).code === "RBAC_NOT_LOADED" || !req.user) throw e;
+      if (!(await alternativa(req))) throw e;
+    }
+  };
+  return Object.assign(handler, { permissionCode });
+}

@@ -248,7 +248,7 @@ export class HeuresysClient {
       // Difetto del 2026-11-22: dopo un consenso e un rifiuto l'assistente può chiudere il giro
       // senza dire niente. Il gateway tiene l'esito e, se il modello tace, lo dice lui (sdk-agent).
       this.scrittureFallite.push(perLaPersona);
-      throw new Error(`${method} ${path} -> ${res.status} (scrittura NON eseguita). Di' alla persona: «${perLaPersona}»${motivo}`);
+      throw new Error(`${method} ${path} -> ${res.status} (scrittura NON eseguita). La piattaforma lo scrive da sé alla persona: «${perLaPersona}»${motivo}`);
     }
     if (lettura) this.esiti?.riuscita();
     else this.scrittureFallite.length = 0; // una scrittura riuscita dopo un rifiuto lo supera

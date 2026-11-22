@@ -492,6 +492,7 @@ const server = createServer(async (req, res) => {
           approvalTimeoutMs: APPROVAL_TIMEOUT_MS,
           scrivi,
           nota: () => notaSugliEsiti(vista.esiti),
+          scrittureNonSalvate: () => client.consumaScrittureFallite(),
           rifiuto: () => esitiLetture.rifiuto(),
           attesa: { sospendi: posto.sospendi, riprendi: posto.riprendi },
           // Il costo e la durata del giro vanno nel registro delle chiamate dell'agente. Col gettone

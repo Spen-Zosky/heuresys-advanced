@@ -504,7 +504,8 @@ if [ -f "$CG" ] && [ -f "$DW" ]; then
   echo x > "$W/f"; git -C "$W" add -A >/dev/null; git -C "$W" commit -qm c1
   git -C "$W" remote add origin "$B"; git -C "$W" push -q origin HEAD:refs/heads/main
   SHA1="$(git -C "$W" rev-parse HEAD)"
-  dw() { DEPLOY_WATCH_DRYRUN=1 REPO_DIR="$W" bash "$W/scripts/deploy-watch.sh" 2>&1; }
+  cp scripts/blocco-rilascio.sh "$W/scripts/"
+  dw() { BLOCCO_FILE="$W/.blocco-prova" BLOCCO_GH=true DEPLOY_WATCH_DRYRUN=1 REPO_DIR="$W" bash "$W/scripts/deploy-watch.sh" 2>&1; }
 
   out="$(dw)"; rc=$?
   { [ "$rc" = 0 ] && <<<"$out" grep -q 'nessun deploy armato'; } \
@@ -546,6 +547,27 @@ if [ -f "$CG" ] && [ -f "$DW" ]; then
   out="$(CI_GATE_FIXTURE="$F/green.json" dw)"; rc=$?
   { [ "$rc" = 0 ] && <<<"$out" grep -q 'partirebbe'; } \
     && ok "deploy-watch: armato + arretrato + verde => deploya" || fail "deploy-watch GREEN ($rc: $out)"
+
+  # 2026-11-22: main avanza DOPO un armo di rilascia.sh => si deploya lo sha armato, non la punta
+  SHA2="$(git -C "$W" rev-parse HEAD)"                       # c2, armato (prod == c2)
+  echo w >> "$W/f"; git -C "$W" commit -qam c3; git -C "$W" push -q origin HEAD:refs/heads/main
+  rm -f "$W/.deploy-watch-state"
+  out="$(CI_GATE_FIXTURE="$F/green.json" dw)"; rc=$?
+  { [ "$rc" = 0 ] && <<<"$out" grep -q 'non e. piu. quella autorizzata' && ! <<<"$out" grep -q 'partirebbe'; } \
+    && ok "deploy-watch: main avanzata e nessuna traccia di rilascio => NON deploya (regola di prima)" || fail "deploy-watch punta senza traccia ($rc: $out)"
+  BLOCCO_FILE="$W/.blocco-prova" BLOCCO_GH=true bash "$W/scripts/blocco-rilascio.sh" arma "$SHA1" >/dev/null 2>&1       # traccia su un altro sha
+  out="$(CI_GATE_FIXTURE="$F/green.json" dw)"; rc=$?
+  { [ "$rc" = 0 ] && <<<"$out" grep -q 'non e. piu. quella autorizzata' && ! <<<"$out" grep -q 'partirebbe'; } \
+    && ok "deploy-watch: traccia di un altro sha => NON deploya" || fail "deploy-watch traccia altro sha ($rc: $out)"
+  BLOCCO_FILE="$W/.blocco-prova" BLOCCO_GH=true bash "$W/scripts/blocco-rilascio.sh" arma "$SHA2" >/dev/null 2>&1
+  out="$(CI_GATE_FIXTURE="$F/green.json" dw)"; rc=$?
+  { [ "$rc" = 0 ] && <<<"$out" grep -q 'deploy dello sha armato' && <<<"$out" grep -q "partirebbe: vm-deploy.sh su ${SHA2:0:8}"; } \
+    && ok "deploy-watch: main avanzata + traccia sullo sha armato + antenato + CI verde => deploya LO SHA ARMATO" || fail "deploy-watch punta avanzata ($rc: $out)"
+  out="$(CI_GATE_FIXTURE="$F/red.json" dw)"; rc=$?
+  { [ "$rc" = 1 ] && <<<"$out" grep -q 'NON VERDE'; } \
+    && ok "deploy-watch: main avanzata + traccia, ma CI rossa sullo sha armato => non deploya" || fail "deploy-watch punta avanzata CI rossa ($rc: $out)"
+  BLOCCO_FILE="$W/.blocco-prova" BLOCCO_GH=true bash "$W/scripts/blocco-rilascio.sh" togli prova >/dev/null 2>&1 || true
+  git -C "$W" push -qf origin "$SHA1:refs/heads/prod"        # ripristina lo stato che i test seguenti si aspettano
 
   # --- #212 GEMELLO: il deploy porta una FINESTRA, non un commit.
   #     Successo davvero il 2026-08-16: armato un commit di soli documenti (una sola corsa,

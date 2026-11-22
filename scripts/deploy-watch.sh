@@ -27,6 +27,8 @@
 # quella autorizzata». Con il veto attivo la chiusura non arma e qui non succede
 # nulla: il veto e' preservato per costruzione, non per promessa.
 #
+# (Dal 2026-11-22 il caso sotto vale solo senza la traccia di rilascia.sh: con la traccia, lo sha
+# armato si deploya anche se main e' avanzata, purche' ne sia antenato.)
 # Caso limite dichiarato: se una sessione arma e la successiva pusha prima che il
 # timer scatti, `main` supera `prod` e il deploy armato NON parte piu'. E' il verso
 # giusto in cui sbagliare — non si manda mai in produzione cio' che nessuno ha
@@ -101,8 +103,20 @@ if [ -z "$TIP" ]; then
   exit 0
 fi
 if [ "$ARMED" != "$TIP" ]; then
-  say "armato ${ARMED:0:8} ma origin/$BRANCH e' a ${TIP:0:8} — la punta non e' piu' quella autorizzata, non deployo"
-  exit 0
+  # 2026-11-22 (decisione di Enzo): un'unione dopo l'armo non invalida il rilascio. Si deploya lo
+  # sha armato, e non la punta, se sono vere tutte e tre: e' antenato di origin/main (produzione
+  # avanza solo in avanti), la traccia di rilascia.sh (scripts/blocco-rilascio.sh) nomina proprio
+  # quello sha ed e' fresca (cioe' qualcuno l'ha armato con le guardie G1-G4), e la CI sotto e'
+  # verde su QUELLO sha. Senza la traccia (arma di chiusura, rilascio abbandonato da piu' di 2 ore)
+  # vale la regola di prima: la punta non e' piu' quella autorizzata, non si deploya.
+  _blocco_d="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/blocco-rilascio.sh"
+  if git merge-base --is-ancestor "$ARMED" "$TIP" 2>/dev/null \
+     && [ -f "$_blocco_d" ] && bash "$_blocco_d" autorizza "$ARMED" 2>/dev/null; then
+    say "armato ${ARMED:0:8}, origin/$BRANCH e' avanzata a ${TIP:0:8}: deploy dello sha armato (antenato della punta, rilascio autorizzato)"
+  else
+    say "armato ${ARMED:0:8} ma origin/$BRANCH e' a ${TIP:0:8} — la punta non e' piu' quella autorizzata, non deployo"
+    exit 0
+  fi
 fi
 
 # --- 2. cosa gira davvero. Lo scrive vm-deploy.sh:245 alla fine di un deploy RIUSCITO.

@@ -67,7 +67,60 @@
       "optional": "Type"
     },
     "optionalYes": "Optional",
-    "optionalNo": "Core"
+    "optionalNo": "Core",
+    "pubblicabilita": {
+      "colonna": "Publishability",
+      "conteggio": "{{n}} of 8 criteria",
+      "titolo": "Publishability: {{nome}}",
+      "pubblicabile": "The process meets all eight criteria: it can be published as a reusable model.",
+      "nonPubblicabile": "The process meets {{n}} criteria out of 8. For each one, what the model still lacks.",
+      "colonne": {
+        "criterio": "Criterion",
+        "manca": "What is missing",
+        "esito": "Met"
+      },
+      "si": "Yes",
+      "no": "No",
+      "nota": "This is a report, not a block: it shows where the description of processes is still incomplete. Gaps that appear in every process are parts of the model not yet built, closed by the next steps.",
+      "criteri": {
+        "c1": "Stable identity and version, with verifiable boundaries and results",
+        "c2": "Distinguishes mandatory, configurable, derived and not applicable values",
+        "c3": "States responsibilities, decisions, exceptions and controls",
+        "c4": "Indicators with formula, unit, source, period and missing-data handling",
+        "c5": "Declares dependencies, compatible variants and configuration constraints",
+        "c6": "Keeps provenance, approvals and change history",
+        "c7": "Lets you rebuild version and configuration of every run",
+        "c8": "Separates identifiers, readable codes and translatable names"
+      },
+      "mancanze": {
+        "codice": "the code",
+        "versione": "the version",
+        "descrizione": "the description",
+        "risultato": "a result declared in the activities",
+        "confini": "the event that starts and the condition that ends the process",
+        "valori_non_distinti": "the model does not yet distinguish mandatory, configurable and derived values",
+        "attivita": "the activities",
+        "esecutore": "who performs some activities",
+        "decisioni": "the decisions",
+        "eccezioni": "the exceptions",
+        "controlli": "the controls",
+        "kpi": "the indicators",
+        "formula": "the formula of some indicators",
+        "unita": "the unit of some indicators",
+        "fonte": "the data source of the indicators",
+        "finestra": "the measurement period",
+        "dati_mancanti": "how missing data is handled",
+        "dipendenze": "dependencies on other processes",
+        "varianti": "compatible variants",
+        "vincoli": "configuration constraints",
+        "provenienza": "the provenance of some activities",
+        "approvazioni": "the approvals",
+        "storia": "the change history",
+        "esecuzioni": "the link between each run and the model version",
+        "denominazione": "the name",
+        "traduzione": "the name in other languages"
+      }
+    }
   },
   "brownfield": {
     "title": "Brownfield adaptation",

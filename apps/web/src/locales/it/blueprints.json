@@ -67,7 +67,60 @@
       "optional": "Tipo"
     },
     "optionalYes": "Facoltativo",
-    "optionalNo": "Essenziale"
+    "optionalNo": "Essenziale",
+    "pubblicabilita": {
+      "colonna": "Pubblicabilità",
+      "conteggio": "{{n}} di 8 criteri",
+      "titolo": "Pubblicabilità: {{nome}}",
+      "pubblicabile": "Il processo soddisfa tutti gli otto criteri: si può pubblicare come modello riutilizzabile.",
+      "nonPubblicabile": "Il processo soddisfa {{n}} criteri su 8. Per ciascuno, che cosa manca ancora al modello.",
+      "colonne": {
+        "criterio": "Criterio",
+        "manca": "Che cosa manca",
+        "esito": "Soddisfatto"
+      },
+      "si": "Sì",
+      "no": "No",
+      "nota": "È un rapporto, non un blocco: dice dove la descrizione dei processi è ancora incompleta. Le mancanze che compaiono in ogni processo sono parti del modello non ancora costruite, e si chiudono con i prossimi passi.",
+      "criteri": {
+        "c1": "Identità e versione stabili, con confini e risultati verificabili",
+        "c2": "Distingue valori obbligatori, configurabili, derivati e non applicabili",
+        "c3": "Esplicita responsabilità, decisioni, eccezioni e controlli",
+        "c4": "Indicatori con formula, unità, fonte, periodo e trattamento dei dati mancanti",
+        "c5": "Dichiara dipendenze, varianti compatibili e vincoli di configurazione",
+        "c6": "Conserva provenienza, approvazioni e storia delle modifiche",
+        "c7": "Permette di ricostruire versione e configurazione di ogni esecuzione",
+        "c8": "Separa identificativi, codici leggibili e nomi traducibili"
+      },
+      "mancanze": {
+        "codice": "il codice",
+        "versione": "la versione",
+        "descrizione": "la descrizione",
+        "risultato": "un risultato dichiarato nelle attività",
+        "confini": "l'evento che avvia e la condizione che chiude il processo",
+        "valori_non_distinti": "il modello non distingue ancora valori obbligatori, configurabili e derivati",
+        "attivita": "le attività",
+        "esecutore": "chi esegue alcune attività",
+        "decisioni": "le decisioni",
+        "eccezioni": "le eccezioni",
+        "controlli": "i controlli",
+        "kpi": "gli indicatori",
+        "formula": "la formula di alcuni indicatori",
+        "unita": "l'unità di misura di alcuni indicatori",
+        "fonte": "la fonte dei dati degli indicatori",
+        "finestra": "il periodo di misura",
+        "dati_mancanti": "come si trattano i dati mancanti",
+        "dipendenze": "le dipendenze da altri processi",
+        "varianti": "le varianti compatibili",
+        "vincoli": "i vincoli di configurazione",
+        "provenienza": "la provenienza di alcune attività",
+        "approvazioni": "le approvazioni",
+        "storia": "la storia delle modifiche",
+        "esecuzioni": "il legame fra ogni esecuzione e la versione del modello",
+        "denominazione": "il nome",
+        "traduzione": "il nome in altre lingue"
+      }
+    }
   },
   "brownfield": {
     "title": "Adattamento dei dati esistenti",

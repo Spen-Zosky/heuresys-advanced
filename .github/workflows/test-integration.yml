@@ -22,12 +22,16 @@ on:
       - "sessioni/**"
       - "apps/web/**"
       - "apps/showcase/**"
+      # Derivato dall'atlante (build_origine_moduli.py): lo rigenera da solo il timer, e il suo
+      # commit non cambia il comportamento verificato dal codice che lo ha prodotto.
+      - "apps/api/src/lib/origine/moduli.generated.ts"
   pull_request:
     branches: [main]
     paths:
       - "apps/api/**"
       - "packages/shared/**"
       - "db/**"
+      - "!apps/api/src/lib/origine/moduli.generated.ts"
   workflow_dispatch: {}
 
 permissions:

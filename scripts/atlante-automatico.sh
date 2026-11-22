@@ -199,28 +199,46 @@ git commit -q -F "$msg" -- $GENERATI
 rm -f "$msg"
 git push -q -u origin "$ramo"
 git rev-parse HEAD > "$SPINTA"
-gh pr create --base main --head "$ramo" --title "docs(kb): rigenera l'atlante ($OGGI)" \
-  --body "Rigenerazione automatica dell'atlante (scripts/atlante-automatico.sh, timer heuresys-advanced-atlante sulla VM). atlante_fresco.py: fresco; tabelle DB $prima -> $dopo. Lo script la unisce da solo quando tutta la sua CI e' verde."
-log "PR aperta dal ramo $ramo"
-# Unione a CI verde, aspettata qui. NON `gh pr merge --auto`: main non ha controlli obbligatori,
-# quindi GitHub non ha niente da aspettare e `--auto` unisce SUBITO, prima che la CI parta (visto
-# il 19/11 con la #313). Si aspetta che i controlli compaiano, poi che finiscano tutti; si unisce
-# solo se sono tutti verdi e la testa del ramo e' ancora il commit di questo giro. Ogni altro
-# esito lascia la PR aperta, da unire a mano: non e' un errore del giro.
+url_pr="$(gh pr create --base main --head "$ramo" --title "docs(kb): rigenera l'atlante ($OGGI)" \
+  --body "Rigenerazione automatica dell'atlante (scripts/atlante-automatico.sh, timer heuresys-advanced-atlante sulla VM). atlante_fresco.py: fresco; tabelle DB $prima -> $dopo. Lo script la unisce da solo quando tutta la sua CI e' verde.")"
+num_pr="${url_pr##*/}"
+log "PR #$num_pr aperta dal ramo $ramo"
+# Unione a CI verde, aspettata qui. NON `gh pr merge --auto`: main non ha controlli obbligatori
+# (a parte rilascio-libero), quindi `--auto` unisce SUBITO, prima che la CI parta (visto il 19/11
+# con la #313). Si aspetta che i controlli compaiano, poi che finiscano tutti; si unisce solo se
+# sono tutti verdi e la testa del ramo e' ancora il commit di questo giro.
+# Dal 22/11 la PR del solo atlante non fa girare integration e smoke (i workflow ignorano
+# moduli.generated.ts): bastano i controlli leggeri, ed e' per questo che l'attesa e' breve.
+# Si lavora sempre per NUMERO di PR e si controlla a ogni giro che sia ancora aperta: il 22/11 il
+# timer tento' di unire la #401, chiusa nel frattempo da un altro, perche' guardava il ramo.
 testa_ramo="$(git rev-parse HEAD)"
+pr_aperta() { [ "$(gh pr view "$num_pr" --json state,headRefOid -q '.state + " " + .headRefOid' 2>/dev/null || true)" = "OPEN $testa_ramo" ]; }
 sleep 60
-if timeout 3600 gh pr checks "$ramo" --watch --interval 30 >/dev/null 2>&1; then
-  if blocco_attivo; then
-    log "CI verde ma nel frattempo e' stato armato un rilascio: la PR resta aperta, la unisce il giro dopo DEPLOYATO"
-    NON_SEGNARE=1
-  elif gh pr merge "$ramo" --squash --delete-branch --match-head-commit "$testa_ramo" >/dev/null 2>&1; then
-    log "CI verde: PR unita"
-  else
-    log "CI verde ma unione rifiutata: la PR resta da unire a mano"
-  fi
-else
-  log "CI non verde, assente o oltre 60 minuti: la PR resta da unire a mano"
-fi
+esito=attesa; inizio=$SECONDS
+while [ "$esito" = attesa ]; do
+  if ! pr_aperta; then esito=chiusa
+  elif gh pr checks "$num_pr" >/dev/null 2>&1; then esito=verde
+  elif [ -z "$(gh pr checks "$num_pr" 2>/dev/null | grep -E '\s(pending|queued|in_progress)\s' || true)" ] \
+       && gh pr checks "$num_pr" 2>&1 | grep -qE '\sfail'; then esito=rossa
+  elif [ $((SECONDS - inizio)) -gt 3600 ]; then esito=scaduta
+  else sleep 30; fi
+done
+case "$esito" in
+  verde)
+    if ! pr_aperta; then
+      log "la PR #$num_pr e' stata chiusa o ritoccata mentre aspettavo: non unisco"
+    elif blocco_attivo; then
+      log "CI verde ma nel frattempo e' stato armato un rilascio: la PR resta aperta, la unisce il giro dopo DEPLOYATO"
+      NON_SEGNARE=1
+    elif gh pr merge "$num_pr" --squash --delete-branch --match-head-commit "$testa_ramo" >/dev/null 2>&1; then
+      log "CI verde: PR #$num_pr unita"
+    else
+      log "CI verde ma unione rifiutata: la PR #$num_pr resta da unire a mano"
+    fi ;;
+  chiusa) log "la PR #$num_pr non e' piu' aperta con la mia testa: non la unisco" ;;
+  rossa)  log "CI rossa sulla PR #$num_pr: resta da guardare a mano" ;;
+  *)      log "CI assente o oltre 60 minuti sulla PR #$num_pr: resta da unire a mano" ;;
+esac
 
 cd "$ROOT"
 chiudi_e_cancella

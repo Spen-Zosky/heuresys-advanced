@@ -474,7 +474,8 @@
         "skill": "Competenza",
         "positions": "Posizioni che la richiedono",
         "project": "Progetto",
-        "status": "Stato"
+        "status": "Stato",
+        "apqc": "Corrispondenza APQC"
       },
       "nessunaAttivita": "Il processo non ha attività.",
       "nessunaUnita": "Nessuna unità partecipa al processo.",
@@ -562,6 +563,42 @@
         "STANDARDIZZAZIONE": {
           "nome": "Standardizzazione",
           "domanda": "Se è uguale ovunque, parametrizzabile, di settore o solo di questa azienda"
+        }
+      }
+    },
+    "apqc": {
+      "voce": "voce {{codice}}",
+      "daDichiarare": "tipo da dichiarare",
+      "proposta": "proposta dell'agente",
+      "dichiara": "Dichiara",
+      "modifica": "Modifica",
+      "esamina": "Esamina",
+      "titolo": "Corrispondenza con la voce APQC",
+      "domanda": "Quanto l'attività «{{attivita}}» coincide con la voce APQC {{codice}} da cui viene?",
+      "propostaAgente": "Il tipo è una proposta dell'agente: confermalo o correggilo e salva per approvarlo.",
+      "criterio": "Criterio",
+      "criterioAiuto": "Perché la corrispondenza è di questo tipo: che cosa l'attività fa in più o in meno rispetto alla voce.",
+      "errore": "Salvataggio non riuscito. Riprova.",
+      "annulla": "Annulla",
+      "salva": "Salva",
+      "approva": "Approva",
+      "salvataggio": "Salvataggio in corso…",
+      "tipi": {
+        "ESATTO": {
+          "nome": "Esatta",
+          "descrizione": "L'attività fa esattamente ciò che la voce descrive, né più né meno."
+        },
+        "PIU_AMPIO": {
+          "nome": "Più ampia",
+          "descrizione": "L'attività comprende la voce e fa anche altro."
+        },
+        "PIU_RISTRETTO": {
+          "nome": "Più ristretta",
+          "descrizione": "L'attività copre solo una parte di ciò che la voce descrive."
+        },
+        "PARZIALE": {
+          "nome": "Parziale",
+          "descrizione": "L'attività e la voce si sovrappongono solo in parte: ognuna fa qualcosa che l'altra non fa."
         }
       }
     }

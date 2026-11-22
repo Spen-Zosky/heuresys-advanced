@@ -220,7 +220,9 @@ VALUES
   ('sys_process_facet_values', 'D', 'EXCLUDE', NULL,
    '[sign-off: EXCLUDE — vocabolario chiuso delle faccette dei processi (ADR-0061 D4, mig 000507): catalogo di piattaforma, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000507.]'),
   ('sys_tenant_process_facets', 'D', 'EXCLUDE', NULL,
-   '[sign-off: EXCLUDE — faccette di un processo del tenant (ADR-0061 D4, mig 000507): righe scritte solo dall''API o proposte dall''agente, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000507.]')
+   '[sign-off: EXCLUDE — faccette di un processo del tenant (ADR-0061 D4, mig 000507): righe scritte solo dall''API o proposte dall''agente, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000507.]'),
+  ('sys_tenant_process_step_mappings', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — corrispondenza delle attivita'' del tenant con APQC (ADR-0061 D7, mig 000509): righe scritte solo dall''API o proposte dall''agente, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000509.]')
 ON CONFLICT (reconciliation_registry_table_name) DO NOTHING;
 
 DO $$

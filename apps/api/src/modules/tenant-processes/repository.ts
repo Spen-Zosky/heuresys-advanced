@@ -168,3 +168,42 @@ export async function replaceFacet(
     [tenantId, processId, facet, codes, criterion],
   );
 }
+
+// ---------------------------------------------------------------------------------------------
+// ADR-0061 D7, passo 4 (000509): la corrispondenza di un'attività con APQC.
+// ---------------------------------------------------------------------------------------------
+
+/** L'attività del processo (o di un suo sottoprocesso) con il codice APQC dei metadati. */
+export async function stepOfProcess(
+  q: DbConnector, processId: string, stepId: string,
+): Promise<{ tenantId: string; apqcCode: string | null } | null> {
+  const r = await q.query<{ t: string; c: string | null }>(
+    `SELECT st.tenant_process_step_tenant_id AS t, nullif(st.tenant_process_step_metadata->>'apqc', '') AS c
+       FROM sys.sys_tenant_process_steps st
+       JOIN sys.sys_tenant_processes tp ON tp.tenant_process_id = st.tenant_process_step_process_id
+      WHERE st.tenant_process_step_id = $2
+        AND (tp.tenant_process_id = $1 OR tp.tenant_process_parent_id = $1)`,
+    [processId, stepId],
+  );
+  const row = r.rows[0];
+  return row ? { tenantId: row.t, apqcCode: row.c } : null;
+}
+
+export async function upsertStepMapping(
+  q: DbConnector, tenantId: string, stepId: string, code: string, kind: string, criterion: string,
+): Promise<void> {
+  await q.query(
+    `INSERT INTO sys.sys_tenant_process_step_mappings
+       (tenant_process_step_mapping_tenant_id, tenant_process_step_mapping_step_id, tenant_process_step_mapping_scheme,
+        tenant_process_step_mapping_code, tenant_process_step_mapping_kind, tenant_process_step_mapping_criterion,
+        tenant_process_step_mapping_source, tenant_process_step_mapping_status)
+     VALUES ($1, $2, 'APQC_PCF', $3, $4, $5, 'PERSONA', 'APPROVATA')
+     ON CONFLICT (tenant_process_step_mapping_step_id, tenant_process_step_mapping_scheme)
+     DO UPDATE SET tenant_process_step_mapping_code = EXCLUDED.tenant_process_step_mapping_code,
+                   tenant_process_step_mapping_kind = EXCLUDED.tenant_process_step_mapping_kind,
+                   tenant_process_step_mapping_criterion = EXCLUDED.tenant_process_step_mapping_criterion,
+                   tenant_process_step_mapping_source = 'PERSONA', tenant_process_step_mapping_status = 'APPROVATA',
+                   updated_at = now()`,
+    [tenantId, stepId, code, kind, criterion],
+  );
+}

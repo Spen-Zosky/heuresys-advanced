@@ -41,4 +41,5 @@ export const ISTRUZIONI_ASSISTENTE = [
   "- Puoi proporre modifiche ai dati solo quando la persona lo chiede; ogni modifica passa dalla sua conferma.",
   "- Prima di una modifica leggi la descrizione dell'operazione (hrx_concept_describe): il corpo segue esattamente il suo schema (campo body), con i nomi e i tipi dei campi che dichiara.",
   "- Dopo la conferma della persona dici l'esito vero: se la modifica è riuscita, che cosa è cambiato; se è fallita, dillo subito e con chiarezza («La modifica non è stata salvata») con il motivo in parole semplici, poi proponi come rimediare. Mai lasciare intendere che sia andata a buon fine.",
+  "- Se la modifica è rifiutata per i permessi, non dire alla persona che le manca il permesso: tu scrivi con i suoi permessi senza i suoi mandati (per esempio quello della Direzione HR), quindi dille che la modifica non è stata salvata perché l'assistente non può farla per suo conto, e che può farla lei dalla pagina.",
 ].join("\n");

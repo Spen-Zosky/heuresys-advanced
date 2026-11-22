@@ -1,0 +1,791 @@
+{
+ "_cosa": "Lo schema del corpo di ogni scrittura aperta all'agente, dai contratti Zod condivisi. Lo legge il gateway accanto a agent-operations.json.",
+ "_generato_da": "apps/api/scripts/genera-corpi-scritture-agente.mts",
+ "corpi": {
+  "goals": {
+   "patch_by_id": {
+    "schema": "UpdateGoalBodySchema",
+    "body": {
+     "$schema": "https://json-schema.org/draft/2020-12/schema",
+     "type": "object",
+     "properties": {
+      "title": {
+       "type": "string",
+       "minLength": 1,
+       "maxLength": 255
+      },
+      "description": {
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "type": {
+       "type": "string",
+       "enum": [
+        "OBJECTIVE",
+        "INDIVIDUAL",
+        "TECHNICAL",
+        "SALES",
+        "CUSTOMER",
+        "PERFORMANCE",
+        "PROJECT",
+        "FINANCIAL",
+        "SECURITY",
+        "LEADERSHIP",
+        "DEVELOPMENT",
+        "EFFICIENCY",
+        "COMPLIANCE"
+       ]
+      },
+      "category": {
+       "anyOf": [
+        {
+         "type": "string",
+         "maxLength": 100
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "priority": {
+       "type": "string",
+       "enum": [
+        "LOW",
+        "MEDIUM",
+        "HIGH",
+        "CRITICAL"
+       ]
+      },
+      "status": {
+       "type": "string",
+       "enum": [
+        "NOT_STARTED",
+        "IN_PROGRESS",
+        "ON_TRACK",
+        "AT_RISK",
+        "BLOCKED",
+        "COMPLETED",
+        "CANCELLED"
+       ]
+      },
+      "progressPercent": {
+       "type": "integer",
+       "minimum": 0,
+       "maximum": 100
+      },
+      "weight": {
+       "type": "number"
+      },
+      "ownerUserId": {
+       "anyOf": [
+        {
+         "type": "string",
+         "format": "uuid",
+         "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "startDate": {
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "dueDate": {
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "completedAt": {
+       "anyOf": [
+        {
+         "type": "string",
+         "format": "date-time",
+         "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "metadata": {
+       "type": "object",
+       "propertyNames": {
+        "type": "string"
+       },
+       "additionalProperties": {}
+      }
+     }
+    }
+   }
+  },
+  "learning-gaps": {
+   "post": {
+    "schema": "CreateLearningGapBodySchema",
+    "body": {
+     "$schema": "https://json-schema.org/draft/2020-12/schema",
+     "type": "object",
+     "properties": {
+      "userId": {
+       "type": "string",
+       "format": "uuid",
+       "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+      },
+      "positionId": {
+       "anyOf": [
+        {
+         "type": "string",
+         "format": "uuid",
+         "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "skillId": {
+       "anyOf": [
+        {
+         "type": "string",
+         "format": "uuid",
+         "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "requiredProficiency": {
+       "anyOf": [
+        {
+         "type": "string",
+         "maxLength": 32
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "currentProficiency": {
+       "anyOf": [
+        {
+         "type": "string",
+         "maxLength": 32
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "score": {
+       "anyOf": [
+        {
+         "type": "number",
+         "minimum": -100,
+         "maximum": 100
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "severity": {
+       "default": "MEDIUM",
+       "type": "string",
+       "enum": [
+        "LOW",
+        "MEDIUM",
+        "HIGH",
+        "CRITICAL"
+       ]
+      },
+      "tenantId": {
+       "type": "string",
+       "format": "uuid",
+       "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+      },
+      "metadata": {
+       "default": {},
+       "type": "object",
+       "propertyNames": {
+        "type": "string"
+       },
+       "additionalProperties": {}
+      }
+     },
+     "required": [
+      "userId"
+     ]
+    }
+   }
+  },
+  "mentorship": {
+   "post_pairings": {
+    "schema": "CreateMentorshipBodySchema",
+    "body": {
+     "$schema": "https://json-schema.org/draft/2020-12/schema",
+     "type": "object",
+     "properties": {
+      "tenantId": {
+       "type": "string",
+       "format": "uuid",
+       "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+      },
+      "programId": {
+       "anyOf": [
+        {
+         "type": "string",
+         "format": "uuid",
+         "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "mentorUserId": {
+       "anyOf": [
+        {
+         "type": "string",
+         "format": "uuid",
+         "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "menteeUserId": {
+       "anyOf": [
+        {
+         "type": "string",
+         "format": "uuid",
+         "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "status": {
+       "default": "ACTIVE",
+       "type": "string",
+       "enum": [
+        "ACTIVE",
+        "COMPLETED",
+        "ON_HOLD",
+        "CANCELLED",
+        "PENDING"
+       ]
+      },
+      "focusAreas": {
+       "anyOf": [
+        {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "meetingFrequency": {
+       "default": "BI_WEEKLY",
+       "type": "string",
+       "enum": [
+        "WEEKLY",
+        "BI_WEEKLY",
+        "MONTHLY",
+        "QUARTERLY",
+        "AD_HOC"
+       ]
+      },
+      "goals": {
+       "anyOf": [
+        {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "matchScore": {
+       "anyOf": [
+        {
+         "type": "number",
+         "minimum": 0,
+         "maximum": 100
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "startDate": {
+       "anyOf": [
+        {
+         "type": "string",
+         "format": "date",
+         "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "endDate": {
+       "anyOf": [
+        {
+         "type": "string",
+         "format": "date",
+         "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "notes": {
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "metadata": {
+       "default": {},
+       "type": "object",
+       "propertyNames": {
+        "type": "string"
+       },
+       "additionalProperties": {}
+      }
+     }
+    }
+   }
+  },
+  "okrs": {
+   "patch_by_id": {
+    "schema": "UpdateOkrBodySchema",
+    "body": {
+     "$schema": "https://json-schema.org/draft/2020-12/schema",
+     "type": "object",
+     "properties": {
+      "objective": {
+       "type": "string",
+       "minLength": 1
+      },
+      "description": {
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "okrType": {
+       "type": "string",
+       "enum": [
+        "COMPANY",
+        "DEPARTMENT",
+        "TEAM",
+        "INDIVIDUAL"
+       ]
+      },
+      "department": {
+       "anyOf": [
+        {
+         "type": "string",
+         "maxLength": 100
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "periodType": {
+       "type": "string",
+       "enum": [
+        "QUARTERLY",
+        "MONTHLY",
+        "YEARLY",
+        "CUSTOM"
+       ]
+      },
+      "periodStart": {
+       "type": "string"
+      },
+      "periodEnd": {
+       "type": "string"
+      },
+      "status": {
+       "type": "string",
+       "enum": [
+        "DRAFT",
+        "ACTIVE",
+        "ACHIEVED",
+        "MISSED",
+        "CANCELLED",
+        "ARCHIVED"
+       ]
+      },
+      "overallProgress": {
+       "type": "number"
+      },
+      "ownerUserId": {
+       "anyOf": [
+        {
+         "type": "string",
+         "format": "uuid",
+         "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "metadata": {
+       "type": "object",
+       "propertyNames": {
+        "type": "string"
+       },
+       "additionalProperties": {}
+      }
+     }
+    }
+   }
+  },
+  "tenant-processes": {
+   "put_by_id_attivita_by_stepid_apqc": {
+    "schema": "PutStepApqcBodySchema",
+    "body": {
+     "$schema": "https://json-schema.org/draft/2020-12/schema",
+     "type": "object",
+     "properties": {
+      "kind": {
+       "type": "string",
+       "enum": [
+        "ESATTO",
+        "PIU_AMPIO",
+        "PIU_RISTRETTO",
+        "PARZIALE"
+       ]
+      },
+      "criterion": {
+       "type": "string",
+       "minLength": 1,
+       "maxLength": 2000
+      }
+     },
+     "required": [
+      "kind",
+      "criterion"
+     ]
+    }
+   },
+   "put_by_id_faccette_by_facet": {
+    "schema": "PutTenantProcessFacetBodySchema",
+    "body": {
+     "$schema": "https://json-schema.org/draft/2020-12/schema",
+     "type": "object",
+     "properties": {
+      "codes": {
+       "maxItems": 10,
+       "type": "array",
+       "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 32
+       }
+      },
+      "criterion": {
+       "default": "",
+       "type": "string",
+       "maxLength": 2000
+      }
+     },
+     "required": [
+      "codes"
+     ]
+    }
+   }
+  },
+  "user-career-plans": {
+   "patch_by_id": {
+    "schema": "UpdateUserCareerPlanBodySchema",
+    "body": {
+     "$schema": "https://json-schema.org/draft/2020-12/schema",
+     "type": "object",
+     "properties": {
+      "pathId": {
+       "anyOf": [
+        {
+         "type": "string",
+         "format": "uuid",
+         "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "targetPositionId": {
+       "anyOf": [
+        {
+         "type": "string",
+         "format": "uuid",
+         "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "horizonMonths": {
+       "anyOf": [
+        {
+         "type": "integer",
+         "minimum": 0,
+         "maximum": 1200
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "status": {
+       "type": "string",
+       "enum": [
+        "ACTIVE",
+        "COMPLETED",
+        "PAUSED",
+        "CANCELLED"
+       ]
+      },
+      "metadata": {
+       "type": "object",
+       "propertyNames": {
+        "type": "string"
+       },
+       "additionalProperties": {}
+      }
+     }
+    }
+   },
+   "post": {
+    "schema": "CreateUserCareerPlanBodySchema",
+    "body": {
+     "$schema": "https://json-schema.org/draft/2020-12/schema",
+     "type": "object",
+     "properties": {
+      "userId": {
+       "type": "string",
+       "format": "uuid",
+       "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+      },
+      "pathId": {
+       "anyOf": [
+        {
+         "type": "string",
+         "format": "uuid",
+         "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "targetPositionId": {
+       "anyOf": [
+        {
+         "type": "string",
+         "format": "uuid",
+         "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "horizonMonths": {
+       "anyOf": [
+        {
+         "type": "integer",
+         "minimum": 0,
+         "maximum": 1200
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "status": {
+       "default": "ACTIVE",
+       "type": "string",
+       "enum": [
+        "ACTIVE",
+        "COMPLETED",
+        "PAUSED",
+        "CANCELLED"
+       ]
+      },
+      "tenantId": {
+       "type": "string",
+       "format": "uuid",
+       "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+      },
+      "metadata": {
+       "default": {},
+       "type": "object",
+       "propertyNames": {
+        "type": "string"
+       },
+       "additionalProperties": {}
+      }
+     },
+     "required": [
+      "userId"
+     ]
+    }
+   }
+  },
+  "user-target-positions": {
+   "patch_by_id": {
+    "schema": "UpdateUserTargetPositionBodySchema",
+    "body": {
+     "$schema": "https://json-schema.org/draft/2020-12/schema",
+     "type": "object",
+     "properties": {
+      "positionId": {
+       "type": "string",
+       "format": "uuid",
+       "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+      },
+      "horizon": {
+       "anyOf": [
+        {
+         "type": "string",
+         "enum": [
+          "SHORT_TERM",
+          "MEDIUM_TERM",
+          "LONG_TERM"
+         ]
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "metadata": {
+       "type": "object",
+       "propertyNames": {
+        "type": "string"
+       },
+       "additionalProperties": {}
+      }
+     }
+    }
+   },
+   "post": {
+    "schema": "CreateUserTargetPositionBodySchema",
+    "body": {
+     "$schema": "https://json-schema.org/draft/2020-12/schema",
+     "type": "object",
+     "properties": {
+      "userId": {
+       "type": "string",
+       "format": "uuid",
+       "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+      },
+      "positionId": {
+       "type": "string",
+       "format": "uuid",
+       "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+      },
+      "horizon": {
+       "anyOf": [
+        {
+         "type": "string",
+         "enum": [
+          "SHORT_TERM",
+          "MEDIUM_TERM",
+          "LONG_TERM"
+         ]
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "reviewStatus": {
+       "default": "PENDING_REVIEW",
+       "type": "string",
+       "enum": [
+        "PENDING_REVIEW",
+        "APPROVED",
+        "REJECTED",
+        "WITHDRAWN"
+       ]
+      },
+      "tenantId": {
+       "type": "string",
+       "format": "uuid",
+       "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+      },
+      "metadata": {
+       "default": {},
+       "type": "object",
+       "propertyNames": {
+        "type": "string"
+       },
+       "additionalProperties": {}
+      }
+     },
+     "required": [
+      "userId",
+      "positionId"
+     ]
+    }
+   },
+   "post_by_id_review": {
+    "schema": "ReviewUserTargetPositionBodySchema",
+    "body": {
+     "$schema": "https://json-schema.org/draft/2020-12/schema",
+     "type": "object",
+     "properties": {
+      "decision": {
+       "type": "string",
+       "enum": [
+        "APPROVED",
+        "REJECTED"
+       ]
+      },
+      "notes": {
+       "anyOf": [
+        {
+         "type": "string",
+         "maxLength": 2000
+        },
+        {
+         "type": "null"
+        }
+       ]
+      }
+     },
+     "required": [
+      "decision"
+     ]
+    }
+   }
+  }
+ }
+}

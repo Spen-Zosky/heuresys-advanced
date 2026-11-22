@@ -93,6 +93,11 @@ describe("HeuresysClient auth/CSRF", () => {
     const errore = c.call("PUT", "/tenant-processes/p-1/faccette/PERIMETRO", { code: "INTERFUNZIONALE" });
     await expect(errore).rejects.toThrow(/400 \(scrittura NON eseguita\)/);
     await expect(c.call("PUT", "/tenant-processes/p-1/faccette/PERIMETRO", {})).rejects.toThrow(/body\/codes: Required/);
+    // Un 403 in scrittura non è «ti manca il permesso»: l'assistente scrive senza i mandati (ADR-0050 D6).
+    const negata = recordingFetch(() => ({ ok: false, status: 403, body: { error: { code: "FORBIDDEN" } } }));
+    const c3 = new HeuresysClient({ baseUrl: "http://api", session, fetchImpl: negata.fetchImpl });
+    await expect(c3.call("PUT", "/tenant-processes/p-1/faccette/PERIMETRO", {})).rejects.toThrow(/SENZA i suoi mandati/);
+    await expect(c3.call("POST", "/skills", {})).rejects.toThrow(/scrittura NON eseguita/);
     // CONTROPROVA: una lettura fallita non si dichiara scrittura.
     await expect(c.call("GET", "/tenant-processes/p-1")).rejects.not.toThrow(/scrittura/);
   });

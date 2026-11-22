@@ -178,7 +178,11 @@ export function buildHeuresysMcp(
                 const base = radice === "/" ? "" : radice;
                 const metodo = op.method.toUpperCase();
                 const q = metodo === "GET" ? specifica.get(`/v1${base}${percorso}`) : undefined;
-                const corpo = metodo === "GET" ? undefined : corpi.get(`${metodo} /v1${base}${percorso}`);
+                // Prima il corpo generato dai contratti Zod (agent-write-bodies.json), che non
+                // dipende dalla specifica OpenAPI, spenta in produzione; la specifica resta ripiego.
+                const corpo = metodo === "GET"
+                  ? undefined
+                  : (operations.bodyOf(a.conceptId, id) ?? corpi.get(`${metodo} /v1${base}${percorso}`));
                 return [id, { ...op, ...(q ? { query: q } : {}), ...(corpo !== undefined ? { body: corpo } : {}) }];
               }),
             );

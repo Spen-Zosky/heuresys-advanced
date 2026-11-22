@@ -190,3 +190,32 @@ describe("#156 il file generato sul disco è coerente con la decisione", () => {
     expect(vero.conceptIds()).not.toContain("tenant-consolidation");
   });
 });
+
+describe("ADR-0061 passo 10 — il corpo di ogni scrittura, dai contratti (difetto del 2026-11-22)", () => {
+  it("ogni scrittura del catalogo ha lo schema del corpo, e quello delle faccette vuole codes (elenco) e non code", () => {
+    const r = AtlasOperationResolver.load();
+    const catalogo = JSON.parse(readFileSync(join(radiceRepo(), "docs/kb/atlas/agent-operations.json"), "utf8")) as {
+      concepts: Record<string, { operations: Record<string, { method: string }> }>;
+    };
+    const scritture = Object.entries(catalogo.concepts).flatMap(([c, v]) =>
+      Object.entries(v.operations)
+        .filter(([, op]) => !["GET", "DELETE"].includes(op.method.toUpperCase()))
+        .map(([id]) => [c, id] as const),
+    );
+    expect(scritture.length).toBeGreaterThan(0); // una mappa vuota non è verde
+    const senza = scritture.filter(([c, id]) => r.bodyOf(c, id) === undefined).map(([c, id]) => `${c}.${id}`);
+    expect(senza).toEqual([]);
+    const faccette = r.bodyOf("tenant-processes", "put_by_id_faccette_by_facet") as {
+      required?: string[]; properties?: Record<string, { type?: string }>;
+    };
+    expect(faccette.required).toContain("codes");
+    expect(faccette.properties?.codes?.type).toBe("array");
+    expect(faccette.properties?.code).toBeUndefined();
+  });
+
+  it("CONTROPROVA: senza il file dei corpi nessun corpo è dichiarato (e il catalogo resta)", () => {
+    const r = AtlasOperationResolver.load(undefined, "docs/kb/atlas/non-esiste.json");
+    expect(r.isEmpty()).toBe(false);
+    expect(r.bodyOf("tenant-processes", "put_by_id_faccette_by_facet")).toBeUndefined();
+  });
+});

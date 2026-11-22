@@ -8,7 +8,7 @@ Fuori da questo ciclo: gli altri sei accorpamenti, che restano come sono; le att
 |---|---|---|---|---|
 | T1 | `db/scripts/processi/separa-tre-accorpamenti.sql` e la sua inversa, con prova a secco | Claude | le due prove a secco (andata, e andata più ritorno in una transazione annullata) danno i numeri attesi | fatta |
 | T2 | La mappa di `colloca-sottoprocessi.sql` dice P04 sotto 02 e P20 sotto 05 | Claude | una nuova corsa dello script non trova stati inattesi | fatta |
-| T3 | CI verde e revisione del codice da un thread nuovo | coordinatore | PR unita | da fare |
+| T3 | CI verde e revisione del codice da un thread nuovo; rilievi 1-5 della revisione corretti | coordinatore, Claude | PR unita | in corso |
 | T4 | Backup verificato, poi `-v applica=1` in produzione | Claude | NOTICE «fatto: 21 processi di primo livello e 24 sottoprocessi attivi, 3 descrizioni ritirate, 3 creati, 0 difetti» | da fare |
 | T5 | Verifica dal vivo | Claude | la matrice di `/tenant-processes` scrive «21 processi e 24 sottoprocessi» | da fare |
 
@@ -19,6 +19,10 @@ Che cosa deve essere vero prima: le tre proposte PROCESSES di P04, P20 e P26 son
 Che cosa produce l'effetto: lo script, nella stessa semantica di `apps/api/src/modules/tenant-consolidation/applicazione.ts`. Per ogni proposta scrive una decisione RIFIUTATA che sostituisce la CONFERMATA; ritira dal giornale `staging.tenant_consolidation_undo` la descrizione che la CONFERMATA aveva copiato nel processo di RTL (solo se è ancora quella); crea il P come sottoprocesso con nome e descrizione del modello; scrive il giornale INSERT e aggiorna il collegamento. Gira col ruolo `heuresys_agenti` (`deploy/postgres/env-agenti.sh`), che non crea strutture: per questo nessuna tabella nuova.
 
 Chi decide è registrato come l'Amministratore di Sistema (l'utente di Enzo), non come chi aveva deciso il 2026-11-17.
+
+Una sola applicazione: una seconda corsa dice «GIÀ APPLICATO» ed esce. Dopo l'inversa i tre codici restano come righe spente, e la guardia ferma una nuova andata: rifarla vuol dire riaccenderli, ed è una decisione nuova.
+
+Concorrenza: i collegamenti delle tre proposte si bloccano (`FOR UPDATE`) prima di leggerli, e l'aggiornamento del collegamento vale solo se la decisione in vigore è ancora quella letta. Il ritiro pretende esattamente tre righe aperte del giornale, tutte sulla descrizione.
 
 Distruttivo: no. Niente DELETE; l'inversa spegne i tre sottoprocessi, rimette le descrizioni e una CONFERMATA nuova. Guardia nel caso limite: post-condizione con impronta di tutte le colonne dei processi esistenti tranne descrizione e `updated_at`, e la sentinella `sys.v_tenant_processes_parent_defects` a zero; se qualcosa non torna la transazione si annulla.
 

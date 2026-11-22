@@ -26,12 +26,29 @@
 -- prima sono invariate tranne le tre descrizioni ritirate; nessun difetto in sys.v_tenant_processes_parent_defects.
 --
 -- PROVA A SECCO: senza -v applica=1 la transazione si chiude con ROLLBACK e lo dice.
+-- UNA SOLA APPLICAZIONE: una seconda corsa dice «GIÀ APPLICATO» ed esce. Dopo l'inversa i tre codici restano come
+-- righe spente e la guardia ferma una nuova andata: rifarla vuol dire riaccenderli, ed è una decisione nuova.
 -- NIENTE CANCELLAZIONI.
 \set ON_ERROR_STOP on
 \if :{?applica}
 \else
   \set applica 0
 \endif
+
+-- Già applicato? Le tre corrispondenze sono RIFIUTATA e i tre sottoprocessi esistono attivi: si esce puliti.
+SELECT (SELECT count(*) FROM sys.sys_tenant_consolidation_links l
+          JOIN sys.sys_tenant_consolidation_proposals p ON p.tenant_consolidation_proposal_id = l.tenant_consolidation_link_proposal_id
+         WHERE p.tenant_consolidation_proposal_group = 'PROCESSES' AND p.tenant_consolidation_proposal_superseded_at IS NULL
+           AND p.tenant_consolidation_proposal_prototype_keys[1] IN ('P04','P20','P26')
+           AND l.tenant_consolidation_link_decision = 'RIFIUTATA') = 3
+   AND (SELECT count(*) FROM sys.sys_tenant_processes
+         WHERE tenant_process_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' AND tenant_process_is_active
+           AND tenant_process_level = 2 AND tenant_process_code IN ('P04','P20','P26')) = 3 AS gia_applicato \gset
+\if :gia_applicato
+  \echo 'GIÀ APPLICATO: le tre corrispondenze sono RIFIUTATA e P04, P20, P26 sono sottoprocessi attivi. Niente da fare.'
+  \quit
+\endif
+
 BEGIN;
 
 CREATE TEMP TABLE mappa(figlio text PRIMARY KEY, genitore text NOT NULL) ON COMMIT DROP;
@@ -41,6 +58,15 @@ CREATE TEMP TABLE ctx ON COMMIT DROP AS
 SELECT '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'::uuid AS tenant,
        '8f4d0161-04ab-5ddb-b5a1-c8656f9c1fa1'::uuid AS decisore,
        'Decisione dell''Amministratore di Sistema del 2026-11-22: la corrispondenza non regge, il processo del modello resta separato come sottoprocesso.'::text AS ragione;
+
+-- I collegamenti delle tre proposte si bloccano prima di leggerli: una decisione presa dalla pagina nel frattempo
+-- aspetta la fine di questa transazione invece di essere sovrascritta.
+SELECT count(*) AS collegamenti_bloccati FROM (
+  SELECT 1 FROM sys.sys_tenant_consolidation_links l
+    JOIN sys.sys_tenant_consolidation_proposals p ON p.tenant_consolidation_proposal_id = l.tenant_consolidation_link_proposal_id
+   WHERE p.tenant_consolidation_proposal_group = 'PROCESSES' AND p.tenant_consolidation_proposal_superseded_at IS NULL
+     AND p.tenant_consolidation_proposal_prototype_keys[1] IN ('P04','P20','P26')
+     FOR UPDATE OF l) x;
 
 -- Le tre proposte correnti con la decisione in vigore (quella del collegamento).
 CREATE TEMP TABLE prop ON COMMIT DROP AS
@@ -75,6 +101,20 @@ BEGIN
   IF n_gia <> 0 THEN RAISE EXCEPTION 'guardia: % dei codici P04, P20, P26 esistono già nel tenant, niente scritto', n_gia; END IF;
   IF n_gen <> 3 THEN RAISE EXCEPTION 'guardia: i genitori 02, 05, 16 non sono tutti attivi di primo livello, niente scritto'; END IF;
   IF n_mod <> 3 THEN RAISE EXCEPTION 'guardia: il modello in uso non ha tutte e tre le voci, niente scritto'; END IF;
+END $$;
+
+-- Il ritiro deve trovare esattamente una riga aperta per proposta, sulla descrizione: se la decisione del
+-- 2026-11-17 avesse scritto anche nome o codice (forma NOME_PROTOTIPO) lo script si ferma invece di lasciarli.
+DO $$
+DECLARE n_aperte int; n_desc int;
+BEGIN
+  SELECT count(*), count(*) FILTER (WHERE u.table_name = 'sys_tenant_processes' AND u.column_name = 'tenant_process_description')
+    INTO n_aperte, n_desc
+    FROM staging.tenant_consolidation_undo u JOIN prop p ON p.proposta = u.proposal_id
+   WHERE u.kind = 'UPDATE' AND u.reverted_at IS NULL;
+  IF n_aperte <> 3 OR n_desc <> 3 THEN
+    RAISE EXCEPTION 'guardia: righe aperte del giornale % (sulla descrizione %), attese 3 e 3, niente scritto', n_aperte, n_desc;
+  END IF;
 END $$;
 
 CREATE TEMP TABLE impronta_prima ON COMMIT DROP AS
@@ -122,7 +162,9 @@ WITH ins AS (
   RETURNING tenant_process_id, tenant_process_code
 ) SELECT * FROM ins;
 
--- 3. I collegamenti portano la decisione nuova e il rapporto.
+-- 3. I collegamenti portano la decisione nuova e il rapporto, solo se la decisione in vigore è ancora quella letta.
+CREATE TEMP TABLE collegati ON COMMIT DROP AS
+WITH u AS (
 UPDATE sys.sys_tenant_consolidation_links l
    SET tenant_consolidation_link_decision_id = p.dec_nuova,
        tenant_consolidation_link_decision = 'RIFIUTATA',
@@ -134,7 +176,10 @@ UPDATE sys.sys_tenant_consolidation_links l
          'skipped', jsonb_build_array('Il processo del modello resta separato: creato come sottoprocesso di ' || p.genitore || '.')),
        tenant_consolidation_link_applied_at = now()
   FROM prop p
- WHERE l.tenant_consolidation_link_proposal_id = p.proposta;
+ WHERE l.tenant_consolidation_link_proposal_id = p.proposta
+   AND l.tenant_consolidation_link_decision_id = p.dec_prima
+RETURNING l.tenant_consolidation_link_id
+) SELECT * FROM u;
 
 -- Il giornale dell'applicazione: una riga INSERT per processo creato, legata alla decisione nuova, come fa
 -- l'adozione (applicazione.ts). L'inversa la legge da qui.
@@ -157,6 +202,9 @@ BEGIN
   SELECT count(*) INTO nr FROM rimesse;
   SELECT count(*) INTO nc FROM creati;
   IF nc <> 3 OR dif <> 0 THEN RAISE EXCEPTION 'post-condizione: creati % (attesi 3), difetti %', nc, dif; END IF;
+  IF nr <> 3 THEN RAISE EXCEPTION 'post-condizione: descrizioni ritirate % (attese 3): qualcuno le aveva cambiate', nr; END IF;
+  IF (SELECT count(*) FROM collegati) <> 3 THEN RAISE EXCEPTION 'post-condizione: collegamenti aggiornati % (attesi 3)', (SELECT count(*) FROM collegati); END IF;
+  IF l1 <> 21 OR l2 <> 24 THEN RAISE EXCEPTION 'post-condizione: % processi di primo livello e % sottoprocessi (attesi 21 e 24)', l1, l2; END IF;
   RAISE NOTICE 'fatto: % processi di primo livello e % sottoprocessi attivi, % descrizioni ritirate, % creati, 0 difetti', l1, l2, nr, nc;
 END $$;
 

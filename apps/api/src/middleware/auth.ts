@@ -24,6 +24,12 @@ export interface AgenteDelGettone {
   compito: string;
   /** A-2: i soli permessi del compito; null = tutti quelli dei ruoli del gettone. */
   permessi: ReadonlySet<string> | null;
+  /**
+   * ADR-0050 D6: i ruoli pieni della persona (`rl`), mandati compresi. In scrittura non danno
+   * nessun permesso: servono solo a dire, quando una scrittura è negata, se la persona avrebbe il
+   * potere per mandato (`AGENT_MANDATE_ONLY`) o non lo ha affatto (difetto del 2026-11-22).
+   */
+  ruoliPieni?: readonly RoleCode[];
 }
 
 export interface AuthUser {
@@ -186,6 +192,7 @@ const plugin: FastifyPluginAsync = async (app) => {
                 codice: agt.cod,
                 compito: agt.cmp,
                 permessi: Array.isArray(payload.scp) ? new Set(payload.scp) : null,
+                ...(Array.isArray(payload.rl) ? { ruoliPieni: payload.rl } : {}),
               },
             }
           : {}),

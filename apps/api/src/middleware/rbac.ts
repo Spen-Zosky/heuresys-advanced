@@ -116,6 +116,16 @@ export function requirePermission(
     }
     if (!req.user) throw new UnauthorizedError("Authentication required");
     if (!userHasPermission(req.user, permissionCode)) {
+      // ADR-0050 D6: un gettone d'agente scrive con i ruoli della persona senza i mandati. Se il
+      // permesso la persona lo ha solo per mandato, lo si dice con un codice proprio: l'assistente
+      // allora le dice che può farlo lei dalla pagina, e non a chi quel potere non ce l'ha.
+      const agente = req.user.agente;
+      if (agente?.ruoliPieni && userHasPermission({ roles: [...agente.ruoliPieni], agente }, permissionCode)) {
+        throw new ForbiddenError(
+          `Missing permission: ${permissionCode} (the person holds it only through a mandate, which an agent never uses to write)`,
+          "AGENT_MANDATE_ONLY",
+        );
+      }
       throw deniedCode
         ? new ForbiddenError(`Missing permission: ${permissionCode}`, deniedCode)
         : new ForbiddenError(`Missing permission: ${permissionCode}`);

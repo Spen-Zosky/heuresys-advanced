@@ -51,7 +51,7 @@ jobs:
     # run on it. Same-repo PRs (Dependabot lives in this repo) + push/dispatch only; skip
     # Dependabot defer-major PRs (single-runner churn, D-09). Push events have no PR context.
     if: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && !contains(github.event.pull_request.labels.*.name, 'defer-major') }}
-    runs-on: [self-hosted, off-prod]
+    runs-on: [self-hosted, leggero]
     timeout-minutes: 5
     steps:
       - name: Checkout
@@ -92,7 +92,7 @@ jobs:
     # sola con l'etichetta `state-lint-rosso`, a cui si aggiunge un commento a ogni giro rosso.
     needs: state-lint
     if: ${{ failure() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
-    runs-on: [self-hosted, off-prod]
+    runs-on: [self-hosted, leggero]
     timeout-minutes: 3
     permissions:
       issues: write

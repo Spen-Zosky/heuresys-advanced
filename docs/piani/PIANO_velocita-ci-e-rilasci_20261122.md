@@ -66,6 +66,15 @@ Proposte:
 2. Spesa per i runner a pagamento solo per i job leggeri (proposta 4): sì o no.
 3. R1 (deploy dello sha armato anche se main è avanzata) al posto del blocco di main, oppure R2.
 
+## Esiti al 22/11 (decisioni di Enzo: sì a tutto, tranne i runner a pagamento)
+
+- Etichetta `leggero`: fatta (#388); i sei job leggeri hanno due runner (enzo-s550cm e Z420 Debian) e l'attesa è scesa da minuti a secondi o pochi minuti. Cartella pnpm per istanza di runner: #394.
+- Deploy dello sha armato anche se main è avanzata (R1): scritto in #387, ma la prova dal vivo è fallita (il blocco veniva cancellato da `togli`, che serve per unire); corretto in #410 con una traccia d'autorizzazione separata. Resta da provare al prossimo rilascio.
+- Atlante: la PR dell'atlante non fa più girare integration e smoke, e il timer lavora per numero di PR (#404).
+- Prove di integrazione in due metà: #389 unita; la corsa di prova è verde (circa 10 minuti per metà), ma il guadagno vero richiede due runner pesanti liberi. Smoke in due metà: non fatta, da decidere dopo la prima corsa reale.
+- Runner a pagamento: no, per ora.
+- Blocco di main: resta finché R1 non ha la sua prova dal vivo.
+
 ## Cosa non è stato fatto
 
-Nessuna modifica a workflow, runner, script o impostazioni del repo. Le stime di risparmio sono calcolate sul campione di 24 ore e vanno riverificate dopo il primo cambio con lo stesso comando.
+Alla stesura del piano (prima degli esiti sopra) non era stata fatta nessuna modifica. Le stime di risparmio sono calcolate sul campione di 24 ore e vanno riverificate dopo il primo cambio con lo stesso comando.

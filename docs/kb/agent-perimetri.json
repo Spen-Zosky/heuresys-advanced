@@ -155,6 +155,16 @@
       ],
       "data": "2026-11-18",
       "decisione": "Enzo, 2026-11-17: approvate le cinque ondate degli endpoint senza consumatori (PR #280, piano docs/piani/PIANO_endpoint-orfani-ondate_20261117.md), criterio (b): all'agente, con le scritture approvate dalla persona. Ondata 4. Si aprono SOLO le scritture elencate in `scritture` (classe C nel catalogo generico: ogni chiamata chiede l'approvazione della persona); nessuna cancellazione. Come gli obiettivi."
+    },
+    {
+      "concetto": "tenant-processes",
+      "sola_lettura": false,
+      "scritture": [
+        "put_by_id_faccette_by_facet",
+        "put_by_id_attivita_by_stepid_apqc"
+      ],
+      "data": "2026-11-22",
+      "decisione": "Enzo, 2026-11-22: ADR-0061 accettato con le tre raccomandazioni e operativo subito, passo 10 del §7 (le capacità di §6 nel catalogo e nei perimetri). Si aprono SOLO le due scritture elencate in `scritture`: «Classifica un processo» (le faccette di D4) e «Mappa verso APQC» (il tipo di corrispondenza di D7). Classe C nel catalogo generico: ogni chiamata chiede l'approvazione della persona, che scrive con la sua identità e i suoi permessi (fonte PERSONA); nessuna cancellazione. Il cambio di responsabile (`patch_by_id_owner`) resta chiuso."
     }
   ]
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { adatta, altezzaArea, zoomIntorno, SCALA_MAX, SCALA_MIN } from "./navigazione-area";
+import { adatta, altezzaArea, zoomIntorno, SCALA_MAX, SCALA_MIN, SCALA_MIN_LEGGIBILE } from "./navigazione-area";
 
 describe("adatta (fit)", () => {
   it("rimpicciolisce un contenuto più largo dell'area e lo centra", () => {
@@ -22,6 +22,21 @@ describe("adatta (fit)", () => {
   });
   it("con misure assenti resta alla scala 1 invece di produrre NaN", () => {
     expect(adatta(0, 0, 100, 100)).toEqual({ s: 1, x: 0, y: 0 });
+  });
+});
+
+describe("adatta con scala minima leggibile", () => {
+  it("non scende sotto la scala minima e ancora in alto a sinistra il lato che sborda", () => {
+    const v = adatta(1600, 700, 3900, 400, SCALA_MIN_LEGGIBILE);
+    expect(v.s).toBe(SCALA_MIN_LEGGIBILE);
+    expect(v.x).toBe(12);
+    expect(v.y).toBeCloseTo((700 - 400 * v.s) / 2);
+  });
+  it("se il contenuto sta alla scala minima, il fit è quello normale", () => {
+    expect(adatta(1000, 800, 1200, 300, SCALA_MIN_LEGGIBILE)).toEqual(adatta(1000, 800, 1200, 300));
+  });
+  it("l'altezza dell'area segue la scala minima", () => {
+    expect(altezzaArea(1600, 3900, 600, 900, 240, SCALA_MIN_LEGGIBILE)).toBe(Math.round(600 * SCALA_MIN_LEGGIBILE + 24));
   });
 });
 

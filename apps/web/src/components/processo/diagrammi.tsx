@@ -21,6 +21,7 @@ import { Download } from "lucide-react";
 import type { TenantProcessScheda } from "@heuresys/shared";
 import { AreaNavigabile, ATTR_OGGETTO } from "@/components/organigramma/area-navigabile";
 import { svgEsportabile } from "@/components/organigramma/blocchi";
+import { SCALA_MIN_LEGGIBILE } from "@/lib/navigazione-area";
 
 type Attivita = TenantProcessScheda["activities"][number];
 
@@ -111,6 +112,10 @@ export function FlussoCorsie({
       const chiave = a.unitId ?? `x:${a.unitName ?? a.executorName ?? ""}`;
       if (!indice.has(chiave)) { indice.set(chiave, corsie.length); corsie.push({ chiave, id: a.unitId, nome: a.unitName ?? a.executorName ?? senzaUnita }); }
     }
+    // Le unità del processo che non eseguono attività (consultate, informate) hanno comunque la loro corsia.
+    for (const u of scheda.units) {
+      if (!indice.has(u.unitId)) { indice.set(u.unitId, corsie.length); corsie.push({ chiave: u.unitId, id: u.unitId, nome: u.unitName }); }
+    }
     const nomi = new Map([[scheda.process.processId, scheda.process.name], ...scheda.subprocesses.map((p) => [p.processId, p.name] as [string, string])]);
     const fasce: Array<{ processId: string; nome: string; da: number; a: number }> = [];
     att.forEach((a, i) => {
@@ -125,7 +130,7 @@ export function FlussoCorsie({
   }, [scheda, senzaUnita]);
 
   return (
-    <AreaNavigabile larghezza={d.larghezza} altezza={d.altezza} ariaLabel={ariaLabel} {...(testId ? { testId } : {})} strumenti={<BottoneEsporta onClick={esporta} />}>
+    <AreaNavigabile scalaMinFit={SCALA_MIN_LEGGIBILE} larghezza={d.larghezza} altezza={d.altezza} ariaLabel={ariaLabel} {...(testId ? { testId } : {})} strumenti={<BottoneEsporta onClick={esporta} />}>
       <svg ref={ref} role="group" aria-label={ariaLabel} width={d.larghezza} height={d.altezza} viewBox={`0 0 ${d.larghezza} ${d.altezza}`} fontFamily="Inter, Arial, Helvetica, sans-serif" className="block">
         <defs>
           <marker id="freccia-corsie" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -139,7 +144,7 @@ export function FlussoCorsie({
               <rect x={x0} y={4} width={x1 - x0} height={TOP - 4} rx={4} style={{ fill: C.fascia }} />
               <text x={x0 + 8} y={TOP / 2 + 6} fontSize={12} fontWeight={600} style={{ fill: C.testo }}>
                 <title>{f.nome}</title>
-                {dueRighe(f.nome, Math.max(8, Math.floor((x1 - x0 - 16) / 7)))[0]}
+                {dueRighe(f.nome, Math.max(8, Math.floor((x1 - x0 - 16) / 8)))[0]}
               </text>
             </g>
           );
@@ -189,7 +194,7 @@ export function FlussoCorsie({
 
 /* ------------------------------------------------------------------ diagramma per fasi */
 
-const FCW = 190, FBW = 176, FLH = 112;
+const FCW = 220, FBW = 206, FLH = 120;
 
 /**
  * Il diagramma per fasi: una colonna per attività (la «fase»), nell'ordine del catalogo, una corsia per
@@ -198,10 +203,12 @@ const FCW = 190, FBW = 176, FLH = 112;
  * la gerarchia non è il flusso). Le relazioni «precede» arriveranno col passo 6 dell'ADR.
  */
 export function DiagrammaFasi({
-  scheda, senzaUnita, ruoloUnita, onApriAttivita, onApriUnita, nomeFile, ariaLabel, testId,
+  scheda, senzaUnita, senzaAttivita, ruoloUnita, onApriAttivita, onApriUnita, nomeFile, ariaLabel, testId,
 }: {
   scheda: TenantProcessScheda;
   senzaUnita: string;
+  /** il testo, già tradotto, di una corsia di un'unità del processo che non ha attività */
+  senzaAttivita: string;
   /** il nome, già tradotto, del ruolo RACI di una unità nel processo */
   ruoloUnita: (unitId: string) => string | null;
   onApriAttivita: (id: string) => void;
@@ -226,30 +233,31 @@ export function DiagrammaFasi({
       const f = fasce[fasce.length - 1];
       if (f && f.processId === a.processId) f.a = i; else fasce.push({ processId: a.processId, nome: nomi.get(a.processId) ?? "", da: i, a: i });
     });
-    const LW2 = 190, TOP2 = 58;
+    const LW2 = 210, TOP2 = 62;
     const x = (i: number) => LW2 + i * FCW + (FCW - FBW) / 2;
     const larghezza = Math.max(LW2 + att.length * FCW + 8, 480);
     const altezza = TOP2 + corsie.length * FLH + 6;
-    return { att, corsie, indice, fasce, chiaveDi, x, LW2, TOP2, larghezza, altezza };
+    const occupate = new Set(att.map(chiaveDi));
+    return { att, corsie, indice, fasce, chiaveDi, occupate, x, LW2, TOP2, larghezza, altezza };
   }, [scheda, senzaUnita]);
 
   return (
-    <AreaNavigabile larghezza={d.larghezza} altezza={d.altezza} ariaLabel={ariaLabel} {...(testId ? { testId } : {})} strumenti={<BottoneEsporta onClick={esporta} />}>
+    <AreaNavigabile scalaMinFit={SCALA_MIN_LEGGIBILE} larghezza={d.larghezza} altezza={d.altezza} ariaLabel={ariaLabel} {...(testId ? { testId } : {})} strumenti={<BottoneEsporta onClick={esporta} />}>
       <svg ref={ref} role="group" aria-label={ariaLabel} width={d.larghezza} height={d.altezza} viewBox={`0 0 ${d.larghezza} ${d.altezza}`} fontFamily="Inter, Arial, Helvetica, sans-serif" className="block">
         {d.fasce.map((f) => {
           const x0 = d.LW2 + f.da * FCW + 4, x1 = d.LW2 + (f.a + 1) * FCW - 4;
           return (
             <g key={`${f.processId}-${f.da}`}>
-              <rect x={x0} y={4} width={x1 - x0} height={22} rx={4} style={{ fill: C.fascia }} />
-              <text x={x0 + 8} y={19} fontSize={12} fontWeight={600} style={{ fill: C.testo }}>
+              <rect x={x0} y={4} width={x1 - x0} height={26} rx={4} style={{ fill: C.fascia }} />
+              <text x={x0 + 8} y={22} fontSize={13} fontWeight={600} style={{ fill: C.testo }}>
                 <title>{f.nome}</title>
-                {dueRighe(f.nome, Math.max(8, Math.floor((x1 - x0 - 16) / 7)))[0]}
+                {dueRighe(f.nome, Math.max(8, Math.floor((x1 - x0 - 16) / 8)))[0]}
               </text>
             </g>
           );
         })}
         {d.att.map((a, i) => (
-          <text key={`h-${a.activityId}`} x={d.LW2 + i * FCW + FCW / 2} y={d.TOP2 - 8} fontSize={10} textAnchor="middle" style={{ fill: C.tenue }}>{`${a.ordinal} · ${a.code}`}</text>
+          <text key={`h-${a.activityId}`} x={d.LW2 + i * FCW + FCW / 2} y={d.TOP2 - 8} fontSize={12} textAnchor="middle" style={{ fill: C.tenue }}>{`${a.ordinal} · ${a.code}`}</text>
         ))}
         {d.corsie.map((c, k) => {
           const y0 = d.TOP2 + k * FLH;
@@ -261,10 +269,11 @@ export function DiagrammaFasi({
               {d.att.map((_, i) => <line key={i} x1={d.LW2 + i * FCW} x2={d.LW2 + i * FCW} y1={y0} y2={y0 + FLH} style={{ stroke: C.bordo, strokeOpacity: 0.15 }} />)}
               <g {...(c.id && onApriUnita ? aprendo(() => onApriUnita(c.id!)) : {})}>
                 <title>{c.nome}</title>
-                {ruolo ? <text x={10} y={y0 + 22} fontSize={10} fontWeight={700} style={{ fill: C.tenue }}>{ruolo.toUpperCase()}</text> : null}
-                {dueRighe(c.nome, 24).map((r, j) => (
-                  <text key={j} x={10} y={y0 + 42 + j * 15} fontSize={12} fontWeight={600} style={{ fill: C.testo }}>{r}</text>
+                {ruolo ? <text x={10} y={y0 + 24} fontSize={12} fontWeight={700} style={{ fill: C.tenue }}>{ruolo.toUpperCase()}</text> : null}
+                {dueRighe(c.nome, 20).map((r, j) => (
+                  <text key={j} x={10} y={y0 + 46 + j * 18} fontSize={14} fontWeight={600} style={{ fill: C.testo }}>{r}</text>
                 ))}
+                {!d.occupate.has(c.chiave) ? <text x={d.LW2 + 14} y={y0 + FLH / 2 + 4} fontSize={12} fontStyle="italic" style={{ fill: C.tenue }}>{senzaAttivita}</text> : null}
               </g>
             </g>
           );
@@ -272,14 +281,14 @@ export function DiagrammaFasi({
         {d.att.map((a, i) => {
           const k = d.indice.get(d.chiaveDi(a))!;
           const x = d.x(i), y = d.TOP2 + k * FLH + 8;
-          const nome = dueRighe(a.name, 26), esec = a.executorName ? dueRighe(a.executorName, 28)[0] : null;
+          const nome = dueRighe(a.name, 22), esec = a.executorName ? dueRighe(a.executorName, 26)[0] : null;
           return (
             <g key={a.activityId} data-testid="fasi-attivita" {...aprendo(() => onApriAttivita(a.activityId))}>
               <title>{`${a.ordinal}. ${a.name}${a.executorName ? ` — ${a.executorName}` : ""}`}</title>
               <rect x={x} y={y} width={FBW} height={FLH - 16} rx={6} style={{ fill: C.riquadro, stroke: C.testo, strokeWidth: 1.4 }} />
-              {nome.map((r, j) => <text key={j} x={x + 8} y={y + 17 + j * 13} fontSize={11} fontWeight={700} style={{ fill: C.testo }}>{r}</text>)}
-              {esec ? <text x={x + 8} y={y + 17 + nome.length * 13 + 8} fontSize={10} style={{ fill: C.tenue }}>{esec}</text> : null}
-              {a.typicalHoursPerCycle !== null ? <text x={x + 8} y={y + FLH - 22} fontSize={10} style={{ fill: C.tenue }}>{`${a.typicalHoursPerCycle} h`}</text> : null}
+              {nome.map((r, j) => <text key={j} x={x + 8} y={y + 20 + j * 16} fontSize={13} fontWeight={700} style={{ fill: C.testo }}>{r}</text>)}
+              {esec ? <text x={x + 8} y={y + 20 + nome.length * 16 + 8} fontSize={12} style={{ fill: C.tenue }}>{esec}</text> : null}
+              {a.typicalHoursPerCycle !== null ? <text x={x + 8} y={y + FLH - 22} fontSize={12} style={{ fill: C.tenue }}>{`${a.typicalHoursPerCycle} h`}</text> : null}
             </g>
           );
         })}
@@ -336,7 +345,7 @@ export function GrafoProcesso({
   };
 
   return (
-    <AreaNavigabile larghezza={d.larghezza} altezza={d.altezza} ariaLabel={ariaLabel} {...(testId ? { testId } : {})} strumenti={<BottoneEsporta onClick={esporta} />}>
+    <AreaNavigabile scalaMinFit={SCALA_MIN_LEGGIBILE} larghezza={d.larghezza} altezza={d.altezza} ariaLabel={ariaLabel} {...(testId ? { testId } : {})} strumenti={<BottoneEsporta onClick={esporta} />}>
       <svg ref={ref} role="group" aria-label={ariaLabel} width={d.larghezza} height={d.altezza} viewBox={`0 0 ${d.larghezza} ${d.altezza}`} fontFamily="Inter, Arial, Helvetica, sans-serif" className="block">
         {d.archi.map(([da, a]) => {
           const p = d.pos.get(da), q = d.pos.get(a);

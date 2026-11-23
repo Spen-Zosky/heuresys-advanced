@@ -264,7 +264,7 @@ export default function TenantProcessPage() {
             contenuto: (
               <div className="space-y-2">
                 <p className="text-xs text-muted-foreground">{t("processiDelTenant.scheda.fasiNota")}</p>
-                <DiagrammaFasi scheda={s} senzaUnita={t("processiDelTenant.scheda.senzaUnita")}
+                <DiagrammaFasi scheda={s} senzaUnita={t("processiDelTenant.scheda.senzaUnita")} senzaAttivita={t("processiDelTenant.scheda.fasiSenzaAttivita")}
                   ruoloUnita={(id) => { const u = s.units.find((x) => x.unitId === id); return u ? enumLabel("processUnitRole", u.role) : null; }}
                   onApriAttivita={setAperta} {...(apriUnita ? { onApriUnita: apriUnita } : {})}
                   nomeFile={`fasi_${p.code}`} ariaLabel={t("processiDelTenant.scheda.ariaFasi", { nome: p.name })} testId="tenant-process-fasi" />

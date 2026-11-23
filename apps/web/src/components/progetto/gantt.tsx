@@ -16,6 +16,7 @@ import { Download } from "lucide-react";
 import type { ProjectScheda } from "@heuresys/shared";
 import { AreaNavigabile, ATTR_OGGETTO } from "@/components/organigramma/area-navigabile";
 import { svgEsportabile } from "@/components/organigramma/blocchi";
+import { SCALA_MIN_LEGGIBILE } from "@/lib/navigazione-area";
 import { dueRighe } from "@/components/processo/diagrammi";
 
 type Fase = ProjectScheda["phases"][number];
@@ -116,7 +117,7 @@ export function GanttProgetto({
   const yRiga = (i: number) => TOP + i * RH;
 
   return (
-    <AreaNavigabile larghezza={d.larghezza} altezza={d.altezza} ariaLabel={ariaLabel} {...(testId ? { testId } : {})} strumenti={<Esporta onClick={esporta} />}>
+    <AreaNavigabile scalaMinFit={SCALA_MIN_LEGGIBILE} larghezza={d.larghezza} altezza={d.altezza} ariaLabel={ariaLabel} {...(testId ? { testId } : {})} strumenti={<Esporta onClick={esporta} />}>
       <svg ref={ref} role="group" aria-label={ariaLabel} width={d.larghezza} height={d.altezza} viewBox={`0 0 ${d.larghezza} ${d.altezza}`} fontFamily="Inter, Arial, Helvetica, sans-serif" className="block">
         <defs>
           <marker id="freccia-gantt" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
@@ -225,7 +226,7 @@ export function GrafoDipendenze({
   }, [scheda]);
 
   return (
-    <AreaNavigabile larghezza={d.larghezza} altezza={d.altezza} ariaLabel={ariaLabel} {...(testId ? { testId } : {})} strumenti={<Esporta onClick={esporta} />}>
+    <AreaNavigabile scalaMinFit={SCALA_MIN_LEGGIBILE} larghezza={d.larghezza} altezza={d.altezza} ariaLabel={ariaLabel} {...(testId ? { testId } : {})} strumenti={<Esporta onClick={esporta} />}>
       <svg ref={ref} role="group" aria-label={ariaLabel} width={d.larghezza} height={d.altezza} viewBox={`0 0 ${d.larghezza} ${d.altezza}`} fontFamily="Inter, Arial, Helvetica, sans-serif" className="block">
         <defs>
           <marker id="freccia-dipendenze" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">

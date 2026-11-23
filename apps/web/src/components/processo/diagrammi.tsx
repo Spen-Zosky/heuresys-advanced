@@ -21,9 +21,10 @@ import { Download } from "lucide-react";
 import type { TenantProcessScheda } from "@heuresys/shared";
 import { AreaNavigabile, ATTR_OGGETTO } from "@/components/organigramma/area-navigabile";
 import { svgEsportabile } from "@/components/organigramma/blocchi";
+import { attivitaInOrdine, corsieFasi } from "./corsie-fasi";
 import { SCALA_MIN_LEGGIBILE } from "@/lib/navigazione-area";
 
-type Attivita = TenantProcessScheda["activities"][number];
+export { attivitaInOrdine };
 
 const C = {
   riquadro: "var(--card)",
@@ -33,12 +34,6 @@ const C = {
   bordo: "var(--muted-foreground)",
   forte: "var(--primary)",
 };
-
-/** Le attività nell'ordine in cui si leggono: prima quelle del processo, poi un sottoprocesso alla volta. */
-export function attivitaInOrdine(s: TenantProcessScheda): Attivita[] {
-  const ordine = new Map<string, number>([[s.process.processId, 0], ...s.subprocesses.map((p, i) => [p.processId, i + 1] as [string, number])]);
-  return [...s.activities].sort((a, b) => (ordine.get(a.processId) ?? 99) - (ordine.get(b.processId) ?? 99) || a.ordinal - b.ordinal);
-}
 
 /** Va a capo su al massimo due righe di `n` caratteri; l'ultima finisce con «…» se il testo è più lungo. */
 export function dueRighe(testo: string, n: number): string[] {
@@ -106,16 +101,7 @@ export function FlussoCorsie({
   const { ref, esporta } = useEsporta(nomeFile);
   const d = useMemo(() => {
     const att = attivitaInOrdine(scheda);
-    const corsie: Array<{ chiave: string; id: string | null; nome: string }> = [];
-    const indice = new Map<string, number>();
-    for (const a of att) {
-      const chiave = a.unitId ?? `x:${a.unitName ?? a.executorName ?? ""}`;
-      if (!indice.has(chiave)) { indice.set(chiave, corsie.length); corsie.push({ chiave, id: a.unitId, nome: a.unitName ?? a.executorName ?? senzaUnita }); }
-    }
-    // Le unità del processo che non eseguono attività (consultate, informate) hanno comunque la loro corsia.
-    for (const u of scheda.units) {
-      if (!indice.has(u.unitId)) { indice.set(u.unitId, corsie.length); corsie.push({ chiave: u.unitId, id: u.unitId, nome: u.unitName }); }
-    }
+    const { corsie, indice } = corsieFasi(scheda, att, senzaUnita);
     const nomi = new Map([[scheda.process.processId, scheda.process.name], ...scheda.subprocesses.map((p) => [p.processId, p.name] as [string, string])]);
     const fasce: Array<{ processId: string; nome: string; da: number; a: number }> = [];
     att.forEach((a, i) => {
@@ -220,13 +206,7 @@ export function DiagrammaFasi({
   const { ref, esporta } = useEsporta(nomeFile);
   const d = useMemo(() => {
     const att = attivitaInOrdine(scheda);
-    const chiaveDi = (a: Attivita) => a.unitId ?? `x:${a.unitName ?? a.executorName ?? ""}`;
-    const corsie: Array<{ chiave: string; id: string | null; nome: string }> = [];
-    const indice = new Map<string, number>();
-    for (const a of att) {
-      const k = chiaveDi(a);
-      if (!indice.has(k)) { indice.set(k, corsie.length); corsie.push({ chiave: k, id: a.unitId, nome: a.unitName ?? a.executorName ?? senzaUnita }); }
-    }
+    const { corsie, indice, chiaveDi } = corsieFasi(scheda, att, senzaUnita);
     const nomi = new Map([[scheda.process.processId, scheda.process.name], ...scheda.subprocesses.map((p) => [p.processId, p.name] as [string, string])]);
     const fasce: Array<{ processId: string; nome: string; da: number; a: number }> = [];
     att.forEach((a, i) => {

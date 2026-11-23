@@ -2105,6 +2105,40 @@ PY
 else
   ok "python3 assente: guardia valori saltata"
 fi
+# ------------------------------------------------- hook portabili (23/11/2026)
+section "hook di sessione: stesso comportamento su Linux e Windows, idempotenti"
+SB="scripts/hooks/session-boot.sh"
+HK="$(mktemp -d)"
+# H1: guardia statica: nessun hook di .claude/settings.json dipende da powershell.exe
+if node -e 'const s=require("./.claude/settings.json");const c=[];for(const e of Object.values(s.hooks||{}))for(const g of e)for(const h of g.hooks)c.push(h.command);process.exit(c.some(x=>/powershell|pwsh|\.ps1/i.test(x)||/\|\|\s*true\s*$/.test(x))?1:0)' 2>/dev/null; then
+  ok "settings.json: nessun hook chiama powershell ne' si salta con '|| true'"
+else
+  fail "settings.json: un hook chiama powershell o tace con '|| true'"
+fi
+# H2: due avvii di fila escono 0 e stampano la stessa intestazione (idempotente)
+a="$(CLAUDE_PROJECT_DIR="$ROOT" sh "$SB" 2>&1)"; ra=$?
+b="$(CLAUDE_PROJECT_DIR="$ROOT" sh "$SB" 2>&1)"; rb=$?
+if [ $ra = 0 ] && [ $rb = 0 ] && printf '%s' "$a" | grep -q '=== HEURESYS BOOT' && [ "$(printf '%s' "$a" | grep -c sessione)" = "$(printf '%s' "$b" | grep -c sessione)" ]; then
+  ok "session-boot.sh: 2 avvii consecutivi, exit 0, stesso esito"
+else
+  fail "session-boot.sh non idempotente (exit $ra/$rb)"
+fi
+# H3: repo diverso da CLAUDE_PROJECT_DIR -> silenzio, exit 0
+o="$(CLAUDE_PROJECT_DIR="$HK" sh "$SB" 2>&1)"; r=$?
+[ $r = 0 ] && [ -z "$o" ] && ok "session-boot.sh: progetto diverso -> nessun output" || fail "session-boot.sh agisce su un altro progetto"
+# H4: Windows simulato (uname MINGW + powershell.exe finto): sceglie il ramo PowerShell e passa -File
+mkdir -p "$HK/bin"
+printf '#!/bin/sh\necho MINGW64_NT-10.0\n' > "$HK/bin/uname"
+printf '#!/bin/sh\necho "PS:$*"\n' > "$HK/bin/powershell.exe"
+chmod +x "$HK/bin/uname" "$HK/bin/powershell.exe"
+o="$(PATH="$HK/bin:$PATH" CLAUDE_PROJECT_DIR="$ROOT" sh "$SB" 2>&1)"
+if printf '%s' "$o" | grep -q 'PS:.*session-boot.ps1 -ProjectRoot'; then ok "Windows simulato: usa powershell.exe -File session-boot.ps1"; else fail "Windows simulato: ramo PowerShell non scelto ($o)"; fi
+# H5: gli altri hook (.sh) escono 0 senza input su ogni sistema
+for h in precompact-journal.sh qualita-lint.sh; do
+  if printf '{}' | sh "scripts/hooks/$h" >/dev/null 2>&1; then ok "hook $h: exit 0 con input vuoto"; else fail "hook $h: exit non zero con input vuoto"; fi
+done
+rm -rf "$HK"
+git checkout -q -- .handoff 2>/dev/null || true
 # ---------------------------------------------------------------- summary
 printf '\n%d ok, %d failed\n' "$PASS" "$FAIL"
 [ "$FAIL" = 0 ]

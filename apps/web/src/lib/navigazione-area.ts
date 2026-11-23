@@ -16,12 +16,20 @@ export const SCALA_MIN = 0.1;
 export const SCALA_MAX = 4;
 export const PASSO_ZOOM = 1.2;
 const MARGINE = 12;
+/** La scala sotto cui il testo dei diagrammi di processo e di progetto non si legge più: il fit non scende oltre. */
+export const SCALA_MIN_LEGGIBILE = 0.7;
 
-/** Il fit: tutto il contenuto dentro l'area, centrato, mai ingrandito oltre la scala 1. */
-export function adatta(larghezzaArea: number, altezzaArea: number, nw: number, nh: number): Vista {
+/**
+ * Il fit: tutto il contenuto dentro l'area, centrato, mai ingrandito oltre la scala 1.
+ * Con `scalaMin` il fit non scende sotto quella scala: se il contenuto non ci sta, si apre alla scala
+ * minima ancorato in alto a sinistra (nel lato che sborda) e si scorre trascinando.
+ */
+export function adatta(larghezzaArea: number, altezzaArea: number, nw: number, nh: number, scalaMin = SCALA_MIN): Vista {
   if (nw <= 0 || nh <= 0 || larghezzaArea <= 0 || altezzaArea <= 0) return { s: 1, x: 0, y: 0 };
-  const s = Math.max(SCALA_MIN, Math.min(1, (larghezzaArea - 2 * MARGINE) / nw, (altezzaArea - 2 * MARGINE) / nh));
-  return { s, x: (larghezzaArea - nw * s) / 2, y: (altezzaArea - nh * s) / 2 };
+  const s = Math.max(scalaMin, Math.min(1, (larghezzaArea - 2 * MARGINE) / nw, (altezzaArea - 2 * MARGINE) / nh));
+  const x = nw * s + 2 * MARGINE > larghezzaArea ? MARGINE : (larghezzaArea - nw * s) / 2;
+  const y = nh * s + 2 * MARGINE > altezzaArea ? MARGINE : (altezzaArea - nh * s) / 2;
+  return { s, x, y };
 }
 
 /** Zoom di un fattore tenendo fermo il punto (cx, cy) dell'area: quello sotto il mouse resta sotto il mouse. */
@@ -36,8 +44,8 @@ export function zoomIntorno(v: Vista, fattore: number, cx: number, cy: number): 
  * massimo dato (una frazione dello schermo). Un organigramma piccolo non lascia un vuoto alto
  * mezzo schermo; uno grande non spinge la pagina oltre lo schermo.
  */
-export function altezzaArea(larghezzaArea: number, nw: number, nh: number, massimo: number, minimo = 240): number {
+export function altezzaArea(larghezzaArea: number, nw: number, nh: number, massimo: number, minimo = 240, scalaMin = SCALA_MIN): number {
   if (nw <= 0 || nh <= 0) return minimo;
-  const s = Math.min(1, (larghezzaArea - 2 * MARGINE) / nw);
+  const s = Math.max(scalaMin, Math.min(1, (larghezzaArea - 2 * MARGINE) / nw));
   return Math.round(Math.max(Math.min(minimo, massimo), Math.min(massimo, nh * s + 2 * MARGINE)));
 }

@@ -15,7 +15,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Maximize2, Minus, Plus } from "lucide-react";
-import { adatta, altezzaArea, zoomIntorno, PASSO_ZOOM, type Vista } from "@/lib/navigazione-area";
+import { adatta, altezzaArea, zoomIntorno, PASSO_ZOOM, SCALA_MIN, type Vista } from "@/lib/navigazione-area";
 
 /** Gli oggetti che si aprono con il doppio clic portano questo attributo: lì il doppio clic non riadatta. */
 export const ATTR_OGGETTO = "data-oggetto";
@@ -29,12 +29,14 @@ function pxDa(massimo: string): number {
 }
 
 export function AreaNavigabile({
-  larghezza, altezza, altezzaMax = "70vh", strumenti, children, testId, ariaLabel,
+  larghezza, altezza, altezzaMax = "70vh", scalaMinFit = SCALA_MIN, strumenti, children, testId, ariaLabel,
 }: {
   /** Grandezza naturale del contenuto; se manca, l'area la misura. */
   larghezza?: number;
   altezza?: number;
   altezzaMax?: string;
+  /** Scala sotto cui «Adatta» non scende: il contenuto più grande si apre a quella scala e si scorre. */
+  scalaMinFit?: number;
   /** Pulsanti in più nella barra (per esempio «Esporta SVG»). */
   strumenti?: ReactNode;
   children: ReactNode;
@@ -56,8 +58,8 @@ export function AreaNavigabile({
 
   const nw = larghezza ?? misura.w;
   const nh = altezza ?? misura.h;
-  const hArea = larghezzaArea ? altezzaArea(larghezzaArea, nw, nh, pxDa(altezzaMax)) : 240;
-  const fit = adatta(larghezzaArea, hArea, nw, nh);
+  const hArea = larghezzaArea ? altezzaArea(larghezzaArea, nw, nh, pxDa(altezzaMax), 240, scalaMinFit) : 240;
+  const fit = adatta(larghezzaArea, hArea, nw, nh, scalaMinFit);
   const vista = scelta ?? fit;
 
   // Grandezza naturale misurata, quando non è dichiarata (offsetWidth ignora la trasformazione).

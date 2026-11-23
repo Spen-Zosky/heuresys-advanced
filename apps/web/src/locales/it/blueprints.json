@@ -485,6 +485,7 @@
       "nessunProgetto": "Nessun progetto è collegato al processo.",
       "approvazioni": "Richieste di approvazione: {{totale}}, di cui {{inAttesa}} in attesa",
       "fasiNota": "Una colonna per fase (attività), nell'ordine del catalogo, e una corsia per unità. L'ordine è quello del catalogo, non una sequenza nel tempo: le frecce non ci sono. Doppio clic su un riquadro per aprire l'attività, su un'unità per la sua scheda.",
+      "fasiSenzaAttivita": "Nessuna attività in questo processo: partecipa con il ruolo indicato",
       "ariaFasi": "Diagramma per fasi del processo {{nome}}",
       "flussoNota": "Una corsia per unità; le attività si leggono da sinistra a destra e i sottoprocessi sono le fasce in alto. Doppio clic su un'attività per aprirla, su un'unità per la sua scheda.",
       "grafoNota": "Il processo, i sottoprocessi, le attività e le unità che le eseguono. Doppio clic su un sottoprocesso per aprirlo, su un'attività per i dettagli, su un'unità per la sua scheda.",

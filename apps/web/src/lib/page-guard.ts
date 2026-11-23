@@ -59,6 +59,7 @@ export function pageVerdict(
   rawPathname: string,
   routes: ReadonlyArray<RouteAccess>,
   tabGroups: ReadonlyArray<ReadonlyArray<string>> = [],
+  schede?: PermessiDelleSchede,
 ): PageVerdict {
   const pathname = normalize(rawPathname);
   const direct = bestMatch(pathname, routes);
@@ -66,9 +67,76 @@ export function pageVerdict(
   for (const tabs of tabGroups) {
     const main = tabs[0];
     if (main === undefined) continue;
-    if (!tabs.some((t) => routeContains(t, pathname))) continue;
+    const scheda = schedaPiuLunga(tabs, pathname);
+    if (scheda === null) continue;
     const viaMain = bestMatch(main, routes);
-    if (viaMain !== null) return viaMain.kind === "denied" ? { kind: "denied", route: main } : viaMain;
+    if (viaMain === null) continue;
+    if (viaMain.kind === "denied") return { kind: "denied", route: main };
+    // K30 (forense 23/11): una scheda con un permesso suo segue la pagina principale solo se la
+    // persona ha anche quel permesso; altrimenti la pagina si apriva e le sue letture finivano
+    // in 403 (/mentorship per il CEO). Con i permessi non ancora noti decide l'API, come prima.
+    const richiesti = schede?.permessiDi(scheda) ?? null;
+    const noti = schede?.permessi ?? null;
+    if (richiesti !== null && noti !== null && !richiesti.some((p) => noti.includes(p))) {
+      return { kind: "denied", route: scheda };
+    }
+    return viaMain;
   }
   return { kind: "allowed", route: null };
+}
+
+/** I permessi della persona e quelli che una scheda chiede (null: segue la principale). */
+export interface PermessiDelleSchede {
+  /** null finché non sono caricati: allora non si nega niente in più. */
+  permessi: ReadonlyArray<string> | null;
+  /** Basta uno dei permessi elencati per aprire la scheda. */
+  permessiDi: (href: string) => ReadonlyArray<string> | null;
+}
+
+/**
+ * Le sole schede che la guardia chiude per un permesso proprio, con i permessi che la pagina
+ * esige davvero (basta uno). Non è `permessoDellaScheda` di section-tabs.tsx, che decide solo se
+ * mostrare la scheda: lì /admin/agent-requests chiede `agent_request:read:all`, mentre la pagina
+ * funziona anche con `agent_conversation:use:self` (le proprie richieste), e /admin/tassonomie
+ * con uno qualunque di tre permessi. Una scheda entra qui solo dopo aver letto i permessi di
+ * tutte le letture della sua pagina.
+ *  - /mentorship: ogni GET di /v1/mentorship/* chiede `mentorship:read` (modules/mentorship/routes.ts).
+ */
+export const PERMESSI_GUARDIA_SCHEDE: Readonly<Record<string, ReadonlyArray<string>>> = {
+  "/mentorship": ["mentorship:read"],
+};
+
+export function permessiGuardiaScheda(href: string): ReadonlyArray<string> | null {
+  return PERMESSI_GUARDIA_SCHEDE[href] ?? null;
+}
+
+function schedaPiuLunga(hrefs: ReadonlyArray<string>, pathname: string): string | null {
+  let best: string | null = null;
+  for (const h of hrefs) {
+    if (routeContains(h, pathname) && (best === null || h.length > best.length)) best = h;
+  }
+  return best;
+}
+
+const chiaveVoce = (route: string) => `shell:nav.voci.${route.replace(/^\//, "").replace(/\//g, "_")}`;
+
+/**
+ * K29 (forense 23/11): le chiavi i18n con cui nominare una pagina negata, in ordine di
+ * preferenza. Prima la voce di menu della pagina richiesta, poi l'etichetta della sua scheda;
+ * la rotta del verdetto solo se contiene la pagina richiesta. Prima la si usava sempre, e la
+ * scheda /admin/gdpr negata insieme alla sua principale si presentava come «Registro di
+ * provenienza». Se nessuna chiave ha un testo, la pagina usa la frase generica.
+ */
+export function chiaviNomePaginaNegata(
+  rawPathname: string,
+  verdict: PageVerdict,
+  schede: ReadonlyArray<{ href: string; key: string }>,
+): string[] {
+  const pathname = normalize(rawPathname);
+  const chiavi = [chiaveVoce(pathname)];
+  const scheda = schedaPiuLunga(schede.map((s) => s.href), pathname);
+  const chiaveScheda = schede.find((s) => s.href === scheda)?.key;
+  if (chiaveScheda !== undefined) chiavi.push(`shell:tabs.${chiaveScheda}`);
+  if (verdict.route !== null && routeContains(verdict.route, pathname)) chiavi.push(chiaveVoce(verdict.route));
+  return chiavi;
 }

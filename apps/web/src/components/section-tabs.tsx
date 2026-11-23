@@ -101,6 +101,9 @@ export const SECTION_TAB_GROUPS: ReadonlyArray<ReadonlyArray<string>> = MERGE_GR
   g.tabs.map((t) => t.href),
 );
 
+/** K29: ogni scheda con la sua chiave `shell:tabs.*`, per nominare una scheda negata. */
+export const SECTION_TABS: ReadonlyArray<Tab> = MERGE_GROUPS.flatMap((g) => g.tabs);
+
 /** Match with a "/" boundary so /analytics/skills does NOT swallow
  *  /analytics/skills-by-category (a bare startsWith would). */
 function matchHref(pathname: string, href: string): boolean {

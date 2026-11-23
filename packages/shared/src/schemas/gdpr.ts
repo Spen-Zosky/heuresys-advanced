@@ -11,6 +11,7 @@
  */
 import { z } from "zod";
 import { paginationFields } from "./_pagination.js";
+import { FaldoneLinguaSchema } from "./faldone.js";
 
 /* --- data map ----------------------------------------------------------- */
 
@@ -49,8 +50,25 @@ export const GdprDataMapEntrySchema = z.object({
 });
 export type GdprDataMapEntry = z.infer<typeof GdprDataMapEntrySchema>;
 
+/**
+ * Una voce della mappa come la legge la pagina (giro forense K34): in più il TITOLO della tabella,
+ * nella lingua chiesta, dallo stesso catalogo del Faldone (`faldone/classi.ts` e `inglese.ts`), che
+ * è la fonte unica dei nomi leggibili delle tabelle che parlano di una persona. `null` quando la
+ * tabella non è nel catalogo (per esempio `sys_leads`, il cui soggetto non è un utente): allora il
+ * titolo lo dà il dizionario della pagina (`admin:gdpr.tabelle.<nome>`).
+ */
+export const GdprDataMapItemSchema = GdprDataMapEntrySchema.extend({
+  title: z.string().nullable(),
+});
+export type GdprDataMapItem = z.infer<typeof GdprDataMapItemSchema>;
+
+export const GdprDataMapQuerySchema = z.object({
+  /** La lingua dei titoli (italiano se manca). */
+  lingua: FaldoneLinguaSchema.optional(),
+});
+
 export const GdprDataMapResponseSchema = z.object({
-  items: z.array(GdprDataMapEntrySchema),
+  items: z.array(GdprDataMapItemSchema),
 });
 export type GdprDataMapResponse = z.infer<typeof GdprDataMapResponseSchema>;
 

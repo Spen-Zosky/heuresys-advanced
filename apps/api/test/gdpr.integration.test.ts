@@ -7,6 +7,8 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { randomUUID } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
@@ -106,6 +108,38 @@ describe("D-14 F3/F4 GDPR tooling", () => {
       .filter((k) => !mapped.has(k))
       .sort();
     expect(missing, "FK di appartenenza senza classificazione GDPR (aggiorna sys_gdpr_data_map)").toEqual([]);
+  });
+
+  // Giro forense K34: la pagina mostrava i nomi fisici delle tabelle. Ogni voce deve avere un titolo
+  // leggibile in entrambe le lingue: dal catalogo del Faldone (campo `title` dell'API) oppure, per le
+  // tabelle fuori da quel catalogo, dal dizionario della pagina (`admin:gdpr.tabelle.<nome>`). Una
+  // tabella nuova nella mappa senza né l'uno né l'altro fa diventare rossa questa prova.
+  it("data-map: ogni voce ha un titolo leggibile, in italiano e in inglese (giro forense K34)", async () => {
+    for (const lingua of ["it", "en"] as const) {
+      const r = await suite.app.inject({
+        method: "GET",
+        url: `/v1/gdpr/data-map?lingua=${lingua}`,
+        headers: headers(platform),
+      });
+      expect(r.statusCode).toBe(200);
+      const { items } = r.json() as { items: { tableName: string; title: string | null }[] };
+      const dizionario = JSON.parse(
+        readFileSync(resolve(__dirname, `../../web/src/locales/${lingua}/admin.json`), "utf8"),
+      ) as { gdpr: { tabelle?: Record<string, string> } };
+      const senzaTitolo = items
+        .filter((i) => i.title === null && !dizionario.gdpr.tabelle?.[i.tableName])
+        .map((i) => i.tableName);
+      expect(senzaTitolo, `tabelle della mappa senza titolo (${lingua})`).toEqual([]);
+      for (const i of items.filter((x) => x.title !== null)) {
+        expect(i.title, `il titolo non è il nome fisico: ${i.tableName}`).not.toMatch(/_/);
+      }
+    }
+    const rIt = await suite.app.inject({ method: "GET", url: "/v1/gdpr/data-map?lingua=it", headers: headers(platform) });
+    const rEn = await suite.app.inject({ method: "GET", url: "/v1/gdpr/data-map?lingua=en", headers: headers(platform) });
+    const titolo = (r: typeof rIt, tabella: string) =>
+      (r.json() as { items: { tableName: string; title: string | null }[] }).items.find((i) => i.tableName === tabella)?.title;
+    expect(titolo(rIt, "sys_user_bank_details")).toBe("Coordinate bancarie");
+    expect(titolo(rEn, "sys_user_bank_details")).not.toBe("Coordinate bancarie");
   });
 
   it("il registro delle richieste si può RILEGGERE (prima si scriveva soltanto)", async () => {

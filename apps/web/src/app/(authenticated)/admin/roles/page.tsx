@@ -19,8 +19,9 @@ interface RolePermItem {
 }
 
 /**
- * Repertorio interfacce (blocco B2): ogni riga dice il permesso in parole, «Utenti · leggere»,
- * e il codice tecnico (`user:read`) resta solo nel suggerimento al passaggio del mouse (R4).
+ * Repertorio interfacce (blocco B2): ogni riga dice il permesso in parole, «Utenti · leggere».
+ * Il codice tecnico (`user:read`, `HRMS_MANAGER`) resta in un attributo `data-` per chi controlla
+ * la pagina, non nel suggerimento al passaggio del mouse, che è testo che una persona legge (K14).
  * Le righe sono in ordine alfabetico delle parole, così i permessi di una stessa area stanno insieme.
  */
 // D3-20: i due punti e il trattino dei codici (`read:self`, `job-requisition`) non sono chiavi valide
@@ -110,7 +111,7 @@ export default function AdminRolesPage() {
                       key={r}
                       className="px-3 py-2 text-center font-medium text-foreground"
                       data-testid="admin-roles-role-col"
-                      title={r}
+                      data-codice-ruolo={r}
                     >
                       {t(`shell:roles.${r}`, { defaultValue: r })}
                     </th>
@@ -124,7 +125,7 @@ export default function AdminRolesPage() {
                     className="border-b border-border last:border-b-0 transition-colors hover:bg-muted/50"
                     data-testid="admin-roles-perm-row"
                   >
-                    <td className="px-3 py-1.5 whitespace-nowrap text-foreground" title={p} data-testid="admin-roles-perm-label">
+                    <td className="px-3 py-1.5 whitespace-nowrap text-foreground" data-codice-permesso={p} data-testid="admin-roles-perm-label">
                       {label}
                     </td>
                     {roles.map((r) => {

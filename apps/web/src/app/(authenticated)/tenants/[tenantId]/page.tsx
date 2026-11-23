@@ -99,7 +99,6 @@ export default function TenantDetailPage() {
         }
         badges={
           <>
-            <span data-testid="tenant-code" className="font-mono text-sm text-muted-foreground">{tn.tenantCode}</span>
             <EnumStatusBadge domain="tenantStatus" value={tn.tenantStatus} />
           </>
         }

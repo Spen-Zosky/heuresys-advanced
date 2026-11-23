@@ -67,7 +67,10 @@ export default function MeMatchingPage() {
       },
       {
         header: t("matching.colIsco"),
-        cell: (m) => <span className="text-xs text-muted-foreground">{m.iscoCode ?? "—"}</span>,
+        // K19: il codice ISCO è un identificativo: resta testo («2411», non «2.411») e sta nella
+        // scheda della riga in tutte e due le lingue, non solo dove l'intestazione dice «Codice».
+        secondaria: true,
+        cell: (m) => <span className="text-xs text-muted-foreground" data-grezzo>{m.iscoCode ?? "—"}</span>,
       },
       {
         header: t("matching.colScore"),

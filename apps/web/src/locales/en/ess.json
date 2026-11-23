@@ -106,6 +106,7 @@
       "value": "Value",
       "band": "Band",
       "model": "Model",
+      "modelVersion": "version {{n}}",
       "computedAt": "Computed at",
       "successionTitle": "Succession readiness",
       "position": "Position",

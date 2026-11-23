@@ -303,6 +303,10 @@
       "permanent": "Tempo indeterminato",
       "fixed_term": "Tempo determinato"
     },
+    "workScheduleType": {
+      "full_time": "Tempo pieno",
+      "part_time": "Tempo parziale"
+    },
     "contractStatus": {
       "ACTIVE": "Attivo",
       "ENDED": "Concluso",

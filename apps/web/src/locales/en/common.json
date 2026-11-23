@@ -303,6 +303,10 @@
       "permanent": "Permanent",
       "fixed_term": "Fixed-term"
     },
+    "workScheduleType": {
+      "full_time": "Full time",
+      "part_time": "Part time"
+    },
     "contractStatus": {
       "ACTIVE": "Active",
       "ENDED": "Ended",

@@ -199,6 +199,15 @@ describe("faldone — l'accesso", () => {
     const r = await get(platform, `/v1/faldone/${targetId}/sezioni/sys.sys_inesistente.colonna`);
     expect(r.status).toBe(404);
   });
+
+  it("K27: la sezione con l'identificativo più lungo si apre (prima 414 oltre 100 caratteri)", async () => {
+    const indice = (await get(hr, "/v1/me/faldone")).body as Indice;
+    const lunga = [...indice.sezioni].sort((a, b) => b.id.length - a.id.length)[0];
+    expect(lunga, "l'indice non ha sezioni").toBeTruthy();
+    expect(lunga!.id.length, "serve una sezione oltre il tetto di difetto di Fastify").toBeGreaterThan(100);
+    const r = await get(hr, `/v1/me/faldone/sezioni/${encodeURIComponent(lunga!.id)}?limit=1`);
+    expect(r.status, `${lunga!.id}: ${r.raw.slice(0, 200)}`).toBe(200);
+  });
 });
 
 /**

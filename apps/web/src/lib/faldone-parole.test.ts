@@ -6,7 +6,7 @@
  * nessuno dei tre insiemi va aggiunta al dizionario o, se è italiana, a ITALIANE.
  */
 import { describe, expect, it } from "vitest";
-import { intestazione, PAROLE, SIGLE } from "./faldone-parole";
+import { intestazione, PAROLE, PAROLE_EN, SIGLE } from "./faldone-parole";
 
 const CATALOGO = [
   "1y 6mo aaguid accepted account accountable accrual accrued accuracy achievement acknowledged acquisition act acting",
@@ -104,5 +104,32 @@ describe("faldone: ogni parola dei nomi di colonna è detta in italiano", () => 
     expect(intestazione("auth_session_step_up_at", "sys.sys_auth_sessions")).toBe("Riconferma il");
     expect(intestazione("auth_session_ip", "sys.sys_auth_sessions")).toBe("IP");
     expect(intestazione("auth_session_user_agent", "sys.sys_auth_sessions")).toBe("Browser");
+  });
+});
+
+/** Parole che si scrivono uguali nelle due lingue e in inglese restano come sono. */
+const ANCHE_INGLESI = new Set(["data", "dossier"]);
+
+describe("faldone in inglese (K01): nessuna parola italiana nelle intestazioni", () => {
+  it("ogni parola italiana dei nomi di colonna ha la sua forma inglese", () => {
+    expect([...ITALIANE].filter((p) => !(p in PAROLE_EN) && !ANCHE_INGLESI.has(p))).toEqual([]);
+  });
+
+  it("nessuna intestazione inglese contiene una parola italiana del catalogo", () => {
+    const italiane = CATALOGO.filter((p) => ITALIANE.has(p))
+      .map((p) => intestazione(`x_${p}`, "sys.sys_y", "en").toLowerCase().split(" "))
+      .flat()
+      .filter((w) => ITALIANE.has(w) && !ANCHE_INGLESI.has(w));
+    expect(italiane).toEqual([]);
+  });
+
+  it("i casi visti dal vivo il 21/11 escono in inglese, e senza lingua restano in italiano", () => {
+    expect(intestazione("auth_refresh_used_at", "sys.sys_auth_refresh_tokens", "en")).toBe("Used at");
+    expect(intestazione("auth_refresh_revoked_at", "sys.sys_auth_refresh_tokens", "en")).toBe("Revoked at");
+    expect(intestazione("auth_session_step_up_at", "sys.sys_auth_sessions", "en")).toBe("Step-up at");
+    expect(intestazione("auth_session_ip", "sys.sys_auth_sessions", "en")).toBe("IP");
+    expect(intestazione("user_profile_is_active", "sys.sys_user_profiles", "en")).toBe("Active");
+    expect(intestazione("registro_scrittura_persona_user_id", "audit.registro_scritture", "en")).toBe("Log write person user");
+    expect(intestazione("auth_refresh_used_at", "sys.sys_auth_refresh_tokens")).toBe("Usato il");
   });
 });

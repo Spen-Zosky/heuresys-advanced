@@ -1,5 +1,5 @@
 /**
- * apps/web/src/lib/faldone-parole.ts — il nome di una colonna del database detto in italiano.
+ * apps/web/src/lib/faldone-parole.ts — il nome di una colonna del database detto in italiano (o in inglese).
  *
  * Il Faldone mostra le colonne di tutte le tabelle che riguardano una persona: il loro nome arriva
  * dal catalogo del database (`persona_last_login_at`), non da un'etichetta scritta a mano. Prima un
@@ -208,15 +208,60 @@ const COMPOSTE: Array<[RegExp, string]> = [
   [/(^|_)line_manager(_|$)/, "$1responsabile diretto$2"],
 ];
 
-/** Il nome di una colonna in italiano, senza il prefisso della tabella. */
-export function intestazione(colonna: string, tabella: string): string {
+/**
+ * Classe K01 del controllo forense del 23/11/2026: in una pagina inglese le intestazioni uscivano in
+ * italiano. In inglese i nomi di colonna sono già quasi tutti inglesi: si tolgono le parole vuote, si
+ * sciolgono le abbreviazioni e si traducono le parole italiane che il catalogo contiene (la prova
+ * `faldone-parole.test.ts` fallisce se una di esse resta senza traduzione).
+ */
+export const PAROLE_EN: Record<string, string> = {
+  id: "", ids: "", is: "", has: "",
+  cal: "calendar", conf: "configuration", cred: "credential", prof: "professional", prefs: "preferences",
+  req: "request", seq: "sequence", op: "operation", cert: "certificate", ref: "reference", org: "organisation",
+  args: "arguments", params: "parameters",
+  // Le parole italiane dei nomi di colonna.
+  agente: "agent", aggiunto: "added", annotato: "annotated", annullata: "cancelled", annullato: "cancelled",
+  applicata: "applied", applicato: "applied", approvatore: "approver", attiva: "active", attivo: "active",
+  attore: "actor", avvenuta: "occurred", avvenuto: "occurred", azione: "action", catalogo: "catalogue",
+  categoria: "category", chiave: "key", chiusura: "closure", codice: "code", colonna: "column", compito: "task",
+  concedente: "grantor", concessioni: "grants", condizione: "condition", confidenza: "confidence",
+  conflitto: "conflict", contratto: "contract", corpo: "body", corsa: "run", creata: "created", creato: "created",
+  da: "by", dato: "data", decisa: "decided", decisione: "decision", descrizione: "description", dettaglio: "detail",
+  distinte: "distinct", dopo: "after", eccezione: "exception", era: "was",
+  eseguita: "executed", eseguito: "executed", esenzione: "exemption", esito: "outcome", etichetta: "label",
+  evento: "event", fine: "end", genitore: "parent", gettone: "token", giornale: "journal", ibrido: "hybrid",
+  idempotenza: "idempotency", identita: "identity", il: "on", impiego: "employment", importato: "imported",
+  importazione: "import", impronta: "fingerprint", intera: "whole", livello: "level", mestiere: "trade",
+  metodo: "method", migrazione: "migration", modo: "mode", motivo: "reason", nativo: "native", nota: "note",
+  nuovo: "new", oggetto: "object", operazione: "operation", ora: "time", origine: "origin", passo: "step",
+  periodo: "period", persona: "person", persone: "people", precedente: "previous", prima: "before",
+  processo: "process", provenienza: "provenance", ragione: "reason", ratificato: "ratified",
+  registrato: "recorded", registro: "log", reparto: "department", requisito: "requirement",
+  revocato: "revoked", revoche: "revocations", riapplicato: "reapplied", richiesta: "request", riga: "row",
+  rimossa: "removed", risolto: "resolved", ritirata: "withdrawn", ritirato: "withdrawn", ritiro: "withdrawal",
+  rotta: "route", ruolo: "role", salario: "salary", salvato: "saved", scade: "expires", scritto: "written",
+  scrittura: "write", specie: "kind", stato: "status", superficie: "surface", tabella: "table", tipo: "type",
+  tolto: "removed", trattamento: "processing", uso: "use", valore: "value", versione: "version", voce: "item",
+};
+
+/** Coppie di parole che in inglese si scrivono unite. */
+const COMPOSTE_EN: Array<[RegExp, string]> = [
+  [/(^|_)step_up(_|$)/, "$1step-up$2"],
+];
+
+export type LinguaIntestazione = "it" | "en";
+
+/** Il nome di una colonna nella lingua della pagina (italiano se manca), senza il prefisso della tabella. */
+export function intestazione(colonna: string, tabella: string, lingua: LinguaIntestazione = "it"): string {
+  const en = lingua === "en";
   const radice = tabella.replace(/^.*\.sys_/, "").replace(/s$/, "");
-  const parti = COMPOSTE.reduce((c, [re, v]) => c.replace(re, v), colonna).split("_");
+  const parti = (en ? COMPOSTE_EN : COMPOSTE).reduce((c, [re, v]) => c.replace(re, v), colonna).split("_");
   const pref = radice.split("_");
   let i = 0;
   while (i < pref.length && i < parti.length - 1 && parti[i] === pref[i]) i += 1;
+  const dizionario = en ? PAROLE_EN : PAROLE;
   const tradotte = parti.slice(i)
-    .map((p) => (SIGLE.has(p) ? p.toUpperCase() : (PAROLE[p] ?? p)))
+    .map((p) => (SIGLE.has(p) ? p.toUpperCase() : (dizionario[p] ?? p)))
     .filter((p) => p !== "");
   const testo = (tradotte.length > 0 ? tradotte : parti).join(" ");
   return testo.charAt(0).toUpperCase() + testo.slice(1);

@@ -954,6 +954,49 @@
     "link": "Il mio faldone: tutti i miei dati",
     "indietro": "Profilo",
     "linkPersona": "Faldone: tutti i dati della persona",
-    "indietroPersona": "Scheda della persona"
+    "indietroPersona": "Scheda della persona",
+    "vista": {
+      "titolo": "Faldone di {{nome}}",
+      "descrizione": "Tutti i dati della persona, diretti e collegati. Ciò che non hai titolo di vedere compare come non visibile, con il motivo.",
+      "caricamento": "Caricamento del faldone…",
+      "caricamentoRighe": "Caricamento delle righe…",
+      "classi": {
+        "PERSONAL": "Dati personali",
+        "COMPENSATION": "Retribuzione",
+        "SKILL": "Competenze",
+        "EVALUATION": "Valutazioni",
+        "ACTIVITY": "Attività",
+        "CREDENTIAL": "Credenziali",
+        "SPECIAL_CATEGORY": "Categorie particolari"
+      },
+      "visibilita": {
+        "piena": "Visibile per intero",
+        "parziale": "Visibile in parte",
+        "omissis": "Non visibile"
+      },
+      "legameSoggetto": "Dati della persona",
+      "legameRelazione": "La persona vi compare",
+      "motivo": "Motivo: {{motivo}}",
+      "mostraRighe": "Mostra le righe",
+      "mostraStruttura": "Mostra la struttura delle righe",
+      "mostraAltre": "Mostra altre righe",
+      "righeDi": "{{n}} di {{totale}} righe",
+      "nessunaRiga": "Nessuna riga",
+      "nessunDato": "Nessun dato registrato",
+      "nessunDatoPersona": "Nessun dato registrato per questa persona",
+      "si": "Sì",
+      "no": "No",
+      "conferma": "Per vedere {{classi}} serve una conferma recente del secondo fattore.",
+      "congiunzione": " e ",
+      "confermaAzione": "Conferma",
+      "totaleRighe": "Righe",
+      "totaleSezioniConDati": "Sezioni con dati",
+      "diTotale": "{{n}} di {{totale}}",
+      "totaleVoci": "Voci di catalogo",
+      "totaleOmissis": "Sezioni con campi non visibili",
+      "generatoIl": "Generato il",
+      "soloConDati": "Solo le sezioni con dati",
+      "aggiorna": "Aggiorna"
+    }
   }
 }

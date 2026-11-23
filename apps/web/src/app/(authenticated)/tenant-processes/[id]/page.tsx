@@ -28,7 +28,7 @@ import { SchedePagina } from "@/components/schede-pagina";
 import { Riferimento, useScheda } from "@/components/scheda-rapida";
 import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
 import { NomeOppure } from "@/components/senza-nome";
-import { FlussoCorsie, GrafoProcesso, attivitaInOrdine } from "@/components/processo/diagrammi";
+import { DiagrammaFasi, FlussoCorsie, GrafoProcesso, attivitaInOrdine } from "@/components/processo/diagrammi";
 
 type Attivita = TenantProcessScheda["activities"][number];
 
@@ -256,6 +256,18 @@ export default function TenantProcessPage() {
                 <p className="text-xs text-muted-foreground">{t("processiDelTenant.scheda.flussoNota")}</p>
                 <FlussoCorsie scheda={s} senzaUnita={t("processiDelTenant.scheda.senzaUnita")} onApriAttivita={setAperta} {...(apriUnita ? { onApriUnita: apriUnita } : {})}
                   nomeFile={`flusso_${p.code}`} ariaLabel={t("processiDelTenant.scheda.ariaFlusso", { nome: p.name })} testId="tenant-process-flusso" />
+              </div>
+            ),
+          },
+          {
+            id: "fasi", titolo: t("processiDelTenant.scheda.tabs.fasi"), nascosta: att.length === 0,
+            contenuto: (
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground">{t("processiDelTenant.scheda.fasiNota")}</p>
+                <DiagrammaFasi scheda={s} senzaUnita={t("processiDelTenant.scheda.senzaUnita")}
+                  ruoloUnita={(id) => { const u = s.units.find((x) => x.unitId === id); return u ? enumLabel("processUnitRole", u.role) : null; }}
+                  onApriAttivita={setAperta} {...(apriUnita ? { onApriUnita: apriUnita } : {})}
+                  nomeFile={`fasi_${p.code}`} ariaLabel={t("processiDelTenant.scheda.ariaFasi", { nome: p.name })} testId="tenant-process-fasi" />
               </div>
             ),
           },

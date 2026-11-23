@@ -15,13 +15,13 @@
  * Il testo che non sta in un riquadro va a capo su due righe e porta il titolo completo nel
  * suggerimento: niente si perde in silenzio (R5).
  */
-import { useMemo, useRef, type KeyboardEvent } from "react";
+import { useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Download } from "lucide-react";
 import type { TenantProcessScheda } from "@heuresys/shared";
 import { AreaNavigabile, ATTR_OGGETTO } from "@/components/organigramma/area-navigabile";
 import { svgEsportabile } from "@/components/organigramma/blocchi";
-import { attivitaInOrdine, corsieFasi } from "./corsie-fasi";
+import { attivitaInOrdine, corsieFasi, etichettaAttivita, propsApribili } from "./corsie-fasi";
 import { SCALA_MIN_LEGGIBILE } from "@/lib/navigazione-area";
 
 export { attivitaInOrdine };
@@ -73,14 +73,8 @@ function BottoneEsporta({ onClick }: { onClick: () => void }) {
   );
 }
 
-const aprendo = (f: () => void) => ({
-  [ATTR_OGGETTO]: "",
-  tabIndex: 0,
-  role: "button",
-  style: { cursor: "pointer" },
-  onDoubleClick: (e: { stopPropagation: () => void }) => { e.stopPropagation(); f(); },
-  onKeyDown: (e: KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); f(); } },
-});
+/** Un oggetto del disegno che si apre: porta sempre il suo nome (`aria-label`), che un gruppo SVG non ha da sé. */
+const aprendo = (etichetta: string, f: () => void) => ({ [ATTR_OGGETTO]: "", ...propsApribili(etichetta, f) });
 
 /* ------------------------------------------------------------------ flusso a corsie */
 
@@ -141,7 +135,7 @@ export function FlussoCorsie({
             <g key={c.chiave} data-testid="corsia">
               <rect x={0} y={y0} width={d.larghezza} height={LH} style={{ fill: i % 2 ? C.fascia : "transparent", fillOpacity: 0.35 }} />
               <line x1={0} x2={d.larghezza} y1={y0} y2={y0} style={{ stroke: C.bordo, strokeOpacity: 0.3 }} />
-              <g {...(c.id && onApriUnita ? aprendo(() => onApriUnita(c.id!)) : {})}>
+              <g {...(c.id && onApriUnita ? aprendo(c.nome, () => onApriUnita(c.id!)) : {})}>
                 <title>{c.nome}</title>
                 {dueRighe(c.nome, 22).map((r, k) => (
                   <text key={k} x={10} y={y0 + LH / 2 + (k - 0.5) * 15 + 4} fontSize={12} fontWeight={600} style={{ fill: C.testo }}>{r}</text>
@@ -163,8 +157,8 @@ export function FlussoCorsie({
           const c = d.indice.get(a.unitId ?? `x:${a.unitName ?? a.executorName ?? ""}`)!;
           const x = d.x(i), y = d.y(c);
           return (
-            <g key={a.activityId} data-testid="flusso-attivita" {...aprendo(() => onApriAttivita(a.activityId))}>
-              <title>{`${a.ordinal}. ${a.name}${a.executorName ? ` — ${a.executorName}` : ""}`}</title>
+            <g key={a.activityId} data-testid="flusso-attivita" {...aprendo(etichettaAttivita(a), () => onApriAttivita(a.activityId))}>
+              <title>{etichettaAttivita(a)}</title>
               <rect x={x} y={y} width={BW} height={BH} rx={6} style={{ fill: C.riquadro, stroke: C.bordo, strokeWidth: 1 }} />
               <text x={x + 8} y={y + 15} fontSize={10} style={{ fill: C.tenue }}>{a.ordinal}</text>
               {dueRighe(a.name, 22).map((r, k) => (
@@ -247,7 +241,7 @@ export function DiagrammaFasi({
               <rect x={0} y={y0} width={d.larghezza} height={FLH} style={{ fill: k % 2 ? C.fascia : "transparent", fillOpacity: 0.35 }} />
               <line x1={0} x2={d.larghezza} y1={y0} y2={y0} style={{ stroke: C.bordo, strokeOpacity: 0.3 }} />
               {d.att.map((_, i) => <line key={i} x1={d.LW2 + i * FCW} x2={d.LW2 + i * FCW} y1={y0} y2={y0 + FLH} style={{ stroke: C.bordo, strokeOpacity: 0.15 }} />)}
-              <g {...(c.id && onApriUnita ? aprendo(() => onApriUnita(c.id!)) : {})}>
+              <g {...(c.id && onApriUnita ? aprendo(c.nome, () => onApriUnita(c.id!)) : {})}>
                 <title>{c.nome}</title>
                 {ruolo ? <text x={10} y={y0 + 24} fontSize={12} fontWeight={700} style={{ fill: C.tenue }}>{ruolo.toUpperCase()}</text> : null}
                 {dueRighe(c.nome, 20).map((r, j) => (
@@ -263,8 +257,8 @@ export function DiagrammaFasi({
           const x = d.x(i), y = d.TOP2 + k * FLH + 8;
           const nome = dueRighe(a.name, 22), esec = a.executorName ? dueRighe(a.executorName, 26)[0] : null;
           return (
-            <g key={a.activityId} data-testid="fasi-attivita" {...aprendo(() => onApriAttivita(a.activityId))}>
-              <title>{`${a.ordinal}. ${a.name}${a.executorName ? ` — ${a.executorName}` : ""}`}</title>
+            <g key={a.activityId} data-testid="fasi-attivita" {...aprendo(etichettaAttivita(a), () => onApriAttivita(a.activityId))}>
+              <title>{etichettaAttivita(a)}</title>
               <rect x={x} y={y} width={FBW} height={FLH - 16} rx={6} style={{ fill: C.riquadro, stroke: C.testo, strokeWidth: 1.4 }} />
               {nome.map((r, j) => <text key={j} x={x + 8} y={y + 20 + j * 16} fontSize={13} fontWeight={700} style={{ fill: C.testo }}>{r}</text>)}
               {esec ? <text x={x + 8} y={y + 20 + nome.length * 16 + 8} fontSize={12} style={{ fill: C.tenue }}>{esec}</text> : null}
@@ -337,7 +331,7 @@ export function GrafoProcesso({
           const p = d.pos.get(n.id)!;
           const apribile = n.tipo !== "processo" && (n.tipo !== "unita" || Boolean(onApriUnita));
           return (
-            <g key={`${n.tipo}-${n.id}`} data-testid={`grafo-${n.tipo}`} {...(apribile ? aprendo(() => apri(n.tipo, n.id)) : {})}>
+            <g key={`${n.tipo}-${n.id}`} data-testid={`grafo-${n.tipo}`} {...(apribile ? aprendo(n.nome, () => apri(n.tipo, n.id)) : {})}>
               <title>{n.nome}</title>
               <rect x={p.x} y={p.y} width={NW} height={NH} rx={n.tipo === "unita" ? NH / 2 : 6}
                 style={{ fill: n.tipo === "processo" ? C.forte : C.riquadro, stroke: n.tipo === "processo" ? C.forte : C.bordo, strokeWidth: n.tipo === "sottoprocesso" ? 1.6 : 1 }} />

@@ -109,7 +109,7 @@ export default function AgentRequestsPage() {
       <PageHeader title={t("agentReq.titolo")} description={t("agentReq.descrizione")} />
       <Card>
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
-          <CardTitle>{t("agentReq.elenco", { count: righe.length })}</CardTitle>
+          <CardTitle as="h2">{t("agentReq.elenco", { count: righe.length })}</CardTitle>
           <select aria-label={t("agentReq.filtroStato")} className={SELECT_CLASS} value={stato} data-testid="agent-request-filter"
             onChange={(e) => setStato(e.target.value as "" | AgentRequestStatus)}>
             <option value="">{t("agentReq.tutte")}</option>
@@ -126,7 +126,7 @@ export default function AgentRequestsPage() {
       </Card>
       {leggeTutte && (
         <Card data-testid="agent-calls-card">
-          <CardHeader><CardTitle>{t("agentReq.registroTitolo")}</CardTitle></CardHeader>
+          <CardHeader><CardTitle as="h2">{t("agentReq.registroTitolo")}</CardTitle></CardHeader>
           <CardContent className="space-y-1 text-sm">
             {chiamate.isLoading ? <StatoCaricamento /> : chiamate.isError ? (
               <StatoErrore errore={chiamate.error} titolo={t("agentReq.erroreRegistro")} onRiprova={() => void chiamate.refetch()} />

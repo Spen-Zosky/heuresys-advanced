@@ -106,7 +106,7 @@ export default function MeAnalyticsPage() {
               <div className="grid gap-4 lg:grid-cols-2">
                 {dev.data.capability && (
                   <Card data-testid="me-development-capability">
-                    <CardHeader><CardTitle as="h2">{t("analytics.development.capabilityTitle")}</CardTitle></CardHeader>
+                    <CardHeader><CardTitle as="h3">{t("analytics.development.capabilityTitle")}</CardTitle></CardHeader>
                     <CardContent className="p-5 pt-0">
                       <div className="text-3xl font-semibold tabular-nums">
                         {fmt.numeroFisso(dev.data.capability.value, 1)}
@@ -123,7 +123,7 @@ export default function MeAnalyticsPage() {
                 {dev.data.flightRisk && (
                   <Card data-testid="me-development-stability">
                     <CardHeader>
-                      <CardTitle as="h2" className="flex items-center gap-2">
+                      <CardTitle as="h3" className="flex items-center gap-2">
                         {t("analytics.development.flightTitle")}
                         <Badge variant={dev.data.flightRisk.band === "HIGH" ? "destructive" : "secondary"}>
                           {fmt.numeroFisso(dev.data.flightRisk.value, 1)}

@@ -71,7 +71,7 @@ export default function DatiDiRiferimentoPage() {
           {fonti.data && (
             <table className="w-full text-sm">
               <thead><tr className="text-left text-muted-foreground">
-                <th className="py-1">{t("datiRiferimento.fonte")}</th><th>{t("datiRiferimento.ultimoSuccesso")}</th><th>{t("datiRiferimento.ultimaCorsa")}</th><th />
+                <th className="py-1">{t("datiRiferimento.fonte")}</th><th>{t("datiRiferimento.ultimoSuccesso")}</th><th>{t("datiRiferimento.ultimaCorsa")}</th><th><span className="sr-only">{t("common:table.actions")}</span></th>
               </tr></thead>
               <tbody>
                 {fonti.data.items.map((f) => (

@@ -12,10 +12,16 @@
  *
  * Ogni sezione con righe si apre su richiesta (`/sezioni/:id`, a pagine da 100): il faldone di una
  * persona supera le duemila voci di catalogo, e caricarle tutte all'apertura costerebbe secondi.
+ *
+ * Classe K01 del controllo forense del 23/11/2026: ogni testo della pagina viene dai file di lingua
+ * (`ess.faldone.vista.*`), i titoli, i capitoli e i motivi arrivano dall'API nella lingua chiesta
+ * (`?lingua=`), e le intestazioni delle colonne si dicono nella lingua della pagina.
  */
 
 import { useMemo, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { Button, Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
 import { FALDONE_OMISSIS, type FaldoneIndice, type FaldoneRighe, type FaldoneSezione } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
@@ -26,32 +32,25 @@ import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pa
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { MaskedCell } from "@/components/masked-cell";
 import { useFormat, type Formati } from "@/lib/format";
-import { intestazione } from "@/lib/faldone-parole";
+import { intestazione, type LinguaIntestazione } from "@/lib/faldone-parole";
 
 const PAGINA = 100;
 /** Le colonne che stanno in tabella; le altre si leggono nella scheda della riga (C12). */
 const COLONNE_IN_TABELLA = 6;
 
-const CLASSI: Record<string, string> = {
-  PERSONAL: "Dati personali",
-  COMPENSATION: "Retribuzione",
-  SKILL: "Competenze",
-  EVALUATION: "Valutazioni",
-  ACTIVITY: "Attività",
-  CREDENTIAL: "Credenziali",
-  SPECIAL_CATEGORY: "Categorie particolari",
-};
+/** La lingua della pagina, nella forma che l'API e le intestazioni capiscono. */
+function linguaDi(lingua: string | undefined): LinguaIntestazione {
+  return (lingua ?? "it").startsWith("en") ? "en" : "it";
+}
 
-const VISIBILITA: Record<FaldoneSezione["visibilita"], string> = {
-  piena: "Visibile per intero",
-  parziale: "Visibile in parte",
-  omissis: "Non visibile",
-};
+function classe(t: TFunction, c: string): string {
+  return t(`faldone.vista.classi.${c}`, { defaultValue: c });
+}
 
-function valore(v: unknown, tipo: string, fmt: Formati): ReactNode {
+function valore(v: unknown, tipo: string, fmt: Formati, t: TFunction): ReactNode {
   if (v === FALDONE_OMISSIS) return <MaskedCell />;
   if (v === null || v === undefined || v === "") return "—";
-  if (typeof v === "boolean") return v ? "Sì" : "No";
+  if (typeof v === "boolean") return v ? t("faldone.vista.si") : t("faldone.vista.no");
   if (typeof v === "number") return fmt.numero(v, 2);
   if (typeof v === "string") {
     if (tipo === "date") return fmt.data(v);
@@ -68,13 +67,17 @@ type Riga = { i: number; r: Record<string, unknown>; e: Record<string, string> }
 /** Le righe di una sezione, a pagine, aperte su richiesta. */
 function RigheSezione({ base, sezione }: { base: string; sezione: FaldoneSezione }) {
   const fmt = useFormat();
+  const { t, i18n } = useTranslation("ess");
+  const lingua = linguaDi(i18n.language);
   const [pagine, setPagine] = useState(1);
   const q = useQuery({
-    queryKey: ["faldone", base, sezione.id, pagine],
+    queryKey: ["faldone", base, sezione.id, pagine, lingua],
     queryFn: async () => {
       const blocchi: FaldoneRighe[] = [];
       for (let p = 0; p < pagine; p += 1) {
-        blocchi.push(await apiFetch<FaldoneRighe>(`${base}/sezioni/${encodeURIComponent(sezione.id)}?limit=${PAGINA}&offset=${p * PAGINA}`));
+        blocchi.push(await apiFetch<FaldoneRighe>(
+          `${base}/sezioni/${encodeURIComponent(sezione.id)}?limit=${PAGINA}&offset=${p * PAGINA}&lingua=${lingua}`,
+        ));
       }
       return blocchi;
     },
@@ -92,13 +95,13 @@ function RigheSezione({ base, sezione }: { base: string; sezione: FaldoneSezione
     const leggibili = cs.filter((c) => c.tipo !== "uuid" || conEtichetta.has(c.nome));
     const ordinate = [...leggibili, ...cs.filter((c) => !leggibili.includes(c))];
     return ordinate.map((c, j) => ({
-      header: intestazione(c.nome, sezione.tabella),
+      header: intestazione(c.nome, sezione.tabella, lingua),
       secondaria: j >= COLONNE_IN_TABELLA || !leggibili.includes(c),
-      cell: (x: Riga) => (x.e[c.nome] ? x.e[c.nome] : valore(x.r[c.nome], c.tipo, fmt)),
+      cell: (x: Riga) => (x.e[c.nome] ? x.e[c.nome] : valore(x.r[c.nome], c.tipo, fmt, t)),
     }));
-  }, [ultimo, righe, sezione.tabella, fmt]);
+  }, [ultimo, righe, sezione.tabella, fmt, lingua, t]);
 
-  if (q.isLoading) return <StatoCaricamento etichetta="Caricamento delle righe…" />;
+  if (q.isLoading) return <StatoCaricamento etichetta={t("faldone.vista.caricamentoRighe")} />;
   if (q.isError) return <StatoErrore errore={q.error} />;
   return (
     <div className="flex flex-col gap-2">
@@ -111,14 +114,14 @@ function RigheSezione({ base, sezione }: { base: string; sezione: FaldoneSezione
         columns={colonne}
         pageSize={25}
         originPath={`${base}/sezioni/${sezione.id}`}
-        emptyTitle="Nessuna riga"
+        emptyTitle={t("faldone.vista.nessunaRiga")}
       />
       {ultimo ? (
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>{`${fmt.numero(righe.length)} di ${fmt.numero(ultimo.totale)} righe`}</span>
+          <span>{t("faldone.vista.righeDi", { n: fmt.numero(righe.length), totale: fmt.numero(ultimo.totale) })}</span>
           {ultimo.prossimo !== null ? (
             <Button type="button" size="sm" variant="outline" data-testid="faldone-altre" onClick={() => setPagine((n) => n + 1)}>
-              Mostra altre righe
+              {t("faldone.vista.mostraAltre")}
             </Button>
           ) : null}
         </div>
@@ -129,42 +132,44 @@ function RigheSezione({ base, sezione }: { base: string; sezione: FaldoneSezione
 
 function SchedaSezione({ base, sezione }: { base: string; sezione: FaldoneSezione }) {
   const fmt = useFormat();
+  const { t, i18n } = useTranslation("ess");
+  const lingua = linguaDi(i18n.language);
   const [aperta, setAperta] = useState(false);
   const chiusa = sezione.visibilita === "omissis";
   return (
     <Card data-testid="faldone-sezione" data-sezione={sezione.id} data-visibilita={sezione.visibilita}>
       <CardHeader className="pb-2">
-        <CardTitle as="h3" className="flex flex-wrap items-center justify-between gap-2 text-base">
+        <CardTitle as="h2" className="flex flex-wrap items-center justify-between gap-2 text-base">
           <span>
             {sezione.titolo}
             <span className="ml-2 text-sm font-normal tabular-nums text-muted-foreground">{fmt.numero(sezione.righe)}</span>
           </span>
           <span className="flex flex-wrap items-center gap-2 text-xs font-normal text-muted-foreground">
-            <span>{CLASSI[sezione.classe] ?? sezione.classe}</span>
+            <span>{classe(t, sezione.classe)}</span>
             <span>·</span>
-            <span>{sezione.legame === "soggetto" ? "Dati della persona" : "La persona vi compare"}</span>
+            <span>{sezione.legame === "soggetto" ? t("faldone.vista.legameSoggetto") : t("faldone.vista.legameRelazione")}</span>
             <span>·</span>
-            <span data-testid="faldone-visibilita">{VISIBILITA[sezione.visibilita]}</span>
+            <span data-testid="faldone-visibilita">{t(`faldone.vista.visibilita.${sezione.visibilita}`)}</span>
           </span>
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-2 pt-0">
         {sezione.motivoOmissis ? (
           <p className="text-xs text-muted-foreground" data-testid="faldone-motivo">
-            {`Motivo: ${sezione.motivoOmissis}`}
+            {t("faldone.vista.motivo", { motivo: sezione.motivoOmissis })}
             {sezione.campiOmessi.length > 0 && !chiusa
-              ? ` (${sezione.campiOmessi.map((c) => intestazione(c, sezione.tabella)).join(", ")})`
+              ? ` (${sezione.campiOmessi.map((c) => intestazione(c, sezione.tabella, lingua)).join(", ")})`
               : ""}
           </p>
         ) : null}
         {sezione.righe === 0 ? (
-          <StatoVuoto titolo="Nessun dato registrato" compatto />
+          <StatoVuoto titolo={t("faldone.vista.nessunDato")} compatto />
         ) : aperta ? (
           <RigheSezione base={base} sezione={sezione} />
         ) : (
           <div>
             <Button type="button" size="sm" variant="outline" data-testid="faldone-apri" onClick={() => setAperta(true)}>
-              {chiusa ? "Mostra la struttura delle righe" : "Mostra le righe"}
+              {chiusa ? t("faldone.vista.mostraStruttura") : t("faldone.vista.mostraRighe")}
             </Button>
           </div>
         )}
@@ -179,30 +184,36 @@ function SchedaSezione({ base, sezione }: { base: string; sezione: FaldoneSezion
  */
 export function FaldoneVista({ base, indietro }: { base: string; indietro?: ReactNode }) {
   const fmt = useFormat();
-  const q = useQuery({ queryKey: ["faldone", base, "indice"], queryFn: () => apiFetch<FaldoneIndice>(base) });
+  const { t, i18n } = useTranslation("ess");
+  const lingua = linguaDi(i18n.language);
+  const q = useQuery({
+    queryKey: ["faldone", base, "indice", lingua],
+    queryFn: () => apiFetch<FaldoneIndice>(`${base}?lingua=${lingua}`),
+  });
   const [soloConDati, setSoloConDati] = useState(true);
 
-  if (q.isLoading) return <StatoCaricamento etichetta="Caricamento del faldone…" testId="faldone-caricamento" />;
+  if (q.isLoading) return <StatoCaricamento etichetta={t("faldone.vista.caricamento")} testId="faldone-caricamento" />;
   if (q.isError || !q.data) return <StatoErrore errore={q.error} testId="faldone-errore" />;
   const d = q.data;
 
-  const capitoli = new Map<string, FaldoneSezione[]>();
+  // Il capitolo si raccoglie per identificativo, uguale in ogni lingua: `?scheda=` resta lo stesso.
+  const capitoli = new Map<string, { titolo: string; sezioni: FaldoneSezione[] }>();
   for (const s of d.sezioni) {
     if (soloConDati && s.righe === 0) continue;
-    const l = capitoli.get(s.capitolo) ?? [];
-    l.push(s);
-    capitoli.set(s.capitolo, l);
+    const c = capitoli.get(s.capitoloId) ?? { titolo: s.capitolo, sezioni: [] };
+    c.sezioni.push(s);
+    capitoli.set(s.capitoloId, c);
   }
   const schede = [...capitoli.entries()]
-    .sort((a, b) => a[0].localeCompare(b[0], "it"))
-    .map(([cap, sezioni]) => ({
-      id: cap.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-      titolo: cap,
+    .sort((a, b) => a[1].titolo.localeCompare(b[1].titolo, lingua))
+    .map(([id, { titolo, sezioni }]) => ({
+      id,
+      titolo,
       conteggio: sezioni.reduce((n, s) => n + s.righe, 0),
       contenuto: (
         <div className="flex flex-col gap-3">
           {sezioni
-            .sort((a, b) => b.righe - a.righe || a.titolo.localeCompare(b.titolo, "it"))
+            .sort((a, b) => b.righe - a.righe || a.titolo.localeCompare(b.titolo, lingua))
             .map((s) => <SchedaSezione key={s.id} base={base} sezione={s} />)}
         </div>
       ),
@@ -211,42 +222,45 @@ export function FaldoneVista({ base, indietro }: { base: string; indietro?: Reac
   return (
     <div className="flex flex-col gap-3" data-testid="faldone-pagina">
       <PageHeader
-        title={`Faldone di ${d.persona.nome}`}
+        title={t("faldone.vista.titolo", { nome: d.persona.nome })}
         breadcrumbs={indietro}
-        description="Tutti i dati della persona, diretti e collegati. Ciò che non hai titolo di vedere compare come non visibile, con il motivo."
+        description={t("faldone.vista.descrizione")}
       />
       {d.confermaRichiesta.length > 0 ? (
         <div role="status" data-testid="faldone-conferma"
           className="flex flex-wrap items-center justify-between gap-3 rounded border border-border bg-muted/40 px-4 py-3 text-sm">
-          <span>{`Per vedere ${d.confermaRichiesta.map((c) => (CLASSI[c] ?? c).toLowerCase()).join(" e ")} serve una conferma recente del secondo fattore.`}</span>
+          <span>{t("faldone.vista.conferma", {
+            classi: d.confermaRichiesta.map((c) => classe(t, c).toLowerCase()).join(t("faldone.vista.congiunzione")),
+          })}</span>
           <Button type="button" size="sm" data-testid="faldone-conferma-azione"
             onClick={() => { void chiediConferma().then((ok) => { if (ok) void q.refetch(); }); }}>
-            Conferma
+            {t("faldone.vista.confermaAzione")}
           </Button>
         </div>
       ) : null}
       <Card data-testid="faldone-totali">
         <CardContent className="grid grid-cols-2 gap-3 pt-6 text-sm sm:grid-cols-5">
-          <Totale etichetta="Righe" valore={fmt.numero(d.totali.righe)} testId="faldone-totale-righe" />
-          <Totale etichetta="Sezioni con dati" valore={`${fmt.numero(d.totali.sezioniConDati)} di ${fmt.numero(d.totali.sezioni)}`} />
-          <Totale etichetta="Voci di catalogo" valore={fmt.numero(d.totali.campiCatalogo)} />
-          <Totale etichetta="Sezioni con campi non visibili" valore={fmt.numero(d.totali.sezioniConOmissis)} />
-          <Totale etichetta="Generato il" valore={fmt.dataOra(d.generatoIl)} />
+          <Totale etichetta={t("faldone.vista.totaleRighe")} valore={fmt.numero(d.totali.righe)} testId="faldone-totale-righe" />
+          <Totale etichetta={t("faldone.vista.totaleSezioniConDati")}
+            valore={t("faldone.vista.diTotale", { n: fmt.numero(d.totali.sezioniConDati), totale: fmt.numero(d.totali.sezioni) })} />
+          <Totale etichetta={t("faldone.vista.totaleVoci")} valore={fmt.numero(d.totali.campiCatalogo)} />
+          <Totale etichetta={t("faldone.vista.totaleOmissis")} valore={fmt.numero(d.totali.sezioniConOmissis)} />
+          <Totale etichetta={t("faldone.vista.generatoIl")} valore={fmt.dataOra(d.generatoIl)} />
         </CardContent>
       </Card>
       <div className="flex items-center gap-2 text-sm">
         <label className="flex items-center gap-2">
           <input type="checkbox" checked={soloConDati} data-testid="faldone-solo-con-dati"
             onChange={(e) => setSoloConDati(e.target.checked)} />
-          Solo le sezioni con dati
+          {t("faldone.vista.soloConDati")}
         </label>
         <span className="ml-auto">
           <Button type="button" size="sm" variant="outline" data-testid="faldone-aggiorna" onClick={() => void q.refetch()}>
-            Aggiorna
+            {t("faldone.vista.aggiorna")}
           </Button>
         </span>
       </div>
-      {schede.length === 0 ? <StatoVuoto titolo="Nessun dato registrato per questa persona" /> : <SchedePagina schede={schede} />}
+      {schede.length === 0 ? <StatoVuoto titolo={t("faldone.vista.nessunDatoPersona")} /> : <SchedePagina schede={schede} />}
     </div>
   );
 }

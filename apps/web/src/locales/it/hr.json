@@ -1411,7 +1411,12 @@
       "rejectReason": "Motivo del rifiuto",
       "grossAnnualSalary": "RAL lorda",
       "contractType": "Tipo di contratto",
-      "chooseInterviewer": "Intervistatore…"
+      "chooseInterviewer": "Intervistatore…",
+      "interviewKind": "Tipo di colloquio",
+      "scheduledAt": "Data e ora del colloquio",
+      "durationMin": "Durata in minuti",
+      "interviewer": "Intervistatore",
+      "startDate": "Data di inizio"
     },
     "requisitions": {
       "title": "Richieste di personale",
@@ -1496,6 +1501,7 @@
     "nessuno": "non indicato",
     "omissis": "{omissis}",
     "omissisAiuto": "Persona fuori dal tuo perimetro: il nome non si mostra.",
+    "incontriFuoriPerimetro": "Incontri non visibili: una delle due persone è fuori dal tuo perimetro.",
     "programmi": "Programmi ({{count}})",
     "programmi_one": "Programma ({{count}})",
     "erroreCarica": "Non è stato possibile caricare il mentoring.",

@@ -504,6 +504,8 @@
       "spiega": "R = responsabile (pieno), E = esecutrice (grigio), C = consultata (tratteggio), I = informata (chiaro). La colonna E/C conta le unità esecutrici e consultate. Il nome intero di un'unità compare passando sopra l'intestazione; un clic sul codice di un processo ne apre la scheda.",
       "numeri": "{{processi}} processi e {{sottoprocessi}} sottoprocessi · {{unita}} unità coinvolte · {{celle}} partecipazioni",
       "processo": "Processo",
+      "eC": "E/C",
+      "sigla": {"OWNER": "R", "CONTRIBUTOR": "E", "CONSULTED": "C", "INFORMED": "I"},
       "eCTitolo": "Unità esecutrici / unità consultate",
       "piede": "processi seguiti (R + E)",
       "apri": "Apri la scheda del processo",

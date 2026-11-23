@@ -1411,7 +1411,12 @@
       "rejectReason": "Reject reason",
       "grossAnnualSalary": "Gross annual salary",
       "contractType": "Contract type",
-      "chooseInterviewer": "Interviewer…"
+      "chooseInterviewer": "Interviewer…",
+      "interviewKind": "Interview type",
+      "scheduledAt": "Interview date and time",
+      "durationMin": "Duration in minutes",
+      "interviewer": "Interviewer",
+      "startDate": "Start date"
     },
     "requisitions": {
       "title": "Job requisitions",
@@ -1496,6 +1501,7 @@
     "nessuno": "not set",
     "omissis": "{omissis}",
     "omissisAiuto": "Person outside your scope: the name is not shown.",
+    "incontriFuoriPerimetro": "Meetings not visible: one of the two people is outside your scope.",
     "programmi": "Programmes ({{count}})",
     "programmi_one": "Programme ({{count}})",
     "erroreCarica": "Mentoring could not be loaded.",

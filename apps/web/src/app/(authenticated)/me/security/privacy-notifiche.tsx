@@ -33,7 +33,7 @@ export function PreferenzeNotifiche() {
   if (!puo) return null;
   return (
     <Card data-testid="me-notification-preferences">
-      <CardHeader><CardTitle>{t("security.privacy.notificheTitolo")}</CardTitle></CardHeader>
+      <CardHeader><CardTitle as="h2">{t("security.privacy.notificheTitolo")}</CardTitle></CardHeader>
       <CardContent>
         {pref.isLoading ? <p className="text-sm text-muted-foreground">{t("common:loading")}</p> : pref.isError ? (
           <p className="text-sm text-danger">{t("security.privacy.erroreCarica")}</p>
@@ -102,7 +102,7 @@ export function ConsensiEDati() {
   if (!puoConsensi && !puoEsportare) return null;
   return (
     <Card data-testid="me-privacy">
-      <CardHeader><CardTitle>{t("security.privacy.titolo")}</CardTitle></CardHeader>
+      <CardHeader><CardTitle as="h2">{t("security.privacy.titolo")}</CardTitle></CardHeader>
       <CardContent className="space-y-4">
         {puoConsensi && (
           <ul className="divide-y divide-border rounded-card border border-border">

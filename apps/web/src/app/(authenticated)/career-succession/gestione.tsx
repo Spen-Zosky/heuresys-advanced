@@ -139,7 +139,7 @@ export function GestionePercorsi({ percorsi }: { percorsi: CareerPath[] }) {
   if (!perm.crea && !perm.modifica) return null;
   return (
     <Card data-testid="career-paths-manage">
-      <CardHeader><CardTitle>{t("career.gestione.percorsi")}</CardTitle></CardHeader>
+      <CardHeader><CardTitle as="h2">{t("career.gestione.percorsi")}</CardTitle></CardHeader>
       <CardContent className="space-y-6">
         {perm.crea && (
           <div className="grid grid-cols-1 gap-3 md:grid-cols-4" data-testid="career-path-create">
@@ -300,7 +300,7 @@ export function GestioneBacini({ bacini }: { bacini: SuccessionPool[] }) {
   if (!perm.crea && !perm.modifica) return null;
   return (
     <Card data-testid="career-pools-manage">
-      <CardHeader><CardTitle>{t("career.gestione.bacini")}</CardTitle></CardHeader>
+      <CardHeader><CardTitle as="h2">{t("career.gestione.bacini")}</CardTitle></CardHeader>
       <CardContent className="space-y-6">
         {perm.crea && (
           <div className="grid grid-cols-1 gap-3 md:grid-cols-4" data-testid="career-pool-create">
@@ -418,7 +418,7 @@ export function GestioneCandidati({ candidati }: { candidati: SuccessorCandidate
   if (!perm.crea && !perm.modifica) return null;
   return (
     <Card data-testid="career-candidates-manage">
-      <CardHeader><CardTitle>{t("career.gestione.candidati")}</CardTitle></CardHeader>
+      <CardHeader><CardTitle as="h2">{t("career.gestione.candidati")}</CardTitle></CardHeader>
       <CardContent className="space-y-6">
         {perm.crea && (
           <div className="grid grid-cols-1 gap-3 md:grid-cols-3" data-testid="career-candidate-create">

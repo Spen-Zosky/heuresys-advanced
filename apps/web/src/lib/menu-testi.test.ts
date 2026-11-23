@@ -12,6 +12,11 @@ describe("inizialeMaiuscola", () => {
     expect(inizialeMaiuscola("Contratti CCNL")).toBe("Contratti CCNL");
     expect(inizialeMaiuscola("Mappa Heuresys")).toBe("Mappa Heuresys");
   });
+  it("K22: il plurale inglese di una sigla resta sigla («OKRs», non «Okrs»)", () => {
+    expect(inizialeMaiuscola("OKRs")).toBe("OKRs");
+    expect(inizialeMaiuscola("KPIs and OKRs")).toBe("KPIs and OKRs");
+    expect(inizialeMaiuscola("Okrs")).toBe("Okrs");
+  });
 });
 
 describe("ordine dei gruppi", () => {

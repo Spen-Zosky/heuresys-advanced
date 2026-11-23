@@ -151,7 +151,7 @@ export default function AgentCapabilitiesPage() {
     <main data-testid="agent-capabilities-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader title={t("agentCaps.titolo")} description={t("agentCaps.descrizione")} />
       <Card>
-        <CardHeader><CardTitle>{t("agentCaps.elenco", { count: elenco.data?.items.length ?? 0 })}</CardTitle></CardHeader>
+        <CardHeader><CardTitle as="h2">{t("agentCaps.elenco", { count: elenco.data?.items.length ?? 0 })}</CardTitle></CardHeader>
         <CardContent className="p-0">
           {elenco.isLoading ? <StatoCaricamento /> : elenco.isError ? (
             <StatoErrore errore={elenco.error} titolo={t("agentCaps.erroreCarica")} onRiprova={() => void elenco.refetch()} />
@@ -162,7 +162,7 @@ export default function AgentCapabilitiesPage() {
       </Card>
       {perms.includes("agent_capability:manage") && (
         <Card data-testid="agent-capability-create">
-          <CardHeader><CardTitle>{t("agentCaps.nuova")}</CardTitle></CardHeader>
+          <CardHeader><CardTitle as="h2">{t("agentCaps.nuova")}</CardTitle></CardHeader>
           <CardContent className="grid grid-cols-1 gap-3 text-sm md:grid-cols-3">
             <label className="font-medium text-foreground">{t("agentCaps.codice")}
               <Input value={nuova.code} maxLength={100} placeholder="persone.aggiorna_sede" onChange={(e) => setNuova({ ...nuova, code: e.target.value })} aria-invalid={!!nuova.code && !codiceValido} /></label>

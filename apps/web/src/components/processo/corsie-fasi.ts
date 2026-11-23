@@ -32,3 +32,24 @@ export function corsieFasi(scheda: TenantProcessScheda, att: Attivita[], senzaUn
   }
   return { corsie, indice, chiaveDi };
 }
+
+/** Il nome che si legge di un'attività nei disegni: numero, nome e, se c'è, chi la esegue. */
+export function etichettaAttivita(a: Pick<Attivita, "ordinal" | "name" | "executorName">): string {
+  return `${a.ordinal}. ${a.name}${a.executorName ? ` — ${a.executorName}` : ""}`;
+}
+
+/**
+ * Le proprietà di un oggetto del disegno che si apre (doppio clic, Invio o spazio). Il nome è obbligatorio:
+ * un gruppo SVG con role="button" non ha testo proprio da leggere, e senza aria-label chi usa un lettore di
+ * schermo sente solo «pulsante» (classe K10 del controllo forense del 23/11/2026).
+ */
+export function propsApribili(etichetta: string, f: () => void) {
+  return {
+    tabIndex: 0,
+    role: "button" as const,
+    "aria-label": etichetta,
+    style: { cursor: "pointer" },
+    onDoubleClick: (e: { stopPropagation: () => void }) => { e.stopPropagation(); f(); },
+    onKeyDown: (e: { key: string; preventDefault: () => void }) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); f(); } },
+  };
+}

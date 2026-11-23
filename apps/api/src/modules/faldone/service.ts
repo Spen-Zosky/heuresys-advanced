@@ -42,12 +42,13 @@ import { chainLevelOf } from "../../lib/scope/org.js";
 import { serveConferma } from "../../lib/scope/conferma.js";
 import {
   FALDONE_OMISSIS,
-  type FaldoneCompleto, type FaldoneIndice, type FaldoneRighe, type FaldoneSezione,
+  type FaldoneCompleto, type FaldoneIndice, type FaldoneLingua, type FaldoneRighe, type FaldoneSezione,
 } from "@heuresys/shared";
 import { catalogo, ident, identQualificato, type Catalogo, type LegameCatalogo, type TabellaCatalogo } from "./catalogo.js";
 import {
   classificazioneDi, legameSoggetto, ruoloDiRelazione, CAPITOLI, COLONNE_PERSONA_IMPLICITE, type Classificazione,
 } from "./classi.js";
+import { idCapitolo, testiFaldone, type TestiFaldone } from "./inglese.js";
 
 /** I nomi di colonna che portano un segreto: non escono per nessuno, nemmeno per sé stessi. */
 const SEGRETO = /(password|passwd|_hash$|hash_|secret|totp|token(?!_id)|salt|otp_code|recovery_code(?!_id|_user)|private_key|api_key|_cipher|encrypted)/;
@@ -107,8 +108,8 @@ function soggetto(l: LegameCatalogo): boolean {
   return legameSoggetto(l.tabella, l.colonna);
 }
 
-function titolo(l: LegameCatalogo, c: Classificazione): string {
-  return soggetto(l) ? c.titolo : `${c.titolo}: ${ruoloDiRelazione(l.colonna)}`;
+function titolo(l: LegameCatalogo, c: Classificazione, tt: TestiFaldone): string {
+  return soggetto(l) ? tt.titolo(c.titolo) : `${tt.titolo(c.titolo)}: ${tt.ruolo(ruoloDiRelazione(l.colonna))}`;
 }
 
 /** Le colonne di una tabella che indicano un'altra persona: chiave esterna verso sys_users o legame
@@ -169,10 +170,16 @@ function regolaBase(l: LegameCatalogo, t: TabellaCatalogo, c: Classificazione, d
 }
 
 /** L'espressione SQL di una colonna: i tipi che non stanno in JSON escono come descrizione. */
-function espressione(alias: string, nome: string, tipo: string): string {
+function espressione(alias: string, nome: string, tipo: string, lingua: FaldoneLingua): string {
   const col = `${alias}.${ident(nome)}`;
-  if (tipo === "bytea") return `CASE WHEN ${col} IS NULL THEN NULL ELSE '[dato binario di ' || octet_length(${col}) || ' byte]' END AS ${ident(nome)}`;
-  if (tipo.startsWith("vector")) return `CASE WHEN ${col} IS NULL THEN NULL ELSE '[impronta semantica]' END AS ${ident(nome)}`;
+  const en = lingua === "en";
+  if (tipo === "bytea") {
+    const [prima, dopo] = en ? ["[binary data of ", " bytes]"] : ["[dato binario di ", " byte]"];
+    return `CASE WHEN ${col} IS NULL THEN NULL ELSE '${prima}' || octet_length(${col}) || '${dopo}' END AS ${ident(nome)}`;
+  }
+  if (tipo.startsWith("vector")) {
+    return `CASE WHEN ${col} IS NULL THEN NULL ELSE '${en ? "[semantic fingerprint]" : "[impronta semantica]"}' END AS ${ident(nome)}`;
+  }
   if (tipo === "tsvector") return `NULL::text AS ${ident(nome)}`;
   if (tipo === "date") return `to_char(${col}, 'YYYY-MM-DD') AS ${ident(nome)}`;
   return `${col} AS ${ident(nome)}`;
@@ -222,7 +229,7 @@ function ordine(t: TabellaCatalogo): string {
   return parti.join(", ");
 }
 
-async function contesto(actor: ActorContext, userId: string): Promise<{ persona: Persona; diritti: Diritti }> {
+async function contesto(actor: ActorContext, userId: string, lingua: FaldoneLingua = "it"): Promise<{ persona: Persona; diritti: Diritti }> {
   const r = await pool.query<{ user_id: string; tenant_id: string | null; nome: string }>(
     `SELECT user_id, user_tenant_id AS tenant_id,
             concat_ws(', ', nullif(user_last_name, ''), nullif(user_first_name, '')) AS nome
@@ -246,7 +253,7 @@ async function contesto(actor: ActorContext, userId: string): Promise<{ persona:
   const evalu = masksSensitiveClass(actor, "EVALUATION", userId) || d5Eval;
   const privata = self || haMandatoHr(actor) || haPerimetroTenantMascherato(actor) || haMandatoPiattaforma(actor);
   return {
-    persona: { userId, nome: row.nome || "(senza nome)", tenantId: row.tenant_id },
+    persona: { userId, nome: row.nome || (lingua === "en" ? "(no name)" : "(senza nome)"), tenantId: row.tenant_id },
     diritti: {
       self, hr: haMandatoHr(actor), privata, credenziali: haMandatoPiattaforma(actor), comp, eval: evalu,
       confermaRichiesta: [...(d5Comp ? ["COMPENSATION" as const] : []), ...(d5Eval ? ["EVALUATION" as const] : [])],
@@ -263,23 +270,25 @@ function tabellaDi(cat: Catalogo, l: LegameCatalogo): TabellaCatalogo {
   return t;
 }
 
-function sezioneDi(cat: Catalogo, l: LegameCatalogo, righe: number, d: Diritti): FaldoneSezione {
+function sezioneDi(cat: Catalogo, l: LegameCatalogo, righe: number, d: Diritti, tt: TestiFaldone): FaldoneSezione {
   const c = classificazione(l);
   const t = tabellaDi(cat, l);
   const r = regolaPer(l, t, c, d);
   return {
-    id: l.id, titolo: titolo(l, c), capitolo: c.capitolo, tabella: l.tabella, colonnaLegame: l.colonna,
+    id: l.id, titolo: titolo(l, c, tt), capitolo: tt.capitolo(c.capitolo), capitoloId: idCapitolo(c.capitolo),
+    tabella: l.tabella, colonnaLegame: l.colonna,
     livello: l.livello, legame: soggetto(l) ? "soggetto" : "relazione", classe: c.classe,
-    righe, colonne: t.colonne.length, visibilita: r.visibilita, campiOmessi: r.campiOmessi, motivoOmissis: r.motivo,
+    righe, colonne: t.colonne.length, visibilita: r.visibilita, campiOmessi: r.campiOmessi,
+    motivoOmissis: r.motivo === null ? null : tt.motivo(r.motivo),
   };
 }
 
-const ordineCapitoli = new Map<string, number>(CAPITOLI.map((c, i) => [c, i]));
-function ordinaSezioni(s: FaldoneSezione[]): FaldoneSezione[] {
+const ordineCapitoli = new Map<string, number>(CAPITOLI.map((c, i) => [idCapitolo(c), i]));
+function ordinaSezioni(s: FaldoneSezione[], lingua: FaldoneLingua): FaldoneSezione[] {
   return s.sort((a, b) =>
-    (ordineCapitoli.get(a.capitolo) ?? 99) - (ordineCapitoli.get(b.capitolo) ?? 99)
+    (ordineCapitoli.get(a.capitoloId) ?? 99) - (ordineCapitoli.get(b.capitoloId) ?? 99)
     || Number(a.legame === "relazione") - Number(b.legame === "relazione")
-    || a.titolo.localeCompare(b.titolo, "it"));
+    || a.titolo.localeCompare(b.titolo, lingua));
 }
 
 /** Conta le righe di ogni sezione per la persona: una sola query, un ramo per legame. */
@@ -296,13 +305,14 @@ async function conteggi(cat: Catalogo, userId: string, d: Diritti): Promise<Map<
   return out;
 }
 
-async function costruisciIndice(actor: ActorContext, userId: string): Promise<{
+async function costruisciIndice(actor: ActorContext, userId: string, lingua: FaldoneLingua): Promise<{
   indice: FaldoneIndice; cat: Catalogo; diritti: Diritti;
 }> {
   const cat = await catalogo(pool);
-  const { persona, diritti } = await contesto(actor, userId);
+  const { persona, diritti } = await contesto(actor, userId, lingua);
   const n = await conteggi(cat, userId, diritti);
-  const sezioni = ordinaSezioni(legamiDi(cat).map((l) => sezioneDi(cat, l, n.get(l.id) ?? 0, diritti)));
+  const tt = testiFaldone(lingua);
+  const sezioni = ordinaSezioni(legamiDi(cat).map((l) => sezioneDi(cat, l, n.get(l.id) ?? 0, diritti, tt)), lingua);
   const campiCatalogo = sezioni.reduce((s, x) => s + x.colonne, 0);
   return {
     cat, diritti,
@@ -324,12 +334,13 @@ async function costruisciIndice(actor: ActorContext, userId: string): Promise<{
 
 async function righeDi(
   cat: Catalogo, l: LegameCatalogo, sezione: FaldoneSezione, d: Diritti, userId: string, limit: number, offset: number,
+  lingua: FaldoneLingua,
 ): Promise<FaldoneRighe> {
   const t = tabellaDi(cat, l);
   const omessi = new Set(sezione.campiOmessi);
   // Ciò che è {omissis} non si legge nemmeno dal database: non attraversa il processo.
   const colonne = t.colonne;
-  const sel = colonne.map((c) => omessi.has(c.nome) ? `NULL::text AS ${ident(c.nome)}` : espressione("f", c.nome, c.tipo)).join(", ");
+  const sel = colonne.map((c) => omessi.has(c.nome) ? `NULL::text AS ${ident(c.nome)}` : espressione("f", c.nome, c.tipo, lingua)).join(", ");
   const dove = l.id === ID_PERSONA ? `FROM sys.sys_users f WHERE f.${ident(l.colonna)} = $1::uuid` : daDove(cat, l, d);
   const [righe, tot] = await Promise.all([
     pool.query<Record<string, unknown>>(`SELECT ${sel} ${dove} ORDER BY ${ordine(t)} LIMIT $2 OFFSET $3`, [userId, limit, offset]),
@@ -405,32 +416,38 @@ async function etichetteDi(
 }
 
 export const faldoneService = {
-  async indice(actor: ActorContext, userId: string): Promise<FaldoneIndice> {
-    return (await costruisciIndice(actor, userId)).indice;
+  async indice(actor: ActorContext, userId: string, lingua: FaldoneLingua = "it"): Promise<FaldoneIndice> {
+    return (await costruisciIndice(actor, userId, lingua)).indice;
   },
 
-  async sezione(actor: ActorContext, userId: string, id: string, q: { limit: number; offset: number }): Promise<FaldoneRighe> {
+  async sezione(
+    actor: ActorContext, userId: string, id: string, q: { limit: number; offset: number; lingua?: FaldoneLingua | undefined },
+  ): Promise<FaldoneRighe> {
+    const lingua = q.lingua ?? "it";
     const cat = await catalogo(pool);
-    const { diritti } = await contesto(actor, userId);
+    const { diritti } = await contesto(actor, userId, lingua);
     const l = id === ID_PERSONA ? legamePersona(cat) : cat.perId.get(id);
     if (!l) throw new NotFoundError("Sezione del faldone");
     const conteggio = await pool.query<{ n: number }>(
       l.id === ID_PERSONA ? "SELECT 1 AS n" : `SELECT count(*)::int AS n ${daDove(cat, l, diritti)}`,
       l.id === ID_PERSONA ? [] : [userId],
     );
-    const sezione = sezioneDi(cat, l, conteggio.rows[0]?.n ?? 0, diritti);
-    return righeDi(cat, l, sezione, diritti, userId, q.limit, q.offset);
+    const sezione = sezioneDi(cat, l, conteggio.rows[0]?.n ?? 0, diritti, testiFaldone(lingua));
+    return righeDi(cat, l, sezione, diritti, userId, q.limit, q.offset, lingua);
   },
 
-  async completo(actor: ActorContext, userId: string, q: { righePerSezione: number }): Promise<FaldoneCompleto> {
-    const { indice, cat, diritti } = await costruisciIndice(actor, userId);
+  async completo(
+    actor: ActorContext, userId: string, q: { righePerSezione: number; lingua?: FaldoneLingua | undefined },
+  ): Promise<FaldoneCompleto> {
+    const lingua = q.lingua ?? "it";
+    const { indice, cat, diritti } = await costruisciIndice(actor, userId, lingua);
     const conDati = indice.sezioni.filter((s) => s.righe > 0);
     const contenuto: FaldoneCompleto["contenuto"] = [];
     // A gruppi di otto: abbastanza in parallelo da essere svelto, non tanto da occupare il pool.
     for (let i = 0; i < conDati.length; i += 8) {
       const blocco = await Promise.all(conDati.slice(i, i + 8).map(async (s) => {
         const l = s.id === ID_PERSONA ? legamePersona(cat) : cat.perId.get(s.id)!;
-        const r = await righeDi(cat, l, s, diritti, userId, q.righePerSezione, 0);
+        const r = await righeDi(cat, l, s, diritti, userId, q.righePerSezione, 0, lingua);
         return { ...r, troncata: r.prossimo !== null };
       }));
       contenuto.push(...blocco);

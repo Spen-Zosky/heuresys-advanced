@@ -175,6 +175,7 @@ import type { SemanticMatchingDeps } from "./modules/semantic-matching/service.j
 import type { IMailer } from "./modules/auth/mailer.js";
 import { makeSmsSender, type ISmsSender } from "./modules/auth/sms-sender.js";
 import { createWebauthnService } from "./modules/auth/webauthn-service.js";
+import { ROUTER_OPTIONS } from "./lib/router-options.js";
 
 export interface BuildAppOptions {
   /** Custom mailer for the auth module — tests inject InMemoryMailer. */
@@ -246,6 +247,8 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
       redact: { paths: [...LOG_REDACT_PATHS], censor: "[REDACTED]" },
     },
     trustProxy: env.TRUST_PROXY,
+    // K27: gli identificativi delle sezioni collegate del faldone superano i 100 caratteri.
+    routerOptions: ROUTER_OPTIONS,
     bodyLimit: 1024 * 1024, // 1 MB
     disableRequestLogging: false,
   }).withTypeProvider<ZodTypeProvider>();

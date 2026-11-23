@@ -66,9 +66,15 @@ export default function MeSurveyAnswerPage() {
       </div>
 
       {detail.isLoading ? (
-        <StatoCaricamento testId="me-survey-loading" />
+        <>
+          <PageHeader title={t("surveys.title")} />
+          <StatoCaricamento testId="me-survey-loading" />
+        </>
       ) : detail.isError || !d ? (
-        <StatoErrore errore={detail.error} titolo={t("surveys.notFound")} testId="me-survey-detail-error" onRiprova={() => void detail.refetch()} />
+        <>
+          <PageHeader title={t("surveys.title")} />
+          <StatoErrore errore={detail.error} titolo={t("surveys.notFound")} testId="me-survey-detail-error" onRiprova={() => void detail.refetch()} />
+        </>
       ) : (
         <>
           <PageHeader

@@ -20,6 +20,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { useFormat } from "@/lib/format";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { MODALE } from "@/lib/modale";
+import { RIPIEGABILE } from "@/lib/colonne-mobile";
 import { PageHeader } from "@/components/intestazione-pagina";
 import { OggettoContato } from "@/components/processo/oggetto-contato";
 import { ClassificazioneProcesso, useFaccetteProcesso } from "@/components/processo/classificazione-processo";
@@ -27,21 +28,31 @@ import { CorrispondenzaApqc } from "@/components/processo/corrispondenza-apqc";
 import { SchedePagina } from "@/components/schede-pagina";
 import { Riferimento, useScheda } from "@/components/scheda-rapida";
 import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
-import { NomeOppure } from "@/components/senza-nome";
 import { DiagrammaFasi, FlussoCorsie, GrafoProcesso, attivitaInOrdine } from "@/components/processo/diagrammi";
+import { NomePersona } from "@/components/nome-persona";
 
 type Attivita = TenantProcessScheda["activities"][number];
 
 function Tabella({ testId, intestazioni, righe, vuoto }: { testId: string; intestazioni: string[]; righe: ReactNode[][]; vuoto: string }) {
   if (righe.length === 0) return <p className="text-sm text-muted-foreground" data-testid={`${testId}-vuoto`}>{vuoto}</p>;
   return (
+    // K18: a 390 px la tabella usciva dallo schermo; sotto md ogni riga si ripiega in una scheda.
     <div className="overflow-x-auto rounded-md border border-border">
-      <table className="w-full text-sm" data-testid={testId}>
-        <thead className="bg-muted/50 text-left text-xs text-muted-foreground">
+      <table className={RIPIEGABILE.tabella} data-testid={testId}>
+        <thead className={`${RIPIEGABILE.intestazione} bg-muted/50 text-left text-xs text-muted-foreground`}>
           <tr>{intestazioni.map((h) => <th key={h} className="px-3 py-2 font-medium">{h}</th>)}</tr>
         </thead>
-        <tbody className="divide-y divide-border">
-          {righe.map((r, i) => <tr key={i} data-testid={`${testId}-riga`}>{r.map((c, k) => <td key={k} className="px-3 py-2 align-top">{c}</td>)}</tr>)}
+        <tbody className={RIPIEGABILE.corpo}>
+          {righe.map((r, i) => (
+            <tr key={i} className={RIPIEGABILE.riga} data-testid={`${testId}-riga`}>
+              {r.map((c, k) => (
+                <td key={k} className={RIPIEGABILE.cella}>
+                  <span className={RIPIEGABILE.etichetta}>{intestazioni[k]}</span>
+                  <span className="min-w-0 break-words">{c}</span>
+                </td>
+              ))}
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>
@@ -185,7 +196,7 @@ export default function TenantProcessPage() {
       righe={s.units.map((u) => [
         unita(u.unitId, u.unitName),
         u.participants.length ? (
-          <ul key="p" className="space-y-0.5">{u.participants.map((x) => <li key={x.userId}><Riferimento tipo="persona" id={x.userId}><NomeOppure nome={x.fullName} id={x.userId} /></Riferimento></li>)}</ul>
+          <ul key="p" className="space-y-0.5">{u.participants.map((x) => <li key={x.userId}><Riferimento tipo="persona" id={x.userId}><NomePersona nome={x.fullName} id={x.userId} /></Riferimento></li>)}</ul>
         ) : "—",
         enumLabel("processUnitRole", u.role),
       ])}

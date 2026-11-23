@@ -53,7 +53,7 @@ function Persona() {
   const parola = t("gdpr.parolaCancella");
   return (
     <Card data-testid="gdpr-subject">
-      <CardHeader><CardTitle>{t("gdpr.persona")}</CardTitle></CardHeader>
+      <CardHeader><CardTitle as="h2">{t("gdpr.persona")}</CardTitle></CardHeader>
       <CardContent className="space-y-4 text-sm">
         <PersonPicker label={t("gdpr.scegliPersona")} value={persone} onChange={(x) => { setPersone(x.slice(-1)); setProva(null); }} testId="gdpr-subject-person" />
         {id && (
@@ -108,7 +108,7 @@ function Conservazione() {
   const parola = t("gdpr.parolaConserva");
   return (
     <Card data-testid="gdpr-retention">
-      <CardHeader><CardTitle>{t("gdpr.conservazione")}</CardTitle></CardHeader>
+      <CardHeader><CardTitle as="h2">{t("gdpr.conservazione")}</CardTitle></CardHeader>
       <CardContent className="space-y-3 text-sm">
         <p className="text-xs text-muted-foreground">{t("gdpr.conservazioneSpiega")}</p>
         <Button type="button" variant="outline" data-testid="gdpr-retention-dry" disabled={corsa.isPending} onClick={() => corsa.mutate(true)}>{t("gdpr.provaConservazione")}</Button>
@@ -150,7 +150,7 @@ export default function GdprAdminPage() {
       {(perms.includes("gdpr:export") || perms.includes("gdpr:erase")) && <Persona />}
       {perms.includes("gdpr:retention") && <Conservazione />}
       <Card data-testid="gdpr-requests">
-        <CardHeader><CardTitle>{t("gdpr.registro", { mostrati: richieste.data?.items.length ?? 0, totale: richieste.data?.total ?? 0 })}</CardTitle></CardHeader>
+        <CardHeader><CardTitle as="h2">{t("gdpr.registro", { mostrati: richieste.data?.items.length ?? 0, totale: richieste.data?.total ?? 0 })}</CardTitle></CardHeader>
         <CardContent>
           <ul className="divide-y divide-border rounded-card border border-border text-sm">
             {(richieste.data?.items ?? []).map((r) => (
@@ -164,7 +164,7 @@ export default function GdprAdminPage() {
         </CardContent>
       </Card>
       <Card data-testid="gdpr-data-map">
-        <CardHeader><CardTitle>{t("gdpr.mappa", { count: mappa.data?.items.length ?? 0 })}</CardTitle></CardHeader>
+        <CardHeader><CardTitle as="h2">{t("gdpr.mappa", { count: mappa.data?.items.length ?? 0 })}</CardTitle></CardHeader>
         <CardContent>
           <ul className="divide-y divide-border rounded-card border border-border text-xs">
             {(mappa.data?.items ?? []).map((m) => (

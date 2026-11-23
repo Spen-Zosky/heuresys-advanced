@@ -1071,6 +1071,8 @@
       "vuotoRighe": "No rows in your perimeter",
       "vuotoFiliali": "No branch to show",
       "vuotoFilialiMotivo": "This dashboard is about branches: your unit is not a branch and you do not run any.",
+      "motivoMasked": "Values withheld: you can see this view's data only in masked form. The view exists and concerns you; the values require a mandate you do not hold.",
+      "motivoDenied": "None of your domains opens this view.",
       "senzaValori": "Values not available",
       "catalogoIrraggiungibile": "Dashboard catalogue unreachable",
       "datiIrraggiungibili": "Dashboard data unreachable",
@@ -1776,7 +1778,8 @@
     "description": "Leave requests, tenant accrual policy and the per-balance transaction ledger. Read-only consultation.",
     "requests": "Leave requests",
     "accrualRules": "Accrual rules",
-    "accrualAmount": "{{amount}} days {{period}}",
+    "accrualAmount_one": "{{amount}} day {{period}}",
+    "accrualAmount_other": "{{amount}} days {{period}}",
     "accrualPeriod": {
       "MONTHLY": "per month",
       "QUARTERLY": "per quarter",

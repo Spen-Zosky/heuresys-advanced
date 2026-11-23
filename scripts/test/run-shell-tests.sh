@@ -12,6 +12,31 @@ set -uo pipefail
 
 ROOT="$(git rev-parse --show-toplevel)"; cd "$ROOT"
 FAIL=0; PASS=0
+
+# Stato isolato per giro (idempotenza, voce I4 del 23/11/2026). Rilanciata nella stessa
+# copia, la batteria deve dare lo stesso esito e lasciare la copia come l'ha trovata:
+# - ogni temporaneo, nostro o degli script provati (mktemp senza pulizia, $ERRLOG.ren di
+#   clone-vm-db.sh), nasce sotto RUN_TMP e se ne va con lui all'uscita;
+# - il registro delle chiusure punta dentro RUN_TMP: quello vero (.handoff/close-log.ndjson)
+#   non riceve righe di prova (arma-clone G1 ce ne scriveva una a giro);
+# - niente __pycache__ nel repo dagli script python provati.
+# Il diario di sessione vero non si tocca: gli hook che ci scrivono girano in fixture (H2, H5).
+# Resta fuori: la sezione «session modes» usa il registro <padre>/.heuresys-session-mode
+# (toglie i suoi marcatori, ma aggiorna payload-shapes.json); spostarlo chiederebbe una
+# variabile nella guardia lab, che servirebbe anche a spegnerla.
+RUN_TMP="$(mktemp -d)"; trap 'rm -rf "$RUN_TMP"' EXIT
+export TMPDIR="$RUN_TMP"
+export HEURESYS_CLOSE_LOG="$RUN_TMP/close-log.ndjson"
+export PYTHONDONTWRITEBYTECODE=1
+# Impronta dei file che gli hook di sessione scrivono nella copia: alla fine deve essere uguale.
+impronta_stato_sessione() {
+  local f
+  for f in .handoff/session-journal.ndjson .handoff/session-journal.recovered.ndjson \
+           .handoff/session-id .handoff/close-log.ndjson .session-align.marker; do
+    if [ -f "$f" ]; then printf '%s %s\n' "$(cksum < "$f")" "$f"; else printf 'assente %s\n' "$f"; fi
+  done
+}
+STATO_SESSIONE_PRIMA="$(impronta_stato_sessione)"
 ok()      { PASS=$((PASS+1)); printf '  \033[32mok\033[0m  %s\n' "$*"; }
 fail()    { FAIL=$((FAIL+1)); printf '  \033[31mFAIL\033[0m %s\n' "$*" >&2; }
 section() { printf '\n\033[1m== %s ==\033[0m\n' "$*"; }
@@ -36,7 +61,7 @@ fi
 
 # ------------------------------------- C. env-key-merge.sh merge core (fixtures)
 section "env-key-merge.sh — merge_env_into fixtures (ENV_MERGE_LOCAL)"
-T="$(mktemp -d)"; trap 'rm -rf "$T"' EXIT
+T="$(mktemp -d)"   # sotto RUN_TMP: lo ripulisce il trap EXIT di testa
 
 # C1: additive add + never-overwrite + comment/blank/non-var skip
 printf 'A=1\nB=remote\n' > "$T/target"
@@ -1361,7 +1386,7 @@ if [ -f "$HK" ]; then
     'Bash {"command":"pnpm status"}' \
     'Bash {"command":"ssh linux-pc systemctl is-active heuresys-api"}' \
     'Bash {"command":"cat apps/api/package.json"}' ; do
-    # NON usare `T`: è il tempdir globale (riga 39) e il trap EXIT ci fa `rm -rf`. Clobberarlo
+    # NON usare `T`: è il tempdir globale (sezione C) e il trap EXIT ci faceva `rm -rf`. Clobberarlo
     # qui lasciava T="Bash" ⟹ il trap cancellava una cartella `Bash` relativa alla root del repo
     # e il vero tempdir non veniva mai ripulito. Latente finché nessun test DOPO questa sezione
     # usava $T (S1046: i primi sono stati quelli della dottrina del dubbio).
@@ -2135,9 +2160,18 @@ if node -e 'const s=require("./.claude/settings.json");const c=[];for(const e of
 else
   fail "settings.json: un hook chiama powershell o tace con '|| true'"
 fi
-# H2: due avvii di fila escono 0 e stampano la stessa intestazione (idempotente)
-a="$(CLAUDE_PROJECT_DIR="$ROOT" sh "$SB" 2>&1)"; ra=$?
-b="$(CLAUDE_PROJECT_DIR="$ROOT" sh "$SB" 2>&1)"; rb=$?
+# H2: due avvii di fila escono 0 e stampano la stessa intestazione (idempotente).
+# Girano in una fixture git con gli script veri copiati dalla copia di lavoro, non nella copia:
+# l'avvio scrive diario, marcatore e session-id, e il diario vero non deve ricevere niente
+# (prima di I4 il giro dopo ritrovava la riga lasciata da H5 e la prova diventava rossa).
+# Porta 1: nessun database in ascolto, il controllo psql si salta.
+FXB="$HK/boot"; mkdir -p "$FXB/scripts/hooks" "$FXB/scripts/lib" "$FXB/.handoff"
+cp "$SB" "$FXB/scripts/hooks/"; cp scripts/session-boot.ps1 scripts/close-log.sh "$FXB/scripts/"
+cp scripts/lib/superficie-codex.txt "$FXB/scripts/lib/" 2>/dev/null; cp .gitignore "$FXB/"
+( cd "$FXB" && git init -q . && git config user.email t@t && git config user.name t \
+  && git add -A && git commit -qm "chore: handoff S900" ) >/dev/null 2>&1
+a="$(HEURESYS_DB_PORT=1 HEURESYS_CLOSE_LOG="$FXB/.handoff/close-log.ndjson" CLAUDE_PROJECT_DIR="$FXB" sh "$FXB/$SB" 2>&1)"; ra=$?
+b="$(HEURESYS_DB_PORT=1 HEURESYS_CLOSE_LOG="$FXB/.handoff/close-log.ndjson" CLAUDE_PROJECT_DIR="$FXB" sh "$FXB/$SB" 2>&1)"; rb=$?
 if [ $ra = 0 ] && [ $rb = 0 ] && printf '%s' "$a" | grep -q '=== HEURESYS BOOT' && [ "$(printf '%s' "$a" | grep -c sessione)" = "$(printf '%s' "$b" | grep -c sessione)" ]; then
   ok "session-boot.sh: 2 avvii consecutivi, exit 0, stesso esito"
 else
@@ -2153,12 +2187,20 @@ printf '#!/bin/sh\necho "PS:$*"\n' > "$HK/bin/powershell.exe"
 chmod +x "$HK/bin/uname" "$HK/bin/powershell.exe"
 o="$(PATH="$HK/bin:$PATH" CLAUDE_PROJECT_DIR="$ROOT" sh "$SB" 2>&1)"
 if printf '%s' "$o" | grep -q 'PS:.*session-boot.ps1 -ProjectRoot'; then ok "Windows simulato: usa powershell.exe -File session-boot.ps1"; else fail "Windows simulato: ramo PowerShell non scelto ($o)"; fi
-# H5: gli altri hook (.sh) escono 0 senza input su ogni sistema
+# H5: gli altri hook (.sh) escono 0 senza input su ogni sistema. Dalla fixture: precompact
+# scrive nel diario del repo in cui gira, e non deve essere quello vero.
 for h in precompact-journal.sh qualita-lint.sh; do
-  if printf '{}' | sh "scripts/hooks/$h" >/dev/null 2>&1; then ok "hook $h: exit 0 con input vuoto"; else fail "hook $h: exit non zero con input vuoto"; fi
+  if printf '{}' | ( cd "$FXB" && sh "$ROOT/scripts/hooks/$h" ) >/dev/null 2>&1; then ok "hook $h: exit 0 con input vuoto"; else fail "hook $h: exit non zero con input vuoto"; fi
 done
 rm -rf "$HK"
-git checkout -q -- .handoff 2>/dev/null || true
+# H6: la batteria non ha scritto nel diario, nel marcatore, nel session-id ne' nel registro
+# delle chiusure della copia (prima di I4 li sporcava, e il secondo giro diventava rosso).
+STATO_SESSIONE_DOPO="$(impronta_stato_sessione)"
+if [ "$STATO_SESSIONE_PRIMA" = "$STATO_SESSIONE_DOPO" ]; then
+  ok "batteria: diario, marcatore, session-id e registro delle chiusure della copia intatti"
+else
+  fail "batteria: ha scritto nello stato di sessione della copia: $(diff <(printf '%s\n' "$STATO_SESSIONE_PRIMA") <(printf '%s\n' "$STATO_SESSIONE_DOPO") | tr '\n' ' ')"
+fi
 # ---------------------------------------------------------------- summary
 printf '\n%d ok, %d failed\n' "$PASS" "$FAIL"
 [ "$FAIL" = 0 ]

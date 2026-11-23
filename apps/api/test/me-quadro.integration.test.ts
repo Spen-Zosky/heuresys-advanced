@@ -5,6 +5,8 @@
  * Che cosa si prova:
  *  - ogni lente gira sullo schema vero: per un mandato HR nessuna lente resta non calcolata;
  *  - chi vede solo sé stesso riceve solo le lenti personali;
+ *  - le sue assenze (ferie da godere, richieste in attesa) solo quando la pagina chiede
+ *    «mie-assenze», non su ogni pagina personale né nel ripiego (K09, forense 23/11/2026);
  *  - gli insight arrivano in ordine di gravità;
  *  - chi non è autenticato riceve 401.
  */
@@ -66,8 +68,17 @@ describe("GET /v1/me/quadro", () => {
       const b = await leggiQuadro(actor!, aree);
       expect(b.nonCalcolate).toEqual([]);
       expect(b.verifiche).toBeGreaterThan(0);
-      for (const i of b.insight) expect(i.area).toBe("personale");
+      for (const i of b.insight) expect(["personale", "mie-assenze"]).toContain(i.area);
     }
+    // K09: l'avviso delle ferie non arriva su una pagina personale qualunque né nel ripiego,
+    // e arriva quando la pagina chiede le assenze di chi guarda
+    for (const aree of [["personale"], ["selezione"]] as AreaQuadro[][]) {
+      const b = await leggiQuadro(actor!, aree);
+      expect(b.insight.map((i) => i.chiave)).not.toContain("mie-ferie");
+    }
+    const assenze = await leggiQuadro(actor!, ["personale", "mie-assenze"]);
+    expect(assenze.nonCalcolate).toEqual([]);
+    expect(assenze.insight.map((i) => i.chiave)).toContain("mie-ferie");
   });
 
   it("le segnalazioni arrivano solo a chi le custodisce, come due conteggi", async () => {

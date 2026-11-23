@@ -556,7 +556,9 @@ export const LENTI: Lente[] = [
   /* ---------------- personale: ciò che riguarda chi guarda ---------------- */
   {
     chiave: "mie-ferie",
-    aree: ["personale"],
+    // K09 (forense 23/11/2026): l'avviso compariva in cima a ogni pagina personale; ora solo sul
+    // cruscotto personale e sulla pagina delle assenze, che chiedono l'area «mie-assenze»
+    aree: ["mie-assenze"],
     personale: true,
     sql: `SELECT coalesce(sum(coalesce(b.balance_total_days,0) + coalesce(b.balance_carryover_days,0)
                  + coalesce(b.balance_adjustment_days,0) - coalesce(b.balance_used_days,0)), 0)::int AS valore, NULL::int AS prima
@@ -569,7 +571,7 @@ export const LENTI: Lente[] = [
       titolo: L.t(`Hai ${L.n(v)} giorni di ferie e permessi da godere quest'anno`, `You have ${L.n(v)} days of leave and time off still to take this year`),
       dettaglio: v > 20
         ? L.t("Sono tanti: pianificali con il tuo responsabile prima della fine dell'anno.", "That is a lot: plan them with your manager before the end of the year.")
-        : L.t("Il saldo comprende maturato, riporto e rettifiche.", "The balance includes accrued, carried-over and adjusted days."),
+        : L.t("È la spettanza dell'anno, con riporto e rettifiche, meno i giorni già goduti.", "It is this year's entitlement, with carry-over and adjustments, minus the days already taken."),
       azione: { etichetta: L.t("Le mie assenze", "My time off"), href: "/me/time-off" },
     }),
   },
@@ -616,7 +618,7 @@ export const LENTI: Lente[] = [
   },
   {
     chiave: "mie-richieste",
-    aree: ["personale"],
+    aree: ["mie-assenze"],
     personale: true,
     sql: `SELECT count(*)::int AS valore, NULL::int AS prima FROM sys.sys_time_off_requests r
            WHERE r.request_subject_user_id = ($1::uuid[])[1] AND r.request_status = 'PENDING'`,

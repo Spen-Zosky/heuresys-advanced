@@ -17,6 +17,7 @@ import { Button, Dialog, DialogContent, DialogDescription, DialogTitle } from "@
 import type { ProcessFacet, ProcessFacetVocabularyResponse, TenantProcessFacet, TenantProcessFacetsResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { MODALE } from "@/lib/modale";
+import { RIPIEGABILE } from "@/lib/colonne-mobile";
 
 export const FACCETTE: readonly ProcessFacet[] = ["FINALITA", "BENEFICIARIO", "PERIMETRO", "MODALITA", "ATTIVAZIONE", "TECNOLOGIA", "STANDARDIZZAZIONE"];
 
@@ -79,8 +80,8 @@ export function ClassificazioneProcesso({ processId, faccette }: { processId: st
       </div>
       {approvaTutte.isError ? <p className="text-xs text-destructive">{k("errore")}</p> : null}
       <div className="overflow-x-auto rounded-md border border-border">
-        <table className="w-full text-sm" data-testid="classificazione-tabella">
-          <thead className="bg-muted/50 text-left text-xs text-muted-foreground">
+        <table className={RIPIEGABILE.tabella} data-testid="classificazione-tabella">
+          <thead className={`${RIPIEGABILE.intestazione} bg-muted/50 text-left text-xs text-muted-foreground`}>
             <tr>
               <th className="px-3 py-2 font-medium">{k("colonne.faccetta")}</th>
               <th className="px-3 py-2 font-medium">{k("colonne.valori")}</th>
@@ -89,29 +90,34 @@ export function ClassificazioneProcesso({ processId, faccette }: { processId: st
               {faccette.canEdit ? <th className="px-3 py-2" /> : null}
             </tr>
           </thead>
-          <tbody className="divide-y divide-border">
+          <tbody className={RIPIEGABILE.corpo}>
             {FACCETTE.map((f) => {
               const valori = perFaccetta.get(f) ?? [];
               const proposta = valori.some((v) => v.status === "PROPOSTA");
               return (
-                <tr key={f} data-testid="classificazione-riga" data-faccetta={f} className="align-top">
-                  <td className="px-3 py-2">
+                <tr key={f} data-testid="classificazione-riga" data-faccetta={f} className={`${RIPIEGABILE.riga} align-top`}>
+                  <td className={RIPIEGABILE.cella}>
+                    <span className={RIPIEGABILE.etichetta}>{k("colonne.faccetta")}</span>
+                    <span className="min-w-0">
                     <span className="font-medium">{k(`faccette.${f}.nome`)}</span>
                     <span className="block text-xs text-muted-foreground">{k(`faccette.${f}.domanda`)}</span>
+                    </span>
                   </td>
-                  <td className="px-3 py-2">
+                  <td className={RIPIEGABILE.cella}>
+                    <span className={RIPIEGABILE.etichetta}>{k("colonne.valori")}</span>
                     {valori.length === 0 ? <span className="text-xs text-muted-foreground">{k("nessunValore")}</span> : (
                       <span className="flex flex-wrap gap-1">
                         {valori.map((v) => <span key={v.code} className="rounded border border-border bg-muted px-1.5 py-0.5 text-xs" data-testid="classificazione-valore">{v.label}</span>)}
                       </span>
                     )}
                   </td>
-                  <td className="px-3 py-2 text-xs">{valori[0]?.criterion ?? ""}</td>
-                  <td className="px-3 py-2 text-xs">
+                  <td className={`${RIPIEGABILE.cella} text-xs`}><span className={RIPIEGABILE.etichetta}>{k("colonne.criterio")}</span><span className="min-w-0 break-words">{valori[0]?.criterion ?? ""}</span></td>
+                  <td className={`${RIPIEGABILE.cella} text-xs`}>
+                    <span className={RIPIEGABILE.etichetta}>{k("colonne.stato")}</span>
                     {valori.length === 0 ? null : proposta ? <span className="font-medium">{k("stato.proposta")}</span> : <span>{k("stato.approvata")}</span>}
                   </td>
                   {faccette.canEdit ? (
-                    <td className="px-3 py-2 text-right">
+                    <td className="block px-3 py-1 md:table-cell md:py-2 md:text-right">
                       <Button size="sm" variant="outline" onClick={() => setAperta(f)} data-testid="classificazione-modifica">
                         {proposta ? k("esamina") : k("modifica")}
                       </Button>

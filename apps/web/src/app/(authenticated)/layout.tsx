@@ -96,8 +96,8 @@ import { primaryRoleOf } from "../../lib/role-precedence";
 import { cognomeNome } from "../../lib/person-label";
 import { PreferencesApplier } from "../../components/preferences-applier";
 import { StepUpDialog } from "../../components/step-up-dialog";
-import { SectionTabs, SECTION_TAB_GROUPS, SECTION_TABS, permessoDellaScheda } from "../../components/section-tabs";
-import { chiaviNomePaginaNegata, pageVerdict } from "../../lib/page-guard";
+import { SectionTabs, SECTION_TAB_GROUPS, SECTION_TABS } from "../../components/section-tabs";
+import { chiaviNomePaginaNegata, pageVerdict, permessiGuardiaScheda } from "../../lib/page-guard";
 import { PannelloAgente } from "../../components/assistente/finestra-assistente";
 import { ContestoAgenteProvider } from "../../lib/agente/contesto";
 import { SchedeProvider } from "@/components/scheda-rapida";
@@ -368,7 +368,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
 
   const verdict = pageVerdict(pathname, ifaces.data?.routes ?? [], SECTION_TAB_GROUPS, {
     permessi: permessiPersona.data?.permissions ?? null,
-    permessoDi: permessoDellaScheda,
+    permessiDi: permessiGuardiaScheda,
   });
   // La pagina negata si nomina a parole (voce di menu o scheda), mai col percorso tecnico, e mai
   // col nome della pagina principale del suo gruppo (K29).

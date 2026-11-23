@@ -221,12 +221,12 @@ export default function ApplicationDetailPage() {
         <CardHeader><CardTitle as="h2">{t("recruiting.application.interviewsTitle")}</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           {canInterview && (<div className="grid gap-3 md:grid-cols-5" data-testid="interview-form">
-            <select data-testid="interview-kind" className={SELECT_CLASS} value={iv.kind} onChange={(e) => setIv({ ...iv, kind: e.target.value })}>
+            <select data-testid="interview-kind" aria-label={t("recruiting.fields.interviewKind")} className={SELECT_CLASS} value={iv.kind} onChange={(e) => setIv({ ...iv, kind: e.target.value })}>
               {INTERVIEW_KINDS.map((k) => <option key={k} value={k}>{t(`recruiting.interviewKind.${k}`)}</option>)}
             </select>
-            <Input type="datetime-local" data-testid="interview-scheduled-at" value={iv.scheduledAt} onChange={(e) => setIv({ ...iv, scheduledAt: e.target.value })} />
-            <Input type="number" min={5} max={1440} data-testid="interview-duration" value={iv.durationMin} onChange={(e) => setIv({ ...iv, durationMin: e.target.value })} />
-            <Input data-testid="interview-location" placeholder={t("recruiting.fields.location")} value={iv.location} onChange={(e) => setIv({ ...iv, location: e.target.value })} />
+            <Input type="datetime-local" data-testid="interview-scheduled-at" aria-label={t("recruiting.fields.scheduledAt")} value={iv.scheduledAt} onChange={(e) => setIv({ ...iv, scheduledAt: e.target.value })} />
+            <Input type="number" min={5} max={1440} data-testid="interview-duration" aria-label={t("recruiting.fields.durationMin")} value={iv.durationMin} onChange={(e) => setIv({ ...iv, durationMin: e.target.value })} />
+            <Input data-testid="interview-location" aria-label={t("recruiting.fields.location")} placeholder={t("recruiting.fields.location")} value={iv.location} onChange={(e) => setIv({ ...iv, location: e.target.value })} />
             <Button type="button" data-testid="interview-submit" disabled={createInterview.isPending} onClick={() => createInterview.mutate()}>
               {t("recruiting.application.scheduleInterview")}
             </Button>
@@ -265,14 +265,14 @@ export default function ApplicationDetailPage() {
         <CardHeader><CardTitle as="h2">{t("recruiting.application.offerTitle")}</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           {canOffer && (<div className="grid gap-3 md:grid-cols-4" data-testid="offer-form">
-            <Input type="number" min={1} step={100} data-testid="offer-salary" placeholder={t("recruiting.fields.grossAnnualSalary")} value={of.grossAnnualSalary} onChange={(e) => setOf({ ...of, grossAnnualSalary: e.target.value })} />
+            <Input type="number" min={1} step={100} data-testid="offer-salary" aria-label={t("recruiting.fields.grossAnnualSalary")} placeholder={t("recruiting.fields.grossAnnualSalary")} value={of.grossAnnualSalary} onChange={(e) => setOf({ ...of, grossAnnualSalary: e.target.value })} />
             {/* F-2 (L6): il tipo di contratto si sceglie fra i valori noti, con la loro etichetta; prima era un testo libero che mostrava «permanent». */}
             <select data-testid="offer-contract-type" aria-label={t("recruiting.fields.contractType")} className={SELECT_CLASS} value={of.contractType} onChange={(e) => setOf({ ...of, contractType: e.target.value })}>
               {["permanent", "fixed_term"].map((c) => (
                 <option key={c} value={c}>{enumLabel("contractType", c)}</option>
               ))}
             </select>
-            <Input type="date" data-testid="offer-start-date" value={of.startDate} onChange={(e) => setOf({ ...of, startDate: e.target.value })} />
+            <Input type="date" data-testid="offer-start-date" aria-label={t("recruiting.fields.startDate")} value={of.startDate} onChange={(e) => setOf({ ...of, startDate: e.target.value })} />
             <Button type="button" data-testid="offer-submit" disabled={createOffer.isPending} onClick={() => createOffer.mutate()}>{t("recruiting.application.createOffer")}</Button>
           </div>)}
           {(offers.data?.items ?? []).length === 0 ? (
@@ -352,15 +352,15 @@ function FeedbackBlock({
   return (
     <div className="space-y-2 rounded-card bg-muted/30 p-3" data-testid="feedback-block">
       {canWrite && (<div className="grid gap-2 md:grid-cols-5" data-testid="feedback-form">
-        <select data-testid="feedback-interviewer" className={SELECT_CLASS} value={fb.interviewerUserId} onChange={(e) => setFb({ ...fb, interviewerUserId: e.target.value })}>
+        <select data-testid="feedback-interviewer" aria-label={t("recruiting.fields.interviewer")} className={SELECT_CLASS} value={fb.interviewerUserId} onChange={(e) => setFb({ ...fb, interviewerUserId: e.target.value })}>
           <option value="">{t("recruiting.fields.chooseInterviewer")}</option>
           {interviewers.map((u) => <option key={u.userId} value={u.userId}>{etichettaPersona(u, enumLabel)}</option>)}
         </select>
-        <select data-testid="feedback-recommendation" className={SELECT_CLASS} value={fb.recommendation} onChange={(e) => setFb({ ...fb, recommendation: e.target.value })}>
+        <select data-testid="feedback-recommendation" aria-label={t("recruiting.correzioni.raccomandazione")} className={SELECT_CLASS} value={fb.recommendation} onChange={(e) => setFb({ ...fb, recommendation: e.target.value })}>
           {FEEDBACK_RECOMMENDATIONS.map((r) => <option key={r} value={r}>{t(`recruiting.recommendation.${r}`)}</option>)}
         </select>
-        <Input type="number" min={0} max={10} step={0.5} data-testid="feedback-score" placeholder="0-10" value={fb.score} onChange={(e) => setFb({ ...fb, score: e.target.value })} />
-        <Input data-testid="feedback-notes" placeholder={t("recruiting.fields.notes")} value={fb.notes} onChange={(e) => setFb({ ...fb, notes: e.target.value })} />
+        <Input type="number" min={0} max={10} step={0.5} data-testid="feedback-score" aria-label={t("recruiting.correzioni.voto")} placeholder="0-10" value={fb.score} onChange={(e) => setFb({ ...fb, score: e.target.value })} />
+        <Input data-testid="feedback-notes" aria-label={t("recruiting.fields.notes")} placeholder={t("recruiting.fields.notes")} value={fb.notes} onChange={(e) => setFb({ ...fb, notes: e.target.value })} />
         <Button type="button" variant="outline" data-testid="feedback-submit" disabled={!fb.interviewerUserId || create.isPending} onClick={() => create.mutate()}>
           {t("recruiting.application.submitFeedback")}
         </Button>

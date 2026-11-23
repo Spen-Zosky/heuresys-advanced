@@ -134,7 +134,7 @@ function SchedaSezione({ base, sezione }: { base: string; sezione: FaldoneSezion
   return (
     <Card data-testid="faldone-sezione" data-sezione={sezione.id} data-visibilita={sezione.visibilita}>
       <CardHeader className="pb-2">
-        <CardTitle as="h3" className="flex flex-wrap items-center justify-between gap-2 text-base">
+        <CardTitle as="h2" className="flex flex-wrap items-center justify-between gap-2 text-base">
           <span>
             {sezione.titolo}
             <span className="ml-2 text-sm font-normal tabular-nums text-muted-foreground">{fmt.numero(sezione.righe)}</span>

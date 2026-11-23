@@ -34,7 +34,7 @@ export function CodiciDiRecupero() {
   });
   return (
     <Card data-testid="me-recovery-codes">
-      <CardHeader><CardTitle>{t("security.recupero.titolo")}</CardTitle></CardHeader>
+      <CardHeader><CardTitle as="h2">{t("security.recupero.titolo")}</CardTitle></CardHeader>
       <CardContent className="space-y-3 text-sm">
         <p data-testid="me-recovery-codes-count">
           {conteggio.data ? t("security.recupero.restano", { count: conteggio.data.remaining }) : conteggio.isError ? t("security.recupero.erroreCarica") : t("common:loading")}
@@ -81,7 +81,7 @@ export function SessioniUtente({ userId }: { userId: string }) {
   const righe = sessioni.data?.items ?? [];
   return (
     <Card data-testid="user-sessions">
-      <CardHeader><CardTitle>{t("users.sessioni.titolo", { count: righe.length })}</CardTitle></CardHeader>
+      <CardHeader><CardTitle as="h2">{t("users.sessioni.titolo", { count: righe.length })}</CardTitle></CardHeader>
       <CardContent className="space-y-3 text-sm">
         {sessioni.isLoading ? <p className="text-muted-foreground">{t("common:loading")}</p> : righe.length === 0 ? (
           <p data-testid="user-sessions-empty" className="text-muted-foreground">{t("users.sessioni.nessuna")}</p>

@@ -243,7 +243,7 @@ export default function VisualizationDetailPage() {
           <CardContent className="flex flex-wrap items-center gap-3 pt-6 text-sm">
             <p className="min-w-0 flex-1 text-muted-foreground">
               {t("visualizations.detail.rigenera.spiegazione")}{" "}
-              <Link href="/organization/org-chart" className="text-primary hover:underline">{t("visualizations.detail.rigenera.vivo")}</Link>
+              <Link href="/organization/org-chart" className="text-primary underline underline-offset-2">{t("visualizations.detail.rigenera.vivo")}</Link>
             </p>
             {rigenera.data ? (
               <span className="text-xs" data-testid="visualization-rigenera-esito">

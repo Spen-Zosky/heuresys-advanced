@@ -73,6 +73,7 @@ export default function SkillsByCategoryAnalyticsPage() {
   if (q.isLoading) {
     return (
       <main className="mx-auto max-w-7xl px-6 pb-8">
+        <PageHeader title={t("skillsByCategory.title")} description={t("skillsByCategory.description")} />
         <StatoCaricamento testId="analytics-skills-by-category-loading" />
       </main>
     );
@@ -80,6 +81,7 @@ export default function SkillsByCategoryAnalyticsPage() {
   if (q.isError) {
     return (
       <main className="mx-auto max-w-7xl px-6 pb-8">
+        <PageHeader title={t("skillsByCategory.title")} description={t("skillsByCategory.description")} />
         <StatoErrore errore={q.error} titolo={t("error")} testId="analytics-skills-by-category-error" onRiprova={() => void q.refetch()} />
       </main>
     );

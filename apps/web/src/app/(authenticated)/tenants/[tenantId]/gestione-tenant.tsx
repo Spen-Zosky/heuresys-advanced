@@ -48,7 +48,7 @@ export function ModificaTenant({ tenant, settori }: { tenant: Tenant; settori: I
   const cambiaStato = v.status !== tenant.tenantStatus;
   return (
     <Card data-testid="tenant-edit">
-      <CardHeader><CardTitle>{t("tenants.gestione.modifica")}</CardTitle></CardHeader>
+      <CardHeader><CardTitle as="h2">{t("tenants.gestione.modifica")}</CardTitle></CardHeader>
       <CardContent className="grid grid-cols-1 gap-3 md:grid-cols-3">
         <label className="text-sm font-medium text-foreground">{t("tenants.gestione.nome")}
           <Input value={v.name} maxLength={255} onChange={(e) => setV({ ...v, name: e.target.value })} data-testid="tenant-edit-name" /></label>
@@ -110,7 +110,7 @@ export function AssegnazioniPiattaforma({ tenantId }: { tenantId: string }) {
   if (!puo) return null;
   return (
     <Card data-testid="tenant-platform-assignments">
-      <CardHeader><CardTitle>{t("tenants.gestione.assegnazioni")}</CardTitle></CardHeader>
+      <CardHeader><CardTitle as="h2">{t("tenants.gestione.assegnazioni")}</CardTitle></CardHeader>
       <CardContent className="space-y-4">
         <p className="text-xs text-muted-foreground">{t("tenants.gestione.assegnazioniSpiega")}</p>
         <ul className="divide-y divide-border rounded-card border border-border text-sm">

@@ -62,7 +62,7 @@ export function NuovoProgetto() {
   return (
     <Card data-testid="project-create">
       <CardHeader>
-        <CardTitle className="flex items-center justify-between gap-3">
+        <CardTitle as="h2" className="flex items-center justify-between gap-3">
           <span>{t("projects.gestione.nuovo")}</span>
           <Button type="button" variant="outline" data-testid="project-create-toggle" onClick={() => setAperto((v) => !v)}>
             {aperto ? t("projects.gestione.chiudi") : t("projects.gestione.crea")}
@@ -121,7 +121,7 @@ export function GestioneProgetto({ progetto }: { progetto: ProjectDetail }) {
   if (!usePuoGestireProgetti()) return null;
   return (
     <Card data-testid="project-manage">
-      <CardHeader><CardTitle>{t("projects.gestione.titolo")}</CardTitle></CardHeader>
+      <CardHeader><CardTitle as="h2">{t("projects.gestione.titolo")}</CardTitle></CardHeader>
       <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <label htmlFor="project-status" className="text-sm font-medium text-foreground">{t("projects.statusLabel")}</label>

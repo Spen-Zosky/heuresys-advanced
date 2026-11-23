@@ -136,7 +136,7 @@ export default function MentorshipPage() {
       <PageHeader title={t("mentorship.titolo")} description={t("mentorship.descrizione")} />
 
       <Card data-testid="mentorship-programs">
-        <CardHeader><CardTitle>{t("mentorship.programmi", { count: programmi.data?.total ?? 0 })}</CardTitle></CardHeader>
+        <CardHeader><CardTitle as="h2">{t("mentorship.programmi", { count: programmi.data?.total ?? 0 })}</CardTitle></CardHeader>
         <CardContent className="space-y-4 text-sm">
           {programmi.isLoading ? <StatoCaricamento /> : programmi.isError ? (
             <StatoErrore errore={programmi.error} titolo={t("mentorship.erroreCarica")} onRiprova={() => void programmi.refetch()} />
@@ -178,7 +178,7 @@ export default function MentorshipPage() {
       </Card>
 
       <Card data-testid="mentorship-pairings">
-        <CardHeader><CardTitle>{t("mentorship.coppie", { count: coppie.data?.total ?? 0 })}</CardTitle></CardHeader>
+        <CardHeader><CardTitle as="h2">{t("mentorship.coppie", { count: coppie.data?.total ?? 0 })}</CardTitle></CardHeader>
         <CardContent className="space-y-4 text-sm">
           <label className="block w-72 font-medium text-foreground">{t("mentorship.filtraProgramma")}
             <select className={SELECT_CLASS} value={programma} onChange={(e) => { setProgramma(e.target.value); setCoppiaScelta(""); }} data-testid="mentorship-pairing-filter">

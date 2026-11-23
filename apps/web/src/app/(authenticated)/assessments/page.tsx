@@ -119,7 +119,7 @@ export default function AssessmentsPage() {
     <main data-testid="assessments-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader title={t("assessments.titolo")} description={t("assessments.descrizione")} />
       <Card>
-        <CardHeader><CardTitle>{t("assessments.elenco", { mostrati: elenco.data?.items.length ?? 0, totale: elenco.data?.total ?? 0 })}</CardTitle></CardHeader>
+        <CardHeader><CardTitle as="h2">{t("assessments.elenco", { mostrati: elenco.data?.items.length ?? 0, totale: elenco.data?.total ?? 0 })}</CardTitle></CardHeader>
         <CardContent className="space-y-4 text-sm">
           <label className="block w-56 font-medium text-foreground">{t("assessments.stato")}
             <select className={SELECT_CLASS} value={stato} onChange={(e) => setStato(e.target.value)} data-testid="assessments-filter">
@@ -154,7 +154,7 @@ export default function AssessmentsPage() {
       </Card>
       {puoCreare && (
         <Card data-testid="assessment-create">
-          <CardHeader><CardTitle>{t("assessments.nuova")}</CardTitle></CardHeader>
+          <CardHeader><CardTitle as="h2">{t("assessments.nuova")}</CardTitle></CardHeader>
           <CardContent className="grid grid-cols-1 gap-3 text-sm md:grid-cols-4">
             <div className="md:col-span-4"><PersonPicker label={t("assessments.persona")} value={persone} onChange={(x) => setPersone(x.slice(-1))} testId="assessment-create-person" /></div>
             <label className="font-medium text-foreground">{t("assessments.tipo")}

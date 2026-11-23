@@ -96,7 +96,7 @@ export function NuovaIniziativa() {
   return (
     <Card data-testid="training-create">
       <CardHeader>
-        <CardTitle className="flex items-center justify-between gap-3">
+        <CardTitle as="h2" className="flex items-center justify-between gap-3">
           <span>{t("training.form.nuova")}</span>
           <Button type="button" variant="outline" data-testid="training-create-toggle" onClick={() => setAperto((x) => !x)}>
             {aperto ? t("training.form.chiudi") : t("training.form.crea")}
@@ -148,7 +148,7 @@ export function ModificaIniziativa({ iniziativa, onChiudi }: { iniziativa: Train
   });
   return (
     <Card data-testid="training-edit">
-      <CardHeader><CardTitle>{t("training.form.modifica", { nome: iniziativa.cohortName ?? t("training.cohortNd") })}</CardTitle></CardHeader>
+      <CardHeader><CardTitle as="h2">{t("training.form.modifica", { nome: iniziativa.cohortName ?? t("training.cohortNd") })}</CardTitle></CardHeader>
       <CardContent className="grid grid-cols-1 gap-3 md:grid-cols-3">
         <CampiIniziativa v={v} set={setV} prefisso="training-edit" />
         <div className="flex items-center gap-3 md:col-span-3">

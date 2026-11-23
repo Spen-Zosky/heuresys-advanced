@@ -13,6 +13,8 @@ import { OrigineDelDato, OrigineDellaRiga } from "@/components/origine-del-dato"
 import { descrivi, useTabellaAgente } from "@/lib/agente/use-tabella-agente";
 import { ConSpiegazione } from "@/components/spiegazione";
 import { useLeggibile } from "@/lib/leggibile";
+import { VUOTO } from "@/lib/format";
+import { cellaVuota, colonnaVuotaOvunque } from "@/lib/celle-tabella";
 
 /**
  * Canonical list-page composition (brand-component-contract.md: "Data table /
@@ -47,18 +49,8 @@ const INTESTAZIONE_IDENTIFICATIVO = /\b(cap|matricola|telefono|cellulare|iban|pe
 const grezza = <T,>(c: DataColumn<T>) => typeof c.header === "string" && INTESTAZIONE_IDENTIFICATIVO.test(c.header);
 
 const INTESTAZIONE_SECONDARIA = /^\s*(codice|code|cod\.|e-?mail|identificativo|id)\b/i;
-/** Una cella è vuota quando non porta niente: assente, stringa vuota, il trattino, o un elemento
- *  che contiene soltanto uno di questi. */
-export function cellaVuota(n: unknown, profondita = 0): boolean {
-  if (n === null || n === undefined || n === false || n === "") return true;
-  if (typeof n === "string") return /^\s*(—|–|-|n\/d)?\s*$/i.test(n);
-  if (Array.isArray(n)) return n.every((x) => cellaVuota(x, profondita + 1));
-  if (profondita < 3 && typeof n === "object" && "props" in (n as object)) {
-    const p = (n as { props?: { children?: unknown } }).props;
-    if (p && "children" in p && typeof (n as { type?: unknown }).type === "string") return cellaVuota(p.children, profondita + 1);
-  }
-  return false;
-}
+/** La regola della cella vuota sta in `@/lib/celle-tabella` (provata là); qui si riesporta. */
+export { cellaVuota };
 
 function eSecondaria<T>(c: DataColumn<T>): boolean {
   return c.secondaria ?? (typeof c.header === "string" && INTESTAZIONE_SECONDARIA.test(c.header));
@@ -195,9 +187,9 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
     : [...columns.slice(0, coda), colonnaOrigine, ...columns.slice(coda)];
   // In tabella le colonne del lavoro; nella scheda della riga tutte (C2, C3).
   // C9: una colonna vuota in tutte le righe in vista non dice niente; esce dalla tabella e resta
-  // nella scheda della riga.
-  const vuotaOvunque = (c: DataColumn<T>) =>
-    visibleRows.length > 0 && c.header !== "" && visibleRows.every((r) => cellaVuota(c.cell(r)));
+  // nella scheda della riga. K15: vale anche per la colonna dei comandi (intestazione vuota), che
+  // per chi non ha il permesso di usarli è una fila di celle vuote senza spiegazione.
+  const vuotaOvunque = (c: DataColumn<T>) => colonnaVuotaOvunque(visibleRows.map((r) => c.cell(r)));
   const primarie = colonne.filter((c) => !eSecondaria(c) && !vuotaOvunque(c));
   const inTabella = primarie.filter((c) => c.header !== "").length >= 2 ? primarie : colonne;
   const titoloRiga = rigaAperta !== null ? colonnaTitolo(inTabella, rigaAperta) : undefined;
@@ -268,7 +260,8 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
             >
               {inTabella.map((c, i) => (
                 <td key={i} className={`px-4 py-2 align-middle ${c.align === "right" ? "text-right tabular-nums" : ""} ${c.cellClassName ?? ""}`} {...(grezza(c) ? { "data-grezzo": "" } : {})}>
-                  {grezza(c) ? c.cell(row) : leggi.nodo(c.cell(row))}
+                  {/* K15: una cella che non porta niente dice «—», con o senza la rete di leggibilità */}
+                  {cellaVuota(c.cell(row)) ? VUOTO : grezza(c) ? c.cell(row) : leggi.nodo(c.cell(row))}
                 </td>
               ))}
             </tr>

@@ -16,7 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { TenantProcessMatrixResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
-import { useFormat } from "@/lib/format";
+import { VUOTO, useFormat } from "@/lib/format";
 import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
 
 type Ruolo = TenantProcessMatrixResponse["cells"][number]["role"];
@@ -82,8 +82,9 @@ export function MatriceProcessi({ tenantId }: { tenantId?: string }) {
                 {d.units.map((u) => {
                   const r = ruolo.get(`${p.processId}|${u.unitId}`);
                   return (
-                    <td key={u.unitId} title={r ? `${nomeRuolo(r)}: ${u.name}` : undefined} className={`h-5 w-[18px] min-w-[18px] border border-border/50 text-center text-[10px] ${r ? CELLA[r] : ""}`}>
-                      {r ? SIGLA[r] : ""}
+                    <td key={u.unitId} title={r ? `${nomeRuolo(r)}: ${u.name}` : m("nessunRuolo", { unita: u.name })} className={`h-5 w-[18px] min-w-[18px] border border-border/50 text-center text-[10px] ${r ? CELLA[r] : "text-muted-foreground/40"}`}>
+                      {/* K15: la cella senza ruolo porta un segno tenue, e il suo perché nel suggerimento */}
+                      {r ? SIGLA[r] : "·"}
                     </td>
                   );
                 })}
@@ -91,7 +92,7 @@ export function MatriceProcessi({ tenantId }: { tenantId?: string }) {
             ))}
             <tr>
               <td className={`${fermo} px-2 py-0.5 text-[10px] text-muted-foreground`}>{m("piede")}</td>
-              <td />
+              <td className="text-center text-[10px] text-muted-foreground" title={m("eCTitolo")}>{VUOTO}</td>
               {d.units.map((u) => (
                 <td key={u.unitId} className="text-center text-[10px] tabular-nums text-muted-foreground">
                   {fmt.numero(d.processes.filter((p) => { const r = ruolo.get(`${p.processId}|${u.unitId}`); return r === "OWNER" || r === "CONTRIBUTOR"; }).length)}

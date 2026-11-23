@@ -32,6 +32,7 @@ import { useTranslation } from "react-i18next";
 import { formati, localeDi } from "@/lib/format";
 import { esadecimaleConAlfa } from "@/lib/colori-grafico";
 import { assiDerivati, letturaDelGrafico, type ChartTable } from "@/lib/lettura-grafico";
+import { testoCellaGrafico } from "@/lib/celle-tabella";
 
 const RawEChartsCard = dynamic(
   // Subpath `/charts` isolates echarts so this lazy import does NOT drag the whole
@@ -183,12 +184,17 @@ function conNomiDegliAssi(option: RawProps["option"], assiPagina: { x?: string; 
   return o as RawProps["option"];
 }
 
+// K15 (controllo forense del 23/11/2026): un valore assente si scrive «—», mai una cella vuota; e
+// la tabella si monta solo quando la si apre, perché chiusa le sue celle sono in pagina ma non si
+// leggono, e a chi le controlla risultano tutte vuote.
 function TabellaEquivalente({ tabella, lingua }: { tabella: ChartTable; lingua: string | undefined }) {
   const f = formati(lingua);
-  const fmt = (v: string | number) => (typeof v === "number" ? f.numero(v, 2) : v);
+  const [aperta, setAperta] = useState(false);
+  const fmt = (v: string | number | null | undefined) => testoCellaGrafico(v, (n) => f.numero(n, 2));
   return (
-    <details className="mt-3 text-sm" data-testid="chart-table">
+    <details className="mt-3 text-sm" data-testid="chart-table" onToggle={(e) => setAperta(e.currentTarget.open)}>
       <summary className="cursor-pointer text-xs text-muted-foreground">{tabella.titolo}</summary>
+      {aperta ? (
       <div className="mt-2 overflow-x-auto">
         <table className="w-full border-collapse text-xs">
           <caption className="sr-only">{tabella.titolo}</caption>
@@ -210,6 +216,7 @@ function TabellaEquivalente({ tabella, lingua }: { tabella: ChartTable; lingua: 
           </tbody>
         </table>
       </div>
+      ) : null}
     </details>
   );
 }

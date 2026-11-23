@@ -12,7 +12,7 @@ import { NomeOppure } from "@/components/senza-nome";
 import { Codice } from "@/components/codice";
 import { useFormat } from "@/lib/format";
 import { vociTemplateKpi } from "@/lib/template-kpi";
-import { NuovoIndicatoreRichiesto, PesoIndicatore, TogliRequisito } from "../_components/requisiti-modifica";
+import { NuovoIndicatoreRichiesto, PesoIndicatore, TogliRequisito, usePuoModificarePosizione } from "../_components/requisiti-modifica";
 
 interface PositionKpiReq {
   requirementId: string;
@@ -25,6 +25,9 @@ interface PositionKpiReq {
 
 export default function PositionKpisPage() {
   const { t } = useTranslation("admin");
+  // K15: la colonna «Togli» c'è solo per chi può modificare la posizione; per gli altri sarebbe
+  // una fila di celle vuote senza spiegazione.
+  const puo = usePuoModificarePosizione();
   const fmt = useFormat();
   const params = useParams<{ positionId: string }>();
   const positionId = params.positionId;
@@ -85,9 +88,9 @@ export default function PositionKpisPage() {
                   </span>
                 );
               } },
-              { header: "", cell: (k) => (
+              ...(puo ? [{ header: "", cell: (k: PositionKpiReq) => (
                 <TogliRequisito percorso={`/v1/positions/${positionId}/kpis/${k.kpiDefinitionId}`} chiave={["positions", positionId, "kpis"]} testId="position-kpi-remove" />
-              ) },
+              ) }] : []),
             ]}
           />
         </CardContent>

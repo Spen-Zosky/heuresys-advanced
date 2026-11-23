@@ -51,6 +51,8 @@ function PerProcesso() {
   const fmt = useFormat();
   const qc = useQueryClient();
   const perms = useCurrentUserPermissions().data?.permissions ?? [];
+  // K15: la colonna «Togli» c'è solo per chi può togliere; per gli altri sarebbe vuota in ogni riga.
+  const puoTogliere = perms.includes("process_kpi_template:delete");
   const nomi = useNomi();
   const [scelta, setScelta] = useState({ processId: "", kpiId: "", peso: "1" });
   const righe = useQuery({ queryKey: ["process-kpi-templates"], queryFn: () => leggiTutto<ProcessKpiTemplate>("/v1/process-kpi-templates", 500) });
@@ -78,7 +80,8 @@ function PerProcesso() {
         <p className="text-sm text-muted-foreground" data-testid="kpi-templates-process-count">{t("catalogoKpi.conto", { count: elenco.length })}</p>
         <table className="w-full text-sm">
           <thead><tr className="text-left text-muted-foreground">
-            <th className="py-1">{t("catalogoKpi.processi.processo")}</th><th>{t("catalogoKpi.kpi")}</th><th>{t("catalogoKpi.peso")}</th><th />
+            <th className="py-1">{t("catalogoKpi.processi.processo")}</th><th>{t("catalogoKpi.kpi")}</th><th>{t("catalogoKpi.peso")}</th>
+            {puoTogliere && <th><span className="sr-only">{t("common:table.actions")}</span></th>}
           </tr></thead>
           <tbody>
             {elenco.map((r) => (
@@ -86,14 +89,14 @@ function PerProcesso() {
                 <td className="py-1">{nomeProcesso.get(r.processId) ?? "—"}</td>
                 <td>{nomeKpi.get(r.kpiId) ?? "—"}</td>
                 <td>{fmt.numeroFisso(r.defaultWeight, 2)}</td>
-                <td className="text-right">
-                  {perms.includes("process_kpi_template:delete") && (
+                {puoTogliere && (
+                  <td className="text-right">
                     <Button type="button" size="sm" variant="ghost" data-testid="kpi-template-process-remove" disabled={togli.isPending}
                       onClick={() => { if (window.confirm(t("catalogoKpi.confermaTogli"))) togli.mutate(r.processKpiTemplateId); }}>
                       {t("catalogoKpi.togli")}
                     </Button>
-                  )}
-                </td>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
@@ -128,6 +131,7 @@ function PerUnita() {
   const fmt = useFormat();
   const qc = useQueryClient();
   const perms = useCurrentUserPermissions().data?.permissions ?? [];
+  const puoTogliere = perms.includes("organization_unit_kpi_template:delete");
   const nomi = useNomi();
   const [scelta, setScelta] = useState({ unitId: "", kpiId: "", peso: "1" });
   const righe = useQuery({ queryKey: ["organization-unit-kpi-templates"], queryFn: () => leggiTutto<OrganizationUnitKpiTemplate>("/v1/organization-unit-kpi-templates", 500) });
@@ -155,7 +159,8 @@ function PerUnita() {
         <p className="text-sm text-muted-foreground" data-testid="kpi-templates-unit-count">{t("catalogoKpi.conto", { count: elenco.length })}</p>
         <table className="w-full text-sm">
           <thead><tr className="text-left text-muted-foreground">
-            <th className="py-1">{t("catalogoKpi.unita.unita")}</th><th>{t("catalogoKpi.kpi")}</th><th>{t("catalogoKpi.peso")}</th><th />
+            <th className="py-1">{t("catalogoKpi.unita.unita")}</th><th>{t("catalogoKpi.kpi")}</th><th>{t("catalogoKpi.peso")}</th>
+            {puoTogliere && <th><span className="sr-only">{t("common:table.actions")}</span></th>}
           </tr></thead>
           <tbody>
             {elenco.map((r) => (
@@ -163,14 +168,14 @@ function PerUnita() {
                 <td className="py-1">{r.unitId ? (nomeUnita.get(r.unitId) ?? "—") : t("catalogoKpi.unita.daModello")}</td>
                 <td>{nomeKpi.get(r.kpiId) ?? "—"}</td>
                 <td>{fmt.numeroFisso(r.weight, 2)}</td>
-                <td className="text-right">
-                  {perms.includes("organization_unit_kpi_template:delete") && (
+                {puoTogliere && (
+                  <td className="text-right">
                     <Button type="button" size="sm" variant="ghost" data-testid="kpi-template-unit-remove" disabled={togli.isPending}
                       onClick={() => { if (window.confirm(t("catalogoKpi.confermaTogli"))) togli.mutate(r.organizationUnitKpiTemplateId); }}>
                       {t("catalogoKpi.togli")}
                     </Button>
-                  )}
-                </td>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

@@ -514,7 +514,8 @@
         "CONTRIBUTOR": "Executing",
         "CONSULTED": "Consulted",
         "INFORMED": "Informed"
-      }
+      },
+      "nessunRuolo": "{{unita}}: not involved in the process"
     },
     "classificazione": {
       "nota": "How the process is classified, one independent dimension per row: {{assegnate}} of {{totale}} facets assigned. Every value carries the criterion it was chosen with.",

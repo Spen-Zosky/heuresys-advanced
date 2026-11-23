@@ -17,6 +17,7 @@ import { Button, Dialog, DialogContent, DialogDescription, DialogTitle } from "@
 import type { ProcessFacet, ProcessFacetVocabularyResponse, TenantProcessFacet, TenantProcessFacetsResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { MODALE } from "@/lib/modale";
+import { VUOTO } from "@/lib/format";
 
 export const FACCETTE: readonly ProcessFacet[] = ["FINALITA", "BENEFICIARIO", "PERIMETRO", "MODALITA", "ATTIVAZIONE", "TECNOLOGIA", "STANDARDIZZAZIONE"];
 
@@ -106,9 +107,10 @@ export function ClassificazioneProcesso({ processId, faccette }: { processId: st
                       </span>
                     )}
                   </td>
-                  <td className="px-3 py-2 text-xs">{valori[0]?.criterion ?? ""}</td>
+                  {/* K15: una faccetta non classificata non ha criterio né stato: lo si dice con «—», non con il vuoto */}
+                  <td className="px-3 py-2 text-xs">{valori[0]?.criterion || VUOTO}</td>
                   <td className="px-3 py-2 text-xs">
-                    {valori.length === 0 ? null : proposta ? <span className="font-medium">{k("stato.proposta")}</span> : <span>{k("stato.approvata")}</span>}
+                    {valori.length === 0 ? <span className="text-muted-foreground">{VUOTO}</span> : proposta ? <span className="font-medium">{k("stato.proposta")}</span> : <span>{k("stato.approvata")}</span>}
                   </td>
                   {faccette.canEdit ? (
                     <td className="px-3 py-2 text-right">

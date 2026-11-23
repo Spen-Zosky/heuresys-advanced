@@ -1496,6 +1496,7 @@
     "nessuno": "non indicato",
     "omissis": "{omissis}",
     "omissisAiuto": "Persona fuori dal tuo perimetro: il nome non si mostra.",
+    "incontriFuoriPerimetro": "Incontri non visibili: una delle due persone è fuori dal tuo perimetro.",
     "programmi": "Programmi ({{count}})",
     "programmi_one": "Programma ({{count}})",
     "erroreCarica": "Non è stato possibile caricare il mentoring.",

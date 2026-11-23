@@ -89,15 +89,15 @@ import {
   Workflow,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useCurrentUser, useLogout, useMyInterfaces, useMyPreferences, useUpdateMyPreferences } from "../../lib/api/auth";
+import { useCurrentUser, useCurrentUserPermissions, useLogout, useMyInterfaces, useMyPreferences, useUpdateMyPreferences } from "../../lib/api/auth";
 import { isApiError, SessionExpiredError } from "../../lib/api/errors";
 import { setLocale } from "../../lib/i18n";
 import { primaryRoleOf } from "../../lib/role-precedence";
 import { cognomeNome } from "../../lib/person-label";
 import { PreferencesApplier } from "../../components/preferences-applier";
 import { StepUpDialog } from "../../components/step-up-dialog";
-import { SectionTabs, SECTION_TAB_GROUPS } from "../../components/section-tabs";
-import { pageVerdict } from "../../lib/page-guard";
+import { SectionTabs, SECTION_TAB_GROUPS, SECTION_TABS, permessoDellaScheda } from "../../components/section-tabs";
+import { chiaviNomePaginaNegata, pageVerdict } from "../../lib/page-guard";
 import { PannelloAgente } from "../../components/assistente/finestra-assistente";
 import { ContestoAgenteProvider } from "../../lib/agente/contesto";
 import { SchedeProvider } from "@/components/scheda-rapida";
@@ -246,6 +246,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
   const pathname = usePathname() ?? "";
   const me = useCurrentUser();
   const ifaces = useMyInterfaces();
+  const permessiPersona = useCurrentUserPermissions();
   const logout = useLogout();
   const updatePrefs = useUpdateMyPreferences();
   const prefs = useMyPreferences();
@@ -365,12 +366,17 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
       </CommandPalette.Group>
     ));
 
-  const verdict = pageVerdict(pathname, ifaces.data?.routes ?? [], SECTION_TAB_GROUPS);
-  // La pagina negata si nomina a parole (la voce di menu), mai col percorso tecnico.
+  const verdict = pageVerdict(pathname, ifaces.data?.routes ?? [], SECTION_TAB_GROUPS, {
+    permessi: permessiPersona.data?.permissions ?? null,
+    permessoDi: permessoDellaScheda,
+  });
+  // La pagina negata si nomina a parole (voce di menu o scheda), mai col percorso tecnico, e mai
+  // col nome della pagina principale del suo gruppo (K29).
   const nomePaginaNegata =
     verdict.kind === "denied"
-      ? t(`shell:nav.voci.${pathname.replace(/^\//, "").replace(/\//g, "_")}`, { defaultValue: "" }) ||
-        t(`shell:nav.voci.${verdict.route.replace(/^\//, "").replace(/\//g, "_")}`, { defaultValue: "" })
+      ? chiaviNomePaginaNegata(pathname, verdict, SECTION_TABS)
+          .map((k) => t(k, { defaultValue: "" }))
+          .find((n) => n !== "") ?? ""
       : "";
 
   const roles = user.roles ?? [];

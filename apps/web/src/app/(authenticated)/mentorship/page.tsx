@@ -16,6 +16,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { useFormat } from "@/lib/format";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
+import { incontriLeggibili } from "@/lib/mentorship-coppie";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -31,7 +32,8 @@ interface Incontro { sessionId: string; date: string; durationMinutes: number | 
 
 function usePermessi() {
   const p = useCurrentUserPermissions().data?.permissions ?? [];
-  return { crea: p.includes("mentorship:create"), modifica: p.includes("mentorship:update") };
+  // K30: le letture partono solo con `mentorship:read` (prima chi non l'aveva riceveva due 403).
+  return { legge: p.includes("mentorship:read"), crea: p.includes("mentorship:create"), modifica: p.includes("mentorship:update") };
 }
 
 function Persona({ id, nome }: { id: string | null; nome: string | null }) {
@@ -108,9 +110,10 @@ export default function MentorshipPage() {
   const [nuovo, setNuovo] = useState({ name: "", type: "GENERAL" as string, durationMonths: "" });
   const [programma, setProgramma] = useState("");
   const [coppiaScelta, setCoppiaScelta] = useState("");
-  const programmi = useQuery({ queryKey: ["mentorship", "programs"], queryFn: () => apiFetch<{ items: Programma[]; total: number }>("/v1/mentorship/programs?limit=100") });
+  const programmi = useQuery({ queryKey: ["mentorship", "programs"], enabled: perm.legge, queryFn: () => apiFetch<{ items: Programma[]; total: number }>("/v1/mentorship/programs?limit=100") });
   const coppie = useQuery({
     queryKey: ["mentorship", "pairings", programma],
+    enabled: perm.legge,
     queryFn: () => apiFetch<{ items: Coppia[]; total: number }>(`/v1/mentorship/pairings?limit=100${programma ? `&programId=${programma}` : ""}`),
   });
   const ricarica = () => void qc.invalidateQueries({ queryKey: ["mentorship"] });
@@ -205,9 +208,11 @@ export default function MentorshipPage() {
                       </select>
                     </>
                   ) : <Badge variant="secondary">{t(`mentorship.statiCoppia.${c.status}`)}</Badge>}
-                  <Button type="button" size="sm" variant="outline" data-testid="mentorship-pairing-open" onClick={() => setCoppiaScelta(c.mentorshipId === coppiaScelta ? "" : c.mentorshipId)}>
-                    {c.mentorshipId === coppiaScelta ? t("mentorship.chiudiIncontri") : t("mentorship.apriIncontri")}
-                  </Button>
+                  {incontriLeggibili(c) ? (
+                    <Button type="button" size="sm" variant="outline" data-testid="mentorship-pairing-open" onClick={() => setCoppiaScelta(c.mentorshipId === coppiaScelta ? "" : c.mentorshipId)}>
+                      {c.mentorshipId === coppiaScelta ? t("mentorship.chiudiIncontri") : t("mentorship.apriIncontri")}
+                    </Button>
+                  ) : <span className="text-xs text-muted-foreground" data-testid="mentorship-pairing-closed">{t("mentorship.incontriFuoriPerimetro")}</span>}
                 </span>
               </li>
             ))}

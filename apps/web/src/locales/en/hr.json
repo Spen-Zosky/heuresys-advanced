@@ -1496,6 +1496,7 @@
     "nessuno": "not set",
     "omissis": "{omissis}",
     "omissisAiuto": "Person outside your scope: the name is not shown.",
+    "incontriFuoriPerimetro": "Meetings not visible: one of the two people is outside your scope.",
     "programmi": "Programmes ({{count}})",
     "programmi_one": "Programme ({{count}})",
     "erroreCarica": "Mentoring could not be loaded.",

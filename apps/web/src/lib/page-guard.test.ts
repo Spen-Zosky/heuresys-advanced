@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { pageVerdict, routeContains, type RouteAccess } from "./page-guard";
+import { chiaviNomePaginaNegata, pageVerdict, routeContains, type RouteAccess } from "./page-guard";
 
 const ROUTES: RouteAccess[] = [
   { route: "/me", allowed: true },
@@ -58,5 +58,59 @@ describe("pageVerdict", () => {
 
   it("lascia aperto ciò che il registro non conosce", () => {
     expect(pageVerdict("/qualcosa-di-nuovo", ROUTES)).toEqual({ kind: "allowed", route: null });
+  });
+});
+
+// Forense 23/11/2026: K29 (il diniego nomina la pagina sbagliata) e K30 (scheda con permesso suo).
+const GRUPPI = [
+  ["/provenance", "/admin/gdpr", "/admin/tassonomie", "/admin/dati-di-riferimento"],
+  ["/career-succession", "/insights/succession-readiness", "/mentorship"],
+];
+const SCHEDE = [
+  { href: "/provenance", key: "dati.provenance" },
+  { href: "/admin/gdpr", key: "dati.gdpr" },
+  { href: "/admin/tassonomie", key: "dati.tassonomie" },
+  { href: "/admin/dati-di-riferimento", key: "dati.riferimento" },
+  { href: "/mentorship", key: "career.mentorship" },
+];
+const REGISTRO: RouteAccess[] = [
+  { route: "/provenance", allowed: false },
+  { route: "/career-succession", allowed: true },
+];
+const permessoDi = (href: string) => (href === "/mentorship" ? "mentorship:read" : null);
+
+describe("chiaviNomePaginaNegata (K29)", () => {
+  it("una scheda negata insieme alla sua principale si nomina con la propria etichetta, non con la principale", () => {
+    for (const [pagina, chiave] of [["/admin/gdpr", "dati.gdpr"], ["/admin/tassonomie", "dati.tassonomie"], ["/admin/dati-di-riferimento", "dati.riferimento"]] as const) {
+      const v = pageVerdict(pagina, REGISTRO, GRUPPI);
+      expect(v).toEqual({ kind: "denied", route: "/provenance" });
+      const chiavi = chiaviNomePaginaNegata(pagina, v, SCHEDE);
+      expect(chiavi).toContain(`shell:tabs.${chiave}`);
+      expect(chiavi).not.toContain("shell:nav.voci.provenance");
+    }
+  });
+
+  it("la rotta del verdetto vale ancora quando contiene la pagina richiesta (dettaglio di una pagina negata)", () => {
+    const v = pageVerdict("/users/0000-1111", ROUTES);
+    expect(chiaviNomePaginaNegata("/users/0000-1111", v, SCHEDE)).toEqual([
+      "shell:nav.voci.users_0000-1111",
+      "shell:nav.voci.users",
+    ]);
+  });
+});
+
+describe("pageVerdict con il permesso della scheda (K30)", () => {
+  it("nega la scheda /mentorship a chi non ha mentorship:read, anche se la principale è aperta", () => {
+    expect(pageVerdict("/mentorship", REGISTRO, GRUPPI, { permessi: ["career_succession:read"], permessoDi }))
+      .toEqual({ kind: "denied", route: "/mentorship" });
+  });
+
+  it("la apre a chi ha il permesso, e non nega niente finché i permessi non sono noti", () => {
+    expect(pageVerdict("/mentorship", REGISTRO, GRUPPI, { permessi: ["mentorship:read"], permessoDi }).kind).toBe("allowed");
+    expect(pageVerdict("/mentorship", REGISTRO, GRUPPI, { permessi: null, permessoDi }).kind).toBe("allowed");
+  });
+
+  it("le schede senza permesso proprio seguono la principale come prima", () => {
+    expect(pageVerdict("/insights/succession-readiness", REGISTRO, GRUPPI, { permessi: [], permessoDi }).kind).toBe("allowed");
   });
 });

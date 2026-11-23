@@ -955,6 +955,49 @@
     "link": "My file: all my data",
     "indietro": "Profile",
     "linkPersona": "File: all data of the person",
-    "indietroPersona": "Person record"
+    "indietroPersona": "Person record",
+    "vista": {
+      "titolo": "File of {{nome}}",
+      "descrizione": "All the person's data, direct and linked. What you are not entitled to see is shown as not visible, with the reason.",
+      "caricamento": "Loading the file…",
+      "caricamentoRighe": "Loading the rows…",
+      "classi": {
+        "PERSONAL": "Personal data",
+        "COMPENSATION": "Pay",
+        "SKILL": "Skills",
+        "EVALUATION": "Reviews",
+        "ACTIVITY": "Activity",
+        "CREDENTIAL": "Credentials",
+        "SPECIAL_CATEGORY": "Special categories"
+      },
+      "visibilita": {
+        "piena": "Fully visible",
+        "parziale": "Partly visible",
+        "omissis": "Not visible"
+      },
+      "legameSoggetto": "The person's data",
+      "legameRelazione": "The person appears here",
+      "motivo": "Reason: {{motivo}}",
+      "mostraRighe": "Show the rows",
+      "mostraStruttura": "Show the row structure",
+      "mostraAltre": "Show more rows",
+      "righeDi": "{{n}} of {{totale}} rows",
+      "nessunaRiga": "No rows",
+      "nessunDato": "No data recorded",
+      "nessunDatoPersona": "No data recorded for this person",
+      "si": "Yes",
+      "no": "No",
+      "conferma": "To see {{classi}} a recent second-factor confirmation is required.",
+      "congiunzione": " and ",
+      "confermaAzione": "Confirm",
+      "totaleRighe": "Rows",
+      "totaleSezioniConDati": "Sections with data",
+      "diTotale": "{{n}} of {{totale}}",
+      "totaleVoci": "Catalogue fields",
+      "totaleOmissis": "Sections with hidden fields",
+      "generatoIl": "Generated on",
+      "soloConDati": "Only sections with data",
+      "aggiorna": "Refresh"
+    }
   }
 }

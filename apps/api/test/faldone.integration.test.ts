@@ -22,6 +22,7 @@ import { leggiCatalogo, type Catalogo } from "../src/modules/faldone/catalogo.js
 import {
   classificazioneDi, COLONNE_PERSONA_IMPLICITE, LEGAMI_IMPLICITI, LEGAMI_SOGGETTO, TABELLE_CLASSIFICATE,
 } from "../src/modules/faldone/classi.js";
+import { CAPITOLI_EN, MOTIVI_EN, RUOLI_EN, TITOLI_EN } from "../src/modules/faldone/inglese.js";
 import { FALDONE_OMISSIS } from "@heuresys/shared";
 import { TABELLE_CUSTODITE } from "../src/modules/whistleblowing/custodia.js";
 import { unCapoConSottoposti, unEstraneoOrganizzativo, unSottopostoOrganizzativo } from "./helpers/org-actors.js";
@@ -41,7 +42,7 @@ async function login(t: TestApp, email: string): Promise<Session> {
 }
 
 interface Sezione {
-  id: string; titolo: string; capitolo: string; tabella: string; legame: string; classe: string;
+  id: string; titolo: string; capitolo: string; capitoloId: string; tabella: string; legame: string; classe: string;
   righe: number; colonne: number; visibilita: string; campiOmessi: string[]; motivoOmissis: string | null;
 }
 interface Indice { persona: { userId: string; nome: string }; totali: Record<string, number>; sezioni: Sezione[] }
@@ -157,6 +158,33 @@ describe("faldone — l'accesso", () => {
         }
       }
     }
+  });
+
+  it("in inglese (K01): capitoli, titoli e motivi in inglese, stessi identificativi e stesse sezioni", async () => {
+    const [itR, enR] = await Promise.all([get(platform, `/v1/faldone/${targetId}`), get(platform, `/v1/faldone/${targetId}?lingua=en`)]);
+    expect(itR.status, itR.raw.slice(0, 300)).toBe(200);
+    expect(enR.status, enR.raw.slice(0, 300)).toBe(200);
+    const it_ = new Map((itR.body as Indice).sezioni.map((s) => [s.id, s]));
+    const en = (enR.body as Indice).sezioni;
+    expect(en.length).toBe(it_.size);
+    const capitoli = new Set(Object.values(CAPITOLI_EN));
+    const titoli = new Set(Object.values(TITOLI_EN));
+    const ruoli = new Set(Object.values(RUOLI_EN));
+    const motivi = new Set(Object.values(MOTIVI_EN));
+    for (const s of en) {
+      const i = it_.get(s.id)!;
+      expect(s.capitoloId, s.id).toBe(i.capitoloId);
+      expect(capitoli.has(s.capitolo), `${s.id}: capitolo «${s.capitolo}»`).toBe(true);
+      const [base, ruolo] = s.titolo.split(": ");
+      expect(titoli.has(base!), `${s.id}: titolo «${s.titolo}»`).toBe(true);
+      if (ruolo !== undefined) expect(ruoli.has(ruolo), `${s.id}: ruolo «${ruolo}»`).toBe(true);
+      expect(s.visibilita).toBe(i.visibilita);
+      for (const m of s.motivoOmissis?.split("; ") ?? []) expect(motivi.has(m), `${s.id}: motivo «${m}»`).toBe(true);
+    }
+    const unaSezione = en.find((s) => s.righe > 0)!;
+    const p = await get(platform, `/v1/faldone/${targetId}/sezioni/${unaSezione.id}?limit=1&lingua=en`);
+    expect(p.status).toBe(200);
+    expect((p.body as { sezione: Sezione }).sezione.titolo).toBe(unaSezione.titolo);
   });
 
   it("mandato tecnico: le buste paga altrui sono {omissis}, e nessun importo vero esce", async () => {

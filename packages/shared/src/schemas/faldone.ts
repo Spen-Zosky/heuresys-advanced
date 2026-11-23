@@ -30,8 +30,10 @@ export const FaldoneSezioneSchema = z.object({
   /** Identificativo stabile: `<tabella>.<colonna di legame>` (per i collegati `<figlia>.<colonna>@<madre>`). */
   id: z.string(),
   titolo: z.string(),
-  /** Il gruppo del faldone (Anagrafica, Rapporto di lavoro, Retribuzione, ...). */
+  /** Il gruppo del faldone (Anagrafica, Rapporto di lavoro, Retribuzione, ...), nella lingua chiesta. */
   capitolo: z.string(),
+  /** Identificativo stabile del capitolo, uguale in ogni lingua (per esempio `anagrafica`). */
+  capitoloId: z.string(),
   tabella: z.string(),
   colonnaLegame: z.string(),
   /** diretto = FK verso la persona; collegato = figlia di un dato diretto. */
@@ -90,15 +92,22 @@ export const FaldoneRigheSchema = z.object({
 });
 export type FaldoneRighe = z.infer<typeof FaldoneRigheSchema>;
 
+/** La lingua dei titoli, dei capitoli e dei motivi (italiano se manca). */
+export const FaldoneLinguaSchema = z.enum(["it", "en"]);
+export type FaldoneLingua = z.infer<typeof FaldoneLinguaSchema>;
+export const FaldoneIndiceQuerySchema = z.object({ lingua: FaldoneLinguaSchema.optional() });
+
 export const FaldoneParamSchema = z.object({ userId: z.string().uuid() });
 export const FaldoneSezioneParamSchema = z.object({ userId: z.string().uuid(), sezione: z.string().min(3).max(200) });
 export const FaldoneSezioneSelfParamSchema = z.object({ sezione: z.string().min(3).max(200) });
 export const FaldonePaginaQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(500).default(50),
   offset: z.coerce.number().int().min(0).default(0),
+  lingua: FaldoneLinguaSchema.optional(),
 });
 export const FaldoneCompletoQuerySchema = z.object({
   righePerSezione: z.coerce.number().int().min(1).max(1000).default(200),
+  lingua: FaldoneLinguaSchema.optional(),
 });
 
 export const FaldoneCompletoSchema = FaldoneIndiceSchema.extend({

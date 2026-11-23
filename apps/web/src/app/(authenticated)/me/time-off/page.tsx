@@ -203,7 +203,7 @@ export default function MeTimeOffPage() {
             )}
             {submit.isSuccess && (
               <p className="text-sm text-success" data-testid="me-time-off-success">
-                {t("timeOff.submitted", { days: submit.data.daysRequested })}{" "}
+                {t("timeOff.submitted", { count: submit.data.daysRequested, days: submit.data.daysRequested })}{" "}
                 <Link href="/me/approvals" className="underline underline-offset-2">{t("timeOff.trackLink")}</Link>
               </p>
             )}

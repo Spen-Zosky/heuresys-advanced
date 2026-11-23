@@ -65,13 +65,14 @@ function Vista({ v, t, famiglia }: { v: DashboardBlockData; t: (k: string) => st
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {/* Il motivo è testo che viene dall'API: qui non si riscrive, o diventerebbe una
-              seconda dichiarazione da tenere allineata a quella del servizio. */}
+          {/* K26: il motivo dell'API è scritto in italiano; per le due modalità note (mascherata,
+              negata) la frase si scrive nella lingua di chi guarda, e il testo dell'API resta il
+              ripiego per gli altri casi. */}
           <p
             data-testid={`motivo-${v.code}`}
             className={negata ? "text-sm text-danger" : "text-sm text-warning"}
           >
-            {v.withheldReason ?? t("dashboard.famiglie.senzaValori")}
+            {v.access === "masked" ? t("dashboard.famiglie.motivoMasked") : negata ? t("dashboard.famiglie.motivoDenied") : (v.withheldReason ?? t("dashboard.famiglie.senzaValori"))}
           </p>
           {v.dataClasses.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-1.5">

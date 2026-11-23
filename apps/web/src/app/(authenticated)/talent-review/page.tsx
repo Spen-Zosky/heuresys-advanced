@@ -17,6 +17,7 @@ import { StatoErrore } from "@/components/stato-pagina";
 import { useEnumLabel, type EnumLabelFn } from "@/lib/enum-labels";
 import { useFormat, type Formati } from "@/lib/format";
 import { NomeOppure } from "@/components/senza-nome";
+import { NomePersona } from "@/components/nome-persona";
 
 /**
  * A/L3 (#29) — Talent review admin page. Live over /v1/talent-review/*:
@@ -36,7 +37,7 @@ function cellKey(pot: TalentBand, perf: TalentBand): string {
 
 function buildFitColumns(t: TFunction, f: Formati, enumLabel: EnumLabelFn): DataColumn<FitScore>[] {
   return [
-    { header: t("talentReview.cols.employee"), cell: (r) => <span>{r.subjectUserName ?? "—"}</span> },
+    { header: t("talentReview.cols.employee"), cell: (r) => <span><NomePersona nome={r.subjectUserName} id={r.userId} /></span> },
     { header: t("talentReview.cols.position"), cell: (r) => <NomeOppure nome={r.positionTitle} id={r.positionId} /> },
     { header: t("talentReview.cols.dimension"), cell: (r) => <span className="text-xs text-muted-foreground">{enumLabel("fitDimension", r.dimension)}</span> },
     { header: t("talentReview.cols.score"), align: "right", cell: (r) => <span className="tabular-nums">{r.score}</span> },
@@ -46,7 +47,7 @@ function buildFitColumns(t: TFunction, f: Formati, enumLabel: EnumLabelFn): Data
 
 function buildReadinessColumns(t: TFunction, enumLabel: EnumLabelFn, f: Formati): DataColumn<ReadinessScore>[] {
   return [
-    { header: t("talentReview.cols.employee"), cell: (r) => <span>{r.subjectUserName ?? "—"}</span> },
+    { header: t("talentReview.cols.employee"), cell: (r) => <span><NomePersona nome={r.subjectUserName} id={r.userId} /></span> },
     { header: t("talentReview.cols.position"), cell: (r) => <NomeOppure nome={r.positionTitle} id={r.positionId} /> },
     { header: t("talentReview.cols.horizon"), cell: (r) => <span className="text-xs text-muted-foreground">{enumLabel("horizon", r.horizon)}</span> },
     { header: t("talentReview.cols.value"), align: "right", cell: (r) => <span className="tabular-nums">{r.value ?? "—"}</span> },
@@ -56,7 +57,7 @@ function buildReadinessColumns(t: TFunction, enumLabel: EnumLabelFn, f: Formati)
 
 function buildSuccessionColumns(t: TFunction, enumLabel: EnumLabelFn, f: Formati): DataColumn<SuccessionScore>[] {
   return [
-    { header: t("talentReview.cols.employee"), cell: (r) => <span>{r.subjectUserName ?? "—"}</span> },
+    { header: t("talentReview.cols.employee"), cell: (r) => <span><NomePersona nome={r.subjectUserName} id={r.userId} /></span> },
     { header: t("talentReview.cols.position"), cell: (r) => <NomeOppure nome={r.positionTitle} id={r.positionId} /> },
     { header: t("talentReview.cols.value"), align: "right", cell: (r) => <span className="tabular-nums">{r.value ?? "—"}</span> },
     { header: t("talentReview.cols.horizon"), cell: (r) => <span className="text-xs text-muted-foreground">{enumLabel("horizon", r.horizon)}</span> },
@@ -214,7 +215,7 @@ export default function TalentReviewPage() {
                               key={r.talentScoreId}
                               className="rounded-control border border-border bg-muted px-1.5 py-0.5 text-[11px] text-foreground"
                             >
-                              {r.subjectUserName ?? "—"}
+                              <NomePersona nome={r.subjectUserName} id={r.userId} />
                             </span>
                           ))}
                         </div>

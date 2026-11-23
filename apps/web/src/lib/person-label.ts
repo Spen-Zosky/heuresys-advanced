@@ -73,6 +73,19 @@ export function cognomeNome(u: {
 }
 
 /**
+ * K22 (giro forense del 23/11/2026): dove l'API dà di una persona solo l'id e il nome visualizzato
+ * («Tommaso Esposito»), la rubrica del perimetro ne conosce l'etichetta «Cognome, Nome». Fuori dalla
+ * rubrica non si inventa niente: chi chiama tiene il nome che ha.
+ */
+export function etichettaDaRubrica(
+  rubrica: { persone: ReadonlyArray<{ id: string; etichetta: string }> } | undefined,
+  id: string | null | undefined,
+): string | null {
+  if (!rubrica || !id) return null;
+  return rubrica.persone.find((p) => p.id === id)?.etichetta ?? null;
+}
+
+/**
  * C1/C4: la stringa del browser («Mozilla/5.0 (X11; Linux x86_64) …») non dice niente a chi la
  * legge. Si scrive il browser e il sistema, come «Chrome su Windows».
  */

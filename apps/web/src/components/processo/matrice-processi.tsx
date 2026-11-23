@@ -9,7 +9,7 @@
  * almeno un processo con l'intestazione verticale, celle = R (responsabile, pieno), E (esecutrice,
  * grigio), C (consultata, tratteggio), I (informata, chiaro). La colonna E/C conta le unità
  * esecutrici e consultate; il nome intero dell'unità compare passando sopra l'intestazione; il clic
- * sul processo ne apre la scheda.
+ * sul processo ne apre la scheda. Le sigle stanno nei dizionari (K26): nessun testo fisso qui.
  */
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
@@ -21,7 +21,6 @@ import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
 
 type Ruolo = TenantProcessMatrixResponse["cells"][number]["role"];
 
-const SIGLA: Record<Ruolo, string> = { OWNER: "R", CONTRIBUTOR: "E", CONSULTED: "C", INFORMED: "I" };
 const CELLA: Record<Ruolo, string> = {
   OWNER: "bg-foreground font-semibold text-background",
   CONTRIBUTOR: "bg-muted-foreground/60 text-foreground",
@@ -59,7 +58,7 @@ export function MatriceProcessi({ tenantId }: { tenantId?: string }) {
           <thead className="sticky top-0 z-[2] bg-card">
             <tr>
               <th className={`${fermo} px-2 py-1 text-left align-bottom font-medium`}>{m("processo")}</th>
-              <th className="px-1 py-1 align-bottom text-[10px] font-medium" title={m("eCTitolo")}>E/C</th>
+              <th className="px-1 py-1 align-bottom text-[10px] font-medium" title={m("eCTitolo")}>{m("eC")}</th>
               {d.units.map((u) => (
                 <th key={u.unitId} title={u.name} className="rotate-180 whitespace-nowrap px-0.5 py-1 align-bottom text-[10px] font-medium [writing-mode:vertical-rl]">
                   {u.name}
@@ -83,7 +82,7 @@ export function MatriceProcessi({ tenantId }: { tenantId?: string }) {
                   const r = ruolo.get(`${p.processId}|${u.unitId}`);
                   return (
                     <td key={u.unitId} title={r ? `${nomeRuolo(r)}: ${u.name}` : undefined} className={`h-5 w-[18px] min-w-[18px] border border-border/50 text-center text-[10px] ${r ? CELLA[r] : ""}`}>
-                      {r ? SIGLA[r] : ""}
+                      {r ? m(`sigla.${r}`) : ""}
                     </td>
                   );
                 })}

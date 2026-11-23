@@ -5,6 +5,7 @@ import type { KeyboardEvent, ReactNode } from "react";
 import { useState } from "react";
 import { Badge, Button, DataTableWithCrossHair, Dialog, DialogContent, DialogDescription, DialogTitle } from "@heuresys/ui";
 import { colonnaTitolo } from "@/lib/titolo-riga";
+import { visibiliSuMobile } from "@/lib/colonne-mobile";
 import { PageHeader } from "@/components/intestazione-pagina";
 import { useTranslation } from "react-i18next";
 import type { ServerPagination } from "@/lib/hooks/use-paginated-list";
@@ -72,8 +73,8 @@ export interface EntityTableProps<T> {
   /** Il motivo da dire se l'API nega l'accesso (403), quando la pagina lo sa meglio dell'API (F-5). */
   deniedReason?: string;
   /**
-   * L'errore della chiamata (F-4, S-12). Se e' un errore dell'API, la riga d'errore dice che cosa
-   * e' successo nella lingua della persona e porta il riferimento da citare; altrimenti resta il
+   * L'errore della chiamata (F-4, S-12). Se è un errore dell'API, la riga d'errore dice che cosa
+   * è successo nella lingua della persona e porta il riferimento da citare; altrimenti resta il
    * testo generico.
    */
   error?: unknown;
@@ -201,6 +202,9 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
   const primarie = colonne.filter((c) => !eSecondaria(c) && !vuotaOvunque(c));
   const inTabella = primarie.filter((c) => c.header !== "").length >= 2 ? primarie : colonne;
   const titoloRiga = rigaAperta !== null ? colonnaTitolo(inTabella, rigaAperta) : undefined;
+  // K18: sotto md restano le prime colonne; le altre si leggono nella scheda della riga.
+  const suMobile = visibiliSuMobile(inTabella.map((c) => c.header), { conScheda: !onRowClick });
+  const soloLargo = (i: number) => (suMobile[i] ? "" : "hidden md:table-cell");
   const from = total === 0 ? 0 : start + 1;
   const to = end;
   const goToPage = (i: number) =>
@@ -233,7 +237,7 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
         <thead>
           <tr className="border-b border-border bg-muted text-left text-[11px] uppercase tracking-wider text-muted-foreground">
             {inTabella.map((c, i) => (
-              <th key={i} className={`px-4 py-2 ${c.align === "right" ? "text-right" : ""} ${c.headClassName ?? ""}`}>
+              <th key={i} className={`px-4 py-2 ${c.align === "right" ? "text-right" : ""} ${soloLargo(i)} ${c.headClassName ?? ""}`}>
                 {/* colonna di comandi senza titolo: il nome c'è per i lettori di schermo (axe: empty-table-header) */}
                 {c.header === "" ? <span className="sr-only">{t("table.actions")}</span> : <ConSpiegazione>{c.header}</ConSpiegazione>}
               </th>
@@ -267,7 +271,7 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
               }}
             >
               {inTabella.map((c, i) => (
-                <td key={i} className={`px-4 py-2 align-middle ${c.align === "right" ? "text-right tabular-nums" : ""} ${c.cellClassName ?? ""}`} {...(grezza(c) ? { "data-grezzo": "" } : {})}>
+                <td key={i} className={`px-4 py-2 align-middle ${c.align === "right" ? "text-right tabular-nums" : ""} ${soloLargo(i)} ${c.cellClassName ?? ""}`} {...(grezza(c) ? { "data-grezzo": "" } : {})}>
                   {grezza(c) ? c.cell(row) : leggi.nodo(c.cell(row))}
                 </td>
               ))}

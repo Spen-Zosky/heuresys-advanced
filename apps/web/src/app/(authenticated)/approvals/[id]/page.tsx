@@ -14,6 +14,7 @@ import { useCan, useCurrentUser } from "@/lib/api/auth";
 import { useContestoAgente } from "@/lib/agente/contesto";
 import { useFormat } from "@/lib/format";
 import { LavoroInCorso } from "@/components/lavoro-in-corso";
+import { NomePersona } from "@/components/nome-persona";
 
 function reqStatusVariant(s: ApprovalStatus): "success" | "secondary" | "destructive" {
   if (s === "APPROVED" || s === "APPLIED") return "success";
@@ -189,7 +190,7 @@ export default function ApprovalDetailPage() {
                 {d.steps.map((s) => (
                   <li key={s.approvalStepId} data-testid="approval-step-row" className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
                     <span className="flex flex-col">
-                      <span className="font-medium text-foreground">{s.approverName ?? s.approverEmail ?? "—"}</span>
+                      <span className="font-medium text-foreground"><NomePersona nome={s.approverName ?? s.approverEmail} id={s.approverUserId} /></span>
                       {/* V-3 (ADR-0051 §5): quando ha deciso un delegato, la firma lo dice. */}
                       {s.actingDelegationId && (
                         <span className="text-xs text-muted-foreground" data-testid="approval-step-on-behalf">

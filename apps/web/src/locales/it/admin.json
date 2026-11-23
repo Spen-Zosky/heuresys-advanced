@@ -1071,6 +1071,8 @@
       "vuotoRighe": "Nessuna riga nel tuo perimetro",
       "vuotoFiliali": "Nessuna filiale da mostrare",
       "vuotoFilialiMotivo": "Questa dashboard riguarda le filiali: la tua unità non è una filiale e non ne governi nessuna.",
+      "motivoMasked": "Valori trattenuti: i dati di questa vista ti sono accessibili solo in forma mascherata. La vista esiste e ti riguarda; i valori richiedono un mandato che non hai.",
+      "motivoDenied": "Nessuno dei tuoi domini apre questa vista.",
       "senzaValori": "Valori non disponibili",
       "catalogoIrraggiungibile": "Catalogo delle dashboard non raggiungibile",
       "datiIrraggiungibili": "Dati della dashboard non raggiungibili",
@@ -1776,7 +1778,8 @@
     "description": "Richieste di assenza, policy di maturazione del tenant e registro delle transazioni per saldo. Consultazione in sola lettura.",
     "requests": "Richieste di assenza",
     "accrualRules": "Regole di maturazione",
-    "accrualAmount": "{{amount}} giorni {{period}}",
+    "accrualAmount_one": "{{amount}} giorno {{period}}",
+    "accrualAmount_other": "{{amount}} giorni {{period}}",
     "accrualPeriod": {
       "MONTHLY": "al mese",
       "QUARTERLY": "a trimestre",

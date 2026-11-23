@@ -11,6 +11,7 @@ import { EnumStatusPill } from "@/components/enum-badge";
 import { useEnumLabel, type EnumLabelFn } from "@/lib/enum-labels";
 import { GoalTimelineDialog } from "@/components/goal-timeline-dialog";
 import { useFormat, type Formati } from "@/lib/format";
+import { NomePersona } from "@/components/nome-persona";
 
 function toneForStatus(s: string): "info" | "success" | "warning" | "danger" | "neutral" {
   if (s === "COMPLETED" || s === "ON_TRACK") return "success";
@@ -24,7 +25,7 @@ function buildColumns(t: TFunction, enumLabel: EnumLabelFn, onTimeline: (g: Goal
   return [
     { header: t("shared.name"), cell: (g) => <span className="font-medium text-foreground">{g.title}</span> },
     // C20: più obiettivi con lo stesso titolo si distinguono per la persona (R1: «Cognome, Nome», dall'API).
-    { header: t("goals.cols.person"), cell: (g) => <span className="text-xs text-foreground">{g.subjectName ?? "—"}</span> },
+    { header: t("goals.cols.person"), cell: (g) => <span className="text-xs text-foreground"><NomePersona nome={g.subjectName} id={g.subjectUserId} /></span> },
     { header: t("goals.cols.type"), cell: (g) => <span className="text-xs text-muted-foreground">{enumLabel("goalType", g.type)}</span> },
     { header: t("goals.cols.priority"), cell: (g) => <span className="text-xs text-muted-foreground">{enumLabel("goalPriority", g.priority)}</span> },
     { header: t("goals.cols.progress"), cell: (g) => <span className="text-xs text-muted-foreground">{fmt.percento(g.progressPercent, "0-100")}</span> },

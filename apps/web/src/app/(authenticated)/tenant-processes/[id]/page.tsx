@@ -28,8 +28,8 @@ import { CorrispondenzaApqc } from "@/components/processo/corrispondenza-apqc";
 import { SchedePagina } from "@/components/schede-pagina";
 import { Riferimento, useScheda } from "@/components/scheda-rapida";
 import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
-import { NomeOppure } from "@/components/senza-nome";
 import { DiagrammaFasi, FlussoCorsie, GrafoProcesso, attivitaInOrdine } from "@/components/processo/diagrammi";
+import { NomePersona } from "@/components/nome-persona";
 
 type Attivita = TenantProcessScheda["activities"][number];
 
@@ -196,7 +196,7 @@ export default function TenantProcessPage() {
       righe={s.units.map((u) => [
         unita(u.unitId, u.unitName),
         u.participants.length ? (
-          <ul key="p" className="space-y-0.5">{u.participants.map((x) => <li key={x.userId}><Riferimento tipo="persona" id={x.userId}><NomeOppure nome={x.fullName} id={x.userId} /></Riferimento></li>)}</ul>
+          <ul key="p" className="space-y-0.5">{u.participants.map((x) => <li key={x.userId}><Riferimento tipo="persona" id={x.userId}><NomePersona nome={x.fullName} id={x.userId} /></Riferimento></li>)}</ul>
         ) : "—",
         enumLabel("processUnitRole", u.role),
       ])}

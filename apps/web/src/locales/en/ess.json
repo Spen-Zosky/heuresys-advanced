@@ -239,7 +239,8 @@
     "dateRequired": "Date required (YYYY-MM-DD)",
     "submit": "Submit request",
     "submitting": "Submitting…",
-    "submitted": "Request submitted ({{days}} days) — awaiting your manager's approval.",
+    "submitted_one": "Request submitted ({{days}} day) — awaiting your manager's approval.",
+    "submitted_other": "Request submitted ({{days}} days) — awaiting your manager's approval.",
     "trackLink": "Track status",
     "errors": {
       "GENERIC": "Submission failed. Try again.",

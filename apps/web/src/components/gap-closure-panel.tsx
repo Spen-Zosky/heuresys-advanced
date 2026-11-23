@@ -10,7 +10,7 @@ import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { EnumStatusPill } from "@/components/enum-badge";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { useFormat } from "@/lib/format";
-import { NomeOppure } from "@/components/senza-nome";
+import { NomePersona } from "@/components/nome-persona";
 
 /**
  * GapClosurePanel (#30) — the closure layer under learning gaps: remediation
@@ -42,14 +42,14 @@ export function GapClosurePanel() {
   });
 
   const planCols = useMemo<DataColumn<GapClosurePlan>[]>(() => [
-    { header: t("gaps.closure.subject"), cell: (p) => <NomeOppure nome={p.userName} id={p.userId} /> },
+    { header: t("gaps.closure.subject"), cell: (p) => <NomePersona nome={p.userName} id={p.userId} /> },
     { header: t("gaps.closure.milestones"), align: "right", cell: (p) => <span className="tabular-nums">{p.milestones.length}</span> },
     { header: t("gaps.closure.target"), cell: (p) => <span className="text-xs text-muted-foreground">{fmt.data(p.targetCompletionDate)}</span> },
     { header: t("shared.status"), cell: (p) => <EnumStatusPill domain="gapClosurePlanStatus" value={p.status} tone={planTone(p.status)} /> },
   ], [t, fmt]);
 
   const resultCols = useMemo<DataColumn<GapAnalysisResult>[]>(() => [
-    { header: t("gaps.closure.subject"), cell: (r) => <NomeOppure nome={r.userName} id={r.userId} /> },
+    { header: t("gaps.closure.subject"), cell: (r) => <NomePersona nome={r.userName} id={r.userId} /> },
     { header: t("gaps.closure.kind"), cell: (r) => <Badge variant="secondary">{enumLabel("gapClosureActionKind", r.kind)}</Badge> },
     { header: t("gaps.closure.score"), align: "right", cell: (r) => <span className="tabular-nums">{r.overallScore != null ? fmt.numeroFisso(r.overallScore, 1) : "—"}</span> },
   ], [t, enumLabel, fmt]);

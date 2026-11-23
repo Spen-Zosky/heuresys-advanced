@@ -36,6 +36,7 @@ import { useEnumLabel, type EnumLabelFn } from "@/lib/enum-labels";
 import { NomeOppure } from "@/components/senza-nome";
 import { SchedePagina } from "@/components/schede-pagina";
 import { NuovaRaccomandazione } from "./nuova-raccomandazione";
+import { NomePersona } from "@/components/nome-persona";
 
 interface RewardGate {
   rewardGateId: string;
@@ -114,7 +115,7 @@ function buildVariablePayColumns(
   return [
     {
       header: t("compReward.cols.employee"),
-      cell: (r) => <span>{r.subjectUserName ?? "—"}</span>,
+      cell: (r) => <span><NomePersona nome={r.subjectUserName} id={r.userId} /></span>,
     },
     {
       header: t("compReward.cols.period"),
@@ -350,7 +351,7 @@ function buildRecommendationColumns(
   return [
     {
       header: t("compReward.cols.employee"),
-      cell: (r) => <span>{r.subjectUserName ?? "—"}</span>,
+      cell: (r) => <span><NomePersona nome={r.subjectUserName} id={r.userId} /></span>,
     },
     {
       header: t("compReward.cols.period"),
@@ -534,7 +535,7 @@ function buildRewardGateColumns(
       header: t("compensation.cols.user"),
       cell: (g) => (
         <span className="text-xs">
-          {g.userId ? <NomeOppure nome={g.userName} id={g.userId} /> : "—"}
+          {g.userId ? <NomePersona nome={g.userName} id={g.userId} /> : "—"}
         </span>
       ),
     },

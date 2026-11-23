@@ -17,6 +17,7 @@ import { StatusPill } from "@/components/status-pill";
 import { useEnumLabel, type EnumLabelFn } from "@/lib/enum-labels";
 import { EnumStatusPill } from "@/components/enum-badge";
 import { useFormat, type Formati } from "@/lib/format";
+import { NomePersona } from "@/components/nome-persona";
 
 /**
  * A/L8 (#33) — Time-off & leave admin page. Live over /v1/time-off/*:
@@ -34,7 +35,7 @@ function toneForRequestStatus(s: string): "success" | "warning" | "danger" | "ne
 
 function buildRequestColumns(t: TFunction, f: Formati, enumLabel: EnumLabelFn): DataColumn<TimeOffRequest>[] {
   return [
-    { header: t("timeOff.cols.employee"), cell: (r) => <span>{r.subjectUserName ?? "—"}</span> },
+    { header: t("timeOff.cols.employee"), cell: (r) => <span><NomePersona nome={r.subjectUserName} id={r.subjectUserId} /></span> },
     { header: t("timeOff.cols.leaveType"), cell: (r) => <span className="text-xs">{enumLabel("leaveType", r.leaveType)}</span> },
     { header: t("timeOff.cols.period"), cell: (r) => <span className="tabular-nums text-xs">{f.data(r.startDate)} → {f.data(r.endDate)}</span> },
     { header: t("timeOff.cols.days"), align: "right", cell: (r) => <span className="tabular-nums">{f.numero(r.daysRequested, 2)}</span> },
@@ -48,7 +49,7 @@ function buildRuleColumns(t: TFunction, enumLabel: EnumLabelFn, f: Formati): Dat
     { header: t("timeOff.cols.ruleName"), cell: (r) => <span>{r.name}</span> },
     { header: t("timeOff.cols.method"), cell: (r) => <span className="text-xs text-muted-foreground">{enumLabel("accrualMethod", r.method)}</span> },
     // C16 (giro qa-web 18/11): «0,5 / 1 / 1,67» senza unità: sono giorni, per il periodo del metodo.
-    { header: t("timeOff.cols.amount"), align: "right", cell: (r) => <span className="tabular-nums">{t("timeOff.accrualAmount", { amount: f.numero(r.amount, 2), period: t(`timeOff.accrualPeriod.${r.method}`, { defaultValue: "" }) }).trim()}</span> },
+    { header: t("timeOff.cols.amount"), align: "right", cell: (r) => <span className="tabular-nums">{t("timeOff.accrualAmount", { count: r.amount, amount: f.numero(r.amount, 2), period: t(`timeOff.accrualPeriod.${r.method}`, { defaultValue: "" }) }).trim()}</span> },
     { header: t("timeOff.cols.ccnl"), cell: (r) => <span className="text-xs">{r.ccnlType ?? "—"}</span> },
     { header: t("timeOff.cols.active"), cell: (r) => <StatusPill tone={r.isActive ? "success" : "neutral"}>{r.isActive ? t("timeOff.active") : t("timeOff.inactive")}</StatusPill> },
   ];

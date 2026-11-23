@@ -9,7 +9,7 @@
     "description": "How many people are in each organizational unit and under each position title, in your scope.",
     "stats": {
       "totalLabel": "Total workforce",
-      "totalDesc": "People in your scope. Technical accounts (agents, test) are not counted.",
+      "totalDesc": "People in your scope, excluding the system's technical accounts.",
       "ouLabel": "Organizational units",
       "ouDesc": "Units with at least one person",
       "rolesLabel": "Position titles",

@@ -9,7 +9,7 @@
     "description": "Quante persone ci sono in ogni unità organizzativa e per ogni titolo di posizione, nel tuo ambito.",
     "stats": {
       "totalLabel": "Organico totale",
-      "totalDesc": "Persone nel tuo ambito. Le utenze tecniche (agenti, collaudo) non contano.",
+      "totalDesc": "Persone nel tuo ambito, senza le utenze tecniche del sistema.",
       "ouLabel": "Unità organizzative",
       "ouDesc": "Unità con almeno una persona",
       "rolesLabel": "Titoli di posizione",

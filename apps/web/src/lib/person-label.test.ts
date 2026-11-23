@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cognomeNome, etichettaPersona } from "./person-label";
+import { cognomeNome, etichettaDaRubrica, etichettaPersona } from "./person-label";
 
 const enumLabel = (_d: string, v: string | null | undefined) => (v === "SERVICE" ? "Utenza di servizio" : String(v));
 
@@ -20,5 +20,17 @@ describe("R1 del repertorio interfacce: «Cognome, Nome»", () => {
     expect(etichettaPersona({ displayName: "Integrazione paghe", type: "SERVICE" }, enumLabel)).toBe(
       "Integrazione paghe (Utenza di servizio)",
     );
+  });
+});
+
+describe("K22: una persona nota solo per id e «Nome Cognome» si scrive dalla rubrica", () => {
+  const rubrica = { persone: [{ id: "u1", etichetta: "Esposito, Tommaso" }] };
+  it("l'etichetta della rubrica è «Cognome, Nome»", () => {
+    expect(etichettaDaRubrica(rubrica, "u1")).toBe("Esposito, Tommaso");
+  });
+  it("fuori dalla rubrica, o senza id, non inventa niente", () => {
+    expect(etichettaDaRubrica(rubrica, "u2")).toBeNull();
+    expect(etichettaDaRubrica(rubrica, null)).toBeNull();
+    expect(etichettaDaRubrica(undefined, "u1")).toBeNull();
   });
 });

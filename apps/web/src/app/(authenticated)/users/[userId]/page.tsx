@@ -41,6 +41,7 @@ import { RolesEditor } from "./_components/roles-editor";
 import { SchedePagina } from "@/components/schede-pagina";
 import { chiediConferma } from "@/lib/api/step-up";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
+import { cognomeNome } from "@/lib/person-label";
 
 /* --- formattazione: mai una data ISO o un numero nudo davanti a una persona --- */
 // F-1 (piano interfacce, 2026-11-04): la forma comune di `@/lib/format`, nella lingua del portale.
@@ -137,7 +138,8 @@ export default function UserDetailPage() {
     <main data-testid="user-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="user-display-name"
-        title={p.displayName ?? t("users.detail.unnamed")}
+        // K22 (R1): anche il titolo della scheda scrive la persona «Cognome, Nome».
+        title={cognomeNome({ displayName: p.displayName, firstName: p.identity?.firstName, lastName: p.identity?.lastName }) || t("users.detail.unnamed")}
         breadcrumbs={
           <Link href="/users" data-testid="user-back" className="text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
             {t("users.detail.back")}

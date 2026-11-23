@@ -1776,7 +1776,8 @@
     "description": "Richieste di assenza, policy di maturazione del tenant e registro delle transazioni per saldo. Consultazione in sola lettura.",
     "requests": "Richieste di assenza",
     "accrualRules": "Regole di maturazione",
-    "accrualAmount": "{{amount}} giorni {{period}}",
+    "accrualAmount_one": "{{amount}} giorno {{period}}",
+    "accrualAmount_other": "{{amount}} giorni {{period}}",
     "accrualPeriod": {
       "MONTHLY": "al mese",
       "QUARTERLY": "a trimestre",

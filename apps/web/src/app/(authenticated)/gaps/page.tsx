@@ -13,7 +13,7 @@ import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { GapClosurePanel } from "@/components/gap-closure-panel";
-import { NomeOppure } from "@/components/senza-nome";
+import { NomePersona } from "@/components/nome-persona";
 
 const SEVERITIES = ["CRITICAL", "HIGH", "MEDIUM", "LOW"] as const;
 const SEV_TONE: Record<(typeof SEVERITIES)[number], KpiCardData["iconTone"]> = {
@@ -56,7 +56,7 @@ export default function AdminGapsPage() {
     () => [
       {
         header: t("gaps.cols.user"),
-        cell: (g) => <span className="text-xs text-foreground"><NomeOppure nome={g.userName} id={g.userId} /></span>,
+        cell: (g) => <span className="text-xs text-foreground"><NomePersona nome={g.userName} id={g.userId} /></span>,
       },
       {
         header: t("gaps.cols.position"),

@@ -14,7 +14,8 @@ export function inizialeMaiuscola(testo: string): string {
   return parole
     .map((p) => {
       if (/^\s*$/.test(p)) return p;
-      const sigla = p.length > 1 && (p === p.toUpperCase() || /\d/.test(p)) && /[A-ZÀ-Ý]/.test(p);
+      // K22: il plurale inglese di una sigla («OKRs», «KPIs») resta sigla, non diventa «Okrs».
+      const sigla = p.length > 1 && (p === p.toUpperCase() || /\d/.test(p) || /^[A-Z]{2,}s$/.test(p)) && /[A-ZÀ-Ý]/.test(p);
       const quella = prima;
       prima = false;
       if (sigla || NOMI_PROPRI.has(p)) return p;

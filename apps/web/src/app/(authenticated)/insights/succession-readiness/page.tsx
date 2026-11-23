@@ -15,8 +15,8 @@ import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { MaskedCell, isMasked } from "@/components/masked-cell";
 import { useFormat } from "@/lib/format";
-import { NomeOppure } from "@/components/senza-nome";
 import { LavoroInCorso } from "@/components/lavoro-in-corso";
+import { NomePersona } from "@/components/nome-persona";
 
 // Higher readiness = better: READY_NOW → success, NOT_READY → destructive.
 // Only confirmed @heuresys/ui Badge variants + registered text tokens.
@@ -68,7 +68,7 @@ export default function SuccessionReadinessPage() {
         header: t("insightsReadiness.colSubject"),
         cell: (r) => (
           <button type="button" data-testid="readiness-row-select" className="text-left font-medium text-foreground hover:underline" onClick={() => setSelected(r)}>
-            <NomeOppure nome={r.displayName} id={r.userId} />
+            <NomePersona nome={r.displayName} id={r.userId} />
           </button>
         ),
       },

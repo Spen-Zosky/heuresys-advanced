@@ -265,7 +265,8 @@
     "dateRequired": "Data obbligatoria (AAAA-MM-GG)",
     "submit": "Invia richiesta",
     "submitting": "Invio…",
-    "submitted": "Richiesta inviata ({{days}} giorni) — in attesa di approvazione del tuo responsabile.",
+    "submitted_one": "Richiesta inviata ({{days}} giorno) — in attesa di approvazione del tuo responsabile.",
+    "submitted_other": "Richiesta inviata ({{days}} giorni) — in attesa di approvazione del tuo responsabile.",
     "trackLink": "Segui lo stato",
     "errors": {
       "GENERIC": "Invio non riuscito. Riprova.",

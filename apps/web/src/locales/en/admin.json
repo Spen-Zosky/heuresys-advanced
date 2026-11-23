@@ -1776,7 +1776,8 @@
     "description": "Leave requests, tenant accrual policy and the per-balance transaction ledger. Read-only consultation.",
     "requests": "Leave requests",
     "accrualRules": "Accrual rules",
-    "accrualAmount": "{{amount}} days {{period}}",
+    "accrualAmount_one": "{{amount}} day {{period}}",
+    "accrualAmount_other": "{{amount}} days {{period}}",
     "accrualPeriod": {
       "MONTHLY": "per month",
       "QUARTERLY": "per quarter",

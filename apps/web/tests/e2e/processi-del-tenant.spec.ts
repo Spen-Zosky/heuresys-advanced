@@ -54,6 +54,12 @@ test.describe("Processi del tenant — dati vivi", () => {
     await expect(page.getByTestId("tenant-process-attivita-finestra")).toBeVisible();
     await page.keyboard.press("Escape");
 
+    await page.getByRole("tab", { name: /Fasi/ }).click();
+    await expect(page.getByTestId("fasi-attivita")).toHaveCount(scheda.activities.length);
+    await page.getByTestId("fasi-attivita").first().dblclick();
+    await expect(page.getByTestId("tenant-process-attivita-finestra")).toBeVisible();
+    await page.keyboard.press("Escape");
+
     await page.getByRole("tab", { name: /Grafo/ }).click();
     await expect(page.getByTestId("grafo-attivita")).toHaveCount(scheda.activities.length);
     await expect(page.getByTestId("grafo-processo")).toHaveCount(1);

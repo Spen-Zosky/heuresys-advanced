@@ -51,7 +51,7 @@ export function DatiCandidato({ candidato, puoScrivere }: { candidato: Candidate
   const serveAssunto = v.status === "HIRED" && candidato.hiredUserId === null && assunto.length === 0;
   return (
     <Card data-testid="candidate-edit">
-      <CardHeader><CardTitle>{t("recruiting.correzioni.candidato")}</CardTitle></CardHeader>
+      <CardHeader><CardTitle as="h2">{t("recruiting.correzioni.candidato")}</CardTitle></CardHeader>
       <CardContent className="grid gap-3 md:grid-cols-3">
         <label className="space-y-1 text-sm">
           <span className="text-xs text-muted-foreground">{t("recruiting.fields.phone")}</span>

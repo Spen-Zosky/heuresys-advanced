@@ -133,7 +133,7 @@ export function TitolariPosizione({ positionId }: { positionId: string }) {
   const righe = incarichi.data?.items ?? [];
   return (
     <Card data-testid="position-holders">
-      <CardHeader><CardTitle>{t("positions.titolari.titolo")}</CardTitle></CardHeader>
+      <CardHeader><CardTitle as="h2">{t("positions.titolari.titolo")}</CardTitle></CardHeader>
       <CardContent className="space-y-4">
         <p className="text-xs text-muted-foreground">{t("positions.titolari.spiegazione")}</p>
         {esito && <Esito r={esito} />}

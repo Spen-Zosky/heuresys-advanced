@@ -178,7 +178,7 @@ export function CatalogoClassi({ c, dettaglio }: { c: Catalogo; dettaglio?: (v: 
               {elenco.data.items.length === 0 ? <StatoVuoto /> : (
                 <table className="w-full text-sm">
                   <thead><tr className="text-left text-muted-foreground">
-                    <th className="py-1">{t("tassonomie.nome")}</th><th>{t("tassonomie.codice")}</th><th>{t("tassonomie.livello")}</th><th />
+                    <th className="py-1">{t("tassonomie.nome")}</th><th>{t("tassonomie.codice")}</th><th>{t("tassonomie.livello")}</th><th><span className="sr-only">{t("common:table.actions")}</span></th>
                   </tr></thead>
                   <tbody>
                     {elenco.data.items.map(c.voce).map((v) => (

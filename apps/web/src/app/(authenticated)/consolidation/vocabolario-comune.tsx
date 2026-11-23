@@ -33,7 +33,7 @@ export function VocabolarioComune({ onErrore }: { onErrore: (messaggio: string |
   return (
     <Card data-testid="consolidation-vocabulary">
       <CardHeader>
-        <CardTitle>{t("consolidationVocabulary.title")}</CardTitle>
+        <CardTitle as="h2">{t("consolidationVocabulary.title")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-sm text-muted-foreground">{t("consolidationVocabulary.hint")}</p>

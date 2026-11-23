@@ -76,7 +76,7 @@ export function RiscontriEPiani() {
   const errore = registra.error ?? statoRiscontro.error ?? creaPiano.error ?? statoPiano.error;
   return (
     <Card data-testid="engagement-feedback">
-      <CardHeader><CardTitle>{t("engagement.riscontri.titolo")}</CardTitle></CardHeader>
+      <CardHeader><CardTitle as="h2">{t("engagement.riscontri.titolo")}</CardTitle></CardHeader>
       <CardContent className="space-y-6 text-sm">
         <div className="flex flex-wrap items-end gap-3">
           <label className="w-56 font-medium text-foreground">{t("engagement.riscontri.mostra")}

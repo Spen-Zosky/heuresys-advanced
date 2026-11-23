@@ -123,7 +123,7 @@ export function PianoProgetto({ projectId }: { projectId: string }) {
                   <th className="py-2 pr-3">{t("projects.piano.colonne.fine")}</th>
                   <th className="py-2 pr-3 text-right">{t("projects.piano.colonne.avanzamento")}</th>
                   <th className="py-2 pr-3">{t("projects.piano.colonne.stato")}</th>
-                  {s.canManage ? <th className="py-2" /> : null}
+                  {s.canManage ? <th className="py-2"><span className="sr-only">{t("common:table.actions")}</span></th> : null}
                 </tr>
               </thead>
               <tbody className="divide-y">

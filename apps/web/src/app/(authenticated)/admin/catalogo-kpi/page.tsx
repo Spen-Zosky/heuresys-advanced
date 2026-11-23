@@ -78,7 +78,7 @@ function PerProcesso() {
         <p className="text-sm text-muted-foreground" data-testid="kpi-templates-process-count">{t("catalogoKpi.conto", { count: elenco.length })}</p>
         <table className="w-full text-sm">
           <thead><tr className="text-left text-muted-foreground">
-            <th className="py-1">{t("catalogoKpi.processi.processo")}</th><th>{t("catalogoKpi.kpi")}</th><th>{t("catalogoKpi.peso")}</th><th />
+            <th className="py-1">{t("catalogoKpi.processi.processo")}</th><th>{t("catalogoKpi.kpi")}</th><th>{t("catalogoKpi.peso")}</th><th><span className="sr-only">{t("common:table.actions")}</span></th>
           </tr></thead>
           <tbody>
             {elenco.map((r) => (
@@ -155,7 +155,7 @@ function PerUnita() {
         <p className="text-sm text-muted-foreground" data-testid="kpi-templates-unit-count">{t("catalogoKpi.conto", { count: elenco.length })}</p>
         <table className="w-full text-sm">
           <thead><tr className="text-left text-muted-foreground">
-            <th className="py-1">{t("catalogoKpi.unita.unita")}</th><th>{t("catalogoKpi.kpi")}</th><th>{t("catalogoKpi.peso")}</th><th />
+            <th className="py-1">{t("catalogoKpi.unita.unita")}</th><th>{t("catalogoKpi.kpi")}</th><th>{t("catalogoKpi.peso")}</th><th><span className="sr-only">{t("common:table.actions")}</span></th>
           </tr></thead>
           <tbody>
             {elenco.map((r) => (

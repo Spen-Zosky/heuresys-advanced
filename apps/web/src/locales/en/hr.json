@@ -1411,7 +1411,12 @@
       "rejectReason": "Reject reason",
       "grossAnnualSalary": "Gross annual salary",
       "contractType": "Contract type",
-      "chooseInterviewer": "Interviewer…"
+      "chooseInterviewer": "Interviewer…",
+      "interviewKind": "Interview type",
+      "scheduledAt": "Interview date and time",
+      "durationMin": "Duration in minutes",
+      "interviewer": "Interviewer",
+      "startDate": "Start date"
     },
     "requisitions": {
       "title": "Job requisitions",

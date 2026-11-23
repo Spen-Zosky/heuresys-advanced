@@ -87,7 +87,7 @@ export function ClassificazioneProcesso({ processId, faccette }: { processId: st
               <th className="px-3 py-2 font-medium">{k("colonne.valori")}</th>
               <th className="px-3 py-2 font-medium">{k("colonne.criterio")}</th>
               <th className="px-3 py-2 font-medium">{k("colonne.stato")}</th>
-              {faccette.canEdit ? <th className="px-3 py-2" /> : null}
+              {faccette.canEdit ? <th className="px-3 py-2"><span className="sr-only">{t("common:table.actions")}</span></th> : null}
             </tr>
           </thead>
           <tbody className={RIPIEGABILE.corpo}>

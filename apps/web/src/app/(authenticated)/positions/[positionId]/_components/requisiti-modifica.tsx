@@ -91,7 +91,7 @@ export function NuovaCompetenzaRichiesta({ positionId }: { positionId: string })
   return (
     <Card data-testid="position-skill-add">
       <CardHeader>
-        <CardTitle className="flex items-center justify-between gap-3">
+        <CardTitle as="h2" className="flex items-center justify-between gap-3">
           <span>{t("positions.requisiti.nuovaCompetenza")}</span>
           <Button type="button" variant="outline" data-testid="position-skill-add-toggle" onClick={() => setAperto((v) => !v)}>
             {aperto ? t("positions.requisiti.chiudi") : t("positions.requisiti.aggiungi")}
@@ -143,7 +143,7 @@ export function NuovoIndicatoreRichiesto({ positionId }: { positionId: string })
   return (
     <Card data-testid="position-kpi-add">
       <CardHeader>
-        <CardTitle className="flex items-center justify-between gap-3">
+        <CardTitle as="h2" className="flex items-center justify-between gap-3">
           <span>{t("positions.requisiti.nuovoIndicatore")}</span>
           <Button type="button" variant="outline" data-testid="position-kpi-add-toggle" onClick={() => setAperto((v) => !v)}>
             {aperto ? t("positions.requisiti.chiudi") : t("positions.requisiti.aggiungi")}

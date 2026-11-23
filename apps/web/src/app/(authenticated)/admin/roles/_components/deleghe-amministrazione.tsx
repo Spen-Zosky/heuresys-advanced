@@ -89,7 +89,7 @@ export function DelegheAmministrazione() {
 
   return (
     <Card data-testid="admin-delegations">
-      <CardHeader><CardTitle>{t("roles.deleghe.titolo")}</CardTitle></CardHeader>
+      <CardHeader><CardTitle as="h2">{t("roles.deleghe.titolo")}</CardTitle></CardHeader>
       <CardContent className="space-y-6">
         {puoGestire && (
           <div data-testid="admin-delegation-form" className="grid grid-cols-1 gap-3 md:grid-cols-2">

@@ -79,7 +79,7 @@ export function FasceDimensionali() {
         {fasce.data && (
           <table className="w-full text-sm">
             <thead><tr className="text-left text-muted-foreground">
-              <th className="py-1">{t("tassonomie.nome")}</th><th>{t("tassonomie.imprese.taglia")}</th><th>{t("tassonomie.imprese.addetti")}</th><th>{t("tassonomie.imprese.fatturato")}</th><th />
+              <th className="py-1">{t("tassonomie.nome")}</th><th>{t("tassonomie.imprese.taglia")}</th><th>{t("tassonomie.imprese.addetti")}</th><th>{t("tassonomie.imprese.fatturato")}</th><th><span className="sr-only">{t("common:table.actions")}</span></th>
             </tr></thead>
             <tbody>{elenco.map((b) => <Fascia key={`${b.enterpriseSizeBandId}:${b.updatedAt}`} b={b} puo={perms.includes("enterprise_typing:update")} />)}</tbody>
           </table>
@@ -113,7 +113,7 @@ export function ModelliOperativi() {
           <>
             <p className="text-sm text-muted-foreground" data-testid="modelli-count">{t("tassonomie.imprese.contoModelli", { count: elenco.length })}</p>
             <table className="w-full text-sm">
-              <thead><tr className="text-left text-muted-foreground"><th className="py-1">{t("tassonomie.nome")}</th><th>{t("tassonomie.descrizione")}</th><th /></tr></thead>
+              <thead><tr className="text-left text-muted-foreground"><th className="py-1">{t("tassonomie.nome")}</th><th>{t("tassonomie.descrizione")}</th><th><span className="sr-only">{t("common:table.actions")}</span></th></tr></thead>
               <tbody>
                 {elenco.map((m) => (
                   <tr key={m.operatingModelId} className="border-t border-border" data-testid="modello-row" data-code={m.code}>

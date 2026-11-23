@@ -21,6 +21,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { useFormat } from "@/lib/format";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
+import { parametriEvento } from "@/lib/frase-evento";
 
 const PAGE = 25;
 
@@ -57,6 +58,12 @@ export function TimelinePanel({ basePath, userId, testId = "timeline-panel" }: T
     queryFn: () =>
       apiFetch<{ items: UserTimelineEvent[]; total: number }>(`${basePath}?${qs({ limit })}`),
   });
+
+  // K26: la sintesi salvata in italiano si ricompone nella lingua di chi guarda, quando il tipo la riconosce.
+  const fraseEvento = (tipo: string, sintesi: string) => {
+    const p = parametriEvento(tipo, sintesi);
+    return p ? t(`dashboard.catalogo.evento.${p.kind}`, { subject: p.subject, defaultValue: sintesi }) : sintesi;
+  };
 
   const total = events.data?.total ?? 0;
   const shown = events.data?.items.length ?? 0;
@@ -118,7 +125,7 @@ export function TimelinePanel({ basePath, userId, testId = "timeline-panel" }: T
                 <span className="min-w-0 flex-1">
                   <Badge variant="secondary">{enumLabel("timelineEventType", e.type)}</Badge>
                   {e.summary ? (
-                    <span className="ml-2 text-sm text-foreground">{e.summary}</span>
+                    <span className="ml-2 text-sm text-foreground">{fraseEvento(e.type, e.summary)}</span>
                   ) : null}
                 </span>
               </li>

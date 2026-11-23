@@ -1071,6 +1071,8 @@
       "vuotoRighe": "No rows in your perimeter",
       "vuotoFiliali": "No branch to show",
       "vuotoFilialiMotivo": "This dashboard is about branches: your unit is not a branch and you do not run any.",
+      "motivoMasked": "Values withheld: you can see this view's data only in masked form. The view exists and concerns you; the values require a mandate you do not hold.",
+      "motivoDenied": "None of your domains opens this view.",
       "senzaValori": "Values not available",
       "catalogoIrraggiungibile": "Dashboard catalogue unreachable",
       "datiIrraggiungibili": "Dashboard data unreachable",

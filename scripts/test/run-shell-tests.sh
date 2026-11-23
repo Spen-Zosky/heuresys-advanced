@@ -2028,6 +2028,26 @@ git -C "$W" reset -q --hard "$A"; echo x > "$W/x"; git -C "$W" add x; git -C "$W
 rl env RILASCIO_CI_STATO="6 6 0 0" bash scripts/rilascia.sh "$B"; e=$?
 [ $e = 1 ] && prod_e "$A" && ok "rilascia G0: cartella divergente => fermo, prod non si muove" || fail "rilascia G0 divergente (exit $e)"
 rm -rf "$RT"
+# 23/11: vm-deploy.sh (senza copia rilasciata) si allinea allo sha armato, non alla punta
+section "sync-target.sh — DEPLOY_SHA vince su origin/<ramo> (prova R1 sul gemello)"
+ST="$(mktemp -d)"
+(
+  set -e; cd "$ST"
+  git init -q --bare o.git; git clone -q o.git w 2>/dev/null; cd w
+  git config user.email t@t; git config user.name t
+  echo a > a; git add a; git commit -qm A; git push -q origin HEAD:refs/heads/main
+  echo b > b; git add b; git commit -qm B; git push -q origin HEAD:refs/heads/main
+) >/dev/null 2>&1
+ST_A="$(git -C "$ST/w" rev-parse HEAD~1)"; ST_B="$(git -C "$ST/w" rev-parse HEAD)"
+t1="$( . scripts/lib/sync-target.sh; unset DEPLOY_SHA; sync_target "$ST/w" main )"
+[ "$t1" = "origin/main" ] && ok "sync-target: senza DEPLOY_SHA => origin/<ramo> (come prima)" || fail "sync-target senza sha ($t1)"
+t2="$( . scripts/lib/sync-target.sh; DEPLOY_SHA="$ST_A" sync_target "$ST/w" main )"
+[ "$t2" = "$ST_A" ] && [ "$t2" != "$ST_B" ] && ok "sync-target: DEPLOY_SHA armato con main avanzata => lo sha armato, non la punta" || fail "sync-target sha armato ($t2)"
+( . scripts/lib/sync-target.sh; DEPLOY_SHA="0123456789abcdef0123456789abcdef01234567" sync_target "$ST/w" main ) >/dev/null 2>&1
+[ $? != 0 ] && ok "sync-target: DEPLOY_SHA sconosciuto => errore (non ripiega sulla punta)" || fail "sync-target sha sconosciuto non fallisce"
+grep -q 'reset --hard "\$SYNC_TARGET"' scripts/vm-deploy.sh && ! grep -q 'reset --hard "origin/\$BRANCH"' scripts/vm-deploy.sh \
+  && ok "vm-deploy.sh: il reset del sync usa SYNC_TARGET" || fail "vm-deploy.sh non usa SYNC_TARGET nel reset"
+rm -rf "$ST"
 # ------------------------------------------- I. tree-gia-verificato.sh (fixture)
 section "tree-gia-verificato.sh — la seconda passata di CI e' un doppione solo a albero uguale"
 TG="$(mktemp -d)"; ( cd "$TG" && git init -q . && git config user.email t@t && git config user.name t \

@@ -179,8 +179,11 @@ if [ "${VM_DEPLOY_COPIA:-0}" = 1 ]; then
 else
 # 1. Sync the repo to the authoritative remote (prod box: no local edits expected;
 #    gitignored .env/.secrets are preserved by reset).
-log "sync: $BRANCH @ origin"
+# lo sha passato dal guardiano (DEPLOY_SHA) vince sulla punta: scripts/lib/sync-target.sh
+. "$REPO_DIR/scripts/lib/sync-target.sh"
 git -C "$REPO_DIR" fetch origin --quiet
+SYNC_TARGET="$(sync_target "$REPO_DIR" "$BRANCH")" || { echo "ERROR: sync target non risolvibile" >&2; exit 1; }
+log "sync: $BRANCH @ $SYNC_TARGET"
 # D-08 (F-8): capture the CURRENTLY-DEPLOYED sha BEFORE the reset — it is the app
 # rollback target if the new deploy fails its probe gate (scripts/vm-rollback.sh).
 # Survives the self-modify re-exec below via VM_DEPLOY_PREV_SHA.
@@ -190,7 +193,7 @@ else
   PREV_SHA="${VM_DEPLOY_PREV_SHA:-unknown}"
 fi
 git -C "$REPO_DIR" checkout "$BRANCH" --quiet
-git -C "$REPO_DIR" reset --hard "origin/$BRANCH" --quiet
+git -C "$REPO_DIR" reset --hard "$SYNC_TARGET" --quiet
 git -C "$REPO_DIR" log --oneline -1
 
 # Self-modify-buffer fix: bash already buffered the OLD vm-deploy.sh into memory before

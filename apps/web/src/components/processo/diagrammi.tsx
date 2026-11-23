@@ -101,12 +101,7 @@ export function FlussoCorsie({
   const { ref, esporta } = useEsporta(nomeFile);
   const d = useMemo(() => {
     const att = attivitaInOrdine(scheda);
-    const corsie: Array<{ chiave: string; id: string | null; nome: string }> = [];
-    const indice = new Map<string, number>();
-    for (const a of att) {
-      const chiave = a.unitId ?? `x:${a.unitName ?? a.executorName ?? ""}`;
-      if (!indice.has(chiave)) { indice.set(chiave, corsie.length); corsie.push({ chiave, id: a.unitId, nome: a.unitName ?? a.executorName ?? senzaUnita }); }
-    }
+    const { corsie, indice } = corsieFasi(scheda, att, senzaUnita);
     const nomi = new Map([[scheda.process.processId, scheda.process.name], ...scheda.subprocesses.map((p) => [p.processId, p.name] as [string, string])]);
     const fasce: Array<{ processId: string; nome: string; da: number; a: number }> = [];
     att.forEach((a, i) => {

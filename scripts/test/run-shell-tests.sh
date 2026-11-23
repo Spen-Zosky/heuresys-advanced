@@ -24,7 +24,8 @@ FAIL=0; PASS=0
 # Resta fuori: la sezione «session modes» usa il registro <padre>/.heuresys-session-mode
 # (toglie i suoi marcatori, ma aggiorna payload-shapes.json); spostarlo chiederebbe una
 # variabile nella guardia lab, che servirebbe anche a spegnerla.
-RUN_TMP="$(mktemp -d)"; trap 'rm -rf "$RUN_TMP"' EXIT
+RUN_TMP="$(mktemp -d)" && [ -n "$RUN_TMP" ] || { echo "mktemp -d fallito: niente stato isolato, niente batteria" >&2; exit 1; }
+trap 'rm -rf "$RUN_TMP"' EXIT
 export TMPDIR="$RUN_TMP"
 export HEURESYS_CLOSE_LOG="$RUN_TMP/close-log.ndjson"
 export PYTHONDONTWRITEBYTECODE=1
@@ -2172,10 +2173,10 @@ cp scripts/lib/superficie-codex.txt "$FXB/scripts/lib/" 2>/dev/null; cp .gitigno
   && git add -A && git commit -qm "chore: handoff S900" ) >/dev/null 2>&1
 a="$(HEURESYS_DB_PORT=1 HEURESYS_CLOSE_LOG="$FXB/.handoff/close-log.ndjson" CLAUDE_PROJECT_DIR="$FXB" sh "$FXB/$SB" 2>&1)"; ra=$?
 b="$(HEURESYS_DB_PORT=1 HEURESYS_CLOSE_LOG="$FXB/.handoff/close-log.ndjson" CLAUDE_PROJECT_DIR="$FXB" sh "$FXB/$SB" 2>&1)"; rb=$?
-if [ $ra = 0 ] && [ $rb = 0 ] && printf '%s' "$a" | grep -q '=== HEURESYS BOOT' && [ "$(printf '%s' "$a" | grep -c sessione)" = "$(printf '%s' "$b" | grep -c sessione)" ]; then
+if [ $ra = 0 ] && [ $rb = 0 ] && grep -q '=== HEURESYS BOOT' <<<"$a" && grep -q 'sessione S901' <<<"$a" && [ "$(grep -c sessione <<<"$a")" = "$(grep -c sessione <<<"$b")" ]; then
   ok "session-boot.sh: 2 avvii consecutivi, exit 0, stesso esito"
 else
-  fail "session-boot.sh non idempotente (exit $ra/$rb)"
+  fail "session-boot.sh non idempotente (exit $ra/$rb; 1o: $(printf '%s' "$a" | grep -a sessione | tr '\n' ' '); 2o: $(printf '%s' "$b" | grep -a sessione | tr '\n' ' '))"
 fi
 # H3: repo diverso da CLAUDE_PROJECT_DIR -> silenzio, exit 0
 o="$(CLAUDE_PROJECT_DIR="$HK" sh "$SB" 2>&1)"; r=$?
@@ -2195,6 +2196,8 @@ done
 rm -rf "$HK"
 # H6: la batteria non ha scritto nel diario, nel marcatore, nel session-id ne' nel registro
 # delle chiusure della copia (prima di I4 li sporcava, e il secondo giro diventava rosso).
+# Se un'altra sessione apre o compatta nella stessa copia mentre la batteria gira, H6 puo'
+# essere rossa senza colpa della batteria: si rilancia a copia ferma.
 STATO_SESSIONE_DOPO="$(impronta_stato_sessione)"
 if [ "$STATO_SESSIONE_PRIMA" = "$STATO_SESSIONE_DOPO" ]; then
   ok "batteria: diario, marcatore, session-id e registro delle chiusure della copia intatti"

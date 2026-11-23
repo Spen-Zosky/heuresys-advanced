@@ -10,8 +10,8 @@
  *   · A-link-in-text-block: un collegamento dentro una frase è sottolineato, non solo colorato.
  *   · A-page-has-heading-one: le pagine hanno l'h1 anche mentre caricano o in errore.
  */
-import { readdirSync, readFileSync, statSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const radice = join(__dirname, "..");
@@ -31,6 +31,42 @@ describe("accessibilità puntuale (K13)", () => {
     const colpe = file.flatMap((p) =>
       [...readFileSync(p, "utf8").matchAll(/<CardTitle(?=[\s>])[^>]*>/g)].filter((m) => !/\bas=/.test(m[0])).map(() => p.slice(radice.length)),
     );
+    expect(colpe).toEqual([]);
+  });
+
+  it("le schede dentro una sezione che ha già il suo h2 sono h3", () => {
+    // Una `<section>` aperta da un `<h2>` proprio: le CardTitle che ci stanno dentro, scritte lì o in un
+    // componente importato con un percorso del progetto, scendono di un livello. Caso della revisione di
+    // #440: «Nuova raccomandazione» sotto l'h2 «Raccomandazioni» di /compensation-intelligence.
+    const risolvi = (da: string, spec: string): string | null => {
+      const base = spec.startsWith("@/") ? join(radice, spec.slice(2)) : spec.startsWith(".") ? join(dirname(da), spec) : null;
+      if (!base) return null;
+      return [`${base}.tsx`, join(base, "index.tsx")].find((c) => existsSync(c)) ?? null;
+    };
+    const colpe: string[] = [];
+    for (const p of file) {
+      const s = readFileSync(p, "utf8");
+      const importati = new Map<string, string>();
+      for (const m of s.matchAll(/import\s*\{([^}]*)\}\s*from\s*"([^"]+)"/g)) {
+        for (const n of (m[1] ?? "").split(",")) {
+          const nome = n.trim().split(/\s+as\s+/).pop()?.trim();
+          if (nome) importati.set(nome, m[2] ?? "");
+        }
+      }
+      for (const m of s.matchAll(/<section\b/g)) {
+        const fine = s.indexOf("</section>", m.index);
+        const blocco = s.slice(m.index, fine < 0 ? undefined : fine);
+        const titolo = blocco.search(/<h2\b/);
+        if (titolo < 0) continue;
+        const dentro = blocco.slice(titolo + 3);
+        if (/<CardTitle as="h2"/.test(dentro)) colpe.push(p.slice(radice.length));
+        for (const c of new Set([...dentro.matchAll(/<([A-Z]\w*)/g)].map((x) => x[1] ?? ""))) {
+          const spec = importati.get(c);
+          const f = spec ? risolvi(p, spec) : null;
+          if (f && /<CardTitle as="h2"/.test(readFileSync(f, "utf8"))) colpe.push(`${p.slice(radice.length)} -> ${c}`);
+        }
+      }
+    }
     expect(colpe).toEqual([]);
   });
 

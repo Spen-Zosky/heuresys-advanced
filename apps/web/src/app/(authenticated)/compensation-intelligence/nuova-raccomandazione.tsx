@@ -40,7 +40,7 @@ export function NuovaRaccomandazione() {
   return (
     <Card data-testid="comp-recommendation-create">
       <CardHeader>
-        <CardTitle as="h2" className="flex items-center justify-between gap-3">
+        <CardTitle as="h3" className="flex items-center justify-between gap-3">
           <span>{t("compReward.nuova.titolo")}</span>
           <Button type="button" variant="outline" data-testid="comp-recommendation-create-toggle" onClick={() => setAperto((x) => !x)}>
             {aperto ? t("compReward.nuova.chiudi") : t("compReward.nuova.apri")}

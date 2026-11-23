@@ -36,7 +36,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"${CLAUDE_PROJECT_DIR:-.}\" && command -v powershell.exe >/dev/null 2>&1 && powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/session-boot.ps1 -ProjectRoot \"$CLAUDE_PROJECT_DIR\" || true"
+            "command": "cd \"${CLAUDE_PROJECT_DIR:-.}\" && sh scripts/hooks/session-boot.sh",
+            "timeout": 60
           }
         ]
       }

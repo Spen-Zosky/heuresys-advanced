@@ -27,6 +27,7 @@ import { apiFetch } from "../../../../../lib/api/fetch";
 import { useCan } from "../../../../../lib/api/auth";
 import { testoPerLaPersona } from "../../../../../lib/api/errors";
 import { StatoErrore } from "@/components/stato-pagina";
+import { useEnumLabel } from "@/lib/enum-labels";
 
 const INTENSITA: readonly RegulatoryIntensity[] = ["LOW", "MEDIUM", "HIGH", "EXTREME"];
 const CAMPO =
@@ -66,6 +67,8 @@ function daProfilo(p: EnterpriseTypingProfile): Modulo {
 
 export default function EnterpriseTypingPage() {
   const { t } = useTranslation("admin");
+  // K19: lo schema della classe si legge per nome («ATECO 2025»), non come codice («ATECO_2025»)
+  const enumLabel = useEnumLabel();
   const params = useParams<{ tenantId: string }>();
   const tenantId = params.tenantId;
   const qc = useQueryClient();
@@ -187,7 +190,7 @@ export default function EnterpriseTypingPage() {
                     {modulo.industryClassId === ""
                       ? t("enterpriseTyping.classNone")
                       : classeScelta.data
-                        ? `${classeScelta.data.scheme} ${classeScelta.data.code} — ${classeScelta.data.name}`
+                        ? `${enumLabel("activityClassScheme", classeScelta.data.scheme)} ${classeScelta.data.code} — ${classeScelta.data.name}`
                         : classeScelta.isError
                           ? t("common:stato.nonDisponibile")
                           : t("common:loading")}
@@ -211,7 +214,7 @@ export default function EnterpriseTypingPage() {
                     >
                       {classi.data!.items.map((c) => (
                         <option key={c.activityClassificationId} value={c.activityClassificationId}>
-                          {c.scheme} {c.code} — {c.name}
+                          {enumLabel("activityClassScheme", c.scheme)} {c.code} — {c.name}
                         </option>
                       ))}
                     </select>

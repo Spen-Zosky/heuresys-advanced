@@ -516,7 +516,8 @@
         "CONTRIBUTOR": "Esecutrice",
         "CONSULTED": "Consultata",
         "INFORMED": "Informata"
-      }
+      },
+      "nessunRuolo": "{{unita}}: non partecipa al processo"
     },
     "classificazione": {
       "nota": "Come si classifica il processo, una dimensione indipendente per riga: {{assegnate}} di {{totale}} faccette assegnate. Ogni valore porta il criterio con cui è stato scelto.",

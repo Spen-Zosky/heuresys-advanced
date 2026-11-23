@@ -11,7 +11,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable } from "@/components/data-table-panel";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { NomeOppure } from "@/components/senza-nome";
-import { NuovaCompetenzaRichiesta, TogliRequisito } from "../_components/requisiti-modifica";
+import { NuovaCompetenzaRichiesta, TogliRequisito, usePuoModificarePosizione } from "../_components/requisiti-modifica";
 
 interface PositionSkillReq {
   requirementId: string;
@@ -24,6 +24,9 @@ interface PositionSkillReq {
 
 export default function PositionSkillsPage() {
   const { t } = useTranslation("admin");
+  // K15: la colonna «Togli» c'è solo per chi può modificare la posizione; per gli altri sarebbe
+  // una fila di celle vuote senza spiegazione.
+  const puo = usePuoModificarePosizione();
   const params = useParams<{ positionId: string }>();
   const positionId = params.positionId;
   const skills = useQuery({
@@ -75,9 +78,9 @@ export default function PositionSkillsPage() {
               { header: t("positions.skills.columns.code"), cell: (s) => <Codice value={s.skillCode} /> },
               { header: t("positions.skills.columns.proficiency"), cell: (s) => <EnumStatusBadge domain="proficiency" value={s.requiredProficiency} /> },
               { header: t("positions.skills.columns.weight"), cell: (s) => <span className="text-xs">{s.weight}</span> },
-              { header: "", cell: (s) => (
+              ...(puo ? [{ header: "", cell: (s: PositionSkillReq) => (
                 <TogliRequisito percorso={`/v1/positions/${positionId}/skills/${s.skillId}`} chiave={["positions", positionId, "skills"]} testId="position-skill-remove" />
-              ) },
+              ) }] : []),
             ]}
           />
         </CardContent>

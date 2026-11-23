@@ -17,6 +17,7 @@ import { Button, Dialog, DialogContent, DialogDescription, DialogTitle } from "@
 import type { ProcessFacet, ProcessFacetVocabularyResponse, TenantProcessFacet, TenantProcessFacetsResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { MODALE } from "@/lib/modale";
+import { VUOTO } from "@/lib/format";
 import { RIPIEGABILE } from "@/lib/colonne-mobile";
 
 export const FACCETTE: readonly ProcessFacet[] = ["FINALITA", "BENEFICIARIO", "PERIMETRO", "MODALITA", "ATTIVAZIONE", "TECNOLOGIA", "STANDARDIZZAZIONE"];
@@ -111,10 +112,11 @@ export function ClassificazioneProcesso({ processId, faccette }: { processId: st
                       </span>
                     )}
                   </td>
-                  <td className={`${RIPIEGABILE.cella} text-xs`}><span className={RIPIEGABILE.etichetta}>{k("colonne.criterio")}</span><span className="min-w-0 break-words">{valori[0]?.criterion ?? ""}</span></td>
+                  {/* K15: una faccetta non classificata non ha criterio né stato: lo si dice con «—», non con il vuoto */}
+                  <td className={`${RIPIEGABILE.cella} text-xs`}><span className={RIPIEGABILE.etichetta}>{k("colonne.criterio")}</span><span className="min-w-0 break-words">{valori[0]?.criterion || VUOTO}</span></td>
                   <td className={`${RIPIEGABILE.cella} text-xs`}>
                     <span className={RIPIEGABILE.etichetta}>{k("colonne.stato")}</span>
-                    {valori.length === 0 ? null : proposta ? <span className="font-medium">{k("stato.proposta")}</span> : <span>{k("stato.approvata")}</span>}
+                    {valori.length === 0 ? <span className="text-muted-foreground">{VUOTO}</span> : proposta ? <span className="font-medium">{k("stato.proposta")}</span> : <span>{k("stato.approvata")}</span>}
                   </td>
                   {faccette.canEdit ? (
                     <td className="block px-3 py-1 md:table-cell md:py-2 md:text-right">

@@ -7,10 +7,16 @@ import { apiFetch } from "@/lib/api/fetch";
 import { Field, ProfileSection, fmtDate } from "../../profile/_components/field";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { useFormat } from "@/lib/format";
+import { versioneModello } from "@/lib/celle-tabella";
 
 /** Rischio & Successione — own flight-risk + succession-readiness per target position. */
 export function RiskTab() {
   const { t } = useTranslation("ess");
+  // K19: il modello si dice per versione («versione 2»), non con il suo codice («flight-risk-v2»)
+  const modello = (codice: string | null | undefined) => {
+    const n = versioneModello(codice);
+    return n === null ? (codice ?? null) : t("career.risk.modelVersion", { n });
+  };
   const fmt = useFormat();
   const enumLabel = useEnumLabel();
   const q = useQuery({
@@ -29,7 +35,7 @@ export function RiskTab() {
           <>
             <Field label={t("career.risk.value")} value={flightRisk.value != null ? fmt.numeroFisso(flightRisk.value, 2) : null} testId="career-flight-value" />
             <Field label={t("career.risk.band")} value={enumLabel("flightRiskBand", flightRisk.band)} testId="career-flight-band" />
-            <Field label={t("career.risk.model")} value={flightRisk.modelVersion} />
+            <Field label={t("career.risk.model")} value={modello(flightRisk.modelVersion)} />
             <Field label={t("career.risk.computedAt")} value={flightRisk.computedAt ? fmtDate(flightRisk.computedAt.slice(0, 10)) : null} />
           </>
         ) : (
@@ -47,7 +53,7 @@ export function RiskTab() {
               <ProfileSection key={`succ-${i}`} title={s.positionTitle ?? t("career.risk.position")}>
                 <Field label={t("career.risk.value")} value={s.value != null ? fmt.numeroFisso(s.value, 2) : null} />
                 <Field label={t("career.risk.horizon")} value={enumLabel("horizon", s.horizon)} />
-                <Field label={t("career.risk.model")} value={s.modelVersion} />
+                <Field label={t("career.risk.model")} value={modello(s.modelVersion)} />
               </ProfileSection>
             ))}
           </div>

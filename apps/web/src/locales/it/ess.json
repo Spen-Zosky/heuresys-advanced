@@ -132,6 +132,7 @@
       "value": "Valore",
       "band": "Fascia",
       "model": "Modello",
+      "modelVersion": "versione {{n}}",
       "computedAt": "Calcolato il",
       "successionTitle": "Prontezza alla successione",
       "position": "Posizione",

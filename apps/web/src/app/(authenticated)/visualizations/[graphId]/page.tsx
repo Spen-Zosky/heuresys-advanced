@@ -229,7 +229,6 @@ export default function VisualizationDetailPage() {
         }
         badges={
           <>
-            <span data-testid="visualization-code" className="font-mono text-sm text-muted-foreground">{g.code}</span>
             <EnumStatusPill domain="vizGraphType" value={g.type} tone="info" />
             <span data-testid="visualization-version" className="text-sm text-muted-foreground">
               {t("visualizations.detail.versionBadge", { version: g.version })}

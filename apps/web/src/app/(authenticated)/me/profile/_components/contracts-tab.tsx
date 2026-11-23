@@ -32,7 +32,8 @@ export function ContractsTab() {
       {items.map((c, i) => (
         <ProfileSection
           key={`contract-${i}`}
-          title={`${c.type ? enumLabel("contractType", c.type) : t("profile.full.contracts.title")}${c.code ? ` · ${c.code}` : ""}`}
+          // K19: il codice del contratto («CCNL_CRED_3») è un identificativo di macchina, non un titolo
+          title={c.type ? enumLabel("contractType", c.type) : t("profile.full.contracts.title")}
           testId={i === 0 ? "section-contract-primary" : undefined}
         >
           <Field label={t("profile.full.contracts.type")} value={enumLabel("contractType", c.type)} testId={i === 0 ? "ct-type" : undefined} />
@@ -45,7 +46,7 @@ export function ContractsTab() {
             testId={i === 0 ? "ct-gross" : undefined}
           />
           <Field label={t("profile.full.contracts.workHours")} value={c.workHoursWeekly != null ? `${c.workHoursWeekly} h` : null} />
-          <Field label={t("profile.full.contracts.scheduleType")} value={c.workScheduleType} />
+          <Field label={t("profile.full.contracts.scheduleType")} value={c.workScheduleType ? enumLabel("workScheduleType", c.workScheduleType) : null} />
           <Field label={t("profile.full.contracts.partTime")} value={c.partTimePercentage != null ? `${c.partTimePercentage}%` : null} />
           <Field label={t("profile.full.contracts.startDate")} value={fmtDate(c.startDate)} />
           <Field label={t("profile.full.contracts.endDate")} value={fmtDate(c.endDate)} />

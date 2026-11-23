@@ -121,6 +121,21 @@ export const BuildPlanPreviewSchema = z.object({
 export type BuildPlanPreview = z.infer<typeof BuildPlanPreviewSchema>;
 
 /**
+ * I dettagli del 409 `BLUEPRINT_CONTENT_INCOHERENT` di `build-plan` (giro forense K32). Il conflitto
+ * resta la guardia che ferma una costruzione incoerente; questi dettagli lo rendono leggibile:
+ * il motivo come codice (il client lo traduce), il numero e l'elenco delle righe che non tornano,
+ * con il loro nome. Il messaggio del server non elenca più i codici.
+ */
+export const BuildPlanIncoherenceSchema = z.object({
+  reason: z.enum(["SKILLS_WITHOUT_CATEGORY", "POSITIONS_IN_MISSING_UNITS"]),
+  count: z.number().int(),
+  items: z.array(
+    z.object({ code: z.string(), name: z.string(), unitCode: z.string().optional() }),
+  ),
+});
+export type BuildPlanIncoherence = z.infer<typeof BuildPlanIncoherenceSchema>;
+
+/**
  * L'esito di `apply`. **Non contiene conteggi di righe create, e non è una dimenticanza**:
  * `apply` NON costruisce — apre una richiesta di approvazione, e la costruzione avviene
  * quando quella richiesta viene approvata. Restituire numeri qui farebbe credere il

@@ -14,7 +14,7 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { actorFromRequest } from "../../lib/actor.js";
 import { requirePermission } from "../../middleware/rbac.js";
 import {
-  FaldoneParamSchema, FaldoneSezioneParamSchema, FaldoneSezioneSelfParamSchema,
+  FaldoneParamSchema, FaldoneIndiceQuerySchema, FaldoneSezioneParamSchema, FaldoneSezioneSelfParamSchema,
   FaldonePaginaQuerySchema, FaldoneCompletoQuerySchema,
   FaldoneIndiceSchema, FaldoneRigheSchema, FaldoneCompletoSchema,
 } from "@heuresys/shared";
@@ -26,8 +26,8 @@ export const faldoneRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/:userId", {
     config: cfg,
     preHandler: [requirePermission("user:read")],
-    schema: { params: FaldoneParamSchema, response: { 200: FaldoneIndiceSchema } },
-  }, async (req) => faldoneService.indice(actorFromRequest(req), req.params.userId));
+    schema: { params: FaldoneParamSchema, querystring: FaldoneIndiceQuerySchema, response: { 200: FaldoneIndiceSchema } },
+  }, async (req) => faldoneService.indice(actorFromRequest(req), req.params.userId, req.query.lingua));
 
   app.get("/:userId/sezioni/:sezione", {
     config: cfg,
@@ -45,10 +45,10 @@ export const faldoneRoutes: FastifyPluginAsyncZod = async (app) => {
 export const faldoneSelfRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
     preHandler: [requirePermission("user_profile:read:self")],
-    schema: { response: { 200: FaldoneIndiceSchema } },
+    schema: { querystring: FaldoneIndiceQuerySchema, response: { 200: FaldoneIndiceSchema } },
   }, async (req) => {
     const a = actorFromRequest(req);
-    return faldoneService.indice(a, a.userId);
+    return faldoneService.indice(a, a.userId, req.query.lingua);
   });
 
   app.get("/sezioni/:sezione", {

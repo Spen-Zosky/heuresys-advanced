@@ -509,10 +509,15 @@ const RUOLI: ReadonlyArray<[RegExp, string]> = [
   [/_hired_user_id$/, "come assunto"],
 ];
 
+const RUOLO_GENERICO = "collegati";
+
 export function ruoloDiRelazione(colonna: string): string {
   for (const [re, r] of RUOLI) if (re.test(colonna)) return r;
-  return "collegati";
+  return RUOLO_GENERICO;
 }
+
+/** Tutti i ruoli che `ruoloDiRelazione` può restituire (per la prova della traduzione). */
+export const RUOLI_DI_RELAZIONE: readonly string[] = [...new Set([...RUOLI.map(([, r]) => r), RUOLO_GENERICO])];
 
 /** Le colonne che indicano una persona senza chiave esterna (legami impliciti), per tabella. */
 export const COLONNE_PERSONA_IMPLICITE: ReadonlySet<string> = new Set(LEGAMI_IMPLICITI);

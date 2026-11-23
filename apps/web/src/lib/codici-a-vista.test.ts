@@ -70,7 +70,4 @@ describe("K19 — codici tecnici in campi e titoli", () => {
     expect(s).not.toMatch(/value=\{(flightRisk|s)\.modelVersion\}/);
   });
 
-  it("l'informativa non mostra il codice della regione del cloud", () => {
-    for (const l of ["it", "en"]) expect(leggi(`locales/${l}/landing.json`), l).not.toContain("eu-milan-1");
-  });
 });

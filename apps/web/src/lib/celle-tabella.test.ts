@@ -60,6 +60,21 @@ describe("K15 — i punti del codice usano il segno", () => {
   it("catalogo dei KPI: la colonna Togli c'è solo per chi può togliere", () => {
     const s = leggi("app/(authenticated)/admin/catalogo-kpi/page.tsx");
     expect(s).not.toMatch(/<th \/>/);
+    // ognuna delle due tabelle lega il permesso, l'intestazione e la cella allo stesso interruttore
+    for (const permesso of ["process_kpi_template:delete", "organization_unit_kpi_template:delete"]) {
+      expect(s, permesso).toContain(`const puoTogliere = perms.includes("${permesso}");`);
+    }
+    const intestazioni = s.match(/\{puoTogliere && <th>/g) ?? [];
+    const celle = s.match(/\{puoTogliere && \(\s*<td/g) ?? [];
+    expect(intestazioni).toHaveLength(2);
+    expect(celle).toHaveLength(2);
+    // nessun pulsante «Togli» fuori dalle celle condizionate: senza permesso non resta niente
+    const pulsanti = s.match(/kpi-template-(process|unit)-remove/g) ?? [];
+    expect(pulsanti).toHaveLength(2);
+    for (const blocco of s.split("{puoTogliere && (").slice(1)) {
+      expect(blocco.slice(0, blocco.indexOf("</td>"))).toMatch(/kpi-template-(process|unit)-remove/);
+    }
+    expect(s).not.toMatch(/<td className="text-right">\s*\{perms\.includes\("[a-z_]+:delete"\)/);
   });
 
   it("classificazione del processo: criterio e stato assenti si scrivono «—»", () => {

@@ -72,6 +72,7 @@ Proposte:
 - Deploy dello sha armato anche se main è avanzata (R1): scritto in #387, ma la prova dal vivo è fallita (il blocco veniva cancellato da `togli`, che serve per unire); corretto in #410 con una traccia d'autorizzazione separata. Resta da provare al prossimo rilascio.
 - Atlante: la PR dell'atlante non fa più girare integration e smoke, e il timer lavora per numero di PR (#404).
 - Prove di integrazione in due metà: #389 unita; la corsa di prova è verde (circa 10 minuti per metà), ma il guadagno vero richiede due runner pesanti liberi. Smoke in due metà: non fatta, da decidere dopo la prima corsa reale.
+- Gemello: il deploy-watch del linux-pc ora vede l'autorizzazione dello sha armato tramite un tag `rilascio/<sha>` su origin (#421), il commit dell'atlante conta tra gli esiti più recenti (#423), `rilascia.sh` si ferma se la cartella non è allineata a origin/main (#424) e `riconcilia` non fallisce se `gh` non risponde (#425). Rilascio c68dee36 deployato dal gemello alle 23:35 ora di Roma del 22/11.
 - Runner a pagamento: no, per ora.
 - Blocco di main: resta finché R1 non ha la sua prova dal vivo.
 

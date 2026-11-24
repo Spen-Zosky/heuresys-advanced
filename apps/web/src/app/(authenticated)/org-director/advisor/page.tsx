@@ -53,8 +53,9 @@ function Citation({ c, t, fmt }: { c: AdvisorCitation; t: T; fmt: Formati }) {
         {t(`advisor.sources.${c.source}`)}
       </span>
       <span className="text-xs text-foreground">{c.subjectLabel}</span>
-      {/* il campo grezzo resta solo nel suggerimento, per chi deve ritrovarlo nella fonte */}
-      <span className="text-xs text-muted-foreground" title={c.field}>{campoLeggibile(c.field, t)}:</span>
+      {/* il campo grezzo resta nella pagina per chi deve ritrovarlo nella fonte, ma in un attributo
+          data-: nel title una persona lo leggeva («dimensions.performance.score», K22 forense 23/11) */}
+      <span className="text-xs text-muted-foreground" data-campo={c.field}>{campoLeggibile(c.field, t)}:</span>
       <span className="text-xs font-semibold tabular-nums text-foreground">{valoreLeggibile(c, t, fmt)}</span>
     </li>
   );

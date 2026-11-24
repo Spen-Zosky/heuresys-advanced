@@ -90,7 +90,13 @@ export async function errorHandler(
     return;
   }
   if (err instanceof ConflictError) {
-    reply.code(409).send({ error: { code: err.code, message: err.message } });
+    reply.code(409).send({
+      error: {
+        code: err.code,
+        message: err.message,
+        ...(err.details !== undefined ? { details: err.details } : {}),
+      },
+    });
     return;
   }
   if (err instanceof ValidationError) {

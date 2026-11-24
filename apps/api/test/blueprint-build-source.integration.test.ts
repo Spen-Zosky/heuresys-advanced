@@ -26,6 +26,8 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { PoolClient } from "pg";
 
+import { BuildPlanIncoherenceSchema } from "@heuresys/shared";
+import { ConflictError } from "../src/errors/index.js";
 import { closePool, pool } from "../src/db/client.js";
 import {
   BLUEPRINT_CONTENT_KEY,
@@ -272,6 +274,43 @@ describe("BlueprintBuildSource — il modello si legge dal database (#132 F2)", 
         await expect(new BlueprintBuildSource(client, v).plan()).rejects.toThrow(
           /SK-NUDA.*deploy successivo|senza categoria/s,
         );
+      } finally {
+        await client.query("ROLLBACK TO SAVEPOINT prova");
+      }
+    });
+
+    it("il rifiuto per competenze senza categoria porta numero ed elenco nei dettagli, non nel messaggio (giro forense K32)", async () => {
+      await client.query("SAVEPOINT prova");
+      try {
+        const v = await creaVersione("SENZACATDETT");
+        await unita(v, "RADICE", "Radice", "HEADQUARTERS", null);
+        await client.query(
+          `INSERT INTO sys.sys_blueprint_content_skills
+             (blueprint_content_skill_version_id, blueprint_content_skill_code,
+              blueprint_content_skill_name, blueprint_content_skill_kind)
+           VALUES ($1,'SK-NUDA-1','Prima competenza nuda','SKILL'),
+                  ($1,'SK-NUDA-2','Seconda competenza nuda','SKILL')`,
+          [v],
+        );
+        const errore = await new BlueprintBuildSource(client, v).plan().then(
+          () => null,
+          (e: unknown) => e as ConflictError,
+        );
+        expect(errore).toBeInstanceOf(ConflictError);
+        expect(errore!.code).toBe("BLUEPRINT_CONTENT_INCOHERENT");
+        // La guardia resta: è un 409. Ma il messaggio non elenca più i codici…
+        expect(errore!.message).not.toMatch(/SK-NUDA/);
+        expect(errore!.message).toMatch(/2 competenze senza categoria/);
+        // …che stanno nei dettagli, con il nome, nella forma che il client riconosce.
+        const dettagli = BuildPlanIncoherenceSchema.parse(errore!.details);
+        expect(dettagli).toEqual({
+          reason: "SKILLS_WITHOUT_CATEGORY",
+          count: 2,
+          items: [
+            { code: "SK-NUDA-1", name: "Prima competenza nuda" },
+            { code: "SK-NUDA-2", name: "Seconda competenza nuda" },
+          ],
+        });
       } finally {
         await client.query("ROLLBACK TO SAVEPOINT prova");
       }

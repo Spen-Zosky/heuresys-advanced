@@ -21,6 +21,9 @@ export const AREE_QUADRO = [
   "approvazioni",
   "retribuzioni",
   "personale",
+  // le assenze di chi guarda (ferie da godere, richieste in attesa): solo sul cruscotto personale e
+  // sulla pagina delle assenze, non in cima a ogni pagina personale (K09, forense 23/11/2026)
+  "mie-assenze",
   "accessi",
   "processi",
   "contenuti",

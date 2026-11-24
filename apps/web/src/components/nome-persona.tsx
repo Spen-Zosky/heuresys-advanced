@@ -11,8 +11,14 @@
 import { useRubrica } from "@/lib/leggibile";
 import { etichettaDaRubrica } from "@/lib/person-label";
 import { NomeOppure } from "@/components/senza-nome";
+import type { TestoVisto } from "@/lib/agente/vista-tabella";
 
 export function NomePersona({ nome, id }: { nome: string | null | undefined; id: string | null | undefined }) {
   const rubrica = useRubrica();
   return <NomeOppure nome={etichettaDaRubrica(rubrica.data, id) ?? nome} id={id ?? null} />;
 }
+
+/* Il testo che la cella mostra, per la ricerca e l'ordinamento dell'assistente (vista-tabella.ts):
+ * lo stesso «Cognome, Nome» della rubrica, non il nome grezzo con l'identificativo. */
+(NomePersona as TestoVisto).testoVisto = (p, persona) =>
+  (typeof p.id === "string" ? persona?.(p.id) : null) ?? (typeof p.nome === "string" ? p.nome : "");

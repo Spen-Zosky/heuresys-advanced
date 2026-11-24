@@ -13,12 +13,15 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { useVistaAgente, type VistaDichiarata } from "./contesto";
 import { testo } from "../testi";
+import { useRubrica } from "../leggibile";
+import { etichettaDaRubrica } from "../person-label";
 import {
   COMANDI_TABELLA,
   applicaVista,
   eseguiComando,
   testoDi,
   vistaAttiva,
+  type EtichettaPersona,
   type StatoVistaTabella,
 } from "./vista-tabella";
 
@@ -49,7 +52,10 @@ export function useTabellaAgente<T>(
   }, [stato]);
 
   const nomiColonne = useMemo(() => columns.map((c) => testoDi(c.header)), [columns]);
-  const celle = useMemo(() => (r: T) => columns.map((c) => testoDi(c.cell(r))), [columns]);
+  // le persone si cercano e si ordinano come si leggono, «Cognome, Nome» dalla rubrica (K22)
+  const rubrica = useRubrica().data;
+  const persona = useMemo<EtichettaPersona>(() => (id) => etichettaDaRubrica(rubrica, id), [rubrica]);
+  const celle = useMemo(() => (r: T) => columns.map((c) => testoDi(c.cell(r), persona)), [columns, persona]);
 
   // Senza un comando dell'assistente le righe restano le stesse, anche come riferimento.
   const righe = useMemo(() => (vistaAttiva(stato) ? applicaVista(rows, celle, stato) : rows), [rows, celle, stato]);

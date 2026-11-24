@@ -71,3 +71,11 @@ describe("K19 — codici tecnici in campi e titoli", () => {
   });
 
 });
+
+describe("K22 — consigli operativi senza il campo tecnico nel suggerimento", () => {
+  it("il campo della fonte («dimensions.performance.score») non sta nel title", () => {
+    const s = leggi("app/(authenticated)/org-director/advisor/page.tsx");
+    expect(s).not.toMatch(/title=\{c\.field\}/);
+    expect(s).toContain("data-campo={c.field}");
+  });
+});

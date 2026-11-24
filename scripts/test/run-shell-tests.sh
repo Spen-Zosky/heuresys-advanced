@@ -412,6 +412,60 @@ else
   fail "align-claude-ecosystem.sh assente"
 fi
 
+# ------------------- G-quinquies. align-claude-ecosystem.sh — i rapporti (P4, 24/11/2026)
+# Un giro di --verify che non trova niente di nuovo non aggiunge un rapporto; la
+# conservazione tiene gli ultimi 20 di ogni host e non tocca gli altri file della cartella.
+# Lo script gira davvero, in una casa finta, con ssh/npm/pip/cygpath finti: il rapporto
+# dipende solo da cio' che risponde l'ssh finto (FINTO_SSH_OUT).
+section "align-claude-ecosystem.sh — rapporti: niente doppioni, conservazione per host (P4)"
+if [ -f "$AE" ] && command -v jq >/dev/null 2>&1 && command -v sha256sum >/dev/null 2>&1; then
+  FA="$(mktemp -d)"
+  mkdir -p "$FA/casa/.claude/skills" "$FA/casa/.claude/commands" "$FA/casa/.claude/reference" \
+           "$FA/casa/.claude/agents" "$FA/casa/.claude/scripts" "$FA/casa/.claude-mem" \
+           "$FA/bin" "$FA/repo/scripts"
+  printf '# prova\n' > "$FA/casa/.claude/CLAUDE.md"
+  printf '{}\n' > "$FA/casa/.claude/settings.json"
+  printf '{}\n' > "$FA/casa/.claude-mem/settings.json"
+  printf '#!/bin/sh\n' > "$FA/casa/.claude/statusline-command.sh"
+  printf '#!/bin/sh\n' > "$FA/casa/.claude/scripts/session-bootstrap.sh"
+  cp "$AE" "$FA/repo/scripts/"
+  printf '#!/bin/sh\ncat >/dev/null 2>&1\n[ -n "${FINTO_SSH_OUT:-}" ] && printf "%%s\\n" "$FINTO_SSH_OUT"\nexit 0\n' > "$FA/bin/ssh"
+  # npm dichiara un SDK (senza nessuno lo script esce 1 gia' nel preflight), pip nessuno.
+  printf '#!/bin/sh\necho %s\n' "'{\"dependencies\":{\"@anthropic-ai/sdk\":{\"version\":\"0.0.0\"}}}'" > "$FA/bin/npm"
+  printf '#!/bin/sh\nexit 0\n' > "$FA/bin/pip"; cp "$FA/bin/pip" "$FA/bin/pip3"
+  printf '#!/bin/sh\nprintf "%%s\\n" "$2"\n' > "$FA/bin/cygpath"
+  chmod +x "$FA/bin/"*
+  RD="$FA/repo/deploy/reports/claude-align"
+  giro() { ( env HOME="$FA/casa" PATH="$FA/bin:$PATH" "$@" bash "$FA/repo/scripts/align-claude-ecosystem.sh" vm --verify </dev/null ) 2>&1; }
+  impronta_rd() { ( cd "$RD" && find . -type f | LC_ALL=C sort | xargs sha256sum ) 2>/dev/null; }
+  conta() { find "$RD" -maxdepth 1 -type f -name "$1" | grep -c .; }
+  o1="$(giro)"; r1=$?; i1="$(impronta_rd)"
+  sleep 1   # l'ora del nome cambia: il secondo giro non puo' coincidere col primo per caso
+  o2="$(giro)"; r2=$?; i2="$(impronta_rd)"
+  { [ $r1 = 0 ] && [ $r2 = 0 ] && [ "$(conta 'drift-vm-*.md')" = 1 ] && [ "$i1" = "$i2" ] \
+      && grep -q 'rapporto invariato' <<<"$o2"; } \
+    && ok "align-ecosystem: due --verify di fila senza cambiamenti => un solo rapporto, cartella identica" \
+    || fail "align-ecosystem: secondo giro invariato ha scritto (exit $r1/$r2, rapporti $(conta 'drift-vm-*.md')): $(tail -3 <<<"$o2" | tr '\n' ' ')"
+  sleep 1
+  giro FINTO_SSH_OUT=cambiato >/dev/null
+  [ "$(conta 'drift-vm-*.md')" = 2 ] \
+    && ok "align-ecosystem: un giro che trova qualcosa di diverso scrive un rapporto nuovo" \
+    || fail "align-ecosystem: giro con esito diverso non scritto ($(conta 'drift-vm-*.md') rapporti)"
+  for n in $(seq -w 1 25); do printf 'x\n' > "$RD/drift-vm-200001${n}T000000Z.md"; done
+  for n in 1 2 3; do printf 'x\n' > "$RD/drift-linuxpc-2000010${n}T000000Z.md"; done
+  printf 'x\n' > "$RD/acceptance-20000101.md"
+  sleep 1
+  giro FINTO_SSH_OUT=ancora-diverso >/dev/null
+  { [ "$(conta 'drift-vm-*.md')" = 20 ] && [ "$(conta 'drift-linuxpc-*.md')" = 3 ] \
+      && [ "$(conta 'drift-vm-2000*.md')" = 17 ] && [ ! -f "$RD/drift-vm-20000108T000000Z.md" ] \
+      && [ -f "$RD/drift-vm-20000109T000000Z.md" ] && [ -f "$RD/acceptance-20000101.md" ]; } \
+    && ok "align-ecosystem: conservazione = ultimi 20 per host; gli altri host e gli altri file restano" \
+    || fail "align-ecosystem: conservazione (vm=$(conta 'drift-vm-*.md') linuxpc=$(conta 'drift-linuxpc-*.md'))"
+  rm -rf "$FA"
+else
+  ok "align-ecosystem rapporti: jq o sha256sum assenti, prova saltata"
+fi
+
 # ------------------- G. vm-deploy-remote.sh — detached-deploy wiring (D-49, static)
 section "vm-deploy-remote.sh — detached deploy + poll wiring (D-49)"
 VDR="scripts/vm-deploy-remote.sh"
@@ -1857,6 +1911,18 @@ if [ -f "$CVD" ] && [ -f "$STUB" ]; then
       && <<<"$out" grep -q 'ALTER DATABASE "finto_db_old" RENAME TO "finto_db"'; } \
     && ok "clone-vm-db: secondo rinomino fallito => dice dov'e' il dato E il comando per rimediare" \
     || fail "clone-vm-db rinomino fallito ($rc: $out)"
+
+  # 10. [P7, 24/11/2026] La cartella temporanea resta com'era: ne' $ERRLOG ne' il suo
+  #     "$ERRLOG.ren", che i rinomini creano anche quando riescono. Prima di P7 il .ren
+  #     restava a ogni corsa (e la batteria lo spazzava solo perche' gira sotto RUN_TMP).
+  TT="$T/tmp-cvd"; mkdir -p "$TT"
+  vuota_traccia
+  cvd TMPDIR="$TT" FINTO_SCHEMI_VM=sys FINTO_SCHEMI_LOC=sys >/dev/null
+  cvd TMPDIR="$TT" FINTO_SCHEMI_VM=sys FINTO_SCHEMI_LOC=sys FINTO_RENAME2_KO=1 >/dev/null
+  resti="$(ls -A "$TT")"
+  { [ -z "$resti" ] && grep -q 'RENAME TO' "$T/traccia"; } \
+    && ok "clone-vm-db: dopo una corsa sana e una fallita la cartella temporanea e' vuota" \
+    || fail "clone-vm-db lascia temporanei: $(printf '%s' "$resti" | tr '\n' ' ')"
   rm -rf "$T"
 else
   fail "$CVD o $STUB mancante"
@@ -2151,6 +2217,17 @@ PY
 else
   ok "python3 assente: guardia valori saltata"
 fi
+# ------------------------------------------------- assegna-password (P5, 24/11/2026)
+# Su un cluster PostgreSQL privato creato e tolto dalla prova stessa: mai il cluster vero.
+section "assegna-password: senza --ruota il secondo lancio non cambia niente (P5)"
+o="$(bash scripts/test/prova-assegna-password.sh 2>&1)"; r=$?
+if grep -q 'SALTATA' <<<"$o"; then
+  ok "assegna-password: $(grep -o 'SALTATA.*' <<<"$o")"
+elif [ $r = 0 ]; then
+  ok "assegna-password: $(grep -c '^  ok' <<<"$o") casi verdi su app e agenti (cluster privato)"
+else
+  fail "assegna-password: $(grep 'FAIL' <<<"$o" | tr '\n' ' ')"
+fi
 # ------------------------------------------------- hook portabili (23/11/2026)
 section "hook di sessione: stesso comportamento su Linux e Windows, idempotenti"
 SB="scripts/hooks/session-boot.sh"
@@ -2166,13 +2243,19 @@ fi
 # l'avvio scrive diario, marcatore e session-id, e il diario vero non deve ricevere niente
 # (prima di I4 il giro dopo ritrovava la riga lasciata da H5 e la prova diventava rossa).
 # Porta 1: nessun database in ascolto, il controllo psql si salta.
+# `uname` finto che dice Linux (P7, 24/11/2026): H2 prova la versione sh, su ogni sistema.
+# Su Windows, senza, session-boot.sh passava a session-boot.ps1 vero, che ignora la porta 1:
+# apre il tunnel SSH verso il database se e' giu' (Start-Process ssh -N -L 5433...) e lancia
+# l'handoff-lint con il python del PC, e l'esito dipendeva dalla macchina. Il ramo
+# PowerShell e' coperto da H4 con un powershell.exe finto.
+mkdir -p "$HK/linux"; printf '#!/bin/sh\necho Linux\n' > "$HK/linux/uname"; chmod +x "$HK/linux/uname"
 FXB="$HK/boot"; mkdir -p "$FXB/scripts/hooks" "$FXB/scripts/lib" "$FXB/.handoff"
 cp "$SB" "$FXB/scripts/hooks/"; cp scripts/session-boot.ps1 scripts/close-log.sh "$FXB/scripts/"
 cp scripts/lib/superficie-codex.txt "$FXB/scripts/lib/" 2>/dev/null; cp .gitignore "$FXB/"
 ( cd "$FXB" && git init -q . && git config user.email t@t && git config user.name t \
   && git add -A && git commit -qm "chore: handoff S900" ) >/dev/null 2>&1
-a="$(HEURESYS_DB_PORT=1 HEURESYS_CLOSE_LOG="$FXB/.handoff/close-log.ndjson" CLAUDE_PROJECT_DIR="$FXB" sh "$FXB/$SB" 2>&1)"; ra=$?
-b="$(HEURESYS_DB_PORT=1 HEURESYS_CLOSE_LOG="$FXB/.handoff/close-log.ndjson" CLAUDE_PROJECT_DIR="$FXB" sh "$FXB/$SB" 2>&1)"; rb=$?
+a="$(PATH="$HK/linux:$PATH" HEURESYS_DB_PORT=1 HEURESYS_CLOSE_LOG="$FXB/.handoff/close-log.ndjson" CLAUDE_PROJECT_DIR="$FXB" sh "$FXB/$SB" 2>&1)"; ra=$?
+b="$(PATH="$HK/linux:$PATH" HEURESYS_DB_PORT=1 HEURESYS_CLOSE_LOG="$FXB/.handoff/close-log.ndjson" CLAUDE_PROJECT_DIR="$FXB" sh "$FXB/$SB" 2>&1)"; rb=$?
 if [ $ra = 0 ] && [ $rb = 0 ] && grep -q '=== HEURESYS BOOT' <<<"$a" && grep -q 'sessione S901' <<<"$a" && [ "$(grep -c sessione <<<"$a")" = "$(grep -c sessione <<<"$b")" ]; then
   ok "session-boot.sh: 2 avvii consecutivi, exit 0, stesso esito"
 else

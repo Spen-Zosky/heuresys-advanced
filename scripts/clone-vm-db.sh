@@ -212,7 +212,9 @@ echo "[clone-vm-db] sanity row-counts (local vs VM):"
 mismatch=0
 unmeasured=0
 ERRLOG="$(mktemp)"
-trap 'rm -f "$ERRLOG"' EXIT
+# Anche "$ERRLOG.ren" (lo stderr dei rinomini, piu' sotto) se ne va all'uscita: prima restava
+# nella cartella temporanea a ogni corsa, riuscita o no (P7, 24/11/2026).
+trap 'rm -f "$ERRLOG" "$ERRLOG.ren"' EXIT
 for t in sys.sys_users sys.sys_positions sys.sys_attendance; do
   # D-78: lo stderr di psql NON si butta piu' via. Buttarlo ha nascosto per settimane la
   # ragione vera di un FATAL ricorrente sul gemello: l'unit systemd dichiarava

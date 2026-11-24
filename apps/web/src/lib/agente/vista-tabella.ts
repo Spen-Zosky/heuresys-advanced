@@ -27,14 +27,28 @@ export interface StatoVistaTabella {
   ordine?: { colonna: number; verso: "crescente" | "decrescente" };
 }
 
+/** Dalla rubrica del perimetro, l'etichetta «Cognome, Nome» di una persona (null se non la conosce). */
+export type EtichettaPersona = (id: string) => string | null;
+
+/**
+ * Un componente che sa quale testo mostra senza essere montato (es. `NomePersona`, che risolve il nome
+ * con la rubrica) lo dichiara con `testoVisto`: senza, si leggerebbero le sue props grezze, cioè
+ * «Nome Cognome» e l'identificativo, mentre a video si legge «Cognome, Nome» (K22, revisione di #438).
+ */
+export interface TestoVisto {
+  testoVisto?: (props: Record<string, unknown>, persona?: EtichettaPersona) => string;
+}
+
 /** Il testo che un nodo React mostra: serve a cercare e ordinare su ciò che la persona vede. */
-export function testoDi(nodo: ReactNode): string {
+export function testoDi(nodo: ReactNode, persona?: EtichettaPersona): string {
   if (nodo === null || nodo === undefined || typeof nodo === "boolean") return "";
   if (typeof nodo === "string" || typeof nodo === "number" || typeof nodo === "bigint") return String(nodo);
-  if (Array.isArray(nodo)) return nodo.map(testoDi).filter(Boolean).join(" ");
+  if (Array.isArray(nodo)) return nodo.map((n) => testoDi(n, persona)).filter(Boolean).join(" ");
   if (isValidElement(nodo)) {
+    const visto = typeof nodo.type === "function" ? (nodo.type as TestoVisto).testoVisto : undefined;
+    if (visto) return visto(nodo.props as Record<string, unknown>, persona);
     const p = nodo.props as { children?: ReactNode; title?: unknown; "aria-label"?: unknown };
-    const figli = testoDi(p.children);
+    const figli = testoDi(p.children, persona);
     if (figli) return figli;
     if (typeof p["aria-label"] === "string") return p["aria-label"];
     if (typeof p.title === "string") return p.title;

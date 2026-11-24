@@ -23,6 +23,27 @@ describe("testoDi: ciò che la persona vede in una cella", () => {
   });
 });
 
+describe("testoDi: una persona si cerca e si ordina come si legge, «Cognome, Nome» (K22)", () => {
+  // Come NomePersona: dichiara il testo che mostra, risolto con la rubrica del perimetro.
+  const Persona = Object.assign((props: { nome: string | null; id: string | null }): null => (void props, null), {
+    testoVisto: (p: { nome?: unknown; id?: unknown }, persona?: (id: string) => string | null) =>
+      (typeof p.id === "string" ? persona?.(p.id) : null) ?? (typeof p.nome === "string" ? p.nome : ""),
+  });
+  const rubrica = (id: string) => (id === "u1" ? "Esposito, Tommaso" : null);
+  it("con la rubrica il testo è quello mostrato, senza l'identificativo", () => {
+    expect(testoDi(createElement(Persona, { nome: "Tommaso Esposito", id: "u1" }), rubrica)).toBe("Esposito, Tommaso");
+    expect(testoDi(createElement("span", null, createElement(Persona, { nome: "Tommaso Esposito", id: "u1" })), rubrica)).toBe("Esposito, Tommaso");
+  });
+  it("fuori dalla rubrica resta il nome che la pagina mostra", () => {
+    expect(testoDi(createElement(Persona, { nome: "Anna Neri", id: "u9" }), rubrica)).toBe("Anna Neri");
+  });
+  it("la ricerca per cognome come si legge trova la persona", () => {
+    const righe = [{ id: "u1", nome: "Tommaso Esposito" }];
+    const c = (r: { id: string; nome: string }) => [testoDi(createElement(Persona, r), rubrica)];
+    expect(applicaVista(righe, c, { testo: "esposito, tom" })).toHaveLength(1);
+  });
+});
+
 describe("trovaColonna", () => {
   it("uguale prima, poi contenuta, senza accenti e maiuscole", () => {
     expect(trovaColonna(COLONNE, "sede")).toBe(1);

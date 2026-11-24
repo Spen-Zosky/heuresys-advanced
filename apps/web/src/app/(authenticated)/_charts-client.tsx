@@ -30,7 +30,8 @@ import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState, useSyncExternalStore, type ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import { formati, localeDi } from "@/lib/format";
-import { esadecimaleConAlfa, etichetteLeggibiliMappaDiCalore } from "@/lib/colori-grafico";
+import { coloreDaVariabile, etichetteLeggibiliMappaDiCalore } from "@/lib/colori-grafico";
+import { risolviVariabiliCss } from "@/lib/variabili-css-grafico";
 import { assiDerivati, letturaDelGrafico, type ChartTable } from "@/lib/lettura-grafico";
 import { testoCellaGrafico } from "@/lib/celle-tabella";
 import { ALTEZZA_RIGA_ETICHETTA, altezzaGrafico, type Misura } from "@/lib/altezza-grafico";
@@ -43,42 +44,11 @@ const RawEChartsCard = dynamic(
   { ssr: false },
 );
 
-/** Recursively replace every `var(--name)` token in any string within `value`
- *  with its computed value read from `root`, so the echarts canvas gets concrete
- *  colors. Non-string leaves pass through unchanged. */
+/** Ogni `var(--x)` dell'opzione portato al colore che il canvas di ECharts legge, dal tema attivo su
+ *  `root` (la regola sta in lib/variabili-css-grafico.ts, provata senza browser). */
 function resolveCssVars<T>(value: T, root: HTMLElement): T {
-  if (typeof value === "string") {
-    if (!value.includes("var(--")) return value;
-    const get = (name: string) => getComputedStyle(root).getPropertyValue(name).trim() || "transparent";
-    // 1) Unwrap color-function wrappers around a var. This app's design tokens are
-    //    COMPLETE colors (hex, e.g. --palette-1: #2563EB), but the chart pages wrap
-    //    them as `hsl(var(--palette-1))` → `hsl(#2563EB)`, which is INVALID CSS and
-    //    paints black on the echarts canvas. Resolve straight to the hex.
-    let out = value.replace(
-      /(?:hsla?|rgba?)\(\s*var\((--[a-zA-Z0-9_-]+)\)\s*\)/g,
-      (_m, name: string) => get(name),
-    );
-    // 1b) `hsl(var(--x) / 0.12)`: tinta chiara della scala di una mappa di calore. Il canvas non
-    //    la legge (`hsl(#2563EB / 0.12)` è invalido): si converte l'esadecimale in rgba.
-    out = out.replace(
-      /(?:hsla?|rgba?)\(\s*var\((--[a-zA-Z0-9_-]+)\)\s*\/\s*([0-9.]+%?)\s*\)/g,
-      (_m, name: string, alfa: string) => esadecimaleConAlfa(get(name), alfa) ?? get(name),
-    );
-    // 2) Any remaining bare var(--x).
-    out = out.replace(/var\((--[a-zA-Z0-9_-]+)\)/g, (_m, name: string) => get(name));
-    return out as unknown as T;
-  }
-  if (Array.isArray(value)) {
-    return value.map((item) => resolveCssVars(item, root)) as unknown as T;
-  }
-  if (value && typeof value === "object") {
-    const out: Record<string, unknown> = {};
-    for (const key of Object.keys(value as Record<string, unknown>)) {
-      out[key] = resolveCssVars((value as Record<string, unknown>)[key], root);
-    }
-    return out as unknown as T;
-  }
-  return value;
+  const css = getComputedStyle(root);
+  return risolviVariabiliCss(value, (name) => css.getPropertyValue(name));
 }
 
 type RawProps = ComponentProps<typeof RawEChartsCard>;
@@ -247,7 +217,7 @@ function TabellaEquivalente({ tabella, lingua }: { tabella: ChartTable; lingua: 
  *  primo piano né il fondo del tema arrivano a 4,5:1, e uno dei due puri ci arriva sempre. */
 function conEtichetteLeggibili(option: RawProps["option"], root: HTMLElement): RawProps["option"] {
   const css = getComputedStyle(root);
-  const v = (n: string) => css.getPropertyValue(n).trim();
+  const v = (n: string) => coloreDaVariabile(css.getPropertyValue(n));
   return etichetteLeggibiliMappaDiCalore(option, { fondo: v("--card"), testi: [v("--foreground"), v("--background"), "#000000", "#FFFFFF"] });
 }
 
@@ -255,7 +225,7 @@ function conEtichetteLeggibili(option: RawProps["option"], root: HTMLElement): R
  *  non li dichiara, e ogni testo ad almeno 4,5:1 sul fondo del riquadro (`bg-background`). */
 function conColoriDelTema(option: RawProps["option"], root: HTMLElement): RawProps["option"] {
   const css = getComputedStyle(root);
-  const v = (n: string) => css.getPropertyValue(n).trim();
+  const v = (n: string) => coloreDaVariabile(css.getPropertyValue(n));
   return conStileDelTema(option, { testo: v("--foreground"), testoTenue: v("--muted-foreground"), bordo: v("--border"), fondo: v("--background") });
 }
 

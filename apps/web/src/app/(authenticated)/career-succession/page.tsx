@@ -117,7 +117,7 @@ export default function CareerSuccessionPage() {
       {
         type: "bar" as const,
         data: prontezza.map((i) => i.count),
-        itemStyle: { color: "hsl(var(--palette-1))", borderRadius: [4, 4, 0, 0] as [number, number, number, number] },
+        itemStyle: { color: "var(--palette-1)", borderRadius: [4, 4, 0, 0] as [number, number, number, number] },
         barMaxWidth: 48,
       },
     ],

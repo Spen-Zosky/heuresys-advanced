@@ -18,8 +18,15 @@ export function risolviVariabiliCss<T>(value: T, leggi: LeggiVariabile): T {
     // La variabile può essere un colore completo (l'esadecimale del foglio di stile) o una terna HSL
     // nuda («222 80% 50%», le `--palette-*` che `applyPalette` scrive in linea in tema chiaro):
     // `coloreDaVariabile` porta l'una e l'altra a un colore che il canvas legge (K17, 24/11/2026).
-    // 1) `hsl(var(--x))` e simili.
+    // 0) `color-mix(in <spazio>, var(--x) 12%, transparent)`: la trasparenza nella forma che la
+    //    libreria prescrive dalla 1.7.2. Mescolare con `transparent` lascia la tinta e porta l'alfa
+    //    alla percentuale data; il canvas non legge `color-mix`, quindi diventa `rgba(...)`.
     let out = value.replace(
+      /color-mix\(\s*in\s+[a-z-]+\s*,\s*var\((--[a-zA-Z0-9_-]+)\)\s+([0-9.]+%)\s*,\s*transparent\s*\)/g,
+      (_m, name: string, alfa: string) => coloreDaVariabile(get(name), alfa),
+    );
+    // 1) `hsl(var(--x))` e simili.
+    out = out.replace(
       /(?:hsla?|rgba?)\(\s*var\((--[a-zA-Z0-9_-]+)\)\s*\)/g,
       (_m, name: string) => coloreDaVariabile(get(name)),
     );

@@ -15,10 +15,10 @@ import type {
 import { apiFetch } from "@/lib/api/fetch";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
-/** Brand palette as raw HSL CSS-var refs so the echarts canvas (outside Tailwind's
+/** Brand palette as CSS-var refs (hex in both themes since @heuresys/ui 1.7.2) so the echarts canvas (outside Tailwind's
  *  reach) still follows the active theme tokens — same pattern as workforce/page.tsx. */
-const COLOR_PALETTE_1 = "hsl(var(--palette-1))";
-const COLOR_PALETTE_2 = "hsl(var(--palette-2))";
+const COLOR_PALETTE_1 = "var(--palette-1)";
+const COLOR_PALETTE_2 = "var(--palette-2)";
 const AXIS_COLOR = "hsl(var(--muted-foreground))";
 const GRID_COLOR = "hsl(var(--border))";
 

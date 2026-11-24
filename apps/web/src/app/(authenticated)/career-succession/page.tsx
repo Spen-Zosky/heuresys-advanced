@@ -106,13 +106,12 @@ export default function CareerSuccessionPage() {
       type: "category" as const,
       data: prontezza.map((i) => enumLabel("readinessLevel", i.readinessLevel)),
       axisLabel: { color: "hsl(var(--muted-foreground))", fontSize: 11, interval: 0, rotate: 20 },
-      axisLine: { lineStyle: { color: "#334155" } },
+      // K17: le linee nei colori del tema le mette EChartsCard (#334155 e #1e293b erano del solo tema scuro)
     },
     yAxis: {
       type: "value" as const,
       minInterval: 1,
       axisLabel: { color: "hsl(var(--muted-foreground))", fontSize: 11 },
-      splitLine: { lineStyle: { color: "#1e293b" } },
     },
     series: [
       {

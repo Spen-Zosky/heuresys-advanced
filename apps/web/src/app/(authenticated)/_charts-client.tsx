@@ -34,6 +34,7 @@ import { esadecimaleConAlfa, etichetteLeggibiliMappaDiCalore } from "@/lib/color
 import { assiDerivati, letturaDelGrafico, type ChartTable } from "@/lib/lettura-grafico";
 import { testoCellaGrafico } from "@/lib/celle-tabella";
 import { ALTEZZA_RIGA_ETICHETTA, altezzaGrafico, type Misura } from "@/lib/altezza-grafico";
+import { assiInteri, conStileDelTema, nomiDegliAssiInVista } from "@/lib/stile-grafico";
 
 const RawEChartsCard = dynamic(
   // Subpath `/charts` isolates echarts so this lazy import does NOT drag the whole
@@ -100,7 +101,8 @@ function numeroLocale(locale: string) {
 }
 
 function rendiLeggibile(option: RawProps["option"], locale: string): RawProps["option"] {
-  const o = { ...(option as Record<string, unknown>) };
+  // K17 (24/11/2026): conteggi a tacche intere e nomi degli assi dentro il riquadro, per ogni grafico
+  const o = { ...(assiInteri(nomiDegliAssiInVista(option)) as Record<string, unknown>) };
   const num = numeroLocale(locale);
   const asse = (a: unknown, verticale = false): unknown => {
     if (Array.isArray(a)) return a.map((x) => asse(x, verticale));
@@ -130,7 +132,8 @@ function rendiLeggibile(option: RawProps["option"], locale: string): RawProps["o
     const voci = Array.isArray((o.legend as Record<string, unknown>).data)
       ? ((o.legend as Record<string, unknown>).data as unknown[]).length
       : serie;
-    o.legend = { ...(o.legend as Record<string, unknown>), type: "plain", bottom: 0, left: "center", itemGap: 14, textStyle: { fontSize: 11 } };
+    const lg = o.legend as Record<string, unknown>;
+    o.legend = { ...lg, type: "plain", bottom: 0, left: "center", itemGap: 14, textStyle: { ...((lg.textStyle as Record<string, unknown>) ?? {}), fontSize: 11 } };
     const righe = Math.max(1, Math.ceil(voci / 4));
     const g = (o.grid && typeof o.grid === "object" && !Array.isArray(o.grid) ? { ...(o.grid as Record<string, unknown>) } : {}) as Record<string, unknown>;
     const serve = 36 + righe * 20;
@@ -248,6 +251,14 @@ function conEtichetteLeggibili(option: RawProps["option"], root: HTMLElement): R
   return etichetteLeggibiliMappaDiCalore(option, { fondo: v("--card"), testi: [v("--foreground"), v("--background"), "#000000", "#FFFFFF"] });
 }
 
+/** K17 (24/11/2026): testi e linee di assi, legenda e scala nei colori del tema attivo, dove la pagina
+ *  non li dichiara, e ogni testo ad almeno 4,5:1 sul fondo del riquadro (`bg-background`). */
+function conColoriDelTema(option: RawProps["option"], root: HTMLElement): RawProps["option"] {
+  const css = getComputedStyle(root);
+  const v = (n: string) => css.getPropertyValue(n).trim();
+  return conStileDelTema(option, { testo: v("--foreground"), testoTenue: v("--muted-foreground"), bordo: v("--border"), fondo: v("--background") });
+}
+
 /** K17: la larghezza di un'etichetta misurata dal browser con il carattere di ECharts (sans-serif),
  *  una sola tela per tutta la pagina; null dove non c'è una tela. */
 let misuraCondivisa: Misura | null | undefined;
@@ -281,7 +292,7 @@ export function EChartsCard({ assi, tabella, lingua, ...props }: EChartsCardProp
     () =>
       typeof document === "undefined"
         ? props.option
-        : conEtichetteLeggibili(resolveCssVars(rendiLeggibile(conNomiDegliAssi(props.option, assi), locale), document.documentElement), document.documentElement),
+        : conEtichetteLeggibili(conColoriDelTema(resolveCssVars(rendiLeggibile(conNomiDegliAssi(props.option, assi), locale), document.documentElement), document.documentElement), document.documentElement),
     // themeTick intentionally re-triggers resolution on theme switch
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.option, themeTick, assi?.x, assi?.y, locale],

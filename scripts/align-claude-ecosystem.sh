@@ -447,8 +447,9 @@ rollback_host() {  # $1 = kind, $2 = stamp
 #
 # I rapporti stanno in deploy/reports/claude-align/, ignorata da git (.gitignore,
 # `deploy/reports/`), e appartengono alla macchina che li scrive: sync-gitignored-to-vm.sh
-# non li copia piu' sugli altri cloni. Prima li copiava in modo additivo, e la VM, che li
-# riceveva senza lanciare mai questo script, ne aveva accumulati 397 nonostante la
+# non li copia piu' sugli altri cloni. Prima li copiava in modo additivo, e un clone che li
+# riceveva senza lanciare mai questo script non li potava: sulla VM erano centinaia
+# (`find deploy/reports/claude-align -name 'drift-*' | wc -l`) nonostante la
 # conservazione «ultimi 20» del 23/07.
 #
 # CONSERVAZIONE: gli ultimi REPORTS_KEEP (20) rapporti di ogni host verificato
@@ -471,7 +472,9 @@ prune_reports() {  # $1 = kind
 
 # Un giro ripetuto senza cambiamenti NON aggiunge un rapporto: se il nuovo dice le stesse
 # cose dell'ultimo dello stesso host (tolta la riga di intestazione, l'unica con l'ora),
-# il nuovo si scarta e resta quello di prima. Stampa il percorso del rapporto che vale.
+# il nuovo si scarta e resta quello di prima, con l'ora del file aggiornata (touch: dice
+# quando si e' verificato l'ultima volta; il contenuto non cambia). La conservazione si
+# applica in entrambi i casi. Stampa il percorso del rapporto che vale.
 # `sed -n 1p` e non `head -1`: head chiuderebbe la pipe e sort morirebbe di SIGPIPE
 # sotto pipefail.
 finalizza_report() {  # $1 = kind, $2 = rapporto appena scritto
@@ -479,8 +482,8 @@ finalizza_report() {  # $1 = kind, $2 = rapporto appena scritto
   ultimo="$(rapporti_host "$kind" | grep -vxF "${nuovo##*/}" | sed -n 1p || true)"
   if [ -n "$ultimo" ] && cmp -s <(tail -n +2 "$REPORTS_DIR/$ultimo") <(tail -n +2 "$nuovo"); then
     rm -f "$nuovo"
-    printf '%s\n' "$REPORTS_DIR/$ultimo"
-    return 0
+    touch "$REPORTS_DIR/$ultimo"
+    nuovo="$REPORTS_DIR/$ultimo"
   fi
   prune_reports "$kind"
   printf '%s\n' "$nuovo"
@@ -492,6 +495,8 @@ verify_host() {  # $1 = kind ; returns 0 if clean — writes drift report
   build_stage "$RHOME"
   mkdir -p "$REPORTS_DIR"
   local report="$REPORTS_DIR/drift-$kind-$STAMP.md" issues=0 mem_drift=0
+  # Due giri nello stesso secondo non si sovrascrivono (il confronto sarebbe con se stesso).
+  [ ! -e "$report" ] || report="$REPORTS_DIR/drift-$kind-$STAMP-$$.md"
   {
     echo "# Drift report — $kind ($HOST) — $STAMP"
     echo

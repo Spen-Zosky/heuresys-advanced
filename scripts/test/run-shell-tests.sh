@@ -461,9 +461,17 @@ if [ -f "$AE" ] && command -v jq >/dev/null 2>&1 && command -v sha256sum >/dev/n
       && [ -f "$RD/drift-vm-20000109T000000Z.md" ] && [ -f "$RD/acceptance-20000101.md" ]; } \
     && ok "align-ecosystem: conservazione = ultimi 20 per host; gli altri host e gli altri file restano" \
     || fail "align-ecosystem: conservazione (vm=$(conta 'drift-vm-*.md') linuxpc=$(conta 'drift-linuxpc-*.md'))"
+  # Anche un giro INVARIATO pota: una cartella che ne ha gia' troppi (il caso da cui nasce
+  # P4) torna a 20 senza aspettare un giro diverso.
+  for n in 01 02 03 04 05; do printf 'x\n' > "$RD/drift-vm-199901${n}T000000Z.md"; done
+  sleep 1
+  o="$(giro FINTO_SSH_OUT=ancora-diverso)"
+  { [ "$(conta 'drift-vm-*.md')" = 20 ] && [ "$(conta 'drift-vm-1999*.md')" = 0 ] && grep -q 'rapporto invariato' <<<"$o"; } \
+    && ok "align-ecosystem: un giro invariato pota anche lui (ultimi 20)" \
+    || fail "align-ecosystem: giro invariato non pota (vm=$(conta 'drift-vm-*.md'))"
   rm -rf "$FA"
 else
-  ok "align-ecosystem rapporti: jq o sha256sum assenti, prova saltata"
+  printf '  \033[33mskip\033[0m align-ecosystem rapporti: jq o sha256sum assenti, prova non fatta\n'
 fi
 
 # ------------------- G. vm-deploy-remote.sh — detached-deploy wiring (D-49, static)
@@ -2222,7 +2230,7 @@ fi
 section "assegna-password: senza --ruota il secondo lancio non cambia niente (P5)"
 o="$(bash scripts/test/prova-assegna-password.sh 2>&1)"; r=$?
 if grep -q 'SALTATA' <<<"$o"; then
-  ok "assegna-password: $(grep -o 'SALTATA.*' <<<"$o")"
+  printf '  \033[33mskip\033[0m assegna-password: %s\n' "$(grep -o 'SALTATA.*' <<<"$o")"
 elif [ $r = 0 ]; then
   ok "assegna-password: $(grep -c '^  ok' <<<"$o") casi verdi su app e agenti (cluster privato)"
 else

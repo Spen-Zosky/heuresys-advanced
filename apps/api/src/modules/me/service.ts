@@ -591,7 +591,7 @@ export const meService = {
     return repo.loadPreferences(pool, actor.userId);
   },
 
-  /** Partial update of the caller's UI preferences (theme and/or palette). Tenant is taken from
+  /** Partial update of the caller's UI preferences (theme and/or locale). Tenant is taken from
    *  the resolving actor (FK isolation, never from request input); null tenant is allowed (the
    *  column is nullable for platform-scoped users). */
   async updatePreferences(actor: SelfActor, patch: UpdateUserPreferenceBody): Promise<UserPreference> {

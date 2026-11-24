@@ -11,7 +11,7 @@ import { useTranslation } from "react-i18next";
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
 import { PageHeader } from "@/components/intestazione-pagina";
 import { UpdateMeProfileBodySchema } from "@heuresys/shared";
-import type { MeProfileFull, MeTheme, MePalette } from "@heuresys/shared";
+import type { MeProfileFull, MeTheme } from "@heuresys/shared";
 import { apiFetch } from "../../../../lib/api/fetch";
 import { useMyPreferences, useUpdateMyPreferences } from "../../../../lib/api/auth";
 import { ProfileTabs, type ProfileTabDef } from "../../../../components/profile-tabs";
@@ -48,21 +48,14 @@ const THEME_OPTIONS: { value: MeTheme; labelKey: string }[] = [
   { value: "dark", labelKey: "profile.theme.dark" },
   { value: "light", labelKey: "profile.theme.light" },
 ];
-const PALETTE_OPTIONS: { value: MePalette; labelKey: string }[] = [
-  { value: "balanced", labelKey: "profile.palette.balanced" },
-  { value: "cool-ocean", labelKey: "profile.palette.coolOcean" },
-  { value: "warm-sunset", labelKey: "profile.palette.warmSunset" },
-  { value: "brand-mono", labelKey: "profile.palette.brandMono" },
-];
 
-/** WS-4 P1 — theme + palette controls. Server is the source of truth (PATCH /v1/me/preferences);
+/** WS-4 P1 — theme controls. Server is the source of truth (PATCH /v1/me/preferences);
  *  the layout's PreferencesApplier re-applies the saved choice on every session. */
 function AppearanceCard() {
   const { t } = useTranslation("ess");
   const prefs = useMyPreferences();
   const update = useUpdateMyPreferences();
   const theme = prefs.data?.theme;
-  const palette = prefs.data?.palette;
 
   return (
     <Card>
@@ -84,24 +77,6 @@ function AppearanceCard() {
                     data-testid={`pref-theme-${o.value}`}
                     disabled={update.isPending}
                     onClick={() => { void update.mutateAsync({ theme: o.value }); }}
-                  >
-                    {t(o.labelKey)}
-                  </Button>
-                ))}
-              </div>
-            </div>
-            <div className="space-y-1">
-              <span className="text-sm font-medium text-foreground">{t("profile.paletteLabel")}</span>
-              <div className="flex flex-wrap gap-2" role="group" aria-label={t("profile.paletteLabel")}>
-                {PALETTE_OPTIONS.map((o) => (
-                  <Button
-                    key={o.value}
-                    type="button"
-                    size="sm"
-                    variant={palette === o.value ? "default" : "outline"}
-                    data-testid={`pref-palette-${o.value}`}
-                    disabled={update.isPending}
-                    onClick={() => { void update.mutateAsync({ palette: o.value }); }}
                   >
                     {t(o.labelKey)}
                   </Button>

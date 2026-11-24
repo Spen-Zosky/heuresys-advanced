@@ -448,16 +448,9 @@
     "submitting": "Salvataggio…",
     "appearanceTitle": "Aspetto",
     "themeLabel": "Tema",
-    "paletteLabel": "Tavolozza dei colori",
     "theme": {
       "dark": "Scuro",
       "light": "Chiaro"
-    },
-    "palette": {
-      "balanced": "Equilibrata",
-      "coolOcean": "Oceano",
-      "warmSunset": "Tramonto",
-      "brandMono": "Monocromatica del marchio"
     },
     "settingsTitle": "Impostazioni",
     "full": {

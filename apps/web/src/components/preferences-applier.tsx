@@ -3,7 +3,7 @@
 /**
  * apps/web/src/components/preferences-applier.tsx
  *
- * WS-4 P1 — applies the caller's SERVER-stored UI preferences (theme + palette) on every
+ * WS-4 P1 — applies the caller's SERVER-stored UI preferences (theme + locale) on every
  * authenticated session, including a fresh device with no localStorage. The server is the
  * source of truth (GET /v1/me/preferences); localStorage is only a cache that the @heuresys/ui
  * ThemeProvider / PaletteDropdown read for first-paint — we keep it in sync so the no-FOUC boot
@@ -13,28 +13,18 @@
  */
 
 import { useEffect } from "react";
-import { useTheme, applyPalette, type PaletteIdx } from "@heuresys/ui";
-import type { MePalette } from "@heuresys/shared";
+import { useTheme } from "@heuresys/ui";
 import { useMyPreferences } from "../lib/api/auth";
 import { setLocale, i18n } from "../lib/i18n";
+import { dimenticaCopiaTavolozza } from "../lib/tavolozza";
 
-/** localStorage cache keys read by @heuresys/ui (ThemeProvider + PaletteDropdown) at first paint. */
+/** Chiave della copia del tema nel localStorage, letta da ThemeProvider al primo disegno. */
 const THEME_CACHE_KEY = "heuresys-theme";
-const PALETTE_CACHE_KEY = "heuresys-palette";
-
-/** Palette slug → @heuresys/ui PALETTES index (declaration order, 1:1 with the API CHECK set). */
-const PALETTE_IDX: Record<MePalette, PaletteIdx> = {
-  balanced: 0,
-  "cool-ocean": 1,
-  "warm-sunset": 2,
-  "brand-mono": 3,
-};
 
 export function PreferencesApplier() {
   const prefs = useMyPreferences();
   const { setTheme } = useTheme();
   const theme = prefs.data?.theme;
-  const palette = prefs.data?.palette;
   const locale = prefs.data?.locale;
 
   useEffect(() => {
@@ -43,17 +33,11 @@ export function PreferencesApplier() {
     setTheme(theme);
   }, [theme, setTheme]);
 
+  // Tavolozza: non c'è più una scelta (24/11/2026), vale solo quella standard del design system.
+  // Una volta per sessione si toglie dal browser la copia lasciata dal vecchio selettore.
   useEffect(() => {
-    if (!palette) return;
-    const idx = PALETTE_IDX[palette];
-    // Palette: apply the inline --palette-* vars now + cache the index for the next first-paint.
-    applyPalette(idx);
-    try {
-      window.localStorage.setItem(PALETTE_CACHE_KEY, String(idx));
-    } catch {
-      /* localStorage unavailable (private mode / SSR guard) — server stays the source of truth. */
-    }
-  }, [palette]);
+    dimenticaCopiaTavolozza();
+  }, []);
 
   // Belt-and-suspenders: ensure the theme cache key matches the server choice even if the
   // provider's own write is skipped (e.g. same-value setTheme no-op on a stale cached key).

@@ -1,11 +1,11 @@
 /**
  * apps/api/test/me-preferences.integration.test.ts
- * GET/PATCH /v1/me/preferences — per-user UI preferences (WS-4 P1 theme+palette + i18n Fase 0b
+ * GET/PATCH /v1/me/preferences — per-user UI preferences (WS-4 P1 theme + i18n Fase 0b
  * locale), server = source of truth.
  *
  * Asserts: default when no row (brand defaults dark/balanced/it), PATCH persists + survives a re-GET,
- * partial PATCH (theme-only never resets palette or locale; locale-only flips just the language),
- * self-scope (unauth GET 401), CSRF-missing PATCH 403, and validation (invalid theme/palette/locale → 400).
+ * partial PATCH (theme-only never resets locale; locale-only flips just the language),
+ * self-scope (unauth GET 401), CSRF-missing PATCH 403, and validation (invalid theme/locale → 400).
  *
  * Persona = the seed-test-admin employee (tommaso.fiore), login-capable in CI. Hits the real DB
  * through the tunnel (no mocks). The persona's preference row is reset before/after so the suite is
@@ -56,48 +56,48 @@ describe("/v1/me/preferences (WS-4 P1)", () => {
     await closePool();
   });
 
-  it("GET returns the brand defaults when no row exists (dark / balanced / it)", async () => {
+  it("GET returns the brand defaults when no row exists (dark / it)", async () => {
     const r = await getPrefs(suite, employeeS);
     expect(r.statusCode).toBe(200);
-    expect(r.json()).toEqual({ theme: "dark", palette: "balanced", locale: "it", sidebarOrder: null });
+    expect(r.json()).toEqual({ theme: "dark", locale: "it", sidebarOrder: null });
   });
 
-  it("PATCH persists theme+palette; a fresh GET reflects it (server source-of-truth)", async () => {
-    const p = await patchPrefs(suite, employeeS, { theme: "light", palette: "cool-ocean" });
+  it("PATCH persists theme; a fresh GET reflects it (server source-of-truth)", async () => {
+    const p = await patchPrefs(suite, employeeS, { theme: "light" });
     expect(p.statusCode).toBe(200);
     // locale stays the default 'it' (no row existed, INSERT fills the brand default).
-    expect(p.json()).toEqual({ theme: "light", palette: "cool-ocean", locale: "it", sidebarOrder: null });
+    expect(p.json()).toEqual({ theme: "light", locale: "it", sidebarOrder: null });
 
     const r = await getPrefs(suite, employeeS);
     expect(r.statusCode).toBe(200);
-    expect(r.json()).toEqual({ theme: "light", palette: "cool-ocean", locale: "it", sidebarOrder: null });
+    expect(r.json()).toEqual({ theme: "light", locale: "it", sidebarOrder: null });
   });
 
-  it("partial PATCH (theme only) does NOT reset the stored palette", async () => {
+  it("partial PATCH (theme only) does NOT reset the stored locale (it)", async () => {
     const p = await patchPrefs(suite, employeeS, { theme: "dark" });
     expect(p.statusCode).toBe(200);
-    // palette stays cool-ocean + locale stays it from the previous test
-    expect(p.json()).toEqual({ theme: "dark", palette: "cool-ocean", locale: "it", sidebarOrder: null });
+    // locale stays it from the previous test
+    expect(p.json()).toEqual({ theme: "dark", locale: "it", sidebarOrder: null });
 
     const r = await getPrefs(suite, employeeS);
-    expect(r.json()).toEqual({ theme: "dark", palette: "cool-ocean", locale: "it", sidebarOrder: null });
+    expect(r.json()).toEqual({ theme: "dark", locale: "it", sidebarOrder: null });
   });
 
   it("PATCH persists locale (en); a fresh GET reflects it (i18n Fase 0b)", async () => {
     const p = await patchPrefs(suite, employeeS, { locale: "en", sidebarOrder: null });
     expect(p.statusCode).toBe(200);
-    // only locale flips; theme+palette keep the prior stored values (partial update).
-    expect(p.json()).toEqual({ theme: "dark", palette: "cool-ocean", locale: "en", sidebarOrder: null });
+    // only locale flips; theme keeps the prior stored value (partial update).
+    expect(p.json()).toEqual({ theme: "dark", locale: "en", sidebarOrder: null });
 
     const r = await getPrefs(suite, employeeS);
-    expect(r.json()).toEqual({ theme: "dark", palette: "cool-ocean", locale: "en", sidebarOrder: null });
+    expect(r.json()).toEqual({ theme: "dark", locale: "en", sidebarOrder: null });
   });
 
   it("partial PATCH (theme only) does NOT reset the stored locale", async () => {
     const p = await patchPrefs(suite, employeeS, { theme: "light" });
     expect(p.statusCode).toBe(200);
     // locale stays 'en' from the previous test
-    expect(p.json()).toEqual({ theme: "light", palette: "cool-ocean", locale: "en", sidebarOrder: null });
+    expect(p.json()).toEqual({ theme: "light", locale: "en", sidebarOrder: null });
   });
 
   it("PATCH sidebarOrder persists the order; omitting it keeps it; null restores the standard order", async () => {
@@ -134,8 +134,8 @@ describe("/v1/me/preferences (WS-4 P1)", () => {
     expect(p.statusCode).toBe(400);
   });
 
-  it("PATCH with an invalid palette → 400 (Zod validation)", async () => {
-    const p = await patchPrefs(suite, employeeS, { palette: "not-a-palette" });
+  it("PATCH with only a palette → 400: la scelta della tavolozza non esiste più", async () => {
+    const p = await patchPrefs(suite, employeeS, { palette: "cool-ocean" });
     expect(p.statusCode).toBe(400);
   });
 

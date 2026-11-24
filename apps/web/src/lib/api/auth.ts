@@ -166,7 +166,7 @@ export const ME_PREFERENCES_QUERY_KEY = ["me", "preferences"] as const;
 
 /**
  * The caller's stored UI preferences (GET /v1/me/preferences). Server is the source of truth:
- * theme+palette are re-applied on every session (incl. a new device) by the layout's
+ * theme is re-applied on every session (incl. a new device) by the layout's
  * PreferencesApplier. The API returns the brand defaults (dark / balanced) when no row exists yet.
  */
 export function useMyPreferences() {

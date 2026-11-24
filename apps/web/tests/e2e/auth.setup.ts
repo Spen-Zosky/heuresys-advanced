@@ -45,7 +45,7 @@ for (const key of TARGET_PERSONAS) {
     // in-process — a worker kill skips it), failing every IT-asserting spec.
     // The setup project runs before every other project, so a locale-only
     // PATCH here re-baselines the whole suite. Partial update (COALESCE
-    // server-side): theme/palette untouched. Reuses the session cookies just
+    // server-side): theme untouched. Reuses the session cookies just
     // obtained — zero extra login POSTs against the 10/5min rate limit.
     const csrf = (await page.context().cookies()).find((c) => c.name === "hrx_csrf")?.value;
     if (csrf) {

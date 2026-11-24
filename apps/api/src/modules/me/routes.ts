@@ -568,7 +568,7 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     schema: { response: { 200: MeDocumentsResponseSchema } },
   }, async (req) => meService.listDocuments(selfActor(req)));
 
-  // UI preferences (WS-4 P1) — theme + palette, server source-of-truth. Self-scoped; GET returns
+  // UI preferences (WS-4 P1) — theme + locale, server source-of-truth. Self-scoped; GET returns
   // the brand defaults if no row exists yet, PATCH upserts (CSRF-protected state change).
   app.get("/preferences", {
     preHandler: [requirePermission("me:preferences:read")],

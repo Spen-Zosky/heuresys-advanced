@@ -76,8 +76,10 @@ export function costruisci(fmt: Formati, enumi: Map<string, string>, rubrica: Ru
       if (/^0\d/.test(t)) return s;
       const n = Number(t);
       if (Number.isInteger(n) && n >= 1900 && n <= 2100) return s; // un anno resta un anno
+      // K20 (forense 23/11): le cifre decimali scritte (al più due) restano tutte. Con il solo
+      // massimo, «42.0» scritto dalla pagina con un decimale fisso diventava «42» accanto a «46.2».
       const decimali = t.includes(".") ? Math.min(2, t.split(".")[1]!.length) : 0;
-      return fmt.numero(n, decimali);
+      return decimali > 0 ? fmt.numeroFisso(n, decimali) : fmt.numero(n, 0);
     }
     if (ISO_DATA.test(t)) return fmt.data(t);
     // un mese «2023-08» si legge «ago 2023» (C3: una colonna di mesi non è una colonna di codici)

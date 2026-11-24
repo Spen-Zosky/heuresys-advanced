@@ -132,17 +132,17 @@ export default function MeDelegationsPage() {
     d.endsOn ? t("delegations.period.range", { from: fmt.data(d.startsOn), to: fmt.data(d.endsOn) }) : t("delegations.period.open", { from: fmt.data(d.startsOn) });
 
   if (mie.isLoading) {
-    return <main className="mx-auto max-w-5xl px-6 pb-8"><StatoCaricamento /></main>;
+    return <div className="mx-auto max-w-5xl px-6 pb-8"><StatoCaricamento /></div>;
   }
   if (mie.isError || !mie.data) {
-    return <main className="mx-auto max-w-5xl px-6 pb-8">
+    return <div className="mx-auto max-w-5xl px-6 pb-8">
         <StatoErrore errore={mie.error} titolo={t("delegations.error")} testId="me-delegations-error" onRiprova={() => void mie.refetch()} />
-      </main>;
+      </div>;
   }
   const { granted, received } = mie.data;
 
   return (
-    <main data-testid="me-delegations-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
+    <div data-testid="me-delegations-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
       <PageHeader title={t("delegations.title")} description={t("delegations.description")} />
 
       {(proposte.data?.items ?? []).length > 0 && (
@@ -309,6 +309,6 @@ export default function MeDelegationsPage() {
           )}
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }

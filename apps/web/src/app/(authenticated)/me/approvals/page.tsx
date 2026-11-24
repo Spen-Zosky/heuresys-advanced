@@ -31,7 +31,7 @@ export default function MeApprovalsPage() {
   ];
 
   return (
-    <main data-testid="me-approvals-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
+    <div data-testid="me-approvals-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
       <PageHeader title={t("approvals.title")} description={t("approvals.description")} />
 
       {q.isLoading ? (
@@ -90,6 +90,6 @@ export default function MeApprovalsPage() {
           )}
         </>
       )}
-    </main>
+    </div>
   );
 }

@@ -72,18 +72,18 @@ export default function SkillsByCategoryAnalyticsPage() {
 
   if (q.isLoading) {
     return (
-      <main className="mx-auto max-w-7xl px-6 pb-8">
+      <div className="mx-auto max-w-7xl px-6 pb-8">
         <PageHeader title={t("skillsByCategory.title")} description={t("skillsByCategory.description")} />
         <StatoCaricamento testId="analytics-skills-by-category-loading" />
-      </main>
+      </div>
     );
   }
   if (q.isError) {
     return (
-      <main className="mx-auto max-w-7xl px-6 pb-8">
+      <div className="mx-auto max-w-7xl px-6 pb-8">
         <PageHeader title={t("skillsByCategory.title")} description={t("skillsByCategory.description")} />
         <StatoErrore errore={q.error} titolo={t("error")} testId="analytics-skills-by-category-error" onRiprova={() => void q.refetch()} />
-      </main>
+      </div>
     );
   }
 
@@ -102,7 +102,7 @@ export default function SkillsByCategoryAnalyticsPage() {
   });
 
   return (
-    <main data-testid="analytics-skills-by-category-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
+    <div data-testid="analytics-skills-by-category-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       <PageHeader
         data-testid="analytics-skills-by-category-title"
         title={t("skillsByCategory.title")}
@@ -186,6 +186,6 @@ export default function SkillsByCategoryAnalyticsPage() {
           motivo={t("skillsByCategory.emptyDesc")}
         />
       )}
-    </main>
+    </div>
   );
 }

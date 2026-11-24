@@ -91,7 +91,7 @@ export default function ApprovalDetailPage() {
   useContestoAgente(d ? t("approvals.detail.agent.context", { title: d.title }) : null);
 
   return (
-    <main data-testid="approval-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
+    <div data-testid="approval-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
       <div className="text-sm">
         <Link href="/approvals" className="text-muted-foreground hover:underline" data-testid="approval-detail-back">
           ← {t("approvals.detail.back")}
@@ -219,6 +219,6 @@ export default function ApprovalDetailPage() {
 
         </>
       )}
-    </main>
+    </div>
   );
 }

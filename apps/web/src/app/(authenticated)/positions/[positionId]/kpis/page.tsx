@@ -40,7 +40,7 @@ export default function PositionKpisPage() {
   const items = kpis.data?.items ?? [];
 
   return (
-    <main data-testid="position-kpis-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
+    <div data-testid="position-kpis-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="position-kpis-title"
         title={t("positions.kpis.title")}
@@ -95,6 +95,6 @@ export default function PositionKpisPage() {
           />
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }

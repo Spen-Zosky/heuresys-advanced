@@ -48,7 +48,7 @@ export default function MeAnalyticsPage() {
   ];
 
   return (
-    <main data-testid="me-analytics-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="me-analytics-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader title={t("analytics.title")} description={t("analytics.description")} />
 
       {q.isLoading ? (
@@ -156,6 +156,6 @@ export default function MeAnalyticsPage() {
           </section>
         </>
       )}
-    </main>
+    </div>
   );
 }

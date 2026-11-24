@@ -31,7 +31,7 @@ export default function MeTeamPage() {
     [...lista].sort((a, b) => (persone.get(a.userId)?.etichetta ?? a.fullName ?? "").localeCompare(persone.get(b.userId)?.etichetta ?? b.fullName ?? "", "it"));
 
   return (
-    <main data-testid="me-team-page" className="mx-auto max-w-5xl space-y-8 px-6 pb-8">
+    <div data-testid="me-team-page" className="mx-auto max-w-5xl space-y-8 px-6 pb-8">
       <PageHeader
         title={t("team.title")}
         description={t("team.description")}
@@ -89,6 +89,6 @@ export default function MeTeamPage() {
           ))}
         </section>
       )}
-    </main>
+    </div>
   );
 }

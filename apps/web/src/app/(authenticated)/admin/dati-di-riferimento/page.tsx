@@ -50,17 +50,17 @@ export default function DatiDiRiferimentoPage() {
 
   // Il lavoro sulle fonti ufficiali è del custode dei dati e della piattaforma (reference_sync:read):
   // a chi non ha quel mandato la pagina lo dice, senza chiamate che tornerebbero 403.
-  if (permessi.isLoading) return <main className="mx-auto max-w-6xl px-6 pb-8"><StatoCaricamento /></main>;
+  if (permessi.isLoading) return <div className="mx-auto max-w-6xl px-6 pb-8"><StatoCaricamento /></div>;
   if (!puoLeggere) {
     return (
-      <main data-testid="dati-riferimento-page" className="mx-auto max-w-6xl space-y-6 px-6 pb-8">
+      <div data-testid="dati-riferimento-page" className="mx-auto max-w-6xl space-y-6 px-6 pb-8">
         <PageHeader title={t("datiRiferimento.titolo")} description={t("datiRiferimento.descrizione")} />
         <StatoNegato motivo={t("datiRiferimento.negato")} />
-      </main>
+      </div>
     );
   }
   return (
-    <main data-testid="dati-riferimento-page" className="mx-auto max-w-6xl space-y-6 px-6 pb-8">
+    <div data-testid="dati-riferimento-page" className="mx-auto max-w-6xl space-y-6 px-6 pb-8">
       <PageHeader title={t("datiRiferimento.titolo")} description={t("datiRiferimento.descrizione")} />
 
       <Card data-testid="dati-riferimento-fonti">
@@ -140,6 +140,6 @@ export default function DatiDiRiferimentoPage() {
           )}
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }

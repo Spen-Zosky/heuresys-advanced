@@ -101,15 +101,15 @@ export default function UserDetailPage() {
 
   if (q.isLoading) {
     return (
-      <main className="mx-auto max-w-5xl px-6 pb-8">
+      <div className="mx-auto max-w-5xl px-6 pb-8">
         <StatoCaricamento />
-      </main>
+      </div>
     );
   }
   if (q.isError) {
     const code = isApiError(q.error) ? q.error.status : 0;
     return (
-      <main className="mx-auto max-w-5xl px-6 pb-8" data-testid="user-error">
+      <div className="mx-auto max-w-5xl px-6 pb-8" data-testid="user-error">
         <Link href="/users" className="text-sm underline">{t("users.detail.back")}</Link>
         <div className="mt-4">
           <StatoErrore
@@ -119,7 +119,7 @@ export default function UserDetailPage() {
             onRiprova={() => void q.refetch()}
           />
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -135,7 +135,7 @@ export default function UserDetailPage() {
   const s = (k: string) => t(`users.detail.dossier.${k}`);
 
   return (
-    <main data-testid="user-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
+    <div data-testid="user-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="user-display-name"
         // K22 (R1): anche il titolo della scheda scrive la persona «Cognome, Nome».
@@ -396,6 +396,6 @@ export default function UserDetailPage() {
         ]}
       />
       <SessioniUtente userId={userId} />
-    </main>
+    </div>
   );
 }

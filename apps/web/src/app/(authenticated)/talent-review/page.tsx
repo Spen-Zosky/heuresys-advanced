@@ -152,7 +152,7 @@ export default function TalentReviewPage() {
   ];
 
   return (
-    <main data-testid="talent-review-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="talent-review-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="talent-review-title"
         title={t("talentReview.title")}
@@ -324,6 +324,6 @@ export default function TalentReviewPage() {
           ) },
         ]}
       />
-    </main>
+    </div>
   );
 }

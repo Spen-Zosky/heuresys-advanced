@@ -9,7 +9,7 @@ import { visibiliSuMobile } from "@/lib/colonne-mobile";
 import { PageHeader } from "@/components/intestazione-pagina";
 import { useTranslation } from "react-i18next";
 import type { ServerPagination } from "@/lib/hooks/use-paginated-list";
-import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
+import { StatoCaricamento, StatoErrore, StatoVuoto, type LivelloTitolo } from "@/components/stato-pagina";
 import { OrigineDelDato, OrigineDellaRiga } from "@/components/origine-del-dato";
 import { descrivi, useTabellaAgente } from "@/lib/agente/use-tabella-agente";
 import { ConSpiegazione } from "@/components/spiegazione";
@@ -26,7 +26,7 @@ import { cellaVuota, colonnaVuotaOvunque } from "@/lib/celle-tabella";
  *
  * - `EntityTable`: the state-machine (loading/error/empty) + DataTableWithCrossHair.
  *   Reuse it inside tabbed pages that have their own PageHeader.
- * - `DataTablePanel`: full page = <main> + PageHeader + EntityTable.
+ * - `DataTablePanel`: full page = container + PageHeader + EntityTable (the `main` landmark comes from the shell).
  *
  * Live-data doctrine: `rows` come from a real /v1/* fetch; the empty branch is a
  * real empty-state, never a placeholder.
@@ -94,6 +94,11 @@ export interface EntityTableProps<T> {
    * server viene da `server.apiPath`; un elenco caricato per intero lo passa qui.
    */
   originPath?: string;
+  /**
+   * Livello del titolo degli stati vuoto ed errore (K13). Senza, h3: giusto dentro una scheda con
+   * il suo h2. `DataTablePanel`, che mette la tabella subito sotto l'h1 della pagina, passa h2.
+   */
+  livelloTitoloStati?: LivelloTitolo;
 }
 
 /** Le intestazioni dello stato: la colonna che chiude la riga (R3). */
@@ -110,7 +115,7 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
     isLoading, isError, errorTestId, errorMessage, error, deniedReason,
     rows: righeRicevute, rowKey, rowTestId, onRowClick, columns,
     emptyTestId, emptyTitle, emptyDescription, caption,
-    pageSize: pageSizeProp, server, originPath,
+    pageSize: pageSizeProp, server, originPath, livelloTitoloStati,
   } = props;
   const percorsoOrigine = originPath ?? server?.apiPath;
   // La tabella si dichiara all'assistente e ne esegue i comandi della vista (cerca, filtra,
@@ -145,6 +150,7 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
       <StatoErrore
         errore={error}
         titolo={errorMessage ?? t("error.load")}
+        livelloTitolo={livelloTitoloStati}
         {...(deniedReason ? { motivoNegato: deniedReason } : {})}
         {...(errorTestId ? { testId: errorTestId } : {})}
       />
@@ -154,6 +160,7 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
     return (
       <StatoVuoto
         titolo={emptyTitle ?? t("empty.none")}
+        livelloTitolo={livelloTitoloStati}
         {...(emptyDescription ? { motivo: emptyDescription } : {})}
         {...(emptyTestId ? { testId: emptyTestId } : {})}
       />
@@ -356,7 +363,7 @@ export function DataTablePanel<T>(props: DataTablePanelProps<T>) {
   } = props;
 
   return (
-    <main data-testid={pageTestId} className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid={pageTestId} className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid={titleTestId}
         title={title}
@@ -369,7 +376,7 @@ export function DataTablePanel<T>(props: DataTablePanelProps<T>) {
         }
       />
       {children}
-      <EntityTable<T> {...table} />
-    </main>
+      <EntityTable<T> livelloTitoloStati="h2" {...table} />
+    </div>
   );
 }

@@ -143,7 +143,7 @@ export default function EnterpriseTypingPage() {
   const set = (k: keyof Modulo) => (v: string) => setModulo((m) => ({ ...m, [k]: v }));
 
   return (
-    <main data-testid="enterprise-typing-page" className="mx-auto max-w-3xl space-y-6 px-6 pb-8">
+    <div data-testid="enterprise-typing-page" className="mx-auto max-w-3xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="enterprise-typing-title"
         title={t("enterpriseTyping.title")}
@@ -296,6 +296,6 @@ export default function EnterpriseTypingPage() {
           )}
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }

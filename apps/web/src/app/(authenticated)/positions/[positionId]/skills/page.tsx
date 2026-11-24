@@ -38,7 +38,7 @@ export default function PositionSkillsPage() {
   const items = skills.data?.items ?? [];
 
   return (
-    <main data-testid="position-skills-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
+    <div data-testid="position-skills-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="position-skills-title"
         title={t("positions.skills.title")}
@@ -85,6 +85,6 @@ export default function PositionSkillsPage() {
           />
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }

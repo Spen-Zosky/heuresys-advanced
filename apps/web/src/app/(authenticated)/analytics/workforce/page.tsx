@@ -84,16 +84,16 @@ export default function WorkforceAnalyticsPage() {
 
   if (q.isLoading) {
     return (
-      <main className="mx-auto max-w-7xl px-6 pb-8">
+      <div className="mx-auto max-w-7xl px-6 pb-8">
         <StatoCaricamento testId="analytics-workforce-loading" />
-      </main>
+      </div>
     );
   }
   if (q.isError) {
     return (
-      <main className="mx-auto max-w-7xl px-6 pb-8">
+      <div className="mx-auto max-w-7xl px-6 pb-8">
         <StatoErrore errore={q.error} titolo={t("error")} testId="analytics-workforce-error" onRiprova={() => void q.refetch()} />
-      </main>
+      </div>
     );
   }
 
@@ -101,7 +101,7 @@ export default function WorkforceAnalyticsPage() {
   const hasData = d.byOrgUnit.length > 0;
 
   return (
-    <main data-testid="analytics-workforce-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
+    <div data-testid="analytics-workforce-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       <PageHeader
         data-testid="analytics-workforce-title"
         title={t("workforce.title")}
@@ -181,6 +181,6 @@ export default function WorkforceAnalyticsPage() {
           motivo={t("workforce.emptyDesc")}
         />
       )}
-    </main>
+    </div>
   );
 }

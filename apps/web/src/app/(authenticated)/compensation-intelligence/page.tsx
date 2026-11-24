@@ -744,7 +744,7 @@ export default function CompensationIntelligencePage() {
   }, [t, f]);
 
   return (
-    <main
+    <div
       data-testid="compensation-page"
       className="mx-auto max-w-7xl space-y-6 px-6 pb-8"
     >
@@ -1054,6 +1054,6 @@ export default function CompensationIntelligencePage() {
           },
         ]}
       />
-    </main>
+    </div>
   );
 }

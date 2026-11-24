@@ -66,7 +66,7 @@ export default function EngagementResultsPage() {
   ].join(" · ");
 
   return (
-    <main data-testid="engagement-results-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
+    <div data-testid="engagement-results-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
       <div className="text-sm">
         <Link href="/engagement" className="text-muted-foreground hover:underline" data-testid="engagement-results-back">
           ← {t("engagement.results.back")}
@@ -114,6 +114,6 @@ export default function EngagementResultsPage() {
           )}
         </>
       )}
-    </main>
+    </div>
   );
 }

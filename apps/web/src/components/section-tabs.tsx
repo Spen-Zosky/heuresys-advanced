@@ -9,10 +9,10 @@
  * "le altre diventano tab dentro la pagina principale" (navigation merge, not a
  * content rewrite).
  *
- * Mounted ONCE in the authenticated layout (above the page <main>): it derives the
+ * Mounted ONCE in the authenticated layout (above the page content, inside the shell main): it derives the
  * active group from the current pathname and renders nothing on routes that are not
  * part of a merge group — so non-merged pages are unaffected. The max-w-7xl/px-6
- * container matches the analytics pages' own <main>, so the bar lines up with them.
+ * container matches the analytics pages' own container, so the bar lines up with them.
  */
 
 import Link from "next/link";

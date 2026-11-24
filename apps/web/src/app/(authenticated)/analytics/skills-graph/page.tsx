@@ -62,7 +62,7 @@ export default function SkillsGraphPage() {
   const d = graph.data;
 
   return (
-    <main data-testid="analytics-skills-graph" className="mx-auto max-w-7xl px-6 pb-8">
+    <div data-testid="analytics-skills-graph" className="mx-auto max-w-7xl px-6 pb-8">
       <PageHeader
         title={t("skillsGraph.title")}
         description={t("skillsGraph.description")}
@@ -121,7 +121,7 @@ export default function SkillsGraphPage() {
         )}
 
         {rootId === null ? (
-          <StatoVuoto
+          <StatoVuoto livelloTitolo="h2"
             testId="skills-graph-empty"
             titolo={t("skillsGraph.pickTitle")}
             motivo={t("skillsGraph.pickDescription")}
@@ -129,7 +129,7 @@ export default function SkillsGraphPage() {
         ) : graph.isLoading ? (
           <StatoCaricamento testId="skills-graph-loading" />
         ) : graph.isError ? (
-          <StatoErrore
+          <StatoErrore livelloTitolo="h2"
             errore={graph.error}
             titolo={t("error")}
             testId="skills-graph-error"
@@ -182,6 +182,6 @@ export default function SkillsGraphPage() {
           </>
         ) : null}
       </div>
-    </main>
+    </div>
   );
 }

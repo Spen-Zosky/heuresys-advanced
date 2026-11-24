@@ -67,16 +67,16 @@ export default function DashboardPage() {
 
   if (widgets.isLoading) {
     return (
-      <main className="mx-auto max-w-7xl px-6 pb-8">
+      <div className="mx-auto max-w-7xl px-6 pb-8">
         <StatoCaricamento testId="dashboard-loading" />
-      </main>
+      </div>
     );
   }
   if (widgets.isError) {
     return (
-      <main className="mx-auto max-w-7xl px-6 pb-8">
+      <div className="mx-auto max-w-7xl px-6 pb-8">
         <StatoErrore errore={widgets.error} titolo={t("dashboard.error")} testId="dashboard-error" onRiprova={() => void widgets.refetch()} />
-      </main>
+      </div>
     );
   }
   const w = widgets.data!;
@@ -102,7 +102,7 @@ export default function DashboardPage() {
   });
 
   return (
-    <main data-testid="dashboard-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
+    <div data-testid="dashboard-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       <PageHeader
         data-testid="dashboard-title"
         title={t("dashboard.title")}
@@ -180,6 +180,6 @@ export default function DashboardPage() {
           )}
         </div>
       </section>
-    </main>
+    </div>
   );
 }

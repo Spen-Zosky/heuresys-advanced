@@ -212,12 +212,12 @@ export default function CatalogoKpiPage() {
   const processi = perms.includes("process_kpi_template:read");
   const unita = perms.includes("organization_unit_kpi_template:read");
   return (
-    <main data-testid="kpi-templates-page" className="mx-auto max-w-6xl space-y-6 px-6 pb-8">
+    <div data-testid="kpi-templates-page" className="mx-auto max-w-6xl space-y-6 px-6 pb-8">
       <PageHeader title={t("catalogoKpi.titolo")} description={t("catalogoKpi.descrizione")} />
       {permessi.isLoading && <StatoCaricamento />}
       {permessi.isSuccess && !processi && !unita && <StatoNegato motivo={t("catalogoKpi.negato")} />}
       {processi && <PerProcesso />}
       {unita && <PerUnita />}
-    </main>
+    </div>
   );
 }

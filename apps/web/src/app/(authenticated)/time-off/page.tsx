@@ -98,7 +98,7 @@ export default function TimeOffPage() {
   ], [requests.total, rules.total, txns.total, t, f]);
 
   return (
-    <main data-testid="time-off-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="time-off-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader data-testid="time-off-title" title={t("timeOff.title")} description={t("timeOff.description")} />
 
       <KPIStrip items={kpis} />
@@ -171,6 +171,6 @@ export default function TimeOffPage() {
           ) },
         ]}
       />
-    </main>
+    </div>
   );
 }

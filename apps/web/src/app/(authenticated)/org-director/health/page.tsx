@@ -121,7 +121,7 @@ export default function OrgHealthPage() {
   const data = scorecard.data;
 
   return (
-    <main data-testid="org-health-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="org-health-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="org-health-title"
         title={t("orgHealth.title")}
@@ -181,6 +181,6 @@ export default function OrgHealthPage() {
             })
           : t("orgHealth.methodIdle")}
       </p>
-    </main>
+    </div>
   );
 }

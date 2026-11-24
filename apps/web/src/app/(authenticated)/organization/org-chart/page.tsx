@@ -44,7 +44,7 @@ export default function OrgChartPage() {
   const predefinito = clienti.length > 1 && me.data ? (clienti.find((x) => x.tenantId !== me.data?.tenantId)?.tenantId ?? null) : null;
   const tenantId = richiesto ?? (scelto || predefinito);
   return (
-    <main data-testid="org-chart-page" className="mx-auto max-w-[96rem] space-y-6 px-6 pb-8">
+    <div data-testid="org-chart-page" className="mx-auto max-w-[96rem] space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="org-chart-title"
         title={t("orgChart.title")}
@@ -72,6 +72,6 @@ export default function OrgChartPage() {
           <VistaOrganigramma tenantId={tenantId} testId="org-chart-vista" />
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }

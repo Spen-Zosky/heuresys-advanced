@@ -145,7 +145,7 @@ export default function ApprovalsPage() {
   );
 
   return (
-    <main data-testid="approvals-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="approvals-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="approvals-title"
         title={t("approvals.title")}
@@ -322,6 +322,6 @@ export default function ApprovalsPage() {
           caption={t("approvals.caption")}
         />
       </div>
-    </main>
+    </div>
   );
 }

@@ -116,16 +116,16 @@ export default function OrgNetworkAnalyticsPage() {
 
   if (q.isLoading) {
     return (
-      <main className="mx-auto max-w-7xl px-6 pb-8">
+      <div className="mx-auto max-w-7xl px-6 pb-8">
         <StatoCaricamento testId="analytics-org-network-loading" />
-      </main>
+      </div>
     );
   }
   if (q.isError) {
     return (
-      <main className="mx-auto max-w-7xl px-6 pb-8">
+      <div className="mx-auto max-w-7xl px-6 pb-8">
         <StatoErrore errore={q.error} titolo={t("error")} testId="analytics-org-network-error" onRiprova={() => void q.refetch()} />
-      </main>
+      </div>
     );
   }
 
@@ -135,7 +135,7 @@ export default function OrgNetworkAnalyticsPage() {
   const scoperta = t("orgNetwork.vacant");
 
   return (
-    <main data-testid="analytics-org-network-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
+    <div data-testid="analytics-org-network-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       <PageHeader
         data-testid="analytics-org-network-title"
         title={t("orgNetwork.title")}
@@ -257,6 +257,6 @@ export default function OrgNetworkAnalyticsPage() {
           motivo={t("orgNetwork.emptyDesc")}
         />
       )}
-    </main>
+    </div>
   );
 }

@@ -16,11 +16,18 @@
  * e gli agenti che leggono la pagina riconoscono lo stato senza leggere il testo.
  */
 
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { EmptyState, ErrorState, Spinner } from "@heuresys/ui";
 import { Inbox, Lock } from "lucide-react";
 import { isApiError, NetworkError, SessionExpiredError, testoErrore, testoPerLaPersona } from "@/lib/api/errors";
+
+/**
+ * Livello del titolo dello stato (K13, @heuresys/ui 1.7.0). Senza, è l'h3 della libreria: va bene
+ * dentro una scheda che ha già il suo h2. Uno stato che sta subito sotto l'h1 della pagina passa
+ * "h2", per non saltare un livello (axe heading-order).
+ */
+export type LivelloTitolo = ComponentProps<typeof EmptyState>["headingLevel"];
 
 export function StatoCaricamento({ etichetta, testId = "stato-caricamento" }: { etichetta?: string; testId?: string }) {
   const { t } = useTranslation();
@@ -44,6 +51,7 @@ export function StatoVuoto({
   azione,
   icona,
   compatto,
+  livelloTitolo,
   testId = "stato-vuoto",
 }: {
   titolo?: string;
@@ -52,6 +60,7 @@ export function StatoVuoto({
   icona?: ReactNode;
   /** Una riga sola, per i vuoti dentro una scheda o una tabellina: stesso stato, meno spazio. */
   compatto?: boolean;
+  livelloTitolo?: LivelloTitolo;
   testId?: string;
 }) {
   const { t } = useTranslation();
@@ -70,12 +79,13 @@ export function StatoVuoto({
         title={titolo ?? t("common:empty.none")}
         {...(motivo ? { description: motivo } : {})}
         {...(azione ? { action: azione } : {})}
+        headingLevel={livelloTitolo}
       />
     </div>
   );
 }
 
-export function StatoNegato({ motivo, testId = "stato-negato" }: { motivo?: string; testId?: string }) {
+export function StatoNegato({ motivo, livelloTitolo, testId = "stato-negato" }: { motivo?: string; livelloTitolo?: LivelloTitolo; testId?: string }) {
   const { t } = useTranslation();
   return (
     <div data-testid={testId} data-stato="negato">
@@ -83,6 +93,7 @@ export function StatoNegato({ motivo, testId = "stato-negato" }: { motivo?: stri
         icon={<Lock className="h-6 w-6" aria-hidden="true" />}
         title={t("common:stato.negato.titolo")}
         description={motivo ?? t("common:stato.negato.motivo")}
+        headingLevel={livelloTitolo}
       />
     </div>
   );
@@ -101,6 +112,7 @@ export function StatoErrore({
   titolo,
   onRiprova,
   motivoNegato,
+  livelloTitolo,
   testId = "stato-errore",
 }: {
   errore?: unknown;
@@ -108,11 +120,12 @@ export function StatoErrore({
   onRiprova?: () => void;
   /** Il motivo da dire se l'API nega l'accesso (403), quando la pagina lo sa meglio dell'API. */
   motivoNegato?: string;
+  livelloTitolo?: LivelloTitolo;
   testId?: string;
 }) {
   const { t } = useTranslation();
   if (isApiError(errore) && errore.status === 403) {
-    return <StatoNegato motivo={motivoNegato ?? testoErrore(errore.status, errore.code)} testId={testId} />;
+    return <StatoNegato motivo={motivoNegato ?? testoErrore(errore.status, errore.code)} livelloTitolo={livelloTitolo} testId={testId} />;
   }
   const codice = codiceErrore(errore);
   // Giro 18/11 (G-RENDER): «non trovato» scriveva UUID e NOT_FOUND nel testo. Il messaggio e' in parole;
@@ -131,6 +144,7 @@ export function StatoErrore({
         title={titolo ?? t("common:error.load")}
         description={testo}
         {...(onRiprova ? { retry: onRiprova } : {})}
+        headingLevel={livelloTitolo}
       />
       {perAssistenza && dettagli.length > 0 ? (
         <details className="mx-auto mt-1 max-w-md break-words px-4 text-center text-xs text-muted-foreground">
@@ -149,6 +163,7 @@ export function StatoDellaQuery({
   vuotoTitolo,
   vuotoMotivo,
   erroreTitolo,
+  livelloTitolo,
   children,
 }: {
   query: { isLoading: boolean; isError: boolean; error?: unknown; refetch?: () => unknown };
@@ -156,6 +171,7 @@ export function StatoDellaQuery({
   vuotoTitolo?: string;
   vuotoMotivo?: string;
   erroreTitolo?: string;
+  livelloTitolo?: LivelloTitolo;
   children: ReactNode;
 }) {
   if (query.isLoading) return <StatoCaricamento />;
@@ -164,13 +180,14 @@ export function StatoDellaQuery({
     return (
       <StatoErrore
         errore={query.error}
+        livelloTitolo={livelloTitolo}
         {...(erroreTitolo ? { titolo: erroreTitolo } : {})}
         {...(riprova ? { onRiprova: () => void riprova() } : {})}
       />
     );
   }
   if (vuoto) {
-    return <StatoVuoto {...(vuotoTitolo ? { titolo: vuotoTitolo } : {})} {...(vuotoMotivo ? { motivo: vuotoMotivo } : {})} />;
+    return <StatoVuoto livelloTitolo={livelloTitolo} {...(vuotoTitolo ? { titolo: vuotoTitolo } : {})} {...(vuotoMotivo ? { motivo: vuotoMotivo } : {})} />;
   }
   return <>{children}</>;
 }

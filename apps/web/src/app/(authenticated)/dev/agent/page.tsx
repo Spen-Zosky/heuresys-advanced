@@ -48,7 +48,7 @@ function DisabledNotice() {
   const { t } = useTranslation("admin");
   return (
     // C7: anche spenta, la pagina ha il suo titolo
-    <main className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader title={t("agentDev.title")} description={t("agentDev.description")} />
       <Card data-testid="agentdev-disabled">
         <CardHeader>
@@ -58,7 +58,7 @@ function DisabledNotice() {
           <p className="text-sm text-muted-foreground">{t("agentDev.disabledDesc")}</p>
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }
 
@@ -91,11 +91,13 @@ export default function AgentDevConsolePage() {
   if (!AGENT_DEV_ENABLED) return <DisabledNotice />;
 
   return (
-    <main className="mx-auto max-w-4xl px-6 pb-8">
+    <div className="mx-auto max-w-4xl px-6 pb-8">
       {/* C7: la pagina ha il suo titolo, come le altre; il pannello porta il nome della conversazione */}
       <PageHeader title={t("agentDev.title")} description={t("agentDev.description")} />
       <AgentPanel
         testIdPrefix="agentdev"
+        // K13: il pannello sta subito sotto l'h1 della pagina, quindi i suoi titoli sono h2.
+        headingLevel="h2"
         labels={{
           title: t("agentDev.panelTitle"),
           description: "",
@@ -139,6 +141,6 @@ export default function AgentDevConsolePage() {
         onApproval={(d, reason) => void resolveApproval(d, reason)}
         notice={notice === null || noticeText === null ? null : { kind: notice.kind, text: noticeText }}
       />
-    </main>
+    </div>
   );
 }

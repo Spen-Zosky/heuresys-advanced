@@ -276,6 +276,7 @@
     "theme": "Alterna tema chiaro e scuro",
     "userMenu": "Menu utente: {{username}}",
     "languageSwitch": "{{lang}} — cambia lingua tra italiano e inglese",
+    "homeLabel": "pagina iniziale",
     "paletteSearch": "Cerca tenant, log, audit…",
     "paletteEmpty": "Nessun comando configurato",
     "drawerTitle": "Menu di navigazione",

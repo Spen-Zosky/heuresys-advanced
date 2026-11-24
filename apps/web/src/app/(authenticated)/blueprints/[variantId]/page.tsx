@@ -71,15 +71,15 @@ export default function BlueprintVariantDetailPage() {
 
   if (variant.isLoading) {
     return (
-      <main className="mx-auto max-w-5xl px-6 pb-8">
+      <div className="mx-auto max-w-5xl px-6 pb-8">
         <StatoCaricamento />
-      </main>
+      </div>
     );
   }
   if (variant.isError) {
     const status = isApiError(variant.error) ? variant.error.status : 0;
     return (
-      <main className="mx-auto max-w-5xl px-6 pb-8">
+      <div className="mx-auto max-w-5xl px-6 pb-8">
         <Link href="/blueprints" className="text-sm underline">{t("detail.back")}</Link>
         <div className="mt-4">
           <StatoErrore
@@ -89,12 +89,12 @@ export default function BlueprintVariantDetailPage() {
             onRiprova={() => void variant.refetch()}
           />
         </div>
-      </main>
+      </div>
     );
   }
   const v = variant.data!;
   return (
-    <main data-testid="blueprint-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
+    <div data-testid="blueprint-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="blueprint-name"
         title={v.name}
@@ -246,6 +246,6 @@ export default function BlueprintVariantDetailPage() {
           </CardContent>
         </Card>
       )}
-    </main>
+    </div>
   );
 }

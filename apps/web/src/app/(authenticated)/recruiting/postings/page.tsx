@@ -94,7 +94,7 @@ export default function PostingsPage() {
   const items = q.data?.items ?? [];
 
   return (
-    <main data-testid="postings-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
+    <div data-testid="postings-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       <PageHeader title={t("recruiting.postings.title")} description={t("recruiting.postings.description")} />
 
       {canWrite && (
@@ -206,6 +206,6 @@ export default function PostingsPage() {
           </table>
         </div>
       )}
-    </main>
+    </div>
   );
 }

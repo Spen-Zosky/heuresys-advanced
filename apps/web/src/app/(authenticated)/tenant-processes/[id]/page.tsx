@@ -94,12 +94,12 @@ export default function TenantProcessPage() {
   // ADR-0061 D4: la classificazione per faccette. Chi non ha `bpm_process:read` non vede la scheda.
   const faccette = useFaccetteProcesso(id ?? "");
 
-  if (q.isLoading) return <main className="px-6 pb-8"><StatoCaricamento testId="tenant-process-loading" /></main>;
+  if (q.isLoading) return <div className="px-6 pb-8"><StatoCaricamento testId="tenant-process-loading" /></div>;
   if (q.isError || !s) {
     return (
-      <main className="px-6 pb-8">
+      <div className="px-6 pb-8">
         <StatoErrore errore={q.error} titolo={t("processiDelTenant.scheda.error")} testId="tenant-process-error" onRiprova={() => void q.refetch()} />
-      </main>
+      </div>
     );
   }
 
@@ -238,7 +238,7 @@ export default function TenantProcessPage() {
   );
 
   return (
-    <main data-testid="tenant-process-page" className="space-y-4 px-6 pb-8">
+    <div data-testid="tenant-process-page" className="space-y-4 px-6 pb-8">
       <PageHeader
         title={p.name}
         description={t("processiDelTenant.scheda.riepilogo", { attivita: fmt.numero(att.length), unita: fmt.numero(s.units.length), sottoprocessi: fmt.numero(s.subprocesses.length) })}
@@ -316,6 +316,6 @@ export default function TenantProcessPage() {
           </DialogContent>
         ) : null}
       </Dialog>
-    </main>
+    </div>
   );
 }

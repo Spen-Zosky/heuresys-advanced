@@ -187,7 +187,7 @@ export default function CandidatesPage() {
   );
 
   return (
-    <main data-testid="candidates-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
+    <div data-testid="candidates-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       <PageHeader title={t("recruiting.candidates.title")} description={t("recruiting.candidates.description")} />
 
       {feedback && (
@@ -251,6 +251,6 @@ export default function CandidatesPage() {
           ) },
         ]}
       />
-    </main>
+    </div>
   );
 }

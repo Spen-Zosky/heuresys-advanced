@@ -22,16 +22,16 @@ export default function AnalyticsKpiPage() {
 
   if (q.isLoading) {
     return (
-      <main className="mx-auto max-w-7xl px-6 pb-8">
+      <div className="mx-auto max-w-7xl px-6 pb-8">
         <StatoCaricamento testId="analytics-kpi-loading" />
-      </main>
+      </div>
     );
   }
   if (q.isError) {
     return (
-      <main className="mx-auto max-w-7xl px-6 pb-8">
+      <div className="mx-auto max-w-7xl px-6 pb-8">
         <StatoErrore errore={q.error} titolo={t("error")} testId="analytics-kpi-error" onRiprova={() => void q.refetch()} />
-      </main>
+      </div>
     );
   }
 
@@ -54,7 +54,7 @@ export default function AnalyticsKpiPage() {
   const nullCount = d.byKpi.length - scored.length;
 
   return (
-    <main data-testid="analytics-kpi-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
+    <div data-testid="analytics-kpi-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       <PageHeader
         title={t("kpi.title")}
         description={t("kpi.description")}
@@ -123,6 +123,6 @@ export default function AnalyticsKpiPage() {
           </>
         )}
       </section>
-    </main>
+    </div>
   );
 }

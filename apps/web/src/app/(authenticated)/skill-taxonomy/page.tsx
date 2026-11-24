@@ -27,7 +27,7 @@ export default function SkillTaxonomyPage() {
   const { t } = useTranslation("hr");
 
   return (
-    <main data-testid="skill-taxonomy-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="skill-taxonomy-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="skill-taxonomy-title"
         title={t("taxonomy.title")}
@@ -43,6 +43,6 @@ export default function SkillTaxonomyPage() {
           { id: "livelli", titolo: t("taxonomy.levels.title"), contenuto: <ProficiencyLevelsPanel /> },
         ]}
       />
-    </main>
+    </div>
   );
 }

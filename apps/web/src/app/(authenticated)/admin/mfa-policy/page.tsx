@@ -295,7 +295,7 @@ export default function AdminMfaPolicyPage() {
   const enabledCount = (policies.data?.items ?? []).filter((p) => p.enabled).length;
 
   return (
-    <main data-testid="admin-mfa-policy-page" className="mx-auto max-w-4xl space-y-6 px-6 pb-8">
+    <div data-testid="admin-mfa-policy-page" className="mx-auto max-w-4xl space-y-6 px-6 pb-8">
       <PageHeader
         title={t("mfaPolicy.title")}
         description={t("mfaPolicy.description")}
@@ -351,6 +351,6 @@ export default function AdminMfaPolicyPage() {
           { id: "esenzioni", titolo: t("mfaPolicy.tabs.exemptions"), contenuto: <ExemptionsCard canManage={canManage} /> },
         ]}
       />
-    </main>
+    </div>
   );
 }

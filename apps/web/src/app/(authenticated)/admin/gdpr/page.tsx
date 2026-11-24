@@ -145,7 +145,7 @@ export default function GdprAdminPage() {
   const mappa = useQuery({ queryKey: ["gdpr", "data-map"], queryFn: () => apiFetch<GdprDataMapResponse>("/v1/gdpr/data-map"), enabled: perms.includes("gdpr:read") });
   const richieste = useQuery({ queryKey: ["gdpr", "requests"], queryFn: () => apiFetch<GdprRequestListResponse>("/v1/gdpr/requests?limit=50"), enabled: perms.includes("gdpr:read") });
   return (
-    <main data-testid="gdpr-admin-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="gdpr-admin-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader title={t("gdpr.titolo")} description={t("gdpr.descrizione")} />
       {(perms.includes("gdpr:export") || perms.includes("gdpr:erase")) && <Persona />}
       {perms.includes("gdpr:retention") && <Conservazione />}
@@ -176,6 +176,6 @@ export default function GdprAdminPage() {
           </ul>
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }

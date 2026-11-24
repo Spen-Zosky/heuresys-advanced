@@ -64,7 +64,7 @@ export default function AdminRolesPage() {
     : rp.isError ? t("common:stato.nonDisponibile") : t("common:loading");
 
   return (
-    <main data-testid="admin-roles-page" className="max-w-7xl mx-auto px-6 pb-8 space-y-6">
+    <div data-testid="admin-roles-page" className="max-w-7xl mx-auto px-6 pb-8 space-y-6">
       <PageHeader
         title={t("roles.title")}
         description={t("roles.description")}
@@ -156,6 +156,6 @@ export default function AdminRolesPage() {
       </Card>
 
       <DelegheAmministrazione />
-    </main>
+    </div>
   );
 }

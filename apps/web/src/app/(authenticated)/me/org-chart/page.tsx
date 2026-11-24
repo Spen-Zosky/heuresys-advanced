@@ -29,7 +29,7 @@ export default function MeOrgChartPage() {
   );
 
   return (
-    <main data-testid="me-org-chart-page" className="mx-auto max-w-[96rem] space-y-6 px-6 pb-8">
+    <div data-testid="me-org-chart-page" className="mx-auto max-w-[96rem] space-y-6 px-6 pb-8">
       <PageHeader
         title={t("orgChart.title")}
         description={t("orgChart.description")}
@@ -45,6 +45,6 @@ export default function MeOrgChartPage() {
           <VistaOrganigramma evidenzia={evidenzia} testId="me-org-chart-vista" />
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }

@@ -130,7 +130,7 @@ export default function MeMatchingPage() {
   const noRoleEvidence = jobRoles.data?.evidenceCount === 0;
 
   return (
-    <main data-testid="me-matching-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
+    <div data-testid="me-matching-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       {/* #40 (S1018): free-text semantic search — live pgvector + query-time Voyage embedding */}
       <SemanticSearchPanel />
       <section className="space-y-6">
@@ -217,6 +217,6 @@ export default function MeMatchingPage() {
           caption={t("matching.jobRoles.title")}
         />
       </section>
-    </main>
+    </div>
   );
 }

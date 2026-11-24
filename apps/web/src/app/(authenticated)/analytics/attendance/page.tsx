@@ -197,7 +197,7 @@ export default function AttendanceAnalyticsPage() {
               >
                 <EChartsCard
                   option={ouBarOption(d.byOrgUnit)}
-                  height={Math.max(280, d.byOrgUnit.length * 26)}
+                  height={280}
                   ariaLabel={t("attendance.ouTitle")}
                   assi={{ x: t("charts.axisHours"), y: t("charts.axisUnit") }}
                   lingua={i18n.language}

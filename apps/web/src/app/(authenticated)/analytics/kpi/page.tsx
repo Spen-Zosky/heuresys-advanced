@@ -2,11 +2,12 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, RadialGauge, echartsPresets } from "@heuresys/ui";
+import { Badge, RadialGauge } from "@heuresys/ui";
 import { PageHeader } from "@/components/intestazione-pagina";
 import { StatsCard } from "@/components/indicatori-leggibili";
 import { Gauge, Target } from "lucide-react";
 import { EChartsCard } from "../../_charts-client";
+import { barreOrizzontali } from "@/lib/altezza-grafico";
 import type { KpiAnalyticsResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
@@ -46,8 +47,9 @@ export default function AnalyticsKpiPage() {
 
   // D14: il grafico mostra SOLO gli indicatori con un risultato misurato. Un indicatore senza
   // dato non e' a 0%: non ha ancora un numero, e disegnarlo a zero sarebbe un numero falso.
-  const barOption = echartsPresets.bar({
-    x: scored.map((k) => k.kpiName),
+  // K17: barre orizzontali, un nome di indicatore per riga (verticali ne mostravano uno su tre)
+  const barOption = barreOrizzontali({
+    y: scored.map((k) => k.kpiName),
     series: [{ name: t("kpi.series"), values: scored.map((k) => k.avgAchievementPct) }],
   });
 
@@ -109,7 +111,7 @@ export default function AnalyticsKpiPage() {
           <>
             {scored.length > 0 ? (
               <div data-testid="analytics-kpi-chart">
-                <EChartsCard option={barOption} height={Math.max(240, scored.length * 28)} ariaLabel={t("kpi.chartTitle")} />
+                <EChartsCard option={barOption} height={240} ariaLabel={t("kpi.chartTitle")} />
               </div>
             ) : null}
             <p className="text-xs text-muted-foreground" data-testid="analytics-kpi-measured">

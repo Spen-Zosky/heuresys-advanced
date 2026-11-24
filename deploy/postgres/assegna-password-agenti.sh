@@ -36,8 +36,8 @@ FILE="$DIR/db-agenti.env"
 # Domanda al cluster che risponde 1 o 0; un errore o altro NON e' uno 0.
 chiedi() {  # $1 = SELECT che restituisce 0 o 1
   local r
-  r="$(sudo -u postgres psql -X -tAqc "$1" 2>/dev/null)" \
-    || { echo "[agenti-pw] ERRORE: non riesco a interrogare il cluster (sudo -u postgres psql): non tocco niente" >&2; exit 1; }
+  r="$(sudo -n -u postgres psql -X -tAqc "$1" 2>/dev/null)" \
+    || { echo "[agenti-pw] ERRORE: non riesco a interrogare il cluster (sudo -n -u postgres psql): non tocco niente" >&2; exit 1; }
   case "$(printf '%s' "$r" | tr -d '[:space:]')" in
     1) return 0 ;;
     0) return 1 ;;
@@ -70,7 +70,7 @@ risponde() {  # «password rifiutata» non e' «server irraggiungibile»
   if command -v pg_isready >/dev/null 2>&1; then
     pg_isready -q -t 5 -h "${POSTGRES_HOST:-localhost}" -p "${POSTGRES_PORT:-5432}"
   else
-    sudo -u postgres psql -X -tAqc 'select 1' >/dev/null 2>&1
+    sudo -n -u postgres psql -X -tAqc 'select 1' >/dev/null 2>&1
   fi
 }
 
@@ -79,7 +79,7 @@ risponde() {  # «password rifiutata» non e' «server irraggiungibile»
 # il file non si scrive. La password e' di 32 esadecimali: niente da citare.
 applica_al_ruolo() {  # $1 = password
   printf "BEGIN;\nSET LOCAL log_statement = 'none';\nSET LOCAL log_min_duration_statement = -1;\nSET LOCAL log_min_error_statement = 'panic';\nSET LOCAL pg_stat_statements.track_utility = off;\nALTER ROLE %s LOGIN PASSWORD '%s';\nCOMMIT;\n" \
-    "$RUOLO" "$1" | sudo -u postgres psql -X -q -v ON_ERROR_STOP=1 -d "$DB" -f - >/dev/null
+    "$RUOLO" "$1" | sudo -n -u postgres psql -X -q -v ON_ERROR_STOP=1 -v VERBOSITY=terse -d "$DB" -f - >/dev/null
 }
 
 # Il file nuovo si PREPARA prima di toccare il ruolo (temporaneo nella stessa cartella,

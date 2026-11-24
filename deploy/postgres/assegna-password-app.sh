@@ -52,8 +52,8 @@ RUOLO="heuresys_app"
 # NON e' uno 0: lo script si ferma senza toccare niente.
 chiedi() {  # $1 = SELECT che restituisce 0 o 1
   local r
-  r="$(sudo -u postgres psql -X -tAqc "$1" 2>/dev/null)" \
-    || { echo "[app-pw] ERRORE: non riesco a interrogare il cluster (sudo -u postgres psql): non tocco niente" >&2; exit 1; }
+  r="$(sudo -n -u postgres psql -X -tAqc "$1" 2>/dev/null)" \
+    || { echo "[app-pw] ERRORE: non riesco a interrogare il cluster (sudo -n -u postgres psql): non tocco niente" >&2; exit 1; }
   case "$(printf '%s' "$r" | tr -d '[:space:]')" in
     1) return 0 ;;
     0) return 1 ;;
@@ -91,7 +91,7 @@ risponde() {
   if command -v pg_isready >/dev/null 2>&1; then
     pg_isready -q -t 5 -h "${DB_HOST:-localhost}" -p "${DB_PORT:-5432}"
   else
-    sudo -u postgres psql -X -tAqc 'select 1' >/dev/null 2>&1
+    sudo -n -u postgres psql -X -tAqc 'select 1' >/dev/null 2>&1
   fi
 }
 
@@ -103,7 +103,7 @@ risponde() {
 applica_al_ruolo() {  # $1 = password
   printf "BEGIN;\nSET LOCAL log_statement = 'none';\nSET LOCAL log_min_duration_statement = -1;\nSET LOCAL log_min_error_statement = 'panic';\nSET LOCAL pg_stat_statements.track_utility = off;\nALTER ROLE %s LOGIN PASSWORD %s;\nCOMMIT;\n" \
     "$RUOLO" "$(printf "%s" "$1" | sed "s/'/''/g; s/^/'/; s/$/'/")" \
-    | sudo -u postgres psql -X -q -v ON_ERROR_STOP=1 -d heuresys_advanced -f - >/dev/null
+    | sudo -n -u postgres psql -X -q -v ON_ERROR_STOP=1 -v VERBOSITY=terse -d heuresys_advanced -f - >/dev/null
 }
 
 # Il .env nuovo si PREPARA prima di toccare il ruolo: copia di sicurezza (e' gitignored e

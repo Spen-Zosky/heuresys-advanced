@@ -10,12 +10,14 @@ on:
     paths:
       - "scripts/**"
       - "db/scripts/**"
+      - "deploy/postgres/**"
       - ".github/workflows/shell-tests.yml"
   pull_request:
     branches: [main]
     paths:
       - "scripts/**"
       - "db/scripts/**"
+      - "deploy/postgres/**"
       - ".github/workflows/shell-tests.yml"
   workflow_dispatch: {}
 

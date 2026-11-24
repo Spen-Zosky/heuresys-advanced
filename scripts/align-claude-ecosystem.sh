@@ -496,7 +496,8 @@ verify_host() {  # $1 = kind ; returns 0 if clean — writes drift report
   mkdir -p "$REPORTS_DIR"
   local report="$REPORTS_DIR/drift-$kind-$STAMP.md" issues=0 mem_drift=0
   # Due giri nello stesso secondo non si sovrascrivono (il confronto sarebbe con se stesso).
-  [ ! -e "$report" ] || report="$REPORTS_DIR/drift-$kind-$STAMP-$$.md"
+  # `_` e non `-`: in ordine C `_` viene dopo `.`, quindi il secondo risulta il piu' recente.
+  [ ! -e "$report" ] || report="$REPORTS_DIR/drift-$kind-${STAMP}_$$.md"
   {
     echo "# Drift report — $kind ($HOST) — $STAMP"
     echo

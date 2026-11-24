@@ -27,12 +27,13 @@
  */
 
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState, type ComponentProps } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore, type ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import { formati, localeDi } from "@/lib/format";
 import { esadecimaleConAlfa, etichetteLeggibiliMappaDiCalore } from "@/lib/colori-grafico";
 import { assiDerivati, letturaDelGrafico, type ChartTable } from "@/lib/lettura-grafico";
 import { testoCellaGrafico } from "@/lib/celle-tabella";
+import { ALTEZZA_RIGA_ETICHETTA, altezzaGrafico, type Misura } from "@/lib/altezza-grafico";
 
 const RawEChartsCard = dynamic(
   // Subpath `/charts` isolates echarts so this lazy import does NOT drag the whole
@@ -101,8 +102,8 @@ function numeroLocale(locale: string) {
 function rendiLeggibile(option: RawProps["option"], locale: string): RawProps["option"] {
   const o = { ...(option as Record<string, unknown>) };
   const num = numeroLocale(locale);
-  const asse = (a: unknown): unknown => {
-    if (Array.isArray(a)) return a.map(asse);
+  const asse = (a: unknown, verticale = false): unknown => {
+    if (Array.isArray(a)) return a.map((x) => asse(x, verticale));
     if (!a || typeof a !== "object") return a;
     const ax = { ...(a as Record<string, unknown>) };
     const label = { ...((ax.axisLabel as Record<string, unknown>) ?? {}) };
@@ -112,12 +113,18 @@ function rendiLeggibile(option: RawProps["option"], locale: string): RawProps["o
     } else if (tipo === "category") {
       if (label.width === undefined) label.width = 200;
       if (label.overflow === undefined) label.overflow = "break";
+      // K17: sull'asse verticale ogni categoria scrive la sua etichetta (ECharts altrimenti ne salta
+      // qualcuna quando si toccano) con un'interlinea nota, quella su cui altezzaGrafico fa il conto
+      if (verticale) {
+        if (label.interval === undefined) label.interval = 0;
+        if (label.lineHeight === undefined) label.lineHeight = ALTEZZA_RIGA_ETICHETTA;
+      }
     }
     ax.axisLabel = label;
     return ax;
   };
   if (o.xAxis) o.xAxis = asse(o.xAxis);
-  if (o.yAxis) o.yAxis = asse(o.yAxis);
+  if (o.yAxis) o.yAxis = asse(o.yAxis, true);
   const serie = Array.isArray(o.series) ? (o.series as unknown[]).length : 0;
   if (o.legend && typeof o.legend === "object" && !Array.isArray(o.legend)) {
     const voci = Array.isArray((o.legend as Record<string, unknown>).data)
@@ -241,6 +248,23 @@ function conEtichetteLeggibili(option: RawProps["option"], root: HTMLElement): R
   return etichetteLeggibiliMappaDiCalore(option, { fondo: v("--card"), testi: [v("--foreground"), v("--background"), "#000000", "#FFFFFF"] });
 }
 
+/** K17: la larghezza di un'etichetta misurata dal browser con il carattere di ECharts (sans-serif),
+ *  una sola tela per tutta la pagina; null dove non c'è una tela. */
+let misuraCondivisa: Misura | null | undefined;
+function misuraDelBrowser(): Misura | null {
+  if (misuraCondivisa === undefined) {
+    const ctx = document.createElement("canvas").getContext("2d");
+    misuraCondivisa = ctx
+      ? (testo: string, corpo: number) => {
+          ctx.font = `${corpo}px sans-serif`;
+          return ctx.measureText(testo).width;
+        }
+      : null;
+  }
+  return misuraCondivisa;
+}
+const senzaIscrizione = () => () => {};
+
 export function EChartsCard({ assi, tabella, lingua, ...props }: EChartsCardProps) {
   const { i18n } = useTranslation();
   const locale = localeDi(lingua ?? i18n.language);
@@ -263,10 +287,21 @@ export function EChartsCard({ assi, tabella, lingua, ...props }: EChartsCardProp
     [props.option, themeTick, assi?.x, assi?.y, locale],
   );
 
+  // K17: l'altezza data dalla pagina è il minimo; un asse verticale di categorie la fa crescere
+  // con le righe e con le righe di testo delle etichette. Le etichette si misurano nel browser con il
+  // carattere di ECharts; durante l'idratazione vale la stima del server (la terza funzione di
+  // useSyncExternalStore), così il primo disegno coincide e la misura vera arriva subito dopo.
+  const misura = useSyncExternalStore(senzaIscrizione, misuraDelBrowser, () => null);
+  const altezza = useMemo(
+    () => (typeof props.height === "number" ? altezzaGrafico(rendiLeggibile(conNomiDegliAssi(props.option, assi), locale), props.height, misura ?? undefined) : props.height),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [props.option, props.height, assi?.x, assi?.y, locale, misura],
+  );
+
   const lettura = useMemo(() => letturaDelGrafico(props.option, locale), [props.option, locale]);
   return (
     <>
-      <RawEChartsCard {...props} option={option} />
+      <RawEChartsCard {...props} height={altezza} option={option} />
       {lettura ? (
         <p className="mt-2 text-xs leading-relaxed text-muted-foreground" data-grafico-lettura>{lettura.frase}</p>
       ) : null}

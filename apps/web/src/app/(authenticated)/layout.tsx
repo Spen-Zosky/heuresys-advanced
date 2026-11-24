@@ -307,7 +307,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
   // declares in blocks of 100 per group. Every group is collapsible (DashboardSidebar keeps
   // the open/closed state per group id).
   const sections = ifaces.data?.perspectives ?? [];
-  // Una voce sola accesa: la rotta piu' lunga che contiene la pagina. Con la sola regola del
+  // Una voce sola accesa: la rotta più lunga che contiene la pagina. Con la sola regola del
   // prefisso «/dashboard» restava accesa anche su «/dashboard/company», insieme alla sua voce.
   const allRoutes = sections.flatMap((s) => s.interfaces.map((i) => i.route));
   const activeRoute = allRoutes
@@ -398,8 +398,8 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
         ? nomeCompleto.split(/[\s,]+/).filter(Boolean).map((w) => w.charAt(0)).join("").slice(0, 2)
         : user.email.slice(0, 2)
   ).toUpperCase();
-  // Non `roles[0]`: l'ordine con cui l'API restituisce i ruoli e' arbitrario, e
-  // con l'invariante I17 (chiunque e' almeno USER) un'amministratrice di tenant
+  // Non `roles[0]`: l'ordine con cui l'API restituisce i ruoli è arbitrario, e
+  // con l'invariante I17 (chiunque è almeno USER) un'amministratrice di tenant
   // finiva presentata come «Dipendente» — vedi lib/role-precedence.ts.
   const primaryRole = primaryRoleOf(roles);
   const identity: UserIdentity = {
@@ -475,7 +475,10 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
           toggleLabel={t("shell:ui.toggleSidebar")}
           footerSlot={
             <div className="space-y-2 border-t border-border px-3 py-3">
-              <p data-testid="app-user-email" title={user.email} className="break-all text-xs text-muted-foreground">
+              {/* K21 (forense 23/11): a barra compressa (72 px) l'email sparisce con le altre etichette
+                  invece di spezzarsi su cinque righe; a barra aperta va a capo solo se non ci sta
+                  (`break-words`, non `break-all`), mai tagliata (regola «nessun testo troncato»). */}
+              <p data-testid="app-user-email" title={user.email} className="nav-label break-words text-xs text-muted-foreground">
                 {user.email}
               </p>
               <Button

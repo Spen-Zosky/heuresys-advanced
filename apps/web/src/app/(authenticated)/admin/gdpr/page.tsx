@@ -24,6 +24,7 @@ import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { useFormat } from "@/lib/format";
 import { PersonPicker } from "@/components/person-picker";
 import { LavoroInCorso } from "@/components/lavoro-in-corso";
+import { raggruppaMappa } from "@/lib/gdpr-mappa";
 
 function righeTotali(tabelle: Record<string, { affectedRows: number }>): number {
   return Object.values(tabelle).reduce((s, x) => s + x.affectedRows, 0);
@@ -139,10 +140,14 @@ function Conservazione() {
 }
 
 export default function GdprAdminPage() {
-  const { t } = useTranslation("admin");
+  const { t, i18n } = useTranslation("admin");
   const fmt = useFormat();
   const perms = useCurrentUserPermissions().data?.permissions ?? [];
-  const mappa = useQuery({ queryKey: ["gdpr", "data-map"], queryFn: () => apiFetch<GdprDataMapResponse>("/v1/gdpr/data-map"), enabled: perms.includes("gdpr:read") });
+  // I titoli delle tabelle arrivano dall'API nella lingua della pagina (giro forense K34).
+  const lingua = i18n.language?.startsWith("en") ? "en" : "it";
+  const mappa = useQuery({ queryKey: ["gdpr", "data-map", lingua], queryFn: () => apiFetch<GdprDataMapResponse>(`/v1/gdpr/data-map?lingua=${lingua}`), enabled: perms.includes("gdpr:read") });
+  const [nomiTecnici, setNomiTecnici] = useState(false);
+  const gruppi = raggruppaMappa(mappa.data?.items ?? [], t, (k) => i18n.exists(k, { ns: "admin" }), lingua);
   const richieste = useQuery({ queryKey: ["gdpr", "requests"], queryFn: () => apiFetch<GdprRequestListResponse>("/v1/gdpr/requests?limit=50"), enabled: perms.includes("gdpr:read") });
   return (
     <main data-testid="gdpr-admin-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
@@ -165,15 +170,33 @@ export default function GdprAdminPage() {
       </Card>
       <Card data-testid="gdpr-data-map">
         <CardHeader><CardTitle as="h2">{t("gdpr.mappa", { count: mappa.data?.items.length ?? 0 })}</CardTitle></CardHeader>
-        <CardContent>
-          <ul className="divide-y divide-border rounded-card border border-border text-xs">
-            {(mappa.data?.items ?? []).map((m) => (
-              <li key={`${m.tableSchema}.${m.tableName}.${m.subjectFkColumn}`} data-testid="gdpr-map-row" className="flex flex-wrap justify-between gap-3 px-4 py-2">
-                <span className="font-mono">{m.tableSchema}.{m.tableName}</span>
-                <span>{t(`gdpr.strategie.${m.erasureStrategy}`)}{m.retentionDays ? ` · ${t("gdpr.giorni", { count: m.retentionDays })}` : ""}</span>
-              </li>
-            ))}
-          </ul>
+        <CardContent className="space-y-4">
+          {/* Giro forense K34: per classe di dato e con il titolo della tabella. Il nome fisico
+              serve a chi verifica il registro, e si mostra a richiesta, non come prima cosa. */}
+          <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
+            <p className="text-muted-foreground">{t("gdpr.mappaSpiega")}</p>
+            <Button variant="outline" size="sm" data-testid="gdpr-map-technical" aria-pressed={nomiTecnici} onClick={() => setNomiTecnici((x) => !x)}>
+              {nomiTecnici ? t("gdpr.nascondiNomiTecnici") : t("gdpr.mostraNomiTecnici")}
+            </Button>
+          </div>
+          {gruppi.map((g) => (
+            <section key={g.classe} data-testid="gdpr-map-group" data-classe={g.classe} className="space-y-2">
+              <h3 className="text-sm font-semibold text-foreground">{t(`gdpr.classi.${g.classe}`)} <span className="font-normal text-muted-foreground">· {fmt.numero(g.voci.length)}</span></h3>
+              <ul className="divide-y divide-border rounded-card border border-border text-sm">
+                {g.voci.map((m) => (
+                  <li key={`${m.tableSchema}.${m.tableName}.${m.subjectFkColumn}`} data-testid="gdpr-map-row" className="flex flex-wrap justify-between gap-3 px-4 py-2">
+                    <span className="min-w-0 break-words">
+                      <span className="text-foreground">{m.titolo}</span>
+                      <span className="text-muted-foreground"> · {t(`gdpr.riferimento.${m.referenceKind}`)}</span>
+                      {m.ripetuta > 1 ? <span className="block text-xs text-muted-foreground">{t("gdpr.piuColonne", { count: m.ripetuta })}</span> : null}
+                      {nomiTecnici ? <span className="block break-all font-mono text-xs text-muted-foreground" data-testid="gdpr-map-physical">{m.tableSchema}.{m.tableName} · {m.subjectFkColumn}</span> : null}
+                    </span>
+                    <span>{t(`gdpr.strategie.${m.erasureStrategy}`)}{m.retentionDays ? ` · ${t("gdpr.giorni", { count: m.retentionDays })}` : ""}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
         </CardContent>
       </Card>
     </main>

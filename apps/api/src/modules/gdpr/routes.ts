@@ -15,6 +15,7 @@
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { actorFromRequest as actorFromReq } from "../../lib/actor.js";
 import {
+  GdprDataMapQuerySchema,
   GdprDataMapResponseSchema,
   GdprUserIdParamSchema,
   GdprExportBundleSchema,
@@ -33,9 +34,9 @@ export const gdprRoutes: FastifyPluginAsyncZod = async (app) => {
     "/data-map",
     {
       preHandler: [requirePermission("gdpr:read")],
-      schema: { response: { 200: GdprDataMapResponseSchema } },
+      schema: { querystring: GdprDataMapQuerySchema, response: { 200: GdprDataMapResponseSchema } },
     },
-    async (req) => gdprService.dataMap(actorFromReq(req)),
+    async (req) => gdprService.dataMap(actorFromReq(req), req.query.lingua),
   );
 
   // Il REGISTRO delle richieste: si scriveva e non si poteva rileggere —

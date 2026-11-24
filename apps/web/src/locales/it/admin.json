@@ -2115,6 +2115,28 @@
     "statiRichiesta": {
       "COMPLETED": "Eseguita",
       "DRY_RUN": "Prova"
+    },
+    "mappaSpiega": "Ogni tabella che contiene dati di una persona, per classe di dato, con ciò che succede alla cancellazione e il periodo di conservazione.",
+    "mostraNomiTecnici": "Mostra i nomi tecnici",
+    "nascondiNomiTecnici": "Nascondi i nomi tecnici",
+    "senzaTitolo": "Tabella senza descrizione nel catalogo",
+    "piuColonne": "Compare {{count}} volte: una per ogni colonna che indica la persona.",
+    "piuColonne_one": "Compare {{count}} volta.",
+    "classi": {
+      "IDENTITY": "Identità",
+      "PERSONAL": "Dati anagrafici e personali",
+      "FINANCIAL_LEGAL": "Dati economici e legali",
+      "EVALUATION": "Valutazioni",
+      "OPERATIONAL": "Attività di lavoro",
+      "AUTH_SECURITY": "Accesso e sicurezza",
+      "DERIVED": "Dati derivati"
+    },
+    "riferimento": {
+      "SUBJECT": "dati della persona",
+      "ACTOR": "la persona come autrice di dati di altri"
+    },
+    "tabelle": {
+      "sys_leads": "Contatti commerciali (richieste di contatto)"
     }
   },
   "agentCaps": {

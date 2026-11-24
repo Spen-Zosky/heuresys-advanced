@@ -17,7 +17,10 @@ import type { ActorContext } from "../../lib/actor.js";
 import { haMandatoGdpr } from "../../lib/scope/mandati.js";
 import { ForbiddenError, NotFoundError, ConflictError } from "../../errors/index.js";
 import * as repo from "./repository.js";
+import { classificazioneDi } from "../faldone/classi.js";
+import { testiFaldone } from "../faldone/inglese.js";
 import type {
+  FaldoneLingua,
   GdprDataMapResponse,
   GdprExportBundle,
   GdprErasureReport,
@@ -48,8 +51,20 @@ function assertTenantScope(actor: ActorContext, subject: SubjectRow): void {
 }
 
 export const gdprService = {
-  async dataMap(_actor: ActorContext): Promise<GdprDataMapResponse> {
-    return { items: await repo.listDataMap(pool) };
+  /**
+   * La mappa, con il titolo leggibile di ogni tabella (giro forense K34): la pagina mostrava solo
+   * il nome fisico. Il titolo viene dal catalogo del Faldone, che è già la fonte dei nomi delle
+   * tabelle che parlano di una persona, in italiano e in inglese: qui non se ne scrive un secondo.
+   */
+  async dataMap(_actor: ActorContext, lingua?: FaldoneLingua): Promise<GdprDataMapResponse> {
+    const tt = testiFaldone(lingua ?? "it");
+    const voci = await repo.listDataMap(pool);
+    return {
+      items: voci.map((v) => {
+        const c = classificazioneDi(`${v.tableSchema}.${v.tableName}`);
+        return { ...v, title: c ? tt.titolo(c.titolo) : null };
+      }),
+    };
   },
 
   /**

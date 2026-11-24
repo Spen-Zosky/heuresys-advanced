@@ -2115,6 +2115,28 @@
     "statiRichiesta": {
       "COMPLETED": "Done",
       "DRY_RUN": "Trial"
+    },
+    "mappaSpiega": "Every table holding a person's data, by data class, with what happens on erasure and the retention period.",
+    "mostraNomiTecnici": "Show technical names",
+    "nascondiNomiTecnici": "Hide technical names",
+    "senzaTitolo": "Table with no description in the catalogue",
+    "piuColonne": "Appears {{count}} times: once for each column that points to the person.",
+    "piuColonne_one": "Appears {{count}} time.",
+    "classi": {
+      "IDENTITY": "Identity",
+      "PERSONAL": "Personal data",
+      "FINANCIAL_LEGAL": "Financial and legal data",
+      "EVALUATION": "Evaluations",
+      "OPERATIONAL": "Work activity",
+      "AUTH_SECURITY": "Access and security",
+      "DERIVED": "Derived data"
+    },
+    "riferimento": {
+      "SUBJECT": "the person's data",
+      "ACTOR": "the person as author of others' data"
+    },
+    "tabelle": {
+      "sys_leads": "Sales contacts (contact requests)"
     }
   },
   "agentCaps": {

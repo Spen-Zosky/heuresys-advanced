@@ -27,6 +27,12 @@ import type {
 import { userHasPermission } from "../../middleware/rbac.js";
 import * as repo from "./repository.js";
 
+/** Un gettone d'agente il cui compito esclude il permesso non lo recupera dall'essere responsabile. */
+function compitoComprende(actor: ActorContext, permesso: string): boolean {
+  const compito = actor.agente?.permessi;
+  return !compito || compito.has(permesso);
+}
+
 function cambiaTuttoIlTenant(actor: ActorContext): boolean {
   return haMandatoDisegnoProcessi(actor);
 }
@@ -110,7 +116,8 @@ export const tenantProcessesService = {
     // Il mandato e chi disegna i processi su tutto il tenant (con il permesso); il responsabile in
     // carica sul proprio processo, con o senza PROCESS_OWNER (decisione di Enzo del 2026-11-22).
     const canEdit = (userHasPermission(actor, "bpm_process:update") && cambiaTuttoIlTenant(actor))
-      || (p.ownerPositionId !== null && (await repo.holdsPosition(pool, actor.userId, p.ownerPositionId)));
+      || (compitoComprende(actor, "bpm_process:update")
+        && p.ownerPositionId !== null && (await repo.holdsPosition(pool, actor.userId, p.ownerPositionId)));
     return { processId: id, canEdit, items: await repo.processFacets(pool, id) };
   },
 

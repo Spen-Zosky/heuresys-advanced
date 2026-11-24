@@ -11,10 +11,10 @@ import type { WorkforceAnalyticsResponse, WorkforceByDimensionRow } from "@heure
 import { apiFetch } from "@/lib/api/fetch";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
-/** Brand palette colors as raw HSL CSS-var references so the echarts canvas
+/** Brand palette colors as CSS-var references (hex since @heuresys/ui 1.7.2) so the echarts canvas
  *  (which is outside Tailwind's reach) still follows the active theme tokens. */
-const COLOR_PALETTE_1 = "hsl(var(--palette-1))";
-const COLOR_PALETTE_2 = "hsl(var(--palette-2))";
+const COLOR_PALETTE_1 = "var(--palette-1)";
+const COLOR_PALETTE_2 = "var(--palette-2)";
 const AXIS_COLOR = "hsl(var(--muted-foreground))";
 const GRID_COLOR = "hsl(var(--border))";
 

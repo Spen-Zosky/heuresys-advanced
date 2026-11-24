@@ -18,12 +18,12 @@ import type {
 import { apiFetch } from "@/lib/api/fetch";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
-/** Brand palette as raw HSL CSS-var refs so the echarts canvas follows the theme. */
-const COLOR_PALETTE_1 = "hsl(var(--palette-1))";
-const COLOR_PALETTE_2 = "hsl(var(--palette-2))";
+/** Brand palette as CSS-var refs (hex in both themes since @heuresys/ui 1.7.2) so the echarts canvas follows the theme. */
+const COLOR_PALETTE_1 = "var(--palette-1)";
+const COLOR_PALETTE_2 = "var(--palette-2)";
 const AXIS_COLOR = "hsl(var(--muted-foreground))";
 const GRID_COLOR = "hsl(var(--border))";
-const PALETTE = [1, 2, 3, 4, 5, 6].map((n) => `hsl(var(--palette-${n}))`);
+const PALETTE = [1, 2, 3, 4].map((n) => `var(--palette-${n})`);
 
 /** Horizontal boxplot: per-OU distribution of band mid_eur (pre-computed 5-number summary). */
 function bandingBoxplotOption(rows: CompensationBandingByOuRow[], midAxisLabel: string) {

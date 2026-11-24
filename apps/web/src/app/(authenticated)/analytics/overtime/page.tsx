@@ -17,14 +17,14 @@ import type {
 import { apiFetch } from "@/lib/api/fetch";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
-/** Brand palette as raw HSL CSS-var refs so the echarts canvas (outside Tailwind's
+/** Brand palette as CSS-var refs (hex in both themes since @heuresys/ui 1.7.2) so the echarts canvas (outside Tailwind's
  *  reach) follows the active theme tokens — same pattern as attendance/page.tsx. */
-const COLOR_PALETTE_1 = "hsl(var(--palette-1))";
+const COLOR_PALETTE_1 = "var(--palette-1)";
 const COLOR_SERIES = [
-  "hsl(var(--palette-1))",
-  "hsl(var(--palette-2))",
-  "hsl(var(--palette-3))",
-  "hsl(var(--palette-4))",
+  "var(--palette-1)",
+  "var(--palette-2)",
+  "var(--palette-3)",
+  "var(--palette-4)",
 ];
 const AXIS_COLOR = "hsl(var(--muted-foreground))";
 const GRID_COLOR = "hsl(var(--border))";

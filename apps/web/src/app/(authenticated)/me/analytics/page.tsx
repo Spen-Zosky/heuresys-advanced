@@ -34,8 +34,8 @@ export default function MeAnalyticsPage() {
     xAxis: { type: "category" as const, data: trend.map((m) => m.month), axisLabel: { color: "hsl(var(--muted-foreground))" } },
     yAxis: { type: "value" as const, axisLabel: { color: "hsl(var(--muted-foreground))" } },
     series: [
-      { name: t("analytics.regular"), type: "bar" as const, stack: "h", data: trend.map((m) => m.regularHours), itemStyle: { color: "hsl(var(--palette-1))" } },
-      { name: t("analytics.overtime"), type: "bar" as const, stack: "h", data: trend.map((m) => m.overtimeHours), itemStyle: { color: "hsl(var(--palette-4))" } },
+      { name: t("analytics.regular"), type: "bar" as const, stack: "h", data: trend.map((m) => m.regularHours), itemStyle: { color: "var(--palette-1)" } },
+      { name: t("analytics.overtime"), type: "bar" as const, stack: "h", data: trend.map((m) => m.overtimeHours), itemStyle: { color: "var(--palette-4)" } },
     ],
   };
 

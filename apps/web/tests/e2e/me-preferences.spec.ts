@@ -25,7 +25,7 @@ test.setTimeout(120_000);
 
 const LIGHT_BACKGROUND_RGB = "rgb(250, 251, 253)"; // #FAFBFD (light --background)
 const DARK_BACKGROUND_RGB = "rgb(13, 16, 23)"; // #0D1017 (dark --background)
-const COOL_OCEAN_PALETTE_1 = "178 75% 42%"; // applyPalette(1) inline --palette-1 (light mode)
+const COOL_OCEAN_PALETTE_1 = "#1BBBB6"; // applyPalette(1) inline --palette-1 (light mode, hex since @heuresys/ui 1.7.2)
 
 async function patchAndWait(page: Page, testId: string) {
   const [resp] = await Promise.all([

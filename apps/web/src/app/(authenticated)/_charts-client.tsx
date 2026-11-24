@@ -17,7 +17,7 @@
  * literal — the SWC plugin static-analyses it and rejects a hoisted variable.
  *
  * B-05 fix (audit S1006): the analytics pages encode brand colors as raw CSS-var
- * strings (e.g. `hsl(var(--palette-1))`). ECharts paints to an HTML <canvas>, and
+ * strings (e.g. `var(--palette-1)`). ECharts paints to an HTML <canvas>, and
  * a canvas 2D context CANNOT resolve CSS custom properties (`var()` only works in
  * the CSSOM) — it discards the unparseable string and falls back to BLACK, which
  * is invisible on the dark theme. Rather than rewrite every page, the exported

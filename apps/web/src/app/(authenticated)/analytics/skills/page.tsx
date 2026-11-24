@@ -46,7 +46,7 @@ function coverageHeatmapOption(d: SkillsCoverageAnalyticsResponse, etichetta: (p
       orient: "horizontal" as const,
       left: "center",
       bottom: 8,
-      inRange: { color: ["hsl(var(--palette-1) / 0.12)", "hsl(var(--palette-1))"] },
+      inRange: { color: ["color-mix(in oklab, var(--palette-1) 12%, transparent)", "var(--palette-1)"] },
       textStyle: { color: AXIS_COLOR },
     },
     series: [

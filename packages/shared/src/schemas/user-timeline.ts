@@ -32,7 +32,13 @@ export const UserTimelineEventSchema = z.object({
   type: UserTimelineEventTypeSchema,
   occurredAt: z.iso.datetime(),
   sourceTable: z.string().nullable(),
-  sourceId: z.uuid().nullable(),
+  /**
+   * Riferimento a una riga della tabella di origine. z.guid() e non z.uuid(): la colonna è uuid
+   * di PostgreSQL, che accetta anche gli identificativi importati senza versione né variante
+   * RFC (es. b2000002-0000-0000-0000-000000000002), e z.uuid() trasformava la scheda «Storia»
+   * di chi li aveva in un 500 (K31, giro del 23/11/2026).
+   */
+  sourceId: z.guid().nullable(),
   /** La sintesi del fatto così com'era nel sistema di origine. */
   summary: z.string().nullable(),
   payload: z.record(z.string(), z.unknown()),

@@ -19,6 +19,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { MODALE } from "@/lib/modale";
 import { VUOTO } from "@/lib/format";
 import { RIPIEGABILE } from "@/lib/colonne-mobile";
+import { criterioDaMostrare } from "@/lib/criterio-faccetta";
 
 export const FACCETTE: readonly ProcessFacet[] = ["FINALITA", "BENEFICIARIO", "PERIMETRO", "MODALITA", "ATTIVAZIONE", "TECNOLOGIA", "STANDARDIZZAZIONE"];
 
@@ -112,8 +113,9 @@ export function ClassificazioneProcesso({ processId, faccette }: { processId: st
                       </span>
                     )}
                   </td>
-                  {/* K15: una faccetta non classificata non ha criterio né stato: lo si dice con «—», non con il vuoto */}
-                  <td className={`${RIPIEGABILE.cella} text-xs`}><span className={RIPIEGABILE.etichetta}>{k("colonne.criterio")}</span><span className="min-w-0 break-words">{valori[0]?.criterion || VUOTO}</span></td>
+                  {/* K15: una faccetta non classificata non ha criterio né stato: lo si dice con «—», non con il vuoto.
+                      K08: il prefisso con il numero interno («Proposta dell'agente (000511)») non si mostra; il dato resta com'è */}
+                  <td className={`${RIPIEGABILE.cella} text-xs`}><span className={RIPIEGABILE.etichetta}>{k("colonne.criterio")}</span><span className="min-w-0 break-words">{criterioDaMostrare(valori[0]?.criterion)}</span></td>
                   <td className={`${RIPIEGABILE.cella} text-xs`}>
                     <span className={RIPIEGABILE.etichetta}>{k("colonne.stato")}</span>
                     {valori.length === 0 ? <span className="text-muted-foreground">{VUOTO}</span> : proposta ? <span className="font-medium">{k("stato.proposta")}</span> : <span>{k("stato.approvata")}</span>}

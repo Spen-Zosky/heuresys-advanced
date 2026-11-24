@@ -31,7 +31,41 @@ export function esadecimaleConAlfa(esadecimale: string, alfa: string | number): 
  */
 type Rgba = { r: number; g: number; b: number; a: number };
 
-/** `#rgb`, `#rrggbb`, `rgb(...)` o `rgba(...)` → componenti; null se il colore non si legge. */
+/** Una trasparenza scritta come «0.12» o «12%» → 0-1; null se non si legge. */
+function leggiAlfa(alfa: string | number): number | null {
+  const a = typeof alfa === "number" ? alfa : alfa.trim().endsWith("%") ? parseFloat(alfa) / 100 : parseFloat(alfa);
+  return Number.isFinite(a) ? Math.min(1, Math.max(0, a)) : null;
+}
+
+/**
+ * K17, tema chiaro (giro del 24/11/2026): `applyPalette` di @heuresys/ui scrive in linea le
+ * `--palette-1..4` come terne HSL nude («222 80% 50%», alla maniera di shadcn), mentre il foglio di
+ * stile le dà in esadecimale; in tema scuro vince `.dark … !important`, in chiaro resta la terna.
+ * Qui si legge la terna in tutte le forme che CSS ammette: con o senza «deg», con spazi o virgole,
+ * con la trasparenza dopo «/».
+ */
+const TERNA_HSL = /^(-?[0-9.]+)(?:deg)?\s*[\s,]\s*([0-9.]+)%\s*[\s,]\s*([0-9.]+)%\s*(?:[/,]\s*([0-9.]+%?))?$/i;
+
+function daHsl(h: number, s: number, l: number, a: number): Rgba {
+  const [ss, ll] = [s / 100, l / 100];
+  const k = (n: number) => (n + h / 30) % 12;
+  const f = (n: number) => ll - ss * Math.min(ll, 1 - ll) * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1));
+  // l'arrotondamento a sei cifre toglie l'errore della virgola mobile (0,1 × 255 = 25,4999…), come fa il browser
+  const c = (n: number) => Math.round(Number((f(n) * 255).toFixed(6)));
+  return { r: c(0), g: c(8), b: c(4), a };
+}
+
+function leggiHsl(corpo: string): Rgba | null {
+  const m = TERNA_HSL.exec(corpo.trim());
+  if (!m) return null;
+  const h = ((Number(m[1]) % 360) + 360) % 360;
+  const a = m[4] === undefined ? 1 : leggiAlfa(m[4]);
+  if (a === null) return null;
+  return daHsl(h, Math.min(100, Number(m[2])), Math.min(100, Number(m[3])), a);
+}
+
+/** `#rgb`, `#rrggbb`, `rgb(...)`, `rgba(...)`, `hsl(...)` o `hsla(...)`, nelle forme con virgole e in
+ *  quelle con spazi e «/ alfa» → componenti; null se il colore non si legge. */
 export function leggiColore(colore: string): Rgba | null {
   const s = colore.trim();
   const h = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(s);
@@ -41,9 +75,33 @@ export function leggiColore(colore: string): Rgba | null {
     const n = (i: number) => parseInt(x.slice(i, i + 2), 16);
     return { r: n(0), g: n(2), b: n(4), a: 1 };
   }
-  const f = /^rgba?\(\s*([0-9.]+)\s*,\s*([0-9.]+)\s*,\s*([0-9.]+)\s*(?:,\s*([0-9.]+)\s*)?\)$/i.exec(s);
-  if (!f) return null;
-  return { r: Number(f[1]), g: Number(f[2]), b: Number(f[3]), a: f[4] === undefined ? 1 : Math.min(1, Math.max(0, Number(f[4]))) };
+  const f = /^rgba?\(\s*([0-9.]+)\s*[\s,]\s*([0-9.]+)\s*[\s,]\s*([0-9.]+)\s*(?:[/,]\s*([0-9.]+%?)\s*)?\)$/i.exec(s);
+  if (f) {
+    const a = f[4] === undefined ? 1 : leggiAlfa(f[4]);
+    return a === null ? null : { r: Number(f[1]), g: Number(f[2]), b: Number(f[3]), a };
+  }
+  const hsl = /^hsla?\((.*)\)$/i.exec(s);
+  return hsl ? leggiHsl(hsl[1]!) : null;
+}
+
+const esa = (n: number) => Math.round(n).toString(16).padStart(2, "0").toUpperCase();
+
+/**
+ * Il valore calcolato di una variabile CSS portato a un colore che il canvas di ECharts legge, con la
+ * trasparenza `alfa` se data (la tinta chiara della scala, `hsl(var(--x) / 0.12)`).
+ *   - terna HSL nuda → `#RRGGBB`, o `rgba(...)` se c'è una trasparenza;
+ *   - colore completo leggibile (esadecimale, rgb, hsl) → com'è, o `rgba(...)` con la trasparenza;
+ *   - altro (oklch, un nome CSS) → com'è: meglio quello che un colore inventato.
+ */
+export function coloreDaVariabile(valore: string, alfa?: string): string {
+  const v = valore.trim();
+  const terna = leggiHsl(v);
+  const c = terna ?? leggiColore(v);
+  if (!c) return v;
+  const a = alfa === undefined ? c.a : leggiAlfa(alfa);
+  if (a === null) return v;
+  if (!terna && alfa === undefined) return v;
+  return a === 1 ? `#${esa(c.r)}${esa(c.g)}${esa(c.b)}` : `rgba(${Math.round(c.r)}, ${Math.round(c.g)}, ${Math.round(c.b)}, ${a})`;
 }
 
 const lineare = (c: number) => {

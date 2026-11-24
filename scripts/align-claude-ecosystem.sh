@@ -23,7 +23,8 @@
 #               settings, smoke test (claude -p), verify. Smoke failure → auto-rollback.
 #   --dry-run   build staging + show manifest + per-host settings diff; NO remote writes.
 #   --verify    no writes; checksum + semantic comparison; drift report under
-#               deploy/reports/claude-align/.
+#               deploy/reports/claude-align/ (gitignored, per macchina: vedi prune_reports
+#               e finalizza_report — un giro che non trova niente di nuovo non ne aggiunge).
 #   --delta     skip a host if no payload source changed since .session-align.marker
 #               and the host has already been aligned (sentinel present).
 #   --rollback <stamp>  restore ~/.claude from ~/.claude.bak-<stamp> (or .tgz).
@@ -442,14 +443,50 @@ rollback_host() {  # $1 = kind, $2 = stamp
   togli_incorso
 }
 
-# #60 G1 (S1028): retention N-ultimi sui report locali (gitignored) — la dir
-# accumulava senza policy (108 file al momento del fix). Tiene i 20 più recenti.
-prune_reports() {
-  local keep=20
+# Conservazione dei rapporti di verifica (P4, 24/11/2026; prima #60 G1, S1028).
+#
+# I rapporti stanno in deploy/reports/claude-align/, ignorata da git (.gitignore,
+# `deploy/reports/`), e appartengono alla macchina che li scrive: sync-gitignored-to-vm.sh
+# non li copia piu' sugli altri cloni. Prima li copiava in modo additivo, e un clone che li
+# riceveva senza lanciare mai questo script non li potava: sulla VM erano centinaia
+# (`find deploy/reports/claude-align -name 'drift-*' | wc -l`) nonostante la
+# conservazione «ultimi 20» del 23/07.
+#
+# CONSERVAZIONE: gli ultimi REPORTS_KEEP (20) rapporti di ogni host verificato
+# (drift-vm-*, drift-linuxpc-*, drift-mac-*), in ordine di nome, che porta l'ora UTC:
+# un host verificato spesso non fa sparire la storia di un altro. I file della cartella
+# che non sono rapporti di verifica di questo script non si toccano.
+REPORTS_KEEP=20
+rapporti_host() {  # $1 = kind — i nomi dei suoi rapporti, dal piu' recente; sempre exit 0
+  local f
+  for f in "$REPORTS_DIR"/drift-"$1"-*.md; do
+    if [ -f "$f" ]; then printf '%s\n' "${f##*/}"; fi
+  done | LC_ALL=C sort -r
+}
+prune_reports() {  # $1 = kind
   [ -d "$REPORTS_DIR" ] || return 0
-  ls -1t "$REPORTS_DIR" 2>/dev/null | tail -n +$((keep + 1)) | while IFS= read -r f; do
+  rapporti_host "$1" | tail -n +$((REPORTS_KEEP + 1)) | while IFS= read -r f; do
     rm -f "$REPORTS_DIR/$f"
   done
+}
+
+# Un giro ripetuto senza cambiamenti NON aggiunge un rapporto: se il nuovo dice le stesse
+# cose dell'ultimo dello stesso host (tolta la riga di intestazione, l'unica con l'ora),
+# il nuovo si scarta e resta quello di prima, con l'ora del file aggiornata (touch: dice
+# quando si e' verificato l'ultima volta; il contenuto non cambia). La conservazione si
+# applica in entrambi i casi. Stampa il percorso del rapporto che vale.
+# `sed -n 1p` e non `head -1`: head chiuderebbe la pipe e sort morirebbe di SIGPIPE
+# sotto pipefail.
+finalizza_report() {  # $1 = kind, $2 = rapporto appena scritto
+  local kind="$1" nuovo="$2" ultimo
+  ultimo="$(rapporti_host "$kind" | grep -vxF "${nuovo##*/}" | sed -n 1p || true)"
+  if [ -n "$ultimo" ] && cmp -s <(tail -n +2 "$REPORTS_DIR/$ultimo") <(tail -n +2 "$nuovo"); then
+    rm -f "$nuovo"
+    touch "$REPORTS_DIR/$ultimo"
+    nuovo="$REPORTS_DIR/$ultimo"
+  fi
+  prune_reports "$kind"
+  printf '%s\n' "$nuovo"
 }
 
 # --- verify ---------------------------------------------------------------------------------
@@ -457,8 +494,10 @@ verify_host() {  # $1 = kind ; returns 0 if clean — writes drift report
   local kind="$1"; "${kind}_cfg"
   build_stage "$RHOME"
   mkdir -p "$REPORTS_DIR"
-  prune_reports
   local report="$REPORTS_DIR/drift-$kind-$STAMP.md" issues=0 mem_drift=0
+  # Due giri nello stesso secondo non si sovrascrivono (il confronto sarebbe con se stesso).
+  # `_` e non `-`: in ordine C `_` viene dopo `.`, quindi il secondo risulta il piu' recente.
+  [ ! -e "$report" ] || report="$REPORTS_DIR/drift-$kind-${STAMP}_$$.md"
   {
     echo "# Drift report — $kind ($HOST) — $STAMP"
     echo
@@ -476,7 +515,9 @@ verify_host() {  # $1 = kind ; returns 0 if clean — writes drift report
 
   echo '## 2. settings.json semantic diff (expected transform vs remote, modulo extraKnownMarketplaces which the remote CLI manages)' >> "$report"
   local sdiff
-  sdiff="$(diff -u <(jq -S 'del(.extraKnownMarketplaces)' "$STAGE/payload/settings.json") <(rssh "$HOST" 'cat "$HOME/.claude/settings.json" 2>/dev/null' | jq -S 'del(.extraKnownMarketplaces)' 2>/dev/null) 2>&1 || true)"
+  # Etichette fisse (-L): senza, `diff -u` mette nell'intestazione l'ora dei due /dev/fd, e
+  # due giri identici darebbero rapporti diversi (P4: un giro invariato non scrive).
+  sdiff="$(diff -u -L atteso -L remoto <(jq -S 'del(.extraKnownMarketplaces)' "$STAGE/payload/settings.json") <(rssh "$HOST" 'cat "$HOME/.claude/settings.json" 2>/dev/null' | jq -S 'del(.extraKnownMarketplaces)' 2>/dev/null) 2>&1 || true)"
   if [ -z "$sdiff" ]; then echo 'OK — semantically identical' >> "$report"; else { echo '```diff'; printf '%s\n' "$sdiff"; echo '```'; } >> "$report"; issues=$((issues+1)); fi
 
   echo '## 3. CLI / plugins / claude-mem / purity' >> "$report"
@@ -566,9 +607,15 @@ verify_host() {  # $1 = kind ; returns 0 if clean — writes drift report
   echo >> "$report"
   if [ "$issues" = 0 ]; then
     echo "## VERDICT: CLEAN — $kind is an effective clone of the Windows catalog" >> "$report"
-    log "[$kind] verify CLEAN ($report)"
   else
     echo "## VERDICT: DRIFT — $issues issue group(s), see sections above" >> "$report"
+  fi
+  local scritto="$report"
+  report="$(finalizza_report "$kind" "$report")"
+  [ "$report" = "$scritto" ] || log "[$kind] rapporto invariato rispetto all'ultimo: nessun file nuovo ($report)"
+  if [ "$issues" = 0 ]; then
+    log "[$kind] verify CLEAN ($report)"
+  else
     warn "[$kind] verify found drift ($issues issue groups) — $report"
   fi
   cleanup; STAGE=""

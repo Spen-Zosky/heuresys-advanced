@@ -10,7 +10,7 @@ configurata la produzione.
 |---|---|---|
 | `parametri-server.sql` | logging, query lente, `track_functions` | `ssh oracle-vm-default 'sudo -u postgres psql -f -' < deploy/postgres/parametri-server.sql` poi `pg_reload_conf()` |
 | `ruoli.sql` | crea `heuresys_app` e `heuresys_ro` e assegna i privilegi | `ssh oracle-vm-default 'sudo -u postgres psql -d heuresys_advanced -f -' < deploy/postgres/ruoli.sql` |
-| `assegna-password-app.sh` | dà la password a `heuresys_app` e la deposita nel `.env` | `ssh oracle-vm-default 'bash -s' < deploy/postgres/assegna-password-app.sh` |
+| `assegna-password-app.sh` | dà la password a `heuresys_app` e la deposita nel `.env`; senza opzioni non ruota (`--ruota` per farlo) | `ssh oracle-vm-default 'bash -s' < deploy/postgres/assegna-password-app.sh` |
 | `prova-identita-app.sh` | verifica che l'identità dell'app possa il giusto e **non** il resto | `ssh oracle-vm-default 'bash -s' < deploy/postgres/prova-identita-app.sh` |
 
 ## Le tre identità (#223 F3)
@@ -50,5 +50,12 @@ una mano umana.
 
 Le password non stanno in nessun file versionato, e non devono starci. Vengono
 generate sulla macchina da `assegna-password-app.sh` e scritte direttamente nel
-`.env` (che è gitignored e reale). Rieseguire quello script **ruota** la
-password: è il comportamento voluto per una rotazione.
+`.env` (che è gitignored e reale). Dal 24/11/2026 (P5) rieseguire quello script
+senza opzioni **non** ruota la password: se il `.env` ne ha già una con cui il
+ruolo entra non cambia niente, e se il ruolo non la accetta gli si riapplica
+quella del `.env`. Una rotazione si chiede in modo esplicito:
+`ssh oracle-vm-default 'bash -s -- --ruota' < deploy/postgres/assegna-password-app.sh`
+(l'API in servizio usa la password nuova solo dopo il riavvio). Se il `.env` non ha
+la password ma il ruolo sì, senza `--ruota` lo script esce 1 e non tocca niente.
+Lo stesso vale per `assegna-password-agenti.sh [--ruota]`. La prova è
+`bash scripts/test/prova-assegna-password.sh`, su un cluster PostgreSQL privato.

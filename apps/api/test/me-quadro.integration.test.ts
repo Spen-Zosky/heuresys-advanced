@@ -75,10 +75,17 @@ describe("GET /v1/me/quadro", () => {
     for (const aree of [["personale"], ["selezione"]] as AreaQuadro[][]) {
       const b = await leggiQuadro(actor!, aree);
       expect(b.insight.map((i) => i.chiave)).not.toContain("mie-ferie");
+      expect(b.insight.map((i) => i.chiave)).not.toContain("mie-richieste");
     }
     const assenze = await leggiQuadro(actor!, ["personale", "mie-assenze"]);
     expect(assenze.nonCalcolate).toEqual([]);
     expect(assenze.insight.map((i) => i.chiave)).toContain("mie-ferie");
+    // l'area «mie-assenze» fa girare le sue due lenti: le ferie e le richieste in attesa (che parla
+    // solo se ce n'è almeno una, quindi si conta fra le verifiche e non fra gli insight)
+    const soloAssenze = await leggiQuadro(actor!, ["mie-assenze"]);
+    expect(soloAssenze.nonCalcolate).toEqual([]);
+    expect(soloAssenze.verifiche).toBe(2);
+    for (const i of soloAssenze.insight) expect(["mie-ferie", "mie-richieste"]).toContain(i.chiave);
   });
 
   it("le segnalazioni arrivano solo a chi le custodisce, come due conteggi", async () => {

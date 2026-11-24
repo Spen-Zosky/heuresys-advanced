@@ -6,7 +6,9 @@ import { areeDellaRotta } from "./quadro-aree";
  * lenti sulle assenze di chi guarda stanno nell'area «mie-assenze», che apre solo il cruscotto
  * personale e la pagina delle assenze. */
 describe("aree del quadro per rotta: le assenze di chi guarda solo dove c'entrano", () => {
-  it("il cruscotto personale apre le lenti personali e le assenze", () => {
+  // Il cruscotto Self-Service (famiglia «self» del catalogo, sys.sys_dashboards) ha come rotta /me,
+  // non /dashboard/self: è questa la pagina dove l'avviso delle ferie deve comparire.
+  it("il cruscotto Self-Service (/me) apre le lenti personali e le assenze", () => {
     expect(areeDellaRotta("/me")).toEqual(["personale", "mie-assenze"]);
   });
 

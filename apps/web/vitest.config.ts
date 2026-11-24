@@ -20,9 +20,14 @@
  * `vitest` era già fra le devDependencies di questo pacchetto — nessuna dipendenza nuova.
  */
 
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
+  // Una prova può importare un componente vero (es. `NomePersona` in vista-tabella.test.ts) per
+  // leggerne una proprietà statica senza montarlo: servono il JSX e l'alias `@/` di tsconfig.
+  oxc: { jsx: { runtime: "automatic" } },
+  resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
   test: {
     environment: "node",
     include: ["src/**/*.test.ts"],

@@ -1,5 +1,6 @@
 import { createElement } from "react";
 import { describe, expect, it } from "vitest";
+import { NomePersona } from "@/components/nome-persona";
 import { applicaVista, eseguiComando, testoDi, trovaColonna, vistaAttiva, type StatoVistaTabella } from "./vista-tabella";
 
 type Riga = { nome: string; sede: string; persone: string };
@@ -24,11 +25,8 @@ describe("testoDi: ciò che la persona vede in una cella", () => {
 });
 
 describe("testoDi: una persona si cerca e si ordina come si legge, «Cognome, Nome» (K22)", () => {
-  // Come NomePersona: dichiara il testo che mostra, risolto con la rubrica del perimetro.
-  const Persona = Object.assign((props: { nome: string | null; id: string | null }): null => (void props, null), {
-    testoVisto: (p: { nome?: unknown; id?: unknown }, persona?: (id: string) => string | null) =>
-      (typeof p.id === "string" ? persona?.(p.id) : null) ?? (typeof p.nome === "string" ? p.nome : ""),
-  });
+  // Il componente vero: se perde `testoVisto`, la ricerca torna a «Nome Cognome» e questa prova lo dice.
+  const Persona = NomePersona;
   const rubrica = (id: string) => (id === "u1" ? "Esposito, Tommaso" : null);
   it("con la rubrica il testo è quello mostrato, senza l'identificativo", () => {
     expect(testoDi(createElement(Persona, { nome: "Tommaso Esposito", id: "u1" }), rubrica)).toBe("Esposito, Tommaso");

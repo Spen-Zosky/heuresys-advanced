@@ -13,22 +13,17 @@
  */
 
 import { useEffect } from "react";
-import { useTheme, applyPalette, type PaletteIdx } from "@heuresys/ui";
-import type { MePalette } from "@heuresys/shared";
+import { useTheme } from "@heuresys/ui";
 import { useMyPreferences } from "../lib/api/auth";
 import { setLocale, i18n } from "../lib/i18n";
+import {
+  applicaTavolozzaDellaPersona,
+  dimenticaCopiaTavolozza,
+  ripristinaTavolozzaStandard,
+} from "../lib/tavolozza";
 
-/** localStorage cache keys read by @heuresys/ui (ThemeProvider + PaletteDropdown) at first paint. */
+/** Chiave della copia del tema nel localStorage, letta da ThemeProvider al primo disegno. */
 const THEME_CACHE_KEY = "heuresys-theme";
-const PALETTE_CACHE_KEY = "heuresys-palette";
-
-/** Palette slug → @heuresys/ui PALETTES index (declaration order, 1:1 with the API CHECK set). */
-const PALETTE_IDX: Record<MePalette, PaletteIdx> = {
-  balanced: 0,
-  "cool-ocean": 1,
-  "warm-sunset": 2,
-  "brand-mono": 3,
-};
 
 export function PreferencesApplier() {
   const prefs = useMyPreferences();
@@ -43,16 +38,13 @@ export function PreferencesApplier() {
     setTheme(theme);
   }, [theme, setTheme]);
 
+  // Tavolozza: scelta della sola persona, letta dal server. Chi non ha scelto (o ha «Equilibrata»)
+  // non porta variabili in linea: vale la tavolozza standard di @heuresys/ui. All'uscita della
+  // persona (smontaggio) si torna alla standard, e la copia nel localStorage condiviso si toglie.
   useEffect(() => {
-    if (!palette) return;
-    const idx = PALETTE_IDX[palette];
-    // Palette: apply the inline --palette-* vars now + cache the index for the next first-paint.
-    applyPalette(idx);
-    try {
-      window.localStorage.setItem(PALETTE_CACHE_KEY, String(idx));
-    } catch {
-      /* localStorage unavailable (private mode / SSR guard) — server stays the source of truth. */
-    }
+    dimenticaCopiaTavolozza();
+    applicaTavolozzaDellaPersona(palette);
+    return () => ripristinaTavolozzaStandard();
   }, [palette]);
 
   // Belt-and-suspenders: ensure the theme cache key matches the server choice even if the

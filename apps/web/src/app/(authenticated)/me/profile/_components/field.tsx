@@ -7,12 +7,14 @@ import { formati, VUOTO } from "@/lib/format";
 export function Field({ label, value, testId, emailAmmessa }: { label: string; value: ReactNode; testId?: string; emailAmmessa?: boolean }) {
   const empty = value == null || value === "";
   return (
-    <div className="space-y-0.5" {...(emailAmmessa ? { "data-giro-email-ammessa": "" } : {})}>
+    <div className="min-w-0 space-y-0.5" {...(emailAmmessa ? { "data-giro-email-ammessa": "" } : {})}>
       <dt className="text-xs uppercase tracking-wide text-muted-foreground">{label}</dt>
       {/* Un testo del profilo (CAP, matricola, IBAN, telefono) è un identificativo: la rete di
           leggibilità non lo tocca, altrimenti «24122» diventerebbe «24.122». I numeri veri
           arrivano già in forma dalla pagina. */}
-      <dd className="text-sm font-medium text-foreground" data-testid={testId} {...(typeof value === "string" && !/^-?\d+[.,]\d+$/.test(value) ? { "data-grezzo": "" } : {})}>
+      {/* K20 (forense 23/11): un valore senza spazi (IBAN) va a capo nella sua colonna invece di
+          coprire quella accanto; `min-w-0` lascia restringere la casella nella griglia. */}
+      <dd className="wrap-anywhere text-sm font-medium text-foreground" data-testid={testId} {...(typeof value === "string" && !/^-?\d+[.,]\d+$/.test(value) ? { "data-grezzo": "" } : {})}>
         {empty ? <span className="text-muted-foreground">—</span> : value}
       </dd>
     </div>

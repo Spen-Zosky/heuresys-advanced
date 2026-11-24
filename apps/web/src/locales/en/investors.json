@@ -35,7 +35,7 @@
   },
   "traction": {
     "title": "Where we are (honestly)",
-    "body": "Technical GA live in production at www.heuresys.com. Pre-commercial: zero paying customers, synthetic case-study data (RTL Bank reference tenant), seeking design partners. Capital efficiency: burn ≈ €0 (free-tier infra + founder time).",
+    "body": "Technical GA live in production at www.heuresys.com. Pre-commercial: zero paying customers, data from a model client, RTL Bank, as the reference tenant, seeking design partners. Capital efficiency: burn ≈ €0 (free-tier infra + founder time).",
     "gapClosed": "Update: credibility gap #1 is closed — all three perspectives (HR, Process Owner, Org Director) now have live UI, including L0-L5 organizational maturity."
   },
   "whyNow": {

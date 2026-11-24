@@ -150,7 +150,7 @@ export default function SkillsCoverageAnalyticsPage() {
             >
               <EChartsCard
                 option={coverageHeatmapOption(d, (p) => enumLabel("proficiency", p))}
-                height={Math.max(360, d.orgUnits.length * 26)}
+                height={360}
                 ariaLabel={t("skills.heatmapAria")}
               />
             </div>

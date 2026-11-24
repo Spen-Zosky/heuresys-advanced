@@ -205,7 +205,7 @@ export default function CompensationAnalyticsPage() {
             >
               <EChartsCard
                 option={bandingBoxplotOption(bandingByOu, t("compensation.axisMid"))}
-                height={Math.max(300, bandingByOu.length * 30)}
+                height={300}
                 ariaLabel={t("compensation.boxplotAria")}
               />
             </div>

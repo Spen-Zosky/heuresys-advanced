@@ -153,7 +153,7 @@ export default function SkillsByCategoryAnalyticsPage() {
             >
               <EChartsCard
                 option={categoryHeatmapOption(d, (p) => enumLabel("proficiency", p))}
-                height={Math.max(360, d.categories.length * 26)}
+                height={360}
                 ariaLabel={t("skillsByCategory.heatmapAria")}
               />
             </div>

@@ -2,11 +2,12 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, echartsPresets } from "@heuresys/ui";
+import { Badge } from "@heuresys/ui";
 import { PageHeader } from "@/components/intestazione-pagina";
 import { StatsCard } from "@/components/indicatori-leggibili";
 import { Boxes, Layers, PieChart } from "lucide-react";
 import { EChartsCard } from "../../_charts-client";
+import { barreOrizzontali } from "@/lib/altezza-grafico";
 import type { SkillsGroupShareAnalyticsResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { useFormat } from "@/lib/format";
@@ -49,8 +50,9 @@ export default function SkillsGroupShareAnalyticsPage() {
     ...d.groups.map((g) => g.skillCount),
     ...(d.otherGroupsCount > 0 ? [d.otherSkillCount] : []),
   ];
-  const barOption = echartsPresets.bar({
-    x: barX,
+  // K17: barre orizzontali, un gruppo per riga (verticali ne mostravano due su sedici)
+  const barOption = barreOrizzontali({
+    y: barX,
     series: [{ name: t("skillsGroupShare.seriesSkills"), values: barValues }],
   });
 
@@ -106,7 +108,7 @@ export default function SkillsGroupShareAnalyticsPage() {
             >
               <EChartsCard
                 option={barOption}
-                height={Math.max(360, barX.length * 16)}
+                height={360}
                 ariaLabel={t("skillsGroupShare.chartAria")}
               />
             </div>

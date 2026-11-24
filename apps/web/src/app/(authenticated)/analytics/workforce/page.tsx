@@ -119,7 +119,7 @@ export default function WorkforceAnalyticsPage() {
             <div data-testid="analytics-org-chart" className="rounded-card border border-border bg-card p-4">
               <EChartsCard
                 option={horizontalBarOption(d.byOrgUnit)}
-                height={Math.max(240, d.byOrgUnit.length * 34)}
+                height={240}
                 ariaLabel={t("workforce.byOu")}
               />
             </div>
@@ -133,7 +133,7 @@ export default function WorkforceAnalyticsPage() {
               <div data-testid="analytics-role-chart" className="rounded-card border border-border bg-card p-4">
                 <EChartsCard
                   option={horizontalBarOption(d.byJobRole, COLOR_PALETTE_2)}
-                  height={Math.max(240, d.byJobRole.length * 34)}
+                  height={240}
                   ariaLabel={t("workforce.byRole")}
                 />
               </div>

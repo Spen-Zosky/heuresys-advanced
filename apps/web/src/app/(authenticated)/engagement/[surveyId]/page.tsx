@@ -20,9 +20,11 @@ function ratingsBarOption(questions: EngagementQuestionResult[], label: string) 
   const rated = questions.filter((q) => q.avgRating != null);
   return {
     tooltip: { trigger: "axis" as const },
-    grid: { left: 40, right: 20, top: 30, bottom: 80 },
-    xAxis: { type: "category" as const, data: rated.map((q) => q.text.slice(0, 24)), axisLabel: { interval: 0, rotate: 35, fontSize: 10 } },
-    yAxis: { type: "value" as const, name: label, max: 10 },
+    // K17: le domande sull'asse verticale e intere, una per riga, invece che tagliate a 24 caratteri
+    // e ruotate a 10 px sotto barre verticali; l'altezza la fa crescere EChartsCard
+    grid: { left: 8, right: 24, top: 12, bottom: 8, containLabel: true },
+    xAxis: { type: "value" as const, name: label, max: 10 },
+    yAxis: { type: "category" as const, data: rated.map((q) => q.text), inverse: true },
     series: [{ type: "bar" as const, data: rated.map((q) => (q.scale && q.scale !== 10 ? Math.round(((q.avgRating ?? 0) * 1000) / q.scale) / 100 : q.avgRating)) }],
   };
 }
@@ -108,7 +110,7 @@ export default function EngagementResultsPage() {
                 <CardTitle as="h2">{t("engagement.results.chartTitle")}</CardTitle>
               </CardHeader>
               <CardContent>
-                <EChartsCard option={ratingsBarOption(d.questions, t("engagement.results.avg"))} height={360} ariaLabel={t("engagement.results.chartTitle")} />
+                <EChartsCard option={ratingsBarOption(d.questions, t("engagement.results.avg"))} height={240} ariaLabel={t("engagement.results.chartTitle")} />
               </CardContent>
             </Card>
           )}

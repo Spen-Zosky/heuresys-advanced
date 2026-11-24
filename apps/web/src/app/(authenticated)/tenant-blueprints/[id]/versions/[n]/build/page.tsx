@@ -21,6 +21,7 @@ import { useEnumLabel } from "@/lib/enum-labels";
 import { useFormat } from "@/lib/format";
 import { Leggibile } from "@/lib/leggibile";
 import { LavoroInCorso } from "@/components/lavoro-in-corso";
+import { incoerenzaDelPiano, titoloIncoerenza } from "@/lib/blueprint-testi";
 
 /**
  * #198 Tenant Builder P3, T7 — LA COSTRUZIONE: il piano prima, e la firma dopo.
@@ -145,6 +146,10 @@ export default function TenantBlueprintBuildPage({
         : null;
 
   const p = piano.data;
+  // Giro forense K32: il 409 «contenuto incoerente» porta il motivo, il numero e l'elenco nei
+  // dettagli. Il titolo dice motivo e numero nella lingua della pagina; l'elenco, con i nomi,
+  // sta sotto in una parte richiudibile, invece di un paragrafo di centinaia di codici.
+  const incoerenza = piano.isError ? incoerenzaDelPiano(piano.error) : null;
   // V-16: questa lista e' la configurazione delle ETICHETTE delle righe del piano, non un dato:
   // ogni numero della tabella viene da `GET .../build-plan` (willCreate, alreadyThere).
   const righe: Array<{ chiave: keyof BuildPlanPreview["willCreate"]; etichetta: string }> = [
@@ -193,12 +198,41 @@ export default function TenantBlueprintBuildPage({
         //   («L'operazione è in conflitto…»), e aveva rifatto muta questa pagina. Il motivo
         //   del servizio sulla costruzione è scritto per chi la decide, con i nomi del modello
         //   e delle righe che non tornano; il testo per la persona e il codice restano sotto.
-        <StatoErrore
-          errore={piano.error}
-          titolo={erroreApi(piano.error)?.serverMessage ?? t("dossier.build.planError")}
-          testId="build-plan-error"
-          onRiprova={() => void piano.refetch()}
-        />
+        <div className="min-w-0">
+          <StatoErrore
+            errore={piano.error}
+            titolo={
+              incoerenza
+                ? titoloIncoerenza(incoerenza, t)
+                : (erroreApi(piano.error)?.serverMessage ?? t("dossier.build.planError"))
+            }
+            testId="build-plan-error"
+            onRiprova={() => void piano.refetch()}
+          />
+          {incoerenza && incoerenza.items.length > 0 ? (
+            <details
+              className="mx-auto mt-2 max-w-2xl rounded-lg border border-border bg-card p-3 text-sm"
+              data-testid="build-plan-incoherent-items"
+            >
+              <summary className="cursor-pointer text-foreground">
+                {t("dossier.build.incoherent.showList", { count: incoerenza.items.length })}
+              </summary>
+              <ul className="mt-2 max-h-96 space-y-1 overflow-y-auto">
+                {incoerenza.items.map((v) => (
+                  <li key={v.code} className="break-words text-foreground">
+                    {v.name}
+                    {v.unitCode ? (
+                      <span className="text-muted-foreground">
+                        {" · "}
+                        {t("dossier.build.incoherent.unit", { unit: v.unitCode })}
+                      </span>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            </details>
+          ) : null}
+        </div>
       ) : p ? (
         <section
           className="rounded-lg border border-border bg-card p-4"

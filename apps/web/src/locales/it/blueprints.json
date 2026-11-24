@@ -273,7 +273,17 @@
       "removed": "Rimossi",
       "renamed": "Rinominati",
       "identityChanged": "Identità modificata",
-      "none": "Nessuna differenza"
+      "none": "Nessuna differenza",
+      "notComputableReason": "In questa parte l'impatto sull'azienda già costruita non è calcolabile: mancano lo strato della struttura e il motore che applica il fascicolo. Dichiararlo zero sarebbe un'informazione falsa.",
+      "fields": {
+        "industryClassId": "Settore di attività",
+        "sizeBandId": "Fascia dimensionale",
+        "operatingModelId": "Modello operativo",
+        "regulatoryIntensity": "Intensità di vigilanza",
+        "countryCode": "Paese",
+        "employeeCount": "Numero di dipendenti",
+        "revenueEur": "Ricavi"
+      }
     },
     "build": {
       "title": "Costruzione dell'azienda",
@@ -284,7 +294,7 @@
       "what": "Cosa",
       "willCreate": "Nascerebbero",
       "alreadyThere": "Ci sono già",
-      "alreadyThereMeans": "«Ci sono gia'» è ciò che distingue una costruzione nuova da una ri-applicazione su un'azienda già popolata.",
+      "alreadyThereMeans": "«Ci sono già» è ciò che distingue una costruzione nuova da una ri-applicazione su un'azienda già popolata.",
       "apply": "Applicazione",
       "applyOpensApproval": "Applicare NON costruisce: apre una richiesta di approvazione. La costruzione avviene quando quella richiesta viene approvata.",
       "applyAction": "Chiedi l'approvazione",
@@ -310,7 +320,16 @@
         "skillEvidence": "Evidenze di competenza",
         "kpiEvidence": "Evidenze di indicatore"
       },
-      "blockedNoPlan": "Il piano non è calcolabile: non c'è niente da firmare finché il modello non ha contenuto."
+      "blockedNoPlan": "Il piano non è calcolabile: non c'è niente da firmare finché il modello non ha contenuto.",
+      "incoherent": {
+        "skillsWithoutCategory_one": "Il modello dichiara {{count}} competenza senza categoria: il piano non è calcolabile. Una competenza senza categoria costruisce, e rompe il deploy successivo.",
+        "skillsWithoutCategory": "Il modello dichiara {{count}} competenze senza categoria: il piano non è calcolabile. Una competenza senza categoria costruisce, e rompe il deploy successivo.",
+        "positionsInMissingUnits_one": "Il modello colloca {{count}} posizione in un'unità che non esiste: il piano non è calcolabile.",
+        "positionsInMissingUnits": "Il modello colloca {{count}} posizioni in unità che non esistono: il piano non è calcolabile.",
+        "showList_one": "Mostra la riga da correggere",
+        "showList": "Mostra le {{count}} righe da correggere",
+        "unit": "unità {{unit}}"
+      }
     }
   },
   "gestione": {
@@ -505,7 +524,12 @@
       "numeri": "{{processi}} processi e {{sottoprocessi}} sottoprocessi · {{unita}} unità coinvolte · {{celle}} partecipazioni",
       "processo": "Processo",
       "eC": "E/C",
-      "sigla": {"OWNER": "R", "CONTRIBUTOR": "E", "CONSULTED": "C", "INFORMED": "I"},
+      "sigla": {
+        "OWNER": "R",
+        "CONTRIBUTOR": "E",
+        "CONSULTED": "C",
+        "INFORMED": "I"
+      },
       "eCTitolo": "Unità esecutrici / unità consultate",
       "piede": "processi seguiti (R + E)",
       "apri": "Apri la scheda del processo",

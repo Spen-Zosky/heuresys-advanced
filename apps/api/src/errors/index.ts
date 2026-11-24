@@ -46,8 +46,13 @@ export class UnprocessableEntityError extends ApiError {
   }
 }
 
+/**
+ * 409. `details`, quando c'è, è la forma strutturata del conflitto (per esempio il numero e
+ * l'elenco delle righe che non tornano): il client la traduce nella lingua della persona,
+ * invece di stampare un messaggio che elenca centinaia di codici.
+ */
 export class ConflictError extends ApiError {
-  constructor(message: string, code = "CONFLICT") {
+  constructor(message: string, code = "CONFLICT", public details?: unknown) {
     super(code, message);
   }
 }

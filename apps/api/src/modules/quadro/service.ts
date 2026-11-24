@@ -48,8 +48,10 @@ export async function leggiQuadro(
       (l.permesso ? haPermesso(l.permesso) : soloSe ? l.personale === true : true),
   );
   // Chi vede solo sé stesso, su una pagina che non ha lenti personali (la selezione,
-  // l'organigramma), riceve comunque le proprie: una pagina non apre mai muta (C15).
-  const scelte = perArea.length > 0 || !soloSe ? perArea : LENTI.filter((l) => l.personale === true);
+  // l'organigramma), riceve comunque le proprie dell'area «personale»: una pagina non apre mai
+  // muta (C15). Le sue assenze no: l'avviso delle ferie non c'entra fuori dalle assenze (K09).
+  const scelte =
+    perArea.length > 0 || !soloSe ? perArea : LENTI.filter((l) => l.personale === true && l.aree.includes("personale"));
 
   const nonCalcolate: string[] = [];
   const esiti: Array<Insight | null> = await Promise.all(

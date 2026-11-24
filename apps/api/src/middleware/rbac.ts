@@ -152,7 +152,14 @@ export function requirePermissionOr(
     try {
       await base.call(this as never, req, reply);
     } catch (e) {
-      if (!(e instanceof ForbiddenError) || (e as { code?: string }).code === "RBAC_NOT_LOADED" || !req.user) throw e;
+      if (!(e instanceof ForbiddenError) || !req.user) throw e;
+      // Solo il diniego di ruolo semplice (FORBIDDEN) ricade sull'alternativa: RBAC_NOT_LOADED,
+      // AGENT_MANDATE_ONLY e ogni altro codice restano dinieghi.
+      if ((e as { code?: string }).code !== "FORBIDDEN") throw e;
+      // Un gettone d'agente il cui compito esclude il permesso non lo recupera dal dato: il
+      // perimetro del gettone vale più dell'essere responsabile del processo.
+      const compito = req.user.agente?.permessi;
+      if (compito && !compito.has(permissionCode)) throw e;
       if (!(await alternativa(req))) throw e;
     }
   };

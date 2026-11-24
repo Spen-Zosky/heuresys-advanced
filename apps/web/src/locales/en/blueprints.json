@@ -497,6 +497,7 @@
         "status": "Status",
         "apqc": "APQC correspondence"
       },
+      "attivitaNonCompilate": "Activity data not yet filled in",
       "nessunaAttivita": "The process has no activities.",
       "nessunaUnita": "No unit takes part in the process.",
       "nessunKpi": "The model process declares no indicators.",

@@ -30,6 +30,7 @@ import { Riferimento, useScheda } from "@/components/scheda-rapida";
 import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
 import { DiagrammaFasi, FlussoCorsie, GrafoProcesso, attivitaInOrdine } from "@/components/processo/diagrammi";
 import { NomePersona } from "@/components/nome-persona";
+import { colonneAttivitaVuote, type ColonnaAttivita } from "@/lib/attivita-processo";
 
 type Attivita = TenantProcessScheda["activities"][number];
 
@@ -167,25 +168,33 @@ export default function TenantProcessPage() {
     </div>
   );
 
+  // K24: una colonna vuota in tutte le attività esce, e una riga dice che quei dati non sono ancora
+  // compilati; una colonna con almeno un valore resta (decisione di Enzo del 24/11/2026).
+  const vuote = colonneAttivitaVuote(att);
+  const colonneAttivita: { chiave: ColonnaAttivita | null; intestazione: string; cella: (a: Attivita) => ReactNode }[] = [
+    { chiave: null, intestazione: k("ordinal"), cella: (a) => <span key="o" className="tabular-nums text-xs text-muted-foreground">{a.ordinal}</span> },
+    { chiave: null, intestazione: k("activity"), cella: (a) => <button key="n" type="button" className="text-left font-medium hover:underline" onClick={() => setAperta(a.activityId)}>{a.name}</button> },
+    ...(conSotto ? [{ chiave: null, intestazione: k("subprocess"), cella: (a: Attivita) => <span key="s" className="text-xs">{nomeProcesso.get(a.processId)}</span> }] : []),
+    { chiave: "input", intestazione: k("input"), cella: (a) => a.input ?? "—" },
+    { chiave: "output", intestazione: k("output"), cella: (a) => a.output ?? "—" },
+    { chiave: null, intestazione: k("unit"), cella: (a) => unita(a.unitId, a.unitName) },
+    { chiave: "executor", intestazione: k("executor"), cella: (a) => (a.executorPositionId ? <Riferimento tipo="posizione" id={a.executorPositionId}>{a.executorName ?? ""}</Riferimento> : (a.executorName ?? "—")) },
+    { chiave: "nature", intestazione: k("nature"), cella: (a) => enumLabel("processWorkNature", a.workNature) },
+    { chiave: "delivery", intestazione: k("delivery"), cella: (a) => enumLabel("processDeliveryModel", a.deliveryModel) },
+    { chiave: "hours", intestazione: k("hours"), cella: (a) => <span key="h" className="tabular-nums">{a.typicalHoursPerCycle === null ? "—" : fmt.numero(a.typicalHoursPerCycle, 1)}</span> },
+    { chiave: "apqc", intestazione: k("apqc"), cella: (a) => <CorrispondenzaApqc key="apqc" processId={p.processId} attivita={a} canEdit={faccette.data?.canEdit ?? false} /> },
+  ];
+  const inVista = colonneAttivita.filter((c) => c.chiave === null || !vuote.has(c.chiave));
   const attivita = (
-    <Tabella
-      testId="tenant-process-attivita"
-      vuoto={t("processiDelTenant.scheda.nessunaAttivita")}
-      intestazioni={[k("ordinal"), k("activity"), ...(conSotto ? [k("subprocess")] : []), k("input"), k("output"), k("unit"), k("executor"), k("nature"), k("delivery"), k("hours"), k("apqc")]}
-      righe={att.map((a) => [
-        <span key="o" className="tabular-nums text-xs text-muted-foreground">{a.ordinal}</span>,
-        <button key="n" type="button" className="text-left font-medium hover:underline" onClick={() => setAperta(a.activityId)}>{a.name}</button>,
-        ...(conSotto ? [<span key="s" className="text-xs">{nomeProcesso.get(a.processId)}</span>] : []),
-        a.input ?? "—",
-        a.output ?? "—",
-        unita(a.unitId, a.unitName),
-        a.executorPositionId ? <Riferimento tipo="posizione" id={a.executorPositionId}>{a.executorName ?? ""}</Riferimento> : (a.executorName ?? "—"),
-        enumLabel("processWorkNature", a.workNature),
-        enumLabel("processDeliveryModel", a.deliveryModel),
-        <span key="h" className="tabular-nums">{a.typicalHoursPerCycle === null ? "—" : fmt.numero(a.typicalHoursPerCycle, 1)}</span>,
-        <CorrispondenzaApqc key="apqc" processId={p.processId} attivita={a} canEdit={faccette.data?.canEdit ?? false} />,
-      ])}
-    />
+    <div className="space-y-2">
+      {vuote.size > 0 ? <p className="text-xs text-muted-foreground" data-testid="tenant-process-attivita-non-compilate">{t("processiDelTenant.scheda.attivitaNonCompilate")}</p> : null}
+      <Tabella
+        testId="tenant-process-attivita"
+        vuoto={t("processiDelTenant.scheda.nessunaAttivita")}
+        intestazioni={inVista.map((c) => c.intestazione)}
+        righe={att.map((a) => inVista.map((c) => c.cella(a)))}
+      />
+    </div>
   );
 
   const unitaRuoli = (

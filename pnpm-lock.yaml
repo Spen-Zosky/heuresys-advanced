@@ -260,8 +260,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/shared
       '@heuresys/ui':
-        specifier: ^1.7.1
-        version: 1.7.1(@standard-schema/spec@1.1.0)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(@types/three@0.184.1)(ajv@8.20.0)(immer@11.1.8)(prop-types@15.8.1)(react-dom@19.2.8(react@19.2.8))(react-is@16.13.1)(react@19.2.8)(redux@5.0.1)
+        specifier: ^1.7.2
+        version: 1.7.2(@standard-schema/spec@1.1.0)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(@types/three@0.184.1)(ajv@8.20.0)(immer@11.1.8)(prop-types@15.8.1)(react-dom@19.2.8(react@19.2.8))(react-is@16.13.1)(react@19.2.8)(redux@5.0.1)
       '@hookform/resolvers':
         specifier: 5.9.1
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv@8.20.0)(react-hook-form@7.91.0(@types/react@19.2.18)(react@19.2.8))(zod@4.6.7)
@@ -864,8 +864,8 @@ packages:
       '@types/react-dom':
         optional: true
 
-  '@heuresys/ui@1.7.1':
-    resolution: {integrity: sha512-7QTZomR6fsl8ktUHxCAew1BCQDRWeuml9/B1lPOVmuEbkeTswhZmrqd9u6kvRvEmwjcLaJQMNILIpTQDNGCwZQ==}
+  '@heuresys/ui@1.7.2':
+    resolution: {integrity: sha512-J5feVCUW3oYrQ2p5rovB10X37mAOgQN5JGagVVvQhujfs8uNm/DFYU0bq9CceEQfvuC9W2IVtcR3ypT5bQ1GWg==}
     engines: {node: '>=20.0.0', pnpm: '>=9.0.0'}
     peerDependencies:
       '@types/react': 19.2.18
@@ -7183,7 +7183,7 @@ snapshots:
       - vest
       - yup
 
-  '@heuresys/ui@1.7.1(@standard-schema/spec@1.1.0)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(@types/three@0.184.1)(ajv@8.20.0)(immer@11.1.8)(prop-types@15.8.1)(react-dom@19.2.8(react@19.2.8))(react-is@16.13.1)(react@19.2.8)(redux@5.0.1)':
+  '@heuresys/ui@1.7.2(@standard-schema/spec@1.1.0)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(@types/three@0.184.1)(ajv@8.20.0)(immer@11.1.8)(prop-types@15.8.1)(react-dom@19.2.8(react@19.2.8))(react-is@16.13.1)(react@19.2.8)(redux@5.0.1)':
     dependencies:
       '@dnd-kit/core': 6.3.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@dnd-kit/sortable': 10.0.0(@dnd-kit/core@6.3.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)

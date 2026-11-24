@@ -88,7 +88,7 @@ export default function TenantProcessesPage() {
   );
 
   return (
-    <main data-testid="tenant-processes-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="tenant-processes-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="tenant-processes-title"
         title={t("processiDelTenant.title")}
@@ -113,6 +113,6 @@ export default function TenantProcessesPage() {
           { id: "matrice", titolo: t("processiDelTenant.matrice.scheda"), contenuto: <MatriceProcessi tenantId={tenant || tenants[0]?.[0]} /> },
         ]}
       />
-    </main>
+    </div>
   );
 }

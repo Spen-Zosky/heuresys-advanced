@@ -39,7 +39,7 @@ export default function TassonomiePage() {
     testId: "catalogo-attivita", titolo: t("tassonomie.attivita"),
   };
   return (
-    <main data-testid="tassonomie-page" className="mx-auto max-w-6xl space-y-6 px-6 pb-8">
+    <div data-testid="tassonomie-page" className="mx-auto max-w-6xl space-y-6 px-6 pb-8">
       <PageHeader title={t("tassonomie.titolo")} description={t("tassonomie.descrizionePagina")} />
       {permessi.isLoading && <StatoCaricamento />}
       {permessi.isSuccess && ![professioni.permessi.leggi, attivita.permessi.leggi, "operating_model:read"].some((p) => perms.includes(p)) && (
@@ -49,6 +49,6 @@ export default function TassonomiePage() {
       {perms.includes(attivita.permessi.leggi) && <CatalogoClassi c={attivita} dettaglio={(v) => <Corrispondenze voce={v} />} />}
       {perms.includes("enterprise_typing:read") && <FasceDimensionali />}
       {perms.includes("operating_model:read") && <ModelliOperativi />}
-    </main>
+    </div>
   );
 }

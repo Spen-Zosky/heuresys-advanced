@@ -106,16 +106,16 @@ export default function CompensationAnalyticsPage() {
 
   if (q.isLoading) {
     return (
-      <main className="mx-auto max-w-7xl px-6 pb-8">
+      <div className="mx-auto max-w-7xl px-6 pb-8">
         <StatoCaricamento testId="analytics-compensation-loading" />
-      </main>
+      </div>
     );
   }
   if (q.isError) {
     return (
-      <main className="mx-auto max-w-7xl px-6 pb-8">
+      <div className="mx-auto max-w-7xl px-6 pb-8">
         <StatoErrore errore={q.error} titolo={t("error")} testId="analytics-compensation-error" onRiprova={() => void q.refetch()} />
-      </main>
+      </div>
     );
   }
 
@@ -138,7 +138,7 @@ export default function CompensationAnalyticsPage() {
       : t("compensation.rangeEmpty");
 
   return (
-    <main data-testid="analytics-compensation-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
+    <div data-testid="analytics-compensation-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       <PageHeader
         data-testid="analytics-compensation-title"
         title={t("compensation.title")}
@@ -241,6 +241,6 @@ export default function CompensationAnalyticsPage() {
           motivo={t("compensation.emptyDesc")}
         />
       )}
-    </main>
+    </div>
   );
 }

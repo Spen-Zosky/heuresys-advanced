@@ -20,7 +20,7 @@ export default function MeSurveysPage() {
   const items = surveys.data?.items ?? [];
 
   return (
-    <main data-testid="me-surveys-page" className="mx-auto max-w-4xl space-y-6 px-6 pb-8">
+    <div data-testid="me-surveys-page" className="mx-auto max-w-4xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="me-surveys-title"
         title={t("surveys.title")}
@@ -73,6 +73,6 @@ export default function MeSurveysPage() {
           </CardContent>
         </Card>
       )}
-    </main>
+    </div>
   );
 }

@@ -136,7 +136,7 @@ export default function AdvisorPage() {
   const data = advisor.data;
 
   return (
-    <main data-testid="advisor-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="advisor-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="advisor-title"
         title={t("advisor.title")}
@@ -176,6 +176,6 @@ export default function AdvisorPage() {
             })
           : t("advisor.methodIdle")}
       </p>
-    </main>
+    </div>
   );
 }

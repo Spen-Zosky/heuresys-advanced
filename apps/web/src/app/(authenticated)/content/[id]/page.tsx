@@ -224,7 +224,7 @@ export default function ContentEditPage() {
 
   if (detail.isError) {
     return (
-      <main data-testid="content-edit-page" className="mx-auto max-w-3xl space-y-4 px-6 pb-8">
+      <div data-testid="content-edit-page" className="mx-auto max-w-3xl space-y-4 px-6 pb-8">
         <Link href="/content" data-testid="content-edit-back" className="inline-flex text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
           {t("content.detail.back")}
         </Link>
@@ -233,14 +233,14 @@ export default function ContentEditPage() {
           titolo={t("content.detail.notFound")}
           onRiprova={() => void detail.refetch()}
         />
-      </main>
+      </div>
     );
   }
 
   const doc = detail.data?.document;
 
   return (
-    <main data-testid="content-edit-page" className="mx-auto max-w-3xl space-y-6 px-6 pb-8">
+    <div data-testid="content-edit-page" className="mx-auto max-w-3xl space-y-6 px-6 pb-8">
       <div className="space-y-3">
         <Link href="/content" data-testid="content-edit-back" className="inline-flex text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
           {t("content.detail.back")}
@@ -475,7 +475,7 @@ export default function ContentEditPage() {
           </div>
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }
 import { ContentMediaPanel } from "../../../../components/ContentMediaPanel";

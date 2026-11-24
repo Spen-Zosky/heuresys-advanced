@@ -36,7 +36,7 @@ export default function ProjectsPage() {
   const items = q.data?.items ?? [];
 
   return (
-    <main data-testid="projects-page" className="mx-auto max-w-6xl space-y-8 px-6 pb-8">
+    <div data-testid="projects-page" className="mx-auto max-w-6xl space-y-8 px-6 pb-8">
       <PageHeader
         title={t("projects.title")}
         description={t("projects.description")}
@@ -104,6 +104,6 @@ export default function ProjectsPage() {
           </section>
         </>
       )}
-    </main>
+    </div>
   );
 }

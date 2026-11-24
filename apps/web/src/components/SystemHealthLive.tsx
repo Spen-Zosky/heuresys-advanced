@@ -155,19 +155,19 @@ export function SystemHealthLive() {
 
   if (health.isLoading) {
     return (
-      <main
+      <div
         data-testid="system-health-loading"
         className="mx-auto max-w-7xl px-6 pb-8"
       >
         <StatoCaricamento />
-      </main>
+      </div>
     );
   }
   if (health.isError || !health.data) {
     return (
-      <main data-testid="system-health-error" className="mx-auto max-w-7xl px-6 pb-8">
+      <div data-testid="system-health-error" className="mx-auto max-w-7xl px-6 pb-8">
         <StatoErrore errore={health.error} titolo={t("health.loadError")} onRiprova={() => void health.refetch()} />
-      </main>
+      </div>
     );
   }
 
@@ -178,7 +178,7 @@ export function SystemHealthLive() {
   const matrix = rolePerms.data ? buildMatrix(rolePerms.data.items) : null;
 
   return (
-    <main
+    <div
       data-testid="system-health-page"
       className="mx-auto max-w-[1600px] space-y-6 px-6 pb-8"
     >
@@ -506,6 +506,6 @@ export function SystemHealthLive() {
           ) },
         ]}
       />
-    </main>
+    </div>
   );
 }

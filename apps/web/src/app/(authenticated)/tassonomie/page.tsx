@@ -22,7 +22,7 @@ import { NavigatoreCodici, NavigatoreCompetenze } from "./_components/navigatore
 export default function TassonomiePage() {
   const { t } = useTranslation("hr");
   return (
-    <main data-testid="tassonomie-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="tassonomie-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader title={t("tassonomie.titolo")} description={t("tassonomie.descrizione")} />
       <SchedePagina
         schede={[
@@ -48,6 +48,6 @@ export default function TassonomiePage() {
           },
         ]}
       />
-    </main>
+    </div>
   );
 }

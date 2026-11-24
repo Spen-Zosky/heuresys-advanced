@@ -116,7 +116,7 @@ export default function AdminGapsPage() {
   );
 
   return (
-    <main data-testid="gaps-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="gaps-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="gaps-title"
         title={t("gaps.title")}
@@ -158,6 +158,6 @@ export default function AdminGapsPage() {
           { id: "piani", titolo: t("gaps.tabs.closure"), contenuto: <GapClosurePanel /> },
         ]}
       />
-    </main>
+    </div>
   );
 }

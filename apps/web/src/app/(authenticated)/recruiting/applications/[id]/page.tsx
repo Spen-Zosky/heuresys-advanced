@@ -149,21 +149,21 @@ export default function ApplicationDetailPage() {
 
   if (app.isLoading) {
     return (
-      <main className="mx-auto max-w-5xl px-6 pb-8">
+      <div className="mx-auto max-w-5xl px-6 pb-8">
         <StatoCaricamento testId="application-loading" />
-      </main>
+      </div>
     );
   }
   if (app.isError || !app.data) {
     return (
-      <main className="mx-auto max-w-5xl px-6 pb-8">
+      <div className="mx-auto max-w-5xl px-6 pb-8">
         <StatoErrore
           errore={app.error}
           titolo={t("recruiting.application.error")}
           testId="application-error"
           onRiprova={() => void app.refetch()}
         />
-      </main>
+      </div>
     );
   }
 
@@ -173,7 +173,7 @@ export default function ApplicationDetailPage() {
   const interviewers = users.data?.items ?? [];
 
   return (
-    <main data-testid="application-page" className="mx-auto max-w-5xl space-y-8 px-6 pb-8">
+    <div data-testid="application-page" className="mx-auto max-w-5xl space-y-8 px-6 pb-8">
       <PageHeader
         title={candidate ? candidateName(candidate) : t("recruiting.application.title")}
         description={posting ? `${posting.code} · ${posting.title}` : a.postingId}
@@ -305,7 +305,7 @@ export default function ApplicationDetailPage() {
           )}
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }
 

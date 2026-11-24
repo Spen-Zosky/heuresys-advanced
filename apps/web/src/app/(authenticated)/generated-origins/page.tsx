@@ -139,7 +139,7 @@ export default function GeneratedOriginsPage() {
     !sommario.isLoading && !sommario.isError && (sommario.data?.totals.total ?? 0) === 0;
 
   return (
-    <main data-testid="generated-origins-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="generated-origins-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="generated-origins-title"
         title={t("generatedOrigins.title")}
@@ -208,6 +208,6 @@ export default function GeneratedOriginsPage() {
           caption={t("generatedOrigins.records")}
         />
       </section>
-    </main>
+    </div>
   );
 }

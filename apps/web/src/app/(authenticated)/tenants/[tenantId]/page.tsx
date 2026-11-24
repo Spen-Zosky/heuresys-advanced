@@ -61,15 +61,15 @@ export default function TenantDetailPage() {
 
   if (tenant.isLoading) {
     return (
-      <main className="mx-auto max-w-5xl px-6 pb-8">
+      <div className="mx-auto max-w-5xl px-6 pb-8">
         <StatoCaricamento />
-      </main>
+      </div>
     );
   }
   if (tenant.isError) {
     const status = isApiError(tenant.error) ? tenant.error.status : 0;
     return (
-      <main className="mx-auto max-w-5xl px-6 pb-8" data-testid="tenant-error">
+      <div className="mx-auto max-w-5xl px-6 pb-8" data-testid="tenant-error">
         <Link href="/tenants" className="text-sm underline">{t("tenants.detail.back")}</Link>
         <div className="mt-4">
           <StatoErrore
@@ -79,12 +79,12 @@ export default function TenantDetailPage() {
             onRiprova={() => void tenant.refetch()}
           />
         </div>
-      </main>
+      </div>
     );
   }
   const tn = tenant.data!;
   return (
-    <main data-testid="tenant-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
+    <div data-testid="tenant-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="tenant-name"
         title={tn.tenantName}
@@ -207,6 +207,6 @@ export default function TenantDetailPage() {
           </CardContent>
         </Card>
       )}
-    </main>
+    </div>
   );
 }

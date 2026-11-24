@@ -51,7 +51,7 @@ export default function PublicJobsPage() {
         ) : data === null ? (
           <div className="flex justify-center py-12" data-testid="jobs-loading"><Spinner label={t("shell:ui.loading")} /></div>
         ) : data.items.length === 0 ? (
-          <EmptyState data-testid="jobs-empty" title={t("jobs.emptyTitle")} description={t("jobs.emptyDesc")} />
+          <EmptyState data-testid="jobs-empty" headingLevel="h2" title={t("jobs.emptyTitle")} description={t("jobs.emptyDesc")} />
         ) : (
           <>
             <p className="text-sm text-muted-foreground" data-testid="jobs-count">{t("jobs.count", { count: data.total })}</p>

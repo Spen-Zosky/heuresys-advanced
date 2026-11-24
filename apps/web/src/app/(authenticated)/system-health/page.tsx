@@ -21,9 +21,9 @@ export default function SystemHealthPage() {
 
   if (perms.isLoading) {
     return (
-      <main className="flex h-screen items-center justify-center">
+      <div className="flex h-screen items-center justify-center">
         <StatoCaricamento />
-      </main>
+      </div>
     );
   }
 

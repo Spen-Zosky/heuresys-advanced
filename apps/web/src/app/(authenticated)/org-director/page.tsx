@@ -143,7 +143,7 @@ export default function OrgDirectorPage() {
   ], [t]);
 
   return (
-    <main data-testid="org-director-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="org-director-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="org-director-title"
         title={t("orgDirector.title")}
@@ -218,6 +218,6 @@ export default function OrgDirectorPage() {
           ) },
         ]}
       />
-    </main>
+    </div>
   );
 }

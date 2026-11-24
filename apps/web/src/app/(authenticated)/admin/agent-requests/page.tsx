@@ -105,7 +105,7 @@ export default function AgentRequestsPage() {
   });
   const righe = elenco.data?.items ?? [];
   return (
-    <main data-testid="agent-requests-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="agent-requests-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader title={t("agentReq.titolo")} description={t("agentReq.descrizione")} />
       <Card>
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
@@ -142,6 +142,6 @@ export default function AgentRequestsPage() {
           </CardContent>
         </Card>
       )}
-    </main>
+    </div>
   );
 }

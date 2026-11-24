@@ -71,16 +71,16 @@ export default function SkillsCoverageAnalyticsPage() {
 
   if (q.isLoading) {
     return (
-      <main className="mx-auto max-w-7xl px-6 pb-8">
+      <div className="mx-auto max-w-7xl px-6 pb-8">
         <StatoCaricamento testId="analytics-skills-loading" />
-      </main>
+      </div>
     );
   }
   if (q.isError) {
     return (
-      <main className="mx-auto max-w-7xl px-6 pb-8">
+      <div className="mx-auto max-w-7xl px-6 pb-8">
         <StatoErrore errore={q.error} titolo={t("error")} testId="analytics-skills-error" onRiprova={() => void q.refetch()} />
-      </main>
+      </div>
     );
   }
 
@@ -99,7 +99,7 @@ export default function SkillsCoverageAnalyticsPage() {
   });
 
   return (
-    <main data-testid="analytics-skills-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
+    <div data-testid="analytics-skills-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       <PageHeader
         data-testid="analytics-skills-title"
         title={t("skills.title")}
@@ -183,6 +183,6 @@ export default function SkillsCoverageAnalyticsPage() {
           motivo={t("skills.emptyDesc")}
         />
       )}
-    </main>
+    </div>
   );
 }

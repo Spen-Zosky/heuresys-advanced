@@ -465,7 +465,7 @@ export default function ConsolidationPage() {
   );
 
   return (
-    <main data-testid="consolidation-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="consolidation-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="consolidation-title"
         title={t("consolidation.title")}
@@ -532,6 +532,6 @@ export default function ConsolidationPage() {
           onChiudi={chiudiDecisione}
         />
       ) : null}
-    </main>
+    </div>
   );
 }

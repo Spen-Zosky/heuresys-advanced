@@ -24,7 +24,7 @@ export default function JobCatalogPage() {
   const { t } = useTranslation("admin");
 
   return (
-    <main data-testid="job-catalog-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="job-catalog-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="job-catalog-title"
         title={t("jobCatalog.title")}
@@ -32,6 +32,6 @@ export default function JobCatalogPage() {
       />
       <JobFamiliesPanel />
       <JobRolesPanel />
-    </main>
+    </div>
   );
 }

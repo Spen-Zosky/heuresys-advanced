@@ -99,7 +99,7 @@ export default function ProvenancePage() {
   ], [t, f]);
 
   return (
-    <main data-testid="provenance-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="provenance-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader data-testid="provenance-title" title={t("provenance.title")} description={t("provenance.description")} />
 
       {kpis.length > 0 ? <KPIStrip items={kpis} /> : null}
@@ -147,6 +147,6 @@ export default function ProvenancePage() {
           caption={t("provenance.records")}
         />
       </section>
-    </main>
+    </div>
   );
 }

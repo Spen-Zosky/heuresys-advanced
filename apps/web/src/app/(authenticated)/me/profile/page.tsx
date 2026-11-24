@@ -259,7 +259,7 @@ export default function MeProfilePage() {
   });
 
   return (
-    <main data-testid="me-profile-page" className="mx-auto max-w-5xl space-y-8 px-6 pb-8">
+    <div data-testid="me-profile-page" className="mx-auto max-w-5xl space-y-8 px-6 pb-8">
       <PageHeader
         data-testid="me-profile-title"
         title={t("profile.title")}
@@ -286,6 +286,6 @@ export default function MeProfilePage() {
         <SettingsForm />
         <AppearanceCard />
       </section>
-    </main>
+    </div>
   );
 }

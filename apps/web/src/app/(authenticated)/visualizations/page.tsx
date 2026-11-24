@@ -94,7 +94,7 @@ export default function VisualizationsPage() {
   );
 
   return (
-    <main data-testid="visualizations-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="visualizations-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="visualizations-title"
         title={t("visualizations.title")}
@@ -179,6 +179,6 @@ export default function VisualizationsPage() {
           <StatoVuoto titolo={t("visualizations.exports.empty")} testId="visualizations-exports-empty" />
         )}
       </section>
-    </main>
+    </div>
   );
 }

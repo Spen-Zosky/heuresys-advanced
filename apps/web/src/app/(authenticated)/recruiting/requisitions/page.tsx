@@ -85,7 +85,7 @@ export default function RequisitionsPage() {
   const items = q.data?.items ?? [];
 
   return (
-    <main data-testid="requisitions-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
+    <div data-testid="requisitions-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       <PageHeader title={t("recruiting.requisitions.title")} description={t("recruiting.requisitions.description")} />
 
       {canWrite && (
@@ -204,6 +204,6 @@ export default function RequisitionsPage() {
           </table>
         </div>
       )}
-    </main>
+    </div>
   );
 }

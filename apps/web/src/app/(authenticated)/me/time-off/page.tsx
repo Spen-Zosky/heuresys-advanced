@@ -115,7 +115,7 @@ export default function MeTimeOffPage() {
   );
 
   return (
-    <main data-testid="me-time-off-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
+    <div data-testid="me-time-off-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="me-time-off-title"
         title={t("timeOff.title")}
@@ -235,6 +235,6 @@ export default function MeTimeOffPage() {
           />
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }

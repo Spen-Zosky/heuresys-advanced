@@ -170,15 +170,15 @@ export default function VisualizationDetailPage() {
 
   if (graph.isLoading) {
     return (
-      <main className="mx-auto max-w-5xl px-6 pb-8">
+      <div className="mx-auto max-w-5xl px-6 pb-8">
         <StatoCaricamento />
-      </main>
+      </div>
     );
   }
   if (graph.isError) {
     const status = isApiError(graph.error) ? graph.error.status : 0;
     return (
-      <main className="mx-auto max-w-5xl px-6 pb-8" data-testid="visualization-error">
+      <div className="mx-auto max-w-5xl px-6 pb-8" data-testid="visualization-error">
         <Link href="/visualizations" className="text-sm underline">{t("visualizations.detail.back")}</Link>
         <div className="mt-4">
           <StatoErrore
@@ -188,7 +188,7 @@ export default function VisualizationDetailPage() {
             onRiprova={() => void graph.refetch()}
           />
         </div>
-      </main>
+      </div>
     );
   }
   const g = graph.data!;
@@ -214,7 +214,7 @@ export default function VisualizationDetailPage() {
       : null;
 
   return (
-    <main data-testid="visualization-detail-page" className="mx-auto max-w-6xl space-y-6 px-6 pb-8">
+    <div data-testid="visualization-detail-page" className="mx-auto max-w-6xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="visualization-name"
         title={g.name}
@@ -454,6 +454,6 @@ export default function VisualizationDetailPage() {
       <p className="text-xs text-muted-foreground">
         {t("visualizations.detail.note")}
       </p>
-    </main>
+    </div>
   );
 }

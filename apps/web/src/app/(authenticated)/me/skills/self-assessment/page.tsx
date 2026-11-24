@@ -70,7 +70,7 @@ export default function MeSelfAssessmentPage() {
   const onSubmit = handleSubmit(async (vals) => { await create.mutateAsync(vals); });
 
   return (
-    <main data-testid="self-assessment-page" className="mx-auto max-w-3xl space-y-6 px-6 pb-8">
+    <div data-testid="self-assessment-page" className="mx-auto max-w-3xl space-y-6 px-6 pb-8">
       <div className="space-y-3">
         <Link
           href="/me/skills"
@@ -182,6 +182,6 @@ export default function MeSelfAssessmentPage() {
           </form>
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }

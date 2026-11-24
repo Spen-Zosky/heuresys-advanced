@@ -159,7 +159,7 @@ export default function MeCertificationsPage() {
   });
 
   return (
-    <main data-testid="me-certifications-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="me-certifications-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="me-certifications-title"
         title={t("certifications.title")}
@@ -312,6 +312,6 @@ export default function MeCertificationsPage() {
           caption={t("certifications.caption")}
         />
       </div>
-    </main>
+    </div>
   );
 }

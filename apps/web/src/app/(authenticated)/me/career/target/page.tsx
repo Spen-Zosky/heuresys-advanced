@@ -61,7 +61,7 @@ export default function MeCareerTargetPage() {
   const onSubmit = handleSubmit(async (vals) => { await create.mutateAsync(vals); });
 
   return (
-    <main data-testid="career-target-page" className="mx-auto max-w-3xl space-y-6 px-6 pb-8">
+    <div data-testid="career-target-page" className="mx-auto max-w-3xl space-y-6 px-6 pb-8">
       <div className="space-y-3">
         <Link
           href="/me/career"
@@ -162,6 +162,6 @@ export default function MeCareerTargetPage() {
           </form>
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }

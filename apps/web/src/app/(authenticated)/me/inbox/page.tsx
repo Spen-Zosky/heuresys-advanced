@@ -130,7 +130,7 @@ export default function MeInboxPage() {
   });
 
   return (
-    <main data-testid="me-inbox-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
+    <div data-testid="me-inbox-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="me-inbox-title"
         title={t("inbox.title")}
@@ -191,9 +191,9 @@ export default function MeInboxPage() {
       {inbox.isLoading ? (
         <StatoCaricamento testId="me-inbox-loading" />
       ) : inbox.isError ? (
-        <StatoErrore errore={inbox.error} titolo={t("inbox.error")} testId="me-inbox-error" onRiprova={() => void inbox.refetch()} />
+        <StatoErrore livelloTitolo="h2" errore={inbox.error} titolo={t("inbox.error")} testId="me-inbox-error" onRiprova={() => void inbox.refetch()} />
       ) : inbox.data && inbox.data.items.length === 0 ? (
-        <StatoVuoto
+        <StatoVuoto livelloTitolo="h2"
           testId="me-inbox-empty"
           icona={<Inbox className="h-6 w-6" />}
           titolo={t("inbox.emptyTitle")}
@@ -204,6 +204,6 @@ export default function MeInboxPage() {
           <AuditFeed events={events} title={t("inbox.feedTitle")} />
         </div>
       )}
-    </main>
+    </div>
   );
 }

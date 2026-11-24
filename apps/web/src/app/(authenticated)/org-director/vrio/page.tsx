@@ -122,7 +122,7 @@ export default function VrioScorecardPage() {
   const data = scorecard.data;
 
   return (
-    <main data-testid="vrio-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="vrio-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="vrio-title"
         title={t("vrio.title")}
@@ -179,6 +179,6 @@ export default function VrioScorecardPage() {
       <p data-testid="vrio-method" className="text-xs text-muted-foreground">
         {t("vrio.method")}
       </p>
-    </main>
+    </div>
   );
 }

@@ -83,7 +83,7 @@ export default function EngagementPage() {
   };
 
   return (
-    <main data-testid="engagement-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="engagement-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="engagement-title"
         title={t("engagement.title")}
@@ -158,6 +158,6 @@ export default function EngagementPage() {
         </CardContent>
       </Card>
       <RiscontriEPiani />
-    </main>
+    </div>
   );
 }

@@ -419,7 +419,7 @@ export default function MeSecurityPage() {
   });
 
   return (
-    <main
+    <div
       data-testid="me-security-page"
       className="mx-auto max-w-3xl space-y-6 px-6 pb-8"
     >
@@ -927,6 +927,6 @@ export default function MeSecurityPage() {
       <CodiciDiRecupero />
       <PreferenzeNotifiche />
       <ConsensiEDati />
-    </main>
+    </div>
   );
 }

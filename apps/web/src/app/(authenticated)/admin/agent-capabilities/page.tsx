@@ -138,17 +138,17 @@ export default function AgentCapabilitiesPage() {
   });
   const codiceValido = /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/.test(nuova.code.trim());
   // Il registro è di chi ha agent_capability:read: agli altri la pagina lo dice, senza una chiamata che tornerebbe 403.
-  if (permessi.isLoading) return <main className="mx-auto max-w-7xl px-6 pb-8"><StatoCaricamento /></main>;
+  if (permessi.isLoading) return <div className="mx-auto max-w-7xl px-6 pb-8"><StatoCaricamento /></div>;
   if (!puoLeggere) {
     return (
-      <main data-testid="agent-capabilities-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+      <div data-testid="agent-capabilities-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
         <PageHeader title={t("agentCaps.titolo")} description={t("agentCaps.descrizione")} />
         <StatoNegato motivo={t("agentCaps.negato")} />
-      </main>
+      </div>
     );
   }
   return (
-    <main data-testid="agent-capabilities-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="agent-capabilities-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader title={t("agentCaps.titolo")} description={t("agentCaps.descrizione")} />
       <Card>
         <CardHeader><CardTitle as="h2">{t("agentCaps.elenco", { count: elenco.data?.items.length ?? 0 })}</CardTitle></CardHeader>
@@ -188,6 +188,6 @@ export default function AgentCapabilitiesPage() {
           </CardContent>
         </Card>
       )}
-    </main>
+    </div>
   );
 }

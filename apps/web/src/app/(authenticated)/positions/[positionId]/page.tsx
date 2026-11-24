@@ -53,15 +53,15 @@ export default function PositionDetailPage() {
 
   if (position.isLoading) {
     return (
-      <main className="mx-auto max-w-5xl px-6 pb-8">
+      <div className="mx-auto max-w-5xl px-6 pb-8">
         <StatoCaricamento />
-      </main>
+      </div>
     );
   }
   if (position.isError) {
     const code = isApiError(position.error) ? position.error.status : 0;
     return (
-      <main className="mx-auto max-w-5xl px-6 pb-8" data-testid="position-error">
+      <div className="mx-auto max-w-5xl px-6 pb-8" data-testid="position-error">
         <Link href="/positions" className="text-sm underline">{t("positions.detail.back")}</Link>
         <div className="mt-4">
           <StatoErrore
@@ -71,12 +71,12 @@ export default function PositionDetailPage() {
             onRiprova={() => void position.refetch()}
           />
         </div>
-      </main>
+      </div>
     );
   }
   const p = position.data!;
   return (
-    <main data-testid="position-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
+    <div data-testid="position-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="position-title"
         title={p.title}
@@ -127,6 +127,6 @@ export default function PositionDetailPage() {
       {/* Sopra si LEGGE la posizione, qui la si RIDISEGNA: legami scelti per
           nome da elenchi veri, non incollando identificativi (#44). */}
       <PositionEditor positionId={positionId} />
-    </main>
+    </div>
   );
 }

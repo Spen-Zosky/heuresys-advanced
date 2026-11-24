@@ -18,11 +18,11 @@ export default function MeCareerPage() {
     { id: "rischio", label: t("career.tabs.rischio"), testId: "career-tab-rischio", render: () => <RiskTab /> },
   ];
   return (
-    <main data-testid="me-career-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
+    <div data-testid="me-career-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       <PageHeader title={t("career.title")} description={t("career.description")} />
       <Suspense fallback={<StatoCaricamento />}>
         <ProfileTabs tabs={tabs} ariaLabel={t("career.tabs.aria")} />
       </Suspense>
-    </main>
+    </div>
   );
 }

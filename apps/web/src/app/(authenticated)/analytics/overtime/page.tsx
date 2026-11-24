@@ -145,16 +145,16 @@ export default function OvertimeAnalyticsPage() {
 
   if (q.isLoading) {
     return (
-      <main className="mx-auto max-w-7xl px-6 pb-8">
+      <div className="mx-auto max-w-7xl px-6 pb-8">
         <StatoCaricamento testId="analytics-overtime-loading" />
-      </main>
+      </div>
     );
   }
   if (q.isError) {
     return (
-      <main className="mx-auto max-w-7xl px-6 pb-8">
+      <div className="mx-auto max-w-7xl px-6 pb-8">
         <StatoErrore errore={q.error} titolo={t("error")} testId="analytics-overtime-error" onRiprova={() => void q.refetch()} />
-      </main>
+      </div>
     );
   }
 
@@ -167,7 +167,7 @@ export default function OvertimeAnalyticsPage() {
   const typeName = (r: OvertimeByTypeRow) => t(`overtime.types.${r.type}`);
 
   return (
-    <main data-testid="analytics-overtime-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
+    <div data-testid="analytics-overtime-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       <PageHeader
         data-testid="analytics-overtime-title"
         title={t("overtime.title")}
@@ -326,6 +326,6 @@ export default function OvertimeAnalyticsPage() {
           motivo={t("overtime.emptyDesc")}
         />
       )}
-    </main>
+    </div>
   );
 }

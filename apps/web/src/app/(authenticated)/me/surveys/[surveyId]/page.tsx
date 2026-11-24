@@ -58,7 +58,7 @@ export default function MeSurveyAnswerPage() {
   const myAnswerFor = (questionId: string) => d?.myAnswers.find((a) => a.questionId === questionId);
 
   return (
-    <main data-testid="me-survey-answer-page" className="mx-auto max-w-3xl space-y-6 px-6 pb-8">
+    <div data-testid="me-survey-answer-page" className="mx-auto max-w-3xl space-y-6 px-6 pb-8">
       <div className="text-sm">
         <Link href="/me/surveys" className="text-muted-foreground hover:underline" data-testid="me-survey-back">
           ← {t("surveys.back")}
@@ -165,6 +165,6 @@ export default function MeSurveyAnswerPage() {
           </Card>
         </>
       )}
-    </main>
+    </div>
   );
 }

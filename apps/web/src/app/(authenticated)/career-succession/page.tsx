@@ -125,7 +125,7 @@ export default function CareerSuccessionPage() {
   };
 
   return (
-    <main data-testid="career-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="career-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader data-testid="career-title" title={t("career.title")} description={t("career.description")} />
 
       <nav className="flex gap-1 border-b border-border" data-testid="career-tabs">
@@ -213,6 +213,6 @@ export default function CareerSuccessionPage() {
           <GestioneCandidati candidati={candidates.rows} />
         </div>
       )}
-    </main>
+    </div>
   );
 }

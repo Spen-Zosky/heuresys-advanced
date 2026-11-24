@@ -126,7 +126,7 @@ export default function LeadsPage() {
   const data = leads.data;
 
   return (
-    <main data-testid="leads-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="leads-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="leads-title"
         title={t("leads.title")}
@@ -180,6 +180,6 @@ export default function LeadsPage() {
         emptyDescription={t("leads.emptyDescription")}
         caption={t("leads.caption")}
       />
-    </main>
+    </div>
   );
 }

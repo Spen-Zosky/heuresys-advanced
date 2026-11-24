@@ -276,6 +276,7 @@
     "theme": "Toggle light and dark theme",
     "userMenu": "User menu: {{username}}",
     "languageSwitch": "{{lang}} — switch language between Italian and English",
+    "homeLabel": "home page",
     "paletteSearch": "Search tenants, logs, audit…",
     "paletteEmpty": "No commands configured",
     "drawerTitle": "Navigation menu",

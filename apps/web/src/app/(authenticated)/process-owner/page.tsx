@@ -107,7 +107,7 @@ export default function ProcessOwnerPage() {
   }, [t, permRaci.togli, selected]);
 
   return (
-    <main data-testid="process-owner-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="process-owner-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="process-owner-title"
         title={t("processOwner.title")}
@@ -143,6 +143,6 @@ export default function ProcessOwnerPage() {
           <AssegnaUnitaAlProcesso processId={selected.id} giaAssegnate={raciRows.map((r) => r.orgUnitId)} />
         )}
       </section>
-    </main>
+    </div>
   );
 }

@@ -142,26 +142,26 @@ export default function MentorshipPage() {
 
   if (!perm.query.data) {
     return (
-      <main data-testid="mentorship-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+      <div data-testid="mentorship-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
         <PageHeader title={t("mentorship.titolo")} description={t("mentorship.descrizione")} />
         {perm.query.isError ? (
           <StatoErrore errore={perm.query.error} titolo={t("mentorship.erroreCarica")} onRiprova={() => void perm.query.refetch()} />
         ) : <StatoCaricamento />}
-      </main>
+      </div>
     );
   }
   if (!perm.legge) {
     // La guardia di pagina nega già questa scheda; qui resta solo la difesa, senza letture.
     return (
-      <main data-testid="mentorship-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+      <div data-testid="mentorship-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
         <PageHeader title={t("mentorship.titolo")} description={t("mentorship.descrizione")} />
         <StatoVuoto titolo={t("shell:noAccess.title")} motivo={t("shell:noAccess.bodyGenerico")} />
-      </main>
+      </div>
     );
   }
 
   return (
-    <main data-testid="mentorship-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="mentorship-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader title={t("mentorship.titolo")} description={t("mentorship.descrizione")} />
 
       <Card data-testid="mentorship-programs">
@@ -252,6 +252,6 @@ export default function MentorshipPage() {
           {coppia && <Incontri coppia={coppia} />}
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }

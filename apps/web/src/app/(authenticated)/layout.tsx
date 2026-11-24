@@ -427,6 +427,10 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
 
   return (
     <DashboardShell
+      // K03 (giro forense del 23/11/2026, @heuresys/ui 1.7.1): il landmark main lo dà il guscio, una
+      // volta sola, e le pagine non ne aprono un secondo. Così stanno dentro il main anche le
+      // schede di sezione e il pannello dell'agente, che il layout monta sopra la pagina.
+      contentLandmark="main"
       contentLabel={t("shell:ui.content")}
       header={
         <DashboardHeader
@@ -439,6 +443,8 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
             theme: t("shell:ui.theme"),
             language: (lang) => t("shell:ui.languageSwitch", { lang }),
             userMenu: (username) => t("shell:ui.userMenu", { username }),
+            // K05: il pulsante della ricerca nell'header (1.7.1) e la palette dei comandi.
+            searchPlaceholder: t("shell:ui.paletteSearch"),
             commandPalettePlaceholder: t("shell:ui.paletteSearch"),
             commandPaletteEmpty: t("shell:ui.paletteEmpty"),
             drawerTitle: t("shell:ui.drawerTitle"),
@@ -447,6 +453,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
           commandPaletteContent={contenutoPalette}
           mobileNav={<MenuMobile groups={gruppiPersonali} />}
           logo={<HeuresysWordmark variant="brand" size={24} />}
+          homeLabel={t("shell:ui.homeLabel")}
           // F-6 (L7): il collegamento del marchio ha già il suo nome accessibile («Heuresys —
           // pagina iniziale autenticata»); il distintivo «advanced» visibile ma fuori da quel
           // nome è la violazione `label-content-name-mismatch` misurata su 97 pagine. È
@@ -511,7 +518,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
       <StepUpDialog />
       {/* S1009: in-page tab bar for the 6 merge groups; renders nothing off those routes. */}
       {verdict.kind === "denied" ? (
-        <main data-testid="page-no-access" className="mx-auto w-full min-w-0 max-w-2xl space-y-4 break-words px-6 py-10 [overflow-wrap:anywhere]">
+        <div data-testid="page-no-access" className="mx-auto w-full min-w-0 max-w-2xl space-y-4 break-words px-6 py-10 [overflow-wrap:anywhere]">
           <header className="space-y-1">
             <h1 className="text-2xl font-bold tracking-tight">{t("shell:noAccess.title")}</h1>
             <p className="text-sm text-muted-foreground">{nomePaginaNegata ? t("shell:noAccess.body", { pagina: nomePaginaNegata }) : t("shell:noAccess.bodyGenerico")}</p>
@@ -519,7 +526,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
           <Button variant="outline" size="sm" onClick={() => router.push("/me")}>
             {t("shell:noAccess.home")}
           </Button>
-        </main>
+        </div>
       ) : (
         <ContestoAgenteProvider>
           <SchedeProvider>

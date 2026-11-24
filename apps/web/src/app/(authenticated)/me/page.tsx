@@ -28,7 +28,7 @@ export default function MeLandingPage() {
     },
   ];
   return (
-    <main data-testid="me-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
+    <div data-testid="me-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       <PageHeader
         title={t("landing.title")}
         description={t("landing.description")}
@@ -41,6 +41,6 @@ export default function MeLandingPage() {
       <Suspense fallback={<StatoCaricamento />}>
         <ProfileTabs tabs={tabs} ariaLabel={t("landing.tabs.aria")} />
       </Suspense>
-    </main>
+    </div>
   );
 }

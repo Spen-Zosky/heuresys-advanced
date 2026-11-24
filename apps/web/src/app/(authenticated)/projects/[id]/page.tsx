@@ -43,21 +43,21 @@ export default function ProjectDetailPage() {
 
   if (q.isLoading) {
     return (
-      <main className="mx-auto max-w-4xl px-6 pb-8">
+      <div className="mx-auto max-w-4xl px-6 pb-8">
         <StatoCaricamento testId="project-detail-loading" />
-      </main>
+      </div>
     );
   }
   if (q.isError || !q.data) {
     return (
-      <main className="mx-auto max-w-4xl px-6 pb-8">
+      <div className="mx-auto max-w-4xl px-6 pb-8">
         <StatoErrore
           errore={q.error}
           titolo={t("projects.detailError")}
           testId="project-detail-error"
           onRiprova={() => void q.refetch()}
         />
-      </main>
+      </div>
     );
   }
 
@@ -65,7 +65,7 @@ export default function ProjectDetailPage() {
   const correnti = p.members.filter((m) => m.isCurrent);
 
   return (
-    <main data-testid="project-detail-page" className="mx-auto max-w-6xl space-y-8 px-6 pb-8">
+    <div data-testid="project-detail-page" className="mx-auto max-w-6xl space-y-8 px-6 pb-8">
       <PageHeader title={p.name} description={p.code} />
 
       <Card>
@@ -125,6 +125,6 @@ export default function ProjectDetailPage() {
           </ul>
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }

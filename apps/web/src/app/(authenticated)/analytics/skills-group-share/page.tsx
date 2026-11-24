@@ -23,16 +23,16 @@ export default function SkillsGroupShareAnalyticsPage() {
 
   if (q.isLoading) {
     return (
-      <main className="mx-auto max-w-7xl px-6 pb-8">
+      <div className="mx-auto max-w-7xl px-6 pb-8">
         <StatoCaricamento testId="analytics-skills-group-share-loading" />
-      </main>
+      </div>
     );
   }
   if (q.isError) {
     return (
-      <main className="mx-auto max-w-7xl px-6 pb-8">
+      <div className="mx-auto max-w-7xl px-6 pb-8">
         <StatoErrore errore={q.error} titolo={t("error")} testId="analytics-skills-group-share-error" onRiprova={() => void q.refetch()} />
-      </main>
+      </div>
     );
   }
 
@@ -55,7 +55,7 @@ export default function SkillsGroupShareAnalyticsPage() {
   });
 
   return (
-    <main data-testid="analytics-skills-group-share-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
+    <div data-testid="analytics-skills-group-share-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       <PageHeader
         data-testid="analytics-skills-group-share-title"
         title={t("skillsGroupShare.title")}
@@ -147,6 +147,6 @@ export default function SkillsGroupShareAnalyticsPage() {
           motivo={t("skillsGroupShare.emptyDesc")}
         />
       )}
-    </main>
+    </div>
   );
 }

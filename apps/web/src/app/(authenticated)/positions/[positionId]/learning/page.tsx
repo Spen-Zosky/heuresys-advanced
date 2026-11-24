@@ -72,7 +72,7 @@ export default function PositionLearningPage() {
   const gapItems = gaps.rows;
 
   return (
-    <main data-testid="position-learning-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
+    <div data-testid="position-learning-page" className="mx-auto max-w-5xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="position-learning-title"
         title={t("positions.learning.title")}
@@ -215,6 +215,6 @@ export default function PositionLearningPage() {
         </CardContent>
       </Card>
       ) : null}
-    </main>
+    </div>
   );
 }

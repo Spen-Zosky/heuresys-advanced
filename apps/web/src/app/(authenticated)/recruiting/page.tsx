@@ -129,7 +129,7 @@ export default function RecruitingPipelinePage() {
   const publishedPostings = (postings.data?.items ?? []).filter((p) => p.status === "PUBLISHED").length;
 
   return (
-    <main data-testid="recruiting-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
+    <div data-testid="recruiting-page" className="mx-auto max-w-7xl space-y-8 px-6 pb-8">
       <PageHeader title={t("recruiting.title")} description={t("recruiting.description")} />
 
       <section className="grid gap-4 sm:grid-cols-3" data-testid="recruiting-summary">
@@ -169,7 +169,7 @@ export default function RecruitingPipelinePage() {
       {loading ? (
         <StatoCaricamento testId="recruiting-loading" />
       ) : error ? (
-        <StatoErrore
+        <StatoErrore livelloTitolo="h2"
           errore={apps.error ?? candidates.error ?? postings.error}
           titolo={t("recruiting.error")}
           testId="recruiting-error"
@@ -180,7 +180,7 @@ export default function RecruitingPipelinePage() {
           }}
         />
       ) : items.length === 0 ? (
-        <StatoVuoto
+        <StatoVuoto livelloTitolo="h2"
           testId="pipeline-empty"
           titolo={t("recruiting.pipeline.emptyTitle")}
           motivo={t("recruiting.pipeline.emptyDesc")}
@@ -188,9 +188,9 @@ export default function RecruitingPipelinePage() {
       ) : (
         /* C5: la tavola scorre dentro il suo riquadro, la pagina resta corta */
         <div data-testid="pipeline-board" className="max-h-[calc(100vh-16rem)] overflow-auto">
-          <KanbanBoard key={`${impronta}#${annullati}`} columns={columns} onChange={onChange} dragCardLabel={(title) => t("shell:ui.dragCard", { title })} />
+          <KanbanBoard columnHeadingLevel="h2" key={`${impronta}#${annullati}`} columns={columns} onChange={onChange} dragCardLabel={(title) => t("shell:ui.dragCard", { title })} />
         </div>
       )}
-    </main>
+    </div>
   );
 }

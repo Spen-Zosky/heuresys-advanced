@@ -92,7 +92,7 @@ export default function MeLearningCataloguePage() {
   ];
 
   return (
-    <main data-testid="learning-catalogue-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="learning-catalogue-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <Link
         href="/me/learning"
         className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
@@ -149,6 +149,6 @@ export default function MeLearningCataloguePage() {
           {t("catalogue.enrolledConfirm", { path: lastEnrolled })}
         </Badge>
       ) : null}
-    </main>
+    </div>
   );
 }

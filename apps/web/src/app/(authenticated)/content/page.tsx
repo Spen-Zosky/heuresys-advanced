@@ -212,7 +212,7 @@ export default function ContentPage() {
   );
 
   return (
-    <main data-testid="content-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="content-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="content-title"
         title={t("content.title")}
@@ -532,6 +532,6 @@ export default function ContentPage() {
           ) },
         ]}
       />
-    </main>
+    </div>
   );
 }

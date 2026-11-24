@@ -54,23 +54,23 @@ export default function MeHandbookDetailPage() {
 
   if (detail.isLoading) {
     return (
-      <main data-testid="handbook-detail-page" className="mx-auto max-w-3xl space-y-4 px-6 pb-8">
+      <div data-testid="handbook-detail-page" className="mx-auto max-w-3xl space-y-4 px-6 pb-8">
         <Link href="/me/handbook" data-testid="handbook-back" className="inline-flex text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
           {t("handbook.back")}
         </Link>
         <StatoCaricamento />
-      </main>
+      </div>
     );
   }
 
   if (detail.isError) {
     return (
-      <main data-testid="handbook-detail-page" className="mx-auto max-w-3xl space-y-4 px-6 pb-8">
+      <div data-testid="handbook-detail-page" className="mx-auto max-w-3xl space-y-4 px-6 pb-8">
         <Link href="/me/handbook" data-testid="handbook-back" className="inline-flex text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
           {t("handbook.back")}
         </Link>
         <StatoErrore errore={detail.error} titolo={t("handbook.notFound")} onRiprova={() => void detail.refetch()} />
-      </main>
+      </div>
     );
   }
 
@@ -79,7 +79,7 @@ export default function MeHandbookDetailPage() {
   const attachments = media.data?.items ?? [];
 
   return (
-    <main data-testid="handbook-detail-page" className="mx-auto max-w-3xl space-y-6 px-6 pb-8">
+    <div data-testid="handbook-detail-page" className="mx-auto max-w-3xl space-y-6 px-6 pb-8">
       <Link href="/me/handbook" data-testid="handbook-back" className="inline-flex text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
         {t("handbook.back")}
       </Link>
@@ -136,6 +136,6 @@ export default function MeHandbookDetailPage() {
           </CardContent>
         </Card>
       )}
-    </main>
+    </div>
   );
 }

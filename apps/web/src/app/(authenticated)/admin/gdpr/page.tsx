@@ -150,7 +150,7 @@ export default function GdprAdminPage() {
   const gruppi = raggruppaMappa(mappa.data?.items ?? [], t, (k) => i18n.exists(k, { ns: "admin" }), lingua);
   const richieste = useQuery({ queryKey: ["gdpr", "requests"], queryFn: () => apiFetch<GdprRequestListResponse>("/v1/gdpr/requests?limit=50"), enabled: perms.includes("gdpr:read") });
   return (
-    <main data-testid="gdpr-admin-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="gdpr-admin-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader title={t("gdpr.titolo")} description={t("gdpr.descrizione")} />
       {(perms.includes("gdpr:export") || perms.includes("gdpr:erase")) && <Persona />}
       {perms.includes("gdpr:retention") && <Conservazione />}
@@ -199,6 +199,6 @@ export default function GdprAdminPage() {
           ))}
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }

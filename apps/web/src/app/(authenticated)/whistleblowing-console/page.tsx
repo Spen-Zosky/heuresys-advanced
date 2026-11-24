@@ -142,7 +142,7 @@ export default function WhistleblowingConsolePage() {
     || registro.data.perspectives.some((p) => p.interfaces.some((i) => i.code === "whistleblowing-console"));
   if (!puoEntrare) {
     return (
-      <main data-testid="wb-console-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+      <div data-testid="wb-console-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
         <PageHeader
           data-testid="whistleblowing-console-title"
           title={t("whistleblowingConsole.title")}
@@ -155,12 +155,12 @@ export default function WhistleblowingConsolePage() {
             </p>
           </CardContent>
         </Card>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main data-testid="wb-console-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="wb-console-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="whistleblowing-console-title"
         title={t("whistleblowingConsole.title")}
@@ -302,6 +302,6 @@ export default function WhistleblowingConsolePage() {
           </CardContent>
         </Card>
       )}
-    </main>
+    </div>
   );
 }

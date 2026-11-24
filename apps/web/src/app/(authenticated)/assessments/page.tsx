@@ -116,7 +116,7 @@ export default function AssessmentsPage() {
   const periodo = (v: Valutazione) => (v.periodStart ? `${fmt.data(v.periodStart)} – ${v.periodEnd ? fmt.data(v.periodEnd) : "…"}` : t("assessments.senzaPeriodo"));
 
   return (
-    <main data-testid="assessments-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="assessments-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader title={t("assessments.titolo")} description={t("assessments.descrizione")} />
       <Card>
         <CardHeader><CardTitle as="h2">{t("assessments.elenco", { mostrati: elenco.data?.items.length ?? 0, totale: elenco.data?.total ?? 0 })}</CardTitle></CardHeader>
@@ -174,6 +174,6 @@ export default function AssessmentsPage() {
           </CardContent>
         </Card>
       )}
-    </main>
+    </div>
   );
 }

@@ -48,7 +48,7 @@ export default function MeSkillsPage() {
   });
 
   return (
-    <main data-testid="me-skills-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
+    <div data-testid="me-skills-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader
         data-testid="me-skills-title"
         title={t("skills.title")}
@@ -138,6 +138,6 @@ export default function MeSkillsPage() {
           )}
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }

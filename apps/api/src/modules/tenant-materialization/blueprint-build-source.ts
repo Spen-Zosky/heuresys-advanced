@@ -48,7 +48,7 @@
  * di inventare persone, e inventarle significherebbe far nascere ogni azienda con lo stesso
  * organico fittizio — la stessa forma di difetto che E29 chiede di togliere.
  */
-import type { BuildSourceSummary } from "@heuresys/shared";
+import type { BuildPlanIncoherence, BuildSourceSummary } from "@heuresys/shared";
 
 import { ConflictError } from "../../errors/index.js";
 import type {
@@ -217,10 +217,18 @@ export class BlueprintBuildSource implements BuildSource {
     const codiciUnita = new Set(ordinate.map((u) => u.code));
     const collocateMale = posizioni.filter((p) => !codiciUnita.has(p.unit_code));
     if (collocateMale.length > 0) {
+      // Il messaggio resta per la diagnosi; l'elenco va nei dettagli, dove il client lo
+      // mostra richiudibile e con i nomi, invece di un paragrafo di codici (giro forense K32).
+      const dettagli: BuildPlanIncoherence = {
+        reason: "POSITIONS_IN_MISSING_UNITS",
+        count: collocateMale.length,
+        items: collocateMale.map((p) => ({ code: p.code, name: p.title, unitCode: p.unit_code })),
+      };
       throw new ConflictError(
         `Il modello ${modello} colloca ${collocateMale.length} posizioni in unità che non esistono: ` +
           collocateMale.map((p) => `${p.code}→${p.unit_code}`).join(", "),
         "BLUEPRINT_CONTENT_INCOHERENT",
+        dettagli,
       );
     }
 
@@ -232,11 +240,18 @@ export class BlueprintBuildSource implements BuildSource {
     // accetta; qui si dichiara cosa una costruzione pretende.
     const senzaCategoria = competenze.filter((s) => !s.category || s.category.trim() === "");
     if (senzaCategoria.length > 0) {
+      // Il messaggio dice il numero e non elenca i codici: erano centinaia di «ESCO::uuid» in
+      // un paragrafo solo (giro forense K32). L'elenco, con codice e nome, sta nei dettagli.
+      const dettagli: BuildPlanIncoherence = {
+        reason: "SKILLS_WITHOUT_CATEGORY",
+        count: senzaCategoria.length,
+        items: senzaCategoria.map((s) => ({ code: s.code, name: s.name })),
+      };
       throw new ConflictError(
-        `Il modello ${modello} dichiara ${senzaCategoria.length} competenze senza categoria: ` +
-          senzaCategoria.map((s) => s.code).join(", ") +
-          ". Una competenza senza categoria costruisce, e rompe il deploy successivo.",
+        `Il modello ${modello} dichiara ${senzaCategoria.length} competenze senza categoria. ` +
+          "Una competenza senza categoria costruisce, e rompe il deploy successivo.",
         "BLUEPRINT_CONTENT_INCOHERENT",
+        dettagli,
       );
     }
 

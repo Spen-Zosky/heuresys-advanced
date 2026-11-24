@@ -2,14 +2,14 @@
  * apps/api/src/modules/tenant-blueprints/diff.ts
  * #131 Tenant Builder P1, T5 — il confronto, in tre sezioni distinte:
  *
- *   model     cos'e' cambiato nel MODELLO di settore sotto i piedi del fascicolo
+ *   model     cos'è cambiato nel MODELLO di settore sotto i piedi del fascicolo
  *   decisions cosa ho cambiato IO
- *   impact    cosa succederebbe all'azienda gia' costruita
+ *   impact    cosa succederebbe all'azienda già costruita
  *
- * La terza in P1 e' `computable: false`, e resta dichiarata tale finche' non
+ * La terza in P1 è `computable: false`, e resta dichiarata tale finché non
  * esistono lo strato struttura (P2) e il motore di applicazione (P3). **Mai uno
  * zero al posto di uno sconosciuto**: uno zero si legge «nessuna conseguenza»,
- * che e' il contrario della verita'.
+ * che è il contrario della verità.
  */
 import type { Db } from "./repository.js";
 import { listProcessesWithDecisions } from "./repository.js";
@@ -21,10 +21,13 @@ import type {
   ProcessInclusion,
 } from "@heuresys/shared";
 
+// `reason` è il testo tecnico per chi diagnostica, con gli accenti veri; la pagina non lo
+// stampa: dice la stessa cosa nella lingua della persona (`dossier.diff.notComputableReason`),
+// perché in P1 l'impatto non è mai calcolabile e il motivo è uno solo (giro forense K32).
 const IMPACT_NON_CALCOLABILE = {
   computable: false as const,
   reason:
-    "In questa parte l'impatto sull'azienda gia' costruita non e' calcolabile: " +
+    "In questa parte l'impatto sull'azienda già costruita non è calcolabile: " +
     "mancano lo strato della struttura e il motore che applica il fascicolo. " +
     "Dichiararlo zero sarebbe un'informazione falsa.",
 };
@@ -45,7 +48,7 @@ async function processiDelModello(db: Db, variantVersionId: string): Promise<Pro
   return r.rows;
 }
 
-/** L'ultima versione pubblicata dello STESSO modello a cui la versione e' ancorata. */
+/** L'ultima versione pubblicata dello STESSO modello a cui la versione è ancorata. */
 async function ultimaVersioneDelModello(
   db: Db,
   variantVersionId: string,
@@ -88,27 +91,29 @@ function confrontaProcessi(
   return { processesAdded, processesRemoved, processesRenamed };
 }
 
-const ETICHETTE_IDENTITA: Record<keyof BlueprintIdentity, string> = {
-  industryClassId: "settore di attivita'",
-  sizeBandId: "fascia dimensionale",
-  operatingModelId: "modello operativo",
-  regulatoryIntensity: "intensita' di vigilanza",
-  countryCode: "paese",
-  employeeCount: "numero di dipendenti",
-  revenueEur: "ricavi",
-};
+// `field` è la CHIAVE del campo, non un'etichetta italiana: la pagina la traduce
+// (`dossier.diff.fields.<chiave>`), così il confronto si legge nelle due lingue (giro forense K32).
+const CAMPI_IDENTITA: Array<keyof BlueprintIdentity> = [
+  "industryClassId",
+  "sizeBandId",
+  "operatingModelId",
+  "regulatoryIntensity",
+  "countryCode",
+  "employeeCount",
+  "revenueEur",
+];
 
 function confrontaIdentita(
   da: BlueprintIdentity,
   a: BlueprintIdentity,
 ): Array<{ field: string; from: string | null; to: string | null }> {
   const out: Array<{ field: string; from: string | null; to: string | null }> = [];
-  for (const campo of Object.keys(ETICHETTE_IDENTITA) as Array<keyof BlueprintIdentity>) {
+  for (const campo of CAMPI_IDENTITA) {
     const prima = da[campo];
     const dopo = a[campo];
     if (prima === dopo) continue;
     out.push({
-      field: ETICHETTE_IDENTITA[campo],
+      field: campo,
       from: prima === null || prima === undefined ? null : String(prima),
       to: dopo === null || dopo === undefined ? null : String(dopo),
     });
@@ -180,7 +185,7 @@ export async function diffVersions(
 
 /**
  * Confronto fra il modello ANCORATO e l'ultima versione pubblicata dello stesso
- * modello: e' la domanda «il catalogo si e' mosso sotto di me?».
+ * modello: è la domanda «il catalogo si è mosso sotto di me?».
  */
 export async function diffAgainstModelLatest(
   db: Db,
@@ -227,7 +232,7 @@ export async function diffAgainstModelLatest(
       ...confrontaProcessi(ancorata, piuRecente),
     },
     // Le decisioni non si confrontano con niente qui: sono le mie, e restano.
-    // Si dichiarano quelle prese, cosi' chi legge vede su cosa il movimento del
+    // Si dichiarano quelle prese, così chi legge vede su cosa il movimento del
     // modello andrebbe a incidere.
     decisions: { ...vuoto, added: decisioni.filter((d) => d.inclusion !== null) },
     impact: IMPACT_NON_CALCOLABILE,

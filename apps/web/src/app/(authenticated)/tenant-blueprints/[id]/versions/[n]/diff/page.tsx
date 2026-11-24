@@ -4,10 +4,13 @@
  * apps/web/src/app/(authenticated)/tenant-blueprints/[id]/versions/[n]/diff/page.tsx
  * #131 Tenant Builder P1, T6 — il confronto, in tre sezioni.
  *
- * La terza sezione e' quella che conta di piu', e non mostra un numero: dice
- * che l'impatto **non e' calcolabile** in questa parte, e perche'. Un impatto
+ * La terza sezione è quella che conta di più, e non mostra un numero: dice
+ * che l'impatto **non è calcolabile** in questa parte, e perché. Un impatto
  * pari a zero al posto di un impatto sconosciuto si legge «nessuna
- * conseguenza», che e' il contrario della verita'.
+ * conseguenza», che è il contrario della verità.
+ *
+ * Giro forense K32: le decisioni si leggono con il nome del processo e l'etichetta
+ * tradotta dell'inclusione, non come `02 — PARTIAL`.
  */
 import { use } from "react";
 import Link from "next/link";
@@ -17,6 +20,7 @@ import { useTranslation } from "react-i18next";
 import type { BlueprintDiffResponse } from "@heuresys/shared";
 import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
 import { apiFetch } from "@/lib/api/fetch";
+import { voceDecisione } from "@/lib/blueprint-testi";
 
 export default function TenantBlueprintDiffPage({
   params,
@@ -90,16 +94,16 @@ export default function TenantBlueprintDiffPage({
           <dl className="mt-2 space-y-1 text-sm">
             <Elenco
               titolo={t("dossier.diff.added")}
-              voci={d.decisions.added.map((p) => `${p.processCode} — ${p.inclusion}: ${p.rationale ?? ""}`)}
+              voci={d.decisions.added.map((p) => voceDecisione(p, t))}
             />
             <Elenco
               titolo={t("dossier.diff.removed")}
-              voci={d.decisions.removed.map((p) => `${p.processCode} — ${p.inclusion}`)}
+              voci={d.decisions.removed.map((p) => voceDecisione({ ...p, rationale: null }, t))}
             />
             <Elenco
               titolo={t("dossier.diff.identityChanged")}
               voci={d.decisions.identityChanged.map(
-                (c) => `${c.field}: ${c.from ?? "—"} → ${c.to ?? "—"}`,
+                (c) => `${t(`dossier.diff.fields.${c.field}`, { defaultValue: c.field })}: ${c.from ?? "—"} → ${c.to ?? "—"}`,
               )}
             />
           </dl>
@@ -114,7 +118,11 @@ export default function TenantBlueprintDiffPage({
         <p className="mt-1 text-sm font-medium text-foreground" data-testid="diff-impatto-stato">
           {t("dossier.diff.notComputable")}
         </p>
-        <p className="mt-1 text-sm text-muted-foreground">{d.impact.reason}</p>
+        {/* Il motivo nella lingua della pagina: `d.impact.reason` è il testo tecnico del
+            servizio, in italiano, per chi diagnostica (giro forense K32). */}
+        <p className="mt-1 text-sm text-muted-foreground" data-testid="diff-impatto-motivo">
+          {t("dossier.diff.notComputableReason")}
+        </p>
       </section>
     </div>
   );
@@ -126,7 +134,7 @@ function Elenco({ titolo, voci }: { titolo: string; voci: string[] }) {
     <div>
       <dt className="text-xs font-medium uppercase text-muted-foreground">{titolo}</dt>
       {voci.map((v) => (
-        <dd key={v} className="font-mono text-xs text-foreground">
+        <dd key={v} className="break-words text-sm text-foreground">
           {v}
         </dd>
       ))}

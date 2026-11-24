@@ -190,14 +190,15 @@ export const BlueprintDiffResponseSchema = z.object({
         toRationale: z.string(),
       }),
     ),
+    /** `field` è la chiave del campo di identità (`industryClassId`, `sizeBandId`…): la traduce il client. */
     identityChanged: z.array(
       z.object({ field: z.string(), from: z.string().nullable(), to: z.string().nullable() }),
     ),
   }),
   /**
-   * Cosa succederebbe all'azienda gia' costruita. In P1 NON e' calcolabile, e
-   * si dichiara. Uno zero verrebbe letto come «nessuna conseguenza», che e' il
-   * contrario della verita'.
+   * Cosa succederebbe all'azienda già costruita. In P1 NON è calcolabile, e
+   * si dichiara. Uno zero verrebbe letto come «nessuna conseguenza», che è il
+   * contrario della verità.
    */
   impact: z.object({ computable: z.literal(false), reason: z.string() }),
 });

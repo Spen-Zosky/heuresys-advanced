@@ -65,7 +65,7 @@ if [ -d "$WEB/components" ]; then
   # `next build` (which typechecks the whole tree) doesn't choke on a module the showcase
   # intentionally doesn't install.
   find "$SHOWCASE/components" -type f \( -name '*.tsx' -o -name '*.ts' \) | while read -r f; do
-    if grep -qE "@heuresys/shared|@/lib/|i18next" "$f"; then
+    if grep -qE "@heuresys/shared|@/lib/|\.\./lib/|i18next" "$f"; then
       echo "sync-showcase: pruning non-portable component $(basename "$f")"
       rm -f "$f"
     fi

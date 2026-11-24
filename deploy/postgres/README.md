@@ -54,6 +54,8 @@ generate sulla macchina da `assegna-password-app.sh` e scritte direttamente nel
 senza opzioni **non** ruota la password: se il `.env` ne ha già una con cui il
 ruolo entra non cambia niente, e se il ruolo non la accetta gli si riapplica
 quella del `.env`. Una rotazione si chiede in modo esplicito:
-`ssh oracle-vm-default 'bash -s -- --ruota' < deploy/postgres/assegna-password-app.sh`.
+`ssh oracle-vm-default 'bash -s -- --ruota' < deploy/postgres/assegna-password-app.sh`
+(l'API in servizio usa la password nuova solo dopo il riavvio). Se il `.env` non ha
+la password ma il ruolo sì, senza `--ruota` lo script esce 1 e non tocca niente.
 Lo stesso vale per `assegna-password-agenti.sh [--ruota]`. La prova è
 `bash scripts/test/prova-assegna-password.sh`, su un cluster PostgreSQL privato.

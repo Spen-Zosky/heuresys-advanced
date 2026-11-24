@@ -497,6 +497,7 @@
         "status": "Stato",
         "apqc": "Corrispondenza APQC"
       },
+      "attivitaNonCompilate": "Dati dell'attività non ancora compilati",
       "nessunaAttivita": "Il processo non ha attività.",
       "nessunaUnita": "Nessuna unità partecipa al processo.",
       "nessunKpi": "Il processo del modello non dichiara indicatori.",

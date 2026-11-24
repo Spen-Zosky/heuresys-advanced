@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { cookies } from "next/headers";
 import { AppProviders } from "../providers/AppProviders";
+import { COOKIE_LINGUA, linguaDa } from "../lib/lingua";
 
 export const metadata: Metadata = {
   title: "Heuresys",
@@ -27,15 +28,16 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   // content language. The platform is bilingual (IT default + EN, i18n S965) — read the
   // NEXT_LOCALE cookie server-side so the lang is correct from the first byte (SSR), not
   // only after client JS runs. LanguageSwitcher.setLocale syncs document.lang immediately.
-  const cookieLocale = (await cookies()).get("NEXT_LOCALE")?.value;
-  const lang = cookieLocale === "en" ? "en" : "it";
+  // K33: la stessa lingua va ai testi (AppProviders), non solo a <html lang>, con la stessa regola
+  // del browser (lib/lingua.ts): altrimenti il server scrive italiano e il browser inglese (#418).
+  const lang = linguaDa((await cookies()).get(COOKIE_LINGUA)?.value);
   return (
     <html lang={lang} className="dark" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
       </head>
       <body>
-        <AppProviders>{children}</AppProviders>
+        <AppProviders lingua={lang}>{children}</AppProviders>
       </body>
     </html>
   );

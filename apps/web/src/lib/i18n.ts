@@ -1,6 +1,7 @@
 import i18next from "i18next";
 import { initReactI18next } from "react-i18next";
 import { codiceInParole } from "./enum-labels";
+import { linguaDa } from "./lingua";
 
 import commonIt from "../locales/it/common.json";
 import commonEn from "../locales/en/common.json";
@@ -59,19 +60,11 @@ const resources = {
   },
 } as const;
 
-function isLocale(v: string | undefined): v is AppLocale {
-  return v === "it" || v === "en";
-}
-
-/** Resolve the active locale: NEXT_LOCALE cookie → NEXT_PUBLIC_DEFAULT_LOCALE env → IT. */
+/** Resolve the active locale: NEXT_LOCALE cookie → NEXT_PUBLIC_DEFAULT_LOCALE env → IT
+ *  (lib/lingua.ts, the same rule the root layout applies on the server). */
 function detectLocale(): AppLocale {
-  if (typeof document !== "undefined") {
-    const m = document.cookie.match(/(?:^|;\s*)NEXT_LOCALE=(it|en)\b/);
-    const fromCookie = m?.[1];
-    if (isLocale(fromCookie)) return fromCookie;
-  }
-  const fromEnv = typeof process !== "undefined" ? process.env.NEXT_PUBLIC_DEFAULT_LOCALE : undefined;
-  return isLocale(fromEnv) ? fromEnv : DEFAULT_LOCALE;
+  const m = typeof document !== "undefined" ? document.cookie.match(/(?:^|;\s*)NEXT_LOCALE=(it|en)\b/) : null;
+  return linguaDa(m?.[1]);
 }
 
 /**
@@ -143,6 +136,27 @@ if (!i18next.isInitialized) {
       defaultNS: "common",
       interpolation: { escapeValue: false, alwaysFormat: true },
     });
+}
+
+/**
+ * K33 (giro forense del 23/11/2026, React #418): l'istanza con cui si disegna l'albero.
+ *
+ * Nel browser è sempre quella condivisa, che parte dalla lingua del cookie e che `setLocale`
+ * cambia. Sul server l'istanza condivisa non vede il cookie e resta nella lingua predefinita:
+ * qui si dà al disegno del server una copia nella lingua che il layout radice ha letto dal
+ * cookie, così il testo del server coincide con quello del primo disegno nel browser. Non si
+ * cambia la lingua dell'istanza condivisa del server, che serve richieste concorrenti in lingue
+ * diverse: le copie condividono i dizionari e ognuna resta ferma nella sua lingua.
+ */
+const copiePerLingua = new Map<AppLocale, typeof i18next>();
+export function istanzaPerIlDisegno(lingua: AppLocale): typeof i18next {
+  if (typeof window !== "undefined" || lingua === i18next.language) return i18next;
+  let copia = copiePerLingua.get(lingua);
+  if (!copia) {
+    copia = i18next.cloneInstance({ lng: lingua });
+    copiePerLingua.set(lingua, copia);
+  }
+  return copia;
 }
 
 /** Change the active locale + persist it in the NEXT_LOCALE cookie (1-year, lax). */

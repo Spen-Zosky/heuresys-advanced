@@ -10,6 +10,7 @@ import { EChartsCard } from "../../_charts-client";
 import type { SkillsByCategoryAnalyticsResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { grigliaCompleta } from "@/lib/celle-tabella";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 const AXIS_COLOR = "hsl(var(--muted-foreground))";
@@ -17,11 +18,12 @@ const GRID_COLOR = "hsl(var(--border))";
 
 /** Coverage heatmap: skill_category (rows) × proficiency (cols) → evidence count.
  *  Dense by design (every evidence resolves to a category) — missing [x,y] pairs
- *  (a category with no evidence at a given level) still render blank. */
+ *  (a category with no evidence at a given level) are filled with 0 (K17). */
 function categoryHeatmapOption(d: SkillsByCategoryAnalyticsResponse, etichetta: (p: string) => string) {
   const x = d.proficiencyLevels;
   const y = d.categories;
-  const values = d.cells.map((c) => [x.indexOf(c.proficiency), y.indexOf(c.category), c.evidenceCount]);
+  // K17: ogni coppia ha la sua cella; quella senza evidenze vale 0 e lo scrive
+  const values = grigliaCompleta(x.length, y.length, d.cells.map((c) => [x.indexOf(c.proficiency), y.indexOf(c.category), c.evidenceCount] as const));
   const maxV = values.reduce((m, v) => Math.max(m, v[2] ?? 0), 0);
   return {
     grid: { left: 8, right: 16, top: 12, bottom: 64, containLabel: true },
@@ -31,14 +33,12 @@ function categoryHeatmapOption(d: SkillsByCategoryAnalyticsResponse, etichetta: 
       data: x.map(etichetta),
       axisLabel: { color: AXIS_COLOR },
       axisLine: { lineStyle: { color: GRID_COLOR } },
-      splitArea: { show: true },
     },
     yAxis: {
       type: "category" as const,
       data: y,
       axisLabel: { color: AXIS_COLOR, width: 160, overflow: "break" as const },
       axisLine: { lineStyle: { color: GRID_COLOR } },
-      splitArea: { show: true },
     },
     visualMap: {
       min: 0,
@@ -55,7 +55,7 @@ function categoryHeatmapOption(d: SkillsByCategoryAnalyticsResponse, etichetta: 
         type: "heatmap" as const,
         data: values,
         // il valore scritto in ogni cella: il colore da solo non dice «quanto»
-        label: { show: true, color: AXIS_COLOR, fontSize: 11 },
+        label: { show: true, color: AXIS_COLOR, fontSize: 12 },
         emphasis: { itemStyle: { shadowBlur: 6, shadowColor: "rgba(0,0,0,0.2)" } },
       },
     ],

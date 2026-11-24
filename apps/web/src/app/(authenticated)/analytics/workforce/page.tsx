@@ -18,9 +18,11 @@ const COLOR_PALETTE_2 = "hsl(var(--palette-2))";
 const AXIS_COLOR = "hsl(var(--muted-foreground))";
 const GRID_COLOR = "hsl(var(--border))";
 
-/** Horizontal bar option: dimension (OU) → headcount, sorted ascending so the
- *  largest bar sits on top (echarts yAxis category renders bottom-up). */
-function horizontalBarOption(rows: WorkforceByDimensionRow[]) {
+/** Horizontal bar option: dimension (OU or job role) → headcount, sorted ascending so the
+ *  largest bar sits on top (echarts yAxis category renders bottom-up). K17 (forense 23/11/2026):
+ *  the job roles were vertical bars with rotated labels, which overlapped one another as soon as
+ *  the roles were more than a dozen; on a horizontal bar each name has its own row. */
+function horizontalBarOption(rows: WorkforceByDimensionRow[], colore = COLOR_PALETTE_1) {
   const sorted = [...rows].sort((a, b) => a.headcount - b.headcount);
   return {
     grid: { left: 8, right: 24, top: 12, bottom: 8, containLabel: true },
@@ -40,36 +42,8 @@ function horizontalBarOption(rows: WorkforceByDimensionRow[]) {
       {
         type: "bar" as const,
         data: sorted.map((r) => r.headcount),
-        itemStyle: { color: COLOR_PALETTE_1, borderRadius: [0, 4, 4, 0] },
+        itemStyle: { color: colore, borderRadius: [0, 4, 4, 0] },
         barMaxWidth: 28,
-      },
-    ],
-  };
-}
-
-/** Vertical bar option: dimension (job role) → headcount, sorted descending. */
-function verticalBarOption(rows: WorkforceByDimensionRow[]) {
-  const sorted = [...rows].sort((a, b) => b.headcount - a.headcount);
-  return {
-    grid: { left: 8, right: 16, top: 12, bottom: 8, containLabel: true },
-    tooltip: { trigger: "axis" as const, axisPointer: { type: "shadow" as const } },
-    xAxis: {
-      type: "category" as const,
-      data: sorted.map((r) => r.dimension),
-      axisLabel: { color: AXIS_COLOR, interval: 0, rotate: sorted.length > 6 ? 30 : 0 },
-      axisLine: { lineStyle: { color: GRID_COLOR } },
-    },
-    yAxis: {
-      type: "value" as const,
-      axisLabel: { color: AXIS_COLOR },
-      splitLine: { lineStyle: { color: GRID_COLOR } },
-    },
-    series: [
-      {
-        type: "bar" as const,
-        data: sorted.map((r) => r.headcount),
-        itemStyle: { color: COLOR_PALETTE_2, borderRadius: [4, 4, 0, 0] },
-        barMaxWidth: 36,
       },
     ],
   };
@@ -158,8 +132,8 @@ export default function WorkforceAnalyticsPage() {
             {d.byJobRole.length > 0 ? (
               <div data-testid="analytics-role-chart" className="rounded-card border border-border bg-card p-4">
                 <EChartsCard
-                  option={verticalBarOption(d.byJobRole)}
-                  height={320}
+                  option={horizontalBarOption(d.byJobRole, COLOR_PALETTE_2)}
+                  height={Math.max(240, d.byJobRole.length * 34)}
                   ariaLabel={t("workforce.byRole")}
                 />
               </div>

@@ -30,7 +30,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState, type ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import { formati, localeDi } from "@/lib/format";
-import { esadecimaleConAlfa } from "@/lib/colori-grafico";
+import { esadecimaleConAlfa, etichetteLeggibiliMappaDiCalore } from "@/lib/colori-grafico";
 import { assiDerivati, letturaDelGrafico, type ChartTable } from "@/lib/lettura-grafico";
 import { testoCellaGrafico } from "@/lib/celle-tabella";
 
@@ -162,10 +162,20 @@ function conNomiDegliAssi(option: RawProps["option"], assiPagina: { x?: string; 
   const assi = assiDerivati(option, assiPagina);
   if (!assi.x && !assi.y) return option;
   const o = { ...(option as Record<string, unknown>) };
+  // K17 (controllo forense del 23/11/2026): su un asse verticale di categorie (barre orizzontali)
+  // le etichette sono lunghe e il nome dell'asse, messo a metà a 44 px, ci finiva sopra. Lì il
+  // nome sta in cima all'asse, allineato alla colonna delle etichette.
+  let nomeInCima = false;
   const metti = (k: "xAxis" | "yAxis", nome: string | undefined, verticale: boolean) => {
     const a = o[k];
     if (!nome || !a || typeof a !== "object" || Array.isArray(a)) return;
-    o[k] = { ...(a as Record<string, unknown>), name: nome, nameLocation: "middle", nameGap: verticale ? 44 : 28 };
+    const ax = a as Record<string, unknown>;
+    if (verticale && ax.type === "category") {
+      nomeInCima = true;
+      o[k] = { ...ax, name: nome, nameLocation: "end", nameGap: 8, nameTextStyle: { ...((ax.nameTextStyle as Record<string, unknown>) ?? {}), align: "right" } };
+      return;
+    }
+    o[k] = { ...ax, name: nome, nameLocation: "middle", nameGap: verticale ? 44 : 28 };
   };
   metti("xAxis", assi.x, false);
   metti("yAxis", assi.y, true);
@@ -178,7 +188,8 @@ function conNomiDegliAssi(option: RawProps["option"], assiPagina: { x?: string; 
       if (typeof cur !== "number" || cur < v) grid[k] = v;
     };
     if (assi.x) almeno("bottom", 40);
-    if (assi.y) almeno("left", 56);
+    if (assi.y && !nomeInCima) almeno("left", 56);
+    if (nomeInCima) almeno("top", 28);
     o.grid = grid;
   }
   return o as RawProps["option"];
@@ -221,6 +232,15 @@ function TabellaEquivalente({ tabella, lingua }: { tabella: ChartTable; lingua: 
   );
 }
 
+/** K17: il numero di ogni cella di una mappa di calore nel colore che si legge sulla cella, dal tema
+ *  attivo. Il nero e il bianco puri restano fra i candidati perché sui toni medi della scala né il
+ *  primo piano né il fondo del tema arrivano a 4,5:1, e uno dei due puri ci arriva sempre. */
+function conEtichetteLeggibili(option: RawProps["option"], root: HTMLElement): RawProps["option"] {
+  const css = getComputedStyle(root);
+  const v = (n: string) => css.getPropertyValue(n).trim();
+  return etichetteLeggibiliMappaDiCalore(option, { fondo: v("--card"), testi: [v("--foreground"), v("--background"), "#000000", "#FFFFFF"] });
+}
+
 export function EChartsCard({ assi, tabella, lingua, ...props }: EChartsCardProps) {
   const { i18n } = useTranslation();
   const locale = localeDi(lingua ?? i18n.language);
@@ -237,7 +257,7 @@ export function EChartsCard({ assi, tabella, lingua, ...props }: EChartsCardProp
     () =>
       typeof document === "undefined"
         ? props.option
-        : resolveCssVars(rendiLeggibile(conNomiDegliAssi(props.option, assi), locale), document.documentElement),
+        : conEtichetteLeggibili(resolveCssVars(rendiLeggibile(conNomiDegliAssi(props.option, assi), locale), document.documentElement), document.documentElement),
     // themeTick intentionally re-triggers resolution on theme switch
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.option, themeTick, assi?.x, assi?.y, locale],

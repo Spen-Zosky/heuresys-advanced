@@ -10,17 +10,19 @@ import { EChartsCard } from "../../_charts-client";
 import type { SkillsCoverageAnalyticsResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { grigliaCompleta } from "@/lib/celle-tabella";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
 
 const AXIS_COLOR = "hsl(var(--muted-foreground))";
 const GRID_COLOR = "hsl(var(--border))";
 
 /** Coverage heatmap: OU (rows) × proficiency (cols) → evidence count. Sparse by
- *  design — missing [x,y] pairs render blank (no zero triples emitted). */
+ *  design — the API emits no zero triples; grigliaCompleta fills them with 0 (K17). */
 function coverageHeatmapOption(d: SkillsCoverageAnalyticsResponse, etichetta: (p: string) => string) {
   const x = d.proficiencyLevels;
   const y = d.orgUnits;
-  const values = d.cells.map((c) => [x.indexOf(c.proficiency), y.indexOf(c.orgUnit), c.evidenceCount]);
+  // K17: ogni coppia ha la sua cella; quella senza evidenze vale 0 e lo scrive
+  const values = grigliaCompleta(x.length, y.length, d.cells.map((c) => [x.indexOf(c.proficiency), y.indexOf(c.orgUnit), c.evidenceCount] as const));
   const maxV = values.reduce((m, v) => Math.max(m, v[2] ?? 0), 0);
   return {
     grid: { left: 8, right: 16, top: 12, bottom: 64, containLabel: true },
@@ -30,14 +32,12 @@ function coverageHeatmapOption(d: SkillsCoverageAnalyticsResponse, etichetta: (p
       data: x.map(etichetta),
       axisLabel: { color: AXIS_COLOR },
       axisLine: { lineStyle: { color: GRID_COLOR } },
-      splitArea: { show: true },
     },
     yAxis: {
       type: "category" as const,
       data: y,
       axisLabel: { color: AXIS_COLOR, width: 160, overflow: "break" as const },
       axisLine: { lineStyle: { color: GRID_COLOR } },
-      splitArea: { show: true },
     },
     visualMap: {
       min: 0,
@@ -54,7 +54,7 @@ function coverageHeatmapOption(d: SkillsCoverageAnalyticsResponse, etichetta: (p
         type: "heatmap" as const,
         data: values,
         // il valore scritto in ogni cella: il colore da solo non dice «quanto»
-        label: { show: true, color: AXIS_COLOR, fontSize: 11 },
+        label: { show: true, color: AXIS_COLOR, fontSize: 12 },
         emphasis: { itemStyle: { shadowBlur: 6, shadowColor: "rgba(0,0,0,0.2)" } },
       },
     ],

@@ -10,6 +10,10 @@
  * grigio), C (consultata, tratteggio), I (informata, chiaro). La colonna E/C conta le unità
  * esecutrici e consultate; il nome intero dell'unità compare passando sopra l'intestazione; il clic
  * sul processo ne apre la scheda. Le sigle stanno nei dizionari (K26): nessun testo fisso qui.
+ *
+ * K12 (controllo forense del 23/11/2026): tutto il testo della matrice è a 12 px (`text-xs`), la
+ * soglia minima di @heuresys/ui; prima la tabella era a 11 px e intestazioni, sigle e conteggi a
+ * 10. Le celle si allargano a 24 px per contenere la sigla, e la matrice scorre in orizzontale.
  */
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
@@ -53,14 +57,14 @@ export function MatriceProcessi({ tenantId }: { tenantId?: string }) {
       <p className="text-xs text-muted-foreground">{m("spiega")}</p>
       <p className="text-xs text-muted-foreground">{m("numeri", { processi: fmt.numero(d.processes.filter((p) => p.level !== 2).length), sottoprocessi: fmt.numero(d.processes.filter((p) => p.level === 2).length), unita: fmt.numero(d.units.length), celle: fmt.numero(d.cells.length) })}</p>
       <div className="max-h-[70vh] overflow-auto rounded-lg border border-border bg-card">
-        <table className="border-collapse text-[11px] text-foreground">
+        <table className="border-collapse text-xs text-foreground">
           <caption className="sr-only">{m("titolo")}</caption>
           <thead className="sticky top-0 z-[2] bg-card">
             <tr>
               <th className={`${fermo} px-2 py-1 text-left align-bottom font-medium`}>{m("processo")}</th>
-              <th className="px-1 py-1 align-bottom text-[10px] font-medium" title={m("eCTitolo")}>{m("eC")}</th>
+              <th className="px-1 py-1 align-bottom font-medium" title={m("eCTitolo")}>{m("eC")}</th>
               {d.units.map((u) => (
-                <th key={u.unitId} title={u.name} className="rotate-180 whitespace-nowrap px-0.5 py-1 align-bottom text-[10px] font-medium [writing-mode:vertical-rl]">
+                <th key={u.unitId} title={u.name} className="rotate-180 whitespace-nowrap px-0.5 py-1 align-bottom font-medium [writing-mode:vertical-rl]">
                   {u.name}
                 </th>
               ))}
@@ -75,13 +79,13 @@ export function MatriceProcessi({ tenantId }: { tenantId?: string }) {
                   </Link>{" "}
                   <span className={p.level === 2 ? "text-muted-foreground" : "font-medium"}>{p.name}</span>
                 </td>
-                <td className="px-1 text-center text-[10px] tabular-nums text-muted-foreground">
+                <td className="px-1 text-center tabular-nums text-muted-foreground">
                   {fmt.numero(conta(p.processId, "CONTRIBUTOR"))}/{fmt.numero(conta(p.processId, "CONSULTED"))}
                 </td>
                 {d.units.map((u) => {
                   const r = ruolo.get(`${p.processId}|${u.unitId}`);
                   return (
-                    <td key={u.unitId} title={r ? `${nomeRuolo(r)}: ${u.name}` : m("nessunRuolo", { unita: u.name })} className={`h-5 w-[18px] min-w-[18px] border border-border/50 text-center text-[10px] ${r ? CELLA[r] : "text-muted-foreground/40"}`}>
+                    <td key={u.unitId} title={r ? `${nomeRuolo(r)}: ${u.name}` : m("nessunRuolo", { unita: u.name })} className={`h-6 w-6 min-w-6 border border-border/50 text-center ${r ? CELLA[r] : "text-muted-foreground/40"}`}>
                       {/* K15: la cella senza ruolo porta un segno tenue, e il suo perché nel suggerimento */}
                       {r ? m(`sigla.${r}`) : "·"}
                     </td>
@@ -90,10 +94,10 @@ export function MatriceProcessi({ tenantId }: { tenantId?: string }) {
               </tr>
             ))}
             <tr>
-              <td className={`${fermo} px-2 py-0.5 text-[10px] text-muted-foreground`}>{m("piede")}</td>
-              <td className="text-center text-[10px] text-muted-foreground" title={m("eCTitolo")}>{VUOTO}</td>
+              <td className={`${fermo} px-2 py-0.5 text-muted-foreground`}>{m("piede")}</td>
+              <td className="text-center text-muted-foreground" title={m("eCTitolo")}>{VUOTO}</td>
               {d.units.map((u) => (
-                <td key={u.unitId} className="text-center text-[10px] tabular-nums text-muted-foreground">
+                <td key={u.unitId} className="text-center tabular-nums text-muted-foreground">
                   {fmt.numero(d.processes.filter((p) => { const r = ruolo.get(`${p.processId}|${u.unitId}`); return r === "OWNER" || r === "CONTRIBUTOR"; }).length)}
                 </td>
               ))}

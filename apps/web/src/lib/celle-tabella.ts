@@ -44,3 +44,17 @@ export function versioneModello(codice: string | null | undefined): number | nul
   const m = codice?.trim().match(/(?:^|[-_ ])v(\d+)$/i);
   return m ? Number(m[1]) : null;
 }
+
+/**
+ * K17 del controllo forense del 23/11/2026: le mappe di calore delle competenze ricevono dall'API
+ * solo le coppie che hanno evidenze, e la coppia senza evidenze restava una cella senza colore e
+ * senza numero, che non si distingue da un dato mancante. Qui la griglia si completa: ogni coppia
+ * di colonna e riga ha la sua cella, e quella senza evidenze vale 0 e scrive «0».
+ */
+export function grigliaCompleta(colonne: number, righe: number, celle: readonly (readonly [number, number, number])[]): [number, number, number][] {
+  const valore = new Map<string, number>();
+  for (const [x, y, v] of celle) if (x >= 0 && y >= 0) valore.set(`${x}|${y}`, v);
+  const out: [number, number, number][] = [];
+  for (let y = 0; y < righe; y++) for (let x = 0; x < colonne; x++) out.push([x, y, valore.get(`${x}|${y}`) ?? 0]);
+  return out;
+}

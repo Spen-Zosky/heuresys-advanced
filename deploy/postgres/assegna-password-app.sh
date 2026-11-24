@@ -21,8 +21,11 @@
 #   - il `.env` ha gia' una password e `heuresys_app` entra con quella -> non cambia niente;
 #   - il `.env` ce l'ha ma il ruolo non la accetta (LOGIN spento, password diversa nel
 #     cluster) -> si riapplica AL RUOLO quella del `.env`, che non si tocca: e' la
-#     credenziale che l'API sta gia' usando;
-#   - il `.env` non ce l'ha -> se ne crea una (prima assegnazione).
+#     credenziale che l'API sta gia' usando. Solo se il server risponde: un server
+#     irraggiungibile non e' una password rifiutata;
+#   - il `.env` non ce l'ha e il ruolo nemmeno -> se ne crea una (prima assegnazione);
+#   - il `.env` non ce l'ha ma il ruolo si' -> esce 1 senza toccare niente: crearne una
+#     nuova sarebbe una rotazione, e lo decide solo `--ruota`.
 # Un secondo lancio senza opzioni, quindi, non cambia niente. Con `--ruota` se ne crea
 # una nuova comunque e si riallinea il `.env` (il comportamento di prima del 24/11).
 # Prima di P5 ogni lancio ruotava: rilanciarlo «per sicurezza» cambiava la credenziale
@@ -53,9 +56,10 @@ if ! sudo -u postgres psql -tAqc "SELECT 1 FROM pg_roles WHERE rolname='$RUOLO'"
 fi
 
 # Valore di una chiave del `.env` senza stamparlo: vince l'ultima riga, come quando la
-# shell lo carica; via il CR e una coppia di virgolette attorno.
+# shell lo carica; ammessi spazi iniziali ed `export`; via il CR e una coppia di virgolette.
 valore_env() {
-  sed -n "s/^$1=//p" "$ENVF" | tail -n 1 | tr -d '\r' | sed "s/^'\(.*\)'\$/\1/; s/^\"\(.*\)\"\$/\1/"
+  sed -n "s/^[[:space:]]*\(export[[:space:]]\{1,\}\)\{0,1\}$1=//p" "$ENVF" | tail -n 1 | tr -d '\r' \
+    | sed "s/^'\(.*\)'\$/\1/; s/^\"\(.*\)\"\$/\1/"
 }
 DB_HOST="$(valore_env POSTGRES_HOST)"; DB_PORT="$(valore_env POSTGRES_PORT)"; DB_NOME="$(valore_env POSTGRES_DB)"
 
@@ -68,27 +72,53 @@ accetta() {  # $1 = password
          -U "$RUOLO" -d "${DB_NOME:-heuresys_advanced}" -tAqc 'select 1' 2>/dev/null)" || return 1
   [ "$(printf '%s' "$r" | tr -d '[:space:]')" = "1" ]
 }
-
-# La password arriva a psql via STDIN dentro un ALTER ROLE ... PASSWORD: non
-# compare fra gli argomenti del processo, quindi non e' visibile con `ps`.
-applica_al_ruolo() {  # $1 = password
-  printf "ALTER ROLE %s LOGIN PASSWORD %s;\n" "$RUOLO" "$(printf "%s" "$1" | sed "s/'/''/g; s/^/'/; s/$/'/")" \
-    | sudo -u postgres psql -q -d heuresys_advanced -f -
+# Il server dove l'API si collega risponde? Distingue «password rifiutata» da «non arrivo».
+risponde() {
+  if command -v pg_isready >/dev/null 2>&1; then
+    pg_isready -q -t 5 -h "${DB_HOST:-localhost}" -p "${DB_PORT:-5432}"
+  else
+    sudo -u postgres psql -tAqc 'select 1' >/dev/null 2>&1
+  fi
+}
+# Il ruolo ha gia' una password nel cluster? (un ruolo appena creato da ruoli.sql no)
+ha_password() {
+  sudo -u postgres psql -tAqc "SELECT 1 FROM pg_authid WHERE rolname='$RUOLO' AND rolpassword IS NOT NULL" | grep -q 1
 }
 
-# Deposito nel .env. `POSTGRES_APP_USER`/`POSTGRES_APP_PASSWORD` sono nuove:
-# non si tocca `POSTGRES_USER`, che resta il migrator.
-scrivi_env() {  # $1 = password
-  # Copia di sicurezza del .env prima di toccarlo: e' gitignored e REALE, quindi
-  # non c'e' una versione da cui ripescarlo se si rompe.
+# La password arriva a psql via STDIN dentro un ALTER ROLE ... PASSWORD: non
+# compare fra gli argomenti del processo, quindi non e' visibile con `ps`. Nella stessa
+# transazione si spengono, solo per lei, il log delle istruzioni lente o in errore e
+# pg_stat_statements, che altrimenti ne conserverebbero il testo (password compresa).
+# ON_ERROR_STOP: se l'ALTER fallisce, psql esce non zero e il file non si scrive.
+applica_al_ruolo() {  # $1 = password
+  printf "BEGIN;\nSET LOCAL log_statement = 'none';\nSET LOCAL log_min_duration_statement = -1;\nSET LOCAL log_min_error_statement = 'panic';\nSET LOCAL pg_stat_statements.track_utility = off;\nALTER ROLE %s LOGIN PASSWORD %s;\nCOMMIT;\n" \
+    "$RUOLO" "$(printf "%s" "$1" | sed "s/'/''/g; s/^/'/; s/$/'/")" \
+    | sudo -u postgres psql -q -v ON_ERROR_STOP=1 -d heuresys_advanced -f - >/dev/null
+}
+
+# Sostituzione del .env: copia di sicurezza prima (e' gitignored e REALE, non c'e' una
+# versione da cui ripescarlo), temporaneo nella stessa cartella, mv atomico.
+TMP_ENV=""
+trap '[ -z "$TMP_ENV" ] || rm -f "$TMP_ENV"' EXIT
+sostituisci_env() {  # stdin = contenuto nuovo
   cp -p "$ENVF" "$ENVF.bak"
-  local tmp
-  tmp="$(mktemp)"
-  grep -v -E '^POSTGRES_APP_(USER|PASSWORD)=' "$ENVF" > "$tmp" || true
-  printf 'POSTGRES_APP_USER=%s\n' "$RUOLO" >> "$tmp"
-  printf 'POSTGRES_APP_PASSWORD=%s\n' "$1" >> "$tmp"
-  install -m 600 "$tmp" "$ENVF"
-  rm -f "$tmp"
+  TMP_ENV="$(mktemp "$ENVF.XXXXXX")"
+  cat > "$TMP_ENV"
+  chmod 600 "$TMP_ENV"
+  mv -f "$TMP_ENV" "$ENVF"
+  TMP_ENV=""
+}
+# `POSTGRES_APP_USER`/`POSTGRES_APP_PASSWORD`: non si tocca `POSTGRES_USER`, che resta il migrator.
+scrivi_env() {  # $1 = password
+  { grep -v -E '^[[:space:]]*(export[[:space:]]+)?POSTGRES_APP_(USER|PASSWORD)=' "$ENVF" || true
+    printf 'POSTGRES_APP_USER=%s\n' "$RUOLO"
+    printf 'POSTGRES_APP_PASSWORD=%s\n' "$1"
+  } | sostituisci_env
+}
+scrivi_utente() {  # solo la riga dell'utente; quella della password resta com'e'
+  { grep -v -E '^[[:space:]]*(export[[:space:]]+)?POSTGRES_APP_USER=' "$ENVF" || true
+    printf 'POSTGRES_APP_USER=%s\n' "$RUOLO"
+  } | sostituisci_env
 }
 
 # Prova che l'identita' si colleghi DAVVERO con la password del .env. Senza, avremmo
@@ -106,6 +136,11 @@ ATTUALE="$(valore_env POSTGRES_APP_PASSWORD)"
 if [ "$RUOTA" = 0 ] && [ -n "$ATTUALE" ]; then
   fatto=""
   if ! accetta "$ATTUALE"; then
+    if ! risponde; then
+      unset ATTUALE
+      echo "[app-pw] ERRORE: il server su ${DB_HOST:-localhost}:${DB_PORT:-5432} non risponde: non tocco il ruolo" >&2
+      exit 1
+    fi
     # Si riapplica solo una password nel formato che questo script produce: un valore
     # scritto a mano, con caratteri da citare, non si manda al server alla cieca.
     if ! printf '%s' "$ATTUALE" | grep -qxE '[0-9a-f]{32}'; then
@@ -116,16 +151,21 @@ if [ "$RUOTA" = 0 ] && [ -n "$ATTUALE" ]; then
     applica_al_ruolo "$ATTUALE"
     fatto="riapplicata al ruolo la password gia' nel .env (il .env non cambia)"
   fi
-  if [ "$(valore_env POSTGRES_APP_USER)" != "$RUOLO" ]; then
-    scrivi_env "$ATTUALE"
-    fatto="${fatto:+$fatto; }POSTGRES_APP_USER riscritto nel .env, stessa password (backup: .env.bak)"
-  fi
   unset ATTUALE
+  if [ "$(valore_env POSTGRES_APP_USER)" != "$RUOLO" ]; then
+    scrivi_utente
+    fatto="${fatto:+$fatto; }POSTGRES_APP_USER riscritto nel .env, password intatta (backup: .env.bak)"
+  fi
   [ -n "$fatto" ] || fatto="invariato: $RUOLO entra gia' con la password del .env (per cambiarla: --ruota)"
   verifica_finale "$fatto"
   exit 0
 fi
 unset ATTUALE
+
+if [ "$RUOTA" = 0 ] && ha_password; then
+  echo "[app-pw] ERRORE: il .env non ha POSTGRES_APP_PASSWORD ma $RUOLO ha gia' una password nel cluster: crearne una nuova sarebbe una rotazione. Se e' voluta: --ruota" >&2
+  exit 1
+fi
 
 # 32 caratteri esadecimali = 128 bit. Niente simboli: finisce in un `.env` letto
 # da shell e da librerie diverse, e un carattere da citare e' un guasto in attesa.

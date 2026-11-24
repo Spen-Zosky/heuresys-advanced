@@ -80,7 +80,8 @@ describe("K15 — i punti del codice usano il segno", () => {
   it("classificazione del processo: criterio e stato assenti si scrivono «—»", () => {
     const s = leggi("components/processo/classificazione-processo.tsx");
     expect(s).not.toContain('{valori[0]?.criterion ?? ""}</td>');
-    expect(s).toContain("criterion || VUOTO");
+    // K08: il criterio passa da criterioDaMostrare, che scrive «—» quando manca (criterio-faccetta.test.ts)
+    expect(s).toContain("criterioDaMostrare(valori[0]?.criterion)");
     expect(s).not.toMatch(/valori\.length === 0 \? null/);
   });
 

@@ -91,3 +91,11 @@ Quando la colonna di I1.2 è unita, si avvisa il thread «Rifare gli organigramm
 | S3, indicatori dei 30 processi | fatta | La sentinella `v_processi_senza_kpi` guarda solo il modello in uso (000491, PR 255): una corsa accolta e non attiva non la accende più. |
 
 I1.1 e I1.3-I1.7 restano fuori da questo ciclo, come dichiarato: sono il prossimo ciclo, da proporre a Enzo.
+
+## Rilasci e prova dal browser (2026-11-15)
+
+In produzione: PR 255/256 (2948de46), 257 e 260 (eb3ad837), 267 (a2c6ca34), 268 decisioni in blocco (c69deb48), ciascuno con backup verificato prima e `scripts/verifica-deploy.sh` DEPLOYATO dopo. Prova dal browser su una copia del database con la persona Direttore HR: giro dell'agente sul gruppo Organizzazione in 160 s (3 giri, 50 proposte); decisione con «Aggiorna cascata», avviso arancione, anteprima, «Scarta modifiche», approvazione col pulsante rosso (8 valori con il giornale di ritorno, sede e organico su 2 unità); decisioni in blocco (21 filtrate → 16 decise e 6 in cascata, anteprima 22 decisioni e 76 valori). Impronta md5 dei dati vivi invariata fino al pulsante rosso. Copia e app di prova tolte a fine prova.
+
+Lezione di rilascio: dopo ogni unione su main che tocca moduli o pagine l'atlante va rigenerato; il sorvegliante guarda l'esito più recente di ogni workflow nella finestra, quindi una «Atlas freshness» rossa sul commit di unione si rifà verde con `gh workflow run atlas-freshness.yml --ref main` sulla punta.
+
+CICLO CHIUSO per bozza, cascata, sede/organico, indicatori dei processi e decisioni in blocco. Fuori da questo ciclo, da proporre a Enzo: I1.1 e I1.3-I1.7.

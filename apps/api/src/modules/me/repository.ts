@@ -2145,7 +2145,6 @@ export async function listMyDocuments(
 
 interface PreferenceRow {
   user_preference_theme: UserPreference["theme"];
-  user_preference_palette: UserPreference["palette"];
   user_preference_locale: UserPreference["locale"];
   user_preference_sidebar_order: string[] | null;
 }
@@ -2153,7 +2152,7 @@ interface PreferenceRow {
 /** The caller's stored UI preferences, or the brand defaults when no row exists yet. */
 export async function loadPreferences(q: DbConnector, userId: string): Promise<UserPreference> {
   const res = await q.query<PreferenceRow>(
-    `SELECT user_preference_theme, user_preference_palette, user_preference_locale, user_preference_sidebar_order
+    `SELECT user_preference_theme, user_preference_locale, user_preference_sidebar_order
        FROM sys.sys_user_preferences WHERE user_preference_user_id = $1`,
     [userId],
   );
@@ -2161,14 +2160,12 @@ export async function loadPreferences(q: DbConnector, userId: string): Promise<U
   if (!row) {
     return {
       theme: ME_PREFERENCE_DEFAULTS.theme,
-      palette: ME_PREFERENCE_DEFAULTS.palette,
       locale: ME_PREFERENCE_DEFAULTS.locale,
       sidebarOrder: null,
     };
   }
   return {
     theme: row.user_preference_theme,
-    palette: row.user_preference_palette,
     locale: row.user_preference_locale,
     sidebarOrder: row.user_preference_sidebar_order,
   };
@@ -2179,33 +2176,30 @@ export async function loadPreferences(q: DbConnector, userId: string): Promise<U
 export async function upsertPreferences(
   q: DbConnector, userId: string, tenantId: string | null, patch: UpdateUserPreferenceBody,
 ): Promise<UserPreference> {
-  // $3/$4/$7 carry the raw patch (NULL when the field is omitted). On INSERT (no row yet) an omitted
-  // field falls back to the brand default ($5/$6/$8); on UPDATE an omitted field keeps the stored value
-  // (the NULL EXCLUDED value is COALESCE'd against the existing column). This makes PATCH a true
-  // partial update — supplying only `theme` never resets `palette`/`locale`, and vice-versa.
+  // $3/$5 carry the raw patch (NULL when the field is omitted). On INSERT (no row yet) an omitted
+  // field falls back to the brand default ($4/$6); on UPDATE an omitted field keeps the stored value.
+  // PATCH is a true partial update. La colonna user_preference_palette non si tocca più (24/11/2026):
+  // alla prima riga prende il default del DB, e nessuno la legge.
   const res = await q.query<PreferenceRow>(
     `INSERT INTO sys.sys_user_preferences (
         user_preference_user_id, user_preference_tenant_id,
-        user_preference_theme, user_preference_palette, user_preference_locale, user_preference_sidebar_order, created_by, updated_by
-      ) VALUES ($1, $2, COALESCE($3, $5), COALESCE($4, $6), COALESCE($7, $8), $10::jsonb, $1, $1)
+        user_preference_theme, user_preference_locale, user_preference_sidebar_order, created_by, updated_by
+      ) VALUES ($1, $2, COALESCE($3, $4), COALESCE($5, $6), $8::jsonb, $1, $1)
       ON CONFLICT (user_preference_user_id) DO UPDATE SET
         user_preference_theme   = COALESCE($3, sys.sys_user_preferences.user_preference_theme),
-        user_preference_palette = COALESCE($4, sys.sys_user_preferences.user_preference_palette),
-        user_preference_locale  = COALESCE($7, sys.sys_user_preferences.user_preference_locale),
-        -- $9: l ordine dei gruppi e nel patch; null nel patch lo azzera (ordine standard),
+        user_preference_locale  = COALESCE($5, sys.sys_user_preferences.user_preference_locale),
+        -- $7: l ordine dei gruppi e nel patch; null nel patch lo azzera (ordine standard),
         -- l omissione lo lascia com e.
-        user_preference_sidebar_order = CASE WHEN $9 THEN $10::jsonb ELSE sys.sys_user_preferences.user_preference_sidebar_order END,
+        user_preference_sidebar_order = CASE WHEN $7 THEN $8::jsonb ELSE sys.sys_user_preferences.user_preference_sidebar_order END,
         user_preference_tenant_id = COALESCE(sys.sys_user_preferences.user_preference_tenant_id, EXCLUDED.user_preference_tenant_id),
         updated_at = now(),
         updated_by = $1
-      RETURNING user_preference_theme, user_preference_palette, user_preference_locale, user_preference_sidebar_order`,
+      RETURNING user_preference_theme, user_preference_locale, user_preference_sidebar_order`,
     [
       userId,
       tenantId,
       patch.theme ?? null,
-      patch.palette ?? null,
       ME_PREFERENCE_DEFAULTS.theme,
-      ME_PREFERENCE_DEFAULTS.palette,
       patch.locale ?? null,
       ME_PREFERENCE_DEFAULTS.locale,
       patch.sidebarOrder !== undefined,
@@ -2215,7 +2209,6 @@ export async function upsertPreferences(
   const r = res.rows[0]!;
   return {
     theme: r.user_preference_theme,
-    palette: r.user_preference_palette,
     locale: r.user_preference_locale,
     sidebarOrder: r.user_preference_sidebar_order,
   };

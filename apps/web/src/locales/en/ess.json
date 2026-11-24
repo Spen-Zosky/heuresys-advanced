@@ -448,16 +448,9 @@
     "submitting": "Saving…",
     "appearanceTitle": "Appearance",
     "themeLabel": "Theme",
-    "paletteLabel": "Palette",
     "theme": {
       "dark": "Dark",
       "light": "Light"
-    },
-    "palette": {
-      "balanced": "Balanced",
-      "coolOcean": "Cool ocean",
-      "warmSunset": "Warm sunset",
-      "brandMono": "Brand mono"
     },
     "settingsTitle": "Settings",
     "full": {

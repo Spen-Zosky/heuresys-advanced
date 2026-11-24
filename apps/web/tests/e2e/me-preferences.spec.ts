@@ -1,12 +1,12 @@
 /**
  * apps/web/tests/e2e/me-preferences.spec.ts
  *
- * WS-4 P1 — per-user theme + palette preferences, SERVER source of truth.
+ * WS-4 P1 — per-user theme preferences, SERVER source of truth.
  * i18n Fase 0b — per-user UI locale (it/en), same server-source-of-truth contract.
  *
  * Live-data E2E: a real seeded employee logs in fresh (so the access cookie + csrf token are
  * current — avoids the storageState 15-min-access-token staleness that makes mutation specs flaky),
- * opens /me/profile, changes theme + palette through the real UI (each click PATCHes
+ * opens /me/profile, changes theme through the real UI (each click PATCHes
  * /v1/me/preferences → DB on the OCI VM via the tunnel), then RELOADS the page. After reload the
  * values come back from the server (GET /v1/me/preferences) and are re-applied by the layout's
  * PreferencesApplier — proving the server is the source of truth, not localStorage.
@@ -25,7 +25,6 @@ test.setTimeout(120_000);
 
 const LIGHT_BACKGROUND_RGB = "rgb(250, 251, 253)"; // #FAFBFD (light --background)
 const DARK_BACKGROUND_RGB = "rgb(13, 16, 23)"; // #0D1017 (dark --background)
-const COOL_OCEAN_PALETTE_1 = "#1BBBB6"; // applyPalette(1) inline --palette-1 (light mode, hex since @heuresys/ui 1.7.2)
 
 async function patchAndWait(page: Page, testId: string) {
   const [resp] = await Promise.all([
@@ -40,37 +39,29 @@ async function patchAndWait(page: Page, testId: string) {
 async function bodyBackground(page: Page): Promise<string> {
   return page.evaluate(() => getComputedStyle(document.body).backgroundColor);
 }
-async function paletteVar(page: Page): Promise<string> {
-  return page.evaluate(() =>
-    getComputedStyle(document.documentElement).getPropertyValue("--palette-1").trim(),
-  );
-}
-
 async function openProfile(page: Page) {
   await page.goto("/me/profile");
   await page.waitForLoadState("networkidle");
   await expect(page.getByTestId("me-appearance")).toBeVisible({ timeout: 20_000 });
 }
 
-test.describe("ESS preferences — theme + palette server source-of-truth", () => {
-  test("changing theme+palette persists across a full reload (server SoT)", async ({ page }) => {
+test.describe("ESS preferences — theme server source-of-truth", () => {
+  test("changing theme persists across a full reload (server SoT)", async ({ page }) => {
     await loginAs(page, "employee");
     await openProfile(page);
 
-    // Switch to light + cool-ocean via the real UI (each click PATCHes the API → DB).
+    // Switch to light via the real UI (each click PATCHes the API → DB).
     await patchAndWait(page, "pref-theme-light");
-    await patchAndWait(page, "pref-palette-cool-ocean");
 
-    // Applied live: light background + the cool-ocean --palette-1 value.
+    // Applied live: light background.
     await expect(page.locator("html")).not.toHaveClass(/dark/);
     await expect.poll(() => bodyBackground(page)).toBe(LIGHT_BACKGROUND_RGB);
-    await expect.poll(() => paletteVar(page)).toBe(COOL_OCEAN_PALETTE_1);
 
     // The server is the authoritative store: a direct read reflects the change (any client cache
     // is irrelevant). Uses the page's authenticated context via the /api proxy.
     const apiResp = await page.request.get("/api/v1/me/preferences");
     expect(apiResp.status()).toBe(200);
-    expect(await apiResp.json()).toMatchObject({ theme: "light", palette: "cool-ocean" });
+    expect(await apiResp.json()).toMatchObject({ theme: "light" });
 
     // RELOAD with localStorage cleared first → the re-applied value can ONLY come from the server
     // (GET /v1/me/preferences → PreferencesApplier), proving server source-of-truth over the cache.
@@ -78,14 +69,14 @@ test.describe("ESS preferences — theme + palette server source-of-truth", () =
     await page.reload();
     await page.waitForLoadState("networkidle");
     await expect(page.getByTestId("me-appearance")).toBeVisible({ timeout: 20_000 });
+    // La scelta della tavolozza non esiste più (24/11/2026): resta solo quella standard.
+    await expect(page.getByTestId("pref-palette-cool-ocean")).toHaveCount(0);
 
     await expect(page.locator("html")).not.toHaveClass(/dark/);
     await expect.poll(() => bodyBackground(page)).toBe(LIGHT_BACKGROUND_RGB);
-    await expect.poll(() => paletteVar(page)).toBe(COOL_OCEAN_PALETTE_1);
 
     // Reset to brand defaults so the next run starts clean (dark canonical theme re-applied).
     await patchAndWait(page, "pref-theme-dark");
-    await patchAndWait(page, "pref-palette-balanced");
     await expect(page.locator("html")).toHaveClass(/dark/);
     await expect.poll(() => bodyBackground(page)).toBe(DARK_BACKGROUND_RGB);
   });

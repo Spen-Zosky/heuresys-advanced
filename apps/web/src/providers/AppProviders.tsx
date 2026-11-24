@@ -4,12 +4,15 @@ import { type ReactNode, useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { I18nextProvider } from "react-i18next";
 import { ThemeProvider } from "@heuresys/ui";
-import { i18n } from "../lib/i18n";
+import { istanzaPerIlDisegno, type AppLocale } from "../lib/i18n";
 import { suPermessoNegato } from "../lib/api/session-cache";
 import { ME_INTERFACES_QUERY_KEY, ME_PERMISSIONS_QUERY_KEY } from "../lib/api/auth";
 import { AttesaGlobale } from "../components/attesa-globale";
 
-export function AppProviders({ children }: { children: ReactNode }) {
+export function AppProviders({ children, lingua }: { children: ReactNode; lingua: AppLocale }) {
+  // K33: sul server i testi si scrivono nella lingua del cookie letta dal layout radice, la
+  // stessa da cui parte il browser; senza, il server scriveva italiano e il browser inglese (#418).
+  const istanza = istanzaPerIlDisegno(lingua);
   // One QueryClient per browser session; lazy-initialised so HMR / RSC don't
   // share a cache across server / client boundaries.
   const [qc] = useState(
@@ -42,7 +45,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider defaultTheme="dark">
       <QueryClientProvider client={qc}>
-        <I18nextProvider i18n={i18n}>
+        <I18nextProvider i18n={istanza}>
           <AttesaGlobale />
           {children}
         </I18nextProvider>

@@ -162,7 +162,7 @@ Ogni voce si chiude con una prova: comando, esito, data. Le voci che spostano fi
 | R3 | 2 | correggere i rimandi vivi verso i superati: README, `.claude/rules/*`, skill, workflow (`paths-ignore`), `.gitattributes`, `.gitignore`, `align-clones.sh`; spostare `cowork_reserved/batch_c5/xos_lib/cross_os_pipeline.sh` in `db/scripts/_lib/`; nel datastore gli script `banco_*` che scrivono in `_misure/` | thread | `check_documenti.py --rimandi` verde sui superati |
 | R4 | 2 | metadati (sezione 4.3) e lo strumento A1-A5 con la sua prova rossa e poi verde | thread | CI verde con lo strumento attivo |
 | R5 | 3, ritiro | ritiro dei superati per lotti, prima due campioni per lotto: canali e QA storici (A4, 368 file), programmi chiusi (A3, 221, con la sessione dedicata dei `.programmi`), archivio e source bundle (A5), kb e piani (A2), architettura (A1), datastore (D1, D2), file del progetto (PF) | thread | ogni lotto fuori dal repo, CI verde, voce in `log.md` |
-| R6 | 3 | primi a uscire dai file del progetto: i dati di persone (`confronto-corsa-rtl/grezzi_persone`, `dati_2026111*/utenti.json`, `agente-non-corrispondenze/COERENZA_PERSONE_20261110.tsv`) e i due file dell'operazione segreti del 22/10 (un elenco di percorsi e uno script, senza valori nel controllo fatto) | thread | file fuori dalla cartella condivisa |
+| R6 | 3 | i file del progetto che sono copie identiche di file dei repo (fatto il 25/11 per i dati del confronto TJB-RTL e dei ruoli chiave: 25 file in `_da_eliminare/20261125_dati-persone-rtl/`, i 14 senza copia depositati prima nei repo) e i due file dell'operazione segreti del 22/10 (un elenco di percorsi e uno script, senza valori nel controllo fatto) | thread | file fuori dalla cartella condivisa |
 | R7 | 4, aggiornamento | i 154 documenti da aggiornare, per dominio, cominciando da quelli che istruiscono (CLAUDE.md dei due repo, `.claude/rules`, skill, preflight, README) e dalle contraddizioni della sezione 2 | thread | A4 e A5 verdi, ogni riga del censimento chiusa |
 | R8 | 4 | registri di stato riallineati a novembre: `.handoff/STATE.md`, `SOT_STATE.md`, `SOT_BACKLOG.md`, `DEBT_REGISTER.md`, `cruscotto/stato.json`, `STATO_CORRENTE.md` del datastore (con la skill `handoff`) | thread | A7 verde |
 | R9 | 4 | `ADR_INDEX.md` rigenerato e stati veri (0033, 0040, 0039; note per 0019, 0022, 0058); ADR-0002 e 0007 con la versione attuale | thread | A6 verde |
@@ -174,7 +174,7 @@ Ogni voce si chiude con una prova: comando, esito, data. Le voci che spostano fi
 
 Il lavoro non tocca `docs/piani/forense-frontend_20261123/` finché il giro di verifica delle pagine è aperto, non tocca `_recupero_20260716/` del datastore, e non modifica migrazioni già applicate: i loro commenti che citano un file ritirato restano come sono, e la pagina di dominio dice dove trovarlo nella storia di git.
 
-**Che cosa non si chiude in questa fase.** Tutte le voci da R1 a R14. Questa fase consegna il censimento e il piano, e si ferma all'approvazione di Enzo.
+**Che cosa non si chiude in questa fase.** Tutte le voci da R1 a R14, salvo la parte di R6 già fatta il 25/11. Questa fase consegna il censimento e il piano, e si ferma all'approvazione di Enzo.
 
 ## 7. Le decisioni che spettano a Enzo
 
@@ -186,3 +186,7 @@ Il lavoro non tocca `docs/piani/forense-frontend_20261123/` finché il giro di v
 ## 8. Fuori da questo ciclo
 
 Scoperte di passaggio, da proporre una volta e non da eseguire qui: `PIANO_velocita-ci-e-rilasci_20261122` è una proposta che aspetta un sì o un no; la spec `delivery-loop` del 2026-07-25 descrive una skill mai costruita; `SECURITY.md` riporta un indirizzo email personale da riconfermare; `proposte_advanced/README.md` del datastore propone ad advanced una migrazione 000456 il cui numero è già occupato; `qa-web/strumento/qa-web.mjs` nei file del progetto non è versionato in nessun repo.
+
+## 9. Nota sui dati di RTL Bank
+
+Tutti i dati del tenant RTL Bank, persone comprese, sono inventati: RTL è un tenant dimostrativo trattato come reale solo per sviluppo e prova (chiarimento di Enzo del 2026-11-25). I file che li contengono si trattano come ogni altro documento, secondo il loro verdetto, senza nessuna priorità o cautela per la riservatezza.

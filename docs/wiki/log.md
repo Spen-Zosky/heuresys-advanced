@@ -13,3 +13,4 @@ Una riga per operazione, in sola aggiunta: data, operazione, che cosa, commit o 
 | 2026-11-25 | ingest | voce R7, primo lotto: 43 documenti «da aggiornare» riallineati (README, regole, skill, due diligence sul motore degli agenti, gateway, deploy, CI, curriculum GitHub) | PR del ramo claude/project-thread-5hihsg |
 | 2026-11-25 | ingest | voce R7, secondo lotto: 16 documenti «da aggiornare» con la nota «com'è oggi» (storia36, integrazioni, dump, Dependabot, curriculum GitHub, wargame, canale Cowork, RBAC, ASVS, sicurezza, schema, prodotto) | PR #486 |
 | 2026-11-25 | ritiro | `db-export.zip` esce dal repo (decisione D3): copia con impronta nel cestino, riga D3 nel registro dei ritiri | PR #486 |
+| 2026-11-25 | ritiro | lotto PF: 125 file superati della cartella del progetto spostati nel cestino, registro `_da_eliminare/20261125_riordino/REGISTRO_file-del-progetto.tsv` | cartella del progetto |

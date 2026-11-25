@@ -201,9 +201,9 @@ Un documento superato esce anche se lo citano solo archivi (`docs/archive/`), mi
 |---|---|---|
 | R1 | fatta | decisioni D1-D4 di Enzo nel thread |
 | R2 | fatta | `docs/kb/tools/mappa_rimandi.py`, regola dei rimandi storici (sezione 10) |
-| R3 | in parte | rules, skill e README corretti (PR #485, #486); restano `.gitattributes`/`.gitignore`, `align-clones.sh`, `build_index.py`, i `paths-ignore` dei workflow, `cross_os_pipeline.sh`, `db-export.zip` (D3) |
+| R3 | fatta | rules, skill e README corretti (PR #485, #486); `build_index.py` senza percorsi Windows e indice rigenerato; la libreria cross-OS si carica da `db/scripts/_lib/`; `db-export.zip` uscito (D3). Le voci `cowork_code_exchange` di `.gitattributes`, `.gitignore` e dei `paths-ignore` restano finché la cartella resta (vedi R5) |
 | R4 | fatta | `check_documenti.py --selftest` rosso (1, 9) senza la regola e verde (1, 8) con; in CI con `state-lint` |
-| R5 | in parte | 545 documenti ritirati in advanced (A4, campioni, lotto B) e 84 nel datastore (lotto D), registri con commit di recupero su `main`; restano i «da accorpare» e i file del progetto |
+| R5 | in parte | 546 percorsi ritirati in advanced (A4, campioni, lotto B, D3) e 84 nel datastore (lotto D), registri con commit di recupero su `main`; 125 file del progetto nel cestino (lotto PF, registro nel cestino). Restano i «da accorpare» e i 26 file di `cowork_code_exchange/`, trattenuti dai rimandi di `docs/vision/` (sessione dedicata), di ADR-0017 e di `sessioni/` |
 | R6 | fatta per i dati TJB-RTL e i ruoli chiave | 25 file in `_da_eliminare/` del progetto |
 | R7 | in parte | 59 documenti riallineati nella PR #486; i piani e i programmi restano alle loro sessioni (sezione 8) |
 | R8 | fatta | `.handoff/STATE.md`, `SOT_*`, `DEBT_REGISTER.md`, cruscotti dei due repo (PR #485, datastore #43) |

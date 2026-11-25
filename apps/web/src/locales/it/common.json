@@ -1119,7 +1119,7 @@
     "riduci": "Riduci",
     "ridimensiona": "Trascina per allargare o restringere la finestra",
     "vuotoTitolo": "Come posso aiutarti?",
-    "vuotoTesto": "Fai una domanda sui dati e sulle persone che hai il permesso di vedere. Ciò che non puoi vedere resta {omissis}.",
+    "vuotoTesto": "Fai una domanda sui dati e sulle persone che hai il permesso di vedere. Ciò che non puoi vedere resta nascosto e compare come «{omissis}».",
     "suggerimento1": "Riassumi ciò che mostra questa pagina.",
     "suggerimento2": "Quante persone lavorano in ciascuna unità organizzativa?",
     "suggerimento3": "Quali posizioni sono scoperte?",

@@ -1119,7 +1119,7 @@
     "riduci": "Restore",
     "ridimensiona": "Drag to widen or narrow the window",
     "vuotoTitolo": "How can I help?",
-    "vuotoTesto": "Ask about the data and the people you are allowed to see. What you cannot see stays {omissis}.",
+    "vuotoTesto": "Ask about the data and the people you are allowed to see. What you cannot see stays hidden and is shown as “{omissis}”.",
     "suggerimento1": "Summarise what this page shows.",
     "suggerimento2": "How many people work in each organisational unit?",
     "suggerimento3": "Which positions are vacant?",

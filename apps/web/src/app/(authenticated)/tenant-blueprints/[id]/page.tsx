@@ -31,7 +31,8 @@ import type {
   TenantBlueprintVersion,
 } from "@heuresys/shared";
 import { Button, Input } from "@heuresys/ui";
-import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
+import { StatoCaricamento, StatoVuoto } from "@/components/stato-pagina";
+import { ErroreFascicolo } from "../errore-fascicolo";
 import { DatiFascicolo, RicercaFascicolo } from "./gestione-fascicolo";
 import { apiFetch } from "@/lib/api/fetch";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
@@ -80,7 +81,7 @@ export default function TenantBlueprintDetailPage({
 
   if (fascicolo.isLoading) return <StatoCaricamento />;
   if (fascicolo.isError) {
-    return <StatoErrore errore={fascicolo.error} titolo={t("dossier.error")} onRiprova={() => void fascicolo.refetch()} />;
+    return <ErroreFascicolo errore={fascicolo.error} onRiprova={() => void fascicolo.refetch()} />;
   }
   if (!fascicolo.data || !versione) return <StatoVuoto titolo={t("dossier.notFound")} />;
 

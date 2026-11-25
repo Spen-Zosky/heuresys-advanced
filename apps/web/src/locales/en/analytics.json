@@ -164,7 +164,7 @@
     "depthLevel": "Level {{n}}",
     "spanTitle": "Who has the most direct reports (top 15)",
     "spanAria": "Managers with the most positions reporting directly to them",
-    "spanNote": "For each manager, how many positions report directly to them (in English, the «span of control»): a high number means many people to follow first-hand.",
+    "spanNote": "For each manager, how many positions report directly to them (the «span of control»): a high number means many people to follow first-hand.",
     "seriesDirectReports": "Direct reports",
     "reachTitle": "How many positions depend on each manager across the whole chain (top 15)",
     "reachAria": "Managers with the most positions below them",

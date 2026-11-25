@@ -5,7 +5,7 @@
  * #131 Tenant Builder P1, T6 — il confronto, in tre sezioni.
  *
  * La terza sezione è quella che conta di più, e non mostra un numero: dice
- * che l'impatto **non è calcolabile** in questa parte, e perché. Un impatto
+ * che l'impatto **non è ancora calcolabile**, e perché. Un impatto
  * pari a zero al posto di un impatto sconosciuto si legge «nessuna
  * conseguenza», che è il contrario della verità.
  *
@@ -18,7 +18,8 @@ import { PageHeader } from "@/components/intestazione-pagina";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { BlueprintDiffResponse } from "@heuresys/shared";
-import { StatoCaricamento, StatoErrore } from "@/components/stato-pagina";
+import { StatoCaricamento } from "@/components/stato-pagina";
+import { ErroreFascicolo } from "../../../../errore-fascicolo";
 import { apiFetch } from "@/lib/api/fetch";
 import { voceDecisione } from "@/lib/blueprint-testi";
 
@@ -40,7 +41,7 @@ export default function TenantBlueprintDiffPage({
 
   if (confronto.isLoading) return <StatoCaricamento />;
   if (confronto.isError) {
-    return <StatoErrore errore={confronto.error} titolo={t("dossier.error")} onRiprova={() => void confronto.refetch()} />;
+    return <ErroreFascicolo errore={confronto.error} onRiprova={() => void confronto.refetch()} />;
   }
   const d = confronto.data;
   if (!d) return null;
@@ -134,7 +135,7 @@ function Elenco({ titolo, voci }: { titolo: string; voci: string[] }) {
     <div>
       <dt className="text-xs font-medium uppercase text-muted-foreground">{titolo}</dt>
       {voci.map((v) => (
-        <dd key={v} className="break-words text-sm text-foreground">
+        <dd key={v} className="break-words border-b border-border/60 py-1 text-sm text-foreground last:border-b-0">
           {v}
         </dd>
       ))}

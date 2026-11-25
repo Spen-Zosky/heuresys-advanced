@@ -89,7 +89,7 @@ export function SessioniUtente({ userId }: { userId: string }) {
           <ul className="divide-y divide-border rounded-card border border-border">
             {righe.map((s) => (
               <li key={s.familyId} data-testid="user-session-row" className="px-4 py-2">
-                <span className="font-medium">{dispositivoLeggibile(s.userAgent, (b, so) => t("users.sessioni.dispositivo", { browser: b, sistema: so }))}</span>
+                <span className="font-medium">{dispositivoLeggibile(s.userAgent, (b, so) => t("users.sessioni.dispositivo", { browser: b, sistema: so })) ?? t("users.sessioni.dispositivoIgnoto")}</span>
                 <span className="text-xs text-muted-foreground"> · {t("users.sessioni.ultimo", { data: fmt.dataOra(s.lastIssuedAt) })} · {t("users.sessioni.scade", { data: fmt.dataOra(s.expiresAt) })}</span>
               </li>
             ))}

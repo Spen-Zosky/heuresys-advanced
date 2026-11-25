@@ -27,7 +27,7 @@
  */
 
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState, useSyncExternalStore, type ComponentProps } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import { formati, localeDi } from "@/lib/format";
 import { coloreDaVariabile, etichetteLeggibiliMappaDiCalore } from "@/lib/colori-grafico";
@@ -35,7 +35,7 @@ import { risolviVariabiliCss } from "@/lib/variabili-css-grafico";
 import { assiDerivati, letturaDelGrafico, type ChartTable } from "@/lib/lettura-grafico";
 import { testoCellaGrafico } from "@/lib/celle-tabella";
 import { ALTEZZA_RIGA_ETICHETTA, altezzaGrafico, larghezzaStimata, type Misura } from "@/lib/altezza-grafico";
-import { assiInteri, conStileDelTema, etichetteStrette, nomeSottoEtichetteRuotate, nomiDegliAssiInVista, scalaConValori } from "@/lib/stile-grafico";
+import { assiInteri, conStileDelTema, etichetteInColonna, etichetteStrette, nomeSottoEtichetteRuotate, nomiDegliAssiInVista, scalaConValori } from "@/lib/stile-grafico";
 
 const RawEChartsCard = dynamic(
   // Subpath `/charts` isolates echarts so this lazy import does NOT drag the whole
@@ -85,6 +85,10 @@ function rendiLeggibile(option: RawProps["option"], locale: string, stretto = fa
     const tipo = ax.type ?? "value";
     if (tipo === "value" || tipo === "log") {
       if (label.formatter === undefined) label.formatter = num;
+      // Classi Q (25/11): con le etichette lunghe accanto, l'asse dei valori di una barra orizzontale
+      // resta stretto e le tacche si toccavano («120150180» in org-network): quelle che non ci stanno
+      // si saltano, invece di sovrapporsi.
+      if (label.hideOverlap === undefined) label.hideOverlap = true;
     } else if (tipo === "category") {
       if (label.width === undefined) label.width = 200;
       if (label.overflow === undefined) label.overflow = "break";
@@ -284,14 +288,31 @@ export function EChartsCard({ assi, tabella, lingua, ...props }: EChartsCardProp
   }, []);
 
   const stretto = useSyncExternalStore(iscriviStretto, leggiStretto, () => false);
+  // Classi Q (25/11): la larghezza vera del riquadro, per dare a ogni categoria dell'asse orizzontale
+  // il suo posto (etichetteInColonna); finché non è misurata l'opzione resta com'è.
+  const contenitore = useRef<HTMLDivElement | null>(null);
+  const [larghezza, setLarghezza] = useState<number | null>(null);
+  useEffect(() => {
+    const el = contenitore.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const leggi = () => setLarghezza((prima) => {
+      const ora = Math.round(el.getBoundingClientRect().width);
+      return ora > 0 && ora !== prima ? ora : prima;
+    });
+    leggi();
+    const ro = new ResizeObserver(leggi);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const opzione = useMemo(() => etichetteInColonna(props.option, larghezza, stretto, larghezzaStimata), [props.option, larghezza, stretto]);
   const option = useMemo(
     () =>
       typeof document === "undefined"
         ? props.option
-        : conEtichetteLeggibili(conColoriDelTema(resolveCssVars(rendiLeggibile(conNomiDegliAssi(props.option, assi), locale, stretto), document.documentElement), document.documentElement), document.documentElement),
+        : conEtichetteLeggibili(conColoriDelTema(resolveCssVars(rendiLeggibile(conNomiDegliAssi(opzione, assi), locale, stretto), document.documentElement), document.documentElement), document.documentElement),
     // themeTick intentionally re-triggers resolution on theme switch
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props.option, themeTick, assi?.x, assi?.y, locale, stretto],
+    [opzione, themeTick, assi?.x, assi?.y, locale, stretto],
   );
 
   // K17: l'altezza data dalla pagina è il minimo; un asse verticale di categorie la fa crescere
@@ -300,15 +321,17 @@ export function EChartsCard({ assi, tabella, lingua, ...props }: EChartsCardProp
   // useSyncExternalStore), così il primo disegno coincide e la misura vera arriva subito dopo.
   const misura = useSyncExternalStore(senzaIscrizione, misuraDelBrowser, () => null);
   const altezza = useMemo(
-    () => (typeof props.height === "number" ? altezzaGrafico(rendiLeggibile(conNomiDegliAssi(props.option, assi), locale, stretto), props.height, misura ?? undefined) : props.height),
+    () => (typeof props.height === "number" ? altezzaGrafico(rendiLeggibile(conNomiDegliAssi(opzione, assi), locale, stretto), props.height, misura ?? undefined) : props.height),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props.option, props.height, assi?.x, assi?.y, locale, misura, stretto],
+    [opzione, props.height, assi?.x, assi?.y, locale, misura, stretto],
   );
 
   const lettura = useMemo(() => letturaDelGrafico(props.option, locale), [props.option, locale]);
   return (
     <>
-      <RawEChartsCard {...props} height={altezza} option={option} />
+      <div ref={contenitore} className="min-w-0" data-grafico-riquadro>
+        <RawEChartsCard {...props} height={altezza} option={option} />
+      </div>
       {lettura ? (
         <p className="mt-2 text-xs leading-relaxed text-muted-foreground" data-grafico-lettura>{lettura.frase}</p>
       ) : null}

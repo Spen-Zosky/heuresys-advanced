@@ -410,6 +410,7 @@
       "titolo_one": "Open session ({{count}})",
       "nessuna": "No open session.",
       "dispositivo": "{{browser}} on {{sistema}}",
+      "dispositivoIgnoto": "Unrecognised device",
       "ultimo": "last access {{data}}",
       "scade": "expires {{data}}",
       "conferma": "Close all sessions of this person? They will have to sign in again.",

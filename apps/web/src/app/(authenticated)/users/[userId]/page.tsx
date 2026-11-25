@@ -152,8 +152,14 @@ export default function UserDetailPage() {
         }
         badges={
           <>
-            <span data-testid="user-email-detail" className="text-sm text-muted-foreground">{p.email}</span>
-            {primary && <span className="text-sm text-muted-foreground">· {primary.positionTitle}</span>}
+            {/* Classi Q (25/11): l'email è il dato che si guarda, e senza `data-grezzo` la rete di
+                Leggibile la riscriveva «Cognome, Nome», ripetendo il titolo; la posizione sta nella
+                stessa riga, così il «·» non apre mai una riga da solo. */}
+            <span className="text-sm text-muted-foreground">
+              {p.email ? <span data-testid="user-email-detail" data-grezzo="">{p.email}</span> : null}
+              {p.email && primary ? " · " : null}
+              {primary ? primary.positionTitle : null}
+            </span>
           </>
         }
       />

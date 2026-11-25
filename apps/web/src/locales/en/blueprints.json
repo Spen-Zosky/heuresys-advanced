@@ -207,6 +207,13 @@
     "caption": "List of configuration dossiers",
     "back": "Back to dossiers",
     "notFound": "Dossier not found.",
+    "singleTitle": "Configuration dossier",
+    "loadError": "The dossier could not be opened.",
+    "unavailable": {
+      "title": "Dossier not available",
+      "reason": "This dossier, or the version you asked for, is not among those your profile can open.",
+      "toList": "Go to the list of dossiers you can open"
+    },
     "createTitle": "Open a dossier",
     "createHint": "A dossier may exist before the company: during a negotiation the company is left empty.",
     "create": "Create",
@@ -266,7 +273,7 @@
       "model": "What changed in the model",
       "decisions": "What I changed",
       "impact": "Consequences for the company",
-      "notComputable": "Not computable in this part",
+      "notComputable": "Not yet calculable",
       "changed": "The model moved",
       "unchanged": "The model did not move",
       "added": "Added",
@@ -274,7 +281,7 @@
       "renamed": "Renamed",
       "identityChanged": "Identity changed",
       "none": "No difference",
-      "notComputableReason": "In this part the impact on the already built company cannot be computed: the structure layer and the engine that applies the dossier are missing. Declaring it zero would be false information.",
+      "notComputableReason": "The platform cannot yet calculate what effect these changes would have on the company already configured. That is why there is no number here: a zero would suggest that nothing changes.",
       "fields": {
         "industryClassId": "Industry",
         "sizeBandId": "Size band",
@@ -322,10 +329,11 @@
       },
       "blockedNoPlan": "The plan cannot be computed: there is nothing to sign until the model has content.",
       "incoherent": {
-        "skillsWithoutCategory_one": "The model declares {{count}} skill without a category: the plan cannot be computed. A skill without a category builds, and breaks the next deploy.",
-        "skillsWithoutCategory": "The model declares {{count}} skills without a category: the plan cannot be computed. A skill without a category builds, and breaks the next deploy.",
+        "skillsWithoutCategory_one": "The model has {{count}} skill without a category: until it has one, the plan cannot be calculated.",
+        "skillsWithoutCategory": "The model has {{count}} skills without a category: until they have one, the plan cannot be calculated.",
         "positionsInMissingUnits_one": "The model places {{count}} position in a unit that does not exist: the plan cannot be computed.",
         "positionsInMissingUnits": "The model places {{count}} positions in units that do not exist: the plan cannot be computed.",
+        "whatToDo": "Whoever maintains the model needs to fix the rows listed below; once they are fixed, reopen this page to calculate the plan.",
         "showList_one": "Show the row to fix",
         "showList": "Show the {{count}} rows to fix",
         "unit": "unit {{unit}}"

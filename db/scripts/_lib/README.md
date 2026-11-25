@@ -37,7 +37,7 @@ Flag globali su `xos_init`: `--dry-run` (no side effects, solo log), `--verbose`
 set -euo pipefail
 
 # Source the library (path relative to script location)
-source "$(dirname "$0")/../../cowork_reserved/batch_c5/xos_lib/cross_os_pipeline.sh"
+source "$(dirname "$0")/_lib/cross_os_pipeline.sh"   # da uno script in db/scripts/
 
 # Init
 xos_init \
@@ -75,7 +75,7 @@ Verified cross-platform pattern: extract_users_employees_legacy.sh (C3 fixed man
 
 ```bash
 # From repo root:
-bash cowork_reserved/batch_c5/xos_lib/cross_os_pipeline.sh
+bash db/scripts/_lib/cross_os_pipeline.sh
 # Emits: bash version + OS + available xos_* functions + usage example
 ```
 

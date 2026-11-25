@@ -1,0 +1,1010 @@
+path	verdetto	documento	codice	workflow	migrazione	generato	libero	esempi
+.programmi/132-ricerca-genera-il-modello.md	superato	3	2	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1920 docs/archive/SOT_BACKLOG_CHIUSI.md:1928 .programmi/S1093-ricognizione-10-voci.json:174 .programmi/S1093-ricognizione-10-voci.json:426
+.programmi/142-cruscotti-per-tipologia.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1769
+.programmi/143-squadra-come-progetto.md	superato	2	4	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1154 docs/archive/SOT_BACKLOG_CHIUSI.md:2181 .programmi/S1093-ricognizione-10-voci.json:237 .programmi/S1093-ricognizione-10-voci.json:242
+.programmi/148-rendiconto-chiusure-quattro-verbi.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1609
+.programmi/169-due-segreti-dalla-stessa-chiave.md	da accorpare	1	5	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2161 .programmi/S1093-ricognizione-10-voci.json:258 .programmi/S1093-ricognizione-10-voci.json:263
+.programmi/181-rilievi-controllo-drift.md	superato	0	0	0	0	3	sì	
+.programmi/197-marchio-materializzazione.md	superato	0	0	0	0	3	sì	
+.programmi/211-suite-e2e-completa.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2061
+.programmi/215-stato-impossibile-bande-e-competenze.md	superato	0	0	0	0	3	sì	
+.programmi/216-passaggio-di-consegne.md	superato	0	0	0	0	3	sì	
+.programmi/217-flusso-di-chiusura.md	superato	0	0	0	0	3	sì	
+.programmi/218-residui-legacy-senza-referente.md	superato	0	0	0	0	3	sì	
+.programmi/219-otto-guasti-suite-e2e.md	superato	3	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2024 docs/archive/SOT_BACKLOG_CHIUSI.md:2031
+.programmi/219-triage-2026-09-05.txt	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2034
+.programmi/219-triage-2026-09-06-dopo-correzione.txt	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2033
+.programmi/219-triage-2026-09-06.txt	superato	0	0	0	0	3	sì	
+.programmi/220-remediation-dossier-forense.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1776
+.programmi/221-remediation-w2-recuperi.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1784
+.programmi/222-remediation-w3-integrita-contenuti.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1793
+.programmi/223-remediation-w4-pipeline-ruoli.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1799
+.programmi/224-check-non-deterministico-fuso.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1807
+.programmi/225-claude-md-affermazioni-scadute.md	superato	0	0	0	0	3	sì	
+.programmi/226-storia-rtl-scorrevole.md	superato	0	0	0	0	3	sì	
+.programmi/227-competenze-isolate-nel-grafo.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1822
+.programmi/228-cancello-a-tempo.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:787
+.programmi/229-eredita-fra-sessioni.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:775
+.programmi/230-verifica-quattro-attese.md	superato	4	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1438 docs/archive/SOT_BACKLOG_CHIUSI.md:1565
+.programmi/231-consumo-lavori-attivi.md	superato	2	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2099 docs/archive/SOT_BACKLOG_CHIUSI.md:2102
+.programmi/234-otto-rossi-verifica-incrociata.md	superato	0	0	0	0	3	sì	
+.programmi/235-sondaggi-clima-fuori-catena.md	superato	0	0	0	0	3	sì	
+.programmi/236-lavori-remoti-armati-non-appesi.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1859
+.programmi/237-chiusura-troppo-cara.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1848
+.programmi/238-verifica-deploy-clone-in-corso.md	superato	0	0	0	0	3	sì	
+.programmi/239-nome-del-cliente-blocca-la-ricerca.md	superato	2	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2012 docs/kb/SOT_BACKLOG.md:286
+.programmi/241-ci-rossa-e-fascicoli-di-prova.md	superato	2	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1980 docs/kb/SOT_BACKLOG.md:281
+.programmi/242-fastify-trustproxy-per-indirizzo.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2007
+.programmi/243-igiene-e-pr-dependabot.md	superato	2	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1994 docs/kb/SOT_BACKLOG.md:283
+.programmi/245-dominio-fonte-testo-libero.md	superato	2	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1985 docs/kb/SOT_BACKLOG.md:282
+.programmi/246-fixed-term-senza-data-di-fine.md	superato	2	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2075 docs/kb/DEBT_REGISTER.md:140
+.programmi/249-contabilita-dei-piani-e-cancello-non-interrogato.md	superato	0	0	0	0	3	sì	
+.programmi/251-contatore-persone-distinte.md	da accorpare	2	2	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2281 docs/archive/SOT_BACKLOG_CHIUSI.md:2287 apps/agent-gateway/src/soglie-persone.ts:30 docs/kb/tools/build_soglie_agente.py:26
+.programmi/252-ponte-anche-sulle-letture.md	superato	2	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2293 docs/archive/SOT_BACKLOG_CHIUSI.md:2303
+.programmi/253-diario-interrogabile.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2309
+.programmi/255-scorecard-rivalidata.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2317
+.programmi/256-confine-del-cancello-fra-clienti.md	superato	2	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2324 docs/archive/SOT_BACKLOG_CHIUSI.md:2326
+.programmi/257-chi-ripara-e-chi-popola.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2334
+.programmi/258-persona-di-collaudo-di-piattaforma.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:7
+.programmi/259-mandato-k-ruoli-direzione.md	superato	0	0	0	0	3	sì	
+.programmi/260-due-chiavi-di-collaudo.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2274
+.programmi/261-totp-collaudo-stantio-windows.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2263
+.programmi/262-cancello-marciume-esposizione-completezza.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2249
+.programmi/50-knowledge-graph-legacy.md	superato	1	2	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2113 .programmi/S1093-ricognizione-10-voci.json:155 .programmi/S1093-ricognizione-10-voci.json:410
+.programmi/54-recruiting-ats.md	superato	2	2	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2188 docs/archive/SOT_BACKLOG_CHIUSI.md:2193 .programmi/S1093-ricognizione-10-voci.json:107 .programmi/S1093-ricognizione-10-voci.json:347
+.programmi/69-residui-staging-wave1.md	superato	0	0	0	0	3	sì	
+.programmi/92-ciclo-valutazione.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1410
+.programmi/99-domini-gerarchici-funzionali.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1275
+.programmi/D86-D87-i-due-cancelli-della-chiusura.md	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/LEGGIMI.md	superato	0	0	0	0	1	sì	
+.programmi/K-ruoli-direzione/STATO.md	superato	8	0	0	0	1	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2268 docs/kb/COWORK_INBOX.md:848
+.programmi/K-ruoli-direzione/esiti/A0_margine_del_pavimento.md	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/esiti/A5_costo_di_un_ruolo.md	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/esiti/CHIUSURA-C2.md	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/esiti/COWORK_2026-10-05_livelli_RTL.md	superato	1	0	0	0	3	no	docs/kb/COWORK_INBOX.md:1432
+.programmi/K-ruoli-direzione/esiti/D11.md	superato	1	0	0	0	1	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2270
+.programmi/K-ruoli-direzione/esiti/D12.md	superato	0	0	0	0	1	sì	
+.programmi/K-ruoli-direzione/esiti/F0.2_censimento_C1.md	superato	0	5	0	0	3	no	.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148_b/_risultato.json:578 .programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148_b/critico.json:68
+.programmi/K-ruoli-direzione/esiti/F0.4_ripresa.md	superato	0	2	0	0	3	no	.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148_b/_risultato.json:578 .programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148_b/critico.json:68
+.programmi/K-ruoli-direzione/esiti/F0.5_sola_lettura.md	superato	0	2	0	0	3	no	.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148_b/_risultato.json:578 .programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148_b/critico.json:68
+.programmi/K-ruoli-direzione/esiti/F0.6_migrazioni.md	superato	0	2	0	1	3	no	.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148_b/_risultato.json:578 .programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148_b/critico.json:68 db/migrations/000417_incompleto_prova.sql:8
+.programmi/K-ruoli-direzione/esiti/F3_terzo_giro_W3.md	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/esiti/GRD-C.md	superato	0	0	0	0	1	sì	
+.programmi/K-ruoli-direzione/esiti/I-A.md	superato	0	0	0	0	1	sì	
+.programmi/K-ruoli-direzione/esiti/I-B.md	superato	0	0	0	0	1	sì	
+.programmi/K-ruoli-direzione/esiti/I-C.md	superato	0	0	0	0	1	sì	
+.programmi/K-ruoli-direzione/esiti/I-D.md	superato	1	0	0	0	1	no	docs/architecture/adr/0041_direzione_del_dato.md:56
+.programmi/K-ruoli-direzione/esiti/I-E.md	superato	1	0	0	0	1	no	docs/architecture/adr/0041_direzione_del_dato.md:105
+.programmi/K-ruoli-direzione/esiti/I-F.md	superato	0	0	0	0	1	sì	
+.programmi/K-ruoli-direzione/esiti/I-G.md	superato	0	0	0	0	1	sì	
+.programmi/K-ruoli-direzione/esiti/INVENTARIO_stash.md	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/esiti/R-0.md	superato	0	0	0	0	1	sì	
+.programmi/K-ruoli-direzione/esiti/R-0_porte.md	superato	0	1	0	1	3	no	.programmi/K-ruoli-direzione/workflows/W4_audit_ruolo.js:8 db/migrations/000421_r0_asse_utente_di_piattaforma_assegnato.sql:9
+.programmi/K-ruoli-direzione/esiti/R-0b.md	superato	0	0	0	0	1	sì	
+.programmi/K-ruoli-direzione/esiti/R-10_rotte.md	superato	0	0	0	1	3	no	db/migrations/000427_r10_permessi_recruiting_granulari.sql:14
+.programmi/K-ruoli-direzione/esiti/R-1_passo34.md	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/esiti/R-2.md	superato	1	0	0	0	1	no	docs/kb/SOT_STATE.md:7
+.programmi/K-ruoli-direzione/esiti/R-2_domanda_masking.md	superato	3	2	0	1	3	no	docs/architecture/adr/0036_hierarchical_and_functional_domains.md:74 docs/kb/COWORK_INBOX.md:1080 apps/api/test/dpo-dossier-mascherato.integration.test.ts:7 apps/api/test/dpo.integration.test.ts:10 db/migrations/000423_r2_dpo_nucleo_gdpr.sql:3
+.programmi/K-ruoli-direzione/esiti/R-3.md	superato	0	0	0	0	1	sì	
+.programmi/K-ruoli-direzione/esiti/R-3_permessi_dichiarati.txt	superato	0	1	0	2	3	no	apps/api/test/taxonomy-steward.integration.test.ts:7 db/migrations/000426_r3_taxonomy_steward.sql:11 db/migrations/000426_r3_taxonomy_steward.sql:70
+.programmi/K-ruoli-direzione/esiti/R-6_permessi_people_manager.md	superato	0	2	0	2	3	no	apps/api/test/rbac-delete-permissions.test.ts:58 packages/shared/src/schemas/role-codes.ts:75 db/migrations/000432_r6_people_manager.sql:14 db/migrations/000432_r6_people_manager.sql:50
+.programmi/K-ruoli-direzione/esiti/R-6b_DATA_STEWARD.md	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/esiti/R-7.md	superato	0	0	0	0	1	sì	
+.programmi/K-ruoli-direzione/esiti/R-9.md	superato	0	0	0	0	1	sì	
+.programmi/K-ruoli-direzione/esiti/RAPPORTO_2026-09-14.md	superato	1	2	0	0	3	no	docs/kb/SOT_STATE.md:261 .programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148_b/_risultato.json:578 .programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148_b/critico.json:68
+.programmi/K-ruoli-direzione/esiti/RAPPORTO_2026-09-15.md	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/esiti/RAPPORTO_2026-09-16.md	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/esiti/RAPPORTO_2026-09-17-S1105.md	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/esiti/RAPPORTO_2026-09-17.md	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/esiti/RAPPORTO_2026-09-18-S1106.md	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/esiti/RAPPORTO_2026-09-19-S1107.md	superato	1	0	0	0	3	no	docs/kb/COWORK_INBOX.md:1154
+.programmi/K-ruoli-direzione/esiti/RAPPORTO_2026-09-19-S1108.md	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/esiti/RAPPORTO_2026-09-19-S1109.md	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/esiti/RAPPORTO_2026-09-19-S1112.md	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/esiti/REGISTRO_SCOPERTE.md	da accorpare	13	3	0	1	3	no	docs/kb/COWORK_INBOX.md:1116 docs/kb/COWORK_INBOX.md:1148 .programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148_b/_risultato.json:578 .programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148_b/critico.json:68 db/migrations/000431_r8_implementation_consultant.sql:33
+.programmi/K-ruoli-direzione/esiti/REGISTRO_SCOPERTE_addendum_r10.txt	da accorpare	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/esiti/RISPOSTE_ENZO.md	da accorpare	7	8	0	5	3	no	docs/architecture/adr/0036_hierarchical_and_functional_domains.md:73 docs/archive/SOT_BACKLOG_CHIUSI.md:2270 .programmi/K-ruoli-direzione/tools/dove_siamo.py:31 .programmi/K-ruoli-direzione/tools/dove_siamo.py:5 db/migrations/000423_r2_dpo_nucleo_gdpr.sql:5 db/migrations/000429_x1_classificazione_direzione_dato.sql:7
+.programmi/K-ruoli-direzione/esiti/TRG.md	superato	0	0	0	0	1	sì	
+.programmi/K-ruoli-direzione/esiti/X-2_attendance.md	superato	2	0	0	2	3	no	docs/kb/COWORK_INBOX.md:1096 docs/kb/COWORK_INBOX.md:1316 db/migrations/000444_x2_origine_dato_sys_overtime.sql:6 db/migrations/000450_d12_origine_dato_sys_attendance.sql:3
+.programmi/K-ruoli-direzione/esiti/X-2_tabelle.md	superato	0	0	0	3	3	no	db/migrations/000433_x2_origine_dato_sys_user_contracts.sql:3 db/migrations/000437_x2_origine_dato_sys_time_off_requests.sql:11
+.programmi/K-ruoli-direzione/esiti/X-6.md	superato	0	0	0	0	1	sì	
+.programmi/K-ruoli-direzione/evidenze/A0_output_202609170220.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/D11_ci_rehearsal_20260925.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/D11_migrate_vm_20260925.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/D11_prova_a_ROSSO_20260924.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/D11_prova_f_ROSSA_20260925.txt	superato	0	1	0	0	3	no	apps/api/test/dpo-dossier-mascherato.integration.test.ts:18
+.programmi/K-ruoli-direzione/evidenze/D11_prove_VERDI_20260924.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/D11_prove_VERDI_finali_20260925.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/F0.3_controprova.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/F0.4_ripresa_s2_202609150135.txt	superato	0	0	0	1	3	no	db/migrations/000417_incompleto_prova.sql:5
+.programmi/K-ruoli-direzione/evidenze/F0.5_controprova.txt	superato	0	1	0	0	3	no	.programmi/K-ruoli-direzione/tools/controprova_q.sh:8
+.programmi/K-ruoli-direzione/evidenze/F4.0_controprova_db_ROSSO.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/F4.0_controprova_db_VERDE.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/F4.0_controprova_unit_ROSSO.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/F4.0_controprova_unit_VERDE.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/F4.0_verify_gate_run.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/F4.0_verify_gate_run2.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/F4.0_verify_gate_run3.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/G-1_passo67_sentinelle_202609192000.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/I-A_passo13_202609150323.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/I-B_famiglie_202609150326.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/I-C_moduli_passo16.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/I-C_siti_202609150328.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/I-C_siti_passo16_202609151628.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/I-D_rimisure_202609150300.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/I-E_rimisure_202609151627.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/I-E_tabelle_202609150331.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/I-F_rimisure_202609150308.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/R-2_202609190000/passo40_ROSSO.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/R1_passo34_test_api_full_202609161343.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/R1_verify_gate_run.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/R1_verify_gate_run2.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/R1_verify_gate_run3.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/R1_verify_gate_run4.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/S-1_202609152117.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/S-2_202609151636.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/S-3_202609152117.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/S-4_202609151838.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/S-5_202609151640.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/baseline_202609142235.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/baseline_202609142237.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/baseline_202609142318.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/baseline_202609191456.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/spia_prova_202609150150.txt	superato	0	0	0	0	3	sì	
+.programmi/K-ruoli-direzione/evidenze/wf_F0.2_7_202609142251/_LANCIO.txt	superato	0	0	0	0	1	sì	
+.programmi/K-ruoli-direzione/evidenze/wf_F0.2_7_202609142251/_VERIFICATO.txt	superato	0	0	0	0	1	sì	
+.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148/_LANCIO.txt	superato	0	0	0	0	1	sì	
+.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148/_VERIFICATO.txt	superato	0	0	0	0	1	sì	
+.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148_b/_LANCIO.txt	superato	0	0	0	0	1	sì	
+.programmi/K-ruoli-direzione/evidenze/wf_F1_W1_202609150148_b/_VERIFICATO.txt	superato	0	0	0	0	1	sì	
+.programmi/K-ruoli-direzione/evidenze/wf_F3_32_202609160217/_LANCIO.txt	superato	0	0	0	0	1	sì	
+.programmi/K-ruoli-direzione/evidenze/wf_F3_32_202609160217/_VERIFICATO.txt	superato	0	0	0	0	1	sì	
+.programmi/K-ruoli-direzione/evidenze/wf_F3_32b_202609160241/_LANCIO.txt	superato	0	0	0	0	1	sì	
+.programmi/K-ruoli-direzione/evidenze/wf_F3_32b_202609160241/_VERIFICATO.txt	superato	0	0	0	0	1	sì	
+.programmi/K-ruoli-direzione/evidenze/wf_F3_32c_202609162236/_LANCIO.txt	superato	0	0	0	0	1	sì	
+.programmi/K-ruoli-direzione/evidenze/wf_F3_32c_202609162236/_VERIFICATO.txt	superato	0	0	0	0	1	sì	
+.programmi/K-ruoli-direzione/evidenze/wf_I-E_22_202609150331/_ABBANDONATO.txt	superato	1	0	0	0	3	no	docs/kb/COWORK_INBOX.md:940
+.programmi/K-ruoli-direzione/evidenze/wf_I-E_22_202609150331/_LANCIO.txt	superato	0	0	0	0	1	sì	
+.programmi/K-ruoli-direzione/evidenze/wf_I-E_22_202609150331_b/_LANCIO.txt	superato	0	0	0	0	1	sì	
+.programmi/K-ruoli-direzione/evidenze/wf_I-E_22_202609150331_b/_VERIFICATO.txt	superato	0	0	0	0	1	sì	
+.programmi/S1087-piano-sessione.md	superato	0	0	0	0	3	sì	
+.programmi/S1088-piano-sessione.md	superato	0	0	0	0	3	sì	
+.programmi/S1089-piano-sessione.md	superato	0	1	0	0	3	no	docs/kb/tools/programmi.py:81
+.programmi/S1090-piano-sessione.md	superato	1	2	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2083 docs/kb/tools/programmi.py:499 docs/kb/tools/programmi.py:503
+.programmi/S1091-piano-sessione.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2096
+.programmi/S1093-mandato-p1-p3-gated.md	superato	1	10	0	0	3	no	docs/kb/DEBT_REGISTER.md:140 .programmi/S1093-ricognizione-10-voci.json:29 .programmi/S1093-ricognizione-10-voci.json:32
+.programmi/S1093-ricognizione-10-voci-LEGGIMI.md	superato	0	0	0	0	3	sì	
+.programmi/S1093-tre-rimedi-instabilita.md	superato	0	0	0	0	3	sì	
+.programmi/S1095-mandato-p1-p3.md	superato	1	0	0	0	3	no	docs/kb/SOT_STATE.md:475
+.programmi/S1096-mandato-p1-p3-debiti-gated.md	superato	1	0	0	0	3	no	docs/kb/SOT_STATE.md:442
+.programmi/S1097-mandato-tutte-le-corsie.md	superato	1	0	0	0	3	no	docs/kb/SOT_STATE.md:401
+.programmi/S1098-mandato-p1-p3.md	superato	1	0	0	0	3	no	docs/kb/SOT_STATE.md:236
+.programmi/S1099-mandato-p1-p3.md	superato	1	0	0	0	3	no	docs/kb/SOT_STATE.md:336
+.programmi/S1100-mandato-cowork-250-240.md	superato	2	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2223 docs/kb/SOT_STATE.md:312
+.programmi/S1101-mandato-riallineamento-consolidato.md	superato	2	0	0	0	3	no	docs/kb/COWORK_INBOX.md:816 docs/kb/SOT_STATE.md:266
+.programmi/S1101b-mandato-contratto-shared.md	superato	2	0	0	0	3	no	docs/kb/COWORK_INBOX.md:828 docs/kb/SOT_STATE.md:291
+.programmi/Z251-contesa-database-suite.md	superato	0	0	0	0	3	sì	
+.programmi/consolidamento/02_ARCHITETTURA.md	da accorpare	3	0	0	0	0	no	.programmi/consolidamento/00_INDICE.md:16 docs/architecture/adr/0047_contratto_del_fascicolo.md:9
+.programmi/consolidamento/lavoro/A_contratto_gap.md	da accorpare	4	0	0	0	0	no	.programmi/consolidamento/00_INDICE.md:19 .programmi/consolidamento/01_RILIEVI.md:21
+.programmi/consolidamento/lavoro/B_capacita.md	da accorpare	3	0	0	0	0	no	.programmi/consolidamento/00_INDICE.md:20 .programmi/consolidamento/01_RILIEVI.md:5
+.programmi/consolidamento/lavoro/D_schede_riconciliazione.md	da accorpare	5	0	0	0	0	no	.programmi/consolidamento/00_INDICE.md:21 .programmi/consolidamento/01_RILIEVI.md:32
+.programmi/consolidamento/lavoro/F_webapp.md	da accorpare	1	0	0	0	0	no	docs/architecture/adr/0047_contratto_del_fascicolo.md:37
+.programmi/consolidamento/lavoro/G_revisione_indipendente.md	da accorpare	5	0	0	0	0	no	.programmi/consolidamento/00_INDICE.md:23 .programmi/consolidamento/00_INDICE.md:35
+.programmi/esiti-ciclo3/251.md	superato	2	0	0	0	1	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2287 docs/kb/SOT_STATE.md:132
+.programmi/esiti-ciclo3/252.md	superato	1	0	0	0	1	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2303
+.programmi/esiti-ciclo3/258.md	superato	1	0	0	0	1	no	docs/kb/SOT_STATE.md:167
+.programmi/esiti-ciclo4/253.md	superato	1	0	0	0	1	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2311
+.programmi/esiti-ciclo4/257-quinta-regola.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2338
+.programmi/esiti-ciclo4/261.md	superato	0	0	0	0	1	sì	
+.programmi/esiti-ciclo4/262.md	superato	1	0	0	0	1	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2253
+.programmi/esiti-onda0/CENSIMENTO_separazione.md	da accorpare	3	0	0	0	3	no	.programmi/onda2/O2-08_perimetro-ricerche-agente-liste.md:7 docs/architecture/adr/0043_separazione_dal_datastore.md:10
+.programmi/esiti-onda0/CONFRONTO_RTL_giunzione.md	da accorpare	0	0	0	0	3	sì	
+.programmi/esiti-onda0/PE-3.md	superato	1	0	0	0	1	no	docs/kb/SOT_BACKLOG.md:25
+.programmi/esiti-onda0/PE-4.md	superato	0	0	0	0	1	sì	
+.programmi/esiti-onda0/W0-A1.md	superato	5	0	0	0	1	no	.programmi/263-giunzione-pacchetto-datastore.md:5 .programmi/265-gerarchia-livelli-avviso.md:5
+.programmi/esiti-onda0/W0-A2.md	superato	1	0	0	0	1	no	docs/kb/SOT_STATE.md:396
+.programmi/esiti-onda0/W0-A3.md	superato	1	0	0	0	1	no	docs/kb/SOT_STATE.md:388
+.programmi/esiti-onda0/W0-D.md	da accorpare	2	0	0	0	1	no	.programmi/265-gerarchia-livelli-avviso.md:12 docs/kb/SOT_STATE.md:384
+.programmi/esiti-onda0/lavoro/partecipanti_misura_2_esito.txt	superato	0	0	0	0	3	sì	
+.programmi/esiti-onda0/lavoro/partecipanti_misura_3_esito.txt	superato	0	0	0	0	3	sì	
+.programmi/esiti-onda0/lavoro/partecipanti_misura_esito.txt	superato	0	0	0	0	3	sì	
+.programmi/esiti-regole/REGOLE.md	superato	1	0	0	0	1	no	docs/kb/SOT_STATE.md:36
+.programmi/mandati/K-mandato-v2.md	superato	6	6	0	0	3	no	docs/kb/COWORK_INBOX.md:848 docs/kb/COWORK_INBOX.md:870 .programmi/K-ruoli-direzione/tools/estrai_workflows.py:13 .programmi/K-ruoli-direzione/workflows/W1_indagini.js:10
+.programmi/mandati/S1083-corsa-integrale.md	superato	0	0	0	0	3	sì	
+.programmi/mandati/S1084-rossi-237-236.md	superato	0	0	0	0	3	sì	
+.programmi/mandati/mandato-S1067-batch-p1p2p3.md	superato	0	0	0	0	3	sì	
+.programmi/mandati/mandato-S1068-p3-p1-p2.md	superato	0	0	0	0	3	sì	
+.programmi/mandati/mandato-S1071-ciclo-p1.md	superato	0	0	0	0	3	sì	
+.programmi/mandati/mandato-S1073-prompt-ripresa.md	superato	0	0	0	0	3	sì	
+.programmi/mandati/mandato-S1074-prompt-ripresa.md	superato	0	0	0	0	3	sì	
+.programmi/mandati/mandato-S1077-corsa-autonoma.md	superato	0	0	0	0	3	sì	
+.programmi/mandati/mandato-consegne-lab-2026-08-16.md	superato	0	0	0	0	3	sì	
+.programmi/onda2/O2-01_contenuto-modello-v03.md	superato	1	0	0	0	3	no	.programmi/onda2/README.md:11
+.programmi/onda2/O2-02_caricatore-pacchetto-v03.md	superato	1	0	0	0	3	no	.programmi/onda2/README.md:12
+.programmi/onda2/O2-09_partecipazione-passo3a.md	superato	1	0	0	0	3	no	.programmi/onda2/README.md:19
+.programmi/onda2/O2-10_partecipazione-passo3b.md	superato	1	0	0	0	3	no	.programmi/onda2/README.md:20
+.programmi/onda2/PIANO_PE-6.1.md	superato	1	0	0	0	3	no	docs/kb/SOT_STATE.md:372
+.programmi/onda2/PIANO_passo3-partecipazione.md	superato	4	0	0	0	3	no	.programmi/onda2/README.md:5 docs/architecture/adr/0044_partecipazione_ai_processi_legata_alla_posizione.md:8
+.programmi/onda2/esiti/O2-01.md	superato	3	0	0	0	1	no	.programmi/271-onda2-advanced.md:10 .programmi/consolidamento/01_RILIEVI.md:57
+.programmi/onda2/esiti/O2-02.md	superato	2	0	0	0	1	no	.programmi/271-onda2-advanced.md:11 docs/kb/SOT_STATE.md:360
+.programmi/onda2/esiti/O2-02_prova.txt	superato	0	0	0	0	3	sì	
+.programmi/onda2/esiti/O2-09.md	superato	2	1	0	0	0	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2355 docs/archive/SOT_BACKLOG_CHIUSI.md:2359 cruscotto/stato.json:303
+.programmi/onda2/esiti/O2-09_confronto-attori.txt	superato	1	0	0	0	0	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2356
+.programmi/onda2/esiti/O2-10.md	superato	2	0	0	0	0	no	docs/architecture/adr/0044_partecipazione_ai_processi_legata_alla_posizione.md:8 docs/archive/SOT_BACKLOG_CHIUSI.md:2357
+.storia36/analysis/c2-macchina-stati.md	da accorpare	1	1	0	0	3	no	.storia36/PROGRESS.md:199 db/seeds/storia36/02_performance.sql:5
+.storia36/analysis/c2-misura.md	da accorpare	1	2	0	0	3	no	.storia36/PROGRESS.md:199 db/seeds/storia36/02_performance.sql:5 db/seeds/storia36/repair/2026-07-28_c2_legacy_oneshot.sql:3
+.storia36/analysis/c3-misura.md	da accorpare	1	1	0	0	3	no	.storia36/PROGRESS.md:195 db/seeds/storia36/03_compensation.sql:6
+.storia36/analysis/c4-codice.md	da accorpare	2	1	0	0	3	no	.storia36/PROGRESS.md:187 .storia36/PROGRESS.md:191 db/seeds/storia36/04_learning.sql:7
+.storia36/analysis/c4-misura.md	da accorpare	1	1	0	0	3	no	.storia36/PROGRESS.md:187 db/seeds/storia36/04_learning.sql:7
+.storia36/analysis/conventions.md	da accorpare	0	0	0	0	3	sì	
+.storia36/analysis/date-columns.md	da accorpare	1	2	0	0	3	no	.storia36/PROGRESS.md:227 db/scripts/verify-storia36.sql:4 db/scripts/verify-storia36.sql:80
+.storia36/analysis/dossier-derivation.txt	superato	0	0	0	0	3	sì	
+.storia36/analysis/fk-edges.txt	superato	0	0	0	0	3	sì	
+.storia36/analysis/shapes-g2-g4.md	da accorpare	0	0	0	0	3	sì	
+.storia36/baseline-20260727.txt	superato	1	0	0	0	3	no	.storia36/PROGRESS.md:224
+audit/FINDINGS.md	superato	1	0	0	0	1	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1576
+audit/FORENSIC-NOTES-S1006-cli.md	superato	3	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1576 docs/archive/SOT_BACKLOG_CHIUSI.md:1580
+cowork_code_exchange/.inbox/cli/pending/2026-05-25T00-07-39Z__025__prompt_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cli/read/2026-05-18T23-10-02Z__002__prompt_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cli/read/2026-05-19T02-57-15Z__002__approval_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cli/read/2026-05-19T13-09-31Z__002__review_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cli/read/2026-05-19T13-28-26Z__003__prompt_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cli/read/2026-05-19T14-02-10Z__003__plan_amendment_requested.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cli/read/2026-05-19T14-14-49Z__003__approval_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cli/read/2026-05-19T23-15-00Z__003__prompt_amended.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cli/read/2026-05-19T23-25-00Z__003__exec_directive_E1.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cli/read/2026-05-21T03-45-00Z__007__prompt_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cli/read/2026-05-21T11-39-00Z__008__prompt_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cli/read/2026-05-21T12-50-00Z__008__exec_directive_cw_b34.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cli/read/2026-05-21T13-55-00Z__011__prompt_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cli/read/2026-05-21T17-30-00Z__012__prompt_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cli/read/2026-05-21T20-40-00Z__013__prompt_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cli/read/2026-05-23T15-00-00Z__014__prompt_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cli/read/2026-05-23T17-45-00Z__015__prompt_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cli/read/2026-05-23T19-00-00Z__016__prompt_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cli/read/2026-05-24T14-26-07Z__022__prompt_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cli/read/2026-05-24T14-58-00Z__022__prompt_amended.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cli/read/2026-05-24T16-45-02Z__022__prompt_amended.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cli/read/2026-05-24T17-08-26Z__022__prompt_amended.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cli/read/2026-05-24T17-50-02Z__022__prompt_amended.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cli/read/2026-05-24T20-45-22Z__022__prompt_amended.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cli/read/2026-05-25T00-07-36Z__026__prompt_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cli/read/2026-05-25T00-07-37Z__023__prompt_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cli/read/2026-05-25T00-07-38Z__024__prompt_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cli/read/2026-05-25T02-37-27Z__024__prompt_amended.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-18T23-15-33Z__002__pending_applied.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-19T13-10-27Z__000__session_handoff.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-19T13-49-26Z__003__plan_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-19T14-11-02Z__003__plan_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-19T14-54-21Z__003__exec_progress.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-19T15-00-40Z__003__exec_progress.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-19T15-16-22Z__003__exec_progress.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-19T18-49-10Z__003__exec_progress.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-19T22-07-59Z__003__exec_progress.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-19T22-17-12Z__003__exec_progress.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-19T22-29-41Z__003__exec_progress.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-19T23-09-26Z__003__exec_progress.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-20T00-05-26Z__003__exec_progress.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-20T22-14-12Z__004__report_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-21T01-53-26Z__005__report_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-21T02-43-43Z__006__report_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-21T04-53-05Z__007__report_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-21T12-19-00Z__008_halt_adr_0016_unexpected_fail.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-21T12-24-57Z__008__report_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-21T13-11-49Z__009__report_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-21T14-04-34Z__010__report_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-21T16-44-41Z__011__report_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-21T19-20-05Z__012__report_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-23T14-19-00Z__013__report_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-23T16-16-00Z__014__report_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-23T18-21-38Z__015__report_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-23T19-04-31Z__016__report_ready.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-24T14-35-08Z__022__halt_npm_not_logged_in.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-24T14-43-30Z__022__halt_exports_map_subpath_gap.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-24T15-50-39Z__022__halt_publish_2fa_required.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-24T16-32-00Z__022__halt_dual_package_hazard.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-24T17-05-00Z__022__halt_cw_b57_misdiagnosis.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-24T17-25-00Z__022__halt_persistent_build_fail.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-24T18-32-00Z__022__halt_bisect_inconclusive.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/.inbox/cowork/read/2026-05-25T01-44-28Z__023__halt_engine_residual_6_targets.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/GOAL_B_REPORT_2026-05-18.md	superato	0	0	0	0	1	sì	
+cowork_code_exchange/MIGRATION_STATUS_2026-05-18.md	superato	1	0	0	0	1	no	qa_artifacts/dbms_health_2026-06-22/adr0026_audit_register.csv:17
+cowork_code_exchange/README.md	superato	2	8	0	0	1	no	.gitattributes:4 docs/archive/scripts-exhausted/cowork-exchange/hooks/pre-commit:6 docs/archive/scripts-exhausted/cowork-exchange/apply-pending.mjs:6 docs/archive/scripts-exhausted/cowork-exchange/inbox.mjs:5
+cowork_code_exchange/_00_ARCHIVE_READONLY_NOTICE.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_00_DISCOVERY_002_json-extract-lineage-fullscale.md	superato	0	1	0	0	6	no	docs/kb/tools/build_index.py:69
+cowork_code_exchange/_00_DISCOVERY_003_brownfield-seeding-complete.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_00_HANDOVER_CLI_2026-05-26_post_S937.md	superato	2	0	0	0	3	no	qa_artifacts/dbms_health_2026-06-22/adr0026_audit_register.csv:11 qa_artifacts/dbms_health_2026-06-22/adr0026_audit_register.csv:14
+cowork_code_exchange/_00_SESSION_HANDOFF_2026-05-18.md	superato	0	1	0	0	6	no	docs/kb/tools/build_index.py:70
+cowork_code_exchange/_00_SESSION_HANDOFF_2026-05-19.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_00_SESSION_HANDOFF_2026-05-20.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_00_STATE_001.md	superato	0	1	0	0	6	no	docs/kb/tools/build_index.py:71
+cowork_code_exchange/_00_STATE_002.md	superato	0	1	0	0	6	no	docs/kb/tools/build_index.py:72
+cowork_code_exchange/_00_STATE_003.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_01_PROMPT_001_audit_upsert_refactor.md	superato	0	1	0	0	6	no	docs/kb/tools/build_index.py:73
+cowork_code_exchange/_01_PROMPT_002_json-extract-lineage-fullscale.md	superato	0	2	0	0	6	no	docs/archive/scripts-exhausted/cowork-exchange/notify.mjs:24 docs/kb/tools/build_index.py:74
+cowork_code_exchange/_01_PROMPT_003_brownfield-seeding-complete.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_01_PROMPT_003_v1.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_01_PROMPT_003_v2.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_01_PROMPT_004_batch_x1.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_01_PROMPT_005_batch_x2.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_01_PROMPT_006_batch_x3.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_01_PROMPT_007_batch_x4.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_01_PROMPT_008_batch_x5.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_01_PROMPT_011_batch_x7.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_01_PROMPT_012_batch_x8.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_01_PROMPT_013_batch_x9.md	superato	0	1	0	0	3	no	docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave2/x9_block_bcd.sql:4
+cowork_code_exchange/_01_PROMPT_014_batch_x10.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_01_PROMPT_015_batch_x11.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_01_PROMPT_016_batch_x12.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_01_PROMPT_017_batch_x13.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_01_PROMPT_018_batch_x14.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_01_PROMPT_019_batch_x15.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_01_PROMPT_020_batch_x16.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_01_PROMPT_021_batch_x17.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_01_PROMPT_022.1_batch_x18_amendment.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_01_PROMPT_022.2_batch_x18_amendment.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_01_PROMPT_022.3_batch_x18_amendment.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_01_PROMPT_022.4_batch_x18_amendment.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_01_PROMPT_022.5_batch_x18_amendment.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_01_PROMPT_022_batch_x18.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_01_PROMPT_023_batch_x19_brownfield_wave1.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_01_PROMPT_024_batch_x20_mfa_login_gating.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_01_PROMPT_025_batch_x21_defer_f_showcase_fix.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_01_PROMPT_026_batch_x19a_dependabot_cve.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_01_PROMPT_027_s937_ck8_sdbi_phase2_kickoff.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_02_PLAN_001_audit_upsert_refactor.md	superato	0	1	0	0	6	no	docs/kb/tools/build_index.py:77
+cowork_code_exchange/_02_PLAN_001_v3-bis.md	superato	0	1	0	0	6	no	docs/kb/tools/build_index.py:78
+cowork_code_exchange/_02_PLAN_001_v4.md	superato	0	1	0	0	6	no	docs/kb/tools/build_index.py:79
+cowork_code_exchange/_02_PLAN_002_json-extract-lineage-fullscale.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_02_PLAN_003_brownfield-seeding-complete.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_02_PLAN_003_v1.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_02b_APPROVAL_001.md	superato	0	1	0	0	6	no	docs/kb/tools/build_index.py:75
+cowork_code_exchange/_02b_APPROVAL_001_v5.md	superato	0	1	0	0	6	no	docs/kb/tools/build_index.py:76
+cowork_code_exchange/_02b_APPROVAL_002.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_02b_APPROVAL_003.md	superato	0	0	0	1	3	no	db/migrations/000032_sys_activity_classifications_check_relax.sql:58
+cowork_code_exchange/_03_EXEC_001_audit_upsert_refactor.md	superato	0	1	0	0	6	no	docs/kb/tools/build_index.py:81
+cowork_code_exchange/_03_EXEC_001a_audit_upsert_refactor.md	superato	0	1	0	0	6	no	docs/kb/tools/build_index.py:80
+cowork_code_exchange/_03_EXEC_002_json-extract-lineage-fullscale.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_03_EXEC_003_CLASSB_FINDINGS_Item_F.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_03_EXEC_003_CLASSB_SEMANTIC_FAIL_Item_F.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_03_EXEC_003_CLASSB_SUBDISCOVERY_Item_F.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_03_EXEC_003_CLASSB_UQ_BLOCK_Item_F.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_03_EXEC_003_DIAGNOSTIC_REPORT_Item_F.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_03_EXEC_003_brownfield-seeding-complete.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_04_REPORT_001a_audit_upsert_refactor.md	superato	0	1	0	0	6	no	docs/kb/tools/build_index.py:82
+cowork_code_exchange/_04_REPORT_001a_interim.md	superato	0	1	0	0	6	no	docs/kb/tools/build_index.py:83
+cowork_code_exchange/_04_REPORT_002_json-extract-lineage-fullscale.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_04_REPORT_003_brownfield-seeding-complete.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_04_REPORT_004_batch_x1.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_04_REPORT_005_batch_x2.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_04_REPORT_006_batch_x3.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_04_REPORT_007_batch_x4.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_04_REPORT_008_batch_x5.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_04_REPORT_009_batch_x6a.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_04_REPORT_010_batch_x5b.md	superato	1	0	0	0	3	no	qa_artifacts/dbms_health_2026-06-22/adr0026_audit_register.csv:12
+cowork_code_exchange/_04_REPORT_011_batch_x7.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_04_REPORT_012_batch_x8.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_04_REPORT_013_batch_x9.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_04_REPORT_014_batch_x10.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_04_REPORT_015_batch_x11.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_04_REPORT_016_batch_x12.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_04_REPORT_017_batch_x13.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_04_REPORT_018_batch_x14.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_04_REPORT_019_batch_x15.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_04_REPORT_020_batch_x16.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_04_REPORT_021_batch_x17.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_04_REPORT_022_batch_x18.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_04_REPORT_023_batch_x19.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_04_REPORT_024_batch_x20.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_04_REPORT_026_batch_x19a.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_05_REVIEW_001a_audit_upsert_refactor.md	superato	0	1	0	0	6	no	docs/kb/tools/build_index.py:84
+cowork_code_exchange/_05_REVIEW_002_json-extract-lineage-fullscale.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_05_REVIEW_003_brownfield-seeding-complete.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_05_REVIEW_004_batch_x1.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_05_REVIEW_005_batch_x2.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_99_DB_INVENTORY_2026-05-20.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_99_archive_DRAFT_PROMPT_022_tappa_f.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_SKILL_UPDATE_MEMO.md	superato	0	2	0	0	6	no	docs/archive/scripts-exhausted/cowork-exchange/validate-naming.mjs:57 docs/kb/tools/build_index.py:85
+cowork_code_exchange/_templates/_00_DISCOVERY.template.md	superato	0	1	0	0	3	no	docs/archive/scripts-exhausted/cowork-exchange/new-goal.mjs:146
+cowork_code_exchange/_templates/_00_STATE.template.md	superato	0	1	0	0	3	no	docs/archive/scripts-exhausted/cowork-exchange/new-goal.mjs:145
+cowork_code_exchange/_templates/_01_PROMPT.template.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_templates/_02_PLAN.template.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_templates/_02b_APPROVAL.template.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_templates/_03_EXEC.template.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_templates/_04_REPORT.template.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/_templates/_05_REVIEW.template.md	superato	0	0	0	0	3	sì	
+cowork_code_exchange/baselines/001-db-state-20260518_1710.txt	superato	0	1	0	0	6	no	docs/kb/tools/build_index.py:43
+cowork_code_exchange/baselines/001-source-shas-20260518_1710.txt	superato	0	1	0	0	6	no	docs/kb/tools/build_index.py:44
+cowork_code_exchange/baselines/B2_post_state_20260518_175146.txt	superato	0	0	0	0	3	sì	
+cowork_code_exchange/baselines/B2_post_state_20260518_175404.txt	superato	0	0	0	0	3	sì	
+cowork_code_exchange/baselines/B2_pre_state_20260518_175146.txt	superato	0	0	0	0	3	sì	
+cowork_code_exchange/baselines/B2_v4_post_state_20260518_185032.txt	superato	0	0	0	0	3	sì	
+cowork_code_exchange/baselines/B2_v4_pre_state_20260518_185032.txt	superato	0	0	0	0	3	sì	
+cowork_code_exchange/baselines/B4_audit_lineage_state_20260518_180107.txt	superato	0	0	0	0	3	sì	
+cowork_code_exchange/baselines/B6_explain_baseline_20260518_180301.txt	superato	0	0	0	0	3	sì	
+cowork_code_exchange/baselines/INDEX.md	superato	0	0	0	0	1	sì	
+cowork_code_exchange/cli-prompt.md	superato	1	0	0	0	3	no	docs/kb/COWORK_INBOX.md:208
+cowork_reserved/00_README_KB.md	superato	1	0	0	0	3	no	qa_artifacts/dbms_health_2026-06-22/adr0026_audit_register.csv:13
+cowork_reserved/01_DB_PLATFORM_INVENTORY.md	superato	0	0	0	0	3	sì	
+cowork_reserved/02a_ADV_SYS.md	superato	0	2	0	1	3	no	cowork_reserved/batch_c1/goals_pilot/migrations/000035_sys_goals_okrs_scaffold.sql:19 cowork_reserved/batch_c1/goals_pilot/migrations/000037_sys_goals_okrs_scaffold.sql:19 db/migrations/000037_sys_goals_okrs_scaffold.sql:19
+cowork_reserved/02b_ADV_LEGACY_MIRROR.md	superato	0	0	0	0	3	sì	
+cowork_reserved/02c_ADV_STAGING.md	superato	0	0	0	0	3	sì	
+cowork_reserved/02d_ADV_BROWNFIELD.md	superato	0	0	0	0	3	sì	
+cowork_reserved/02e_ADV_AUDIT.md	superato	0	0	0	0	3	sì	
+cowork_reserved/02f_ADV_PUBLIC.md	superato	0	0	0	0	3	sì	
+cowork_reserved/04_MIGRATIONS_TIMELINE.md	superato	0	0	0	0	3	sì	
+cowork_reserved/05_EXTRACT_SCRIPTS_FORENSIC.md	superato	0	0	0	0	3	sì	
+cowork_reserved/06_BROWNFIELD_REGISTRY_DEEP_DIVE.md	superato	0	0	0	0	3	sì	
+cowork_reserved/07_TRANSFORM_COMPILER_ANALYSIS.md	superato	0	0	0	0	3	sì	
+cowork_reserved/08_AUDIT_TRAIL_ANALYSIS.md	superato	0	0	0	0	3	sì	
+cowork_reserved/09_LEXICON_DOMAINS_MAPPING.md	superato	0	0	0	0	3	sì	
+cowork_reserved/10_GAPS_ANALYSIS.md	superato	0	0	0	0	3	sì	
+cowork_reserved/11_STRATEGIC_REFORMULATION.md	superato	1	0	0	0	3	no	qa_artifacts/dbms_health_2026-06-22/adr0026_audit_register.csv:13
+cowork_reserved/12_TODO_LIST_GRANULARE.md	superato	1	0	0	0	3	no	qa_artifacts/dbms_health_2026-06-22/adr0026_audit_register.csv:13
+cowork_reserved/COWORK_CLI_PROMPT_PATTERN.md	superato	0	0	0	0	3	sì	
+cowork_reserved/HANDOFF_FRESH_SESSION.md	superato	0	4	0	0	3	no	cowork_reserved/auto-ship/run-all-s935.ps1:329 cowork_reserved/auto-ship/run-all-s935.ps1:461
+cowork_reserved/MANDATORY_TOOL_PRELOAD_block_to_append.txt	superato	0	0	0	0	3	sì	
+cowork_reserved/PREFERENCES_BLOCK_to_paste.txt	superato	0	0	0	0	3	sì	
+cowork_reserved/PREFERENCES_v5_FINAL.txt	superato	0	0	0	0	3	sì	
+cowork_reserved/_ARCHIVE_READONLY.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c1/C1_4_MIRROR_GAP_fix_report.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c1/P5_heuresys_test_decision.md	superato	1	0	0	0	3	no	qa_artifacts/dbms_health_2026-06-22/adr0026_audit_register.csv:13
+cowork_reserved/batch_c1/class_b_diagnostics/00_SUMMARY.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c1/class_b_diagnostics/sys_blueprint_overrides.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c1/class_b_diagnostics/sys_esco_occupation_mappings.md	superato	0	4	0	0	3	no	cowork_reserved/batch_c2/cascade_fixes/02_sys_esco_occupation_mappings_fix.sql:49 cowork_reserved/batch_c2/cascade_fixes/02_sys_esco_occupation_mappings_fix.sql:7
+cowork_reserved/batch_c1/class_b_diagnostics/sys_job_families.md	superato	0	2	0	1	3	no	docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave1/05_job_families_registry.sql:20 docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave1/05_job_families_registry.sql:4 db/migrations/000034_add_wave1_job_families_staging.sql:17
+cowork_reserved/batch_c1/class_b_diagnostics/sys_job_roles.md	superato	0	2	0	0	3	no	cowork_reserved/batch_c2/cascade_fixes/01_sys_job_roles_mapping_fix.sql:7 docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave2/cascade_fixes/01_sys_job_roles_mapping_fix.sql:6
+cowork_reserved/batch_c1/class_b_diagnostics/sys_learning_path_steps.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c1/class_b_diagnostics/sys_position_learning_requirements.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c1/class_b_diagnostics/sys_position_skill_requirements.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c1/class_b_diagnostics/sys_process_kpi_templates.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c1/class_b_diagnostics/sys_skill_aliases.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c1/class_b_diagnostics/sys_skill_categories.md	superato	0	2	0	0	3	no	cowork_reserved/batch_c2/cascade_fixes/03_sys_skill_categories_fix.sql:7 docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave2/cascade_fixes/03_sys_skill_categories_fix.sql:6
+cowork_reserved/batch_c1/class_b_diagnostics/sys_skill_learning_mappings.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c1/class_b_diagnostics/sys_skill_taxonomy_edges.md	superato	0	2	0	0	3	no	cowork_reserved/batch_c2/cascade_fixes/04_sys_skill_taxonomy_edges_fix.sql:8 docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave2/cascade_fixes/04_sys_skill_taxonomy_edges_fix.sql:7
+cowork_reserved/batch_c1/cw_b17_patches/CW_B17_PATCH_SPEC.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c1/goals_pilot/00_README_GOALS_PILOT.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c1/goals_pilot/01_SOURCE_DISCOVERY.md	superato	0	0	0	0	1	sì	
+cowork_reserved/batch_c1/goals_pilot/02_TARGET_SCHEMA_PROPOSAL.md	superato	0	2	0	1	1	no	cowork_reserved/batch_c1/goals_pilot/migrations/000035_sys_goals_okrs_scaffold.sql:5 cowork_reserved/batch_c1/goals_pilot/migrations/000037_sys_goals_okrs_scaffold.sql:5 db/migrations/000037_sys_goals_okrs_scaffold.sql:5
+cowork_reserved/batch_c1/goals_pilot/04_PHASE3_TEMP_SDBI_DDL.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c1/goals_pilot/05_PHASE5_CONSOLIDATION_PLAN.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c1/goals_pilot/mapping_cards/goal_alignments_sys_goal_alignments.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c1/goals_pilot/mapping_cards/goal_check_ins_sys_goal_check_ins.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c1/goals_pilot/mapping_cards/goal_comments_sys_goal_comments.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c1/goals_pilot/mapping_cards/goal_milestones_sys_goal_milestones.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c1/goals_pilot/mapping_cards/goal_templates_sys_goal_templates.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c1/goals_pilot/mapping_cards/goal_updates_sys_goal_updates.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c1/goals_pilot/mapping_cards/goals_sys_goals.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c1/goals_pilot/mapping_cards/key_results_sys_okr_key_results.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c1/goals_pilot/mapping_cards/okr_check_ins_AND_okr_checkins_sys_okr_check_ins.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c1/goals_pilot/mapping_cards/okrs_sys_okrs.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c10/forensic_cw_b49/01_CW_B49_ROOT_CAUSE.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c10/loop_watchdog/01_LOOP_WATCHDOG_PROMPT.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c12/01_STRATEGIC_ANALYSIS.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c2/cascade_fixes/00_README_CASCADE_FIXES.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c2/engine_patches/00_README_ENGINE_PATCHES.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c2/engine_patches/CW_B22_PATCH_SPEC.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c2/engine_patches/CW_B23_PATCH_SPEC.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c2/engine_patches/CW_B24_PATCH_SPEC.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c3/sdbi_scale/00_MASTER_INDEX.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c3/sdbi_scale/01_PerformanceReviews.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c3/sdbi_scale/02_RecruitingHiring.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c3/sdbi_scale/03_OnboardingPreboarding.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c3/sdbi_scale/04_SurveysEngagementWellbeing.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c3/sdbi_scale/05_TimeLeaveAttendance.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c3/sdbi_scale/06_FeedbackSystems.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c3/sdbi_scale/07_Mentorship.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c3/sdbi_scale/08_PredictionsML.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c3/sdbi_scale/09_CompensationExt.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c3/sdbi_scale/10_DocumentsSignatures.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c3/sdbi_scale/11_TalentPoolExt.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c4/cross_os_fixes/README.md	superato	0	0	0	0	1	sì	
+cowork_reserved/batch_c4/esco_cascade/02_sys_esco_occupation_mappings_RETRY.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c4/investigations/01_job_templates_failure_root_cause.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c4/sys_users_sdbi/00_README_SYS_USERS_SDBI.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c4/sys_users_sdbi/01_SOURCE_ANALYSIS.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c4/sys_users_sdbi/02_MAPPING_STRATEGY.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c4/sys_users_sdbi/03_PHASE3_TEMP_SDBI_DDL.md	superato	0	0	0	0	1	sì	
+cowork_reserved/batch_c4/sys_users_sdbi/04_PHASE5_CONSOLIDATION_PLAN.md	superato	0	0	0	0	1	sì	
+cowork_reserved/batch_c4/time_leave_pilot/00_README_TIME_LEAVE_PILOT.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c4/time_leave_pilot/01_SOURCE_DISCOVERY.md	superato	0	0	0	0	1	sì	
+cowork_reserved/batch_c4/time_leave_pilot/02_TARGET_SCHEMA_PROPOSAL.md	superato	0	1	0	1	1	no	cowork_reserved/batch_c4/time_leave_pilot/migrations/000040_sys_time_leave_scaffold.sql:5 db/migrations/000040_sys_time_leave_scaffold.sql:5
+cowork_reserved/batch_c4/time_leave_pilot/03_PHASE3_TEMP_SDBI_DDL.md	superato	0	0	0	0	1	sì	
+cowork_reserved/batch_c4/time_leave_pilot/04_PHASE5_CONSOLIDATION_PLAN.md	superato	0	0	0	0	1	sì	
+cowork_reserved/batch_c4/time_leave_pilot/mapping_cards/employee_attendance__sys_attendance.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c4/time_leave_pilot/mapping_cards/employee_overtime__sys_overtime.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c4/time_leave_pilot/mapping_cards/employee_time_off_balances__sys_time_off_balances.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c5/enum_fix/CW_B32_PATCH_SPEC.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c5/x4b_retrigger/README.md	superato	0	0	0	0	1	sì	
+cowork_reserved/batch_c6/cw_b34_engine_patch/CW_B34_PATCH_SPEC.md	superato	2	0	0	0	3	no	docs/architecture/adr/0016_sys_esco_occupation_mappings_nullable_job_role_fk.md:230 docs/architecture/adr/0016_sys_esco_occupation_mappings_nullable_job_role_fk.md:6
+cowork_reserved/batch_c7/forensic_cw_b35/01_CW_B35_FORENSIC.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c7/forensic_cw_b36/01_CW_B36_FORENSIC.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c7/forensic_cw_b37/01_CW_B37_FORENSIC.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c8/cw_b38_generalization/01_CW_B38_GENERALIZATION_SPEC.md	superato	0	0	0	0	3	sì	
+cowork_reserved/batch_c8/cw_b39_forensic/01_CW_B39_FORENSIC.md	superato	0	1	0	0	3	no	docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave2/cw_b39_fix/01_learning_path_steps_reclassify.sql:7
+cowork_reserved/batch_c9/adr_0017_lookup_fk_2hop/01_ADR_0017_SPEC.md	superato	0	0	0	1	3	no	db/migrations/000043_lookup_fk_2hop_validator.sql:10
+cowork_reserved/batch_c9/cw_b35_phase_bc/01_FORENSIC.md	superato	0	1	0	0	1	no	docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave2/x9_block_bcd.sql:6
+cowork_reserved/batch_c9/sys_learning_modules_forensic/01_FORENSIC.md	superato	0	1	0	0	1	no	docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave2/x9_block_bcd.sql:5
+cowork_reserved/bias_registry.md	da accorpare	4	4	0	0	3	no	docs/kb/DEBT_REGISTER.md:25 docs/kb/SOT_BACKLOG.md:1156 cowork_reserved/auto-ship/run-all-s935.ps1:324 cowork_reserved/auto-ship/run-all-s935.ps1:460
+db/scripts/_lib/README.md	superato	0	0	0	0	1	sì	
+db/seeds/rtl-rebuild/README.md	superato	1	0	0	0	1	no	docs/architecture/adr/0024_legacy_ingestion_employee_centric.md:84
+docs/A11Y_AUDIT_TIER7_2026-05-20.md	superato	0	1	0	0	3	no	apps/web/tests/e2e/showcase-a11y.spec.ts:4
+docs/BOOTSTRAP_EXECUTION_PLAN.md	da accorpare	14	0	0	0	3	no	README.md:93 db/scripts/README.md:132
+docs/BRAND_V1_DEFERRED_REFINEMENTS.md	superato	0	0	0	0	3	sì	
+docs/api/MVP_2A_API_GAP_AUDIT.md	superato	1	0	0	0	3	no	README.md:95
+docs/architecture/adr/0012_brownfield_table_mapping_wave_column.md	superato	0	0	0	1	4	no	db/migrations/000029_brownfield_table_mapping_wave.sql:9
+docs/architecture/adr/0014_sdbi_semantic_driven_brownfield_import.md	superato	0	0	0	0	4	sì	
+docs/architecture/adr/0017_lookup_fk_2hop_transform.md	superato	0	0	0	0	4	sì	
+docs/architecture/adr/0018_coalesce_uq_class_of_bug.md	superato	0	0	0	0	4	sì	
+docs/architecture/adr/0020_wave2_scope_application_level_targets.md	superato	0	1	0	1	4	no	cowork_reserved/auto-ship/run-all-s935.ps1:366 db/migrations/000044_cw_b60_b_reclassify_application_level_targets.sql:55
+docs/architecture/adr/0023_data_source_doctrine.md	superato	0	0	0	0	4	sì	
+docs/architecture/adr/0027_two_axis_contextual_authorization.md	superato	1	0	0	0	4	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1442
+docs/archive/API_IMPLEMENTATION_PLAN.md	superato	16	0	0	0	3	no	.claude/rules/api-module-pattern.md:27 AGENTS.md:132
+docs/archive/BRAND_SESSION_CHARTER.md	superato	0	1	0	0	3	no	docs/kb/tools/atlas-sweep-templates/fragments_s1016/wiki.yaml:63
+docs/archive/FRONTEND_IMPLEMENTATION_PLAN.md	superato	10	0	0	0	3	no	README.md:97 docs/architecture/adr/0001_monorepo_tool_pnpm.md:61
+docs/archive/GOAL_B_REPORT_2026-05-18.md	superato	0	0	0	0	1	sì	
+docs/archive/HANDOFF.md	superato	0	1	0	0	1	no	docs/kb/tools/build_index.py:165
+docs/archive/HANDOFF_BRAND.md	superato	0	0	0	0	3	sì	
+docs/archive/HANDOFF_S1068.md	superato	0	0	0	0	3	sì	
+docs/archive/MANDATO_AUTOCOSCIENZA_S1063.md	superato	2	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:478 docs/kb/SOT_STATE.md:1626
+docs/archive/MIGRATION_IMPLEMENTATION_PLAN.md	superato	6	0	0	0	4	no	docs/architecture/adr/0001_monorepo_tool_pnpm.md:61 docs/architecture/adr/0003_db_access_drizzle_plus_raw_sql.md:44
+docs/archive/MIGRATION_STATUS_2026-05-18.md	superato	1	0	0	0	1	no	qa_artifacts/dbms_health_2026-06-22/adr0026_audit_register.csv:17
+docs/archive/MVP_4_ROADMAP.md	superato	8	3	0	0	3	no	.programmi/76-verifica-piano-zero-pendenze.md:42 docs/archive/SOT_BACKLOG_CHIUSI.md:2232 cowork_reserved/auto-ship/run-all-s935.ps1:369 cowork_reserved/auto-ship/run-all-s935.ps1:470
+docs/archive/NEXT_GENERATION_ENTRY_POINT.md	superato	1	0	0	0	3	no	qa_artifacts/v1.0.0_release_notes.md:37
+docs/archive/NEXT_SESSION_MVP_2A.md	da accorpare	8	1	0	0	3	no	.claude/rules/frontend-live-data.md:16 AGENTS.md:234 db/seeds/rtl-rebuild/10_rebuild_derived.sql:4
+docs/archive/NEXT_SESSION_MVP_CLOSURE.md	superato	0	0	0	0	3	sì	
+docs/archive/SHOWCASE_AUDIT_2026-05-20.md	superato	1	0	0	0	3	no	docs/superpowers/specs/2026-07-25-zero-pending-plan.md:779
+docs/archive/START_HERE.md	superato	1	0	0	0	6	no	docs/kb/DEBT_REGISTER.md:139
+docs/archive/cw-b59-true-root-cause-2026-05-26.md	superato	0	3	0	0	3	no	cowork_reserved/auto-ship/run-all-s935.ps1:237 cowork_reserved/auto-ship/run-all-s935.ps1:383
+docs/archive/etl-brownfield-ritirato/SDBI_RUNBOOK.md	superato	1	0	0	0	3	no	docs/archive/etl-brownfield-ritirato/README.md:31
+docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/wave1/04_column_mappings_report.md	superato	0	2	0	0	3	no	docs/archive/etl-brownfield-ritirato/scripts/generate_wave1_column_mappings.mjs:23 docs/archive/etl-brownfield-ritirato/scripts/generate_wave1_column_mappings.mjs:38
+docs/archive/etl-brownfield-ritirato/seeds-sdbi-template-tree/README.md	superato	0	0	0	0	1	sì	
+docs/archive/etl-brownfield-ritirato/seeds-sdbi-template-tree/mapping_card.template.md	superato	0	0	0	0	3	sì	
+docs/archive/heuresys-advanced-bootstrap-vm.md	superato	0	0	0	0	3	sì	
+docs/archive/modalita-gov-ritirata/2026-08-09-gov-analisi-sicurezza-e-remediation.md	superato	0	0	0	0	3	sì	
+docs/archive/modalita-gov-ritirata/2026-08-09-gov-fase2-governo-dei-lavoratori.md	superato	0	0	0	0	3	sì	
+docs/archive/modalita-gov-ritirata/2026-08-09-modalita-gov.md	superato	2	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:617 docs/archive/SOT_BACKLOG_CHIUSI.md:624
+docs/archive/modalita-gov-ritirata/2026-08-09-plancia-gov.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:632
+docs/archive/modalita-gov-ritirata/2026-08-10-corsa-181-sequenza-prevista.md	superato	0	0	0	0	3	sì	
+docs/archive/modalita-gov-ritirata/2026-08-10-ritiro-modalita-gov.md	superato	0	0	0	0	3	sì	
+docs/archive/piani-sessione/S1092-mandato-p1-p3.md	superato	0	0	0	0	3	sì	
+docs/archive/scripts-exhausted/README.md	superato	0	0	0	0	1	sì	
+docs/brownfield/BROWNFIELD_ADAPTATION_MAP.md	superato	5	3	0	0	3	no	docs/architecture/adr/0024_legacy_ingestion_employee_centric.md:70 docs/architecture/adr/0024_legacy_ingestion_employee_centric.md:83 docs/archive/etl-brownfield-ritirato/scripts/generate_wave1_seeds.mjs:11 docs/archive/etl-brownfield-ritirato/scripts/generate_wave1_seeds.mjs:43
+docs/brownfield/BROWNFIELD_EXCLUSION_REPORT.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2115
+docs/brownfield/BROWNFIELD_IMPORT_PLAN.md	superato	9	98	0	2	3	no	AGENTS.md:207 docs/architecture/adr/0004_no_docker_native_postgresql.md:74 docs/archive/etl-brownfield-ritirato/scripts/brownfield-wave-1-preflight.sh:15 docs/archive/etl-brownfield-ritirato/scripts/generate_wave1_seeds.mjs:454 db/migrations/000029_brownfield_table_mapping_wave.sql:28 db/migrations/000029_brownfield_table_mapping_wave.sql:56
+docs/brownfield/BROWNFIELD_TABLE_CLASSIFICATION_REPORT.md	superato	0	0	0	0	3	sì	
+docs/brownfield/ENGINE_STATUS.md	superato	2	0	0	0	3	no	docs/kb/DEBT_REGISTER.md:172 docs/kb/SOT_STATE.md:2928
+docs/brownfield/WAVE_1_EXECUTION_RUNBOOK.md	superato	0	0	0	1	3	no	db/migrations/000029_brownfield_table_mapping_wave.sql:14
+docs/brownfield/wave_runners/wave_2_runner.md	superato	0	0	0	0	3	sì	
+docs/brownfield/wave_runners/wave_3_runner.md	superato	0	0	0	0	3	sì	
+docs/brownfield/wave_runners/wave_4_runner.md	superato	0	0	0	0	3	sì	
+docs/due-diligence/00_CHARTER.md	superato	0	0	0	0	3	sì	
+docs/due-diligence/01_DISCOVERY.md	superato	2	0	0	0	3	no	.programmi/76-verifica-piano-zero-pendenze.md:213 docs/superpowers/specs/2026-07-25-zero-pending-plan.md:996
+docs/due-diligence/SCORECARD_ACQUIRER_RUTHLESS.md	superato	3	0	0	0	3	no	.programmi/76-verifica-piano-zero-pendenze.md:212 docs/kb/COWORK_INBOX.md:148
+docs/due-diligence/workstreams/WS-P1.md	superato	0	0	0	0	1	sì	
+docs/due-diligence/workstreams/WS-P2.md	superato	0	0	0	0	1	sì	
+docs/due-diligence/workstreams/WS-T1.md	superato	0	0	0	0	1	sì	
+docs/due-diligence/workstreams/WS-T2.md	superato	0	0	0	0	1	sì	
+docs/due-diligence/workstreams/WS-T3.md	superato	0	0	0	0	1	sì	
+docs/due-diligence/workstreams/WS-T4.md	superato	0	0	0	0	1	sì	
+docs/due-diligence/workstreams/WS-T5.md	superato	0	0	0	0	1	sì	
+docs/due-diligence/workstreams/WS-T6.md	superato	0	0	0	0	1	sì	
+docs/due-diligence/workstreams/WS-T8.md	superato	0	0	0	0	1	sì	
+docs/due-diligence/workstreams/WS-T9.md	superato	0	0	0	0	1	sì	
+docs/due-diligence/workstreams/WS-X1.md	superato	0	0	0	0	1	sì	
+docs/due-diligence/workstreams/WS-X2.md	superato	0	0	0	0	1	sì	
+docs/due-diligence/workstreams/WS-X3.md	superato	0	0	0	0	1	sì	
+docs/github/07-nostri-repo/01-stato-corrente.md	superato	8	0	0	0	3	no	docs/github/06-tooling/01-gh-cli.md:77 docs/github/07-nostri-repo/02-heuresys-advanced.md:242
+docs/integrations/agent_sdk_mcp_integration_plan_2026-06-15.md	superato	7	1	0	1	3	no	apps/agent-gateway/README.md:7 docs/kb/COWORK_INBOX.md:63 apps/agent-gateway/src/sdk-agent.ts:7 db/migrations/000116_mfa_exemptions.sql:7
+docs/integrations/tenant_onboarding_esco_01_coherence_report_2026-06-15.md	superato	1	0	0	0	3	no	docs/kb/DEBT_REGISTER.md:79
+docs/integrations/tenant_onboarding_esco_02_dbms_population_todo_2026-06-15.md	superato	0	0	0	0	3	sì	
+docs/integrations/tenant_onboarding_esco_03_esco_population_spec_2026-06-15.md	superato	0	0	0	1	3	no	db/migrations/000123_occupation_skill_requirements.sql:4
+docs/integrations/tenant_onboarding_esco_04_tenant_onboarding_spec_2026-06-15.md	superato	0	0	0	1	3	no	db/migrations/000119_enterprise_typing_test_tenants.sql:51
+docs/kb/NEXT_SESSION_DB_FRONTEND_FORENSICS_KICKOFF.md	superato	2	1	0	0	3	no	docs/architecture/adr/0029_reference_data_i18n_translations_table.md:4 docs/kb/SOT_STATE.md:2928 apps/web/tests/e2e/f4-sweep.spec.ts:5
+docs/kb/NEXT_SESSION_EPICS_KICKOFF.md	superato	1	0	0	0	3	no	docs/superpowers/specs/2026-07-25-zero-pending-plan.md:255
+docs/kb/NEXT_SESSION_FORENSIC_KICKOFF.md	superato	1	0	0	0	3	no	docs/kb/SOT_STATE.md:2952
+docs/kb/db-forensics/F2_DB_CENSUS_2026-07-21.md	superato	1	0	0	1	3	no	docs/architecture/adr/0029_reference_data_i18n_translations_table.md:4 db/migrations/000188_f2_db_hygiene.sql:8
+docs/kb/db-forensics/F3_SEMANTIC_COHERENCE_2026-07-21.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1521
+docs/kb/db-forensics/USER_ROLE_COHERENCE_2026-07-22.md	superato	4	1	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1532 docs/archive/SOT_BACKLOG_CHIUSI.md:1536 db/seeds/rtl-banking-skills/seed_residual_user_coherence.sql:19
+docs/kb/frontend-forensics/F4_SURFACE_CENSUS_2026-07-22.md	superato	2	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1516 docs/kb/SOT_STATE.md:2920
+docs/kb/full-forensic-audit/AUDIT_FORENSE_heuresys_2026-07-03_151241.md	superato	1	0	0	0	3	no	docs/kb/full-forensic-audit/INDEX.md:25
+docs/kb/full-forensic-audit/AUDIT_FORENSE_heuresys_2026-07-20_022239.md	superato	2	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1466 docs/kb/full-forensic-audit/INDEX.md:39
+docs/kb/full-forensic-audit/FP_CHECK_VERIFICATION_2026-07-03_151241.md	superato	1	0	0	0	3	no	docs/kb/full-forensic-audit/INDEX.md:25
+docs/kb/improvement/2026-06-13_heuresys-advanced-100x-kickoff-prompt.md	superato	1	0	0	0	3	no	docs/kb/SOT_BACKLOG.md:817
+docs/kb/improvement/AUDIT_PROTOCOL.md	superato	2	0	0	0	3	no	docs/kb/SOT_BACKLOG.md:817 docs/kb/SOT_STATE.md:3375
+docs/kb/improvement/BASELINE_METRICS.md	superato	2	0	0	0	3	no	docs/kb/SOT_BACKLOG.md:817 docs/kb/SOT_STATE.md:3375
+docs/kb/improvement/DOSSIERS/D-01.md	superato	0	0	0	0	1	sì	
+docs/kb/improvement/DOSSIERS/D-02.md	superato	0	0	0	0	1	sì	
+docs/kb/improvement/DOSSIERS/D-03.md	superato	0	0	0	0	1	sì	
+docs/kb/improvement/DOSSIERS/D-04.md	superato	0	0	0	0	1	sì	
+docs/kb/improvement/DOSSIERS/D-05.md	superato	1	0	0	0	1	no	qa_artifacts/dbms_health_2026-06-22/adr0026_audit_register.csv:16
+docs/kb/improvement/DOSSIERS/D-06.md	superato	0	0	0	0	1	sì	
+docs/kb/improvement/DOSSIERS/D-07.md	superato	0	0	0	0	1	sì	
+docs/kb/improvement/DOSSIERS/D-08.md	superato	0	0	0	0	1	sì	
+docs/kb/improvement/DOSSIERS/D-09.md	superato	0	0	0	0	1	sì	
+docs/kb/improvement/DOSSIERS/D-10.md	superato	0	0	0	0	1	sì	
+docs/kb/improvement/DOSSIERS/D-11.md	superato	1	0	0	0	1	no	qa_artifacts/dbms_health_2026-06-22/adr0026_audit_register.csv:9
+docs/kb/improvement/DOSSIERS/D-12.md	superato	0	0	0	0	1	sì	
+docs/kb/improvement/DOSSIERS/D-13.md	superato	0	0	0	0	1	sì	
+docs/kb/improvement/DOSSIERS/D-14.md	superato	2	0	0	0	1	no	qa_artifacts/dbms_health_2026-06-22/adr0026_audit_register.csv:5 qa_artifacts/dbms_health_2026-06-22/adr0026_audit_register.csv:8
+docs/kb/improvement/DOSSIERS/README.md	superato	0	0	0	0	1	sì	
+docs/kb/improvement/DOSSIERS_TRIAGE_S1022.md	da accorpare	2	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1463 docs/kb/SOT_STATE.md:2939
+docs/kb/improvement/EPICS_SPEC_S1022.md	superato	2	0	0	0	3	no	docs/architecture/adr/0028_ci_enforcement_at_deploy_gate.md:4 docs/kb/SOT_STATE.md:2940
+docs/kb/improvement/FINDINGS/README.md	superato	0	0	0	0	1	sì	
+docs/kb/improvement/FINDINGS/S-100X-0_recon.md	superato	1	0	0	0	3	no	docs/kb/SOT_STATE.md:3375
+docs/kb/improvement/FINDINGS/WS-A.md	superato	0	0	0	0	1	sì	
+docs/kb/improvement/FINDINGS/WS-B.md	superato	0	0	0	0	1	sì	
+docs/kb/improvement/FINDINGS/WS-C.md	superato	0	0	0	0	1	sì	
+docs/kb/improvement/FINDINGS/WS-D.md	superato	0	0	0	0	1	sì	
+docs/kb/improvement/FINDINGS/WS-E.md	superato	0	0	0	0	1	sì	
+docs/kb/improvement/FINDINGS/WS-F.md	superato	0	0	0	0	1	sì	
+docs/kb/improvement/FINDINGS/WS-G.md	superato	0	0	0	0	1	sì	
+docs/kb/improvement/FINDINGS/WS-H.md	superato	0	0	0	0	1	sì	
+docs/kb/improvement/FINDINGS/WS-I.md	superato	0	0	0	0	1	sì	
+docs/kb/improvement/FINDINGS/WS-J.md	superato	0	0	0	0	1	sì	
+docs/kb/improvement/FINDINGS/WS-K.md	superato	0	0	0	0	1	sì	
+docs/kb/improvement/INTERVIEW_LOG.md	superato	3	0	0	0	3	no	docs/kb/SOT_BACKLOG.md:817 docs/kb/SOT_STATE.md:3375
+docs/kb/improvement/MASTER_PLAN_100X.md	superato	3	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1461 docs/kb/SOT_BACKLOG.md:817
+docs/kb/improvement/TODO_100X.md	superato	9	0	0	0	3	no	.programmi/76-verifica-piano-zero-pendenze.md:37 .programmi/76-verifica-piano-zero-pendenze.md:78
+docs/kb/improvement/WS-L_PLAN.md	superato	2	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1463 docs/kb/SOT_STATE.md:2939
+docs/kb/improvement/WS-L_TODO.md	superato	2	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1463 docs/kb/SOT_STATE.md:2939
+docs/kb/tools/atlas-sweep-templates/sweep_digest_s1016.md	superato	0	0	0	0	3	sì	
+docs/kb/xtras/B50_DEFER_UNBLOCK_PACKAGE.md	superato	2	3	0	1	3	no	docs/kb/SOT_BACKLOG.md:1122 docs/kb/SOT_STATE.md:3336 apps/api/test/reconciliation-wave2-succession-branches.integration.test.ts:9 db/seeds/reconciliation/49_succession_pools_candidates.sql:2 db/migrations/000106_wave2_succession_branches_close.sql:6
+docs/kb/xtras/C3_REFERTO_perimetro_dashboard_20260910.md	superato	1	0	0	1	3	no	docs/kb/SOT_STATE.md:537 db/migrations/000403_un_cruscotto_di_sola_piattaforma_non_entra_nel_profilo_di_un_cliente.sql:13
+docs/kb/xtras/COWORK_ARCHIVE_NOTE.md	superato	7	0	0	0	3	no	docs/kb/COWORK_INBOX.md:6 docs/kb/DEBT_REGISTER.md:17
+docs/kb/xtras/D4_ORG_UNIT_TEMPLATE_DESIGN.md	superato	0	1	0	1	3	no	db/seeds/reconciliation/40_org_unit_kpi_templates.sql:3 db/migrations/000064_org_unit_template_layer.sql:3
+docs/kb/xtras/D6_SDBI_OPTION_B_DESIGN.md	superato	0	2	0	1	3	no	apps/api/test/sdbi-perf-feedback.integration.test.ts:10 docs/archive/etl-brownfield-ritirato/seeds-brownfield-tree/sdbi/perf_feedback/02_phase3_temp_sdbi_seed.sql:15 db/migrations/000065_sdbi_perf_feedback_schema.sql:5
+docs/kb/xtras/DATA_RECONCILIATION_PLAN.md	superato	2	3	0	0	3	no	docs/kb/SOT_BACKLOG.md:925 docs/kb/SOT_STATE.md:3595 db/seeds/reconciliation/01_kpi_definitions.sql:3 db/seeds/reconciliation/02_kpi_catalog_unification.sql:3
+docs/kb/xtras/DESIGN_SYSTEM_UI.md	da accorpare	6	0	0	0	3	no	.claude/rules/design-system-ui.md:10 AGENTS.md:120
+docs/kb/xtras/PLAN_S1018_BATCH.md	superato	2	0	0	0	3	no	docs/kb/SOT_STATE.md:2966 docs/kb/SOT_STATE.md:2970
+docs/kb/xtras/POST_V1_ROADMAP_DOSSIER.md	superato	4	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1562 docs/archive/SOT_BACKLOG_CHIUSI.md:1565
+docs/kb/xtras/RBAC_UIX_PERSPECTIVES_PLAN.md	superato	2	0	0	1	3	no	docs/kb/SOT_BACKLOG.md:971 docs/kb/SOT_STATE.md:3595 db/migrations/000045_rbac_role_category_and_ceo.sql:10
+docs/kb/xtras/RECONCILIATION_WALLS_AND_AI_DECISION_DOSSIER.md	superato	2	3	0	2	3	no	docs/kb/SOT_BACKLOG.md:1044 docs/kb/SOT_BACKLOG.md:933 db/seeds/reconciliation/37_learning_catalog_import.sql:3 db/seeds/reconciliation/38_user_learning_evidence.sql:3 db/migrations/000060_pgvector_substrate.sql:3 db/migrations/000061_learning_catalog_rehome.sql:3
+docs/kb/xtras/RESUME_S1018_BATCH.md	superato	2	0	0	0	3	no	docs/kb/SOT_STATE.md:2970 docs/superpowers/specs/2026-07-25-zero-pending-plan.md:263
+docs/kb/xtras/RTL_STABILIZATION_PLAN.md	superato	2	0	0	0	3	no	docs/brownfield/EMPLOYEE_CENTRIC_MAPPING_DOCTRINE.md:114 docs/kb/SOT_BACKLOG.md:971
+docs/kb/xtras/SDBI_PHASE2_CLOSURE.md	superato	9	0	0	0	3	no	.programmi/76-verifica-piano-zero-pendenze.md:26 docs/kb/SOT_BACKLOG.md:841
+docs/kb/xtras/SESSION_START_FORENSICS.md	superato	3	0	0	0	3	no	AGENTS.md:35 docs/kb/SOT_STATE.md:2982
+docs/kb/xtras/VISUALIZATION_RENDERERS_CLOSURE.md	superato	3	0	0	0	3	no	docs/kb/SOT_BACKLOG.md:1167 docs/kb/SOT_BACKLOG.md:993
+docs/kb/xtras/WAVE2_UNBLOCK_PACKAGE.md	superato	2	2	0	1	3	no	docs/kb/SOT_BACKLOG.md:1122 docs/kb/SOT_STATE.md:3336 apps/api/test/reconciliation-wave2-succession-branches.integration.test.ts:9 db/seeds/reconciliation/49_succession_pools_candidates.sql:2 db/migrations/000106_wave2_succession_branches_close.sql:7
+docs/piani/NOTA_passaggio-rilascio-advanced_20261122.md	superato	0	0	0	0	0	sì	
+docs/piani/PIANO_forense-frontend_20261115.md	superato	1	0	0	0	0	no	docs/piani/forense-frontend_20261123/PIANO_ciclo-23-11.md:3
+docs/piani/PIANO_interfacce-intelligenti_20261110.md	superato	1	0	0	0	0	no	docs/kb/xtras/INTERFACCE_INTELLIGENTI.md:3
+docs/piani/PIANO_interfacce_20261103.md	da accorpare	2	9	0	1	0	no	docs/kb/xtras/INTERFACCE_INTELLIGENTI.md:3 docs/product/VISIONE_INTEGRATA_HEURESYS_20261103.md:13 apps/api/src/modules/positions/service.ts:37 apps/api/test/approvals-elenco-completo.integration.test.ts:4 db/migrations/000471_s18_pulizia_dati_scaduti_solo_piattaforma.sql:1
+docs/piani/PIANO_organigrammi-a-blocchi_20261114.md	superato	0	11	0	0	0	no	apps/api/src/modules/organigramma/repository.ts:4 apps/api/test/me-organigramma.integration.test.ts:3
+docs/piani/PIANO_organigrammi-navigazione_20261115.md	superato	0	13	0	0	0	no	apps/api/test/analytics.integration.test.ts:670 apps/api/test/visualization-graphs.integration.test.ts:358
+docs/piani/PIANO_pacchetti-git-drive_20261104.md	superato	0	1	0	0	0	no	scripts/pacchetti-git-drive.sh:15
+docs/piani/PIANO_pulizia_oggetti_lavoro_20261104.md	superato	0	0	0	0	0	sì	
+docs/piani/PIANO_rilascio-l2_20261104.md	superato	0	0	0	0	0	sì	
+docs/piani/PIANO_tre-accorpamenti-rtl_20261122.md	superato	0	0	0	0	0	sì	
+docs/piani/forense-frontend_20261115/dati-1.md	superato	0	0	0	0	0	sì	
+docs/piani/forense-frontend_20261115/dati-2.md	superato	0	0	0	0	0	sì	
+docs/piani/forense-frontend_20261115/dati-3.md	superato	0	0	0	0	0	sì	
+docs/piani/forense-frontend_20261115/esiti-correzioni.md	superato	0	0	0	0	0	sì	
+docs/piani/forense-frontend_20261115/sorgente-api.md	superato	0	0	0	0	0	sì	
+docs/preflight-residual-todo.md	superato	1	2	0	0	3	no	docs/superpowers/specs/2026-07-25-zero-pending-plan.md:269 cowork_reserved/auto-ship/run-all-s935.ps1:313 cowork_reserved/auto-ship/run-all-s935.ps1:446
+docs/product/BUSINESS_SCOPE_AND_PRD.md	da accorpare	15	0	0	1	3	no	docs/architecture/adr/0054_heuresys_piattaforma_del_cambiamento_organizzativo.md:8 docs/architecture/adr/0054_heuresys_piattaforma_del_cambiamento_organizzativo.md:86 db/migrations/000470_il_valore_si_misura_in_decisioni_tracciabili.sql:3
+docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md	da accorpare	9	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1625 docs/archive/SOT_BACKLOG_CHIUSI.md:1629
+docs/product/DEVELOPMENT_LINES_B_ACTIVATE_DORMANT_CODE.md	da accorpare	7	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1649 docs/archive/SOT_BACKLOG_CHIUSI.md:1653
+docs/product/DEVELOPMENT_LINES_C_ADMIN_EDITING_UI.md	da accorpare	4	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1673 docs/archive/SOT_BACKLOG_CHIUSI.md:1678
+docs/product/DEVELOPMENT_LINES_D_WAVE2_LEGACY_DATA.md	superato	5	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1695 docs/archive/SOT_BACKLOG_CHIUSI.md:1699
+docs/product/DEVELOPMENT_LINES_E_EVO_VERTICALS.md	da accorpare	4	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1711 docs/archive/SOT_BACKLOG_CHIUSI.md:1715
+docs/product/DEVELOPMENT_LINES_F_PRESCRIPTIVE_INTELLIGENCE.md	da accorpare	4	0	0	0	3	no	docs/architecture/adr/0031_ess_self_view_computed_intelligence.md:8 docs/archive/SOT_BACKLOG_CHIUSI.md:1721
+docs/product/DEVELOPMENT_LINES_G_PLATFORM_HYGIENE.md	da accorpare	4	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1744 docs/archive/SOT_BACKLOG_CHIUSI.md:1748
+docs/product/LATENT_CAPABILITY_CATALOG.md	superato	4	0	0	0	3	no	docs/kb/COWORK_INBOX.md:137 docs/kb/SOT_BACKLOG.md:590
+docs/product/WORKITEM_GAP1_DESIGN_SPEC.md	superato	6	0	0	0	3	no	docs/kb/SOT_BACKLOG.md:590 docs/kb/SOT_BACKLOG.md:632
+docs/product/WORKITEM_GAP1_PERSPECTIVES_AND_SCORECARD.md	superato	8	0	0	0	3	no	docs/kb/COWORK_INBOX.md:137 docs/kb/COWORK_INBOX.md:146
+docs/product/WORKITEM_GAP1_PHASE0_VERIFICATION.md	superato	8	0	0	0	3	no	AGENTS.md:29 docs/kb/COWORK_INBOX.md:148
+docs/source_bundle/extracted_bootstrap/INDEX.md	superato	0	0	0	0	1	sì	
+docs/source_bundle/extracted_bootstrap/ISTRUZIONI.md	superato	0	0	0	0	1	sì	
+docs/source_bundle/extracted_bootstrap/LOGICAL_DATA_MODEL_ADDENDUM.md	superato	1	2	0	0	3	no	docs/db/TARGET_SCHEMA_DESIGN.md:5 docs/source_bundle/extracted_bootstrap/manifest.json:19 docs/source_bundle/extracted_bootstrap/scripts/apply_bundle.py:63
+docs/source_bundle/extracted_bootstrap/README.md	superato	0	0	0	0	1	sì	
+docs/source_bundle/extracted_bootstrap/bootstrap_agent/AI_CODING_AGENT_BOOTSTRAP_PROMPT.md	superato	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:39
+docs/source_bundle/extracted_bootstrap/bootstrap_agent/AUTH_STACK_SPEC.md	superato	2	1	0	0	3	no	docs/architecture/adr/0005_password_hashing_argon2id.md:8 docs/security/AUTH_SECURITY_PLAN.md:6 docs/source_bundle/extracted_bootstrap/manifest.json:44
+docs/source_bundle/extracted_bootstrap/bootstrap_agent/BACKEND_API_STACK_SPEC.md	superato	1	1	0	0	3	no	docs/architecture/adr/0002_backend_framework_fastify.md:9 docs/source_bundle/extracted_bootstrap/manifest.json:49
+docs/source_bundle/extracted_bootstrap/bootstrap_agent/DBMS_BOOTSTRAP_SPEC.md	superato	3	1	0	0	3	no	docs/architecture/adr/0003_db_access_drizzle_plus_raw_sql.md:10 docs/architecture/adr/0003_db_access_drizzle_plus_raw_sql.md:31 docs/source_bundle/extracted_bootstrap/manifest.json:54
+docs/source_bundle/extracted_bootstrap/bootstrap_agent/FRONTEND_STACK_SPEC.md	superato	1	1	0	0	3	no	docs/architecture/adr/0007_frontend_next15_app_router.md:8 docs/source_bundle/extracted_bootstrap/manifest.json:59
+docs/source_bundle/extracted_bootstrap/bootstrap_agent/REPOSITORY_STRUCTURE.md	superato	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:64
+docs/source_bundle/extracted_bootstrap/bootstrap_agent/SECURITY_AND_PRIVACY_BOUNDARIES.md	superato	1	1	0	0	3	no	docs/security/AUTH_SECURITY_PLAN.md:6 docs/source_bundle/extracted_bootstrap/manifest.json:69
+docs/source_bundle/extracted_bootstrap/bootstrap_agent/TENANT_USER_PROFILE_MODEL.md	superato	1	1	0	0	3	no	docs/db/TARGET_SCHEMA_DESIGN.md:5 docs/source_bundle/extracted_bootstrap/manifest.json:74
+docs/source_bundle/extracted_bootstrap/bootstrap_agent/UPDATED_MIGRATION_PLAN.md	superato	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:79
+docs/source_bundle/extracted_bootstrap/bootstrap_agent/checklists/ACCEPTANCE_TESTS.md	superato	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:84
+docs/source_bundle/extracted_bootstrap/bootstrap_agent/specs/AUTH_POLICY_MATRIX.md	superato	1	1	0	0	3	no	docs/security/AUTH_SECURITY_PLAN.md:6 docs/source_bundle/extracted_bootstrap/manifest.json:104
+docs/source_bundle/extracted_bootstrap/bootstrap_agent/specs/FRONTEND_ROUTE_MAP.md	superato	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:109
+docs/source_bundle/extracted_bootstrap/bootstrap_agent/specs/GRAPH_VISUALIZATION_MODEL_SPEC.md	superato	2	1	0	0	3	no	docs/architecture/adr/0009_visualization_node_layouts_separate_table.md:8 docs/db/TARGET_SCHEMA_DESIGN.md:5 docs/source_bundle/extracted_bootstrap/manifest.json:114
+docs/source_bundle/extracted_bootstrap/bootstrap_agent/specs/LEARNING_CATALOG_AND_GAP_CLOSURE_SPEC.md	superato	2	1	0	0	3	no	docs/db/TARGET_SCHEMA_DESIGN.md:438 docs/db/TARGET_SCHEMA_DESIGN.md:5 docs/source_bundle/extracted_bootstrap/manifest.json:119
+docs/source_bundle/extracted_bootstrap/bootstrap_agent/templates/README_TEMPLATE.md	superato	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:129
+docs/source_bundle/extracted_bootstrap/brownfield_adaptation/BROWNFIELD_ADAPTATION_MAP_TEMPLATE.md	superato	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:139
+docs/source_bundle/extracted_bootstrap/brownfield_adaptation/BROWNFIELD_AI_AGENT_TASK.md	superato	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:144
+docs/source_bundle/extracted_bootstrap/brownfield_adaptation/BROWNFIELD_EXCLUSION_RULES.md	superato	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:149
+docs/source_bundle/extracted_bootstrap/brownfield_adaptation/BROWNFIELD_IMPORT_PIPELINE_SPEC.md	superato	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:154
+docs/source_bundle/extracted_bootstrap/brownfield_adaptation/BROWNFIELD_IMPORT_STRATEGY.md	superato	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:159
+docs/source_bundle/extracted_bootstrap/brownfield_adaptation/BROWNFIELD_IMPORT_WAVES.md	superato	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:164
+docs/source_bundle/extracted_bootstrap/brownfield_adaptation/BROWNFIELD_LINEAGE_MODEL.md	superato	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:169
+docs/source_bundle/extracted_bootstrap/brownfield_adaptation/BROWNFIELD_TABLE_CLASSIFICATION_RULES.md	superato	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:174
+docs/source_bundle/extracted_bootstrap/brownfield_adaptation/BROWNFIELD_VALIDATION_CHECKLIST.md	superato	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:179
+docs/source_bundle/extracted_bootstrap/db/migration_skeletons/README.md	superato	0	0	0	0	1	sì	
+docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/00_Enterprise_Typing_and_Blueprint_Configuration.md	da accorpare	0	5	0	0	3	no	docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT.json:5 docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT_v4.json:3
+docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/01_Current_Accounts_Management.md	da accorpare	0	5	0	0	3	no	docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT.json:6 docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT_v4.json:3
+docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/02_Payments_and_Transactions_Management.md	da accorpare	0	5	0	0	3	no	docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT.json:7 docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT_v4.json:3
+docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/03_Cash_Operations_Management.md	da accorpare	0	5	0	0	3	no	docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT.json:8 docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT_v4.json:3
+docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/04_Deposit_Products_Management.md	da accorpare	0	5	0	0	3	no	docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT.json:9 docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT_v4.json:3
+docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/05_Lending_and_Credit_Management.md	da accorpare	0	5	0	0	3	no	docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT.json:10 docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT_v4.json:3
+docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/06_Customer_Relationship_Management.md	da accorpare	0	5	0	0	3	no	docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT.json:11 docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT_v4.json:3
+docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/07_Compliance_AML_and_Regulatory_Processes.md	da accorpare	0	5	0	0	3	no	docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT.json:12 docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT_v4.json:3
+docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/08_Risk_Management.md	da accorpare	0	5	0	0	3	no	docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT.json:13 docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT_v4.json:3
+docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/09_Treasury_and_Finance.md	da accorpare	0	5	0	0	3	no	docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT.json:14 docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT_v4.json:3
+docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/10_Digital_Banking_and_Channels.md	da accorpare	0	5	0	0	3	no	docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT.json:15 docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT_v4.json:3
+docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/11_Sales_and_Commercial_Processes.md	da accorpare	0	5	0	0	3	no	docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT.json:16 docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT_v4.json:3
+docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/12_Branch_Operations.md	da accorpare	0	5	0	0	3	no	docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT.json:17 docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT_v4.json:3
+docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/13_Legal_and_Litigation.md	da accorpare	0	5	0	0	3	no	docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT.json:18 docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT_v4.json:3
+docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/14_HR_and_Internal_Services.md	da accorpare	0	5	0	0	3	no	docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT.json:19 docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT_v4.json:3
+docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/15_IT_and_Banking_Technology_Operations.md	da accorpare	0	5	0	0	3	no	docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT.json:20 docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT_v4.json:3
+docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/16_Business_Continuity_and_Security.md	da accorpare	0	5	0	0	3	no	docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT.json:21 docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT_v4.json:3
+docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/17_AI_Augmented_Banking_Processes.md	da accorpare	0	5	0	0	3	no	docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT.json:22 docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT_v4.json:3
+docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/18_KPI_Library_Cascading_and_Assessment_Model.md	da accorpare	0	5	0	0	3	no	docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT.json:23 docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT_v4.json:3
+docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/19_Position_Based_Learning_Path_Management.md	da accorpare	0	5	0	0	3	no	docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT.json:24 docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT_v4.json:3
+docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/20_Workforce_Intelligence_Gap_Analysis_and_Talent_Weighting.md	da accorpare	0	5	0	0	3	no	docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT.json:25 docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT_v4.json:3
+docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/21_Career_Planning_Talent_Mobility_and_Succession.md	da accorpare	0	5	0	0	3	no	docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT.json:26 docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT_v4.json:3
+docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/22_Compensation_Intelligence_and_Objective_Based_Reward_Input.md	da accorpare	0	5	0	0	3	no	docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT.json:27 docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT_v4.json:3
+docs/source_bundle/extracted_bootstrap/seed_acquisition/IDEMPOTENT_SEEDING_RULES.md	superato	1	1	0	0	3	no	docs/db/TARGET_SCHEMA_DESIGN.md:539 docs/source_bundle/extracted_bootstrap/manifest.json:599
+docs/source_bundle/extracted_bootstrap/seed_acquisition/PROMPT_TEMPLATE_LIBRARY.md	superato	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:604
+docs/source_bundle/extracted_bootstrap/seed_acquisition/SEED_ACQUISITION_ENGINE_SPEC.md	superato	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:609
+docs/source_bundle/extracted_bootstrap/seed_acquisition/SEED_COMPLETENESS_BACKLOG.md	superato	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:614
+docs/source_bundle/extracted_bootstrap/seed_acquisition/SEED_STAGING_AND_APPROVAL_MODEL.md	superato	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:619
+docs/source_bundle/extracted_bootstrap/seed_acquisition/SOURCE_OF_TRUTH_REGISTRY.md	superato	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:624
+docs/source_bundle/extracted_bootstrap/seed_acquisition/prompts/PROMPT_ATECO_NACE_RECONCILIATION.md	superato	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:629
+docs/source_bundle/extracted_bootstrap/seed_acquisition/prompts/PROMPT_BANKING_KPI_RESEARCH.md	superato	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:634
+docs/source_bundle/extracted_bootstrap/seed_acquisition/prompts/PROMPT_CAREER_PATH_RESEARCH.md	superato	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:639
+docs/source_bundle/extracted_bootstrap/seed_acquisition/prompts/PROMPT_COMPENSATION_RULE_RESEARCH.md	superato	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:644
+docs/source_bundle/extracted_bootstrap/seed_acquisition/prompts/PROMPT_ESCO_OCCUPATION_DISCOVERY.md	superato	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:649
+docs/source_bundle/extracted_bootstrap/seed_acquisition/prompts/PROMPT_ESCO_SKILL_EXTRACTION.md	superato	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:654
+docs/source_bundle/extracted_bootstrap/seed_acquisition/prompts/PROMPT_LEARNING_CATALOG_RESEARCH.md	superato	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:659
+docs/source_bundle/extracted_bootstrap/seed_acquisition/prompts/PROMPT_POSITION_JOB_DESCRIPTION_RESEARCH.md	superato	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:664
+docs/source_bundle/extracted_bootstrap/universal_hrms_framework/U01_Position_Centric_HRMS_Architecture.md	superato	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:699
+docs/source_bundle/extracted_bootstrap/universal_hrms_framework/U02_Position_Intelligence_Profile.md	superato	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:704
+docs/source_bundle/extracted_bootstrap/universal_hrms_framework/U03_Skill_Taxonomy_Model.md	superato	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:709
+docs/source_bundle/extracted_bootstrap/universal_hrms_framework/U04_KPI_Cascading_and_Assessment_Model.md	da accorpare	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:714
+docs/source_bundle/extracted_bootstrap/universal_hrms_framework/U05_Position_Based_Learning_Path_Model.md	da accorpare	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:719
+docs/source_bundle/extracted_bootstrap/universal_hrms_framework/U06_Workforce_Intelligence_Gap_Analysis.md	da accorpare	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:724
+docs/source_bundle/extracted_bootstrap/universal_hrms_framework/U07_Career_Talent_Succession_Model.md	da accorpare	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:729
+docs/source_bundle/extracted_bootstrap/universal_hrms_framework/U08_Compensation_Intelligence_Model.md	da accorpare	0	1	0	0	3	no	docs/source_bundle/extracted_bootstrap/manifest.json:734
+docs/superpowers/analysis/2026-08-06-inventario-substrato-ai-rag.md	superato	2	0	0	0	3	no	docs/kb/COWORK_INBOX.md:329 docs/superpowers/prompts/README.md:50
+docs/superpowers/plans/2026-05-28-cross-os-bootstrap.md	superato	0	0	0	0	3	sì	
+docs/superpowers/plans/2026-05-28-zod4-ftpz6-migration.md	superato	0	0	0	0	3	sì	
+docs/superpowers/plans/2026-05-29-brand-fidelity-migration.md	superato	0	0	0	0	3	sì	
+docs/superpowers/plans/2026-06-03-bi-analytics-phase1.md	superato	0	0	0	0	3	sì	
+docs/superpowers/plans/2026-06-03-reconciliation-f0-triage.md	superato	0	0	0	0	3	sì	
+docs/superpowers/plans/2026-06-03-reconciliation-f1-registry.md	superato	0	0	0	0	3	sì	
+docs/superpowers/plans/2026-06-05-i18n-monoblock-execution-plan.md	superato	0	0	0	0	3	sì	
+docs/superpowers/plans/2026-06-05-sot-unification.md	superato	0	0	0	0	3	sì	
+docs/superpowers/plans/2026-06-06-ai-semantic-matching-p1.md	superato	0	0	0	0	3	sì	
+docs/superpowers/plans/2026-06-10-s982-mega-batch.md	superato	1	0	0	0	3	no	docs/kb/SOT_BACKLOG.md:1128
+docs/superpowers/plans/2026-06-20-goals-okr-module.md	superato	0	0	0	0	3	sì	
+docs/superpowers/plans/2026-06-21-gtm-front-door-landing-lead-capture.md	superato	0	0	0	0	3	sì	
+docs/superpowers/plans/2026-06-22-gtm-investor-onepager-and-guided-demo.md	superato	2	0	0	0	3	no	docs/wargames/15-heuresys-pricing.md:59 docs/wargames/15-heuresys-pricing.md:9
+docs/superpowers/plans/2026-07-06-project-atlas-skill.md	superato	0	0	0	0	3	sì	
+docs/superpowers/plans/2026-07-26-z261-mfa-fixture-secret-rotation.md	superato	0	0	0	0	3	sì	
+docs/superpowers/plans/2026-07-26-z262-accesso-derivato-tutti-gli-utenti.md	superato	0	0	0	0	3	sì	
+docs/superpowers/plans/2026-07-27-rtl-storia-36-mesi.md	superato	8	17	0	0	3	no	.storia36/PROGRESS.md:3 db/seeds/storia36/README.md:3 db/scripts/storia36.sh:4 db/scripts/verify-storia36.sql:3
+docs/superpowers/plans/2026-08-07-165-sganciare-il-deploy-e-provare-la-catena-in-locale.md	superato	0	0	0	0	3	sì	
+docs/superpowers/plans/2026-08-08-batch-interrotti-e-p1.md	superato	0	0	0	0	3	sì	
+docs/superpowers/plans/2026-08-08-tre-domande-aperte.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:2167
+docs/superpowers/plans/2026-08-10-batch-p1-s1053.md	superato	3	0	0	1	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:580 docs/archive/SOT_BACKLOG_CHIUSI.md:750 db/migrations/000303_approval_history_survives_user_deletion.sql:7
+docs/superpowers/plans/2026-08-11-cancello-verifica-s1054.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:597
+docs/superpowers/plans/2026-08-11-ciclo-g-124-183-s1054.md	superato	0	0	0	0	3	sì	
+docs/superpowers/plans/2026-08-11-ciclo-h-clone-linux-pc-s1054.md	superato	0	0	0	0	3	sì	
+docs/superpowers/plans/2026-08-12-batch-p1-p2-s1055.md	superato	0	0	0	0	3	sì	
+docs/superpowers/plans/2026-08-13-batch-p2-completo-s1056.md	superato	0	0	0	0	3	sì	
+docs/superpowers/plans/2026-08-14-batch-p1p2p3-s1058.md	superato	0	0	0	0	3	sì	
+docs/superpowers/plans/2026-08-14-batch-s1059.md	superato	0	0	0	0	3	sì	
+docs/superpowers/plans/2026-08-14-s1060-b-f4-residuo-e-lacune.md	superato	0	0	0	0	3	sì	
+docs/superpowers/plans/2026-08-14-s1060-sblocco-deploy.md	superato	0	0	0	0	3	sì	
+docs/superpowers/plans/2026-08-14-s1061-batch-integrale.md	superato	1	0	0	0	3	no	docs/kb/SOT_STATE.md:1802
+docs/superpowers/plans/2026-08-15-92-f6-frontend-valutazione.md	superato	0	0	0	0	3	sì	
+docs/superpowers/plans/2026-08-18-s1070-rossi-minori-e-217.md	superato	0	0	0	0	3	sì	
+docs/superpowers/plans/2026-08-27-batch-s1082-continuazione.md	superato	0	0	0	0	3	sì	
+docs/superpowers/prompts/2026-08-06-catalogo-generico-corpus-concetti.md	superato	0	0	0	0	3	sì	
+docs/superpowers/prompts/2026-08-06-substrato-semantico-verifica-e-correzioni.md	superato	0	0	0	0	1	sì	
+docs/superpowers/prompts/2026-08-07-percorsi-carriera-155.md	superato	0	0	0	0	1	sì	
+docs/superpowers/specs/2026-05-28-cross-os-bootstrap-design.md	superato	0	0	0	0	3	sì	
+docs/superpowers/specs/2026-05-30-rtl-tenant-rebuild-import-design.md	superato	0	0	0	0	3	sì	
+docs/superpowers/specs/2026-05-30-rtl-tenant-rebuild.md	superato	0	0	0	0	3	sì	
+docs/superpowers/specs/2026-06-03-ai-semantic-matching-design.md	superato	1	0	0	0	3	no	docs/kb/SOT_BACKLOG.md:1026
+docs/superpowers/specs/2026-06-03-bi-analytics-design.md	superato	0	0	0	0	3	sì	
+docs/superpowers/specs/2026-06-03-platform-capabilities-roadmap.md	superato	1	0	0	0	3	no	docs/kb/SOT_BACKLOG.md:1178
+docs/superpowers/specs/2026-06-03-reconciliation-closure-design.md	superato	1	1	0	1	3	no	docs/kb/SOT_BACKLOG.md:930 docs/archive/etl-brownfield-ritirato/seeds-reconciliation/05_career_paths.sql:3 db/migrations/000058_reconciliation_registry.sql:2
+docs/superpowers/specs/2026-06-04-i18n-milestone-design.md	superato	2	0	0	0	3	no	docs/kb/SOT_BACKLOG.md:954 docs/kb/SOT_STATE.md:3409
+docs/superpowers/specs/2026-06-05-sot-unification-design.md	superato	6	0	0	0	3	no	AGENTS.md:31 AGENTS.md:42
+docs/superpowers/specs/2026-06-07-cms-design.md	superato	0	0	0	1	3	no	db/migrations/000086_content_schema.sql:4
+docs/superpowers/specs/2026-06-07-data-mining-design.md	superato	0	0	0	2	3	no	db/migrations/000082_flight_risk_scores.sql:4 db/migrations/000092_insights_p2_score_tables.sql:4
+docs/superpowers/specs/2026-06-07-scraping-design.md	superato	0	0	0	1	3	no	db/migrations/000095_brownfield_source_watermarks.sql:8
+docs/superpowers/specs/2026-06-16-reporting-export-design.md	superato	2	0	0	0	3	no	docs/kb/SOT_BACKLOG.md:743 docs/kb/SOT_STATE.md:3271
+docs/superpowers/specs/2026-06-17-bpm-approval-flow-design.md	da accorpare	3	0	0	0	3	no	docs/kb/SOT_BACKLOG.md:687 docs/kb/SOT_BACKLOG.md:710
+docs/superpowers/specs/2026-06-18-bpm-approval-slice2-3-design.md	da accorpare	2	0	0	1	3	no	docs/kb/SOT_BACKLOG.md:678 docs/kb/SOT_STATE.md:3215 db/migrations/000141_approval_sla_escalation.sql:14
+docs/superpowers/specs/2026-06-19-product-sot-consolidation-design.md	superato	1	0	0	0	3	no	docs/product/README.md:44
+docs/superpowers/specs/2026-06-21-gtm-front-door-landing-lead-capture-design.md	superato	0	0	0	0	3	sì	
+docs/superpowers/specs/2026-06-22-gtm-investor-onepager-and-guided-demo-design.md	superato	5	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1451 docs/kb/SOT_BACKLOG.md:426
+docs/superpowers/specs/2026-06-30-two-axis-authorization-model-design.md	superato	1	0	0	0	3	no	docs/kb/DEBT_REGISTER.md:121
+docs/superpowers/specs/2026-07-01-f3-sensitive-modules-map.md	superato	1	0	0	0	3	no	docs/kb/SOT_STATE.md:3027
+docs/superpowers/specs/2026-07-06-project-atlas-skill-design.md	superato	0	0	0	0	3	sì	
+docs/superpowers/specs/2026-07-25-delivery-loop-skill-design.md	superato	1	0	0	0	3	no	docs/superpowers/specs/2026-07-25-zero-pending-loop-design.md:6
+docs/superpowers/specs/2026-07-27-claude-ecosystem-harmonization-plan.md	superato	0	0	0	0	3	sì	
+docs/superpowers/specs/2026-08-02-p2-batch-execution-plan.md	superato	13	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1420 docs/archive/SOT_BACKLOG_CHIUSI.md:1421
+docs/superpowers/specs/2026-08-03-consegna-lab-esecuzione.md	superato	6	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1383 docs/archive/SOT_BACKLOG_CHIUSI.md:1390
+docs/superpowers/specs/2026-08-04-consegne-lab-13.md	superato	1	0	0	0	3	no	docs/kb/SOT_STATE.md:2344
+docs/superpowers/specs/2026-08-04-esecuzione-lab-inbox-e-organigramma.md	superato	0	0	0	0	3	sì	
+docs/superpowers/specs/2026-08-04-perimetri-test-dopo-ricostruzione.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1250
+docs/superpowers/specs/2026-08-05-debiti-aperti-S1045.md	superato	0	0	0	0	3	sì	
+docs/superpowers/specs/2026-08-05-perimetri-test-esecuzione.md	superato	0	0	0	0	3	sì	
+docs/superpowers/specs/2026-08-06-catena-migrazioni-stabile-S1045.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1761
+docs/superpowers/specs/2026-08-06-chiusura-dottrina-dubbio-e-diario.md	superato	1	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:1611
+docs/superpowers/specs/2026-08-06-ritrattazione-consegne-lab-e-mfa-produzione.md	da accorpare	3	0	0	0	3	no	docs/archive/SOT_BACKLOG_CHIUSI.md:762 docs/archive/SOT_BACKLOG_CHIUSI.md:987
+docs/superpowers/specs/2026-08-06-substrato-semantico-verifica-e-correzioni.md	superato	0	0	0	0	1	sì	
+docs/superpowers/specs/2026-08-07-catalogo-generico-referto-di-programma.md	superato	0	0	0	0	3	sì	
+docs/superpowers/specs/2026-08-07-percorsi-carriera-155.md	superato	1	0	0	0	1	no	docs/archive/SOT_BACKLOG_CHIUSI.md:962
+docs/superpowers/specs/2026-08-13-batch-S1057.md	superato	0	0	0	0	3	sì	
+docs/vision/DREAM_2026-08-25/00_SINTESI.md	da accorpare	1	0	0	0	3	no	docs/product/VISIONE_INTEGRATA_HEURESYS_20261103.md:25
+docs/vision/DREAM_2026-08-25/01_INVENTARIO.md	da accorpare	0	0	0	0	3	sì	
+docs/vision/DREAM_2026-08-25/02_LATENTI.md	da accorpare	0	0	0	0	3	sì	
+docs/vision/DREAM_2026-08-25/03_COMPETITOR.md	da accorpare	0	0	0	0	3	sì	
+docs/vision/DREAM_2026-08-25/04_MATRICE.md	superato	0	0	0	0	3	sì	
+docs/vision/DREAM_2026-08-25/05_PROPOSTE.md	superato	0	0	0	0	3	sì	
+docs/vision/DREAM_2026-08-25/06_EVIDENZE.md	superato	0	0	0	0	3	sì	
+docs/vision/DREAM_2026-08-25/07_DOCUMENTAZIONE.md	superato	0	0	0	0	3	sì	
+docs/vision/DREAM_2026-08-25/STATO_CICLO.md	superato	0	0	0	0	3	sì	
+docs/vision/DREAM_2026-08-25/_raccolta/architettura_raw.md	superato	0	0	0	0	3	sì	
+docs/vision/DREAM_2026-08-25/_raccolta/competitor_eightfold.md	superato	0	0	0	0	3	sì	
+docs/vision/DREAM_2026-08-25/_raccolta/competitor_personio.md	superato	0	0	0	0	3	sì	
+docs/vision/DREAM_2026-08-25/_raccolta/competitor_zucchetti.md	superato	0	0	0	0	3	sì	
+docs/vision/DREAM_2026-08-25/_raccolta/docs_censimento.md	superato	0	0	0	0	3	sì	
+docs/vision/DREAM_2026-08-25/_raccolta/docs_censimento_pass2_a.md	superato	0	0	0	0	3	sì	
+docs/vision/DREAM_2026-08-25/_raccolta/docs_censimento_pass2_b.md	superato	0	0	0	0	3	sì	
+docs/vision/DREAM_2026-08-25/_raccolta/docs_censimento_pass2_c.md	superato	0	0	0	0	3	sì	
+docs/vision/DREAM_2026-08-25/_raccolta/inventario_raw.md	superato	0	0	0	0	3	sì	
+docs/vision/DREAM_2026-08-25/_raccolta/latenti_raw.md	superato	0	0	0	0	3	sì	
+docs/vision/DREAM_2026-08-25/_raccolta/verifier_verdetti.md	superato	0	0	0	0	3	sì	
+docs/wargames/11-heuresys-evidence.md	superato	0	0	0	0	1	sì	
+docs/wargames/12-heuresys-goals-okr.md	superato	0	0	0	0	1	sì	
+docs/wargames/13-heuresys-f4-activity.md	superato	0	0	0	0	1	sì	
+docs/wargames/14-heuresys-provenance.md	superato	0	0	0	0	1	sì	
+docs/wargames/16-heuresys-approval-effects.md	superato	0	0	0	0	1	sì	
+docs/wargames/17-heuresys-wave3.md	superato	0	0	0	0	1	sì	
+docs/wargames/LEDGER.md	superato	0	0	0	0	1	sì	
+docs/wargames/reviews/REVIEW-03.md	da accorpare	0	0	0	0	3	sì	
+docs/wargames/reviews/REVIEW-11.md	superato	0	0	0	0	3	sì	
+docs/wargames/reviews/REVIEW-12.md	superato	0	0	0	0	3	sì	
+docs/wargames/reviews/REVIEW-13.md	superato	0	0	0	0	3	sì	
+docs/wargames/reviews/REVIEW-14.md	superato	0	0	0	0	3	sì	
+docs/wargames/reviews/REVIEW-16.md	superato	0	0	0	0	3	sì	
+docs/wargames/reviews/REVIEW-17.md	superato	0	0	0	0	3	sì	
+docs/wargames/tasks/03-localai.md	da accorpare	2	0	0	0	6	no	docs/wargames/README.md:26 docs/wargames/README.md:41
+docs/wargames/tasks/11-heuresys-evidence.md	superato	0	0	0	0	1	sì	
+docs/wargames/tasks/12-heuresys-goals-okr.md	superato	0	0	0	0	1	sì	
+docs/wargames/tasks/13-heuresys-f4-activity.md	superato	0	0	0	0	1	sì	
+docs/wargames/tasks/14-heuresys-provenance.md	superato	0	0	0	0	1	sì	
+docs/wargames/tasks/16-heuresys-approval-effects.md	superato	0	0	0	0	1	sì	
+docs/wargames/tasks/17-heuresys-wave3.md	superato	0	0	0	0	1	sì	
+qa_artifacts/F0_legacy_inventory.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/F0_reconciliation_triage.md	superato	1	0	0	0	3	no	docs/kb/SOT_BACKLOG.md:930
+qa_artifacts/F3_bridge_discovery.md	superato	1	0	0	0	3	no	docs/kb/SOT_BACKLOG.md:930
+qa_artifacts/F3b_walls_discovery.md	superato	1	0	0	0	3	no	docs/kb/SOT_BACKLOG.md:930
+qa_artifacts/_FINAL_chain.txt	superato	2	0	0	0	3	no	docs/architecture/adr/0024_legacy_ingestion_employee_centric.md:86 docs/brownfield/EMPLOYEE_CENTRIC_MAPPING_DOCTRINE.md:113
+qa_artifacts/_FINAL_match.txt	superato	2	0	0	0	3	no	docs/architecture/adr/0024_legacy_ingestion_employee_centric.md:86 docs/brownfield/EMPLOYEE_CENTRIC_MAPPING_DOCTRINE.md:113
+qa_artifacts/_FINAL_reconcile.txt	superato	1	0	0	0	3	no	docs/brownfield/EMPLOYEE_CENTRIC_MAPPING_DOCTRINE.md:113
+qa_artifacts/_FK_centric.txt	superato	5	0	0	0	3	no	docs/architecture/adr/0024_legacy_ingestion_employee_centric.md:59 docs/architecture/adr/0024_legacy_ingestion_employee_centric.md:86
+qa_artifacts/_FK_users.txt	superato	5	0	0	0	3	no	docs/architecture/adr/0024_legacy_ingestion_employee_centric.md:59 docs/architecture/adr/0024_legacy_ingestion_employee_centric.md:86
+qa_artifacts/_census_1.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/_census_2.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/_census_3.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/_census_CORRECTION.md	superato	1	0	0	0	3	no	docs/kb/SOT_STATE.md:3590
+qa_artifacts/_email_uniq.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/_emp_user_gap.txt	superato	4	0	0	0	3	no	docs/architecture/adr/0024_legacy_ingestion_employee_centric.md:59 docs/architecture/adr/0024_legacy_ingestion_employee_centric.md:86
+qa_artifacts/_f3_dryrun.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/_f3_fkcheck.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/_f3_selfcontained.txt	superato	0	0	0	1	3	no	db/migrations/000046_rekey_external_code_employee_centric.sql:17
+qa_artifacts/_f3_state.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/_post_cleanup_state.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/_precheck.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/_rtlref_deps.txt	superato	1	0	0	1	3	no	docs/kb/SOT_STATE.md:3591 db/migrations/000047_drop_reference_tenant_and_legacy_mirror.sql:15
+qa_artifacts/data_integrity/20260531_s952/CODEBOOK.md	superato	0	0	0	0	1	sì	
+qa_artifacts/data_integrity/20260531_s952/_R1_system_health_milestone_spec.md	superato	1	0	0	0	3	no	qa_artifacts/dbms_health_2026-06-22/adr0026_audit_register.csv:15
+qa_artifacts/dbms_health_2026-06-22/FINAL_REPORT.md	superato	1	0	0	0	3	no	qa_artifacts/dbms_health_2026-06-22/adr0026_audit_register.csv:7
+qa_artifacts/inbox-orphan-cleanup-20260707.md	superato	1	0	0	0	3	no	docs/kb/DEBT_REGISTER.md:146
+qa_artifacts/mvp3_full_release_notes_v0.3.2.md	superato	0	0	0	0	3	sì	
+qa_artifacts/s936_outcome_summary.md	superato	1	1	0	0	3	no	docs/kb/xtras/AUTONOMY_R23_PROJECT.md:16 docs/archive/scripts-exhausted/bisect-cw-b59-createctx.ps1:13
+qa_artifacts/s936_pathG_build_202605261618.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/s936_pathG_test_outcome.md	superato	0	0	0	0	3	sì	
+qa_artifacts/x13_a11y_report.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x13_e2e_coverage_matrix.md	superato	1	0	0	0	3	no	.programmi/76-verifica-piano-zero-pendenze.md:98
+qa_artifacts/x13_i18n_report.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x14_a11y_live.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x14_playwright_full.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x14_web_build.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x15_playwright_prod.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x15_web_build.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x16_playwright_prod_full.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x16_web_build.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x16b_playwright_prod_125.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x17_release_notes_v0.2.1.md	superato	0	0	0	0	3	sì	
+qa_artifacts/x18_2_pnpm_install.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x18_2_publish.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x18_2_publish_dryrun.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x18_2_tsup_build.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x18_2_web_build.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x18_2_web_build_link_revert.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x18_2_web_build_no_transpile.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x18_4_bisect_baseline_link.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x18_4_bisect_iter_1.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x18_4_bisect_iter_10.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x18_4_bisect_iter_11.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x18_4_bisect_iter_12.txt	superato	0	2	0	0	3	no	cowork_reserved/auto-ship/run-all-s935.ps1:213 cowork_reserved/auto-ship/run-all-s935.ps1:238
+qa_artifacts/x18_4_bisect_iter_2.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x18_4_bisect_iter_3.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x18_4_bisect_iter_4.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x18_4_bisect_iter_5.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x18_4_bisect_iter_6.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x18_4_bisect_iter_7.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x18_4_bisect_iter_8.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x18_4_bisect_iter_9.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x18_5_playwright_versioned.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x18_5_web_build_path_B.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x18_5_web_build_path_C.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x18_consumer_subpath_scan.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x18_mvp3_release_notes_v0.3.1.md	superato	0	0	0	0	3	sì	
+qa_artifacts/x18_publish_dryrun.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x18_tsup_build.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x18_web_build.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x19a_vitest_api.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x19a_web_build.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x20_playwright.txt	superato	0	0	0	0	3	sì	
+qa_artifacts/x20_web_build.txt	superato	0	0	0	0	3	sì	
+sessioni/session_2026-05-26_forensic-state-of-the-art/FORENSIC_STATE_OF_ART_2026-05-26.md	superato	1	0	0	0	3	no	README.md:242
+sessioni/session_2026-05-26_forensic-state-of-the-art/PREFLIGHT_PLAN_2026-05-26.md	superato	0	0	0	0	3	sì	
+sessioni/session_2026-05-26_forensic-state-of-the-art/preflight_baselines/F0_3d_pnpm_test_pid.txt	superato	0	0	0	0	3	sì	
+sessioni/session_2026-05-26_forensic-state-of-the-art/preflight_baselines/F0_BASELINE_SUMMARY.md	superato	0	0	0	0	3	sì	
+sessioni/session_2026-05-26_preflight/NEXT_SESSION_START.md	superato	0	0	0	0	1	sì	
+sessioni/session_2026-05-26_preflight/PREFLIGHT_REPORT.md	superato	0	0	0	0	3	sì	
+sessioni/session_2026-05-26_s935/S935_SESSION_REPORT.md	superato	0	2	0	0	3	no	cowork_reserved/auto-ship/run-all-s935.ps1:332 cowork_reserved/auto-ship/run-all-s935.ps1:463
+sessioni/session_2026-05-26_s937_housekeeping/HANDOVER_CLI.md	superato	2	1	0	0	6	no	qa_artifacts/dbms_health_2026-06-22/adr0026_audit_register.csv:11 qa_artifacts/dbms_health_2026-06-22/adr0026_audit_register.csv:14 docs/kb/tools/build_index.py:34
+sessioni/session_2026-05-26_s937_housekeeping/NEXT_SESSION_START.md	superato	0	0	0	0	1	sì	
+sessioni/session_2026-05-26_s937_housekeeping/S937_SESSION_REPORT.md	superato	0	0	0	0	3	sì	
+sessioni/session_2026-05-26_s937_housekeeping/TRIGGER_PROMPT.txt	superato	0	0	0	0	3	sì	
+ux-design/heuresys_uxix_brand_identity_bundle_v1/ISTRUZIONI.md	superato	0	0	0	0	1	sì	
+ux-design/heuresys_uxix_brand_identity_bundle_v1/MANIFEST.md	superato	0	0	0	0	1	sì	
+ux-design/heuresys_uxix_brand_identity_bundle_v1/README.md	superato	0	0	0	0	1	sì	
+ux-design/heuresys_uxix_brand_identity_bundle_v1/assets/README.md	superato	0	0	0	0	1	sì	
+ux-design/heuresys_uxix_brand_identity_bundle_v1/assets/icons/custom/README.md	superato	0	0	0	0	1	sì	
+ux-design/heuresys_uxix_brand_identity_bundle_v1/docs/00_context_and_scope.md	superato	0	0	0	0	3	sì	
+ux-design/heuresys_uxix_brand_identity_bundle_v1/docs/01_dashboard_shell_architecture.md	superato	0	0	0	0	3	sì	
+ux-design/heuresys_uxix_brand_identity_bundle_v1/docs/02_dom_breadcrumb_and_rendering_model.md	superato	0	0	0	0	3	sì	
+ux-design/heuresys_uxix_brand_identity_bundle_v1/docs/03_navigation_model_sidebar_tabs_routes.md	superato	0	0	0	0	3	sì	
+ux-design/heuresys_uxix_brand_identity_bundle_v1/docs/04_autonomous_module_page_contract.md	superato	0	0	0	0	3	sì	
+ux-design/heuresys_uxix_brand_identity_bundle_v1/docs/05_dynamic_shell_context.md	superato	0	0	0	0	3	sì	
+ux-design/heuresys_uxix_brand_identity_bundle_v1/docs/06_header_specification.md	superato	0	5	0	0	3	no	apps/web/src/app/showcase/header/page.tsx:15 apps/web/src/components/SystemHealthDashboard.tsx:31
+ux-design/heuresys_uxix_brand_identity_bundle_v1/docs/07_sidebar_specification.md	superato	0	7	0	0	3	no	apps/web/src/app/showcase/sidebar/page.tsx:114 apps/web/src/components/SystemHealthDashboard.tsx:32
+ux-design/heuresys_uxix_brand_identity_bundle_v1/docs/08_footer_specification.md	superato	0	4	0	0	3	no	apps/web/src/app/showcase/footer/page.tsx:18 apps/web/src/components/SystemHealthDashboard.tsx:33
+ux-design/heuresys_uxix_brand_identity_bundle_v1/docs/09_design_system_and_tokens.md	superato	2	0	0	0	3	no	ux-design/heuresys_uxix_brand_identity_bundle_v1/code_examples/src/styles/hover-affordance.css:6 ux-design/heuresys_uxix_brand_identity_bundle_v1/code_examples/src/styles/tokens.css:6
+ux-design/heuresys_uxix_brand_identity_bundle_v1/docs/10_graphic_assets_and_icon_system.md	superato	0	1	0	0	3	no	apps/web/src/app/showcase/icons/page.tsx:77
+ux-design/heuresys_uxix_brand_identity_bundle_v1/docs/11_showcase_and_decision_workflow.md	superato	0	0	0	0	3	sì	
+ux-design/heuresys_uxix_brand_identity_bundle_v1/docs/12_page_types_to_design.md	superato	0	2	0	0	3	no	apps/web/src/app/showcase/page-types/page.tsx:155 apps/web/src/app/showcase/primary-initial-page/page.tsx:94
+ux-design/heuresys_uxix_brand_identity_bundle_v1/docs/13_best_practices_for_modern_saas_ui.md	superato	1	5	0	0	3	no	ux-design/heuresys_uxix_brand_identity_bundle_v1/code_examples/src/styles/hover-affordance.css:5 apps/web/src/components/SystemHealthDashboard.tsx:34 docs/archive/codice-non-usato-20261102/showcase/SystemHealthDashboard.tsx:34
+ux-design/heuresys_uxix_brand_identity_bundle_v1/docs/14_accessibility_responsiveness_quality.md	superato	0	0	0	0	3	sì	
+ux-design/heuresys_uxix_brand_identity_bundle_v1/docs/15_implementation_backlog.md	superato	0	0	0	0	3	sì	
+ux-design/heuresys_uxix_brand_identity_bundle_v1/docs/16_system_health_admin_dashboard_patterns.md	superato	0	12	0	0	3	no	apps/web/src/components/SystemHealthDashboard.tsx:30 docs/archive/codice-non-usato-20261102/showcase/SystemHealthDashboard.tsx:30
+ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/ACCEPTANCE_CRITERIA.md	da accorpare	0	0	0	0	3	sì	
+ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/ACCESSIBILITY_CHECKLIST.md	da accorpare	3	0	0	0	3	no	docs/a11y-manual-checklist.md:25 docs/a11y-manual-checklist.md:6
+ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/INTERACTION_REGISTER_TEMPLATE.md	da accorpare	0	0	0	0	3	sì	
+ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/QUALITY_GATES.md	da accorpare	0	0	0	0	3	sì	
+ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/VISUAL_QA_CHECKLIST.md	da accorpare	0	0	0	0	3	sì	
+ux-design/heuresys_uxix_brand_identity_bundle_v1/prompts/CODING_AGENT_MASTER_PROMPT.md	superato	0	0	0	0	3	sì	
+ux-design/heuresys_uxix_brand_identity_bundle_v1/prompts/DESIGN_DECISION_CAPTURE_PROMPT.md	superato	0	1	0	0	3	no	apps/web/src/app/showcase/palettes/page.tsx:267
+ux-design/heuresys_uxix_brand_identity_bundle_v1/prompts/SHOWCASE_GENERATION_PROMPT.md	superato	0	0	0	0	3	sì	
+ux-design/heuresys_uxix_brand_identity_bundle_v1/showcase/SHOWCASE_REQUIREMENTS.md	superato	0	0	0	0	3	sì	
+ux-design/heuresys_uxix_brand_identity_bundle_v1/showcase/showcase-routes.md	superato	0	0	0	0	3	sì	
+ux-design/heuresys_uxix_brand_identity_bundle_v1/templates/ADR_TEMPLATE.md	superato	0	0	0	0	3	sì	
+ux-design/heuresys_uxix_brand_identity_bundle_v1/templates/ASSET_REGISTER_TEMPLATE.md	superato	0	0	0	0	3	sì	
+ux-design/heuresys_uxix_brand_identity_bundle_v1/templates/DECISION_REGISTER.md	superato	1	3	0	0	3	no	docs/kb/DEBT_REGISTER.md:168 apps/web/src/app/showcase/layout.tsx:70 apps/web/src/app/showcase/logo/page.tsx:143
+ux-design/heuresys_uxix_brand_identity_bundle_v1/templates/PAGE_DESIGN_BRIEF_TEMPLATE.md	superato	0	0	0	0	3	sì	
+ux-design/heuresys_uxix_brand_identity_bundle_v1/templates/PALETTE_DECISION_TEMPLATE.md	superato	0	0	0	0	3	sì	
+ux-design/heuresys_uxix_brand_identity_bundle_v1/templates/SHOWCASE_REVIEW_TEMPLATE.md	superato	0	0	0	0	3	sì	
+ux-design/prototypes/superuser-system-health.html	superato	1	3	0	0	3	no	ux-design/heuresys_uxix_brand_identity_bundle_v1/code_examples/src/styles/hover-affordance.css:4 apps/web/src/components/SystemHealthDashboard.tsx:26 docs/archive/codice-non-usato-20261102/showcase/SystemHealthDashboard.tsx:26

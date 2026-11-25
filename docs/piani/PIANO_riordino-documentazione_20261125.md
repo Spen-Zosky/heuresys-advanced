@@ -208,8 +208,18 @@ Un documento superato esce anche se lo citano solo archivi (`docs/archive/`), mi
 | R7 | in parte | 59 documenti riallineati nella PR #486; i piani e i programmi restano alle loro sessioni (sezione 8) |
 | R8 | fatta | `.handoff/STATE.md`, `SOT_*`, `DEBT_REGISTER.md`, cruscotti dei due repo (PR #485, datastore #43) |
 | R9 | fatta | `build_adr_index.py --check` verde |
-| R10 | in parte | quindici pagine di dominio in `docs/wiki/domini/`; l'accorpamento dei «da accorpare» resta |
+| R10 | in parte | quindici pagine di dominio in `docs/wiki/domini/`; accorpamento in corso, sezione 12 |
 | R11 | fatta | `build_wiki.py --check` verde in `state-lint` |
 | R12 | in parte | A1-A5 e A9 in CI; A10 (`scripts/lint-verita.sh`) provato in cloud con un agente finto, da installare sulla VM |
 | R13 | fatta | sezione «Documentazione» in `CLAUDE.md` di advanced (PR #485) e sottosezione del datastore (PR #44) |
 | R14 | da fare | solo con il sì di Enzo |
+
+## 12. Accorpamento dei «da accorpare» (2026-11-25, notte)
+
+Metodo: il contenuto vivo di ciascun documento entra nella destinazione indicata dal censimento, i rimandi si spostano sulla destinazione, poi il file esce con `ritira_documenti.py --anche-accorpare` (copia con impronta nel cestino, riga nel registro). Due campioni prima (wargame 03), poi i lotti. Durante i campioni `mappa_rimandi.py` è stato corretto: un percorso completo di un altro file tracciato non vale più come citazione di un bersaglio che ne condivide il nome, e il censimento del ciclo DREAM (`docs/vision/DREAM_2026-08-25/_raccolta/`) è ignorato come il censimento di oggi.
+
+| sede | da accorpare | fatti | fermi o rimandati, e perché |
+|---|---|---|---|
+| advanced | 77 | 19 ritirati (lotti ACC-campioni, ACC-1, ACC-2) e 7 riconosciuti validi dopo l'accorpamento (DESIGN_SYSTEM_UI aggiornato sul posto, il documento unico del runtime di approvazione, i cinque U04-U08 ora senza doppioni) | 14 in `.programmi/` e 4 in `docs/vision/`: hanno sessioni dedicate. 4 citati da ADR in sola aggiunta (BOOTSTRAP_EXECUTION_PLAN da 0001/0004/0010/0011, BUSINESS_SCOPE_AND_PRD da 0054, DEVELOPMENT_LINES_F da 0031, bias_registry da 0020). DEVELOPMENT_LINES_E citato da `.programmi/54`. PIANO_interfacce_20261103 è la fonte dei codici S-N e D-N che nove sorgenti e test citano. NEXT_SESSION_MVP_2A citato da AGENTS.md (canale Codex), da un seed e da sei documenti. Restano da fare per volume, senza impedimenti: gli 8 `.storia36/analysis/` (vanno in `docs/kb/storia36/` e si spostano i commenti dei seed) e i 18 processi FIN_BANKING 00-17 (vanno raccolti in una pagina di dominio processi) |
+| file del progetto | 72 | 54 accorpati e spostati nel cestino (lotti PF-ACC); 7 erano già usciti con R6; 1 riconosciuto valido (il dato A2, che resta fuori dal repository pubblico perché porta nomi di produzione) | 8 di `qa-web/`: la sede versionata è `~/.claude/tools/qa-web` della VM, serve un confronto sulla VM; 2 di `consolidamento/`: la specifica è citata con quel percorso da ADR-0053 e gli appunti andrebbero in `.programmi/` |
+| datastore | 22 | nessuno | per volume: circa 6.000 righe del vault e oltre 200 rimandi da spostare, con il controllo del vault da far girare sulla VM |

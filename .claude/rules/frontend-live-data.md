@@ -13,4 +13,4 @@ Gli MVP sono **shipped**, ma la dottrina vincola **ogni nuovo lavoro frontend**:
 - **Wiring completo prima di "done"**: schema Zod condiviso → repository/service/route API → integration test → tipi frontend da `@heuresys/shared` → hook TanStack Query → componente composto da primitive `@heuresys/ui` → **Playwright E2E verde** (login reale, navigate + assert su dati seminati; le mutazioni si verificano via re-fetch). Qualunque strato mancante = non done.
 - **Correzione + retest obbligatori**: ogni regressione TypeScript, vitest, Playwright o i18n parity blocca il merge. Nessun "TODO: fix later" in codice di produzione.
 
-La dottrina è questa pagina. Il documento di maggio da cui nasce (`NEXT_SESSION_MVP_2A.md`) è ritirato: si recupera dal registro dei ritiri, `docs/piani/riordino-documentazione_20261125/REGISTRO_RITIRI.tsv`.
+La dottrina è questa pagina. Il documento di maggio da cui nasce (`docs/archive/NEXT_SESSION_MVP_2A.md`) resta in archivio come storia: non è più la dottrina.

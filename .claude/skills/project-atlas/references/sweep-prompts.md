@@ -55,7 +55,7 @@ counts nel return: {modules: N, endpoints: N, tables_distinct: N}.
 ```
 REGOLE COMUNI (vedi sopra)
 
-TASK: inventario frontend Next.js 15 App Router. Scope: {{TARGETS}}.
+TASK: inventario frontend Next.js 16 App Router. Scope: {{TARGETS}}.
 
 Per OGNI pagina estrai (Read del page.tsx + dei componenti locali importati se necessario):
 1. route URL derivata dal path della dir (le route group (xxx) non compaiono nell'URL).

@@ -8,28 +8,32 @@ source bundle (docs/source_bundle/, docs/brownfield raw) e i generati graphify-o
 Niente codice/test/schemi (quelli vanno a graphify).
 
 Usage: python build_linked_manifest.py [out.yaml]
-Default out: C:\\Users\\enzospenuso\\wiki-space\\heuresys-advanced-wiki\\linked_sources.yaml
+Default out: la variabile HEURESYS_LINKED_MANIFEST (nessun percorso fisso)
 """
 import os
 import sys
 
 import yaml
 
-INDEX = r"D:\heuresys-advanced\docs\kb\index_paths.yaml"
-DEFAULT_OUT = r"C:\Users\enzospenuso\wiki-space\heuresys-advanced-wiki\linked_sources.yaml"
+ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."))
+INDEX = os.path.join(ROOT, "docs", "kb", "index_paths.yaml")
+DEFAULT_OUT = os.environ.get("HEURESYS_LINKED_MANIFEST", "")
 
 PROSE_CATEGORIES = {"ADR", "doc-canonical"}
 EXCLUDE_SUBSTRINGS = [
-    os.path.normcase("docs\\source_bundle\\"),
-    os.path.normcase("docs\\brownfield\\_inspection"),
-    os.path.normcase("graphify-out"),
-    os.path.normcase("docs\\kb\\tools\\"),   # tooling, not prose
-    os.path.normcase("docs\\github\\"),      # corso GitHub generico, non dominio heuresys (resta in indice+graphify)
+    "docs/source_bundle/",
+    "docs/brownfield/_inspection",
+    "graphify-out",
+    "docs/kb/tools/",   # tooling, not prose
+    "docs/github/",      # corso GitHub generico, non dominio heuresys (resta in indice+graphify)
 ]
 
 
 def main(argv):
     out = argv[1] if len(argv) > 1 else DEFAULT_OUT
+    if not out:
+        print("uso: build_linked_manifest.py <out.yaml> (o HEURESYS_LINKED_MANIFEST)", file=sys.stderr)
+        return 2
     with open(INDEX, "r", encoding="utf-8") as f:
         idx = yaml.safe_load(f)
 
@@ -40,7 +44,7 @@ def main(argv):
         if e.get("status") != "live":
             continue
         p = e.get("path", "")
-        pn = os.path.normcase(p)
+        pn = p.replace("\\", "/")
         if any(s in pn for s in EXCLUDE_SUBSTRINGS):
             continue
         if not p.lower().endswith((".md", ".txt")):

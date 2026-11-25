@@ -9,15 +9,16 @@ Attinge a docs/kb/index_paths.yaml. Include i file rilevanti per un knowledge gr
 sotto il mirror per preservare la risoluzione AST; i file Claude Desktop sotto _claude_desktop/.
 
 Usage: python build_graph_mirror.py [mirror_dir]
-Default mirror: C:\\Users\\enzospenuso\\wiki-space\\heuresys-advanced-graph\\src-mirror
+Default mirror: la variabile HEURESYS_GRAPH_MIRROR (nessun percorso fisso)
 """
 import os
 import sys
 
 import yaml
 
-INDEX = r"D:\heuresys-advanced\docs\kb\index_paths.yaml"
-DEFAULT_MIRROR = r"C:\Users\enzospenuso\wiki-space\heuresys-advanced-graph\src-mirror"
+ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."))
+INDEX = os.path.join(ROOT, "docs", "kb", "index_paths.yaml")
+DEFAULT_MIRROR = os.environ.get("HEURESYS_GRAPH_MIRROR", "")
 
 # categorie utili al grafo (codice + prosa + db + config); esclusi log puri
 INCLUDE_CATEGORIES = {
@@ -29,6 +30,9 @@ INCLUDE_CATEGORIES = {
 
 def main(argv):
     mirror = argv[1] if len(argv) > 1 else DEFAULT_MIRROR
+    if not mirror:
+        print("uso: build_graph_mirror.py <cartella-specchio> (o HEURESYS_GRAPH_MIRROR)", file=sys.stderr)
+        return 2
     with open(INDEX, "r", encoding="utf-8") as f:
         idx = yaml.safe_load(f)
 
@@ -53,7 +57,7 @@ def main(argv):
         if e.get("category") not in INCLUDE_CATEGORIES:
             skipped += 1
             continue
-        src = e.get("path")
+        src = os.path.join(ROOT, e.get("path", "").replace("/", os.sep))
         rel = e.get("rel", "")
         if e.get("root") == "claude-desktop":
             dest_rel = os.path.join("_claude_desktop", rel.replace("/", os.sep))

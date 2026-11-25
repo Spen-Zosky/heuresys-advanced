@@ -35,6 +35,14 @@ concetti: [agente, assistente, applet]
 |---|---|
 | perimetri dei concetti dell'agente | `python docs/kb/tools/check_concetti_agente.py` |
 
+## Costi, rischi e ritorno del gateway
+
+Dalla nota del 2026-11-05 per le decisioni A-7 e A-11 del piano interfacce, accorpata qui il 2026-11-25 dalla cartella del progetto (`gateway-agenti/`; l'originale è nel cestino del riordino). Le misure sono di quel giorno.
+
+- **Costo**: il gateway pensa con l'abbonamento (`AGENT_GATEWAY_SUBSCRIPTION_AUTH=1`, `apps/agent-gateway/src/subscription-auth.ts`), quindi il costo in euro per conversazione è zero; il costo vero è la capacità dell'abbonamento, condivisa con i thread di sviluppo. Una conversazione fa da 3 a 10 giri col modello (stima del 5/11, non misura). Ogni conversazione avvia un processo `claude` da 85-135 MB sulla VM (misura `ps` del 5/11).
+- **Rischi e come si tolgono**: l'approvazione di una scrittura è legata alla persona che l'ha chiesta e le conversazioni hanno un tetto per persona e in totale (`apps/agent-gateway/src/server.ts`, `apps/agent-gateway/src/limiti.ts`; erano R3 e R4 della nota); il gateway e il giudice del consolidamento stanno nello stesso processo, quindi un sovraccarico dell'uno ferma l'altro (R5); le risposte dell'API mandate al modello non si richiamano, e per questo ci sono il contatore delle persone distinte e le soglie (`persone-distinte.ts`, `soglie-persone.ts`, R6); ogni scrittura dell'assistente passa dall'approvazione umana con il diniego come scelta predefinita (`write-gate.ts`, R7); il diario va nel database solo con la sua configurazione, altrimenti su file (R8, da misurare nella dimostrazione); `API_DOCS_ENABLED` mostra la mappa OpenAPI a chi ha fatto login (R9); `NEXT_PUBLIC_ENABLE_AGENT_DEV` si fissa alla costruzione del web, quindi cambiarlo vuol dire ricostruire e rilasciare (R10).
+- **Come si torna indietro**: assistente aperto al web, si toglie la regola nginx verso la porta 8790 o si spegne la rotta `/agent` (un minuto); gateway intero, `systemctl stop heuresys-agent-gateway`, che ferma anche il giudice (secondi); `API_DOCS_ENABLED`, si rimette a false e si riavvia l'API (un minuto); `NEXT_PUBLIC_ENABLE_AGENT_DEV`, si ricostruisce il web e si rilascia (10-20 minuti); le scritture dell'agente sono scritture approvate da una persona e si correggono come le altre; i dati già inviati al modello sono la sola parte che non torna indietro.
+
 ## Storia
 
 <!-- generato:storia -->

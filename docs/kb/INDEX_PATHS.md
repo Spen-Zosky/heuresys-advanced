@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-11-25T18:37:04Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3997**
+**Generato**: 2026-11-25T18:46:15Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3992**
 
 > Generato: tutti i file tracciati dal repo (`git ls-files`), con percorsi relativi alla radice. Gemello machine-readable: `index_paths.yaml`. La mappa per argomento è il wiki, `docs/wiki/index.md`.
 
@@ -21,7 +21,7 @@
 | db-script | 174 |
 | db-seed | 117 |
 | doc-archive | 72 |
-| doc-canonical | 736 |
+| doc-canonical | 731 |
 | handoff-state | 1 |
 | qa-artifact | 49 |
 | session | 3 |
@@ -31,14 +31,14 @@
 | test | 550 |
 | ux-design-archive | 52 |
 | web-source | 449 |
-| **TOTALE** | **3997** |
+| **TOTALE** | **3992** |
 
 ## Conteggi per status
 
 | Status | File |
 |---|---|
 | archive | 221 |
-| live | 3776 |
+| live | 3771 |
 
 ## File per categoria
 
@@ -2404,8 +2404,8 @@
 - `docs/kb/analisi/endpoint-orfani/ENDPOINT_ORFANI_CLASSIFICATI_20261116.tsv` · *live* · git-tracked
 - `docs/kb/analisi/endpoint-orfani/LEGGIMI.md` · *live* · git-tracked
 - `docs/kb/analisi/endpoint-orfani/classifica.py` · *live* · git-tracked
-- `docs/kb/analisi/endpoint-orfani/estrai_rotte_corretto.py` · *live* · git-tracked
 - `docs/kb/analisi/endpoint-orfani/misura_orfani.py` · *live* · git-tracked
+- `docs/kb/analisi/endpoint-orfani/strumenti/estrai_rotte.py` · *live* · git-tracked
 - `docs/kb/atlas/ATLAS.md` · *live* · git-tracked
 - `docs/kb/atlas/ATLAS_CURATED.md` · *live* · git-tracked
 - `docs/kb/atlas/agent-operations.json` · *live* · git-tracked
@@ -2722,11 +2722,6 @@
 - `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/15_IT_and_Banking_Technology_Operations.md` · *live* · git-tracked
 - `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/16_Business_Continuity_and_Security.md` · *live* · git-tracked
 - `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/17_AI_Augmented_Banking_Processes.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/18_KPI_Library_Cascading_and_Assessment_Model.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/19_Position_Based_Learning_Path_Management.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/20_Workforce_Intelligence_Gap_Analysis_and_Talent_Weighting.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/21_Career_Planning_Talent_Mobility_and_Succession.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/22_Compensation_Intelligence_and_Objective_Based_Reward_Input.md` · *live* · git-tracked
 - `docs/source_bundle/extracted_bootstrap/manifest.json` · *live* · git-tracked
 - `docs/source_bundle/extracted_bootstrap/schemas/position_intelligence_profile.schema.json` · *live* · git-tracked
 - `docs/source_bundle/extracted_bootstrap/scripts/apply_bundle.ps1` · *live* · git-tracked

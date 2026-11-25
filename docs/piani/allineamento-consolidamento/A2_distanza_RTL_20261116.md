@@ -1,6 +1,6 @@
 # A2 — La distanza fra RTL Bank e la corsa p20261010010521tjb, misurata il 2026-11-16
 
-Voce A2 del piano `docs/piani/PIANO_allineamento-consolidamento_20261116.md`. Criterio di «fatta»: su RTL contro la corsa `p20261010010521tjb` la misura ridà i numeri di `confronto-corsa-rtl/dati_20261111/riepilogo.json` (file del progetto) o spiega ogni differenza con una query.
+Voce A2 del piano `docs/piani/PIANO_allineamento-consolidamento_20261116.md`. Criterio di «fatta»: su RTL contro la corsa `p20261010010521tjb` la misura ridà i numeri di `esecuzione/_misure/CONFRONTO_TJB_RTL_20261111/confronto/riepilogo.json` di heuresys-datastore (la copia nei file del progetto è stata accorpata lì il 2026-11-25) o spiega ogni differenza con una query.
 
 ## Lo strumento
 

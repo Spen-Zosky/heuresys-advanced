@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-11-25T18:37:04Z da docs/kb/tools/build_index.py
+# generato: 2026-11-25T18:46:15Z da docs/kb/tools/build_index.py
 # tutti i file tracciati dal repo; percorsi relativi alla radice
 meta:
-  generated_at: "2026-11-25T18:37:04Z"
-  total_files: 3997
+  generated_at: "2026-11-25T18:46:15Z"
+  total_files: 3992
   roots:
     repo: '.'
   category_counts:
@@ -20,7 +20,7 @@ meta:
     db-script: 174
     db-seed: 117
     doc-archive: 72
-    doc-canonical: 736
+    doc-canonical: 731
     handoff-state: 1
     qa-artifact: 49
     session: 3
@@ -32,7 +32,7 @@ meta:
     web-source: 449
   status_counts:
     archive: 221
-    live: 3776
+    live: 3771
 files:
   - path: 'docs/architecture/adr/.keep'
     root: repo
@@ -13954,15 +13954,15 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
-  - path: 'docs/kb/analisi/endpoint-orfani/estrai_rotte_corretto.py'
-    root: repo
-    rel: 'docs/kb/analisi/endpoint-orfani/estrai_rotte_corretto.py'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
   - path: 'docs/kb/analisi/endpoint-orfani/misura_orfani.py'
     root: repo
     rel: 'docs/kb/analisi/endpoint-orfani/misura_orfani.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/kb/analisi/endpoint-orfani/strumenti/estrai_rotte.py'
+    root: repo
+    rel: 'docs/kb/analisi/endpoint-orfani/strumenti/estrai_rotte.py'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -15859,36 +15859,6 @@ files:
   - path: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/17_AI_Augmented_Banking_Processes.md'
     root: repo
     rel: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/17_AI_Augmented_Banking_Processes.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/18_KPI_Library_Cascading_and_Assessment_Model.md'
-    root: repo
-    rel: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/18_KPI_Library_Cascading_and_Assessment_Model.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/19_Position_Based_Learning_Path_Management.md'
-    root: repo
-    rel: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/19_Position_Based_Learning_Path_Management.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/20_Workforce_Intelligence_Gap_Analysis_and_Talent_Weighting.md'
-    root: repo
-    rel: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/20_Workforce_Intelligence_Gap_Analysis_and_Talent_Weighting.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/21_Career_Planning_Talent_Mobility_and_Succession.md'
-    root: repo
-    rel: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/21_Career_Planning_Talent_Mobility_and_Succession.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/22_Compensation_Intelligence_and_Objective_Based_Reward_Input.md'
-    root: repo
-    rel: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/22_Compensation_Intelligence_and_Objective_Based_Reward_Input.md'
     category: doc-canonical
     status: live
     provenance: git-tracked

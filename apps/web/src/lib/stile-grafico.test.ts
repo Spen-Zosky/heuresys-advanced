@@ -174,7 +174,8 @@ describe("giro del 25/11: scala, nome sotto le etichette ruotate, etichette stre
     const ingombro = Math.ceil(larghezzaStimata("2023-08") * Math.sin(Math.PI / 6) + 12 * Math.cos(Math.PI / 6) + 8);
     expect(o.xAxis.nameGap).toBe(ingombro + 12);
     expect(o.xAxis.nameGap).toBeGreaterThan(28);
-    expect(o.grid.bottom).toBeGreaterThanOrEqual(o.xAxis.nameGap + 16);
+    // con containLabel il margine conta dal fondo delle etichette: quanto il nome sporge oltre, più un respiro
+    expect(o.grid.bottom).toBe(Math.max(40, o.xAxis.nameGap + 12 - ingombro + 8));
   });
 
   it("senza rotazione il nome dell'asse resta dove la pagina lo mette", () => {

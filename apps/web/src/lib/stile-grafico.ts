@@ -180,12 +180,13 @@ export function nomeSottoEtichetteRuotate<T>(option: T, larghezza: (testo: strin
     // l'etichetta ruotata occupa in altezza la sua lunghezza per il seno e il corpo per il coseno; 8 px di margine dall'asse
     const ingombro = Math.ceil(piuLunga * Math.sin(r) + corpo * Math.cos(r) + 8);
     const gap = Math.max(typeof a.nameGap === "number" ? a.nameGap : 0, ingombro + 12);
-    serve = Math.max(serve, gap + 16);
+    // con containLabel il margine basso conta dal fondo delle etichette: serve solo ciò che il nome
+    // sporge oltre (la sua distanza dall'asse più il corpo, meno l'ingombro), più un respiro
+    serve = Math.max(serve, gap + corpo - ingombro + 8);
     return { ...a, nameGap: gap };
   });
   if (serve > 0) {
     const g: Oggetto = oggetto(o.grid) ? { ...o.grid } : {};
-    // con containLabel il margine basso conta dal fondo delle etichette: basta quello che il nome sporge oltre
     if (typeof g.bottom !== "number" || g.bottom < serve) g.bottom = serve;
     o.grid = g;
   }

@@ -108,7 +108,9 @@ function rendiLeggibile(option: RawProps["option"], locale: string, stretto = fa
       const se = x as Record<string, unknown>;
       const lb = se.label as Record<string, unknown> | undefined;
       if (se.type === "heatmap" || !lb || lb.show !== true || lb.formatter !== undefined) return x;
-      return { ...se, label: { ...lb, formatter: (p: { value?: unknown }) => num(Array.isArray(p.value) ? p.value[p.value.length - 1] : p.value) } };
+      // solo valori semplici: in un dato a coppie la posizione del valore dipende dall'asse
+      if ((se.data as unknown[] | undefined)?.some((d) => Array.isArray(d) || (d && typeof d === "object" && Array.isArray((d as { value?: unknown }).value)))) return x;
+      return { ...se, label: { ...lb, formatter: (p: { value?: unknown }) => num(p.value) } };
     });
   }
   const serie = Array.isArray(o.series) ? (o.series as unknown[]).length : 0;

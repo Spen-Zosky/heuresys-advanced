@@ -1,0 +1,16 @@
+# Static unit (nessun segnaposto). Si installa a mano, vedi README.md qui accanto.
+#
+# Una volta a settimana (D4 di Enzo, 25/11/2026): il lunedì alle 06:30, ora della VM.
+[Unit]
+Description=Heuresys Advanced — tick settimanale del controllo di verità del wiki (R13)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+
+[Timer]
+OnCalendar=Mon *-*-* 06:30:00
+RandomizedDelaySec=600
+# Recupera il giro perso se la VM era spenta.
+Persistent=true
+Unit=heuresys-advanced-lint-verita.service
+
+[Install]
+WantedBy=timers.target

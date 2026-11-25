@@ -13,13 +13,14 @@ documento superato non contano: escono insieme.
 
 Classi del citante:
   migrazione  db/migrations/** (non si modifica: cambierebbe l'impronta)
+  storico     archivi e registri chiusi (STORICI): la citazione è storia, non uso
   workflow    .github/**
   generato    indici e viste rigenerati da uno script (si rigenerano dopo)
   codice      sorgenti, script, SQL, configurazione
   documento   ogni altro file tracciato
 
 Uso:
-  python3 docs/kb/tools/mappa_rimandi.py --censimento <tsv> --out <tsv> [--repo <dir>]
+  python3 docs/kb/tools/mappa_rimandi.py --censimento <tsv> --out <tsv> [--repo <dir>] [--citanti <tsv>]
 Esce 0 e stampa un riepilogo; il dettaglio va in --out, una riga per documento.
 Funziona su qualunque repo git (lo stesso file serve al datastore).
 """
@@ -40,7 +41,17 @@ NOMI_GENERICI = {
 # il censimento e la mappa nominano per forza ogni documento: non contano
 IGNORATI = (
     "docs/piani/riordino-documentazione_", "docs/piani/PIANO_riordino-documentazione_",
-    "esecuzione/_misure/CENSIMENTO_DOCUMENTI_", "esecuzione/piani/124_PIANO_IL_RIORDINO",
+    "esecuzione/_misure/CENSIMENTO_DOCUMENTI_", "esecuzione/_misure/MAPPA_RIMANDI_",
+    "esecuzione/piani/124_PIANO_IL_RIORDINO",
+)
+# Una citazione da qui è storia: non trattiene il documento, che resta recuperabile
+# dal registro dei ritiri (commit e copia). Decisione del 2026-11-25 nel piano.
+STORICI = (
+    "docs/archive/", "docs/kb/COWORK_INBOX.md", "qa_artifacts/", "cowork_reserved/",
+    "docs/source_bundle/extracted_bootstrap/",
+    # heuresys-datastore: misure, posta con Cowork, stato archiviato, materiale congelato
+    "esecuzione/_misure/", "cowork_exchange/_outbox_cowork/", "cowork_exchange/_inbox_cowork/",
+    "esecuzione/STATO_CORRENTE_ARCHIVIO.md", "_recupero_20260716/", "_originali_consegnati/",
 )
 GENERATI = (
     "docs/kb/INDEX_PATHS.md", "docs/kb/index_paths.yaml", "docs/kb/atlas/",
@@ -53,6 +64,8 @@ CODICE = (".ts", ".tsx", ".js", ".mjs", ".cjs", ".py", ".sh", ".ps1", ".sql",
 def classe(citante: str) -> str:
     if "db/migrations/" in citante:
         return "migrazione"
+    if citante.startswith(STORICI):
+        return "storico"
     if citante.startswith(".github/"):
         return "workflow"
     if citante.startswith(GENERATI):
@@ -67,6 +80,12 @@ def main() -> int:
     ap.add_argument("--censimento", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--repo", default=".")
+    ap.add_argument("--uscenti", help="elenco dei soli file che escono adesso: le citazioni "
+                    "da un superato che resta allora contano (altrimenti il suo link si romperebbe)")
+    ap.add_argument("--link-vincolanti", action="store_true",
+                    help="un link markdown trattiene il documento anche da un citante storico "
+                    "(serve dove un controllo verifica i link di tutti i file, come nel datastore)")
+    ap.add_argument("--citanti", help="tsv con ogni citazione: bersaglio, classe, citante:riga")
     a = ap.parse_args()
     root = subprocess.check_output(["git", "-C", a.repo, "rev-parse", "--show-toplevel"], text=True).strip()
 
@@ -75,8 +94,22 @@ def main() -> int:
     verdetto = {r["path"]: r["verdetto"] for r in righe}
     bersagli = [p for p, v in verdetto.items() if v in DA_TOGLIERE]
     uscenti = set(bersagli)
+    if a.uscenti:
+        with open(a.uscenti, encoding="utf-8") as f:
+            uscenti = {r.strip() for r in f if r.strip()}
 
     nomi = collections.Counter(os.path.basename(p) for p in bersagli)
+    # un rimando Obsidian ([[NOME]], [[cartella/NOME|testo]]) omette l'estensione:
+    # si riconosce solo dentro le doppie quadre, perché fuori un nome come
+    # sys_job_roles è una tabella e non un documento
+    steli = collections.defaultdict(list)
+    for p in bersagli:
+        if p.endswith(".md"):
+            steli[os.path.basename(p)[:-3]].append(p)
+    # un link markdown relativo ([x](../y/README.md)) si risolve dalla cartella del citante:
+    # i suoi suffissi da soli non bastano quando il nome è generico
+    link_re = re.compile(r"\]\(([^)\s#]+)")
+    wiki_re = re.compile(r"\[\[([^\]|#]+)")
     chiavi = {}  # stringa cercata -> bersagli che rappresenta
     for p in bersagli:
         chiavi.setdefault(p, []).append(p)
@@ -105,6 +138,19 @@ def main() -> int:
         if b"\0" in grezzo[:8000]:
             continue
         for num, riga in enumerate(grezzo.decode("utf-8", "replace").splitlines(), 1):
+            for dest in link_re.findall(riga):
+                t = os.path.normpath(os.path.join(os.path.dirname(citante), dest)).replace(os.sep, "/")
+                for p in chiavi.get(t, []):
+                    if p != citante:
+                        k = "documento" if a.link_vincolanti and classe(citante) in ("storico", "generato") else classe(citante)
+                        citazioni[p][k].append(f"{citante}:{num}")
+            for link in wiki_re.findall(riga):
+                nome = link.strip().split("/")[-1]
+                if nome.endswith(".md"):
+                    nome = nome[:-3]
+                for p in steli.get(nome, []):
+                    if p != citante:
+                        citazioni[p][classe(citante)].append(f"{citante}:{num}")
             for tok in token_re.findall(riga):
                 parti = tok.split("/")
                 trovati = set()
@@ -117,29 +163,39 @@ def main() -> int:
                     if p != citante:
                         citazioni[p][classe(citante)].append(f"{citante}:{num}")
 
-    classi = ["documento", "codice", "workflow", "migrazione", "generato"]
+    classi = ["documento", "codice", "workflow", "migrazione", "storico", "generato"]
+    vincolanti = 3  # documento, codice, workflow; migrazioni, storici e generati non trattengono
     with open(a.out, "w", encoding="utf-8", newline="") as f:
         w = csv.writer(f, delimiter="\t", lineterminator="\n")
         w.writerow(["path", "verdetto"] + classi + ["libero", "esempi"])
         for p in sorted(bersagli):
             c = citazioni.get(p, {})
             n = [len(set(c.get(k, []))) for k in classi]
-            libero = "sì" if sum(n[:4]) == 0 else "no"
+            libero = "sì" if sum(n[:vincolanti]) == 0 else "no"
             esempi = []
-            for k in classi[:4]:
+            for k in classi[:vincolanti]:
                 esempi += sorted(set(c.get(k, [])))[:2]
             w.writerow([p, verdetto[p]] + n + [libero, " ".join(esempi[:6])])
+
+    if a.citanti:
+        with open(a.citanti, "w", encoding="utf-8", newline="") as f:
+            w = csv.writer(f, delimiter="\t", lineterminator="\n")
+            w.writerow(["bersaglio", "classe", "citante"])
+            for p in sorted(citazioni):
+                for k in classi:
+                    for c in sorted(set(citazioni[p].get(k, []))):
+                        w.writerow([p, k, c])
 
     tot = collections.Counter()
     for p in bersagli:
         c = citazioni.get(p, {})
-        if not any(c.get(k) for k in classi[:4]):
+        if not any(c.get(k) for k in classi[:vincolanti]):
             tot["liberi"] += 1
         for k in classi:
             if c.get(k):
                 tot[k] += 1
     print(f"documenti da togliere: {len(bersagli)}")
-    print(f"  liberi (nessun citante vivo fuori dai generati): {tot['liberi']}")
+    print(f"  liberi (nessun documento, codice o workflow vivo lo cita): {tot['liberi']}")
     for k in classi:
         print(f"  citati da {k}: {tot[k]}")
     print(f"dettaglio: {a.out}")

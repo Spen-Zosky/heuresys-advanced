@@ -26,6 +26,10 @@ Un passo si chiude solo con una dimostrazione dal vivo su dati reali: comando, o
 - Stati di una voce (insieme chiuso): `ACTIVE`, `GATED`, `WAIT-INPUT`, `HOLD`, `INTERRUPTED`, `DONE`/`FATTO`/`WON'T-DO`. Il controllo di integrità è `docs/kb/tools/handoff_lint.py`.
 - Chi scrive: l'unico che scrive e committa `docs/kb/` è Claude Code CLI. Cowork scrive solo in fondo a `docs/kb/COWORK_INBOX.md` (una voce datata `### YYYY-MM-DD | tipo | titolo`); la CLI la riconcilia e la marca `stato: [RICONCILIATA <commit>]`. Su questo progetto non si usano `cowork_code_exchange/` né le skill `cowork-cli-protocol`/`cowork-cli-orchestrator`. Voci aperte: `python docs/kb/tools/check_canale_cowork.py`.
 
+## Documentazione
+
+La porta d'ingresso è il wiki in `docs/wiki/` (modello llm-wiki, schema in `docs/wiki/LEGGIMI.md`): una pagina per dominio con com'è oggi, decisioni in vigore, come si fa, stato e storia, più l'indice e l'indice analitico, che si rigenerano con `python3 docs/kb/tools/build_wiki.py`. Un documento vivo porta i metadati `dominio`, `natura`, `stato`, `aggiornato_il`, `sintesi`. Ciò che è superato non si corregge e non si cita: si ritira con `python3 docs/kb/tools/ritira_documenti.py` (copia nel cestino del progetto, riga nel registro `docs/piani/riordino-documentazione_20261125/REGISTRO_RITIRI.tsv`, recupero con `git show`). Il controllo è `python3 docs/kb/tools/check_documenti.py` (in CI con `state-lint`); le frasi che non devono tornare stanno in `docs/wiki/affermazioni_vietate.txt`; il lunedì `scripts/lint-verita.sh` confronta il wiki con il codice e apre una PR in bozza con le contraddizioni.
+
 ## Avvio di sessione
 
 Il primo messaggio sceglie la modalità (`docs/kb/xtras/SESSION_MODES.md`): `avvia sessione` apre una sessione canonica; `avvia sessione lab` una sessione di sola analisi in parallelo, con scritture bloccate e artefatti in `<cartella superiore>/heuresys-design-lab/`, senza menu. Qualunque altro messaggio vale come canonica.

@@ -24,7 +24,7 @@ Import con `@heuresys/api`, `@heuresys/web`, `@heuresys/shared` e subpath tipo `
 
 ## La catena di 13 plugin — non riordinare
 
-`apps/api/src/app.ts` costruisce Fastify con una catena **fissa** (dettaglio: `docs/api/API_IMPLEMENTATION_PLAN.md` §3.2):
+`apps/api/src/app.ts` costruisce Fastify con una catena **fissa** (la fonte è il codice di `apps/api/src/app.ts`):
 
 ```
 1. Zod type-provider compilers → 2. requestId → 3. helmet → 4. cors

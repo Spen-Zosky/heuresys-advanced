@@ -82,6 +82,11 @@ def leggi_adr() -> list[dict]:
         # toglie il grassetto, o «**ACCEPTED** - approvato da…» finisce intero nella colonna.
         stato_breve = (stato.split("(")[0].split("—")[0].split(" - ")[0]
                        .replace("**", "").strip() or "—")
+        # un ADR superato solo in parte resta in vigore, ma l'indice deve dirlo: con la
+        # sola prima parola 0039 e 0040 comparivano ACCEPTED e basta (riordino 2026-11-25)
+        parti = re.findall(r"Superseded in part by\W*(?:\[)?ADR[‑\-–]?(\d{4})", testa, re.IGNORECASE)
+        if parti:
+            stato_breve += " · in parte superato da " + ", ".join(f"ADR-{x}" for x in dict.fromkeys(parti))
         voci.append({
             "num": num, "file": f.name, "titolo": titolo,
             "stato": stato_breve, "data": campo(testa, "Date") or "—",
@@ -133,6 +138,11 @@ def genera() -> str:
         desc = desc.replace("\n", " ")
         righe.append(f"| [{v['num']}](adr/{v['file']}) | {titolo} | {v['stato']} | {desc} | {v['data']} |")
     righe.append("")
+    usati = {int(v["num"]) for v in voci}
+    buchi = [f"{n:04d}" for n in range(1, max(usati)) if n not in usati] if usati else []
+    if buchi:
+        righe.append("Numeri mai usati (nessun file, nessuna decisione): " + ", ".join(buchi) + ".")
+        righe.append("")
     coda = coda_conventions()
     if coda:
         righe.append(coda)

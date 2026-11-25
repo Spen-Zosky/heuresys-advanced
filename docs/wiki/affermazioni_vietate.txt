@@ -1,0 +1,19 @@
+# Affermazioni vietate perché false (controllo A5 di docs/kb/tools/check_documenti.py).
+# Una espressione regolare per riga, senza distinzione fra maiuscole e minuscole.
+# Una riga che comincia con ! esenta quel file (deve dire perché, in un commento sopra).
+#
+# Il motore degli agenti: abbonamento di Enzo, questione chiusa (CLAUDE.md, ADR-0056 D3).
+serve (l'|la )?approvazione di Anthropic
+serve una chiave API
+blocked-on-Enzo: *ANTHROPIC_API_KEY
+# Il canale cowork_code_exchange è ritirato: su questo repo Cowork scrive solo in COWORK_INBOX.md.
+cowork_code_exchange/? *(è|resta) (il )?canale (vivo|attivo)
+# L'ingestione dal legacy è chiusa dal 2026-08-14 (ADR-0038).
+fonte autorevole[^.]{0,80}heuresys-evo
+# Versioni del runtime (apps/api/package.json, apps/web/package.json).
+\bFastify 4\b
+\bNext\.js 15\b
+#
+# CLAUDE.md cita le frasi vietate per vietarle; il registro del wiki racconta le correzioni.
+!CLAUDE.md
+!docs/wiki/log.md

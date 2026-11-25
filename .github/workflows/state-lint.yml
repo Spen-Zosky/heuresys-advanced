@@ -17,6 +17,13 @@ on:
       - ".programmi/**"
       - "docs/kb/tools/programmi.py"
       - ".github/workflows/state-lint.yml"
+      # riordino della documentazione (2026-11-25): i documenti vivi e l'indice degli ADR
+      - "**.md"
+      - "docs/wiki/**"
+      - "docs/kb/tools/check_documenti.py"
+      - "docs/kb/tools/build_adr_index.py"
+      - "docs/kb/tools/build_wiki.py"
+      - "docs/piani/riordino-documentazione_20261125/**"
   pull_request:
     branches: [main]
     paths:
@@ -28,6 +35,13 @@ on:
       - ".programmi/**"
       - "docs/kb/tools/programmi.py"
       - ".github/workflows/state-lint.yml"
+      # riordino della documentazione (2026-11-25): i documenti vivi e l'indice degli ADR
+      - "**.md"
+      - "docs/wiki/**"
+      - "docs/kb/tools/check_documenti.py"
+      - "docs/kb/tools/build_adr_index.py"
+      - "docs/kb/tools/build_wiki.py"
+      - "docs/piani/riordino-documentazione_20261125/**"
   # Giro giornaliero (2026-11-20): su main state-lint gira solo quando si toccano i file di stato,
   # e cosi' e' rimasto rosso dal 5 al 20/11 senza che nessuno lo vedesse (SOT_STATE indietro di 31
   # migrazioni, un modulo senza test). Ogni mattina alle 05:40 UTC gira su main; se e' rosso, il job
@@ -86,6 +100,22 @@ jobs:
 
       - name: Module/test coverage census — repo
         run: python3 docs/kb/tools/check_module_test_coverage.py
+
+      # Riordino della documentazione (piano 2026-11-25, automazioni A1-A6). I documenti
+      # vivi (docs/wiki, i file con `stato: vivo`, CLAUDE.md, README, regole, skill) hanno
+      # metadati validi, link che risolvono, nessun rimando a documenti ritirati e nessuna
+      # affermazione vietata; l'indice degli ADR coincide con gli Status dei file.
+      - name: Documenti vivi — self-test dello strumento
+        run: python3 docs/kb/tools/check_documenti.py --selftest
+
+      - name: Documenti vivi — metadati, link, rimandi, affermazioni vietate (blocking gate)
+        run: python3 docs/kb/tools/check_documenti.py
+
+      - name: Indice degli ADR allineato ai file
+        run: python3 docs/kb/tools/build_adr_index.py --check
+
+      - name: Parti generate del wiki allineate (index, indice analitico, decisioni, storia)
+        run: python3 docs/kb/tools/build_wiki.py --check
 
   avviso:
     # Solo per il giro giornaliero o un lancio a mano, e solo se state-lint e' rosso: un'issue

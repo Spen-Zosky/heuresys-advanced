@@ -190,3 +190,7 @@ Scoperte di passaggio, da proporre una volta e non da eseguire qui: `PIANO_veloc
 ## 9. Nota sui dati di RTL Bank
 
 Tutti i dati del tenant RTL Bank, persone comprese, sono inventati: RTL è un tenant dimostrativo trattato come reale solo per sviluppo e prova (chiarimento di Enzo del 2026-11-25). I file che li contengono si trattano come ogni altro documento, secondo il loro verdetto, senza nessuna priorità o cautela per la riservatezza.
+
+## 10. Regola dei rimandi storici (2026-11-25)
+
+Un documento superato esce anche se lo citano solo archivi (`docs/archive/`), migrazioni già applicate, `docs/kb/COWORK_INBOX.md`, `qa_artifacts/`, `cowork_reserved/` o `docs/source_bundle/extracted_bootstrap/`: quella citazione è storia, non uso, e il file resta recuperabile dal registro dei ritiri (commit e copia nel cestino). Lo trattengono ancora un documento vivo, un sorgente o un workflow. Scelta del coordinatore sul metodo approvato da Enzo; la applica `docs/kb/tools/mappa_rimandi.py` (classi `storico` e `migrazione`, che non trattengono). Con la regola i documenti liberi passano da 611 a 777 su 1.009 (`python3 docs/kb/tools/mappa_rimandi.py --censimento docs/piani/riordino-documentazione_20261125/CENSIMENTO_advanced.tsv --out <tsv>`).

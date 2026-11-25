@@ -50,6 +50,13 @@ REGISTRI_RITIRI = (
     "esecuzione/_misure/REGISTRO_RITIRI_20261125.tsv",
 )
 VIETATE = "docs/wiki/affermazioni_vietate.txt"
+# Registri in sola aggiunta (posta con Cowork, misure, archivi): che nominino un documento poi
+# ritirato è storia, non uso, e la regola A4 non li guarda (stessa lista di mappa_rimandi.STORICI).
+STORICI = (
+    "docs/archive/", "docs/kb/COWORK_INBOX.md", "qa_artifacts/", "cowork_reserved/",
+    "esecuzione/_misure/", "cowork_exchange/_outbox_cowork/", "cowork_exchange/_inbox_cowork/",
+    "esecuzione/STATO_CORRENTE_ARCHIVIO.md",
+)
 
 LINK_RE = re.compile(r"\[[^\]\n]*\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
 WIKI_RE = re.compile(r"\[\[([^\]|#\n]+)")
@@ -174,6 +181,7 @@ def main() -> int:
 
     if tutti or a.link or a.rimandi:
         for p in vivi:
+            storico = p.startswith(STORICI)
             base = os.path.dirname(p)
             for n, riga in enumerate(righe_utili(testi[p]), 1):
                 for dest in LINK_RE.findall(riga):
@@ -184,7 +192,7 @@ def main() -> int:
                         continue
                     t = os.path.normpath(os.path.join(base, dest)).replace(os.sep, "/")
                     if t in ritirati:
-                        if tutti or a.rimandi:
+                        if (tutti or a.rimandi) and not storico:
                             rossi.append(f"A4 {p}:{n}: rimanda a {t}, ritirato (recupero da {ritirati[t]})")
                     elif t in sostituiti:
                         if tutti or a.rimandi:
@@ -197,7 +205,7 @@ def main() -> int:
                     nome = nome[:-3] if nome.endswith(".md") else nome
                     if nome not in stemmi and (tutti or a.link):
                         rossi.append(f"A2 {p}:{n}: rimando [[{w.strip()}]] senza pagina")
-            if tutti or a.rimandi:
+            if (tutti or a.rimandi) and not storico:
                 for r in ritirati:
                     if r in testi[p]:
                         voce = f"A4 {p}: nomina {r}, ritirato (recupero da {ritirati[r]})"
@@ -271,6 +279,8 @@ def selftest() -> int:
         scrivi("docs/wiki/domini/prova.md", "---\ndominio: inventato\nnatura: riferimento\nstato: vivo\n"
                "aggiornato_il: 2026-13-01\nfonti: [apps/manca.ts]\n---\n"
                "Vedi [v](../../vecchio.md), [r](nonce.md), [[Fantasma]].\nQui serve una chiave API.\n")
+        # un registro in sola aggiunta che nomina un ritirato non è un rilievo
+        scrivi("cowork_exchange/_outbox_cowork/OUTBOX.md", "---\nstato: vivo\n---\nCitato docs/vecchio.md.\n")
         rosso = gira()
         meta = "---\ndominio: governo\nnatura: riferimento\nstato: vivo\naggiornato_il: 2026-11-25\nfonti: []\n---\n"
         scrivi("docs/wiki/domini/nuda.md", meta + "# ok\n")

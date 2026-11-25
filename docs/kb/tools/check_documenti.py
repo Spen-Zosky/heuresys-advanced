@@ -53,6 +53,7 @@ VIETATE = "docs/wiki/affermazioni_vietate.txt"
 
 LINK_RE = re.compile(r"\[[^\]\n]*\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
 WIKI_RE = re.compile(r"\[\[([^\]|#\n]+)")
+GENERATO_RE = re.compile(r"<!-- generato:\w+ -->.*?<!-- /generato -->", re.S)
 CODICE_RE = re.compile(r"```.*?```", re.S)
 INLINE_RE = re.compile(r"`[^`\n]*`")
 
@@ -100,7 +101,12 @@ def main() -> int:
         print(f"NON MISURATO: {e}")
         return 2
     insieme = set(tracciati)
-    cartelle = {os.path.dirname(p) for p in tracciati}
+    cartelle = set()
+    for p in tracciati:
+        d = os.path.dirname(p)
+        while d and d not in cartelle:
+            cartelle.add(d)
+            d = os.path.dirname(d)
     stemmi = {}
     for p in tracciati:
         if p.endswith(".md"):
@@ -112,7 +118,9 @@ def main() -> int:
             continue
         try:
             with open(os.path.join(root, p), encoding="utf-8", errors="replace") as f:
-                testi[p] = f.read()
+                # i blocchi generati (build_wiki.py) riportano titoli e percorsi delle fonti:
+                # sono dati, non affermazioni della pagina
+                testi[p] = GENERATO_RE.sub("", f.read())
         except OSError:
             continue
         meta[p] = metadati(testi[p])

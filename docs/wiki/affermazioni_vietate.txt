@@ -14,5 +14,6 @@ fonte autorevole[^.]{0,80}heuresys-evo
 \bFastify 4\b
 \bNext\.js 15\b
 #
-# CLAUDE.md cita le frasi vietate per vietarle.
+# CLAUDE.md cita le frasi vietate per vietarle; il registro del wiki racconta le correzioni.
 !CLAUDE.md
+!docs/wiki/log.md

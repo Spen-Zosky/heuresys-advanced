@@ -22,6 +22,8 @@ on:
       - "docs/wiki/**"
       - "docs/kb/tools/check_documenti.py"
       - "docs/kb/tools/build_adr_index.py"
+      - "docs/kb/tools/build_wiki.py"
+      - "docs/piani/riordino-documentazione_20261125/**"
   pull_request:
     branches: [main]
     paths:
@@ -38,6 +40,8 @@ on:
       - "docs/wiki/**"
       - "docs/kb/tools/check_documenti.py"
       - "docs/kb/tools/build_adr_index.py"
+      - "docs/kb/tools/build_wiki.py"
+      - "docs/piani/riordino-documentazione_20261125/**"
   # Giro giornaliero (2026-11-20): su main state-lint gira solo quando si toccano i file di stato,
   # e cosi' e' rimasto rosso dal 5 al 20/11 senza che nessuno lo vedesse (SOT_STATE indietro di 31
   # migrazioni, un modulo senza test). Ogni mattina alle 05:40 UTC gira su main; se e' rosso, il job
@@ -109,6 +113,9 @@ jobs:
 
       - name: Indice degli ADR allineato ai file
         run: python3 docs/kb/tools/build_adr_index.py --check
+
+      - name: Parti generate del wiki allineate (index, indice analitico, decisioni, storia)
+        run: python3 docs/kb/tools/build_wiki.py --check
 
   avviso:
     # Solo per il giro giornaliero o un lancio a mano, e solo se state-lint e' rosso: un'issue

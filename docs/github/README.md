@@ -1,5 +1,7 @@
 # Curriculum GitHub — indice + roadmap di rilascio
 
+> **Nota del 2026-11-25 (com'è oggi).** Questo curriculum è di maggio 2026, quando i repo partivano da zero. Oggi heuresys-advanced ha i workflow di `.github/workflows/`, `.github/dependabot.yml` e `.github/CODEOWNERS`; i capitoli restano utili come spiegazione, le sezioni «Applicato ai nostri repo» come fotografia di allora.
+
 > **A chi è rivolto**: a Enzo Spenuso (sole-coder). L'obiettivo è costruire un mental model strutturato di GitHub partendo da zero, **ancorato ai due repo concreti** `Spen-Zosky/heuresys-advanced` e `Spen-Zosky/ux-design-shared`.
 
 > **Approccio**: per ogni concetto GitHub introduci (a) la spiegazione "generica", (b) la sezione "applicato ai nostri repo" che dice cosa è/cosa potrebbe essere, (c) un block "comandi/checklist" pronto all'uso. Niente walkthrough lunghi che duplicano la doc ufficiale `docs.github.com` — l'indirizzo è sempre linkato come fonte di verità.

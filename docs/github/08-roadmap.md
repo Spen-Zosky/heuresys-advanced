@@ -1,5 +1,7 @@
 # 08 · Roadmap consigliata di adozione
 
+> **Nota del 2026-11-25 (com'è oggi).** Molti gradini di questa roadmap sono attivi (CI in `.github/workflows/`, Dependabot, CODEOWNERS, protezione dei rami in `docs/github/branch-protection.md`): la tabella descrive l'adozione prevista a maggio, non lo stato.
+
 > Quale feature attivare e quando. Ordina i ~30 step possibili in tier di priorità, con stima effort e prerequisiti. È **prescrittivo** ma non vincolante — usalo come check-list di valutazione.
 
 ---

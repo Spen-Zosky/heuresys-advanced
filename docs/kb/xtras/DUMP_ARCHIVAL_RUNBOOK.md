@@ -1,5 +1,7 @@
 # Dump archival runbook (QW-K3)
 
+> **Nota del 2026-11-25 (com'è oggi).** La copia ripristinabile di advanced a fine fase è `bash scripts/copia-fase.sh copia|prova|drive` (ADR-0052), con la copia cifrata su Drive; i dump non stanno più solo sul disco Windows. `scripts/archive-dumps.sh` resta lo script di questa procedura.
+
 Off-machine archival of the pre-op `pg_dump` snapshots to the OCI VM, so a local
 disk failure does not lose every restore-point.
 

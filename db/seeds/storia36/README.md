@@ -1,5 +1,7 @@
 # db/seeds/storia36 — seed del programma "36 mesi di storia RTL"
 
+> **Nota del 2026-11-25 (com'è oggi).** La cartella contiene anche i seed da `06_reorg` a `13_avanzamento` e le cartelle `avanzamento/` e `repair/` (`ls db/seeds/storia36`): la tabella qui sotto si ferma a una fase precedente. Il contratto di idempotenza resta valido; la custodia della storia è la skill `storia36-custodia`.
+
 Piano: `docs/superpowers/plans/2026-07-27-rtl-storia-36-mesi.md` · stato vivo: `.storia36/PROGRESS.md` · entrypoint: `bash db/scripts/storia36.sh {costruzione|custodia|avanzamento}`.
 
 ## Contratto di ogni seed

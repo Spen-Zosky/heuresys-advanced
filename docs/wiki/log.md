@@ -11,3 +11,4 @@ Una riga per operazione, in sola aggiunta: data, operazione, che cosa, commit o 
 | 2026-11-25 | ingest | nascono le quindici pagine di dominio, l'indice e l'indice analitico | PR #485 |
 | 2026-11-25 | lint | nasce il controllo di verità settimanale `scripts/lint-verita.sh` con il timer `heuresys-advanced-lint-verita` (da installare sulla VM); CLAUDE.md ha la sezione Documentazione | PR #485 |
 | 2026-11-25 | ingest | voce R7, primo lotto: 43 documenti «da aggiornare» riallineati (README, regole, skill, due diligence sul motore degli agenti, gateway, deploy, CI, curriculum GitHub) | PR del ramo claude/project-thread-5hihsg |
+| 2026-11-25 | ingest | voce R7, secondo lotto: 16 documenti «da aggiornare» con la nota «com'è oggi» (storia36, integrazioni, dump, Dependabot, curriculum GitHub, wargame, canale Cowork, RBAC, ASVS, sicurezza, schema, prodotto) | PR #486 |

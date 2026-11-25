@@ -1,5 +1,7 @@
 # Analisi — documenti prodotti da Cowork
 
+> **Nota del 2026-11-25 (com'è oggi).** Cowork oggi scrive solo in fondo a `docs/kb/COWORK_INBOX.md` e la CLI riconcilia (`CLAUDE.md`, «Fonti di verità»): il ciclo descritto qui è quello di prima, e i file della cartella sono storia.
+
 Questa cartella conserva le **indagini e gli inventari prodotti da Cowork** (Claude Opus,
 sessioni interattive con Enzo) su questo repository: ricognizioni, misure preliminari,
 valutazioni di opzioni architetturali.

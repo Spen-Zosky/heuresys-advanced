@@ -1,5 +1,7 @@
 # Wargames — battle plan eseguibili (2026-07-06)
 
+> **Nota del 2026-11-25 (com'è oggi).** Mappa del 2026-07-06. Lo stato di ciascun item si legge in `docs/kb/SOT_BACKLOG.md` e, per quelli chiusi, in `docs/archive/SOT_BACKLOG_CHIUSI.md`, non da questa tabella.
+
 Battle plan prodotti da Claude Fable 5 (Cowork) il 2026-07-06, prima dell'uscita di Fable dalle subscription Claude Code. Ogni piano è una simulazione mossa-per-mossa (azione → osservazione attesa → fallimento probabile → contro-mossa, fork con trigger, abort condition, verification run) progettata per essere eseguita **blind** da Claude Code CLI su un modello inferiore, senza fare domande.
 
 Questa directory è **self-contained** — tutto ciò che serve è qui dentro:

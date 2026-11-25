@@ -1,6 +1,8 @@
 # Target Schema Design
 ## Heuresys Advanced — Canonical PostgreSQL 16 Schema (`sys`)
 
+> **Nota del 2026-11-25 (com'è oggi).** Proposta di schema di maggio 2026, citata da commenti nel codice e dagli ADR 0008 e 0009. Lo schema vero è la catena di `db/migrations/`: dove questa proposta diverge, vale la catena.
+
 > **Status:** Planning deliverable #2 of 10. **Target physical schema proposal**, not immutable final SQL. Column types, index names, constraint names and minor field additions may be refined during the migration implementation (Deliverable 3), provided the architecture documented here is preserved (no rename of canonical tables, no schema relocation, no breaking FK).
 > **Source specs:** `DBMS_BOOTSTRAP_SPEC.md`, `TENANT_USER_PROFILE_MODEL.md`, `LOGICAL_DATA_MODEL_ADDENDUM.md`, `LEARNING_CATALOG_AND_GAP_CLOSURE_SPEC.md`, `GRAPH_VISUALIZATION_MODEL_SPEC.md`, processes 18/19/20/21/22.
 

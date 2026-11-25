@@ -1,6 +1,8 @@
 # Authentication & Authorization Security Plan
 ## Heuresys Advanced — Auth Foundation Design
 
+> **Nota del 2026-11-25 (com'è oggi).** Documento di progetto di maggio 2026, citato dai commenti del codice. La sintesi viva delle regole è `.claude/rules/security-auth.md`; il login con secondo fattore TOTP è in produzione.
+
 > **Status:** Planning deliverable #8 of 10.
 > **Scope:** the 11 auth tables (`sys.sys_auth_*` + `sys.sys_user_auth_roles`), password hashing, token model, cookie/CSRF defenses, refresh rotation + replay detection, role matrix, permission catalog, audit logging, MFA foundation, tenant isolation.
 > **Sources:** `AUTH_STACK_SPEC.md`, `AUTH_POLICY_MATRIX.md`, `SECURITY_AND_PRIVACY_BOUNDARIES.md`, ADR‑0005, ADR‑0006.

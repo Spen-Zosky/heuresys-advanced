@@ -1,5 +1,7 @@
 # Come funziona davvero il controllo degli accessi in Heuresys
 
+> **Nota del 2026-11-25 (com'è oggi).** Spiegazione del 2026-09-14 con i numeri di quel giorno. Il modello dei ruoli di oggi è ADR-0057, con il perimetro e le eccezioni di ADR-0036 §5 (`CLAUDE.md`, invarianti I16-I22): dove questa pagina diverge, valgono quelli.
+
 Scritto il 2026-09-14 per Enzo (Cowork, sessione `decisioni-250-240`; adottato nel repo dalla CLI in S1100 lo stesso giorno). Ogni numero qui dentro è stato misurato sul database di produzione quel giorno; i numeri cambiano, e quando cambieranno questo documento sarà vecchio — il comando che li rigenera è in fondo, e vale più dei numeri stessi. **Non copiare questi numeri in altri documenti**: qui sono datati e dichiarati tali, altrove diventerebbero cristallizzazioni (⭐ IL PUNTO FISSO del `CLAUDE.md`).
 
 ## La cosa da capire per prima: RBAC risponde a una domanda sola

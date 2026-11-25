@@ -4,6 +4,8 @@
 **Date wargamed**: 2026-07-06 (specs verified same day; releases verified via web recon same day).
 **Working dirs (fixed, do not improvise)**: PC `D:\localai\` · Mac `/Users/enzo/localai/` · VM `/home/ubuntu/localai/`
 
+> **Nota del 2026-11-25 (com'è oggi).** Piano esplorativo, non eseguito e senza voce di backlog. Il motore degli agenti è l'abbonamento Claude di Enzo (ADR-0056 D3, `CLAUDE.md`); il Mac è fuori dall'ecosistema e il PC Windows non si usa più per il datastore. Un modello locale resta un'opzione che sceglierà Enzo quando i repo apriranno al pubblico.
+
 ---
 
 ## 0. MACHINE FORK — run this first

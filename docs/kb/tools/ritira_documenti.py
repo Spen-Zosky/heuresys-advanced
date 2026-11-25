@@ -74,7 +74,8 @@ def main() -> int:
     with tempfile.TemporaryDirectory() as tmp:
         out = os.path.join(tmp, "mappa.tsv")
         subprocess.check_call([sys.executable, os.path.join(os.path.dirname(__file__), "mappa_rimandi.py"),
-                               "--censimento", a.censimento, "--out", out, "--repo", root],
+                               "--censimento", a.censimento, "--out", out, "--repo", root,
+                               "--uscenti", a.elenco],
                               stdout=subprocess.DEVNULL)
         with open(out, encoding="utf-8") as f:
             libero = {r["path"]: r["libero"] for r in csv.DictReader(f, delimiter="\t")}

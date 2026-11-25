@@ -12,7 +12,8 @@ Per ogni documento dell'elenco:
   3. `git rm` del file (il contenuto resta nella storia di git);
   4. una riga nel registro dei ritiri: path, sha256, commit da cui si recupera, lotto, data.
 
-Ritorno indietro di un file: `git checkout <commit> -- <path>` con il commit del registro,
+Il commit di recupero è l'antenato comune con origin/main, dove il file deve esistere
+identico. Ritorno indietro di un file: `git checkout <commit> -- <path>` con il commit del registro,
 oppure la copia nel cestino. Non fa commit: li fa chi lo lancia, dopo i controlli.
 
 Uso:
@@ -48,7 +49,10 @@ def main() -> int:
 
     root = subprocess.check_output(["git", "rev-parse", "--show-toplevel"], text=True).strip()
     repo = os.path.basename(root)
-    head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+    # il commit di recupero deve stare su main: un ramo unito per squash sparisce,
+    # e con lui i suoi commit. Si usa l'antenato comune con origin/main, se il file
+    # vi esiste con la stessa impronta; altrimenti il lotto si ferma.
+    head = subprocess.check_output(["git", "merge-base", "HEAD", "origin/main"], cwd=root, text=True).strip()
     with open(a.elenco, encoding="utf-8") as f:
         elenco = [r.strip() for r in f if r.strip()]
     with open(a.censimento, encoding="utf-8") as f:
@@ -61,6 +65,10 @@ def main() -> int:
             errori.append(f"{p}: verdetto «{verdetto.get(p)}», non ritirabile")
         elif not os.path.isfile(os.path.join(root, p)):
             errori.append(f"{p}: non esiste")
+        else:
+            r = subprocess.run(["git", "show", f"{head}:{p}"], cwd=root, capture_output=True)
+            if r.returncode or hashlib.sha256(r.stdout).hexdigest() != sha(os.path.join(root, p)):
+                errori.append(f"{p}: su main ({head[:9]}) manca o è diverso, il recupero non sarebbe garantito")
 
     # la mappa si ricalcola al momento: un rimando nato dopo il censimento ferma il lotto
     with tempfile.TemporaryDirectory() as tmp:

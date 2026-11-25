@@ -17,7 +17,8 @@ import path from "node:path";
 import { createRequire } from "node:module";
 import { barreOrizzontali } from "./altezza-grafico";
 import { contrasto, leggiColore } from "./colori-grafico";
-import { CONTRASTO_MINIMO, assiInteri, conStileDelTema, nomiDegliAssiInVista, type ColoriTema } from "./stile-grafico";
+import { CONTRASTO_MINIMO, LARGHEZZA_ETICHETTA_STRETTA, assiInteri, conStileDelTema, etichetteStrette, nomeSottoEtichetteRuotate, nomiDegliAssiInVista, scalaConValori, type ColoriTema } from "./stile-grafico";
+import { larghezzaStimata } from "./altezza-grafico";
 
 const SRC = path.resolve(__dirname, "..");
 const leggi = (rel: string) => fs.readFileSync(path.join(SRC, rel), "utf8");
@@ -145,5 +146,58 @@ describe("K17 — EChartsCard applica le tre regole a ogni grafico", () => {
   it("nessun grafico scrive a mano colori di griglia fuori dal tema", () => {
     const pagine = ["career-succession/page.tsx"];
     for (const p of pagine) expect(leggi(`app/(authenticated)/${p}`)).not.toMatch(/lineStyle: \{ color: "#/);
+  });
+});
+
+describe("giro del 25/11: scala, nome sotto le etichette ruotate, etichette strette", () => {
+  const num = (v: number) => new Intl.NumberFormat("it-IT", { useGrouping: "always" } as unknown as Intl.NumberFormatOptions).format(v);
+
+  it("la scala colori continua scrive massimo e minimo agli estremi", () => {
+    const o = scalaConValori({ visualMap: { min: 0, max: 1205, calculable: false } }, num) as unknown as { visualMap: { text: string[] } };
+    expect(o.visualMap.text).toEqual(["1.205", "0"]);
+  });
+
+  it("una scala che ha già un testo, o è a pezzi, resta della pagina", () => {
+    const conTesto = { visualMap: { min: 0, max: 5, text: ["alto", "basso"] } };
+    expect(scalaConValori(conTesto, num)).toEqual(conTesto);
+    const aPezzi = { visualMap: { type: "piecewise", min: 0, max: 5 } };
+    expect(scalaConValori(aPezzi, num)).toEqual(aPezzi);
+  });
+
+  it("il nome dell'asse orizzontale si sposta sotto le etichette ruotate, e la griglia gli fa posto", () => {
+    const mesi = Array.from({ length: 40 }, (_, i) => `20${23 + Math.floor(i / 12)}-${String((i % 12) + 1).padStart(2, "0")}`);
+    const o = nomeSottoEtichetteRuotate(
+      { grid: { bottom: 40, containLabel: true }, xAxis: { type: "category", data: mesi, name: "Mese", nameLocation: "middle", nameGap: 28, axisLabel: { rotate: 30 } } },
+      larghezzaStimata,
+    ) as { grid: { bottom: number }; xAxis: { nameGap: number } };
+    // «2023-08» a 12 px: 50 px di testo, ruotato di 30 gradi ne occupa 25 + 10 in altezza
+    const ingombro = Math.ceil(larghezzaStimata("2023-08") * Math.sin(Math.PI / 6) + 12 * Math.cos(Math.PI / 6) + 8);
+    expect(o.xAxis.nameGap).toBe(ingombro + 12);
+    expect(o.xAxis.nameGap).toBeGreaterThan(28);
+    // con containLabel il margine conta dal fondo delle etichette: quanto il nome sporge oltre, più un respiro
+    expect(o.grid.bottom).toBe(Math.max(40, o.xAxis.nameGap + 12 - ingombro + 8));
+  });
+
+  it("senza rotazione il nome dell'asse resta dove la pagina lo mette", () => {
+    const o = { xAxis: { type: "category", data: ["a"], name: "Mese", nameLocation: "middle", nameGap: 28, axisLabel: { rotate: 0 } } };
+    expect(nomeSottoEtichetteRuotate(o, larghezzaStimata)).toEqual(o);
+  });
+
+  it("su schermo stretto le etichette di categoria dell'asse verticale si fermano a 120 px e vanno a capo", () => {
+    const o = etichetteStrette({ yAxis: { type: "category", data: ["Direttore Generale — Marchetti, Federica"], axisLabel: { width: 300 } } }) as unknown as {
+      yAxis: { axisLabel: { width: number; overflow: string } };
+    };
+    expect(o.yAxis.axisLabel.width).toBe(LARGHEZZA_ETICHETTA_STRETTA);
+    expect(o.yAxis.axisLabel.overflow).toBe("break");
+    const valori = { yAxis: { type: "value" } };
+    expect(etichetteStrette(valori)).toEqual(valori);
+  });
+
+  it("EChartsCard applica le tre regole e passa lo schermo stretto anche al conto dell'altezza", () => {
+    const sorgente = leggi("app/(authenticated)/_charts-client.tsx");
+    expect(sorgente).toMatch(/scalaConValori\(/);
+    expect(sorgente).toMatch(/nomeSottoEtichetteRuotate\(/);
+    expect(sorgente).toMatch(/etichetteStrette\(/);
+    expect(sorgente).toMatch(/altezzaGrafico\(rendiLeggibile\([^)]*\), locale, stretto\)/);
   });
 });

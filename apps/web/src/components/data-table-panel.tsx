@@ -5,7 +5,7 @@ import type { KeyboardEvent, ReactNode } from "react";
 import { useState } from "react";
 import { Badge, Button, DataTableWithCrossHair, Dialog, DialogContent, DialogDescription, DialogTitle } from "@heuresys/ui";
 import { colonnaTitolo } from "@/lib/titolo-riga";
-import { visibiliSuMobile } from "@/lib/colonne-mobile";
+import { ETICHETTA_DA_ATTRIBUTO, RIPIEGABILE, visibiliSuMobile } from "@/lib/colonne-mobile";
 import { PageHeader } from "@/components/intestazione-pagina";
 import { useTranslation } from "react-i18next";
 import type { ServerPagination } from "@/lib/hooks/use-paginated-list";
@@ -204,6 +204,16 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
   // K18: sotto md restano le prime colonne; le altre si leggono nella scheda della riga.
   const suMobile = visibiliSuMobile(inTabella.map((c) => c.header), { conScheda: !onRowClick });
   const soloLargo = (i: number) => (suMobile[i] ? "" : "hidden md:table-cell");
+  // Giro del 25/11: anche tre colonne, a 390 px, uscivano dalla larghezza senza dire che si
+  // scorreva. Sotto md ogni riga si ripiega in una scheda (lo schema RIPIEGABILE di K18): le
+  // colonne rimaste diventano coppie «intestazione · valore», le altre restano nella scheda della
+  // riga. La colonna dei comandi (intestazione vuota) non ha etichetta e occupa la riga intera.
+  const classeCella = (i: number, c: DataColumn<T>) => {
+    const allinea = c.align === "right" ? "md:text-right md:tabular-nums" : "";
+    if (!suMobile[i]) return `hidden px-4 py-2 align-middle md:table-cell ${allinea}`;
+    if (typeof c.header !== "string" || c.header === "") return `block px-3 py-1 md:table-cell md:px-4 md:py-2 md:align-middle ${allinea}`;
+    return `${RIPIEGABILE.cella} ${ETICHETTA_DA_ATTRIBUTO} md:px-4 md:align-middle ${allinea}`;
+  };
   const from = total === 0 ? 0 : start + 1;
   const to = end;
   const goToPage = (i: number) =>
@@ -232,8 +242,8 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
           <OrigineDelDato path={percorsoOrigine} />
         </div>
       ) : null}
-      <DataTableWithCrossHair caption={caption} className="w-full border-collapse text-sm">
-        <thead>
+      <DataTableWithCrossHair caption={caption} className={`${RIPIEGABILE.tabella} border-collapse`}>
+        <thead className={RIPIEGABILE.intestazione}>
           <tr className="border-b border-border bg-muted text-left text-[11px] uppercase tracking-wider text-muted-foreground">
             {inTabella.map((c, i) => (
               <th key={i} className={`px-4 py-2 ${c.align === "right" ? "text-right" : ""} ${soloLargo(i)} ${c.headClassName ?? ""}`}>
@@ -243,12 +253,12 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-border">
+        <tbody className={RIPIEGABILE.corpo}>
           {visibleRows.map((row) => (
             <tr
               key={rowKey(row)}
               data-testid={rowTestId}
-              className="cursor-pointer transition-colors hover:bg-muted/60"
+              className={`${RIPIEGABILE.riga} cursor-pointer transition-colors hover:bg-muted/60`}
               tabIndex={0}
               // niente role="button": la riga contiene collegamenti e pulsanti, e un controllo
               // dentro un controllo è la violazione axe `nested-interactive`. La riga resta una
@@ -270,9 +280,14 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
               }}
             >
               {inTabella.map((c, i) => (
-                <td key={i} className={`px-4 py-2 align-middle ${c.align === "right" ? "text-right tabular-nums" : ""} ${soloLargo(i)} ${c.cellClassName ?? ""}`} {...(grezza(c) ? { "data-grezzo": "" } : {})}>
+                <td
+                  key={i}
+                  className={`${classeCella(i, c)} ${c.cellClassName ?? ""}`}
+                  {...(typeof c.header === "string" && c.header !== "" ? { "data-etichetta": c.header } : {})}
+                  {...(grezza(c) ? { "data-grezzo": "" } : {})}
+                >
                   {/* K15: una cella che non porta niente dice «—», con o senza la rete di leggibilità */}
-                  {cellaVuota(c.cell(row)) ? VUOTO : grezza(c) ? c.cell(row) : leggi.nodo(c.cell(row))}
+                  <div className="min-w-0 break-words">{cellaVuota(c.cell(row)) ? VUOTO : grezza(c) ? c.cell(row) : leggi.nodo(c.cell(row))}</div>
                 </td>
               ))}
             </tr>

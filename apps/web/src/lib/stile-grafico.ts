@@ -130,3 +130,78 @@ export function nomiDegliAssiInVista<T>(option: T): T {
   }
   return o as T;
 }
+
+/*
+ * Giro di verifica del 25/11/2026 (classi P, rigiudizio delle schermate dei grafici): tre regole in
+ * più, sempre in `EChartsCard` per tutti i grafici.
+ *   - `scalaConValori`: la scala colori di una mappa di calore (visualMap continuo) era una barra
+ *     sfumata senza numeri, e non diceva quanto vale il colore più scuro: agli estremi si scrivono
+ *     il minimo e il massimo.
+ *   - `nomeSottoEtichetteRuotate`: in /analytics/overtime il nome «Mese» dell'asse orizzontale stava
+ *     a 28 px dall'asse, sopra le etichette dei mesi ruotate di 30 gradi; il suo posto si calcola
+ *     dall'ingombro verticale dell'etichetta ruotata più lunga.
+ *   - `etichetteStrette`: a 390 px le etichette di un asse verticale di categorie, larghe fino a
+ *     300 px, prendevano tutto il grafico e le barre diventavano segni (org-network, overtime): su
+ *     uno schermo stretto l'etichetta si ferma a `LARGHEZZA_ETICHETTA_STRETTA` e va a capo.
+ */
+
+/** La larghezza massima di un'etichetta di categoria sull'asse verticale, su uno schermo stretto. */
+export const LARGHEZZA_ETICHETTA_STRETTA = 120;
+
+/** Minimo e massimo scritti agli estremi della scala continua che la pagina lascia senza testo. */
+export function scalaConValori<T>(option: T, numero: (v: number) => string): T {
+  if (!oggetto(option) || !option.visualMap) return option;
+  const o: Oggetto = { ...option };
+  o.visualMap = ognuno(o.visualMap, (vm) => {
+    if (vm.type === "piecewise" || vm.text !== undefined || vm.calculable === true) return vm;
+    if (typeof vm.min !== "number" || typeof vm.max !== "number") return vm;
+    // in ECharts text[0] sta all'estremo alto della scala, text[1] a quello basso
+    return { ...vm, text: [numero(vm.max), numero(vm.min)], itemGap: typeof vm.itemGap === "number" ? vm.itemGap : 8 };
+  });
+  return o as T;
+}
+
+/**
+ * Il nome dell'asse orizzontale sotto le etichette ruotate: `nameGap` almeno l'ingombro verticale
+ * dell'etichetta più lunga più un respiro, e la griglia gli lascia il posto. `larghezza` stima (o
+ * misura) un testo in pixel.
+ */
+export function nomeSottoEtichetteRuotate<T>(option: T, larghezza: (testo: string, corpo: number) => number): T {
+  if (!oggetto(option) || !option.xAxis) return option;
+  const o: Oggetto = { ...option };
+  let serve = 0;
+  o.xAxis = ognuno(o.xAxis, (a) => {
+    const label = oggetto(a.axisLabel) ? a.axisLabel : {};
+    const gradi = typeof label.rotate === "number" ? Math.abs(label.rotate) : 0;
+    if (!gradi || typeof a.name !== "string" || !a.name || a.nameLocation !== "middle" || !Array.isArray(a.data)) return a;
+    const corpo = typeof label.fontSize === "number" ? label.fontSize : 12;
+    const piuLunga = Math.max(0, ...a.data.map((d) => larghezza(String(oggetto(d) && "value" in d ? d.value : (d ?? "")), corpo)));
+    const r = (gradi * Math.PI) / 180;
+    // l'etichetta ruotata occupa in altezza la sua lunghezza per il seno e il corpo per il coseno; 8 px di margine dall'asse
+    const ingombro = Math.ceil(piuLunga * Math.sin(r) + corpo * Math.cos(r) + 8);
+    const gap = Math.max(typeof a.nameGap === "number" ? a.nameGap : 0, ingombro + 12);
+    // con containLabel il margine basso conta dal fondo delle etichette: serve solo ciò che il nome
+    // sporge oltre (la sua distanza dall'asse più il corpo, meno l'ingombro), più un respiro
+    serve = Math.max(serve, gap + corpo - ingombro + 8);
+    return { ...a, nameGap: gap };
+  });
+  if (serve > 0) {
+    const g: Oggetto = oggetto(o.grid) ? { ...o.grid } : {};
+    if (typeof g.bottom !== "number" || g.bottom < serve) g.bottom = serve;
+    o.grid = g;
+  }
+  return o as T;
+}
+
+/** Su uno schermo stretto le etichette di categoria dell'asse verticale non superano `massimo` px. */
+export function etichetteStrette<T>(option: T, massimo = LARGHEZZA_ETICHETTA_STRETTA): T {
+  if (!oggetto(option) || !option.yAxis) return option;
+  const o: Oggetto = { ...option };
+  o.yAxis = ognuno(o.yAxis, (a) => {
+    if (a.type !== "category") return a;
+    const label = oggetto(a.axisLabel) ? a.axisLabel : {};
+    if (typeof label.width === "number" && label.width <= massimo) return a;
+    return { ...a, axisLabel: { ...label, width: massimo, overflow: label.overflow ?? "break" } };
+  });
+  return o as T;
+}

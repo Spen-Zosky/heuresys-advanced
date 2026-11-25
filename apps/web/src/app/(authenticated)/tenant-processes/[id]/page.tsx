@@ -111,6 +111,7 @@ export default function TenantProcessPage() {
   const apriProcesso = (pid: string) => router.push(`/tenant-processes/${pid}`);
   const attivitaAperta: Attivita | undefined = att.find((a) => a.activityId === aperta);
   const conSotto = s.subprocesses.length > 0;
+  const inSottoprocesso = conSotto && att.some((a) => a.processId !== p.processId);
 
   // Chi fa che cosa: per ogni unità (o esecutore senza unità), le attività in ordine.
   const perUnita = new Map<string, { uid: string | null; nome: string; attivita: Attivita[] }>();
@@ -174,7 +175,10 @@ export default function TenantProcessPage() {
   const colonneAttivita: { chiave: ColonnaAttivita | null; intestazione: string; cella: (a: Attivita) => ReactNode }[] = [
     { chiave: null, intestazione: k("ordinal"), cella: (a) => <span key="o" className="tabular-nums text-xs text-muted-foreground">{a.ordinal}</span> },
     { chiave: null, intestazione: k("activity"), cella: (a) => <button key="n" type="button" className="text-left font-medium hover:underline" onClick={() => setAperta(a.activityId)}>{a.name}</button> },
-    ...(conSotto ? [{ chiave: null, intestazione: k("subprocess"), cella: (a: Attivita) => <span key="s" className="text-xs">{nomeProcesso.get(a.processId)}</span> }] : []),
+    // Giro del 25/11: la colonna diceva il nome del processo stesso per le attività che stanno sul
+    // processo e non in un suo sottoprocesso. Compare solo se almeno un'attività sta in un
+    // sottoprocesso, e per quelle che stanno sul processo scrive «—».
+    ...(inSottoprocesso ? [{ chiave: null, intestazione: k("subprocess"), cella: (a: Attivita) => <span key="s" className="text-xs">{a.processId === p.processId ? "—" : nomeProcesso.get(a.processId)}</span> }] : []),
     { chiave: "input", intestazione: k("input"), cella: (a) => a.input ?? "—" },
     { chiave: "output", intestazione: k("output"), cella: (a) => a.output ?? "—" },
     { chiave: null, intestazione: k("unit"), cella: (a) => unita(a.unitId, a.unitName) },

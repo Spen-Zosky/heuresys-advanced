@@ -38,3 +38,12 @@ export const RIPIEGABILE = {
   cella: "grid grid-cols-[7rem_minmax(0,1fr)] gap-2 px-3 py-1 align-top md:table-cell md:py-2",
   etichetta: "text-xs text-muted-foreground md:hidden",
 } as const;
+
+/**
+ * L'etichetta di una cella ripiegata scritta dal CSS, dall'attributo `data-etichetta` della cella,
+ * invece che da un elemento in più (giro del 25/11, `EntityTable`): il testo della cella resta
+ * quello del dato, per le prove che lo leggono e per chi lo copia. Il `::before` di una griglia ne
+ * è il primo elemento, quindi cade nella colonna di 7rem di `RIPIEGABILE.cella`.
+ */
+export const ETICHETTA_DA_ATTRIBUTO =
+  "before:content-[attr(data-etichetta)] before:text-xs before:text-muted-foreground md:before:hidden";

@@ -86,7 +86,7 @@ describe("K17 — altezza di un grafico con l'asse verticale di categorie", () =
 describe("K17 — EChartsCard fa crescere l'altezza", () => {
   const s = leggi("app/(authenticated)/_charts-client.tsx");
   it("l'altezza passata al grafico è quella di altezzaGrafico", () => {
-    expect(s).toMatch(/altezzaGrafico\(rendiLeggibile\(conNomiDegliAssi\(props\.option, assi\), locale\), props\.height, misura \?\? undefined\)/);
+    expect(s).toMatch(/altezzaGrafico\(rendiLeggibile\(conNomiDegliAssi\(props\.option, assi\), locale, stretto\), props\.height, misura \?\? undefined\)/);
     // la misura vera del browser, con il carattere di ECharts
     expect(s).toContain("ctx.font = `${corpo}px sans-serif`");
     expect(s).toContain("<RawEChartsCard {...props} height={altezza} option={option} />");

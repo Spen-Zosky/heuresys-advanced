@@ -34,8 +34,8 @@ import { coloreDaVariabile, etichetteLeggibiliMappaDiCalore } from "@/lib/colori
 import { risolviVariabiliCss } from "@/lib/variabili-css-grafico";
 import { assiDerivati, letturaDelGrafico, type ChartTable } from "@/lib/lettura-grafico";
 import { testoCellaGrafico } from "@/lib/celle-tabella";
-import { ALTEZZA_RIGA_ETICHETTA, altezzaGrafico, type Misura } from "@/lib/altezza-grafico";
-import { assiInteri, conStileDelTema, nomiDegliAssiInVista } from "@/lib/stile-grafico";
+import { ALTEZZA_RIGA_ETICHETTA, altezzaGrafico, larghezzaStimata, type Misura } from "@/lib/altezza-grafico";
+import { assiInteri, conStileDelTema, etichetteStrette, nomeSottoEtichetteRuotate, nomiDegliAssiInVista, scalaConValori } from "@/lib/stile-grafico";
 
 const RawEChartsCard = dynamic(
   // Subpath `/charts` isolates echarts so this lazy import does NOT drag the whole
@@ -70,10 +70,13 @@ function numeroLocale(locale: string) {
   return (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? nf.format(v) : String(v ?? ""));
 }
 
-function rendiLeggibile(option: RawProps["option"], locale: string): RawProps["option"] {
-  // K17 (24/11/2026): conteggi a tacche intere e nomi degli assi dentro il riquadro, per ogni grafico
-  const o = { ...(assiInteri(nomiDegliAssiInVista(option)) as Record<string, unknown>) };
+function rendiLeggibile(option: RawProps["option"], locale: string, stretto = false): RawProps["option"] {
   const num = numeroLocale(locale);
+  // K17 (24/11/2026): conteggi a tacche intere e nomi degli assi dentro il riquadro, per ogni grafico.
+  // Giro del 25/11: la scala colori dice i suoi estremi, il nome dell'asse sta sotto le etichette
+  // ruotate e, su uno schermo stretto, le etichette di categoria lasciano posto alle barre.
+  const leggibile = nomeSottoEtichetteRuotate(scalaConValori(assiInteri(nomiDegliAssiInVista(option)), num), larghezzaStimata);
+  const o = { ...((stretto ? etichetteStrette(leggibile) : leggibile) as Record<string, unknown>) };
   const asse = (a: unknown, verticale = false): unknown => {
     if (Array.isArray(a)) return a.map((x) => asse(x, verticale));
     if (!a || typeof a !== "object") return a;
@@ -97,6 +100,17 @@ function rendiLeggibile(option: RawProps["option"], locale: string): RawProps["o
   };
   if (o.xAxis) o.xAxis = asse(o.xAxis);
   if (o.yAxis) o.yAxis = asse(o.yAxis, true);
+  // Giro del 25/11: anche il numero scritto su una barra o su un punto ha la forma della lingua
+  // («12.639», non «12639»); la mappa di calore scrive già il suo, e un `formatter` della pagina resta.
+  if (Array.isArray(o.series)) {
+    o.series = (o.series as unknown[]).map((x) => {
+      if (!x || typeof x !== "object") return x;
+      const se = x as Record<string, unknown>;
+      const lb = se.label as Record<string, unknown> | undefined;
+      if (se.type === "heatmap" || !lb || lb.show !== true || lb.formatter !== undefined) return x;
+      return { ...se, label: { ...lb, formatter: (p: { value?: unknown }) => num(Array.isArray(p.value) ? p.value[p.value.length - 1] : p.value) } };
+    });
+  }
   const serie = Array.isArray(o.series) ? (o.series as unknown[]).length : 0;
   if (o.legend && typeof o.legend === "object" && !Array.isArray(o.legend)) {
     const voci = Array.isArray((o.legend as Record<string, unknown>).data)
@@ -246,6 +260,15 @@ function misuraDelBrowser(): Misura | null {
 }
 const senzaIscrizione = () => () => {};
 
+/** Giro del 25/11: sotto sm (640 px) lo schermo è stretto e le etichette di categoria si accorciano. */
+const SCHERMO_STRETTO = "(max-width: 639px)";
+const iscriviStretto = (avvisa: () => void) => {
+  const mq = window.matchMedia(SCHERMO_STRETTO);
+  mq.addEventListener("change", avvisa);
+  return () => mq.removeEventListener("change", avvisa);
+};
+const leggiStretto = () => window.matchMedia(SCHERMO_STRETTO).matches;
+
 export function EChartsCard({ assi, tabella, lingua, ...props }: EChartsCardProps) {
   const { i18n } = useTranslation();
   const locale = localeDi(lingua ?? i18n.language);
@@ -258,14 +281,15 @@ export function EChartsCard({ assi, tabella, lingua, ...props }: EChartsCardProp
     return () => observer.disconnect();
   }, []);
 
+  const stretto = useSyncExternalStore(iscriviStretto, leggiStretto, () => false);
   const option = useMemo(
     () =>
       typeof document === "undefined"
         ? props.option
-        : conEtichetteLeggibili(conColoriDelTema(resolveCssVars(rendiLeggibile(conNomiDegliAssi(props.option, assi), locale), document.documentElement), document.documentElement), document.documentElement),
+        : conEtichetteLeggibili(conColoriDelTema(resolveCssVars(rendiLeggibile(conNomiDegliAssi(props.option, assi), locale, stretto), document.documentElement), document.documentElement), document.documentElement),
     // themeTick intentionally re-triggers resolution on theme switch
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props.option, themeTick, assi?.x, assi?.y, locale],
+    [props.option, themeTick, assi?.x, assi?.y, locale, stretto],
   );
 
   // K17: l'altezza data dalla pagina è il minimo; un asse verticale di categorie la fa crescere
@@ -274,9 +298,9 @@ export function EChartsCard({ assi, tabella, lingua, ...props }: EChartsCardProp
   // useSyncExternalStore), così il primo disegno coincide e la misura vera arriva subito dopo.
   const misura = useSyncExternalStore(senzaIscrizione, misuraDelBrowser, () => null);
   const altezza = useMemo(
-    () => (typeof props.height === "number" ? altezzaGrafico(rendiLeggibile(conNomiDegliAssi(props.option, assi), locale), props.height, misura ?? undefined) : props.height),
+    () => (typeof props.height === "number" ? altezzaGrafico(rendiLeggibile(conNomiDegliAssi(props.option, assi), locale, stretto), props.height, misura ?? undefined) : props.height),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props.option, props.height, assi?.x, assi?.y, locale, misura],
+    [props.option, props.height, assi?.x, assi?.y, locale, misura, stretto],
   );
 
   const lettura = useMemo(() => letturaDelGrafico(props.option, locale), [props.option, locale]);

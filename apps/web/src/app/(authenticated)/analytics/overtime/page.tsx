@@ -73,6 +73,11 @@ function typeBarOption(data: Array<{ name: string; value: number }>) {
         data: sorted.map((r) => r.value),
         itemStyle: { color: COLOR_PALETTE_1, borderRadius: [0, 4, 4, 0] },
         barMaxWidth: 22,
+        // Giro del 25/11: accanto alle 12.639 richieste feriali, le 2 festive sono una barra di
+        // frazioni di pixel. Il numero scritto in fondo a ogni barra e una lunghezza minima dicono
+        // che la barra c'è e quanto vale.
+        barMinHeight: 3,
+        label: { show: true, position: "right" as const, color: AXIS_COLOR },
       },
     ],
   };

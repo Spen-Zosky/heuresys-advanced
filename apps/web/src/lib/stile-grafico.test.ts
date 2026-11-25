@@ -17,7 +17,7 @@ import path from "node:path";
 import { createRequire } from "node:module";
 import { barreOrizzontali } from "./altezza-grafico";
 import { contrasto, leggiColore } from "./colori-grafico";
-import { CONTRASTO_MINIMO, LARGHEZZA_ETICHETTA_STRETTA, assiInteri, conStileDelTema, etichetteStrette, nomeSottoEtichetteRuotate, nomiDegliAssiInVista, scalaConValori, type ColoriTema } from "./stile-grafico";
+import { CONTRASTO_MINIMO, LARGHEZZA_ETICHETTA_STRETTA, assiInteri, conStileDelTema, etichetteInColonna, etichetteStrette, nomeSottoEtichetteRuotate, nomiDegliAssiInVista, scalaConValori, type ColoriTema } from "./stile-grafico";
 import { larghezzaStimata } from "./altezza-grafico";
 
 const SRC = path.resolve(__dirname, "..");
@@ -199,5 +199,57 @@ describe("giro del 25/11: scala, nome sotto le etichette ruotate, etichette stre
     expect(sorgente).toMatch(/nomeSottoEtichetteRuotate\(/);
     expect(sorgente).toMatch(/etichetteStrette\(/);
     expect(sorgente).toMatch(/altezzaGrafico\(rendiLeggibile\([^)]*\), locale, stretto\)/);
+  });
+});
+
+describe("classi Q: ogni categoria dell'asse orizzontale ha il suo posto", () => {
+  const categorie = ["Orientamento ai risultati", "Leadership", "Innovazione", "Orientamento al cliente", "Competenza tecnica / di dominio", "Collaborazione", "Adattabilità"];
+  const barre = { xAxis: { type: "category", data: categorie }, yAxis: { type: "value" } };
+  type Asse = { xAxis: { axisLabel: { interval?: number; width?: number; rotate?: number; overflow?: string } } };
+
+  it("a 1040 px le 7 categorie si scrivono tutte e vanno a capo fra le parole", () => {
+    const o = etichetteInColonna(barre, 1040, false, larghezzaStimata) as unknown as Asse;
+    expect(o.xAxis.axisLabel.interval).toBe(0);
+    expect(o.xAxis.axisLabel.rotate).toBeUndefined();
+    expect(o.xAxis.axisLabel.overflow).toBe("break");
+    // la colonna: (1040 - 2 × 104 di margini predefiniti - 48 dell'asse verticale) / 7 = 112, meno 8 di respiro
+    expect(o.xAxis.axisLabel.width).toBe(104);
+  });
+
+  it("a 310 px, dove nemmeno la parola più lunga ci sta, le etichette si ruotano e restano tutte", () => {
+    const o = etichetteInColonna(barre, 310, true, larghezzaStimata) as unknown as Asse;
+    expect(o.xAxis.axisLabel.interval).toBe(0);
+    expect(o.xAxis.axisLabel.rotate).toBe(45);
+    expect(o.xAxis.axisLabel.width).toBeUndefined();
+    // «Orientamento ai risultati» ruotata scende a sinistra per 25 × 7,2 × 0,707 = 128 px, più del
+    // posto prima della sua colonna (31 + 48 + 14): il margine sinistro cresce quanto basta
+    const g = (o as unknown as { grid: { left: number } }).grid;
+    expect(g.left).toBe(Math.ceil(31 + (Math.ceil(larghezzaStimata("Orientamento ai risultati") * Math.SQRT1_2) - (31 + 48 + 14)) + 4));
+  });
+
+  it("la mappa di calore toglie al posto le etichette dell'asse verticale, strette sul telefono", () => {
+    const mappa = { xAxis: { type: "category", data: ["Base", "Intermedio", "Avanzato", "Esperto"] }, yAxis: { type: "category", data: ["Unità"], axisLabel: { width: 160 } } };
+    const largo = etichetteInColonna(mappa, 1040, false, larghezzaStimata) as unknown as Asse;
+    expect(largo.xAxis.axisLabel.width).toBe(Math.floor((1040 - 208 - 160) / 4) - 8);
+    // con i margini in pixel della pagina il posto è quello che resta
+    const conGriglia = etichetteInColonna({ ...mappa, grid: { left: 8, right: 16 } }, 1040, false, larghezzaStimata) as unknown as Asse;
+    expect(conGriglia.xAxis.axisLabel.width).toBe(Math.floor((1040 - 24 - 160) / 4) - 8);
+    const telefono = etichetteInColonna(mappa, 310, true, larghezzaStimata) as unknown as Asse;
+    expect(telefono.xAxis.axisLabel.rotate).toBe(45);
+  });
+
+  it("senza larghezza misurata, con una rotazione o un intervallo della pagina, o con troppe categorie, l'opzione resta com'è", () => {
+    expect(etichetteInColonna(barre, null, false, larghezzaStimata)).toBe(barre);
+    const ruotata = { xAxis: { type: "category", data: categorie, axisLabel: { rotate: 30 } } };
+    expect(etichetteInColonna(ruotata, 1040, false, larghezzaStimata)).toEqual(ruotata);
+    const mesi = { xAxis: { type: "category", data: Array.from({ length: 40 }, (_, i) => `m${i}`) } };
+    expect(etichetteInColonna(mesi, 1040, false, larghezzaStimata)).toEqual(mesi);
+  });
+
+  it("EChartsCard misura il riquadro, applica la regola e salta le tacche di valore che si toccano", () => {
+    const sorgente = leggi("app/(authenticated)/_charts-client.tsx");
+    expect(sorgente).toMatch(/etichetteInColonna\(props\.option, larghezza, stretto, larghezzaStimata\)/);
+    expect(sorgente).toContain("new ResizeObserver(");
+    expect(sorgente).toContain("label.hideOverlap = true");
   });
 });

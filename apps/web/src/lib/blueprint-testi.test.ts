@@ -43,6 +43,19 @@ describe("confronto: la decisione non mostra i codici dell'inclusione", () => {
     it(`${lingua}: il motivo dell'impatto non calcolabile c'è, e senza apostrofi al posto degli accenti`, () => {
       expect(t("dossier.diff.notComputableReason")).not.toMatch(/\b(gia|e|perche|piu)'/);
     });
+    it(`${lingua}: confronto e costruzione parlano a chi usa la pagina, non a chi la sviluppa (classi Q)`, () => {
+      const testi = [
+        t("dossier.diff.notComputable"),
+        t("dossier.diff.notComputableReason"),
+        t("dossier.build.incoherent.skillsWithoutCategory", { count: 2 }),
+        t("dossier.build.incoherent.skillsWithoutCategory", { count: 1 }),
+        t("dossier.build.incoherent.whatToDo"),
+        t("dossier.unavailable.reason"),
+      ];
+      for (const x of testi) {
+        expect(x).not.toMatch(/deploy|in questa parte|in this part|strato della struttura|structure layer|dossier\./i);
+      }
+    });
   }
 });
 

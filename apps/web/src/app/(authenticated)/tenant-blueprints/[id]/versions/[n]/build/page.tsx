@@ -13,6 +13,7 @@ import type {
 } from "@heuresys/shared";
 import { Button } from "@heuresys/ui";
 import { StatoCaricamento, StatoErrore, StatoVuoto } from "@/components/stato-pagina";
+import { ErroreFascicolo } from "../../../../errore-fascicolo";
 import { apiFetch } from "@/lib/api/fetch";
 
 import { useCurrentUserPermissions } from "@/lib/api/auth";
@@ -118,7 +119,7 @@ export default function TenantBlueprintBuildPage({
 
   if (fascicolo.isLoading || piano.isLoading) return <StatoCaricamento />;
   if (fascicolo.isError) {
-    return <StatoErrore errore={fascicolo.error} titolo={t("dossier.error")} onRiprova={() => void fascicolo.refetch()} />;
+    return <ErroreFascicolo errore={fascicolo.error} onRiprova={() => void fascicolo.refetch()} />;
   }
 
   const versione: TenantBlueprintVersion | undefined = fascicolo.data?.versions.find(
@@ -206,6 +207,9 @@ export default function TenantBlueprintBuildPage({
                 ? titoloIncoerenza(incoerenza, t)
                 : (erroreApi(piano.error)?.serverMessage ?? t("dossier.build.planError"))
             }
+            // Classi Q (25/11): per il contenuto incoerente la frase sotto il titolo dice che cosa
+            // fare, invece del testo generico del 409 che invitava a ricaricare la pagina.
+            {...(incoerenza ? { motivo: t("dossier.build.incoherent.whatToDo") } : {})}
             testId="build-plan-error"
             onRiprova={() => void piano.refetch()}
           />

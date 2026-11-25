@@ -205,3 +205,66 @@ export function etichetteStrette<T>(option: T, massimo = LARGHEZZA_ETICHETTA_STR
   });
   return o as T;
 }
+
+/*
+ * Classi Q del giro del 25/11/2026: le etichette di un asse orizzontale di categorie. ECharts le
+ * dirada da sé quando si toccano, e con la larghezza di 200 px data a ogni etichetta si toccavano
+ * sempre: «Evidenze per categoria» mostrava 3 categorie su 7 a 1440 px e una sola a 390 px, la mappa
+ * di calore delle competenze una colonna su 4. Con la larghezza vera del riquadro ogni colonna ha
+ * il suo posto: l'etichetta ci sta intera, oppure va a capo fra le parole, oppure — quando nemmeno
+ * la parola più lunga ci sta — si ruota. In tutti e tre i casi si scrivono tutte (`interval: 0`).
+ */
+
+/** Il posto, in pixel, che le etichette dell'asse verticale tolgono alla larghezza del grafico. */
+function postoAsseVerticale(option: Oggetto, stretto: boolean): number {
+  const y = Array.isArray(option.yAxis) ? option.yAxis[0] : option.yAxis;
+  if (!oggetto(y) || y.type !== "category") return 48;
+  const label = oggetto(y.axisLabel) ? y.axisLabel : {};
+  const larga = typeof label.width === "number" ? label.width : 200;
+  return stretto ? Math.min(larga, LARGHEZZA_ETICHETTA_STRETTA) : larga;
+}
+
+/** Di quanti gradi si ruotano le etichette dell'asse orizzontale che non stanno nella colonna. */
+export const ROTAZIONE_ETICHETTA = 45;
+
+/** Oltre questo numero di categorie l'asse orizzontale resta a ECharts, che le dirada. */
+export const COLONNE_MASSIME_IN_VISTA = 31;
+
+export function etichetteInColonna<T>(
+  option: T,
+  larghezzaGrafico: number | null | undefined,
+  stretto: boolean,
+  larghezza: (testo: string, corpo: number) => number,
+): T {
+  if (!larghezzaGrafico || !oggetto(option) || !option.xAxis) return option;
+  const o: Oggetto = { ...option };
+  // i margini della griglia: un numero è in pixel, una percentuale si conta sul riquadro, e senza
+  // griglia ECharts lascia il 10% per lato
+  const g = oggetto(option.grid) ? option.grid : {};
+  const margine = (v: unknown) =>
+    typeof v === "number" ? v : typeof v === "string" && v.endsWith("%") ? (larghezzaGrafico * parseFloat(v)) / 100 : larghezzaGrafico * 0.1;
+  const posto = larghezzaGrafico - margine(g.left) - margine(g.right) - postoAsseVerticale(option, stretto);
+  let allargaSinistra = 0;
+  o.xAxis = ognuno(o.xAxis, (a) => {
+    if (a.type !== "category" || !Array.isArray(a.data)) return a;
+    const n = a.data.length;
+    const label = oggetto(a.axisLabel) ? a.axisLabel : {};
+    if (n === 0 || n > COLONNE_MASSIME_IN_VISTA || label.rotate !== undefined || label.interval !== undefined) return a;
+    const corpo = typeof label.fontSize === "number" ? label.fontSize : 12;
+    const testi = a.data.map((d) => String(oggetto(d) && "value" in d ? d.value : (d ?? "")));
+    const colonna = Math.floor(posto / n);
+    const piuLunga = Math.max(0, ...testi.map((t) => larghezza(t, corpo)));
+    const parolaPiuLunga = Math.max(0, ...testi.flatMap((t) => t.split(/\s+/)).map((p) => larghezza(p, corpo)));
+    if (piuLunga + 8 <= colonna || parolaPiuLunga + 8 <= colonna) {
+      return { ...a, axisLabel: { ...label, interval: 0, width: typeof label.width === "number" ? label.width : Math.max(24, colonna - 8), overflow: label.overflow ?? "break" } };
+    }
+    // ruotata, l'etichetta resta in una riga (a capo, le righe ruotate si sovrapponevano a quelle della
+    // colonna accanto; e il testo non si tronca mai, regola di Enzo). La prima scende verso sinistra:
+    // se esce dal posto che ha prima della sua colonna, la griglia le allarga il margine sinistro.
+    const sporge = Math.ceil(larghezza(testi[0] ?? "", corpo) * Math.SQRT1_2) - (margine(g.left) + postoAsseVerticale(option, stretto) + colonna / 2);
+    if (sporge > 0) allargaSinistra = Math.max(allargaSinistra, Math.ceil(margine(g.left) + sporge + 4));
+    return { ...a, axisLabel: { ...label, interval: 0, rotate: ROTAZIONE_ETICHETTA } };
+  });
+  if (allargaSinistra > 0) o.grid = { ...g, left: allargaSinistra };
+  return o as T;
+}

@@ -36,7 +36,9 @@ function coverageHeatmapOption(d: SkillsCoverageAnalyticsResponse, etichetta: (p
     yAxis: {
       type: "category" as const,
       data: y,
-      axisLabel: { color: AXIS_COLOR, width: 160, overflow: "break" as const },
+      // Classi Q (25/11): a 160 px i nomi lunghi delle unità andavano su due o tre righe e quelle di
+      // due righe vicine si toccavano; a 240 px stanno quasi tutti in una (sul telefono resta 120).
+      axisLabel: { color: AXIS_COLOR, width: 240, overflow: "break" as const },
       axisLine: { lineStyle: { color: GRID_COLOR } },
     },
     visualMap: {

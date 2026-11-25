@@ -207,6 +207,13 @@
     "caption": "Elenco dei fascicoli di configurazione",
     "back": "Torna ai fascicoli",
     "notFound": "Fascicolo non trovato.",
+    "singleTitle": "Fascicolo di configurazione",
+    "loadError": "Non è stato possibile aprire il fascicolo.",
+    "unavailable": {
+      "title": "Fascicolo non disponibile",
+      "reason": "Questo fascicolo, o la versione che hai chiesto, non è fra quelli che il tuo profilo può aprire.",
+      "toList": "Vai all'elenco dei fascicoli che puoi aprire"
+    },
     "createTitle": "Apri un fascicolo",
     "createHint": "Un fascicolo può nascere prima dell'azienda: durante una trattativa si lascia vuota l'azienda.",
     "create": "Crea",
@@ -266,7 +273,7 @@
       "model": "Cos'è cambiato nel modello",
       "decisions": "Cosa ho cambiato io",
       "impact": "Conseguenze sull'azienda",
-      "notComputable": "Non calcolabile in questa parte",
+      "notComputable": "Non ancora calcolabile",
       "changed": "Il modello si è mosso",
       "unchanged": "Il modello non si è mosso",
       "added": "Aggiunti",
@@ -274,7 +281,7 @@
       "renamed": "Rinominati",
       "identityChanged": "Identità modificata",
       "none": "Nessuna differenza",
-      "notComputableReason": "In questa parte l'impatto sull'azienda già costruita non è calcolabile: mancano lo strato della struttura e il motore che applica il fascicolo. Dichiararlo zero sarebbe un'informazione falsa.",
+      "notComputableReason": "La piattaforma non sa ancora calcolare quali effetti avrebbero queste modifiche sull'azienda già configurata. Per questo qui non c'è un numero: uno zero farebbe credere che non cambi niente.",
       "fields": {
         "industryClassId": "Settore di attività",
         "sizeBandId": "Fascia dimensionale",
@@ -322,10 +329,11 @@
       },
       "blockedNoPlan": "Il piano non è calcolabile: non c'è niente da firmare finché il modello non ha contenuto.",
       "incoherent": {
-        "skillsWithoutCategory_one": "Il modello dichiara {{count}} competenza senza categoria: il piano non è calcolabile. Una competenza senza categoria costruisce, e rompe il deploy successivo.",
-        "skillsWithoutCategory": "Il modello dichiara {{count}} competenze senza categoria: il piano non è calcolabile. Una competenza senza categoria costruisce, e rompe il deploy successivo.",
+        "skillsWithoutCategory_one": "Il modello ha {{count}} competenza senza categoria: finché non ne ha una, il piano non si può calcolare.",
+        "skillsWithoutCategory": "Il modello ha {{count}} competenze senza categoria: finché non ne hanno una, il piano non si può calcolare.",
         "positionsInMissingUnits_one": "Il modello colloca {{count}} posizione in un'unità che non esiste: il piano non è calcolabile.",
         "positionsInMissingUnits": "Il modello colloca {{count}} posizioni in unità che non esistono: il piano non è calcolabile.",
+        "whatToDo": "Chi cura il modello deve correggere le righe elencate qui sotto; dopo la correzione il piano si potrà calcolare riaprendo questa pagina.",
         "showList_one": "Mostra la riga da correggere",
         "showList": "Mostra le {{count}} righe da correggere",
         "unit": "unità {{unit}}"

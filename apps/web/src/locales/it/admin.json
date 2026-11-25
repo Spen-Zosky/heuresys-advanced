@@ -410,6 +410,7 @@
       "titolo_one": "Sessione aperta ({{count}})",
       "nessuna": "Nessuna sessione aperta.",
       "dispositivo": "{{browser}} su {{sistema}}",
+      "dispositivoIgnoto": "Dispositivo non riconosciuto",
       "ultimo": "ultimo accesso {{data}}",
       "scade": "scade {{data}}",
       "conferma": "Chiudere tutte le sessioni di questa persona? Dovrà accedere di nuovo.",

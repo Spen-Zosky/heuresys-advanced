@@ -38,7 +38,9 @@ function statusDonutOption(data: Array<{ name: string; value: number }>) {
     series: [
       {
         type: "pie" as const,
-        radius: ["45%", "70%"],
+        // Classi Q (25/11): a 390 px l'anello al 70% lasciava ai lati meno posto di «Pagata» con la
+        // sua linea, e l'etichetta usciva tagliata («Pag...»): un anello più piccolo lascia il posto.
+        radius: ["36%", "56%"],
         center: ["50%", "45%"],
         avoidLabelOverlap: true,
         itemStyle: { borderColor: GRID_COLOR, borderWidth: 1 },
@@ -54,7 +56,8 @@ function statusDonutOption(data: Array<{ name: string; value: number }>) {
 function typeBarOption(data: Array<{ name: string; value: number }>) {
   const sorted = [...data].sort((a, b) => a.value - b.value);
   return {
-    grid: { left: 8, right: 24, top: 12, bottom: 8, containLabel: true },
+    // a destra il posto del numero scritto in fondo alla barra più lunga («12.639»)
+    grid: { left: 8, right: 48, top: 12, bottom: 8, containLabel: true },
     tooltip: { trigger: "axis" as const, axisPointer: { type: "shadow" as const } },
     xAxis: {
       type: "value" as const,

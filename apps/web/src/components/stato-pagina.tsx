@@ -112,6 +112,7 @@ export function StatoErrore({
   titolo,
   onRiprova,
   motivoNegato,
+  motivo,
   livelloTitolo,
   testId = "stato-errore",
 }: {
@@ -120,6 +121,8 @@ export function StatoErrore({
   onRiprova?: () => void;
   /** Il motivo da dire se l'API nega l'accesso (403), quando la pagina lo sa meglio dell'API. */
   motivoNegato?: string;
+  /** La frase sotto il titolo quando la pagina sa dire che cosa fare meglio del testo legato al codice. */
+  motivo?: string;
   livelloTitolo?: LivelloTitolo;
   testId?: string;
 }) {
@@ -132,7 +135,7 @@ export function StatoErrore({
   // il riferimento tecnico sta in una riga secondaria, chiusa, e solo per gli errori che l'assistenza
   // deve poter cercare (server, rete): una pagina «non trovata» non ne ha bisogno.
   const api = isApiError(errore) ? errore : null;
-  const testo = api ? testoErrore(api.status, api.code) : (testoPerLaPersona(errore) ?? t("common:error.loadHint"));
+  const testo = motivo ?? (api ? testoErrore(api.status, api.code) : (testoPerLaPersona(errore) ?? t("common:error.loadHint")));
   const perAssistenza = !api || api.status >= 500;
   const dettagli = [
     api?.requestId ? t("common:apiErrors.reference", { requestId: api.requestId }) : null,

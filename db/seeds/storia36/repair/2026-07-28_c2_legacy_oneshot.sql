@@ -1,6 +1,6 @@
 -- ============================================================================
 -- storia36 C2 — riparazioni ONE-SHOT sul dato LEGACY del ciclo performance
--- (triage esito c dalla misura C2, .storia36/analysis/c2-misura.md).
+-- (triage esito c dalla misura C2, docs/kb/storia36/analisi/c2-misura.md).
 -- FUORI dal glob custodia (repair/ = one-shot manuali). Guardate e idempotenti.
 --
 --  P1 1.000 check-in con subject = admin@heuresys.com (cross-tenant, bug

@@ -2,7 +2,7 @@
 -- storia36 C2 — tre cicli di performance (2023 innesto H2, 2024, 2025) + 2026
 -- in corso: goals → check-in → review annuale (→ MID_YEAR 2026) → 360.
 -- Piano: docs/superpowers/plans/2026-07-27-rtl-storia-36-mesi.md (Task C2)
--- Misura e macchina a stati: .storia36/analysis/c2-misura.md + c2-macchina-stati.md
+-- Misura e macchina a stati: docs/kb/storia36/analisi/c2-misura.md + c2-macchina-stati.md
 --
 -- Fatti che governano il design (dal codice e dal dato, non dalla doc):
 --  · il ciclo performance NON ha write-path API (reviews/360/goals scritti solo

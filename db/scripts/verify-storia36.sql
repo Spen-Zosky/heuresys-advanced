@@ -1,8 +1,8 @@
 -- ============================================================================
 -- storia36 — batteria GLOBALE di coerenza (G1..G6)
 -- Piano: docs/superpowers/plans/2026-07-27-rtl-storia-36-mesi.md
--- Derivazione delle colonne e delle regole: .storia36/analysis/date-columns.md
--- (classificazione 513 colonne) + .storia36/analysis/shapes-g2-g4.md.
+-- Derivazione delle colonne e delle regole: docs/kb/storia36/analisi/date-columns.md
+-- (classificazione 513 colonne) + docs/kb/storia36/analisi/shapes-g2-g4.md.
 --
 -- Uso:
 --   psql -v ON_ERROR_STOP=1 -f db/scripts/verify-storia36.sql
@@ -77,7 +77,7 @@ SELECT set_config('storia36.window_end',
 -- lifecycle/anagrafiche precedono legittimamente il 2023-08-01 — contratti dal
 -- 2003, istruzione dal 1988, nascite dal 1964). Le 70 colonne BUSINESS_DATE
 -- derivano dalla classificazione completa delle 513 colonne data/timestamptz
--- (.storia36/analysis/date-columns.md): AUDIT_TS e FUTURE_OK escluse con motivo.
+-- (docs/kb/storia36/analisi/date-columns.md): AUDIT_TS e FUTURE_OK escluse con motivo.
 -- ----------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION staging.storia36_check_g1(p_end date)
 RETURNS void LANGUAGE plpgsql AS $fn$

@@ -31,9 +31,9 @@ concetti: [posizione, unità, processo, attività, organigramma]
 ## Storia
 
 <!-- generato:storia -->
-Il riordino del 2026-11-25 ha ritirato **8** documenti di questo dominio (lotti: ACC-1 1, ACC-2 5, B 2). Si recuperano con `git show <commit>:<percorso>` dai commit a1872a180, dbd339511, oppure dalla copia nel cestino della cartella del progetto; l'elenco completo è nel [registro dei ritiri](../../piani/riordino-documentazione_20261125/REGISTRO_RITIRI.tsv).
+Il riordino del 2026-11-25 ha ritirato **3** documenti di questo dominio (lotti: ACC-1 1, B 2). Si recuperano con `git show <commit>:<percorso>` dai commit a1872a180, dbd339511, oppure dalla copia nel cestino della cartella del progetto; l'elenco completo è nel [registro dei ritiri](../../piani/riordino-documentazione_20261125/REGISTRO_RITIRI.tsv).
 
-Da dove venivano: `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes` 5, `docs/superpowers/specs` 2, `docs/piani` 1.
+Da dove venivano: `docs/superpowers/specs` 2, `docs/piani` 1.
 <!-- /generato -->
 
 ## Vedi anche

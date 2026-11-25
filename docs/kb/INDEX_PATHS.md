@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-11-25T18:46:15Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3992**
+**Generato**: 2026-11-25T18:49:31Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **4000**
 
 > Generato: tutti i file tracciati dal repo (`git ls-files`), con percorsi relativi alla radice. Gemello machine-readable: `index_paths.yaml`. La mappa per argomento è il wiki, `docs/wiki/index.md`.
 
@@ -21,7 +21,7 @@
 | db-script | 174 |
 | db-seed | 117 |
 | doc-archive | 72 |
-| doc-canonical | 731 |
+| doc-canonical | 739 |
 | handoff-state | 1 |
 | qa-artifact | 49 |
 | session | 3 |
@@ -31,14 +31,14 @@
 | test | 550 |
 | ux-design-archive | 52 |
 | web-source | 449 |
-| **TOTALE** | **3992** |
+| **TOTALE** | **4000** |
 
 ## Conteggi per status
 
 | Status | File |
 |---|---|
 | archive | 221 |
-| live | 3771 |
+| live | 3779 |
 
 ## File per categoria
 
@@ -2284,14 +2284,6 @@
 - `.programmi/onda2/esiti/O2-09.md` · *live* · git-tracked
 - `.programmi/onda2/esiti/O2-10.md` · *live* · git-tracked
 - `.storia36/PROGRESS.md` · *live* · git-tracked
-- `.storia36/analysis/c2-macchina-stati.md` · *live* · git-tracked
-- `.storia36/analysis/c2-misura.md` · *live* · git-tracked
-- `.storia36/analysis/c3-misura.md` · *live* · git-tracked
-- `.storia36/analysis/c4-codice.md` · *live* · git-tracked
-- `.storia36/analysis/c4-misura.md` · *live* · git-tracked
-- `.storia36/analysis/conventions.md` · *live* · git-tracked
-- `.storia36/analysis/date-columns.md` · *live* · git-tracked
-- `.storia36/analysis/shapes-g2-g4.md` · *live* · git-tracked
 - `.zp/PROGRESS.md` · *live* · git-tracked
 - `AGENTS.md` · *live* · git-tracked
 - `CLAUDE.md` · *live* · git-tracked
@@ -2405,7 +2397,15 @@
 - `docs/kb/analisi/endpoint-orfani/LEGGIMI.md` · *live* · git-tracked
 - `docs/kb/analisi/endpoint-orfani/classifica.py` · *live* · git-tracked
 - `docs/kb/analisi/endpoint-orfani/misura_orfani.py` · *live* · git-tracked
+- `docs/kb/analisi/endpoint-orfani/strumenti/accenti.py` · *live* · git-tracked
+- `docs/kb/analisi/endpoint-orfani/strumenti/esegui_tutto.sh` · *live* · git-tracked
+- `docs/kb/analisi/endpoint-orfani/strumenti/estrai_console.py` · *live* · git-tracked
+- `docs/kb/analisi/endpoint-orfani/strumenti/estrai_endpoint.py` · *live* · git-tracked
+- `docs/kb/analisi/endpoint-orfani/strumenti/estrai_pagine.py` · *live* · git-tracked
+- `docs/kb/analisi/endpoint-orfani/strumenti/estrai_pagine_v1.py` · *live* · git-tracked
 - `docs/kb/analisi/endpoint-orfani/strumenti/estrai_rotte.py` · *live* · git-tracked
+- `docs/kb/analisi/endpoint-orfani/strumenti/genera_tsv.py` · *live* · git-tracked
+- `docs/kb/analisi/endpoint-orfani/strumenti/grafo_ts.py` · *live* · git-tracked
 - `docs/kb/atlas/ATLAS.md` · *live* · git-tracked
 - `docs/kb/atlas/ATLAS_CURATED.md` · *live* · git-tracked
 - `docs/kb/atlas/agent-operations.json` · *live* · git-tracked
@@ -2440,6 +2440,14 @@
 - `docs/kb/storia36/DOMINIO_FORMAZIONE_OBBLIGATORIA.md` · *live* · git-tracked
 - `docs/kb/storia36/DOMINIO_PREMIO_VARIABILE.md` · *live* · git-tracked
 - `docs/kb/storia36/DOSSIER_REGISTRY.md` · *live* · git-tracked
+- `docs/kb/storia36/analisi/c2-macchina-stati.md` · *live* · git-tracked
+- `docs/kb/storia36/analisi/c2-misura.md` · *live* · git-tracked
+- `docs/kb/storia36/analisi/c3-misura.md` · *live* · git-tracked
+- `docs/kb/storia36/analisi/c4-codice.md` · *live* · git-tracked
+- `docs/kb/storia36/analisi/c4-misura.md` · *live* · git-tracked
+- `docs/kb/storia36/analisi/conventions.md` · *live* · git-tracked
+- `docs/kb/storia36/analisi/date-columns.md` · *live* · git-tracked
+- `docs/kb/storia36/analisi/shapes-g2-g4.md` · *live* · git-tracked
 - `docs/kb/tools/_pg_agenti.py` · *live* · git-tracked
 - `docs/kb/tools/aggiorna_numeri_sot.py` · *live* · git-tracked
 - `docs/kb/tools/atlante_fresco.py` · *live* · git-tracked
@@ -2628,6 +2636,24 @@
 - `docs/product/WORKITEM_GAP1_DESIGN_SPEC.md` · *live* · git-tracked
 - `docs/product/WORKITEM_GAP1_PERSPECTIVES_AND_SCORECARD.md` · *live* · git-tracked
 - `docs/product/WORKITEM_GAP1_PHASE0_VERIFICATION.md` · *live* · git-tracked
+- `docs/product/processi-bancari/00_Enterprise_Typing_and_Blueprint_Configuration.md` · *live* · git-tracked
+- `docs/product/processi-bancari/01_Current_Accounts_Management.md` · *live* · git-tracked
+- `docs/product/processi-bancari/02_Payments_and_Transactions_Management.md` · *live* · git-tracked
+- `docs/product/processi-bancari/03_Cash_Operations_Management.md` · *live* · git-tracked
+- `docs/product/processi-bancari/04_Deposit_Products_Management.md` · *live* · git-tracked
+- `docs/product/processi-bancari/05_Lending_and_Credit_Management.md` · *live* · git-tracked
+- `docs/product/processi-bancari/06_Customer_Relationship_Management.md` · *live* · git-tracked
+- `docs/product/processi-bancari/07_Compliance_AML_and_Regulatory_Processes.md` · *live* · git-tracked
+- `docs/product/processi-bancari/08_Risk_Management.md` · *live* · git-tracked
+- `docs/product/processi-bancari/09_Treasury_and_Finance.md` · *live* · git-tracked
+- `docs/product/processi-bancari/10_Digital_Banking_and_Channels.md` · *live* · git-tracked
+- `docs/product/processi-bancari/11_Sales_and_Commercial_Processes.md` · *live* · git-tracked
+- `docs/product/processi-bancari/12_Branch_Operations.md` · *live* · git-tracked
+- `docs/product/processi-bancari/13_Legal_and_Litigation.md` · *live* · git-tracked
+- `docs/product/processi-bancari/14_HR_and_Internal_Services.md` · *live* · git-tracked
+- `docs/product/processi-bancari/15_IT_and_Banking_Technology_Operations.md` · *live* · git-tracked
+- `docs/product/processi-bancari/16_Business_Continuity_and_Security.md` · *live* · git-tracked
+- `docs/product/processi-bancari/17_AI_Augmented_Banking_Processes.md` · *live* · git-tracked
 - `docs/security/.keep` · *live* · git-tracked
 - `docs/security/AUTH_SECURITY_PLAN.md` · *live* · git-tracked
 - `docs/source_bundle/Company_HRMS_BPM_AI_Coding_Agent_Bootstrap_Pack_v5.zip` · *live* · git-tracked
@@ -2704,24 +2730,6 @@
 - `docs/source_bundle/extracted_bootstrap/db/seed_templates/visualization_edges.csv` · *live* · git-tracked
 - `docs/source_bundle/extracted_bootstrap/db/seed_templates/visualization_graphs.csv` · *live* · git-tracked
 - `docs/source_bundle/extracted_bootstrap/db/seed_templates/visualization_nodes.csv` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/00_Enterprise_Typing_and_Blueprint_Configuration.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/01_Current_Accounts_Management.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/02_Payments_and_Transactions_Management.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/03_Cash_Operations_Management.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/04_Deposit_Products_Management.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/05_Lending_and_Credit_Management.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/06_Customer_Relationship_Management.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/07_Compliance_AML_and_Regulatory_Processes.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/08_Risk_Management.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/09_Treasury_and_Finance.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/10_Digital_Banking_and_Channels.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/11_Sales_and_Commercial_Processes.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/12_Branch_Operations.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/13_Legal_and_Litigation.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/14_HR_and_Internal_Services.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/15_IT_and_Banking_Technology_Operations.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/16_Business_Continuity_and_Security.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/17_AI_Augmented_Banking_Processes.md` · *live* · git-tracked
 - `docs/source_bundle/extracted_bootstrap/manifest.json` · *live* · git-tracked
 - `docs/source_bundle/extracted_bootstrap/schemas/position_intelligence_profile.schema.json` · *live* · git-tracked
 - `docs/source_bundle/extracted_bootstrap/scripts/apply_bundle.ps1` · *live* · git-tracked

@@ -13,13 +13,14 @@ documento superato non contano: escono insieme.
 
 Classi del citante:
   migrazione  db/migrations/** (non si modifica: cambierebbe l'impronta)
+  storico     archivi e registri chiusi (STORICI): la citazione è storia, non uso
   workflow    .github/**
   generato    indici e viste rigenerati da uno script (si rigenerano dopo)
   codice      sorgenti, script, SQL, configurazione
   documento   ogni altro file tracciato
 
 Uso:
-  python3 docs/kb/tools/mappa_rimandi.py --censimento <tsv> --out <tsv> [--repo <dir>]
+  python3 docs/kb/tools/mappa_rimandi.py --censimento <tsv> --out <tsv> [--repo <dir>] [--citanti <tsv>]
 Esce 0 e stampa un riepilogo; il dettaglio va in --out, una riga per documento.
 Funziona su qualunque repo git (lo stesso file serve al datastore).
 """
@@ -42,6 +43,12 @@ IGNORATI = (
     "docs/piani/riordino-documentazione_", "docs/piani/PIANO_riordino-documentazione_",
     "esecuzione/_misure/CENSIMENTO_DOCUMENTI_", "esecuzione/piani/124_PIANO_IL_RIORDINO",
 )
+# Una citazione da qui è storia: non trattiene il documento, che resta recuperabile
+# dal registro dei ritiri (commit e copia). Decisione del 2026-11-25 nel piano.
+STORICI = (
+    "docs/archive/", "docs/kb/COWORK_INBOX.md", "qa_artifacts/", "cowork_reserved/",
+    "docs/source_bundle/extracted_bootstrap/",
+)
 GENERATI = (
     "docs/kb/INDEX_PATHS.md", "docs/kb/index_paths.yaml", "docs/kb/atlas/",
     "docs/architecture/ADR_INDEX.md", "docs/_meta/CHANGELOG.md",
@@ -53,6 +60,8 @@ CODICE = (".ts", ".tsx", ".js", ".mjs", ".cjs", ".py", ".sh", ".ps1", ".sql",
 def classe(citante: str) -> str:
     if "db/migrations/" in citante:
         return "migrazione"
+    if citante.startswith(STORICI):
+        return "storico"
     if citante.startswith(".github/"):
         return "workflow"
     if citante.startswith(GENERATI):
@@ -67,6 +76,7 @@ def main() -> int:
     ap.add_argument("--censimento", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--repo", default=".")
+    ap.add_argument("--citanti", help="tsv con ogni citazione: bersaglio, classe, citante:riga")
     a = ap.parse_args()
     root = subprocess.check_output(["git", "-C", a.repo, "rev-parse", "--show-toplevel"], text=True).strip()
 
@@ -117,29 +127,39 @@ def main() -> int:
                     if p != citante:
                         citazioni[p][classe(citante)].append(f"{citante}:{num}")
 
-    classi = ["documento", "codice", "workflow", "migrazione", "generato"]
+    classi = ["documento", "codice", "workflow", "migrazione", "storico", "generato"]
+    vincolanti = 3  # documento, codice, workflow; migrazioni, storici e generati non trattengono
     with open(a.out, "w", encoding="utf-8", newline="") as f:
         w = csv.writer(f, delimiter="\t", lineterminator="\n")
         w.writerow(["path", "verdetto"] + classi + ["libero", "esempi"])
         for p in sorted(bersagli):
             c = citazioni.get(p, {})
             n = [len(set(c.get(k, []))) for k in classi]
-            libero = "sì" if sum(n[:4]) == 0 else "no"
+            libero = "sì" if sum(n[:vincolanti]) == 0 else "no"
             esempi = []
-            for k in classi[:4]:
+            for k in classi[:vincolanti]:
                 esempi += sorted(set(c.get(k, [])))[:2]
             w.writerow([p, verdetto[p]] + n + [libero, " ".join(esempi[:6])])
+
+    if a.citanti:
+        with open(a.citanti, "w", encoding="utf-8", newline="") as f:
+            w = csv.writer(f, delimiter="\t", lineterminator="\n")
+            w.writerow(["bersaglio", "classe", "citante"])
+            for p in sorted(citazioni):
+                for k in classi:
+                    for c in sorted(set(citazioni[p].get(k, []))):
+                        w.writerow([p, k, c])
 
     tot = collections.Counter()
     for p in bersagli:
         c = citazioni.get(p, {})
-        if not any(c.get(k) for k in classi[:4]):
+        if not any(c.get(k) for k in classi[:vincolanti]):
             tot["liberi"] += 1
         for k in classi:
             if c.get(k):
                 tot[k] += 1
     print(f"documenti da togliere: {len(bersagli)}")
-    print(f"  liberi (nessun citante vivo fuori dai generati): {tot['liberi']}")
+    print(f"  liberi (nessun documento, codice o workflow vivo lo cita): {tot['liberi']}")
     for k in classi:
         print(f"  citati da {k}: {tot[k]}")
     print(f"dettaglio: {a.out}")

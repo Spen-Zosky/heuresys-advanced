@@ -185,7 +185,7 @@ Il lavoro non tocca `docs/piani/forense-frontend_20261123/` finché il giro di v
 
 ## 8. Fuori da questo ciclo
 
-Scoperte di passaggio, da proporre una volta e non da eseguire qui: `PIANO_velocita-ci-e-rilasci_20261122` è una proposta che aspetta un sì o un no; la spec `delivery-loop` del 2026-07-25 descrive una skill mai costruita; `SECURITY.md` riporta un indirizzo email personale da riconfermare; `proposte_advanced/README.md` del datastore propone ad advanced una migrazione 000456 il cui numero è già occupato; `qa-web/strumento/qa-web.mjs` nei file del progetto non è versionato in nessun repo.
+Scoperte di passaggio, da proporre una volta e non da eseguire qui: `PIANO_velocita-ci-e-rilasci_20261122` è una proposta che aspetta un sì o un no; la spec `delivery-loop` del 2026-07-25 descrive una skill mai costruita; `SECURITY.md` riporta un indirizzo email personale da riconfermare; `proposte_advanced/README.md` del datastore propone ad advanced una migrazione 000456 il cui numero è già occupato; `qa-web/strumento/qa-web.mjs` nei file del progetto non è versionato in nessun repo. Emerse durante l'esecuzione: il programma #214 (adozione dell'agente in coda per rischio) è contraddetto da ADR-0040 e va rivisto dalla sua sessione; 473 documenti ritirati restano citati solo da altri superati che per ora restano (ADR, `docs/vision/`, note d'archivio), che quindi portano link rotti storici; i piani con voci «da fare» già fatte (applet, assistente, principi agentici, consolidamento, allineamento, change management, turni, pulizia del repo) e i programmi di `.programmi/` si riallineano nelle sessioni che li possiedono; `db/scripts/rtl-allinea/LEGGIMI.md` va riallineato da chi può misurare in produzione se J3-J6 sono applicati, perché `applica.sh` oggi elenca solo `J_testi_italiano` e `J2_testi_residui`.
 
 ## 9. Nota sui dati di RTL Bank
 
@@ -194,3 +194,22 @@ Tutti i dati del tenant RTL Bank, persone comprese, sono inventati: RTL è un te
 ## 10. Regola dei rimandi storici (2026-11-25)
 
 Un documento superato esce anche se lo citano solo archivi (`docs/archive/`), migrazioni già applicate, `docs/kb/COWORK_INBOX.md`, `qa_artifacts/`, `cowork_reserved/` o `docs/source_bundle/extracted_bootstrap/`: quella citazione è storia, non uso, e il file resta recuperabile dal registro dei ritiri (commit e copia nel cestino). Lo trattengono ancora un documento vivo, un sorgente o un workflow. Scelta del coordinatore sul metodo approvato da Enzo; la applica `docs/kb/tools/mappa_rimandi.py` (classi `storico` e `migrazione`, che non trattengono). Con la regola i documenti liberi passano da 611 a 777 su 1.009 (`python3 docs/kb/tools/mappa_rimandi.py --censimento docs/piani/riordino-documentazione_20261125/CENSIMENTO_advanced.tsv --out <tsv>`).
+
+## 11. Avanzamento al 2026-11-25, sera
+
+| voce | stato | prova |
+|---|---|---|
+| R1 | fatta | decisioni D1-D4 di Enzo nel thread |
+| R2 | fatta | `docs/kb/tools/mappa_rimandi.py`, regola dei rimandi storici (sezione 10) |
+| R3 | in parte | rules, skill e README corretti (PR #485, #486); restano `.gitattributes`/`.gitignore`, `align-clones.sh`, `build_index.py`, i `paths-ignore` dei workflow, `cross_os_pipeline.sh`, `db-export.zip` (D3) |
+| R4 | fatta | `check_documenti.py --selftest` rosso (1, 9) senza la regola e verde (1, 8) con; in CI con `state-lint` |
+| R5 | in parte | 545 documenti ritirati in advanced (A4, campioni, lotto B) e 84 nel datastore (lotto D), registri con commit di recupero su `main`; restano i «da accorpare» e i file del progetto |
+| R6 | fatta per i dati TJB-RTL e i ruoli chiave | 25 file in `_da_eliminare/` del progetto |
+| R7 | in parte | 59 documenti riallineati nella PR #486; i piani e i programmi restano alle loro sessioni (sezione 8) |
+| R8 | fatta | `.handoff/STATE.md`, `SOT_*`, `DEBT_REGISTER.md`, cruscotti dei due repo (PR #485, datastore #43) |
+| R9 | fatta | `build_adr_index.py --check` verde |
+| R10 | in parte | quindici pagine di dominio in `docs/wiki/domini/`; l'accorpamento dei «da accorpare» resta |
+| R11 | fatta | `build_wiki.py --check` verde in `state-lint` |
+| R12 | in parte | A1-A5 e A9 in CI; A10 (`scripts/lint-verita.sh`) provato in cloud con un agente finto, da installare sulla VM |
+| R13 | fatta | sezione «Documentazione» in `CLAUDE.md` di advanced (PR #485) e sottosezione del datastore (PR #44) |
+| R14 | da fare | solo con il sì di Enzo |

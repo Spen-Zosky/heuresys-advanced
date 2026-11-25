@@ -4,7 +4,7 @@
 > project instructions lean. `AGENTS.md` keeps a terse pointer + the most operative rule
 > (red-CI-must-fix); this file holds the full project-level detail.
 
-Vale la regola **R23** della SoT cross-tool (`C:\Users\enzospenuso\.claude\CLAUDE.md`): zero delega evitabile + proactive tool loading + self-diagnose fallback + no user-executable instructions when autonomously executable + evidence non suggerimento. Specifiche project-level che si applicano sopra R23 in heuresys-advanced:
+Vale la regola **R23** della SoT cross-tool (`~/.claude/CLAUDE.md` della macchina su cui si lavora; la fonte è quello della VM): zero delega evitabile + proactive tool loading + self-diagnose fallback + no user-executable instructions when autonomously executable + evidence non suggerimento. Specifiche project-level che si applicano sopra R23 in heuresys-advanced:
 
 - **Come si modifica un file in questo repo** (riscritta S1052 — la versione precedente nominava Filesystem MCP, Desktop Commander e Windows-MCP, che **non sono più disponibili**: prescriveva strumenti inesistenti, e il vuoto è stato riempito male):
   - **Si usa `Edit` / `Write`.** Fanno corrispondenza esatta sul testo, senza passare da nessuna shell.

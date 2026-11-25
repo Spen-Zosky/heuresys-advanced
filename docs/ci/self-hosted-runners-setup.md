@@ -1,5 +1,7 @@
 # Self-hosted GitHub Actions runner — OCI VM setup procedure
 
+> **Nota del 2026-11-25 (com'è oggi).** I runner sono registrati e attivi (§10); l'avvertenza in testa sulla prima registrazione rimandata all'host Windows descrive il 26/05/2026. Elenco e stato: `gh api repos/Spen-Zosky/heuresys-advanced/actions/runners`.
+
 **Updated**: 2026-05-26 (S935 phase F)
 **Status**: Procedure SHIPPED; first runner registration deferred to Windows host + SSH session.
 **Runner host**: `oracle-vm-default` (80.225.82.207, Ubuntu 24.04 LTS ARM64, `ubuntu` user).

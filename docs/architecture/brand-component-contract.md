@@ -1,7 +1,7 @@
 # Brand Component Contract — object type → canonical `@heuresys/ui`
 
 > **Status**: APPROVED (Enzo, S947 2026-05-29) — referenced by every page PR in the brand-fidelity migration.
-> **Authority**: this is the single source of truth for "which canonical component for which object type". Every real page in `apps/web/src/app/(authenticated)/*` (admin SPA + ESS `/me/*`) must render with the components below, fed by real `/v1/*` data (LIVE DATA E2E ONLY doctrine — see `NEXT_SESSION_MVP_2A.md`).
+> **Authority**: this is the single source of truth for "which canonical component for which object type". Every real page in `apps/web/src/app/(authenticated)/*` (admin SPA + ESS `/me/*`) must render with the components below, fed by real `/v1/*` data (LIVE DATA E2E ONLY doctrine — see `.claude/rules/frontend-live-data.md`).
 > **Reference implementations**: the `/showcase/*` routes (`dashboard-cards`, `tables`, `page-types`, `charts`, `forms`, `primary-initial-page`, `system-health`) are the canonical visual/behavioral references. Component prop signatures below are verified against `node_modules/@heuresys/ui/dist/index.d.ts` @ `@heuresys/ui@0.1.1`.
 
 ## 0. Import rule (non-negotiable — CW-B59)

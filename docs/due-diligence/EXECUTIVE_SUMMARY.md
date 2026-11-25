@@ -1,5 +1,7 @@
 # Executive Summary — Due Diligence heuresys-advanced — 2026-09-28 (rivalidata)
 
+> **Nota del 2026-11-25 (riordino della documentazione).** Questa due diligence è del 28/09/2026. Sul motore degli agenti vale la decisione definitiva di Enzo del 10/11/2026 (ADR-0056 D3, `CLAUDE.md`): pensare con l'abbonamento Claude è un uso personale legittimo e oggi non serve nessuna chiave API né approvazione; quando i repo apriranno al pubblico il fornitore del modello lo sceglierà Enzo. I rilievi che qui chiedono di migrare a una chiave API commerciale (T7-001, C2, P3) non sono più condizioni aperte; resta valido il tema del conteggio dei consumi per tenant.
+
 **Score globale: 66/100 — Verdetto: CONDITIONAL-GO**
 
 (HEAD `5faa2bc2` · rivalidazione della DD del 17/6/2026 (61/100) — voce #255 · 16 pilastri, 5 analisti indipendenti · postura avversariale. Il 58/100 NO-GO dell'8 settembre, fuori repo, è citato in `REPORT.md` §11 come precedente, mai copiato)
@@ -38,7 +40,7 @@ Tre mesi dopo, il profilo non è cambiato di natura ma si è approfondito: heure
 | # | Condizione | Effort | Priorità |
 |---|---|---|---|
 | C1 | Chiudere `/api/metrics` pubblico (T8-09) e il bug del permesso DPO (X2) | S | **P0** (basso costo, alta visibilità per un audit esterno) |
-| C2 | Migrare l'agent-gateway a una API key commerciale con metering per tenant, prima del primo cliente pagante | S-M | **P0** |
+| C2 | Conteggio dei consumi del modello per tenant; il fornitore del modello per l'apertura al pubblico lo sceglie Enzo (ADR-0056 D3) | S-M | **P0** |
 | C3 | De-personalizzare l'infra residua: managed-DB + app HA, ultimi 6 workflow CI fuori dalla VM-PROD | 4-7 ww | **P0** |
 | C4 | Neutralizzare il key-person: hire 2° dev senior + CONTRIBUTING/ONBOARDING + founder-retention con clausole | continuo | **P0** |
 | C5 | Costruire il layer commerciale: signup/provisioning multi-tenant + pricing/billing + onboarding | 5-8 ww | **P1** |

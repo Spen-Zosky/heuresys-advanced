@@ -71,6 +71,8 @@ Il PR esiste finché il branch `head` esiste (anche dopo il merge — viene most
 
 ## 3. Applicato ai nostri repo
 
+> **Nota del 2026-11-25.** Questa sezione fotografa i repo a maggio 2026. Oggi i workflow sono quelli di `.github/workflows/` (`ls .github/workflows`), con Dependabot attivo e runner self-hosted sulla VM e sulla Debian. Lo stato si legge dal repo, non da qui.
+
 ### Stato attuale: **nessun PR mai aperto**
 
 Entrambi i repo: 0 PR open, 0 PR closed. Workflow attuale è **commit diretti su `main`** (vedi `02-branches.md`).

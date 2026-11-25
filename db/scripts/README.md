@@ -1,5 +1,7 @@
 # `db/scripts/` — Database Bootstrap & Operations
 
+> **Nota del 2026-11-25 (com'è oggi).** Il database di produzione è sulla VM e il linux-pc ne tiene il gemello: dove si esegue ogni lavoro (prova delle migrazioni, prova generale della CI, test di integrazione, applicazione in produzione) lo dice la tabella «Dove si esegue il lavoro sul database» di `CLAUDE.md`. Il tunnel 5433 e gli script PowerShell restano la via da Windows, che oggi serve solo per leggere e diagnosticare.
+
 > Native PostgreSQL 16 setup, migration runner, reset, and validation scripts. Cross‑platform (PowerShell 5+ on Windows, Bash on Linux/macOS/Git Bash). No Docker on the canonical path (ADR‑0004).
 
 ---

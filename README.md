@@ -90,27 +90,24 @@ heuresys-advanced/
 │   └── scripts/                        .ps1 + .sh twins (create / migrate / reset / validate / brownfield-wave-1-preflight)
 │
 ├── docs/
-│   ├── BOOTSTRAP_EXECUTION_PLAN.md     §5 roadmap · §8 risk register · §9 decision log RD-01..RD-25
-│   ├── api/API_IMPLEMENTATION_PLAN.md
-│   ├── api/MVP_2A_API_GAP_AUDIT.md     v2.0 refreshed X12 (gap zero)
-│   ├── architecture/adr/               ADRs (architectural decision records)
-│   ├── frontend/FRONTEND_IMPLEMENTATION_PLAN.md
+│   ├── wiki/                           entry point: one page per domain + index + analytic index (docs/wiki/LEGGIMI.md)
+│   ├── architecture/adr/               ADRs (index: docs/architecture/ADR_INDEX.md)
+│   ├── kb/                             SOT_STATE.md · SOT_BACKLOG.md · DEBT_REGISTER.md · INDEX_PATHS.md · tools/
+│   ├── piani/                          plans, one file per cycle
+│   ├── product/                        product SoT
+│   ├── BOOTSTRAP_EXECUTION_PLAN.md     §9 decision log RD-01..RD-25
 │   ├── security/AUTH_SECURITY_PLAN.md
 │   ├── db/TARGET_SCHEMA_DESIGN.md
-│   ├── brownfield/                     canonical docs + wave_runners/
-│   ├── kb/                             SOT_STATE.md (running counts) · INDEX_PATHS.md (path index) · backlog · debts
-│   └── a11y-tail-items.md              MVP-3 register
+│   └── brownfield/                     legacy concepts (ADR-0038: no rows imported)
 │
-├── cowork_code_exchange/               Cowork↔Claude Code CLI protocol v2.2 (~140 file: Goal 001/002/003 + batch X1-X21)
-├── cowork_reserved/                    KB forensic F0-F12 + 12 batch_cN + bias_registry CW-B17..B60 + HANDOFF_FRESH_SESSION
-├── qa_artifacts/                       Coverage matrix + Playwright/axe/build logs + release notes
-├── scripts/cowork-exchange/            Protocol v2.2 toolchain (status/inbox/locks/notify/validate/session)
-├── sessioni/                           Session deliverables (forensic state of the art + pre-flight reports)
-├── .handoff/STATE.md                   SoT operativa cross-session
-├── .github/                            1 workflow (showcase deploy) + Dependabot + CODEOWNERS + SECURITY + templates
-├── CLAUDE.md                           Conventions for AI-assisted dev (post-X18 Design System npm doctrine)
-├── HANDOFF.md                          Cronologia sessione
-├── NEXT_SESSION_MVP_2A.md              Live-data E2E doctrine (storica, ancora applicable)
+├── .programmi/                         multi-session programmes (dedicated sessions)
+├── qa_artifacts/                       release notes and QA logs (historical)
+├── cowork_reserved/                    historical Cowork material (read-only)
+├── cowork_code_exchange/               historical, no longer used (Cowork writes only to docs/kb/COWORK_INBOX.md)
+├── sessioni/                           session deliverables
+├── .handoff/STATE.md                   quick state view
+├── .github/                            workflows (ls .github/workflows) + Dependabot + CODEOWNERS + SECURITY + templates
+├── CLAUDE.md                           rules for AI-assisted work
 └── README.md                           (this file)
 ```
 
@@ -122,7 +119,7 @@ heuresys-advanced/
 
 - Node.js ≥ 20.11 · pnpm ≥ 9 (project pin `pnpm@9.15.0`)
 - PostgreSQL 16 reachable on `localhost:5433` (we use an SSH tunnel to an OCI VM — see `.env.example`)
-- SSH access configured for `oracle-vm-default` host (key in `C:\Users\<user>\.ssh\oci_recovery_ed25519`)
+- SSH access configured for the `oracle-vm-default` host (see `.env.example`)
 - For the web E2E suite: `playwright install chromium` runs once after `pnpm install`
 
 ### 2. Clone + install

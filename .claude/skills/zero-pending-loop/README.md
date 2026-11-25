@@ -315,16 +315,16 @@ docs/superpowers/specs/2026-07-25-zero-pending-loop-design.md
                                   il perche' di ogni scelta
 ```
 
-Fuori dal repo, sulla macchina Windows:
+Fuori dal repo, sulla macchina Windows dove la CLI `zp` è stata installata (la sede storica di questo impianto, prima che il lavoro passasse alla VM il 22/10/2026):
 
 ```
-C:\Users\enzospenuso\Claude Desktop\scripts\zp.ps1
+<cartella degli script di Claude Desktop>\scripts\zp.ps1
     la CLI
 
-D:\enzospenuso\Documents\PowerShell\Microsoft.PowerShell_profile.ps1
+<profilo di PowerShell>\Microsoft.PowerShell_profile.ps1
     6 righe in fondo: la funzione Invoke-ZeroPending e l'alias zp
 
-D:\heuresys-advanced\.zp\
+<radice del repo>\.zp\
     stato di runtime, gitignored
 ```
 

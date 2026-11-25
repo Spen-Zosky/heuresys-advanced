@@ -1,5 +1,7 @@
 # 07.4 · Interazioni tra `heuresys-advanced` e `ux-design-shared`
 
+> **Nota del 2026-11-25 (com'è oggi).** La dipendenza fra i due repo è semver sul pacchetto pubblicato `@heuresys/ui` (`grep @heuresys/ui apps/web/package.json`), non più `pnpm link:`.
+
 > I due repo sono **fratelli, non parent/child**. Vivono separati su GitHub ma comunicano via dipendenza npm (oggi `pnpm link:`, domani publish). Questo file analizza come si parlano, cosa significa cambiare la modalità, e come tenerli allineati.
 
 ---

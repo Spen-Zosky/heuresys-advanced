@@ -64,6 +64,8 @@ La v1 di Projects, basata solo su colonne board, è in fase di sunset. Ignora co
 
 ## 3. Applicato ai nostri repo
 
+> **Nota del 2026-11-25.** Questa sezione fotografa i repo a maggio 2026. Oggi i workflow sono quelli di `.github/workflows/` (`ls .github/workflows`), con Dependabot attivo e runner self-hosted sulla VM e sulla Debian. Lo stato si legge dal repo, non da qui.
+
 ### Stato attuale: **0 project creati**
 
 Entrambi i repo hanno `has_projects: true` (default) ma nessuno è stato configurato.

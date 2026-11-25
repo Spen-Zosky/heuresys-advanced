@@ -4,6 +4,8 @@
 
 > Tutti i debiti, drift e incoerenze emersi nella ricognizione forense S939 (4-root). Per ognuno: severità, evidenza, remediation, stato. **Tutti in scope** (R3 cross-project: il codebase va lasciato migliore). Quelli operativi sono linkati al `SOT_BACKLOG.md`.
 
+> **Nota del 2026-11-25** (riordino della documentazione, voce R8): i debiti di documentazione di questo registro (deriva dei documenti, duplicati, file di milestone chiuse) sono ora coperti dal ritiro dei documenti superati (`docs/piani/riordino-documentazione_20261125/REGISTRO_RITIRI.tsv`) e dal controllo `docs/kb/tools/check_documenti.py` in CI; lo stato delle singole righe si rilegge prima di agire.
+
 > **Aggiornato**: 2026-07-21 (S1024 — **census forense Fase 1** del mandato S1023: 60/60 righe verificate contro codice/DB via fan-out, 8 righe malformate riparate, 8 emendamenti `[census S1024]`, nuove righe D-61..D-71). Tabella aggiornata fino a D-71.
 
 

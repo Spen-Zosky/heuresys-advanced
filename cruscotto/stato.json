@@ -1,11 +1,11 @@
 {
  "schema": "cruscotto-stato/1",
  "progetto": "heuresys-advanced",
- "aggiornato_il": "2026-10-30",
- "aggiornato_da": "Claude, thread «Riallineare lo stato di advanced» (29/10/2026)",
- "fase": "Dopo la GA v1.0.0: adesione al contratto dati del datastore, onda 2 in corso",
+ "aggiornato_il": "2026-11-25",
+ "aggiornato_da": "Claude, thread «Riordinare la documentazione» (25/11/2026)",
+ "fase": "Giro di verifica e correzione di tutte le pagine, con rilascio e prova dal vivo; riordino della documentazione in corso",
  "stato": "giallo",
- "stato_motivo": "produzione attiva e allineata a main su 0c3088c3 (git ls-remote, 29/10), CI 'Atlas freshness' verde; restano da riesaminare le vulnerabilità Dependabot e il pacchetto v0.3 vero della banca dal datastore.",
+ "stato_motivo": "produzione su 87d7ce9d (git ls-remote origin refs/heads/prod, 25/11) dopo il giro di verifica delle pagine, riaperto il 25/11 nello stesso mandato; i registri SOT vanno riallineati al lavoro dal 30/10 (piano di riordino, voce R8).",
  "avanzamento": null,
  "decisioni_attese": [
   {
@@ -116,8 +116,8 @@
    "id": "R-09",
    "titolo": "Documentazione di stato molto voluminosa (SOT_STATE circa 528 KB) con incoerenze già emerse",
    "impatto": "basso",
-   "mitigazione": "",
-   "fonte": "wc -c"
+   "mitigazione": "riordino del 25/11: documenti superati ritirati (registro dei ritiri), wiki per dominio, check_documenti.py in CI",
+   "fonte": "docs/piani/PIANO_riordino-documentazione_20261125.md"
   },
   {
    "id": "R-10",
@@ -319,6 +319,18 @@
    "titolo": "Accettato ADR-0049 (le attività appartengono a un processo)",
    "tipo": "decisione",
    "fonte": "docs/architecture/adr/0049_le_attivita_appartengono_a_un_processo.md"
+  },
+  {
+   "data": "2026-11-25",
+   "titolo": "Rilascio 87d7ce9d: correzioni del giro di verifica delle pagine (PR #482)",
+   "tipo": "release",
+   "fonte": "git ls-remote origin refs/heads/prod"
+  },
+  {
+   "data": "2026-11-25",
+   "titolo": "Approvato il riordino della documentazione (D1-D4): superati fuori dal repo, wiki in docs/wiki/, controllo settimanale",
+   "tipo": "decisione",
+   "fonte": "docs/piani/PIANO_riordino-documentazione_20261125.md"
   }
  ],
  "aree": [
@@ -399,6 +411,8 @@
   }
  ],
  "prossimi_passi": [
+  "Chiudere il giro di verifica e correzione delle pagine, con rilascio e prova dal vivo",
+  "Chiudere le voci aperte del riordino della documentazione (piano del 25/11, sezione 6)",
   "Far partire O2-03 (struttura del tenant), senza bloccanti",
   "Sollecitare il datastore per il pacchetto v0.3 vero della banca",
   "Riesaminare Dependabot e la PR #119",

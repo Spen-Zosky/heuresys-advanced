@@ -261,7 +261,7 @@ export function DiagrammaFasi({
         {d.att.map((a, i) => {
           const k = d.indice.get(d.chiaveDi(a))!;
           const x = d.x(i), y = d.TOP2 + k * FLH + 8;
-          const nome = dueRighe(a.name, 22), esec = a.executorName ? dueRighe(a.executorName, 26)[0]! : null;
+          const nome = dueRighe(a.name, 22), esec = a.executorName ? unaRiga(a.executorName, 26) : null;
           const ore = a.typicalHoursPerCycle !== null ? `${a.typicalHoursPerCycle} h` : null;
           const completo = `${etichettaAttivita(a)}${ore ? `, ${ore}` : ""}`;
           return (

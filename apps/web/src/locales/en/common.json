@@ -880,7 +880,7 @@
     },
     "processUnitRole": {
       "OWNER": "Owner",
-      "CONTRIBUTOR": "Contributes",
+      "CONTRIBUTOR": "Contributor",
       "CONSULTED": "Consulted",
       "INFORMED": "Informed"
     },

@@ -18,6 +18,14 @@ export const PASSO_ZOOM = 1.2;
 const MARGINE = 12;
 /** La scala sotto cui il testo dei diagrammi di processo e di progetto non si legge più: il fit non scende oltre. */
 export const SCALA_MIN_LEGGIBILE = 0.7;
+/**
+ * La scala a cui si aprono i diagrammi di processo (flusso a corsie, fasi, grafo): 1, cioè il testo alla
+ * sua misura vera, mai sotto i 12 px. Alla scala 0.7 il testo del flusso arrivava a 7 px e il disegno,
+ * contenuto principale della scheda, non si leggeva (classe N1 del giro di verifica del 25/11/2026).
+ * Se il disegno non sta nell'area si apre ancorato in alto a sinistra e si scorre trascinando, o si
+ * rimpicciolisce con − e la rotella.
+ */
+export const SCALA_APERTURA_PROCESSO = 1;
 
 /**
  * Il fit: tutto il contenuto dentro l'area, centrato, mai ingrandito oltre la scala 1.

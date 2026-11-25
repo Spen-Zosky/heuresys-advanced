@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { adatta, altezzaArea, zoomIntorno, SCALA_MAX, SCALA_MIN, SCALA_MIN_LEGGIBILE } from "./navigazione-area";
+import { adatta, altezzaArea, zoomIntorno, SCALA_APERTURA_PROCESSO, SCALA_MAX, SCALA_MIN, SCALA_MIN_LEGGIBILE } from "./navigazione-area";
 
 describe("adatta (fit)", () => {
   it("rimpicciolisce un contenuto più largo dell'area e lo centra", () => {
@@ -72,5 +72,16 @@ describe("altezzaArea", () => {
   });
   it("altrimenti è l'altezza del contenuto adattato alla larghezza", () => {
     expect(altezzaArea(1000, 500, 400, 700)).toBe(424);
+  });
+});
+
+describe("apertura dei diagrammi di processo (N1)", () => {
+  it("si aprono alla scala 1: un disegno largo non si rimpicciolisce, si ancora in alto a sinistra", () => {
+    const v = adatta(1200, 600, 3900, 500, SCALA_APERTURA_PROCESSO);
+    expect(v.s).toBe(1);
+    expect(v.x).toBe(12);
+  });
+  it("il testo più piccolo dei disegni (12) resta a 12 px all'apertura", () => {
+    expect(12 * adatta(390, 500, 2000, 800, SCALA_APERTURA_PROCESSO).s).toBeGreaterThanOrEqual(12);
   });
 });

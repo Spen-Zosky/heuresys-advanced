@@ -127,22 +127,27 @@ afterAll(async () => {
 });
 
 describe("ADR-0061 D4 — le faccette di un processo del tenant", () => {
-  it("il vocabolario ha sette faccette e 26 valori in italiano", async () => {
+  it("il vocabolario ha sette faccette e 26 valori, in italiano e in inglese", async () => {
     const r = await suite.app.inject({ method: "GET", url: "/v1/tenant-processes/faccette/vocabolario", headers: { cookie: ch(hrms.cookies) } });
     expect(r.statusCode).toBe(200);
-    const items = (r.json() as { items: Array<{ facet: string; code: string; label: string }> }).items;
+    const items = (r.json() as { items: Array<{ facet: string; code: string; label: string; labelEn: string; description: string; descriptionEn: string }> }).items;
     expect(items).toHaveLength(26);
     expect(new Set(items.map((x) => x.facet)).size).toBe(7);
-    expect(items.find((x) => x.facet === "BENEFICIARIO" && x.code === "CLIENTE_ESTERNO")?.label).toBe("Cliente esterno");
+    const cliente = items.find((x) => x.facet === "BENEFICIARIO" && x.code === "CLIENTE_ESTERNO");
+    expect(cliente?.label).toBe("Cliente esterno");
+    // N2 del giro di verifica del 25/11/2026: anche l'inglese, che la pagina inglese mostra.
+    expect(cliente?.labelEn).toBe("External customer");
+    expect(items.every((x) => x.labelEn.length > 0 && x.descriptionEn.length > 0)).toBe(true);
   });
 
   it("il mandato HR assegna più valori con il criterio e li rilegge come decisione", async () => {
     const r = await putFacet(suite, hrms, processId, "BENEFICIARIO", { codes: ["CLIENTE_ESTERNO", "AUTORITA"], criterion: "Il risultato va al cliente e alla vigilanza" });
     expect(r.statusCode).toBe(200);
-    const body = r.json() as { canEdit: boolean; items: Array<{ facet: string; code: string; source: string; status: string; criterion: string }> };
+    const body = r.json() as { canEdit: boolean; items: Array<{ facet: string; code: string; labelEn: string; source: string; status: string; criterion: string }> };
     expect(body.canEdit).toBe(true);
     const ben = body.items.filter((x) => x.facet === "BENEFICIARIO");
     expect(ben.map((x) => x.code)).toEqual(["CLIENTE_ESTERNO", "AUTORITA"]);
+    expect(ben[0]?.labelEn).toBe("External customer");
     expect(ben.every((x) => x.source === "PERSONA" && x.status === "APPROVATA")).toBe(true);
     expect(ben[0]!.criterion).toBe("Il risultato va al cliente e alla vigilanza");
   });

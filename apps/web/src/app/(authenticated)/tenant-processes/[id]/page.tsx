@@ -222,7 +222,8 @@ export default function TenantProcessPage() {
           <span key="n"><span className="font-medium">{x.name}</span>{x.description ? <span className="block text-xs text-muted-foreground">{x.description}</span> : null}</span>,
           x.unit ? enumLabel("kpiUnit", x.unit) : "—",
           x.defaultTarget === null ? "—" : fmt.numero(x.defaultTarget, 2),
-          x.defaultWeight === null ? "—" : fmt.numero(x.defaultWeight, 2),
+          // il peso è una frazione (0-1) e si legge in percentuale, come dice la guida: «sommano a 100%» (classe N5)
+          x.defaultWeight === null ? "—" : fmt.percento(x.defaultWeight, "0-1"),
         ])}
       />
       <Tabella
@@ -250,7 +251,12 @@ export default function TenantProcessPage() {
     <div data-testid="tenant-process-page" className="space-y-4 px-6 pb-8">
       <PageHeader
         title={p.name}
-        description={t("processiDelTenant.scheda.riepilogo", { attivita: fmt.numero(att.length), unita: fmt.numero(s.units.length), sottoprocessi: fmt.numero(s.subprocesses.length) })}
+        description={t("processiDelTenant.scheda.riepilogo", {
+          // ogni conteggio con il suo plurale: «1 sottoprocesso», non «1 sottoprocessi» (classe K22)
+          attivita: t("processiDelTenant.scheda.riepilogoAttivita", { count: att.length, n: fmt.numero(att.length) }),
+          unita: t("processiDelTenant.scheda.riepilogoUnita", { count: s.units.length, n: fmt.numero(s.units.length) }),
+          sottoprocessi: t("processiDelTenant.scheda.riepilogoSottoprocessi", { count: s.subprocesses.length, n: fmt.numero(s.subprocesses.length) }),
+        })}
         breadcrumbs={
           <span className="flex flex-wrap gap-2">
             <Link href="/tenant-processes" className="hover:underline">{t("processiDelTenant.scheda.indietro")}</Link>

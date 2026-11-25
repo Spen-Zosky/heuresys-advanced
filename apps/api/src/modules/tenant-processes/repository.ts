@@ -104,7 +104,8 @@ export async function facetVocabulary(q: DbConnector): Promise<ProcessFacetValue
   const r = await q.query<ProcessFacetValue>(
     `SELECT process_facet_value_facet AS facet, process_facet_value_code AS code,
             process_facet_value_ordinal::int AS ordinal, process_facet_value_label_it AS label,
-            process_facet_value_description_it AS description
+            process_facet_value_label_en AS "labelEn", process_facet_value_description_it AS description,
+            process_facet_value_description_en AS "descriptionEn"
        FROM sys.sys_process_facet_values
       ORDER BY array_position(ARRAY['FINALITA','BENEFICIARIO','PERIMETRO','MODALITA','ATTIVAZIONE','TECNOLOGIA','STANDARDIZZAZIONE']::text[], process_facet_value_facet::text),
                process_facet_value_ordinal`,
@@ -115,7 +116,8 @@ export async function facetVocabulary(q: DbConnector): Promise<ProcessFacetValue
 export async function processFacets(q: DbConnector, processId: string): Promise<TenantProcessFacet[]> {
   const r = await q.query<TenantProcessFacet>(
     `SELECT f.tenant_process_facet_facet AS facet, f.tenant_process_facet_value_code AS code,
-            v.process_facet_value_label_it AS label, f.tenant_process_facet_criterion AS criterion,
+            v.process_facet_value_label_it AS label, v.process_facet_value_label_en AS "labelEn",
+            f.tenant_process_facet_criterion AS criterion,
             f.tenant_process_facet_source AS source, f.tenant_process_facet_status AS status,
             to_char(f.updated_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS "updatedAt"
        FROM sys.sys_tenant_process_facets f

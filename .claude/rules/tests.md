@@ -12,7 +12,7 @@ paths:
 
 `apps/api/vitest.config.ts` gira in **singleThread** per evitare race condition sulla rotazione dei refresh token, e condivide un solo pool DB su tutta la suite. L'helper `apps/api/test/helpers/build-test-app.ts` avvia un'istanza Fastify isolata per test, carica la cache RBAC una volta, e inietta un `InMemoryMailer` così le asserzioni sull'auth possono ispezionare la posta in uscita senza I/O.
 
-**I test colpiscono il DB live sulla VM OCI: il tunnel SSH dev'essere su.** Non esiste oggi una separazione unit/integration — tutti i test in `apps/api/test/*.test.ts` sono di livello integrazione.
+**I test di integrazione dell'API girano sul gemello** (la copia del database sul linux-pc): `pnpm test:api:vm`, come dice la tabella «Dove si esegue il lavoro sul database» di `CLAUDE.md`. Lanciati da Windows colpiscono il database attraverso il tunnel SSH, che dev'essere su, e costano molto di più. Non esiste oggi una separazione unit/integration — tutti i test in `apps/api/test/*.test.ts` sono di livello integrazione.
 
 ## Isolamento transazionale (D-52, S1015)
 

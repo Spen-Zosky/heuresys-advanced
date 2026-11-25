@@ -2,6 +2,8 @@
 Agente: Engineering (avversariale) | Modello: Claude Sonnet 5 | Data: 2026-09-28
 HEAD: `5faa2bc2ca78c40bec603e77df9da176c6971337`
 
+> **Nota del 2026-11-25 (riordino della documentazione).** Questa due diligence è del 28/09/2026. Sul motore degli agenti vale la decisione definitiva di Enzo del 10/11/2026 (ADR-0056 D3, `CLAUDE.md`): pensare con l'abbonamento Claude è un uso personale legittimo e oggi non serve nessuna chiave API né approvazione; quando i repo apriranno al pubblico il fornitore del modello lo sceglierà Enzo. I rilievi che qui chiedono di migrare a una chiave API commerciale (T7-001, C2, P3) non sono più condizioni aperte; resta valido il tema del conteggio dei consumi per tenant.
+
 > Rivalidazione della due diligence T7 di giugno (HEAD `ce26608`, 2026-06-17). ~1978 commit di delta. Metodo: grep/read su HEAD attuale + query live pgvector via tunnel SSH :5433 (sola lettura). Nessuna scrittura su codice/DB.
 
 ---
@@ -64,10 +66,10 @@ Le remediation di giugno effettivamente eseguite: **T7-003** (VOYAGE_API_KEY ora
 - **Severità**: High
 - **Tipo**: risk (compliance/ToS)
 - **Evidenza**: `apps/agent-gateway/src/subscription-auth.ts` — modulo dedicato (refactor S1029 da un bug di module-hoisting che rischiava di rendere inefficace la `delete` della chiave); `AGENT_GATEWAY_SUBSCRIPTION_AUTH=1` documentato in `.env.example:284-292`; il README del gateway dichiara esplicitamente "distribuito: NO — nessuna unit systemd, misurato" (D-91, DEBT_REGISTER).
-- **Impatto**: Invariato da giugno — al primo cliente reale l'agente non può essere acceso su questa architettura senza una API key Anthropic (o Bedrock/Vertex) a pagamento, con conseguente costo AI da budgetare.
+- **Impatto**: superato dalla decisione di Enzo del 10/11/2026 (ADR-0056 D3): l'abbonamento è l'architettura scelta per lo sviluppo e il collaudo; il fornitore del modello per l'apertura al pubblico lo sceglierà Enzo, e con lui il costo da mettere a budget.
 - **GA-blocker**: No (nessun cliente oggi), prerequisito commerciale
-- **Remediation**: Invariata — procurare API key Anthropic pay-per-use o AWS Bedrock/GCP Vertex prima del primo cliente reale. Effort: S (configurazione) + decisione di budget.
-- **Best-practice ref**: Anthropic Commercial Terms; serving commerciale richiede API key dedicata
+- **Remediation**: nessuna oggi; la scelta del fornitore per l'apertura al pubblico è di Enzo (ADR-0056 D3).
+- **Best-practice ref**: ADR-0056 D3
 - **Confidence**: Alta
 
 ### T7-002 (invariato) — Nessun eval/golden-set per la qualità del retrieval kNN

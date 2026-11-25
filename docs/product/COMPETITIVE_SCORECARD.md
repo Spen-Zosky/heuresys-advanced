@@ -1,5 +1,7 @@
 # Competitive Scorecard — heuresys-advanced vs alta fascia
 
+> **Nota del 2026-11-25 (com'è oggi).** Benchmark di giugno 2026, tarato sul posizionamento di allora. Il posizionamento di oggi è ADR-0054 (piattaforma del cambiamento organizzativo): il confronto va rifatto su quello prima di usarlo.
+
 > Benchmark investor-grade, postura avversariale. Ricerca **web live giugno 2026** (12 ricerche, 11+ competitor). Fonti in calce.
 > Contesto che incornicia tutto: il **Forrester Skills Intelligence Solutions Landscape Q1 2026** censisce **27 vendor**. heuresys non entra in un vuoto di categoria — entra in un mercato affollato in consolidamento.
 

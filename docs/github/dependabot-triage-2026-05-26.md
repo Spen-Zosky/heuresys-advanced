@@ -1,5 +1,7 @@
 # Dependabot triage procedure — 2026-05-26 (S935 SEC base)
 
+> **Nota del 2026-11-25 (com'è oggi).** La procedura di triage resta valida; le date «ultimo triage» e «ultimo PR» sono ferme. Il lavoro aperto sulle PR di Dependabot è il programma `.programmi/243-igiene-e-pr-dependabot.md`; gli avvisi si leggono con `gh api repos/Spen-Zosky/heuresys-advanced/dependabot/alerts`.
+
 **Status**: Procedure SHIPPED and executed. The triage is run by hand with the `gh` CLI. The automation script sketched in the original draft was never implemented; the reference to it has been removed rather than left as a promise (Z-230).
 **Last triage executed**: **2026-08-09 — 5 open dependency PRs classified: #67 and #60 to MERGE_BATCH, #62 / #61 / #58 to DEFER_MAJOR**
 **Last dependency PR merged**: #53 `next 16.2.9 → 16.2.11`, merged 2026-07-23.

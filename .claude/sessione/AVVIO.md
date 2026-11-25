@@ -7,8 +7,10 @@ lavoro è già stata fatta da due hook prima che tu legga questo.
 
 ## Cosa è già girato da sé, e che NON va rifatto
 
-1. **`scripts/session-boot.ps1`** — hook `SessionStart` registrato in `.claude/settings.local.json`.
-   Ha già: riaperto il tunnel `:5433` se era giù (fino a 12 tentativi), verificato pgpass e fatto uno
+1. **`scripts/hooks/session-boot.sh`** — hook `SessionStart` registrato in `.claude/settings.json`,
+   uguale su ogni macchina: su Windows chiama `scripts/session-boot.ps1` (che riapre il tunnel
+   `:5433` se era giù), sulla VM e sui Linux fa lo stesso controllo senza tunnel, perché il database
+   è locale. Ha già: verificato l'accesso e fatto uno
    smoke `select 1` sul database, raccolto branch / HEAD / dirty / unpushed **escludendo la superficie
    Codex** dal conteggio dello sporco, e girato `handoff-lint --warn-only` in sola lettura.
 2. **`prompt-hook`** (hook `UserPromptSubmit`) — ha già riconosciuto la modalità dalla tua frase, l'ha
@@ -101,7 +103,7 @@ output:
 
 ## Dove si esegue un lavoro
 
-Il database **non è su questa macchina**: si arriva via tunnel `:5433`. Prima di lanciare un lavoro
+Sulla VM il database di produzione è locale; da Windows **non è su questa macchina** e si arriva via tunnel `:5433`. Prima di lanciare un lavoro
 pesante, chiediti su quale macchina va eseguito — il linux-pc è il gemello di produzione, il runner della
 CI e la macchina della verifica lunga.
 

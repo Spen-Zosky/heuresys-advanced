@@ -75,6 +75,8 @@ Per sole-coder + repo public, signed commits sono **nice to have**, non critical
 
 ## 3. Applicato ai nostri repo
 
+> **Nota del 2026-11-25.** Questa sezione fotografa i repo a maggio 2026. Oggi i workflow sono quelli di `.github/workflows/` (`ls .github/workflows`), con Dependabot attivo e runner self-hosted sulla VM e sulla Debian. Lo stato si legge dal repo, non da qui.
+
 ### Stato attuale: nessun commit firmato
 
 Tutti i commit dei due repo sono **unsigned**. Mostrano nome+email autore ma nessun badge `Verified`.

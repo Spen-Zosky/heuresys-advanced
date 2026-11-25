@@ -60,6 +60,8 @@ L'account è l'**owner namespace**: l'URL del repo è sempre `github.com/<owner>
 
 ## 3. Applicato ai nostri repo
 
+> **Nota del 2026-11-25.** Questa sezione fotografa i repo a maggio 2026. Oggi i workflow sono quelli di `.github/workflows/` (`ls .github/workflows`), con Dependabot attivo e runner self-hosted sulla VM e sulla Debian. Lo stato si legge dal repo, non da qui.
+
 | Repo | Visibility | Description | Topics | License | Pages | Issues | Discussions | Wiki |
 |---|---|---|---|---|---|---|---|---|
 | `Spen-Zosky/heuresys-advanced` | public | ✅ (set) | ❌ vuoto | ❌ assente | ❌ | ✅ on (0 open) | ❌ off | ✅ on (vuota) |

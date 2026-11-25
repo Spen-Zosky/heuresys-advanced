@@ -3,7 +3,7 @@
 ## Struttura canonica (12 sezioni — vedi l'istanza live docs/kb/atlas/ATLAS_CURATED.md)
 1 Colpo d'occhio (SOLO rimandi ai conteggi ri-derivabili) · 2 Mappa d'oro tabelle vuote ·
 3 Capacita' dormienti nel codice · 4 Gap/opportunita' API · 5 Web/UX pattern e gap ·
-6 Design system inutilizzato · 7 DB health · 8 Legacy (residuo + cantiere) ·
+6 Design system inutilizzato · 7 DB health · 8 Legacy (solo concetti: ADR-0038 ha chiuso l'ingestione, niente «residuo» da importare) ·
 9 Wiki e grafi (viste parallele) · 10 Incoerenze minori (debt candidates) ·
 11 Drift documentali rilevati · 12 Semi tematici per linee di sviluppo.
 

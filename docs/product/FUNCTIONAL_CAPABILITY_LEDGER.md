@@ -1,5 +1,7 @@
 # Functional Capability Ledger — heuresys-advanced
 
+> **Nota del 2026-11-25 (com'è oggi).** Verificato l'ultima volta il 2026-06-19; da allora la catena delle migrazioni è cresciuta molto e ADR-0054 ha cambiato il posizionamento. Va riverificato prima di usarlo come stato corrente delle capacità.
+
 > **Cos'è**: la guida-alla-verifica del prodotto. Per ogni funzionalità dichiara uno **stato verificato** con evidenza concreta (`file:line` + query/conteggio al 2026-06-19). È il cuore della SoT di prodotto e l'input del piano di sviluppo funzionale.
 > **Metodo**: cartografia codice (`db/migrations` + `apps/api/src/modules` + `packages/shared` + `apps/web/src/app`) + count/absence-check **LIVE** sul DB reale (tunnel `:5433` → OCI VM PostgreSQL 16). Verifica eseguita **2026-06-19** (S998) via 7 work-group paralleli read-only. Schema `sys.*`, migrazioni `000001..000141`.
 > **Anti-drift (T2)**: i conteggi qui riportati sono **evidenza della verifica live al 2026-06-19**, non valori SoT congelati. La SoT dei conteggi correnti è `docs/kb/SOT_STATE.md` (ri-derivata ogni sessione). Non ri-hardcodare questi numeri altrove.

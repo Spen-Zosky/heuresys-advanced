@@ -1,5 +1,7 @@
 # CI workflows overview (S935 phase F)
 
+> **Nota del 2026-11-25 (com'è oggi).** I workflow sono quelli di `.github/workflows/` (`ls .github/workflows`), molti più dei 7 di maggio; i runner self-hosted sono più d'uno (VM e Debian). Questa pagina descrive i workflow della fase F di S935 e resta valida per quelli.
+
 **Updated**: 2026-05-26
 **Total workflows**: 7 (6 new in S935-F + showcase pre-existing)
 **Runner**: `oracle-vm-default` (OCI VM ARM64 self-hosted) — setup procedure in `docs/ci/self-hosted-runners-setup.md`.

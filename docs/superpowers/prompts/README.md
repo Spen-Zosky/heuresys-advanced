@@ -1,5 +1,7 @@
 # Mandati — prompt consegnati a Claude Code CLI
 
+> **Nota del 2026-11-25 (com'è oggi).** `cowork_code_exchange/` non si usa più: Cowork scrive solo in fondo a `docs/kb/COWORK_INBOX.md` (`CLAUDE.md`, «Fonti di verità»). La convenzione dei mandati qui descritta è storica.
+
 Questa cartella conserva i **mandati**: il testo esatto consegnato a Claude Code CLI
 all'inizio di un ciclo di lavoro. E' il gemello di `../specs/`, che conserva i **referti**
 prodotti da quei cicli.

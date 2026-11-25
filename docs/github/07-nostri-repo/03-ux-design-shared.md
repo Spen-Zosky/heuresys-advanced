@@ -1,5 +1,7 @@
 # 07.3 · `Spen-Zosky/ux-design-shared` — deep dive
 
+> **Nota del 2026-11-25 (com'è oggi).** `apps/web` dipende da `@heuresys/ui` per versione semver dal registro (`grep @heuresys/ui apps/web/package.json`), non più via `pnpm link:`; le sezioni su `link:` descrivono maggio 2026.
+
 > Repo che ospita il design system `@heuresys/ui` (51 componenti React + Storybook). Pubblica già su GitHub Pages. Path naturale di evoluzione: publish su npm come `@spen-zosky/ui` per sostituire il `pnpm link:` con cui oggi è consumato.
 
 ---

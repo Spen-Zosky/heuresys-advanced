@@ -1,5 +1,7 @@
 # Due Diligence — heuresys-advanced — Rapporto completo — 2026-09-28 (rivalidato)
 
+> **Nota del 2026-11-25 (riordino della documentazione).** Questa due diligence è del 28/09/2026. Sul motore degli agenti vale la decisione definitiva di Enzo del 10/11/2026 (ADR-0056 D3, `CLAUDE.md`): pensare con l'abbonamento Claude è un uso personale legittimo e oggi non serve nessuna chiave API né approvazione; quando i repo apriranno al pubblico il fornitore del modello lo sceglierà Enzo. I rilievi che qui chiedono di migrare a una chiave API commerciale (T7-001, C2, P3) non sono più condizioni aperte; resta valido il tema del conteggio dei consumi per tenant.
+
 > Forense, investor-grade. HEAD `ce26608` (S994). 16 pilastri (rubrica `references/scoring-rubric.md`), 7 workstream-agent + verifica diretta del DD lead. Postura: indipendente/avversariale. **Score globale 61/100 → verdetto CONDITIONAL-GO** (dettaglio `SCORECARD.md`; sintesi investitore `EXECUTIVE_SUMMARY.md`).
 
 ---

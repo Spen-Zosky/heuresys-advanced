@@ -10,7 +10,7 @@
 # USAGE (source from your script):
 #   #!/usr/bin/env bash
 #   set -euo pipefail
-#   source "$(dirname "$0")/../../cowork_reserved/batch_c5/xos_lib/cross_os_pipeline.sh"
+#   source "$(dirname "$0")/_lib/cross_os_pipeline.sh"   # da uno script in db/scripts/
 #
 #   xos_init \
 #     --ssh-host oracle-vm-default \

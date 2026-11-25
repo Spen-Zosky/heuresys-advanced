@@ -80,6 +80,8 @@ Puoi creare categorie custom + cambiare ordine/visibilità.
 
 ## 3. Applicato ai nostri repo
 
+> **Nota del 2026-11-25.** Questa sezione fotografa i repo a maggio 2026. Oggi i workflow sono quelli di `.github/workflows/` (`ls .github/workflows`), con Dependabot attivo e runner self-hosted sulla VM e sulla Debian. Lo stato si legge dal repo, non da qui.
+
 ### Stato attuale: **disabilitato su entrambi**
 
 `has_discussions: false`. Per ora ha senso così:

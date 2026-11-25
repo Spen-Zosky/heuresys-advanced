@@ -145,6 +145,8 @@ counts: {scripts: N, workflows: N, db_scripts: N}.
 
 ## TEMPLATE: legacy            (parametro `{{LEGACY_TARGET}}`: primary | cantiere)
 
+> **Dal 2026-08-14 (ADR-0038) il legacy non è più una fonte di dati**: l'ingestione è chiusa, ciò che manca si costruisce o si ricava da `sys.*`, e il legacy si consulta solo per i concetti. ADR-0023 è superato. Le tabelle legacy «non coperte» non sono più residuo da importare: questo template si lancia solo per mappare concetti, mai per pianificare caricamenti.
+
 Nota fissa per ENTRAMBE le varianti: ogni comando SSH verso la VM va prefissato SEMPRE con
 `MSYS_NO_PATHCONV=1` (Git Bash altrimenti storpia i path POSIX nella stringa remota). Le
 statistiche sul legacy vanno azzerate a fonte viva (reltuples/count), mai riusate da run precedenti.

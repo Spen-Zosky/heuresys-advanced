@@ -33,14 +33,14 @@ the read-only Cowork design in the plugin repo (`docs/MCP_TOOL_CATALOG.md`,
 Lo stadio «mock-first slice, 2026-06-15» che stava qui era superato da mesi: `src/` porta il
 regime intero. I quattro verbi qui sotto sono misurabili, e accanto a ciascuno c'e' il comando.
 
-- **Implementato** — 12 sorgenti in `src/` (`ls src`): il server HTTP (`server.ts`), il cancello
+- **Implementato** — i sorgenti in `src/` (`ls src`; i principali qui sotto): il server HTTP (`server.ts`), il cancello
   di scrittura (`write-gate.ts`), il ponte di approvazione (`approval-bridge.ts`), gli strumenti
   MCP con il risolutore dell'atlante (`mcp-tools.ts`, `atlas-resolver.ts`, `mcp-tool-names.ts`),
   il client verso `/v1` (`heuresys-client.ts`), il diario senza PII (`audit-sink.ts`,
   `redact.ts`), l'autenticazione ad abbonamento (`subscription-auth.ts`) e il **fornitore di
   proposte** della ricerca (`research-propose.ts`, #132 F4h — due fasi: indirizzi, proposte;
-  dal 2026-09-12 la fase indirizzi riceve il perimetro delle fonti ammesse). 8 file di test
-  (`ls test`): `pnpm test`.
+  dal 2026-09-12 la fase indirizzi riceve il perimetro delle fonti ammesse). I test stanno in
+  `test/` (`ls test`): `pnpm test`.
 - **Configurato** — nessun segreto nei file: `AGENT_GATEWAY_SUBSCRIPTION_AUTH=1` usa il `claude`
   autenticato della macchina (#9, abbonamento MAX); `AGENT_GATEWAY_RESEARCH_TOKEN` e' la parola
   d'ordine condivisa con l'API (`RESEARCH_GATEWAY_TOKEN`), che sul gemello vive in
@@ -56,8 +56,9 @@ regime intero. I quattro verbi qui sotto sono misurabili, e accanto a ciascuno c
   fonti registrate). Il `claude` deve essere autenticato sulla macchina che ospita il gateway:
   misurato il 2026-09-12, su gemello e VM la sessione OAuth era scaduta e il gateway rispondeva
   502 `PROPOSE_FAILED`.
-- **Distribuito** — **no**: nessuna unit systemd `agent-gateway` sulla VM
-  (`ssh oracle-vm-default 'systemctl list-units --all | grep -i gateway'` mostra solo
-  `heuresys-api-gateway`, che e' del legacy). Si accende a mano, dove serve, per la durata di una
-  prova o di una corsa. Nulla qui muta heuresys senza passare dal cancello di scrittura e
-  dall'approvazione umana.
+- **Distribuito** — **sì, dal 2026-11-10**: la unit `deploy/systemd/heuresys-agent-gateway.service`
+  (porta 8790, abbonamento Claude, senza `ANTHROPIC_API_KEY` nell'ambiente) la installa
+  `scripts/vm-deploy.sh` e gira dalla copia rilasciata come api e web; gli elenchi delle persone e
+  dei tenant ammessi stanno nel drop-in di `/etc/systemd/system/heuresys-agent-gateway.service.d/`.
+  Stato: `systemctl status heuresys-agent-gateway` sulla VM. Nulla qui muta heuresys senza passare
+  dal cancello di scrittura e dall'approvazione umana.

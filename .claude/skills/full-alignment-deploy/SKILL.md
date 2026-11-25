@@ -9,6 +9,8 @@ description: Dottrina di allineamento dei cloni (VM OCI, linux-pc) e deploy in p
 
 Rendere i remoti (VM OCI + linux-pc) **cloni veri** del repo locale sul PC — idempotenza modulo OS e architettura — **incluso il payload gitignored che `git pull` non porta mai**. È questo il punto: un `git pull` lascia fuori `.secrets/`, i dati gitignored, il `.env` e l'albero di memoria di Claude.
 
+> **Com'è oggi (25/11/2026, da `CLAUDE.md`).** Il lavoro si fa sulla VM e i repo VM e Debian lavorano a turno (`turni-gemelli`); la produzione non gira dalla cartella del repo ma da una copia rilasciata (`~/heuresys-servizio/advanced-produzione`, `scripts/rilascio-copia.sh`); il rilascio si arma solo con `bash scripts/rilascia.sh <sha>`, che controlla da sé CI verde e backup verificato, e l'esito si legge con `scripts/verifica-deploy.sh`. Dove questa skill dice «repo locale sul PC», si legga «il repo da cui si propaga».
+
 ## Entrypoint canonico
 
 ```bash

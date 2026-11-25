@@ -1,5 +1,7 @@
 # INTEGRATIONS — Tool esterni integrati nel dominio (CLI-owned)
 
+> **Nota del 2026-11-25 (com'è oggi).** Il lavoro si fa sulla VM e sul linux-pc (`CLAUDE.md`): i percorsi Windows di questa pagina descrivono l'installazione di maggio 2026 sul PC.
+
 > Analisi + strategia di integrazione **complementare e non-conflittuale** dei 3 tool richiesti, nell'ecosistema Claude di questo PC Windows. Nessuno rompe ciò che già funziona. **Aggiornato**: 2026-05-27 (S939).
 
 ## 1. graphify (`safishamsi/graphify`) — knowledge graph da codice+docs

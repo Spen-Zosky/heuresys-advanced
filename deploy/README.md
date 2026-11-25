@@ -1,5 +1,7 @@
 # Deploying / running heuresys-advanced
 
+> **Nota del 2026-11-25 (com'è oggi).** La VM gira in modalità produzione (API `node dist/server.js`, web `next start`) dalla copia rilasciata `~/heuresys-servizio/advanced-produzione`, non dalla cartella del repo né in dev-mode; il rilascio si arma solo con `bash scripts/rilascia.sh <sha>`, il rollout lo fa `heuresys-advanced-deploy-watch.timer` a CI verde (ADR-0028), l'esito si legge con `scripts/verifica-deploy.sh`. Le unit sono quelle di `deploy/systemd/` (`ls deploy/systemd`), installate da `scripts/vm-deploy.sh`; le porte si leggono con `ss -ltnp` sulla VM. Le sezioni su dev-mode e sulla mappa delle porte di giugno descrivono il bootstrap di allora.
+
 Idempotent bootstrap, by host role. All scripts are safe to re-run; each run
 converges the host to the same healthy state.
 

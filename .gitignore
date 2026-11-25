@@ -29,8 +29,9 @@
 # -----------------------------------------------------------------------------
 # Brownfield extraction & inspection artifacts (HARD REQUIREMENT)
 # -----------------------------------------------------------------------------
-# The original db-export.zip stays versioned as input material under
-# docs/source_bundle/brownfield/db-export.zip. The extracted working copy and
+# db-export.zip left the repo on 2026-11-25 (decision D3, ingestion closed by
+# ADR-0038); it is recoverable from the retirement register
+# docs/piani/riordino-documentazione_20261125/REGISTRO_RITIRI.tsv. Any extracted copy and
 # the inspection artifacts must NEVER be committed: they may contain (or
 # replicate) sensitive legacy data that the canonical architecture deliberately
 # excludes (PII, payroll, medical, attendance, raw SAP HR, etc.).

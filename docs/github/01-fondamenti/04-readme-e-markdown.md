@@ -67,6 +67,8 @@ I file `<UPPERCASE_NAME>.md` "speciali" (README, CONTRIBUTING, CODE_OF_CONDUCT, 
 
 ## 3. Applicato ai nostri repo
 
+> **Nota del 2026-11-25.** Questa sezione fotografa i repo a maggio 2026. Oggi i workflow sono quelli di `.github/workflows/` (`ls .github/workflows`), con Dependabot attivo e runner self-hosted sulla VM e sulla Debian. Lo stato si legge dal repo, non da qui.
+
 ### `heuresys-advanced/README.md` (esiste — creato oggi)
 
 Stato attuale: README ricco con headline numbers, tech stack, monorepo tree, getting started, testing, invariants, roadmap, link a Storybook. ~230 righe. Già aggiornato dopo il deploy del Storybook su `ux-design-shared`.

@@ -73,6 +73,8 @@ Il **repository** è l'unità centrale. Tutte le altre feature gli orbitano into
 
 ## 3. Applicato ai nostri repo
 
+> **Nota del 2026-11-25.** Questa sezione fotografa i repo a maggio 2026. Oggi i workflow sono quelli di `.github/workflows/` (`ls .github/workflows`), con Dependabot attivo e runner self-hosted sulla VM e sulla Debian. Lo stato si legge dal repo, non da qui.
+
 | Repo | Tier | Stato | Note |
 |---|---|---|---|
 | `Spen-Zosky/heuresys-advanced` | Free personal | Public · 88 commit · 2 MB · creato 2026-05-16 | Codebase principale (monorepo pnpm) |

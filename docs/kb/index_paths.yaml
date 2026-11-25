@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-11-25T18:10:21Z da docs/kb/tools/build_index.py
+# generato: 2026-11-25T18:37:04Z da docs/kb/tools/build_index.py
 # tutti i file tracciati dal repo; percorsi relativi alla radice
 meta:
-  generated_at: "2026-11-25T18:10:21Z"
-  total_files: 4012
+  generated_at: "2026-11-25T18:37:04Z"
+  total_files: 3997
   roots:
     repo: '.'
   category_counts:
@@ -20,7 +20,7 @@ meta:
     db-script: 174
     db-seed: 117
     doc-archive: 72
-    doc-canonical: 746
+    doc-canonical: 736
     handoff-state: 1
     qa-artifact: 49
     session: 3
@@ -28,11 +28,11 @@ meta:
     shared-schema: 138
     showcase-source: 9
     test: 550
-    ux-design-archive: 57
+    ux-design-archive: 52
     web-source: 449
   status_counts:
-    archive: 226
-    live: 3786
+    archive: 221
+    live: 3776
 files:
   - path: 'docs/architecture/adr/.keep'
     root: repo
@@ -14086,12 +14086,6 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
-  - path: 'docs/kb/improvement/DOSSIERS_TRIAGE_S1022.md'
-    root: repo
-    rel: 'docs/kb/improvement/DOSSIERS_TRIAGE_S1022.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
   - path: 'docs/kb/improvement/EPICS_SPEC_S1022.md'
     root: repo
     rel: 'docs/kb/improvement/EPICS_SPEC_S1022.md'
@@ -15244,24 +15238,6 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
-  - path: 'docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md'
-    root: repo
-    rel: 'docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/product/DEVELOPMENT_LINES_B_ACTIVATE_DORMANT_CODE.md'
-    root: repo
-    rel: 'docs/product/DEVELOPMENT_LINES_B_ACTIVATE_DORMANT_CODE.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/product/DEVELOPMENT_LINES_C_ADMIN_EDITING_UI.md'
-    root: repo
-    rel: 'docs/product/DEVELOPMENT_LINES_C_ADMIN_EDITING_UI.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
   - path: 'docs/product/DEVELOPMENT_LINES_E_EVO_VERTICALS.md'
     root: repo
     rel: 'docs/product/DEVELOPMENT_LINES_E_EVO_VERTICALS.md'
@@ -15271,12 +15247,6 @@ files:
   - path: 'docs/product/DEVELOPMENT_LINES_F_PRESCRIPTIVE_INTELLIGENCE.md'
     root: repo
     rel: 'docs/product/DEVELOPMENT_LINES_F_PRESCRIPTIVE_INTELLIGENCE.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/product/DEVELOPMENT_LINES_G_PLATFORM_HYGIENE.md'
-    root: repo
-    rel: 'docs/product/DEVELOPMENT_LINES_G_PLATFORM_HYGIENE.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -15343,12 +15313,6 @@ files:
   - path: 'docs/source_bundle/Company_HRMS_BPM_AI_Coding_Agent_Bootstrap_Pack_v5.zip'
     root: repo
     rel: 'docs/source_bundle/Company_HRMS_BPM_AI_Coding_Agent_Bootstrap_Pack_v5.zip'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/source_bundle/brownfield/db-export.zip'
-    root: repo
-    rel: 'docs/source_bundle/brownfield/db-export.zip'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -16126,12 +16090,6 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
-  - path: 'docs/superpowers/specs/2026-06-17-bpm-approval-flow-design.md'
-    root: repo
-    rel: 'docs/superpowers/specs/2026-06-17-bpm-approval-flow-design.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
   - path: 'docs/superpowers/specs/2026-06-17-surveys-engagement-ui-design.md'
     root: repo
     rel: 'docs/superpowers/specs/2026-06-17-surveys-engagement-ui-design.md'
@@ -16213,12 +16171,6 @@ files:
   - path: 'docs/superpowers/specs/2026-08-04-consegne-lab-13.md'
     root: repo
     rel: 'docs/superpowers/specs/2026-08-04-consegne-lab-13.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/superpowers/specs/2026-08-06-ritrattazione-consegne-lab-e-mfa-produzione.md'
-    root: repo
-    rel: 'docs/superpowers/specs/2026-08-06-ritrattazione-consegne-lab-e-mfa-produzione.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -16396,21 +16348,9 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
-  - path: 'docs/wargames/reviews/REVIEW-03.md'
-    root: repo
-    rel: 'docs/wargames/reviews/REVIEW-03.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
   - path: 'docs/wargames/reviews/REVIEW-15.md'
     root: repo
     rel: 'docs/wargames/reviews/REVIEW-15.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/wargames/tasks/03-localai.md'
-    root: repo
-    rel: 'docs/wargames/tasks/03-localai.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -21355,36 +21295,6 @@ files:
   - path: 'ux-design/heuresys_uxix_brand_identity_bundle_v1/docs/16_system_health_admin_dashboard_patterns.md'
     root: repo
     rel: 'ux-design/heuresys_uxix_brand_identity_bundle_v1/docs/16_system_health_admin_dashboard_patterns.md'
-    category: ux-design-archive
-    status: archive
-    provenance: git-tracked
-  - path: 'ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/ACCEPTANCE_CRITERIA.md'
-    root: repo
-    rel: 'ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/ACCEPTANCE_CRITERIA.md'
-    category: ux-design-archive
-    status: archive
-    provenance: git-tracked
-  - path: 'ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/ACCESSIBILITY_CHECKLIST.md'
-    root: repo
-    rel: 'ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/ACCESSIBILITY_CHECKLIST.md'
-    category: ux-design-archive
-    status: archive
-    provenance: git-tracked
-  - path: 'ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/INTERACTION_REGISTER_TEMPLATE.md'
-    root: repo
-    rel: 'ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/INTERACTION_REGISTER_TEMPLATE.md'
-    category: ux-design-archive
-    status: archive
-    provenance: git-tracked
-  - path: 'ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/QUALITY_GATES.md'
-    root: repo
-    rel: 'ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/QUALITY_GATES.md'
-    category: ux-design-archive
-    status: archive
-    provenance: git-tracked
-  - path: 'ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/VISUAL_QA_CHECKLIST.md'
-    root: repo
-    rel: 'ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/VISUAL_QA_CHECKLIST.md'
     category: ux-design-archive
     status: archive
     provenance: git-tracked

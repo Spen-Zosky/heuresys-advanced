@@ -8,7 +8,7 @@ Questa directory è **self-contained** — tutto ciò che serve è qui dentro:
 
 - `NN-*.md` — i battle plan (il deliverable da eseguire)
 - `SUCCESS.md` — lo standard a 8 punti che ogni piano deve rispettare (usato per il grading)
-- `reviews/REVIEW-NN.md` — le review adversariali indipendenti (spot-check evidenze contro repo/web); le patch sono GIÀ integrate nei piani
+- `reviews/REVIEW-NN.md` — le review adversariali indipendenti (spot-check evidenze contro repo/web); le patch sono GIÀ integrate nei piani (per il 03 la revisione e il brief sono accorpati nel piano, §12, dal 2026-11-25)
 - `tasks/NN-*.md` — i mission brief originali (WARGAME ORDER + brief): servono solo per ri-wargamare una missione da capo o crearne di nuove sullo stesso stampo
 - `LEDGER.md` — registro dei run: self-grade, esiti review, patch applicate
 

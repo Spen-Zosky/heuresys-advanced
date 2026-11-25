@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-11-25T18:10:21Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **4012**
+**Generato**: 2026-11-25T18:37:04Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **3997**
 
 > Generato: tutti i file tracciati dal repo (`git ls-files`), con percorsi relativi alla radice. Gemello machine-readable: `index_paths.yaml`. La mappa per argomento è il wiki, `docs/wiki/index.md`.
 
@@ -21,7 +21,7 @@
 | db-script | 174 |
 | db-seed | 117 |
 | doc-archive | 72 |
-| doc-canonical | 746 |
+| doc-canonical | 736 |
 | handoff-state | 1 |
 | qa-artifact | 49 |
 | session | 3 |
@@ -29,16 +29,16 @@
 | shared-schema | 138 |
 | showcase-source | 9 |
 | test | 550 |
-| ux-design-archive | 57 |
+| ux-design-archive | 52 |
 | web-source | 449 |
-| **TOTALE** | **4012** |
+| **TOTALE** | **3997** |
 
 ## Conteggi per status
 
 | Status | File |
 |---|---|
-| archive | 226 |
-| live | 3786 |
+| archive | 221 |
+| live | 3776 |
 
 ## File per categoria
 
@@ -2426,7 +2426,6 @@
 - `docs/kb/improvement/2026-06-13_heuresys-advanced-100x-kickoff-prompt.md` · *live* · git-tracked
 - `docs/kb/improvement/AUDIT_PROTOCOL.md` · *live* · git-tracked
 - `docs/kb/improvement/BASELINE_METRICS.md` · *live* · git-tracked
-- `docs/kb/improvement/DOSSIERS_TRIAGE_S1022.md` · *live* · git-tracked
 - `docs/kb/improvement/EPICS_SPEC_S1022.md` · *live* · git-tracked
 - `docs/kb/improvement/FINDINGS/3.2_ASVS_MAPPING.md` · *live* · git-tracked
 - `docs/kb/improvement/FINDINGS/S-100X-0_recon.md` · *live* · git-tracked
@@ -2619,12 +2618,8 @@
 - `docs/preflight-residual-todo.md` · *live* · git-tracked
 - `docs/product/BUSINESS_SCOPE_AND_PRD.md` · *live* · git-tracked
 - `docs/product/COMPETITIVE_SCORECARD.md` · *live* · git-tracked
-- `docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md` · *live* · git-tracked
-- `docs/product/DEVELOPMENT_LINES_B_ACTIVATE_DORMANT_CODE.md` · *live* · git-tracked
-- `docs/product/DEVELOPMENT_LINES_C_ADMIN_EDITING_UI.md` · *live* · git-tracked
 - `docs/product/DEVELOPMENT_LINES_E_EVO_VERTICALS.md` · *live* · git-tracked
 - `docs/product/DEVELOPMENT_LINES_F_PRESCRIPTIVE_INTELLIGENCE.md` · *live* · git-tracked
-- `docs/product/DEVELOPMENT_LINES_G_PLATFORM_HYGIENE.md` · *live* · git-tracked
 - `docs/product/FUNCTIONAL_CAPABILITY_LEDGER.md` · *live* · git-tracked
 - `docs/product/LATENT_CAPABILITY_CATALOG.md` · *live* · git-tracked
 - `docs/product/README.md` · *live* · git-tracked
@@ -2636,7 +2631,6 @@
 - `docs/security/.keep` · *live* · git-tracked
 - `docs/security/AUTH_SECURITY_PLAN.md` · *live* · git-tracked
 - `docs/source_bundle/Company_HRMS_BPM_AI_Coding_Agent_Bootstrap_Pack_v5.zip` · *live* · git-tracked
-- `docs/source_bundle/brownfield/db-export.zip` · *live* · git-tracked
 - `docs/source_bundle/extracted_bootstrap/LOGICAL_DATA_MODEL_ADDENDUM.md` · *live* · git-tracked
 - `docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT.json` · *live* · git-tracked
 - `docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT_v4.json` · *live* · git-tracked
@@ -2766,7 +2760,6 @@
 - `docs/superpowers/specs/2026-06-04-i18n-milestone-design.md` · *live* · git-tracked
 - `docs/superpowers/specs/2026-06-05-sot-unification-design.md` · *live* · git-tracked
 - `docs/superpowers/specs/2026-06-16-reporting-export-design.md` · *live* · git-tracked
-- `docs/superpowers/specs/2026-06-17-bpm-approval-flow-design.md` · *live* · git-tracked
 - `docs/superpowers/specs/2026-06-17-surveys-engagement-ui-design.md` · *live* · git-tracked
 - `docs/superpowers/specs/2026-06-18-bpm-approval-slice2-3-design.md` · *live* · git-tracked
 - `docs/superpowers/specs/2026-06-19-integrazione-llmwiki-hrplus-heuresys-design.md` · *live* · git-tracked
@@ -2781,7 +2774,6 @@
 - `docs/superpowers/specs/2026-07-26-organizational-model-and-role-derivation-design.md` · *live* · git-tracked
 - `docs/superpowers/specs/2026-08-02-p2-batch-execution-plan.md` · *live* · git-tracked
 - `docs/superpowers/specs/2026-08-04-consegne-lab-13.md` · *live* · git-tracked
-- `docs/superpowers/specs/2026-08-06-ritrattazione-consegne-lab-e-mfa-produzione.md` · *live* · git-tracked
 - `docs/vision/DREAM_2026-08-25/00_SINTESI.md` · *live* · git-tracked
 - `docs/vision/DREAM_2026-08-25/01_INVENTARIO.md` · *live* · git-tracked
 - `docs/vision/DREAM_2026-08-25/02_LATENTI.md` · *live* · git-tracked
@@ -2811,9 +2803,7 @@
 - `docs/wargames/15-heuresys-pricing.md` · *live* · git-tracked
 - `docs/wargames/README.md` · *live* · git-tracked
 - `docs/wargames/SUCCESS.md` · *live* · git-tracked
-- `docs/wargames/reviews/REVIEW-03.md` · *live* · git-tracked
 - `docs/wargames/reviews/REVIEW-15.md` · *live* · git-tracked
-- `docs/wargames/tasks/03-localai.md` · *live* · git-tracked
 - `docs/wargames/tasks/15-heuresys-pricing.md` · *live* · git-tracked
 - `docs/wiki/LEGGIMI.md` · *live* · git-tracked
 - `docs/wiki/adr_domini.tsv` · *live* · git-tracked
@@ -3662,11 +3652,6 @@
 - `ux-design/heuresys_uxix_brand_identity_bundle_v1/docs/12_page_types_to_design.md` · *archive* · git-tracked
 - `ux-design/heuresys_uxix_brand_identity_bundle_v1/docs/13_best_practices_for_modern_saas_ui.md` · *archive* · git-tracked
 - `ux-design/heuresys_uxix_brand_identity_bundle_v1/docs/16_system_health_admin_dashboard_patterns.md` · *archive* · git-tracked
-- `ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/ACCEPTANCE_CRITERIA.md` · *archive* · git-tracked
-- `ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/ACCESSIBILITY_CHECKLIST.md` · *archive* · git-tracked
-- `ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/INTERACTION_REGISTER_TEMPLATE.md` · *archive* · git-tracked
-- `ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/QUALITY_GATES.md` · *archive* · git-tracked
-- `ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/VISUAL_QA_CHECKLIST.md` · *archive* · git-tracked
 - `ux-design/heuresys_uxix_brand_identity_bundle_v1/prompts/DESIGN_DECISION_CAPTURE_PROMPT.md` · *archive* · git-tracked
 - `ux-design/heuresys_uxix_brand_identity_bundle_v1/templates/DECISION_REGISTER.md` · *archive* · git-tracked
 - `ux-design/heuresys_uxix_brand_identity_bundle_v1/templates/MODULE_MANIFEST_TEMPLATE.ts` · *archive* · git-tracked

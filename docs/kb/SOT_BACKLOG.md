@@ -258,6 +258,7 @@
 - **#168 Cancellare una persona cancella la storia delle sue approvazioni** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#169 Separare i due segreti: la password derivata e il secondo fattore non possono nascere dalla stessa chiave** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#149 Ogni consegna del lab va trattata come non verificata, incluse quelle gia' ingerite** · status: ACTIVE
+  - 📎 **Accorpato il 2026-11-25** il piano S1047 del 2026-08-06 (era `docs/superpowers/specs/2026-08-06-ritrattazione-…`, ritirato; recupero dal registro `docs/piani/riordino-documentazione_20261125/REGISTRO_RITIRI.tsv`). Ciò che ne resta: V1, l'analisi avversariale delle due consegne in attesa, ha retto su 11 affermazioni portanti su 13 (le due smentite erano conteggi) e ha mostrato che la regola «verificare prima di eseguire» trova errori anche in file che si dichiarano verificati; V4, il triage delle 27 voci del lab già eseguite, non ha trovato stati sbagliati in produzione, con quattro voci dichiarate non misurate; V5 ha chiuso `#146` misurando che i fattori `e2e-fixture` erano già spariti; V6 ha trovato in `#152` un difetto di prodotto (l'annulla dell'arruolamento MFA non cancellava il fattore sul server) e la migrazione `000275_purge_orphan_test_mfa_factors.sql` con le sue quattro guardie.
   - ✅ **F4 misurata S1099 (2026-09-13)**: inbox vuota, 6/6 consegne citate con marker — la fase non scatta oggi.
   - ✅ **F4 eseguita su una consegna — S1095 (2026-09-12)**: `2026-08-12-guardia-psql-opzioni-raggruppate` ri-misurata comando per comando, esito **PARZIALE** scritto nel file (la consegna è già stata eseguita: patch nel repo, selftest 122/0, `#121` DONE). Restano 4 consegne citate con marker NON-VERIFICATO: istruzione-vincolante, e22-e23, tenant-builder-p3, tenant-builder-p4.
   - ✅ **F2 · F3 · F4 del piano S1093 CHIUSE (S1094, 2026-09-09) — il presidio ora si misura a macchina.** Nuovo `docs/kb/tools/check_verifica_consegne.py`: **una grafia sola** per il marker (`> **#149 verifica avversariale** · esito: … · sessione: … · data: …`), con **data e sessione obbligatorie** — un marker che congela una misura variabile invecchia insieme a lei, ed e' il difetto trovato oggi sulla riga 54 di questo file. Tre stati, non due: `0` verde · `1` una consegna citata non porta il marker · `2` **NON MISURATO**. Prima dei marker exit **1**, dopo exit **2** (restano 5 consegne che il register nomina e che nel lab non esistono: buco dichiarato, non nascosto). `--selftest` 9 casi, cinque negativi. I **sei** documenti citati portano ora il loro esito: quello di `#205` **SMENTITO**, gli altri cinque **NON-VERIFICATO** dichiarato. ⚠ Le sei smentite di S1093 ri-misurate: **cinque confermate**.
@@ -496,15 +497,15 @@
 - **#27 A/L2 — evidence layer (le prove sotto gli score)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#28 A/L0 — Trust Ledger: read-API provenance (70.972 righe lineage)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#29 A/L3 — talent-review 9-box (talent/fit/readiness/succession scores)** · status: ✅ DONE
-  - priority: P2 · effort: ~6-8h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L3
+  - priority: P2 · effort: ~6-8h · doc: docs/product/FUNCTIONAL_CAPABILITY_LEDGER.md §10-bis (linea A L3)
   - note: ✅ DONE S1020 (`42f4838d`) — modulo `talent-review` 6 GET (/nine-box /fit /readiness /succession /critical-positions /critical-coverage); 9-box derivata da `sys_talent_scores` (potential×performance 50/75 → LOW/MEDIUM/HIGH; `sys_nine_box_grid` NON esiste). EVALUATION org-gated (service+catalog), NO self-view. mig 000174 (`talent:read` 6-role, sidebar). NUOVA pagina `/talent-review` griglia 3×3 board-ready + pannelli. Integration 9/9 + org-gate/data-class regression + E2E verde.
 - **#30 A/L4 — gap closure (plans/actions/results)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#31 A/L6 — metrologia KPI (measurements/methods/weighting)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#32 A/L7 — comp & reward in lettura (+handoff ledger, +recommendations list)** · status: ✅ DONE
-  - priority: P3 · effort: ~4h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L7
+  - priority: P3 · effort: ~4h · doc: docs/product/FUNCTIONAL_CAPABILITY_LEDGER.md §10-bis (linea A L7)
   - note: ✅ DONE S1020 (`c10abc06`) — modulo `compensation` esteso con 6 GET (variable-pay, recommendations, bonus-pools, objective-reward-rules, position-economic-weight, handoff-records). Riuso `compensation_intelligence:read` (nessuna migration). variable-pay/recommendations orgGate service, resto catalog. Chiude `sys_payroll_handoff_records` write-only (0 righe = empty state). Pannelli su `/compensation-intelligence`. Integration 8/8 + E2E verde.
 - **#33 A/L8 — time-off/leave consultivo (read-only)** · status: ✅ DONE
-  - priority: P3 · effort: ~2-4h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L8
+  - priority: P3 · effort: ~2-4h · doc: docs/product/FUNCTIONAL_CAPABILITY_LEDGER.md §10-bis (linea A L8)
   - note: ✅ DONE S1020 (`a5c8a586`) — modulo `time-off` 3 GET (requests/accrual-rules/balance-transactions) + ESS `GET /v1/me/time-off/requests`. `leave` = PERSONAL org-gated (service per requests/transactions + catalog per accrual rules). mig 000173 (`leave:read` + `:self` + sidebar `/time-off`). Pagina admin `/time-off`. Integration 8/8 + E2E verde. (Submission ferie ESS resta fuori — Serie E-E3.)
 - **#34 B/B3 — approval effects: nuovi handler (primo flusso approvativo reale)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#35 B/B7 — observability completa (/metrics Prometheus + slow-query + 4 sezioni system-health)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
@@ -518,7 +519,7 @@
   - hold-since: 2026-08-25
   - riesaminata-2026-09-12 (S1097): **HOLD confermato**, stessa ragione di `#8`, che la precede
   - reactivation-trigger: `{kind: manual}` — **la stessa cosa che riattiva `#8`**: una funzionalità viva che ha bisogno di spedire. Le due si riprendono insieme, `#8` per prima (serve un mittente prima di avere qualcosa da mandare)
-  - resta-vero: transport pronto, chassis testato — nessun lavoro fatto va perso · doc: `docs/product/DEVELOPMENT_LINES_B_ACTIVATE_DORMANT_CODE.md` §B4 · effort quando si riprende: ~2h
+  - resta-vero: transport pronto, chassis testato — nessun lavoro fatto va perso · doc: `docs/product/FUNCTIONAL_CAPABILITY_LEDGER.md §10-bis` (linea B4) · effort quando si riprende: ~2h
 - **#40 B/B1 — free-text semantic search (flag `MATCHING_FREETEXT_ENABLED`)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#41 graphify — top-up semantico (26 chunk mancanti)** · status: WON'T-DO  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
 - **#42 C/C4 — fondazioni frontend (paginazione server-side, refactor shared-types, apiFetch FormData)** · status: DONE  ·  ↦ `docs/archive/SOT_BACKLOG_CHIUSI.md`
@@ -684,7 +685,7 @@ Batch decision-authority session-scoped (Enzo: "esegui tutti i punti da #4 a #14
 Batch P1 (Enzo: "procedi con i P1"; su #2 "parti ora ma chiudi anche UI"). **4 commit LOCALI non pushati** — Enzo: stop ai commit, NO push/align/deploy. Granulare → `SOT_STATE.md §Delta S995`.
 
 **DONE-LIVE (full-stack, E2E live verde):**
-- **#1 BPM approval-flow 3.3 slice-D** (`c582109` backend + `90d03dc` frontend) — runtime approvazioni generico (mig 000132/133/134, modulo `/v1/approvals` 5 endpoint + 10 test, admin-track + decision-page + inbox-actions). Riusa notification center 3.4. Slice-2 (chain ordinato) + slice-3 (effect-wiring/SLA) = roadmap (ordinal+SKIPPED già in schema). Spec `docs/superpowers/specs/2026-06-17-bpm-approval-flow-design.md`.
+- **#1 BPM approval-flow 3.3 slice-D** (`c582109` backend + `90d03dc` frontend) — runtime approvazioni generico (mig 000132/133/134, modulo `/v1/approvals` 5 endpoint + 10 test, admin-track + decision-page + inbox-actions). Riusa notification center 3.4. Slice-2 (chain ordinato) + slice-3 (effect-wiring/SLA) = roadmap (ordinal+SKIPPED già in schema). Spec `docs/superpowers/specs/2026-06-18-bpm-approval-slice2-3-design.md (sezione «Slice D», accorpata il 2026-11-25)`.
 - **#2 Surveys-M2** (`fc47eee` backend + `8e69a28` frontend) — decisione Enzo **M2**: `sys_survey_assignments` (audience esplicita) + perm `surveys:respond:self` + seed 8 RTL (mig 000135/136), ESS `/v1/me/surveys` (6 test), admin `/engagement` + ESS `/me/surveys` form. OQ minori chiuse coi default (edit strict one-shot, anonimato display-only, ruoli all, **pulse-write ESS = deferito follow-up**). Spec `docs/superpowers/specs/2026-06-17-surveys-engagement-ui-design.md`.
 
 **CONSEGNATO / DEFERITO (scelta Enzo → sessione dedicata):**
@@ -707,7 +708,7 @@ Batch decision-authority session-scoped via **intervista preventiva** (Enzo ha s
 - **B-50 CHIUSO terminale** (148 POPULATED / 0 UNCLASSIFIED) + **B-42 ri-confermato** (process_kpi import muro 0/25). **#11 RACI demo LIVE** su RTL_BANK (0 HEURESYS).
 
 **CONSEGNATI (design-spec — attendono go Enzo per implementare, `design→spec→ok→implementa`):**
-- **#9 BPM approval-flow** → `docs/superpowers/specs/2026-06-17-bpm-approval-flow-design.md` (slice-D, riusa notification center 3.4; ~1-2 sessioni).
+- **#9 BPM approval-flow** → `docs/superpowers/specs/2026-06-18-bpm-approval-slice2-3-design.md (sezione «Slice D», accorpata il 2026-11-25)` (slice-D, riusa notification center 3.4; ~1-2 sessioni).
 - **#10 Surveys UI admin+ESS** → `docs/superpowers/specs/2026-06-17-surveys-engagement-ui-design.md` (admin read-only + ESS self-response write-path; ~12-16h).
 - **14 dossier Fase-C** → `docs/kb/improvement/DOSSIERS/D-01..D-14` (option-triad + raccomandazione) → **decide Enzo per-dossier** go/defer/won't → poi **S-100X-E** esecuzione epic.
 

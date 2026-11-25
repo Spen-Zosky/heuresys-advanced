@@ -133,7 +133,7 @@ I tre cunei reali su cui costruire il posizionamento:
 ## 2.6 I gap che definiscono la roadmap
 
 - **G1 — Porte 1+2 (Process Owner / Org Director) UI.** È il gap di **credibilità**: senza, la risposta alla domanda VC "mostrami un Process Owner che usa la piattaforma" è silenzio. Converte il claim di categoria da slide a demo. *(Confermato da F0 codice + F3 wiki, indipendentemente.)*
-- **G2 — BPM runtime** (process-instance/task/approval/SLA). Serve per onorare il nome "BPM". Esiste già una *spec* approval-flow (`docs/superpowers/specs/2026-06-17-bpm-approval-flow-design.md`) che riusa il notification center.
+- **G2 — BPM runtime** (process-instance/task/approval/SLA). Serve per onorare il nome "BPM". Esiste già una *spec* approval-flow (`docs/superpowers/specs/2026-06-18-bpm-approval-slice2-3-design.md`, sezione «Slice D») che riusa il notification center.
 - **G3 — Layer prescrittivo di capability**: MLCE (motore di composizione multi-livello) + almeno una scorecard (Maturity engine o VRIO). È ciò che trasforma "HRMS+skills" in "intelligence". I building-block dati esistono (da ri-verificare sul repo advanced, non sul wiki legacy).
 - **G4 — Layer commerciale** (signup/provisioning multi-tenant + billing + onboarding). Da DD. Senza, non è vendibile.
 - **G5 — Compliance + infra de-risk**: dossier AI-Act (formalizzare l'high-risk + spiegabilità), GDPR tooling al primo tenant; managed-DB/HA, CI≠PROD, observability, rollback (da DD).

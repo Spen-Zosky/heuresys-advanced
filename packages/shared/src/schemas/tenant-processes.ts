@@ -207,8 +207,11 @@ export const ProcessFacetValueSchema = z.object({
   facet: ProcessFacetSchema,
   code: z.string(),
   ordinal: z.number().int(),
+  /** Il nome in italiano; `labelEn` è lo stesso in inglese: la pagina sceglie quello della sua lingua (N2). */
   label: z.string(),
+  labelEn: z.string(),
   description: z.string(),
+  descriptionEn: z.string(),
 });
 export type ProcessFacetValue = z.infer<typeof ProcessFacetValueSchema>;
 
@@ -218,7 +221,9 @@ export type ProcessFacetVocabularyResponse = z.infer<typeof ProcessFacetVocabula
 export const TenantProcessFacetSchema = z.object({
   facet: ProcessFacetSchema,
   code: z.string(),
+  /** Il nome del valore in italiano; `labelEn` in inglese (N2). */
   label: z.string(),
+  labelEn: z.string(),
   criterion: z.string(),
   source: ProcessFacetSourceSchema,
   status: ProcessFacetStatusSchema,

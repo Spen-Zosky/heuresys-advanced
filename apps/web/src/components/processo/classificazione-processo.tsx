@@ -20,6 +20,7 @@ import { MODALE } from "@/lib/modale";
 import { VUOTO } from "@/lib/format";
 import { RIPIEGABILE } from "@/lib/colonne-mobile";
 import { criterioDaMostrare } from "@/lib/criterio-faccetta";
+import { nomeNellaLingua, spiegazioneNellaLingua } from "@/lib/valore-faccetta";
 
 export const FACCETTE: readonly ProcessFacet[] = ["FINALITA", "BENEFICIARIO", "PERIMETRO", "MODALITA", "ATTIVAZIONE", "TECNOLOGIA", "STANDARDIZZAZIONE"];
 
@@ -34,7 +35,7 @@ export function useFaccetteProcesso(processId: string) {
 }
 
 export function ClassificazioneProcesso({ processId, faccette }: { processId: string; faccette: TenantProcessFacetsResponse }) {
-  const { t } = useTranslation("blueprints");
+  const { t, i18n } = useTranslation("blueprints");
   const k = (s: string, o?: Record<string, unknown>) => t(`processiDelTenant.classificazione.${s}`, o ?? {});
   const vocabolario = useQuery({
     queryKey: ["tenant-processes", "faccette", "vocabolario"],
@@ -109,7 +110,7 @@ export function ClassificazioneProcesso({ processId, faccette }: { processId: st
                     <span className={RIPIEGABILE.etichetta}>{k("colonne.valori")}</span>
                     {valori.length === 0 ? <span className="text-xs text-muted-foreground">{k("nessunValore")}</span> : (
                       <span className="flex flex-wrap gap-1">
-                        {valori.map((v) => <span key={v.code} className="rounded border border-border bg-muted px-1.5 py-0.5 text-xs" data-testid="classificazione-valore">{v.label}</span>)}
+                        {valori.map((v) => <span key={v.code} className="rounded border border-border bg-muted px-1.5 py-0.5 text-xs" data-testid="classificazione-valore">{nomeNellaLingua(v, i18n.language)}</span>)}
                       </span>
                     )}
                   </td>
@@ -153,7 +154,7 @@ function FinestraFaccetta({ processId, faccetta, valori, attuali, onChiudi }: {
   attuali: TenantProcessFacet[];
   onChiudi: () => void;
 }) {
-  const { t } = useTranslation("blueprints");
+  const { t, i18n } = useTranslation("blueprints");
   const k = (s: string) => t(`processiDelTenant.classificazione.${s}`);
   const qc = useQueryClient();
   const [scelti, setScelti] = useState<string[]>(attuali.map((a) => a.code));
@@ -188,8 +189,8 @@ function FinestraFaccetta({ processId, faccetta, valori, attuali, onChiudi }: {
                 data-codice={v.code}
               />
               <span>
-                <span className="font-medium">{v.label}</span>
-                <span className="block text-xs text-muted-foreground">{v.description}</span>
+                <span className="font-medium">{nomeNellaLingua(v, i18n.language)}</span>
+                <span className="block text-xs text-muted-foreground">{spiegazioneNellaLingua(v, i18n.language)}</span>
               </span>
             </label>
           ))}

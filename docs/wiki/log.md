@@ -9,3 +9,4 @@ Una riga per operazione, in sola aggiunta: data, operazione, che cosa, commit o 
 | 2026-11-25 | lint | nasce `check_documenti.py` (A1-A5); corretto «Next.js 15» in un prompt di project-atlas | PR #485 |
 | 2026-11-25 | ingest | indice degli ADR: stati in parte superati di 0039 e 0040, numeri mai usati, versioni di 0002 e 0007 | PR #485 |
 | 2026-11-25 | ingest | nascono le quindici pagine di dominio, l'indice e l'indice analitico | PR #485 |
+| 2026-11-25 | lint | nasce il controllo di verità settimanale `scripts/lint-verita.sh` con il timer `heuresys-advanced-lint-verita` (da installare sulla VM); CLAUDE.md ha la sezione Documentazione | PR #485 |

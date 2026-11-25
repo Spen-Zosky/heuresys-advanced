@@ -1,0 +1,25 @@
+# Template — @@REPO_DIR@@ si rende a mano all'installazione (vedi README.md qui accanto).
+# Sta in solo-vm/ perché il glob di scripts/vm-deploy.sh non è ricorsivo: sul gemello linux-pc
+# aprirebbe una seconda PR dallo stesso controllo.
+#
+# Piano di riordino della documentazione (25/11/2026), voce R13, decisione D4 di Enzo: una volta a
+# settimana un agente confronta il wiki (docs/wiki/) con il codice, gli ADR e i registri, scrive le
+# contraddizioni in docs/wiki/lint/<AAAAMMGG>.md e apre una PR in bozza. Non unisce mai.
+# Il token dell'abbonamento lo carica lo script (token-agenti.sh carica): la unit va aggiunta a
+# ~/.claude/tools/token-agenti.unita e collegata con `bash ~/.claude/tools/token-agenti.sh collega`.
+[Unit]
+Description=Heuresys Advanced — controllo di verità settimanale del wiki (R13)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+OnFailure=heuresys-unit-failure@%n.service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=@@REPO_DIR@@
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=/usr/bin/env bash @@REPO_DIR@@/scripts/lint-verita.sh
+# copia di prova + una lettura del wiki da parte dell'agente: di solito pochi minuti
+TimeoutStartSec=3600

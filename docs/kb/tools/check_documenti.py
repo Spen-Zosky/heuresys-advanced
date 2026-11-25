@@ -88,7 +88,10 @@ def main() -> int:
         ap.add_argument(f"--{o}", action="store_true")
     ap.add_argument("--repo", default=".")
     ap.add_argument("--quieto", action="store_true", help="solo il riepilogo")
+    ap.add_argument("--selftest", action="store_true", help="prova lo strumento su un repo finto")
     a = ap.parse_args()
+    if a.selftest:
+        return selftest()
     tutti = not any((a.metadati, a.link, a.rimandi, a.affermazioni, a.freschezza))
     try:
         root = git(a.repo, "rev-parse", "--show-toplevel").strip()
@@ -238,6 +241,36 @@ def main() -> int:
     print(f"check_documenti: {len(vivi)} documenti vivi, {len(rossi)} rilievi rossi, {len(avvisi)} avvisi"
           f" ({len(ritirati)} percorsi ritirati nel registro)")
     return 1 if rossi else 0
+
+
+def selftest() -> int:
+    """Una pagina con otto difetti deve dare otto rossi; corretta, zero."""
+    import tempfile
+    io = os.path.abspath(__file__)
+    with tempfile.TemporaryDirectory() as t:
+        def scrivi(rel, testo):
+            os.makedirs(os.path.join(t, os.path.dirname(rel)), exist_ok=True)
+            with open(os.path.join(t, rel), "w", encoding="utf-8") as f:
+                f.write(testo)
+        def gira():
+            subprocess.check_call(["git", "-C", t, "add", "-A"])
+            r = subprocess.run([sys.executable, io, "--repo", t], capture_output=True, text=True)
+            return r.returncode, r.stdout.count("[!!]")
+        subprocess.check_call(["git", "init", "-q", t])
+        scrivi(VIETATE, "serve una chiave API\n")
+        scrivi(REGISTRI_RITIRI[0], "path\tsha256\trecupero_da_commit\tlotto\tdata\ndocs/vecchio.md\tx\tabc123456\tB\t2026-11-25\n")
+        scrivi("docs/wiki/domini/nuda.md", "# senza metadati\n")
+        scrivi("docs/wiki/domini/prova.md", "---\ndominio: inventato\nnatura: riferimento\nstato: vivo\n"
+               "aggiornato_il: 2026-13-01\nfonti: [apps/manca.ts]\n---\n"
+               "Vedi [v](../../vecchio.md), [r](nonce.md), [[Fantasma]].\nQui serve una chiave API.\n")
+        rosso = gira()
+        meta = "---\ndominio: governo\nnatura: riferimento\nstato: vivo\naggiornato_il: 2026-11-25\nfonti: []\n---\n"
+        scrivi("docs/wiki/domini/nuda.md", meta + "# ok\n")
+        scrivi("docs/wiki/domini/prova.md", meta + "Vedi [n](nuda.md) e [[nuda]].\n")
+        verde = gira()
+    ok = rosso == (1, 8) and verde == (0, 0)
+    print(f"selftest: rosso {rosso}, verde {verde} -> {'OK' if ok else 'FALLITO'}")
+    return 0 if ok else 1
 
 
 if __name__ == "__main__":

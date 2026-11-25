@@ -4,7 +4,7 @@
 -- Piano:   docs/superpowers/plans/2026-07-27-rtl-storia-36-mesi.md (Task C4)
 -- Dominio: docs/kb/storia36/DOMINIO_FORMAZIONE_OBBLIGATORIA.md  ← OGNI soglia
 --          numerica di questo file cita un paragrafo di quel documento.
--- Misura:  .storia36/analysis/c4-misura.md · Codice: c4-codice.md
+-- Misura:  docs/kb/storia36/analisi/c4-misura.md · Codice: c4-codice.md
 --
 -- La v1 e' stata demolita da una review adversarial a tre lenti (FAIL x3,
 -- 4 BLOCKER + 11 MAJOR). Cosa e' cambiato qui, e perche':

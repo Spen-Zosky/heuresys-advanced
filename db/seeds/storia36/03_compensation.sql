@@ -3,7 +3,7 @@
 -- storiche con adeguamenti CCNL + 36 mensilità di payroll handoff.
 -- Piano: docs/superpowers/plans/2026-07-27-rtl-storia-36-mesi.md (Task C3)
 -- Dominio (OGNI parametro citato): docs/kb/storia36/DOMINIO_PREMIO_VARIABILE.md
--- Misura: .storia36/analysis/c3-misura.md
+-- Misura: docs/kb/storia36/analisi/c3-misura.md
 --
 -- Fatti che governano il design:
 --  · curve payout: MBO_STANDARD CAPPED {threshold 0.8, floor 0.5, target 1.0,

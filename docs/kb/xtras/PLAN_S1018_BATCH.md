@@ -77,7 +77,7 @@ Blueprint completo in conversazione (agente P1); essenziali:
 - **G5**: `git mv` script esausti → `docs/archive/scripts/` + README (move-not-delete; lista nel blueprint — conferma per-file nel commit body). G4 → handoff finale; G6 → note.
 
 ### W6 — Serie C admin editing (C4-full → C2 → C1 → C3)
-Dossier `DEVELOPMENT_LINES_C_ADMIN_EDITING_UI.md` (design dettagliato a inizio wave — le write API esistono già, gap quasi solo frontend): C4 retrofit paginazione ~20 pagine esistenti + refactor shared-types (62/87 schemi senza consumer tipizzato) + apiFetch FormData; C2 cataloghi + nuova pagina `/job-catalog`; C1 people&org CRUD; C3 tenant&platform. DoD: ogni form provato con edit reale su RTL Bank.
+Dossier della serie C (oggi in `docs/product/FUNCTIONAL_CAPABILITY_LEDGER.md §10-bis`) (design dettagliato a inizio wave — le write API esistono già, gap quasi solo frontend): C4 retrofit paginazione ~20 pagine esistenti + refactor shared-types (62/87 schemi senza consumer tipizzato) + apiFetch FormData; C2 cataloghi + nuova pagina `/job-catalog`; C1 people&org CRUD; C3 tenant&platform. DoD: ogni form provato con edit reale su RTL Bank.
 
 ### W7 — Serie D legacy wave-2 (D1 → D2 → D3 → D5 → D4 + import comp per E4)
 Dossier `DEVELOPMENT_LINES_D_WAVE2_LEGACY_DATA.md`. Metodo registry-first wave=2, chiave I14 `LEGACY_EMP::`. D1 skill possession ⭐; D2 engagement/PULSAR (sblocca flight-risk pieno + fix dual-shape — regression recompute before/after su `sys_flight_risk_scores`); D3 goal history (**ri-eseguire E2E #26 come regression**); D5 timeline; D4 knowledge-graph (destination design). Fonte legacy: PG nativo `heuresys_platform` su questa VM.

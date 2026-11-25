@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-11-25T18:10:21Z da docs/kb/tools/build_index.py
+# generato: 2026-11-25T18:49:31Z da docs/kb/tools/build_index.py
 # tutti i file tracciati dal repo; percorsi relativi alla radice
 meta:
-  generated_at: "2026-11-25T18:10:21Z"
-  total_files: 4012
+  generated_at: "2026-11-25T18:49:31Z"
+  total_files: 4000
   roots:
     repo: '.'
   category_counts:
@@ -20,7 +20,7 @@ meta:
     db-script: 174
     db-seed: 117
     doc-archive: 72
-    doc-canonical: 746
+    doc-canonical: 739
     handoff-state: 1
     qa-artifact: 49
     session: 3
@@ -28,11 +28,11 @@ meta:
     shared-schema: 138
     showcase-source: 9
     test: 550
-    ux-design-archive: 57
+    ux-design-archive: 52
     web-source: 449
   status_counts:
-    archive: 226
-    live: 3786
+    archive: 221
+    live: 3779
 files:
   - path: 'docs/architecture/adr/.keep'
     root: repo
@@ -13234,54 +13234,6 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
-  - path: '.storia36/analysis/c2-macchina-stati.md'
-    root: repo
-    rel: '.storia36/analysis/c2-macchina-stati.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: '.storia36/analysis/c2-misura.md'
-    root: repo
-    rel: '.storia36/analysis/c2-misura.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: '.storia36/analysis/c3-misura.md'
-    root: repo
-    rel: '.storia36/analysis/c3-misura.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: '.storia36/analysis/c4-codice.md'
-    root: repo
-    rel: '.storia36/analysis/c4-codice.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: '.storia36/analysis/c4-misura.md'
-    root: repo
-    rel: '.storia36/analysis/c4-misura.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: '.storia36/analysis/conventions.md'
-    root: repo
-    rel: '.storia36/analysis/conventions.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: '.storia36/analysis/date-columns.md'
-    root: repo
-    rel: '.storia36/analysis/date-columns.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: '.storia36/analysis/shapes-g2-g4.md'
-    root: repo
-    rel: '.storia36/analysis/shapes-g2-g4.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
   - path: '.zp/PROGRESS.md'
     root: repo
     rel: '.zp/PROGRESS.md'
@@ -13954,15 +13906,63 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
-  - path: 'docs/kb/analisi/endpoint-orfani/estrai_rotte_corretto.py'
-    root: repo
-    rel: 'docs/kb/analisi/endpoint-orfani/estrai_rotte_corretto.py'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
   - path: 'docs/kb/analisi/endpoint-orfani/misura_orfani.py'
     root: repo
     rel: 'docs/kb/analisi/endpoint-orfani/misura_orfani.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/kb/analisi/endpoint-orfani/strumenti/accenti.py'
+    root: repo
+    rel: 'docs/kb/analisi/endpoint-orfani/strumenti/accenti.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/kb/analisi/endpoint-orfani/strumenti/esegui_tutto.sh'
+    root: repo
+    rel: 'docs/kb/analisi/endpoint-orfani/strumenti/esegui_tutto.sh'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/kb/analisi/endpoint-orfani/strumenti/estrai_console.py'
+    root: repo
+    rel: 'docs/kb/analisi/endpoint-orfani/strumenti/estrai_console.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/kb/analisi/endpoint-orfani/strumenti/estrai_endpoint.py'
+    root: repo
+    rel: 'docs/kb/analisi/endpoint-orfani/strumenti/estrai_endpoint.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/kb/analisi/endpoint-orfani/strumenti/estrai_pagine.py'
+    root: repo
+    rel: 'docs/kb/analisi/endpoint-orfani/strumenti/estrai_pagine.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/kb/analisi/endpoint-orfani/strumenti/estrai_pagine_v1.py'
+    root: repo
+    rel: 'docs/kb/analisi/endpoint-orfani/strumenti/estrai_pagine_v1.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/kb/analisi/endpoint-orfani/strumenti/estrai_rotte.py'
+    root: repo
+    rel: 'docs/kb/analisi/endpoint-orfani/strumenti/estrai_rotte.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/kb/analisi/endpoint-orfani/strumenti/genera_tsv.py'
+    root: repo
+    rel: 'docs/kb/analisi/endpoint-orfani/strumenti/genera_tsv.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/kb/analisi/endpoint-orfani/strumenti/grafo_ts.py'
+    root: repo
+    rel: 'docs/kb/analisi/endpoint-orfani/strumenti/grafo_ts.py'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -14086,12 +14086,6 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
-  - path: 'docs/kb/improvement/DOSSIERS_TRIAGE_S1022.md'
-    root: repo
-    rel: 'docs/kb/improvement/DOSSIERS_TRIAGE_S1022.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
   - path: 'docs/kb/improvement/EPICS_SPEC_S1022.md'
     root: repo
     rel: 'docs/kb/improvement/EPICS_SPEC_S1022.md'
@@ -14173,6 +14167,54 @@ files:
   - path: 'docs/kb/storia36/DOSSIER_REGISTRY.md'
     root: repo
     rel: 'docs/kb/storia36/DOSSIER_REGISTRY.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/kb/storia36/analisi/c2-macchina-stati.md'
+    root: repo
+    rel: 'docs/kb/storia36/analisi/c2-macchina-stati.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/kb/storia36/analisi/c2-misura.md'
+    root: repo
+    rel: 'docs/kb/storia36/analisi/c2-misura.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/kb/storia36/analisi/c3-misura.md'
+    root: repo
+    rel: 'docs/kb/storia36/analisi/c3-misura.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/kb/storia36/analisi/c4-codice.md'
+    root: repo
+    rel: 'docs/kb/storia36/analisi/c4-codice.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/kb/storia36/analisi/c4-misura.md'
+    root: repo
+    rel: 'docs/kb/storia36/analisi/c4-misura.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/kb/storia36/analisi/conventions.md'
+    root: repo
+    rel: 'docs/kb/storia36/analisi/conventions.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/kb/storia36/analisi/date-columns.md'
+    root: repo
+    rel: 'docs/kb/storia36/analisi/date-columns.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/kb/storia36/analisi/shapes-g2-g4.md'
+    root: repo
+    rel: 'docs/kb/storia36/analisi/shapes-g2-g4.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -15244,24 +15286,6 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
-  - path: 'docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md'
-    root: repo
-    rel: 'docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/product/DEVELOPMENT_LINES_B_ACTIVATE_DORMANT_CODE.md'
-    root: repo
-    rel: 'docs/product/DEVELOPMENT_LINES_B_ACTIVATE_DORMANT_CODE.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/product/DEVELOPMENT_LINES_C_ADMIN_EDITING_UI.md'
-    root: repo
-    rel: 'docs/product/DEVELOPMENT_LINES_C_ADMIN_EDITING_UI.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
   - path: 'docs/product/DEVELOPMENT_LINES_E_EVO_VERTICALS.md'
     root: repo
     rel: 'docs/product/DEVELOPMENT_LINES_E_EVO_VERTICALS.md'
@@ -15271,12 +15295,6 @@ files:
   - path: 'docs/product/DEVELOPMENT_LINES_F_PRESCRIPTIVE_INTELLIGENCE.md'
     root: repo
     rel: 'docs/product/DEVELOPMENT_LINES_F_PRESCRIPTIVE_INTELLIGENCE.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/product/DEVELOPMENT_LINES_G_PLATFORM_HYGIENE.md'
-    root: repo
-    rel: 'docs/product/DEVELOPMENT_LINES_G_PLATFORM_HYGIENE.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -15328,6 +15346,114 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'docs/product/processi-bancari/00_Enterprise_Typing_and_Blueprint_Configuration.md'
+    root: repo
+    rel: 'docs/product/processi-bancari/00_Enterprise_Typing_and_Blueprint_Configuration.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/product/processi-bancari/01_Current_Accounts_Management.md'
+    root: repo
+    rel: 'docs/product/processi-bancari/01_Current_Accounts_Management.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/product/processi-bancari/02_Payments_and_Transactions_Management.md'
+    root: repo
+    rel: 'docs/product/processi-bancari/02_Payments_and_Transactions_Management.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/product/processi-bancari/03_Cash_Operations_Management.md'
+    root: repo
+    rel: 'docs/product/processi-bancari/03_Cash_Operations_Management.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/product/processi-bancari/04_Deposit_Products_Management.md'
+    root: repo
+    rel: 'docs/product/processi-bancari/04_Deposit_Products_Management.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/product/processi-bancari/05_Lending_and_Credit_Management.md'
+    root: repo
+    rel: 'docs/product/processi-bancari/05_Lending_and_Credit_Management.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/product/processi-bancari/06_Customer_Relationship_Management.md'
+    root: repo
+    rel: 'docs/product/processi-bancari/06_Customer_Relationship_Management.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/product/processi-bancari/07_Compliance_AML_and_Regulatory_Processes.md'
+    root: repo
+    rel: 'docs/product/processi-bancari/07_Compliance_AML_and_Regulatory_Processes.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/product/processi-bancari/08_Risk_Management.md'
+    root: repo
+    rel: 'docs/product/processi-bancari/08_Risk_Management.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/product/processi-bancari/09_Treasury_and_Finance.md'
+    root: repo
+    rel: 'docs/product/processi-bancari/09_Treasury_and_Finance.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/product/processi-bancari/10_Digital_Banking_and_Channels.md'
+    root: repo
+    rel: 'docs/product/processi-bancari/10_Digital_Banking_and_Channels.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/product/processi-bancari/11_Sales_and_Commercial_Processes.md'
+    root: repo
+    rel: 'docs/product/processi-bancari/11_Sales_and_Commercial_Processes.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/product/processi-bancari/12_Branch_Operations.md'
+    root: repo
+    rel: 'docs/product/processi-bancari/12_Branch_Operations.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/product/processi-bancari/13_Legal_and_Litigation.md'
+    root: repo
+    rel: 'docs/product/processi-bancari/13_Legal_and_Litigation.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/product/processi-bancari/14_HR_and_Internal_Services.md'
+    root: repo
+    rel: 'docs/product/processi-bancari/14_HR_and_Internal_Services.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/product/processi-bancari/15_IT_and_Banking_Technology_Operations.md'
+    root: repo
+    rel: 'docs/product/processi-bancari/15_IT_and_Banking_Technology_Operations.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/product/processi-bancari/16_Business_Continuity_and_Security.md'
+    root: repo
+    rel: 'docs/product/processi-bancari/16_Business_Continuity_and_Security.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'docs/product/processi-bancari/17_AI_Augmented_Banking_Processes.md'
+    root: repo
+    rel: 'docs/product/processi-bancari/17_AI_Augmented_Banking_Processes.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'docs/security/.keep'
     root: repo
     rel: 'docs/security/.keep'
@@ -15343,12 +15469,6 @@ files:
   - path: 'docs/source_bundle/Company_HRMS_BPM_AI_Coding_Agent_Bootstrap_Pack_v5.zip'
     root: repo
     rel: 'docs/source_bundle/Company_HRMS_BPM_AI_Coding_Agent_Bootstrap_Pack_v5.zip'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/source_bundle/brownfield/db-export.zip'
-    root: repo
-    rel: 'docs/source_bundle/brownfield/db-export.zip'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -15790,144 +15910,6 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
-  - path: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/00_Enterprise_Typing_and_Blueprint_Configuration.md'
-    root: repo
-    rel: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/00_Enterprise_Typing_and_Blueprint_Configuration.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/01_Current_Accounts_Management.md'
-    root: repo
-    rel: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/01_Current_Accounts_Management.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/02_Payments_and_Transactions_Management.md'
-    root: repo
-    rel: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/02_Payments_and_Transactions_Management.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/03_Cash_Operations_Management.md'
-    root: repo
-    rel: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/03_Cash_Operations_Management.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/04_Deposit_Products_Management.md'
-    root: repo
-    rel: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/04_Deposit_Products_Management.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/05_Lending_and_Credit_Management.md'
-    root: repo
-    rel: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/05_Lending_and_Credit_Management.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/06_Customer_Relationship_Management.md'
-    root: repo
-    rel: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/06_Customer_Relationship_Management.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/07_Compliance_AML_and_Regulatory_Processes.md'
-    root: repo
-    rel: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/07_Compliance_AML_and_Regulatory_Processes.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/08_Risk_Management.md'
-    root: repo
-    rel: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/08_Risk_Management.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/09_Treasury_and_Finance.md'
-    root: repo
-    rel: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/09_Treasury_and_Finance.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/10_Digital_Banking_and_Channels.md'
-    root: repo
-    rel: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/10_Digital_Banking_and_Channels.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/11_Sales_and_Commercial_Processes.md'
-    root: repo
-    rel: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/11_Sales_and_Commercial_Processes.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/12_Branch_Operations.md'
-    root: repo
-    rel: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/12_Branch_Operations.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/13_Legal_and_Litigation.md'
-    root: repo
-    rel: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/13_Legal_and_Litigation.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/14_HR_and_Internal_Services.md'
-    root: repo
-    rel: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/14_HR_and_Internal_Services.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/15_IT_and_Banking_Technology_Operations.md'
-    root: repo
-    rel: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/15_IT_and_Banking_Technology_Operations.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/16_Business_Continuity_and_Security.md'
-    root: repo
-    rel: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/16_Business_Continuity_and_Security.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/17_AI_Augmented_Banking_Processes.md'
-    root: repo
-    rel: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/17_AI_Augmented_Banking_Processes.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/18_KPI_Library_Cascading_and_Assessment_Model.md'
-    root: repo
-    rel: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/18_KPI_Library_Cascading_and_Assessment_Model.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/19_Position_Based_Learning_Path_Management.md'
-    root: repo
-    rel: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/19_Position_Based_Learning_Path_Management.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/20_Workforce_Intelligence_Gap_Analysis_and_Talent_Weighting.md'
-    root: repo
-    rel: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/20_Workforce_Intelligence_Gap_Analysis_and_Talent_Weighting.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/21_Career_Planning_Talent_Mobility_and_Succession.md'
-    root: repo
-    rel: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/21_Career_Planning_Talent_Mobility_and_Succession.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/22_Compensation_Intelligence_and_Objective_Based_Reward_Input.md'
-    root: repo
-    rel: 'docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/22_Compensation_Intelligence_and_Objective_Based_Reward_Input.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
   - path: 'docs/source_bundle/extracted_bootstrap/manifest.json'
     root: repo
     rel: 'docs/source_bundle/extracted_bootstrap/manifest.json'
@@ -16126,12 +16108,6 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
-  - path: 'docs/superpowers/specs/2026-06-17-bpm-approval-flow-design.md'
-    root: repo
-    rel: 'docs/superpowers/specs/2026-06-17-bpm-approval-flow-design.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
   - path: 'docs/superpowers/specs/2026-06-17-surveys-engagement-ui-design.md'
     root: repo
     rel: 'docs/superpowers/specs/2026-06-17-surveys-engagement-ui-design.md'
@@ -16213,12 +16189,6 @@ files:
   - path: 'docs/superpowers/specs/2026-08-04-consegne-lab-13.md'
     root: repo
     rel: 'docs/superpowers/specs/2026-08-04-consegne-lab-13.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/superpowers/specs/2026-08-06-ritrattazione-consegne-lab-e-mfa-produzione.md'
-    root: repo
-    rel: 'docs/superpowers/specs/2026-08-06-ritrattazione-consegne-lab-e-mfa-produzione.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -16396,21 +16366,9 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
-  - path: 'docs/wargames/reviews/REVIEW-03.md'
-    root: repo
-    rel: 'docs/wargames/reviews/REVIEW-03.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
   - path: 'docs/wargames/reviews/REVIEW-15.md'
     root: repo
     rel: 'docs/wargames/reviews/REVIEW-15.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'docs/wargames/tasks/03-localai.md'
-    root: repo
-    rel: 'docs/wargames/tasks/03-localai.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -21355,36 +21313,6 @@ files:
   - path: 'ux-design/heuresys_uxix_brand_identity_bundle_v1/docs/16_system_health_admin_dashboard_patterns.md'
     root: repo
     rel: 'ux-design/heuresys_uxix_brand_identity_bundle_v1/docs/16_system_health_admin_dashboard_patterns.md'
-    category: ux-design-archive
-    status: archive
-    provenance: git-tracked
-  - path: 'ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/ACCEPTANCE_CRITERIA.md'
-    root: repo
-    rel: 'ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/ACCEPTANCE_CRITERIA.md'
-    category: ux-design-archive
-    status: archive
-    provenance: git-tracked
-  - path: 'ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/ACCESSIBILITY_CHECKLIST.md'
-    root: repo
-    rel: 'ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/ACCESSIBILITY_CHECKLIST.md'
-    category: ux-design-archive
-    status: archive
-    provenance: git-tracked
-  - path: 'ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/INTERACTION_REGISTER_TEMPLATE.md'
-    root: repo
-    rel: 'ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/INTERACTION_REGISTER_TEMPLATE.md'
-    category: ux-design-archive
-    status: archive
-    provenance: git-tracked
-  - path: 'ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/QUALITY_GATES.md'
-    root: repo
-    rel: 'ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/QUALITY_GATES.md'
-    category: ux-design-archive
-    status: archive
-    provenance: git-tracked
-  - path: 'ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/VISUAL_QA_CHECKLIST.md'
-    root: repo
-    rel: 'ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/VISUAL_QA_CHECKLIST.md'
     category: ux-design-archive
     status: archive
     provenance: git-tracked

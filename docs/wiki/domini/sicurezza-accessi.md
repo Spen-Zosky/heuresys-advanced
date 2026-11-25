@@ -43,9 +43,9 @@ concetti: [perimetro, mandato, maschera, autenticazione]
 ## Storia
 
 <!-- generato:storia -->
-Il riordino del 2026-11-25 ha ritirato **4** documenti di questo dominio (lotti: B 4). Si recuperano con `git show <commit>:<percorso>` dai commit a1872a180, oppure dalla copia nel cestino della cartella del progetto; l'elenco completo è nel [registro dei ritiri](../../piani/riordino-documentazione_20261125/REGISTRO_RITIRI.tsv).
+Il riordino del 2026-11-25 ha ritirato **5** documenti di questo dominio (lotti: ACC-1 1, B 4). Si recuperano con `git show <commit>:<percorso>` dai commit a1872a180, dbd339511, oppure dalla copia nel cestino della cartella del progetto; l'elenco completo è nel [registro dei ritiri](../../piani/riordino-documentazione_20261125/REGISTRO_RITIRI.tsv).
 
-Da dove venivano: `docs/superpowers/plans` 2, `docs/superpowers/specs` 2.
+Da dove venivano: `docs/superpowers/specs` 3, `docs/superpowers/plans` 2.
 <!-- /generato -->
 
 ## Vedi anche

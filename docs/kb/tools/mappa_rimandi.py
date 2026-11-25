@@ -43,6 +43,9 @@ IGNORATI = (
     "docs/piani/riordino-documentazione_", "docs/piani/PIANO_riordino-documentazione_",
     "esecuzione/_misure/CENSIMENTO_DOCUMENTI_", "esecuzione/_misure/MAPPA_RIMANDI_",
     "esecuzione/piani/124_PIANO_IL_RIORDINO",
+    # censimento dei documenti del ciclo DREAM del 2026-08-25: un inventario datato
+    # che elenca ogni file del repo di allora, come il censimento di oggi
+    "docs/vision/DREAM_2026-08-25/_raccolta/",
 )
 # Una citazione da qui è storia: non trattiene il documento, che resta recuperabile
 # dal registro dei ritiri (commit e copia). Decisione del 2026-11-25 nel piano.
@@ -98,7 +101,9 @@ def main() -> int:
         with open(a.uscenti, encoding="utf-8") as f:
             uscenti = {r.strip() for r in f if r.strip()}
 
-    nomi = collections.Counter(os.path.basename(p) for p in bersagli)
+    tracciati = subprocess.check_output(["git", "-C", root, "ls-files"], text=True).splitlines()
+    # il nome da solo vale come citazione solo se nessun altro file tracciato lo porta
+    nomi = collections.Counter(os.path.basename(p) for p in set(bersagli) | set(tracciati))
     # un rimando Obsidian ([[NOME]], [[cartella/NOME|testo]]) omette l'estensione:
     # si riconosce solo dentro le doppie quadre, perché fuori un nome come
     # sys_job_roles è una tabella e non un documento
@@ -122,8 +127,8 @@ def main() -> int:
     # docs/x/y.md#sez si riconosce dai suoi suffissi. (git grep con duemila
     # modelli fissi impiega minuti; cosi' bastano pochi secondi.)
     token_re = re.compile(r"[A-Za-z0-9_.\-/\u00C0-\u017F]+")
-    tracciati = subprocess.check_output(["git", "-C", root, "ls-files"], text=True).splitlines()
     citazioni = collections.defaultdict(lambda: collections.defaultdict(list))
+    tracciati_set = set(tracciati)
     for citante in tracciati:
         if citante in uscenti or citante.startswith(IGNORATI):
             continue
@@ -156,6 +161,10 @@ def main() -> int:
                 trovati = set()
                 for i in range(len(parti)):
                     suff = "/".join(parti[i:])
+                    # un percorso completo di un altro file tracciato non è una citazione
+                    # del bersaglio che ne condivide solo il nome
+                    if suff in tracciati_set and suff not in chiavi:
+                        break
                     if suff in chiavi:
                         trovati.update(chiavi[suff])
                         break

@@ -8,7 +8,7 @@
  * gli attributi che il modello porta per una voce abbinata e che il tenant non ha.
  *
  * I domini sono i 24 del confronto dell'11/11 fra la corsa `p20261010010521tjb` e RTL Bank
- * (`confronto-corsa-rtl/dati_20261111/riepilogo.json`). Il lato del tenant si legge dalle stesse tabelle
+ * (`esecuzione/_misure/CONFRONTO_TJB_RTL_20261111/confronto/riepilogo.json` di heuresys-datastore). Il lato del tenant si legge dalle stesse tabelle
  * che leggeva quel confronto (`heuresys-datastore/apps/api/src/rtl_lettura.ts` e `rtl_confronto_grezzi.ts`);
  * il lato del modello dal contenuto della versione (`sys_blueprint_content_*`, processi in
  * `sys_blueprint_process_registry`).

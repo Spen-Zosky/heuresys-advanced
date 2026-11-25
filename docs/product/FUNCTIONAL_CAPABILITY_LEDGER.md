@@ -261,6 +261,44 @@ Ordinati per leva (valore alto × effort favorevole). I primi sono "dati già li
 
 ---
 
+### 10-bis. Linee candidate dai dossier del 2026-07-05 (accorpati il 2026-11-25)
+
+I dossier `DEVELOPMENT_LINES_A`, `_B`, `_C` e `_G` (stato PROPOSTO, sweep S1016 del 2026-07-05) sono accorpati qui e ritirati; il testo integrale, con le pagine impattate e le sequenze raccomandate, si recupera dal registro dei ritiri (`docs/piani/riordino-documentazione_20261125/REGISTRO_RITIRI.tsv`). I conteggi dei dossier erano evidenza datata: si rimisurano con l'atlante (`python docs/kb/tools/build_atlas.py`). La scelta e la priorità delle linee restano di Enzo; lo stato di ciascuna, quando è diventata una voce, si legge in `docs/kb/SOT_BACKLOG.md`.
+
+**Serie A — esporre i dati dormienti** (dati già popolati, manca API o UI)
+- **L0 Trust Ledger / provenance**: read-API `/v1/provenance` sui record di lineage (confidenza del mapping, modello IA, approvatore umano) e pannello «Provenienza dei dati»; angolo AI Act e GDPR art. 22.
+- **L1 La vita dei goal**: sotto-risorse in lettura di goal e OKR (aggiornamenti, check-in, milestone, commenti, allineamenti, modelli) e la linea del tempo del goal nell'ESS.
+- **L2 Il layer delle prove**: le evidenze sotto rating, gap e insight (valutazioni, evidenze di apprendimento, feedback continuo e 360), con il perimetro sensibile e la vista di sé nell'ESS.
+- **L3 Talent intelligence**: matrice 9-box derivata dai talent score, fit dimensionale e prontezza per orizzonte (la tabella `sys_nine_box_grid` non esiste: la matrice si deriva).
+- **L4 Gap closure**: piani, azioni e risultati di chiusura dei gap collegati alle competenze (admin) e a `/me/gaps` (ESS).
+- **L5 Ponte posizione → apprendimento**: requisiti di apprendimento della posizione e mappa competenze → moduli, per accendere la pagina `positions/[id]/learning`.
+- **L6 Metrologia KPI**: come si misura un KPI, con che pesi e con quali misurazioni storiche.
+- **L7 Compensi e premi in lettura**: calcoli della retribuzione variabile, pool, regole, registro dei passaggi al payroll e raccomandazioni; la data-class più sensibile.
+- **L8 Ferie e permessi in consultazione**: richieste, regole di maturazione e movimenti in sola lettura (la richiesta di ferie resta una decisione di prodotto).
+
+**Serie B — attivare il codice dormiente**
+- **B1 Ricerca semantica a testo libero**: endpoint pronto dietro `MATCHING_FREETEXT_ENABLED`, spento; serve l'embedding al momento della query.
+- **B2 Motore dei reward gate**: catalogo → gate → esiti e curve di payout sopra i calcoli variabili che oggi girano senza gate.
+- **B3 Effetti delle approvazioni**: nuovi handler oltre all'attivazione del tenant (materializzazione del tenant, ferie, cambi di goal o compenso).
+- **B4 Email**: digest e `EMAIL_OTP` come secondo fattore, con le preferenze di notifica; dipende dalla configurazione SMTP.
+- **B5 Visualizzazioni**: versioni dei grafi ed esportazione reale (PNG, SVG, JSON).
+- **B6 Posta in arrivo in push** (SSE) invece del polling.
+- **B7 Osservabilità**: metriche Prometheus, query lente da `pg_stat_statements`, serie storiche, per riaccendere le sezioni di `/system-health`.
+
+**Serie C — dall'interfaccia di lettura a quella di gestione**
+- **C1 Persone e organizzazione**: modifica di utenti e ruoli, posizioni con requisiti, unità organizzative (le API di scrittura esistono).
+- **C2 Cataloghi**: competenze e tassonomia, KPI, apprendimento, e una pagina del catalogo dei mestieri (famiglie, ruoli, mappa ESCO).
+- **C3 Tenant e piattaforma**: creazione e archiviazione dei tenant, procedura guidata di materializzazione da archetipo, attivazione dei blueprint.
+- **C4 Fondamenta**: paginazione lato server nelle liste, tipi condivisi da `@heuresys/shared` invece delle interfacce locali, upload con `FormData` dal client API.
+
+**Serie G — piattaforma e igiene** (affidabilità e costi; le voci prese in carico vanno anche in `docs/kb/DEBT_REGISTER.md`)
+- **G1 Conservazione e spazio**: politica di partizione o archivio dei risultati di validazione degli import, soglie di pulizia dei token e degli eventi di accesso, tabelle di staging vuote, report di allineamento senza conservazione.
+- **G2 Igiene dei permessi**: permessi `:delete` dedicati, niente permessi per procura, permessi propri per la materializzazione del tenant, gate PLATFORM_ADMIN cablati portati nella matrice.
+- **G3 Integrità preventiva**: aciclicità del grafo IS_A delle competenze, niente `LIMIT` fissi che troncano in silenzio, paginazione di `/v1/leads`.
+- **G4 Allineamento dei documenti** al codice: dal 2026-11-25 lo fa il riordino della documentazione con i suoi controlli (`check_documenti.py`, `scripts/lint-verita.sh`).
+- **G5 Script esauriti**: spostarli in una cartella d'archivio, senza cancellarli.
+- **G6 Wiki e grafi**: dal 2026-11-25 la porta d'ingresso è `docs/wiki/`.
+
 ## Note, DoD e limiti
 
 - **DoD live-data**: gli stati ✅ richiedono codice+test+dato live; le capability con codice/schema completi ma tabella a 0 righe sono 🟡 (orchestration pronta, manca dimostrazione live).

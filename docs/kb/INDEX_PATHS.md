@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-11-25T18:10:21Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **4012**
+**Generato**: 2026-11-25T18:49:31Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **4000**
 
 > Generato: tutti i file tracciati dal repo (`git ls-files`), con percorsi relativi alla radice. Gemello machine-readable: `index_paths.yaml`. La mappa per argomento è il wiki, `docs/wiki/index.md`.
 
@@ -21,7 +21,7 @@
 | db-script | 174 |
 | db-seed | 117 |
 | doc-archive | 72 |
-| doc-canonical | 746 |
+| doc-canonical | 739 |
 | handoff-state | 1 |
 | qa-artifact | 49 |
 | session | 3 |
@@ -29,16 +29,16 @@
 | shared-schema | 138 |
 | showcase-source | 9 |
 | test | 550 |
-| ux-design-archive | 57 |
+| ux-design-archive | 52 |
 | web-source | 449 |
-| **TOTALE** | **4012** |
+| **TOTALE** | **4000** |
 
 ## Conteggi per status
 
 | Status | File |
 |---|---|
-| archive | 226 |
-| live | 3786 |
+| archive | 221 |
+| live | 3779 |
 
 ## File per categoria
 
@@ -2284,14 +2284,6 @@
 - `.programmi/onda2/esiti/O2-09.md` · *live* · git-tracked
 - `.programmi/onda2/esiti/O2-10.md` · *live* · git-tracked
 - `.storia36/PROGRESS.md` · *live* · git-tracked
-- `.storia36/analysis/c2-macchina-stati.md` · *live* · git-tracked
-- `.storia36/analysis/c2-misura.md` · *live* · git-tracked
-- `.storia36/analysis/c3-misura.md` · *live* · git-tracked
-- `.storia36/analysis/c4-codice.md` · *live* · git-tracked
-- `.storia36/analysis/c4-misura.md` · *live* · git-tracked
-- `.storia36/analysis/conventions.md` · *live* · git-tracked
-- `.storia36/analysis/date-columns.md` · *live* · git-tracked
-- `.storia36/analysis/shapes-g2-g4.md` · *live* · git-tracked
 - `.zp/PROGRESS.md` · *live* · git-tracked
 - `AGENTS.md` · *live* · git-tracked
 - `CLAUDE.md` · *live* · git-tracked
@@ -2404,8 +2396,16 @@
 - `docs/kb/analisi/endpoint-orfani/ENDPOINT_ORFANI_CLASSIFICATI_20261116.tsv` · *live* · git-tracked
 - `docs/kb/analisi/endpoint-orfani/LEGGIMI.md` · *live* · git-tracked
 - `docs/kb/analisi/endpoint-orfani/classifica.py` · *live* · git-tracked
-- `docs/kb/analisi/endpoint-orfani/estrai_rotte_corretto.py` · *live* · git-tracked
 - `docs/kb/analisi/endpoint-orfani/misura_orfani.py` · *live* · git-tracked
+- `docs/kb/analisi/endpoint-orfani/strumenti/accenti.py` · *live* · git-tracked
+- `docs/kb/analisi/endpoint-orfani/strumenti/esegui_tutto.sh` · *live* · git-tracked
+- `docs/kb/analisi/endpoint-orfani/strumenti/estrai_console.py` · *live* · git-tracked
+- `docs/kb/analisi/endpoint-orfani/strumenti/estrai_endpoint.py` · *live* · git-tracked
+- `docs/kb/analisi/endpoint-orfani/strumenti/estrai_pagine.py` · *live* · git-tracked
+- `docs/kb/analisi/endpoint-orfani/strumenti/estrai_pagine_v1.py` · *live* · git-tracked
+- `docs/kb/analisi/endpoint-orfani/strumenti/estrai_rotte.py` · *live* · git-tracked
+- `docs/kb/analisi/endpoint-orfani/strumenti/genera_tsv.py` · *live* · git-tracked
+- `docs/kb/analisi/endpoint-orfani/strumenti/grafo_ts.py` · *live* · git-tracked
 - `docs/kb/atlas/ATLAS.md` · *live* · git-tracked
 - `docs/kb/atlas/ATLAS_CURATED.md` · *live* · git-tracked
 - `docs/kb/atlas/agent-operations.json` · *live* · git-tracked
@@ -2426,7 +2426,6 @@
 - `docs/kb/improvement/2026-06-13_heuresys-advanced-100x-kickoff-prompt.md` · *live* · git-tracked
 - `docs/kb/improvement/AUDIT_PROTOCOL.md` · *live* · git-tracked
 - `docs/kb/improvement/BASELINE_METRICS.md` · *live* · git-tracked
-- `docs/kb/improvement/DOSSIERS_TRIAGE_S1022.md` · *live* · git-tracked
 - `docs/kb/improvement/EPICS_SPEC_S1022.md` · *live* · git-tracked
 - `docs/kb/improvement/FINDINGS/3.2_ASVS_MAPPING.md` · *live* · git-tracked
 - `docs/kb/improvement/FINDINGS/S-100X-0_recon.md` · *live* · git-tracked
@@ -2441,6 +2440,14 @@
 - `docs/kb/storia36/DOMINIO_FORMAZIONE_OBBLIGATORIA.md` · *live* · git-tracked
 - `docs/kb/storia36/DOMINIO_PREMIO_VARIABILE.md` · *live* · git-tracked
 - `docs/kb/storia36/DOSSIER_REGISTRY.md` · *live* · git-tracked
+- `docs/kb/storia36/analisi/c2-macchina-stati.md` · *live* · git-tracked
+- `docs/kb/storia36/analisi/c2-misura.md` · *live* · git-tracked
+- `docs/kb/storia36/analisi/c3-misura.md` · *live* · git-tracked
+- `docs/kb/storia36/analisi/c4-codice.md` · *live* · git-tracked
+- `docs/kb/storia36/analisi/c4-misura.md` · *live* · git-tracked
+- `docs/kb/storia36/analisi/conventions.md` · *live* · git-tracked
+- `docs/kb/storia36/analisi/date-columns.md` · *live* · git-tracked
+- `docs/kb/storia36/analisi/shapes-g2-g4.md` · *live* · git-tracked
 - `docs/kb/tools/_pg_agenti.py` · *live* · git-tracked
 - `docs/kb/tools/aggiorna_numeri_sot.py` · *live* · git-tracked
 - `docs/kb/tools/atlante_fresco.py` · *live* · git-tracked
@@ -2619,12 +2626,8 @@
 - `docs/preflight-residual-todo.md` · *live* · git-tracked
 - `docs/product/BUSINESS_SCOPE_AND_PRD.md` · *live* · git-tracked
 - `docs/product/COMPETITIVE_SCORECARD.md` · *live* · git-tracked
-- `docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md` · *live* · git-tracked
-- `docs/product/DEVELOPMENT_LINES_B_ACTIVATE_DORMANT_CODE.md` · *live* · git-tracked
-- `docs/product/DEVELOPMENT_LINES_C_ADMIN_EDITING_UI.md` · *live* · git-tracked
 - `docs/product/DEVELOPMENT_LINES_E_EVO_VERTICALS.md` · *live* · git-tracked
 - `docs/product/DEVELOPMENT_LINES_F_PRESCRIPTIVE_INTELLIGENCE.md` · *live* · git-tracked
-- `docs/product/DEVELOPMENT_LINES_G_PLATFORM_HYGIENE.md` · *live* · git-tracked
 - `docs/product/FUNCTIONAL_CAPABILITY_LEDGER.md` · *live* · git-tracked
 - `docs/product/LATENT_CAPABILITY_CATALOG.md` · *live* · git-tracked
 - `docs/product/README.md` · *live* · git-tracked
@@ -2633,10 +2636,27 @@
 - `docs/product/WORKITEM_GAP1_DESIGN_SPEC.md` · *live* · git-tracked
 - `docs/product/WORKITEM_GAP1_PERSPECTIVES_AND_SCORECARD.md` · *live* · git-tracked
 - `docs/product/WORKITEM_GAP1_PHASE0_VERIFICATION.md` · *live* · git-tracked
+- `docs/product/processi-bancari/00_Enterprise_Typing_and_Blueprint_Configuration.md` · *live* · git-tracked
+- `docs/product/processi-bancari/01_Current_Accounts_Management.md` · *live* · git-tracked
+- `docs/product/processi-bancari/02_Payments_and_Transactions_Management.md` · *live* · git-tracked
+- `docs/product/processi-bancari/03_Cash_Operations_Management.md` · *live* · git-tracked
+- `docs/product/processi-bancari/04_Deposit_Products_Management.md` · *live* · git-tracked
+- `docs/product/processi-bancari/05_Lending_and_Credit_Management.md` · *live* · git-tracked
+- `docs/product/processi-bancari/06_Customer_Relationship_Management.md` · *live* · git-tracked
+- `docs/product/processi-bancari/07_Compliance_AML_and_Regulatory_Processes.md` · *live* · git-tracked
+- `docs/product/processi-bancari/08_Risk_Management.md` · *live* · git-tracked
+- `docs/product/processi-bancari/09_Treasury_and_Finance.md` · *live* · git-tracked
+- `docs/product/processi-bancari/10_Digital_Banking_and_Channels.md` · *live* · git-tracked
+- `docs/product/processi-bancari/11_Sales_and_Commercial_Processes.md` · *live* · git-tracked
+- `docs/product/processi-bancari/12_Branch_Operations.md` · *live* · git-tracked
+- `docs/product/processi-bancari/13_Legal_and_Litigation.md` · *live* · git-tracked
+- `docs/product/processi-bancari/14_HR_and_Internal_Services.md` · *live* · git-tracked
+- `docs/product/processi-bancari/15_IT_and_Banking_Technology_Operations.md` · *live* · git-tracked
+- `docs/product/processi-bancari/16_Business_Continuity_and_Security.md` · *live* · git-tracked
+- `docs/product/processi-bancari/17_AI_Augmented_Banking_Processes.md` · *live* · git-tracked
 - `docs/security/.keep` · *live* · git-tracked
 - `docs/security/AUTH_SECURITY_PLAN.md` · *live* · git-tracked
 - `docs/source_bundle/Company_HRMS_BPM_AI_Coding_Agent_Bootstrap_Pack_v5.zip` · *live* · git-tracked
-- `docs/source_bundle/brownfield/db-export.zip` · *live* · git-tracked
 - `docs/source_bundle/extracted_bootstrap/LOGICAL_DATA_MODEL_ADDENDUM.md` · *live* · git-tracked
 - `docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT.json` · *live* · git-tracked
 - `docs/source_bundle/extracted_bootstrap/VALIDATION_RESULT_v4.json` · *live* · git-tracked
@@ -2710,29 +2730,6 @@
 - `docs/source_bundle/extracted_bootstrap/db/seed_templates/visualization_edges.csv` · *live* · git-tracked
 - `docs/source_bundle/extracted_bootstrap/db/seed_templates/visualization_graphs.csv` · *live* · git-tracked
 - `docs/source_bundle/extracted_bootstrap/db/seed_templates/visualization_nodes.csv` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/00_Enterprise_Typing_and_Blueprint_Configuration.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/01_Current_Accounts_Management.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/02_Payments_and_Transactions_Management.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/03_Cash_Operations_Management.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/04_Deposit_Products_Management.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/05_Lending_and_Credit_Management.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/06_Customer_Relationship_Management.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/07_Compliance_AML_and_Regulatory_Processes.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/08_Risk_Management.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/09_Treasury_and_Finance.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/10_Digital_Banking_and_Channels.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/11_Sales_and_Commercial_Processes.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/12_Branch_Operations.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/13_Legal_and_Litigation.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/14_HR_and_Internal_Services.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/15_IT_and_Banking_Technology_Operations.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/16_Business_Continuity_and_Security.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/17_AI_Augmented_Banking_Processes.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/18_KPI_Library_Cascading_and_Assessment_Model.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/19_Position_Based_Learning_Path_Management.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/20_Workforce_Intelligence_Gap_Analysis_and_Talent_Weighting.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/21_Career_Planning_Talent_Mobility_and_Succession.md` · *live* · git-tracked
-- `docs/source_bundle/extracted_bootstrap/industry_blueprints/FIN_BANKING/processes/22_Compensation_Intelligence_and_Objective_Based_Reward_Input.md` · *live* · git-tracked
 - `docs/source_bundle/extracted_bootstrap/manifest.json` · *live* · git-tracked
 - `docs/source_bundle/extracted_bootstrap/schemas/position_intelligence_profile.schema.json` · *live* · git-tracked
 - `docs/source_bundle/extracted_bootstrap/scripts/apply_bundle.ps1` · *live* · git-tracked
@@ -2766,7 +2763,6 @@
 - `docs/superpowers/specs/2026-06-04-i18n-milestone-design.md` · *live* · git-tracked
 - `docs/superpowers/specs/2026-06-05-sot-unification-design.md` · *live* · git-tracked
 - `docs/superpowers/specs/2026-06-16-reporting-export-design.md` · *live* · git-tracked
-- `docs/superpowers/specs/2026-06-17-bpm-approval-flow-design.md` · *live* · git-tracked
 - `docs/superpowers/specs/2026-06-17-surveys-engagement-ui-design.md` · *live* · git-tracked
 - `docs/superpowers/specs/2026-06-18-bpm-approval-slice2-3-design.md` · *live* · git-tracked
 - `docs/superpowers/specs/2026-06-19-integrazione-llmwiki-hrplus-heuresys-design.md` · *live* · git-tracked
@@ -2781,7 +2777,6 @@
 - `docs/superpowers/specs/2026-07-26-organizational-model-and-role-derivation-design.md` · *live* · git-tracked
 - `docs/superpowers/specs/2026-08-02-p2-batch-execution-plan.md` · *live* · git-tracked
 - `docs/superpowers/specs/2026-08-04-consegne-lab-13.md` · *live* · git-tracked
-- `docs/superpowers/specs/2026-08-06-ritrattazione-consegne-lab-e-mfa-produzione.md` · *live* · git-tracked
 - `docs/vision/DREAM_2026-08-25/00_SINTESI.md` · *live* · git-tracked
 - `docs/vision/DREAM_2026-08-25/01_INVENTARIO.md` · *live* · git-tracked
 - `docs/vision/DREAM_2026-08-25/02_LATENTI.md` · *live* · git-tracked
@@ -2811,9 +2806,7 @@
 - `docs/wargames/15-heuresys-pricing.md` · *live* · git-tracked
 - `docs/wargames/README.md` · *live* · git-tracked
 - `docs/wargames/SUCCESS.md` · *live* · git-tracked
-- `docs/wargames/reviews/REVIEW-03.md` · *live* · git-tracked
 - `docs/wargames/reviews/REVIEW-15.md` · *live* · git-tracked
-- `docs/wargames/tasks/03-localai.md` · *live* · git-tracked
 - `docs/wargames/tasks/15-heuresys-pricing.md` · *live* · git-tracked
 - `docs/wiki/LEGGIMI.md` · *live* · git-tracked
 - `docs/wiki/adr_domini.tsv` · *live* · git-tracked
@@ -3662,11 +3655,6 @@
 - `ux-design/heuresys_uxix_brand_identity_bundle_v1/docs/12_page_types_to_design.md` · *archive* · git-tracked
 - `ux-design/heuresys_uxix_brand_identity_bundle_v1/docs/13_best_practices_for_modern_saas_ui.md` · *archive* · git-tracked
 - `ux-design/heuresys_uxix_brand_identity_bundle_v1/docs/16_system_health_admin_dashboard_patterns.md` · *archive* · git-tracked
-- `ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/ACCEPTANCE_CRITERIA.md` · *archive* · git-tracked
-- `ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/ACCESSIBILITY_CHECKLIST.md` · *archive* · git-tracked
-- `ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/INTERACTION_REGISTER_TEMPLATE.md` · *archive* · git-tracked
-- `ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/QUALITY_GATES.md` · *archive* · git-tracked
-- `ux-design/heuresys_uxix_brand_identity_bundle_v1/governance/VISUAL_QA_CHECKLIST.md` · *archive* · git-tracked
 - `ux-design/heuresys_uxix_brand_identity_bundle_v1/prompts/DESIGN_DECISION_CAPTURE_PROMPT.md` · *archive* · git-tracked
 - `ux-design/heuresys_uxix_brand_identity_bundle_v1/templates/DECISION_REGISTER.md` · *archive* · git-tracked
 - `ux-design/heuresys_uxix_brand_identity_bundle_v1/templates/MODULE_MANIFEST_TEMPLATE.ts` · *archive* · git-tracked

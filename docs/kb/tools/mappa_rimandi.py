@@ -82,6 +82,9 @@ def main() -> int:
     ap.add_argument("--repo", default=".")
     ap.add_argument("--uscenti", help="elenco dei soli file che escono adesso: le citazioni "
                     "da un superato che resta allora contano (altrimenti il suo link si romperebbe)")
+    ap.add_argument("--link-vincolanti", action="store_true",
+                    help="un link markdown trattiene il documento anche da un citante storico "
+                    "(serve dove un controllo verifica i link di tutti i file, come nel datastore)")
     ap.add_argument("--citanti", help="tsv con ogni citazione: bersaglio, classe, citante:riga")
     a = ap.parse_args()
     root = subprocess.check_output(["git", "-C", a.repo, "rev-parse", "--show-toplevel"], text=True).strip()
@@ -103,6 +106,9 @@ def main() -> int:
     for p in bersagli:
         if p.endswith(".md"):
             steli[os.path.basename(p)[:-3]].append(p)
+    # un link markdown relativo ([x](../y/README.md)) si risolve dalla cartella del citante:
+    # i suoi suffissi da soli non bastano quando il nome è generico
+    link_re = re.compile(r"\]\(([^)\s#]+)")
     wiki_re = re.compile(r"\[\[([^\]|#]+)")
     chiavi = {}  # stringa cercata -> bersagli che rappresenta
     for p in bersagli:
@@ -132,6 +138,12 @@ def main() -> int:
         if b"\0" in grezzo[:8000]:
             continue
         for num, riga in enumerate(grezzo.decode("utf-8", "replace").splitlines(), 1):
+            for dest in link_re.findall(riga):
+                t = os.path.normpath(os.path.join(os.path.dirname(citante), dest)).replace(os.sep, "/")
+                for p in chiavi.get(t, []):
+                    if p != citante:
+                        k = "documento" if a.link_vincolanti and classe(citante) in ("storico", "generato") else classe(citante)
+                        citazioni[p][k].append(f"{citante}:{num}")
             for link in wiki_re.findall(riga):
                 nome = link.strip().split("/")[-1]
                 if nome.endswith(".md"):

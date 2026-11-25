@@ -44,6 +44,7 @@ def main() -> int:
     ap.add_argument("--cestino", required=True)
     ap.add_argument("--lotto", required=True)
     ap.add_argument("--anche-accorpare", action="store_true")
+    ap.add_argument("--link-vincolanti", action="store_true", help="vedi mappa_rimandi.py")
     ap.add_argument("--prova", action="store_true", help="solo la guardia, non tocca niente")
     a = ap.parse_args()
 
@@ -75,7 +76,7 @@ def main() -> int:
         out = os.path.join(tmp, "mappa.tsv")
         subprocess.check_call([sys.executable, os.path.join(os.path.dirname(__file__), "mappa_rimandi.py"),
                                "--censimento", a.censimento, "--out", out, "--repo", root,
-                               "--uscenti", a.elenco],
+                               "--uscenti", a.elenco] + (["--link-vincolanti"] if a.link_vincolanti else []),
                               stdout=subprocess.DEVNULL)
         with open(out, encoding="utf-8") as f:
             libero = {r["path"]: r["libero"] for r in csv.DictReader(f, delimiter="\t")}

@@ -73,6 +73,20 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_tenancies"
     ]
   },
+  "agent-weekly-summary": {
+    "prefissi": [
+      "/v1/agent-weekly-summary"
+    ],
+    "tabelle": [
+      "sys_auth_permissions",
+      "sys_auth_role_permissions",
+      "sys_inbox_notifications",
+      "sys_reference_translations",
+      "sys_tenancies",
+      "sys_user_auth_roles",
+      "sys_users"
+    ]
+  },
   "analytics": {
     "prefissi": [
       "/v1/analytics"

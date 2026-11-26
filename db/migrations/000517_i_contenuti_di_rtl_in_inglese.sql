@@ -15,7 +15,9 @@
 -- Il confronto è sul testo: vale per ogni riga con lo stesso valore, di qualunque tenant
 -- (stessa regola del glossario dell'API, ADR-0062). Dove il valore non esiste, niente.
 -- Nei criteri la traduzione omette il riferimento interno iniziale («Proposta
--- dell'agente (0005xx)»).
+-- dell'agente (0005xx)»); il criterio della verifica del rilascio diventa la sola data.
+-- Lo stesso testo italiano ha lo stesso inglese in ogni tabella e colonna (il glossario
+-- dell'API cerca per testo).
 --
 -- Idempotenza: ON CONFLICT; si aggiornano solo le righe 'LLM' con testo diverso, quindi
 -- una seconda passata non modifica niente. Le traduzioni di altra fonte restano.
@@ -27,96 +29,9 @@
 -- Le post-condizioni di copertura della 000255 e gemelle lasciano fuori i campi con
 -- note = 'contenuti dei tenant' (emendate insieme alla 000516): il dato dei tenant cambia nell'uso.
 --
--- Esclusi (42 valori): compaiono come letterali interi in apps/web/src,
--- apps/api/src o packages/shared/src.
---   «Cassiere»
---       apps/web/src/lib/frase-evento.test.ts
---       apps/web/src/lib/leggibile.test.ts
---   «Direzione Affari Legali e Societari»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Direzione Antiriciclaggio»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Direzione Back Office»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Direzione Bilancio e Segnalazioni»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Direzione Compliance e Protezione Dati»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Direzione Coordinamento Commerciale»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Direzione Gestione dei Rischi»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Direzione Governo e Supporto Rete»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Direzione Infrastrutture»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Direzione Internal Audit»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Direzione Istruttoria ed Erogazione»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Direzione Monitoraggio e Crediti Deteriorati»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Direzione Pagamenti»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Direzione Sviluppo Software e Canali Digitali»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Direzione Tesoreria e Mercati»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Divisione Crediti»
---       apps/web/src/lib/altezza-grafico.test.ts
---       apps/web/src/lib/attivita-processo.test.ts
---   «Divisione Finanza e Amministrazione»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Divisione IT & Digital»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Divisione Marketing e Comunicazione»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Divisione Operations»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Divisione Retail Banking»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Divisione Risorse Umane e Organizzazione»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Erogazione del credito»
---       apps/web/src/components/processo/corsie-fasi.test.ts
---   «Filiale Bergamo Centro»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Filiale Brescia Centro»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Filiale Como»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Filiale Dalmine»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Filiale Milano Centro»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Filiale Milano Porta Romana»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Filiale Milano Sempione»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Filiale Monza»
---       apps/web/src/lib/altezza-grafico.test.ts
---       apps/web/src/lib/i18n-numeri.test.ts
---       apps/web/src/lib/leggibile.test.ts
---   «Filiale Sesto San Giovanni»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Filiale Varese»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Operatività di filiale»
---       apps/web/src/components/processo/corsie-fasi.test.ts
---   «RTL Bank S.p.A.»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Strategia e governance aziendale»
---       apps/web/src/lib/titolo-riga.test.ts
---   «Ufficio Amministrazione del Personale»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Ufficio Crediti PMI»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Ufficio Crediti Retail»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Ufficio Sviluppo, Formazione e Organizzazione»
---       apps/web/src/lib/altezza-grafico.test.ts
---   «Verifica dal vivo del rilascio del passo 2 dell'ADR-0061, 22/11/2026.»
---       apps/web/src/lib/criterio-faccetta.test.ts
+-- Esclusi: sono esclusi solo i letterali interi del codice che gira in apps/web/src,
+-- apps/api/src e packages/shared/src (i file di test non contano). Valori esclusi: nessuno.
+
 -- ============================================================================
 
 INSERT INTO sys.sys_translatable_field
@@ -166,6 +81,7 @@ INSERT INTO _rtl_en (tabella, colonna, it, en) VALUES
   ('sys_tenant_processes','tenant_process_name','Dati e analytics','Data and analytics'),
   ('sys_tenant_processes','tenant_process_name','Definizione del modello di business e della visione di lungo periodo','Definition of the business model and long-term vision'),
   ('sys_tenant_processes','tenant_process_name','Elaborazione delle retribuzioni (payroll)','Payroll processing'),
+  ('sys_tenant_processes','tenant_process_name','Erogazione del credito','Loan origination'),
   ('sys_tenant_processes','tenant_process_name','Facility e immobili','Facilities and real estate'),
   ('sys_tenant_processes','tenant_process_name','Finanza e contabilità','Finance and accounting'),
   ('sys_tenant_processes','tenant_process_name','Gestione degli ordini di vendita e cross-sell/up-sell','Sales order management and cross-selling/up-selling'),
@@ -184,6 +100,7 @@ INSERT INTO _rtl_en (tabella, colonna, it, en) VALUES
   ('sys_tenant_processes','tenant_process_name','Monitoraggio e recupero crediti','Credit monitoring and collection'),
   ('sys_tenant_processes','tenant_process_name','Monitoraggio ed esecuzione di operazioni di rischio e hedging','Risk and hedging transaction monitoring and execution'),
   ('sys_tenant_processes','tenant_process_name','Onboarding, formazione e sviluppo dei dipendenti','Employee onboarding, training and development'),
+  ('sys_tenant_processes','tenant_process_name','Operatività di filiale','Branch operations'),
   ('sys_tenant_processes','tenant_process_name','Pagamenti e bonifici','Payments and credit transfers'),
   ('sys_tenant_processes','tenant_process_name','Pianificazione e controllo di gestione','Planning and management control'),
   ('sys_tenant_processes','tenant_process_name','Pianificazione, politiche e strategie HR','HR planning, policies and strategies'),
@@ -192,6 +109,7 @@ INSERT INTO _rtl_en (tabella, colonna, it, en) VALUES
   ('sys_tenant_processes','tenant_process_name','Servizi di investimento','Investment services'),
   ('sys_tenant_processes','tenant_process_name','Servizio alla clientela bancaria (credito e finanziamenti)','Banking customer service (credit and lending)'),
   ('sys_tenant_processes','tenant_process_name','Servizio clienti','Customer service'),
+  ('sys_tenant_processes','tenant_process_name','Strategia e governance aziendale','Corporate strategy and governance'),
   ('sys_tenant_processes','tenant_process_name','Sviluppo della strategia di vendita','Sales strategy development'),
   ('sys_tenant_processes','tenant_process_name','Tesoreria e ALM','Treasury and ALM'),
   ('sys_tenant_processes','tenant_process_description','Analizza il mercato locale, i segmenti di clientela (famiglie, professionisti, PMI) e le capacità competitive della banca.','Analyses the local market, the customer segments (households, professionals, SMEs) and the bank''s competitive capabilities.'),
@@ -620,9 +538,46 @@ INSERT INTO _rtl_en (tabella, colonna, it, en) VALUES
   ('sys_tenant_process_facets','tenant_process_facet_criterion','Proposta dell''agente (000512) dal nome, dalla descrizione e dalle attività di «Tesoreria e ALM»: le persone decidono lavorando con sistemi che preparano dati, calcoli o pratiche.','Based on the name, description and activities of “Treasury and ALM”: people make the decisions, working with systems that prepare data, calculations or case files.'),
   ('sys_organization_units','organization_unit_name','Area Brescia-Bergamo','Brescia-Bergamo Area'),
   ('sys_organization_units','organization_unit_name','Area Milano e Provincia','Milan and Province Area'),
+  ('sys_organization_units','organization_unit_name','Direzione Affari Legali e Societari','Legal and Corporate Affairs Department'),
+  ('sys_organization_units','organization_unit_name','Direzione Antiriciclaggio','Anti-Money Laundering Department'),
+  ('sys_organization_units','organization_unit_name','Direzione Back Office','Back Office Department'),
+  ('sys_organization_units','organization_unit_name','Direzione Bilancio e Segnalazioni','Financial Statements and Regulatory Reporting Department'),
+  ('sys_organization_units','organization_unit_name','Direzione Compliance e Protezione Dati','Compliance and Data Protection Department'),
+  ('sys_organization_units','organization_unit_name','Direzione Coordinamento Commerciale','Commercial Coordination Department'),
   ('sys_organization_units','organization_unit_name','Direzione Corporate Banking','Corporate Banking Department'),
   ('sys_organization_units','organization_unit_name','Direzione Generale','General Management'),
+  ('sys_organization_units','organization_unit_name','Direzione Gestione dei Rischi','Risk Management Department'),
+  ('sys_organization_units','organization_unit_name','Direzione Governo e Supporto Rete','Network Governance and Support Department'),
+  ('sys_organization_units','organization_unit_name','Direzione Infrastrutture','Infrastructure Department'),
+  ('sys_organization_units','organization_unit_name','Direzione Internal Audit','Internal Audit Department'),
+  ('sys_organization_units','organization_unit_name','Direzione Istruttoria ed Erogazione','Credit Assessment and Disbursement Department'),
+  ('sys_organization_units','organization_unit_name','Direzione Monitoraggio e Crediti Deteriorati','Credit Monitoring and Non-Performing Loans Department'),
+  ('sys_organization_units','organization_unit_name','Direzione Pagamenti','Payments Department'),
+  ('sys_organization_units','organization_unit_name','Direzione Sviluppo Software e Canali Digitali','Software Development and Digital Channels Department'),
+  ('sys_organization_units','organization_unit_name','Direzione Tesoreria e Mercati','Treasury and Markets Department'),
+  ('sys_organization_units','organization_unit_name','Divisione Crediti','Credit Division'),
+  ('sys_organization_units','organization_unit_name','Divisione Finanza e Amministrazione','Finance and Administration Division'),
+  ('sys_organization_units','organization_unit_name','Divisione IT & Digital','IT & Digital Division'),
+  ('sys_organization_units','organization_unit_name','Divisione Marketing e Comunicazione','Marketing and Communications Division'),
+  ('sys_organization_units','organization_unit_name','Divisione Operations','Operations Division'),
+  ('sys_organization_units','organization_unit_name','Divisione Retail Banking','Retail Banking Division'),
   ('sys_organization_units','organization_unit_name','Divisione Rischi e Compliance','Risk and Compliance Division'),
+  ('sys_organization_units','organization_unit_name','Divisione Risorse Umane e Organizzazione','Human Resources and Organisation Division'),
+  ('sys_organization_units','organization_unit_name','Filiale Bergamo Centro','Bergamo City Centre Branch'),
+  ('sys_organization_units','organization_unit_name','Filiale Brescia Centro','Brescia City Centre Branch'),
+  ('sys_organization_units','organization_unit_name','Filiale Como','Como Branch'),
+  ('sys_organization_units','organization_unit_name','Filiale Dalmine','Dalmine Branch'),
+  ('sys_organization_units','organization_unit_name','Filiale Milano Centro','Milan City Centre Branch'),
+  ('sys_organization_units','organization_unit_name','Filiale Milano Porta Romana','Milan Porta Romana Branch'),
+  ('sys_organization_units','organization_unit_name','Filiale Milano Sempione','Milan Sempione Branch'),
+  ('sys_organization_units','organization_unit_name','Filiale Monza','Monza Branch'),
+  ('sys_organization_units','organization_unit_name','Filiale Sesto San Giovanni','Sesto San Giovanni Branch'),
+  ('sys_organization_units','organization_unit_name','Filiale Varese','Varese Branch'),
+  ('sys_organization_units','organization_unit_name','RTL Bank S.p.A.','RTL Bank S.p.A.'),
+  ('sys_organization_units','organization_unit_name','Ufficio Amministrazione del Personale','Personnel Administration Office'),
+  ('sys_organization_units','organization_unit_name','Ufficio Crediti PMI','SME Credit Office'),
+  ('sys_organization_units','organization_unit_name','Ufficio Crediti Retail','Retail Credit Office'),
+  ('sys_organization_units','organization_unit_name','Ufficio Sviluppo, Formazione e Organizzazione','Development, Training and Organisation Office'),
   ('sys_positions','position_title','Addetto Amministrazione del Personale','Personnel Administration Officer'),
   ('sys_positions','position_title','Addetto Chiusura Conti','Account Closure Officer'),
   ('sys_positions','position_title','Addetto Customer Care e Qualità','Customer Care and Quality Officer'),
@@ -633,6 +588,7 @@ INSERT INTO _rtl_en (tabella, colonna, it, en) VALUES
   ('sys_positions','position_title','Analista Monitoraggio Crediti','Credit Monitoring Analyst'),
   ('sys_positions','position_title','Analista Rischio','Risk Analyst'),
   ('sys_positions','position_title','Auditor','Auditor'),
+  ('sys_positions','position_title','Cassiere','Teller'),
   ('sys_positions','position_title','Consulente Clientela','Customer Advisor'),
   ('sys_positions','position_title','Consulente di Filiale','Branch Advisor'),
   ('sys_positions','position_title','Consulente Investimenti','Investment Advisor'),
@@ -650,7 +606,7 @@ INSERT INTO _rtl_en (tabella, colonna, it, en) VALUES
   ('sys_positions','position_title','Gestore Piccole Imprese','Small Business Relationship Manager'),
   ('sys_positions','position_title','Gestore Recupero Crediti','Debt Collection Officer'),
   ('sys_positions','position_title','Internal Auditor','Internal Auditor'),
-  ('sys_positions','position_title','Legale','Legal Counsel'),
+  ('sys_positions','position_title','Legale','Legal'),
   ('sys_positions','position_title','Marketing Specialist','Marketing Specialist'),
   ('sys_positions','position_title','Operatore Cambi','Foreign Exchange Operator'),
   ('sys_positions','position_title','Operatore di Sportello e Cassa','Teller and Cash Operator'),
@@ -1074,7 +1030,8 @@ INSERT INTO _rtl_en (tabella, colonna, it, en) VALUES
   ('sys_teams','team_name','Squadra Tesoreria e Mercati','Treasury and Markets Team'),
   ('sys_tenant_processes','tenant_process_name','Gestione del credito e delle politiche di affidamento','Credit and lending policy management'),
   ('sys_tenant_processes','tenant_process_name','Gestione del rischio operativo e antiriciclaggio (AML)','Operational risk and anti-money laundering (AML) management'),
-  ('sys_tenant_processes','tenant_process_name','Sviluppo e gestione dei servizi/soluzioni IT (core banking)','Development and management of IT services/solutions (core banking)');
+  ('sys_tenant_processes','tenant_process_name','Sviluppo e gestione dei servizi/soluzioni IT (core banking)','Development and management of IT services/solutions (core banking)'),
+  ('sys_tenant_process_facets','tenant_process_facet_criterion','Verifica dal vivo del rilascio del passo 2 dell''ADR-0061, 22/11/2026.','Verified on 22 November 2026.');
 
 INSERT INTO sys.sys_reference_translations (entity_table, entity_id, field, locale, text, source)
 SELECT 'sys_career_paths', r.career_path_id, 'name', 'en', v.en, 'LLM'
@@ -1352,3 +1309,47 @@ UNION ALL
 END $$;
 
 DROP TABLE IF EXISTS pg_temp._rtl_en;
+
+-- ----------------------------------------------------------------------------
+-- (d) Cancellata la riga, se ne vanno le sue traduzioni. Senza, ogni cancellazione
+-- dall'applicazione lascerebbe un orfano: la 000255 pretende zero orfani su tutto il
+-- database e la catena si fermerebbe al rilascio successivo. Il repo non aveva un
+-- meccanismo da riusare (solo sentinelle e cancellazioni scritte a mano). I trigger si
+-- mettono sulle tabelle registrate dalla 000516 e da questo file, lette dal registro;
+-- una tabella assente si salta. Valgono anche per le cancellazioni a cascata.
+-- Per annullare: togliere il trigger trg_togli_traduzioni dalle tabelle e la funzione.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION sys.fn_togli_traduzioni_della_riga()
+RETURNS trigger LANGUAGE plpgsql AS $fn$
+BEGIN
+  DELETE FROM sys.sys_reference_translations t
+   WHERE t.entity_table = TG_TABLE_NAME
+     AND t.entity_id = (to_jsonb(OLD) ->> TG_ARGV[0])::uuid;
+  RETURN NULL;
+END $fn$;
+
+COMMENT ON FUNCTION sys.fn_togli_traduzioni_della_riga() IS
+  'Trigger AFTER DELETE (000517): toglie le traduzioni della riga cancellata. Argomento: il nome della chiave primaria.';
+
+DO $$
+DECLARE t record; n int := 0;
+BEGIN
+  FOR t IN
+    SELECT DISTINCT f.entity_table, f.entity_pk_column
+      FROM sys.sys_translatable_field f
+     WHERE f.note IN ('contenuti dei tenant', 'contenuto dei blueprint',
+                      'registro dei processi dei blueprint', 'etichette delle interfacce')
+       AND to_regclass('sys.' || f.entity_table) IS NOT NULL
+     ORDER BY f.entity_table
+  LOOP
+    EXECUTE format('DROP TRIGGER IF EXISTS trg_togli_traduzioni ON sys.%I', t.entity_table);
+    EXECUTE format('CREATE TRIGGER trg_togli_traduzioni AFTER DELETE ON sys.%I '
+                   'FOR EACH ROW EXECUTE FUNCTION sys.fn_togli_traduzioni_della_riga(%L)',
+                   t.entity_table, t.entity_pk_column);
+    n := n + 1;
+  END LOOP;
+  IF n < 14 THEN
+    RAISE EXCEPTION '000517: trigger di pulizia su % tabelle, attese almeno le 14 dei tenant', n;
+  END IF;
+  RAISE NOTICE '000517: trigger di pulizia delle traduzioni su % tabelle', n;
+END $$;

@@ -103,6 +103,14 @@ export function haMandatoGdpr(actor: ActorContext): boolean {
   return actor.roles.some((r) => GDPR_MANDATE_ROLES.has(r));
 }
 
+/** Chi gestisce i modelli (F14, Enzo 2026-11-26): apre ogni fascicolo di configurazione, in elenco e
+ *  in scheda, senza il perimetro dei clienti assegnati. */
+export const MODEL_MANAGEMENT_ROLES: ReadonlySet<RoleCode> = new Set<RoleCode>(["BLUEPRINT_MANAGER"]);
+
+export function haMandatoGestioneModelli(actor: ActorContext): boolean {
+  return actor.roles.some((r) => MODEL_MANAGEMENT_ROLES.has(r));
+}
+
 /** Chi disegna i processi del tenant (ADR-0060, voce P3): cambia il responsabile di ogni processo,
  *  non solo di quelli di cui regge la posizione. Si somma al mandato HR, che lo fa già. */
 export const PROCESS_DESIGN_ROLES: ReadonlySet<RoleCode> = new Set<RoleCode>(["BLUEPRINT_MANAGER"]);

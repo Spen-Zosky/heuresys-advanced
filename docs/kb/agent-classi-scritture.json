@@ -1,0 +1,2288 @@
+{
+ "_cosa": "La classe d'azione di OGNI scrittura dell'API (POST, PUT, PATCH, DELETE), una riga per operazione. Piano Heuresys AI-driven, voci F1 e F1b (ADR-0063, ADR-0056 D2). Lo legge docs/kb/tools/check_copertura_agente.py, che rende rossa in CI una rotta senza riga.",
+ "_regole": [
+  "Ogni scrittura ha `classe` (B o C) oppure `fuori` con una delle categorie qui sotto. Sempre con `ragione`.",
+  "B: struttura del tenant, non una singola persona, annullabile. C: tocca una singola persona, esce dalla piattaforma, impegna spesa o tocca le eccezioni di ADR-0036 §5. Con ADR-0063 D4 (LIBERA spenta) anche ogni B passa dalla conferma della persona collegata (E3, E5).",
+  "Una DELETE nel catalogo è sempre C e porta `verifica`: il file e la riga che mostrano il ritiro logico. Una DELETE che cancella la riga è `fuori: cancellazione-fisica` (classe X, P17, ADR-0035).",
+  "Una funzione nuova nasce con la sua riga (principio P1): senza, check_copertura_agente.py è rosso.",
+  "Questo file è una decisione scritta, non un derivato: si cambia a mano, riga per riga, con la ragione."
+ ],
+ "_categorie_fuori": {
+  "accessi": {
+   "di_business": false,
+   "cosa": "autenticazione, ruoli, deleghe, mandati, sessioni: il governo degli accessi lo fa la persona dalla pagina"
+  },
+  "governo-agenti": {
+   "di_business": false,
+   "cosa": "capacità, gettoni, diario e richieste degli agenti: un agente non governa se stesso"
+  },
+  "segnalazioni": {
+   "di_business": false,
+   "cosa": "whistleblowing, isolamento assoluto (ADR-0036 §5)"
+  },
+  "gdpr": {
+   "di_business": false,
+   "cosa": "diritti dell'interessato e conservazione: atti del DPO o della persona"
+  },
+  "piattaforma": {
+   "di_business": false,
+   "cosa": "lavoro della piattaforma (tenant, semi, importazioni, ingressi macchina), non del tenant"
+  },
+  "atto-personale": {
+   "di_business": false,
+   "cosa": "un atto che solo la persona può compiere per sé (consensi)"
+  },
+  "atto-riservato": {
+   "di_business": false,
+   "cosa": "un atto che una decisione di Enzo riserva a un pulsante della pagina"
+  },
+  "cancellazione-fisica": {
+   "di_business": true,
+   "cosa": "l'API cancella la riga: classe X, fuori dal catalogo finché non diventa un ritiro logico (ADR-0035)"
+  }
+ },
+ "scritture": {
+  "activity-classification-mappings": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "activity-classifications": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "agent-capabilities": {
+   "post": {
+    "fuori": "governo-agenti",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "un agente non cambia le proprie capacità né il loro modo (E3, ADR-0063 D4: LIBERA spenta)"
+   },
+   "post_by_id_mode": {
+    "fuori": "governo-agenti",
+    "metodo": "POST",
+    "percorso": "/:id/mode",
+    "ragione": "un agente non cambia le proprie capacità né il loro modo (E3, ADR-0063 D4: LIBERA spenta)"
+   },
+   "post_by_id_operations": {
+    "fuori": "governo-agenti",
+    "metodo": "POST",
+    "percorso": "/:id/operations",
+    "ragione": "un agente non cambia le proprie capacità né il loro modo (E3, ADR-0063 D4: LIBERA spenta)"
+   },
+   "post_by_id_publish": {
+    "fuori": "governo-agenti",
+    "metodo": "POST",
+    "percorso": "/:id/publish",
+    "ragione": "un agente non cambia le proprie capacità né il loro modo (E3, ADR-0063 D4: LIBERA spenta)"
+   },
+   "post_by_id_retire": {
+    "fuori": "governo-agenti",
+    "metodo": "POST",
+    "percorso": "/:id/retire",
+    "ragione": "un agente non cambia le proprie capacità né il loro modo (E3, ADR-0063 D4: LIBERA spenta)"
+   }
+  },
+  "agent-conversations": {
+   "patch_activities_by_activityid": {
+    "fuori": "governo-agenti",
+    "metodo": "PATCH",
+    "percorso": "/activities/:activityId",
+    "ragione": "il diario delle conversazioni lo scrive il gateway, non uno strumento del modello"
+   },
+   "patch_by_id": {
+    "fuori": "governo-agenti",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "il diario delle conversazioni lo scrive il gateway, non uno strumento del modello"
+   },
+   "post": {
+    "fuori": "governo-agenti",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "il diario delle conversazioni lo scrive il gateway, non uno strumento del modello"
+   },
+   "post_activities_by_activityid_events": {
+    "fuori": "governo-agenti",
+    "metodo": "POST",
+    "percorso": "/activities/:activityId/events",
+    "ragione": "il diario delle conversazioni lo scrive il gateway, non uno strumento del modello"
+   },
+   "post_activities_by_activityid_proposals": {
+    "fuori": "governo-agenti",
+    "metodo": "POST",
+    "percorso": "/activities/:activityId/proposals",
+    "ragione": "il diario delle conversazioni lo scrive il gateway, non uno strumento del modello"
+   },
+   "post_by_id_activities": {
+    "fuori": "governo-agenti",
+    "metodo": "POST",
+    "percorso": "/:id/activities",
+    "ragione": "il diario delle conversazioni lo scrive il gateway, non uno strumento del modello"
+   },
+   "post_proposals_by_proposalid_decision": {
+    "fuori": "governo-agenti",
+    "metodo": "POST",
+    "percorso": "/proposals/:proposalId/decision",
+    "ragione": "il diario delle conversazioni lo scrive il gateway, non uno strumento del modello"
+   }
+  },
+  "agent-requests": {
+   "post": {
+    "fuori": "governo-agenti",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "le richieste agli agenti e le loro decisioni sono il canale di governo, non un'azione del modello"
+   },
+   "post_by_id_decision": {
+    "fuori": "governo-agenti",
+    "metodo": "POST",
+    "percorso": "/:id/decision",
+    "ragione": "le richieste agli agenti e le loro decisioni sono il canale di governo, non un'azione del modello"
+   },
+   "post_calls": {
+    "fuori": "governo-agenti",
+    "metodo": "POST",
+    "percorso": "/calls",
+    "ragione": "le richieste agli agenti e le loro decisioni sono il canale di governo, non un'azione del modello"
+   }
+  },
+  "agent-tokens": {
+   "post": {
+    "fuori": "governo-agenti",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "un agente non emette gettoni d'agente: governo degli agenti"
+   }
+  },
+  "approvals": {
+   "post": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "decisione su una richiesta di approvazione: impegna e tocca singole persone"
+   },
+   "post_by_id_apply": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/:id/apply",
+    "ragione": "decisione su una richiesta di approvazione: impegna e tocca singole persone"
+   },
+   "post_by_id_steps_by_stepid_decide": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/:id/steps/:stepId/decide",
+    "ragione": "decisione su una richiesta di approvazione: impegna e tocca singole persone"
+   }
+  },
+  "assessment-results": {
+   "post": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "esito di una valutazione di una persona (ADR-0036 §5: EVALUATION)"
+   }
+  },
+  "assessments": {
+   "patch_by_id": {
+    "classe": "C",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "valutazione di una persona (ADR-0036 §5: EVALUATION)"
+   },
+   "post": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "valutazione di una persona (ADR-0036 §5: EVALUATION)"
+   }
+  },
+  "auth": {
+   "delete_factors_by_factorid": {
+    "fuori": "accessi",
+    "metodo": "DELETE",
+    "percorso": "/factors/:factorId",
+    "ragione": "superficie di autenticazione: login, fattori e codici li gestisce la persona, mai l'agente (L9, A-3)"
+   },
+   "post_admin_revoke_user_by_userid": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/admin/revoke-user/:userId",
+    "ragione": "superficie di autenticazione: login, fattori e codici li gestisce la persona, mai l'agente (L9, A-3)"
+   },
+   "post_email_otp_enroll": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/email-otp/enroll",
+    "ragione": "superficie di autenticazione: login, fattori e codici li gestisce la persona, mai l'agente (L9, A-3)"
+   },
+   "post_email_otp_resend": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/email-otp/resend",
+    "ragione": "superficie di autenticazione: login, fattori e codici li gestisce la persona, mai l'agente (L9, A-3)"
+   },
+   "post_email_otp_resend_login": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/email-otp/resend-login",
+    "ragione": "superficie di autenticazione: login, fattori e codici li gestisce la persona, mai l'agente (L9, A-3)"
+   },
+   "post_email_otp_verify_setup": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/email-otp/verify-setup",
+    "ragione": "superficie di autenticazione: login, fattori e codici li gestisce la persona, mai l'agente (L9, A-3)"
+   },
+   "post_enroll": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/enroll",
+    "ragione": "superficie di autenticazione: login, fattori e codici li gestisce la persona, mai l'agente (L9, A-3)"
+   },
+   "post_enroll_confirm": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/enroll-confirm",
+    "ragione": "superficie di autenticazione: login, fattori e codici li gestisce la persona, mai l'agente (L9, A-3)"
+   },
+   "post_enroll_confirm_resend": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/enroll-confirm/resend",
+    "ragione": "superficie di autenticazione: login, fattori e codici li gestisce la persona, mai l'agente (L9, A-3)"
+   },
+   "post_login": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/login",
+    "ragione": "superficie di autenticazione: login, fattori e codici li gestisce la persona, mai l'agente (L9, A-3)"
+   },
+   "post_logout": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/logout",
+    "ragione": "superficie di autenticazione: login, fattori e codici li gestisce la persona, mai l'agente (L9, A-3)"
+   },
+   "post_password_reset_complete": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/password-reset/complete",
+    "ragione": "superficie di autenticazione: login, fattori e codici li gestisce la persona, mai l'agente (L9, A-3)"
+   },
+   "post_password_reset_request": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/password-reset/request",
+    "ragione": "superficie di autenticazione: login, fattori e codici li gestisce la persona, mai l'agente (L9, A-3)"
+   },
+   "post_recovery_codes": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/recovery-codes",
+    "ragione": "superficie di autenticazione: login, fattori e codici li gestisce la persona, mai l'agente (L9, A-3)"
+   },
+   "post_refresh": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/refresh",
+    "ragione": "superficie di autenticazione: login, fattori e codici li gestisce la persona, mai l'agente (L9, A-3)"
+   },
+   "post_sms_otp_enroll": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/sms-otp/enroll",
+    "ragione": "superficie di autenticazione: login, fattori e codici li gestisce la persona, mai l'agente (L9, A-3)"
+   },
+   "post_sms_otp_resend": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/sms-otp/resend",
+    "ragione": "superficie di autenticazione: login, fattori e codici li gestisce la persona, mai l'agente (L9, A-3)"
+   },
+   "post_sms_otp_resend_login": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/sms-otp/resend-login",
+    "ragione": "superficie di autenticazione: login, fattori e codici li gestisce la persona, mai l'agente (L9, A-3)"
+   },
+   "post_sms_otp_verify_setup": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/sms-otp/verify-setup",
+    "ragione": "superficie di autenticazione: login, fattori e codici li gestisce la persona, mai l'agente (L9, A-3)"
+   },
+   "post_step_up_begin": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/step-up/begin",
+    "ragione": "superficie di autenticazione: login, fattori e codici li gestisce la persona, mai l'agente (L9, A-3)"
+   },
+   "post_step_up_verify": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/step-up/verify",
+    "ragione": "superficie di autenticazione: login, fattori e codici li gestisce la persona, mai l'agente (L9, A-3)"
+   },
+   "post_step_up_webauthn_verify": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/step-up/webauthn/verify",
+    "ragione": "superficie di autenticazione: login, fattori e codici li gestisce la persona, mai l'agente (L9, A-3)"
+   },
+   "post_verify_login": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/verify-login",
+    "ragione": "superficie di autenticazione: login, fattori e codici li gestisce la persona, mai l'agente (L9, A-3)"
+   },
+   "post_verify_setup": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/verify-setup",
+    "ragione": "superficie di autenticazione: login, fattori e codici li gestisce la persona, mai l'agente (L9, A-3)"
+   },
+   "post_webauthn_authentication_options": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/webauthn/authentication/options",
+    "ragione": "superficie di autenticazione: login, fattori e codici li gestisce la persona, mai l'agente (L9, A-3)"
+   },
+   "post_webauthn_authentication_verify": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/webauthn/authentication/verify",
+    "ragione": "superficie di autenticazione: login, fattori e codici li gestisce la persona, mai l'agente (L9, A-3)"
+   },
+   "post_webauthn_registration_options": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/webauthn/registration/options",
+    "ragione": "superficie di autenticazione: login, fattori e codici li gestisce la persona, mai l'agente (L9, A-3)"
+   },
+   "post_webauthn_registration_verify": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/webauthn/registration/verify",
+    "ragione": "superficie di autenticazione: login, fattori e codici li gestisce la persona, mai l'agente (L9, A-3)"
+   }
+  },
+  "blueprint-activations": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "blueprint-families": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "blueprint-overrides": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "put": {
+    "classe": "B",
+    "metodo": "PUT",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "blueprint-processes": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "blueprint-variants": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "candidate-applications": {
+   "patch_by_id": {
+    "classe": "C",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "candidatura di una singola persona"
+   },
+   "post": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "candidatura di una singola persona"
+   }
+  },
+  "candidates": {
+   "patch_by_id": {
+    "classe": "C",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "dati di un singolo candidato"
+   },
+   "post": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "dati di un singolo candidato"
+   }
+  },
+  "capability-composition": {
+   "post_composition_recompute": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/composition/recompute",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "capability-maturity": {
+   "post_maturity_recompute": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/maturity/recompute",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "career-path-steps": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "career-paths": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "compensation": {
+   "post_handoff_records": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/handoff-records",
+    "ragione": "retribuzione di una persona (ADR-0036 §5: COMPENSATION)"
+   },
+   "post_recommendations": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/recommendations",
+    "ragione": "retribuzione di una persona (ADR-0036 §5: COMPENSATION)"
+   }
+  },
+  "content": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "delete_categories_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/categories/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "delete_media_by_mediaid": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/media/:mediaId",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "patch_categories_by_id": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/categories/:id",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post_by_id_media": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/:id/media",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post_by_id_publish": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/:id/publish",
+    "ragione": "pubblica un contenuto a tutte le persone del tenant"
+   },
+   "post_by_id_return_to_draft": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/:id/return-to-draft",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post_by_id_submit_for_review": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/:id/submit-for-review",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post_by_id_unpublish": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/:id/unpublish",
+    "ragione": "ritira un contenuto pubblicato alle persone del tenant"
+   },
+   "post_by_id_versions_by_versionid_restore": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/:id/versions/:versionId/restore",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post_categories": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/categories",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "content-blueprint-links": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "delegations": {
+   "post": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "una delega trasferisce poteri: governo degli accessi"
+   },
+   "post_by_id_revoke": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/:id/revoke",
+    "ragione": "una delega trasferisce poteri: governo degli accessi"
+   }
+  },
+  "engagement-feedback": {
+   "delete_action_plans_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/action-plans/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_action_plans_by_id": {
+    "classe": "C",
+    "metodo": "PATCH",
+    "percorso": "/action-plans/:id",
+    "ragione": "feedback e piani d'azione che riguardano persone"
+   },
+   "patch_by_id": {
+    "classe": "C",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "feedback e piani d'azione che riguardano persone"
+   },
+   "post": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "feedback e piani d'azione che riguardano persone"
+   },
+   "post_action_plans": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/action-plans",
+    "ragione": "feedback e piani d'azione che riguardano persone"
+   }
+  },
+  "enterprise-size-bands": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "put": {
+    "classe": "B",
+    "metodo": "PUT",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "enterprise-typing-profiles": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "put": {
+    "classe": "B",
+    "metodo": "PUT",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "gdpr": {
+   "post_retention_run": {
+    "fuori": "gdpr",
+    "metodo": "POST",
+    "percorso": "/retention/run",
+    "ragione": "diritti dell'interessato ed esecuzione della conservazione: atti del DPO, non dell'agente"
+   },
+   "post_users_by_userid_erasure": {
+    "fuori": "gdpr",
+    "metodo": "POST",
+    "percorso": "/users/:userId/erasure",
+    "ragione": "diritti dell'interessato ed esecuzione della conservazione: atti del DPO, non dell'agente"
+   },
+   "post_users_by_userid_export": {
+    "fuori": "gdpr",
+    "metodo": "POST",
+    "percorso": "/users/:userId/export",
+    "ragione": "diritti dell'interessato ed esecuzione della conservazione: atti del DPO, non dell'agente"
+   }
+  },
+  "goals": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "C",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "obiettivi di una persona"
+   },
+   "post": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "obiettivi di una persona"
+   }
+  },
+  "insights": {
+   "post_recompute": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/recompute",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post_skill_gap_recompute": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/skill-gap/recompute",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post_succession_readiness_recompute": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/succession-readiness/recompute",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "interview-feedback": {
+   "patch_by_id": {
+    "classe": "C",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "giudizio su un singolo candidato"
+   },
+   "post": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "giudizio su un singolo candidato"
+   }
+  },
+  "interviews": {
+   "patch_by_id": {
+    "classe": "C",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "colloquio con un singolo candidato"
+   },
+   "post": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "colloquio con un singolo candidato"
+   }
+  },
+  "job-families": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "job-offers": {
+   "patch_by_id": {
+    "classe": "C",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "offerta a un singolo candidato: esce dalla piattaforma e impegna"
+   },
+   "post": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "offerta a un singolo candidato: esce dalla piattaforma e impegna"
+   }
+  },
+  "job-postings": {
+   "patch_by_id": {
+    "classe": "C",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "annuncio pubblicato fuori dalla piattaforma"
+   },
+   "post": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "annuncio pubblicato fuori dalla piattaforma"
+   }
+  },
+  "job-requisitions": {
+   "patch_by_id": {
+    "classe": "C",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "richiesta di personale: impegna budget"
+   },
+   "post": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "richiesta di personale: impegna budget"
+   }
+  },
+  "job-roles": {
+   "patch_by_id": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "kpi-definitions": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "leads": {
+   "patch_by_leadid": {
+    "fuori": "piattaforma",
+    "metodo": "PATCH",
+    "percorso": "/:leadId",
+    "ragione": "contatti commerciali della piattaforma, non dati del tenant"
+   },
+   "post": {
+    "fuori": "piattaforma",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "contatti commerciali della piattaforma, non dati del tenant"
+   }
+  },
+  "learning-gaps": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "C",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "lacune di una persona"
+   },
+   "post": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "lacune di una persona"
+   }
+  },
+  "learning-modules": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "learning-path-steps": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "learning-paths": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "mandate-acts": {
+   "post": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "conferire o ritirare un mandato (role:assign) è governo degli accessi: lo fa la persona dalla pagina"
+   },
+   "post_by_id_approve": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/:id/approve",
+    "ragione": "conferire o ritirare un mandato (role:assign) è governo degli accessi: lo fa la persona dalla pagina"
+   },
+   "post_by_id_reject": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/:id/reject",
+    "ragione": "conferire o ritirare un mandato (role:assign) è governo degli accessi: lo fa la persona dalla pagina"
+   },
+   "post_by_id_withdraw": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/:id/withdraw",
+    "ragione": "conferire o ritirare un mandato (role:assign) è governo degli accessi: lo fa la persona dalla pagina"
+   }
+  },
+  "me": {
+   "delete_security_sessions_by_familyid": {
+    "fuori": "accessi",
+    "metodo": "DELETE",
+    "percorso": "/security/sessions/:familyId",
+    "ragione": "sessioni di accesso della persona"
+   },
+   "patch_inbox_by_notificationid": {
+    "classe": "C",
+    "metodo": "PATCH",
+    "percorso": "/inbox/:notificationId",
+    "ragione": "dati della persona stessa (self-service): effetto su un singolo lavoratore"
+   },
+   "patch_notification_preferences": {
+    "classe": "C",
+    "metodo": "PATCH",
+    "percorso": "/notification-preferences",
+    "ragione": "dati della persona stessa (self-service): effetto su un singolo lavoratore"
+   },
+   "patch_preferences": {
+    "classe": "C",
+    "metodo": "PATCH",
+    "percorso": "/preferences",
+    "ragione": "dati della persona stessa (self-service): effetto su un singolo lavoratore"
+   },
+   "patch_profile": {
+    "classe": "C",
+    "metodo": "PATCH",
+    "percorso": "/profile",
+    "ragione": "dati della persona stessa (self-service): effetto su un singolo lavoratore"
+   },
+   "post_career_target_positions": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/career/target-positions",
+    "ragione": "dati della persona stessa (self-service): effetto su un singolo lavoratore"
+   },
+   "post_certifications": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/certifications",
+    "ragione": "dati della persona stessa (self-service): effetto su un singolo lavoratore"
+   },
+   "post_consents": {
+    "fuori": "atto-personale",
+    "metodo": "POST",
+    "percorso": "/consents",
+    "ragione": "un consenso è un atto personale della persona, non si prepara per conto suo"
+   },
+   "post_delegations": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/delegations",
+    "ragione": "una delega trasferisce poteri: governo degli accessi"
+   },
+   "post_delegations_approvals_by_requestid_steps_by_stepid_decide": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/delegations/approvals/:requestId/steps/:stepId/decide",
+    "ragione": "dati della persona stessa (self-service): effetto su un singolo lavoratore"
+   },
+   "post_delegations_by_id_revoke": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/delegations/:id/revoke",
+    "ragione": "una delega trasferisce poteri: governo degli accessi"
+   },
+   "post_gdpr_export": {
+    "fuori": "gdpr",
+    "metodo": "POST",
+    "percorso": "/gdpr/export",
+    "ragione": "esportazione dei propri dati: diritto dell'interessato, lo esercita la persona"
+   },
+   "post_learning_enrollments": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/learning/enrollments",
+    "ragione": "dati della persona stessa (self-service): effetto su un singolo lavoratore"
+   },
+   "post_security_sessions_revoke_others": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/security/sessions/revoke-others",
+    "ragione": "sessioni di accesso della persona"
+   },
+   "post_skills_self_assessments": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/skills/self-assessments",
+    "ragione": "dati della persona stessa (self-service): effetto su un singolo lavoratore"
+   },
+   "post_surveys_by_surveyid_responses": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/surveys/:surveyId/responses",
+    "ragione": "dati della persona stessa (self-service): effetto su un singolo lavoratore"
+   },
+   "post_time_off_requests": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/time-off/requests",
+    "ragione": "dati della persona stessa (self-service): effetto su un singolo lavoratore"
+   }
+  },
+  "mentorship": {
+   "delete_pairings_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/pairings/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "delete_programs_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/programs/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "delete_sessions_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/sessions/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_pairings_by_id": {
+    "classe": "C",
+    "metodo": "PATCH",
+    "percorso": "/pairings/:id",
+    "ragione": "programmi, coppie e incontri di mentorato: toccano persone"
+   },
+   "patch_programs_by_id": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/programs/:id",
+    "ragione": "modello o programma, non una singola persona"
+   },
+   "patch_sessions_by_id": {
+    "classe": "C",
+    "metodo": "PATCH",
+    "percorso": "/sessions/:id",
+    "ragione": "programmi, coppie e incontri di mentorato: toccano persone"
+   },
+   "post_pairings": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/pairings",
+    "ragione": "programmi, coppie e incontri di mentorato: toccano persone"
+   },
+   "post_pairings_by_id_sessions": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/pairings/:id/sessions",
+    "ragione": "programmi, coppie e incontri di mentorato: toccano persone"
+   },
+   "post_programs": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/programs",
+    "ragione": "modello o programma, non una singola persona"
+   }
+  },
+  "mfa-policy": {
+   "post_exemptions_by_exemptionid_disable": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/exemptions/:exemptionId/disable",
+    "ragione": "politica dei secondi fattori del tenant: governo degli accessi, fuori dall'agente"
+   },
+   "put_by_tenantid": {
+    "fuori": "accessi",
+    "metodo": "PUT",
+    "percorso": "/:tenantId",
+    "ragione": "politica dei secondi fattori del tenant: governo degli accessi, fuori dall'agente"
+   }
+  },
+  "notifications": {
+   "post": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "raggiunge una persona"
+   }
+  },
+  "occupation-classifications": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "okrs": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "C",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "obiettivi e risultati chiave con titolari"
+   },
+   "post": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "obiettivi e risultati chiave con titolari"
+   }
+  },
+  "operating-models": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "put": {
+    "classe": "B",
+    "metodo": "PUT",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "organization-unit-history": {
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "organization-unit-kpi-templates": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "put": {
+    "classe": "B",
+    "metodo": "PUT",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "organization-unit-processes": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "organization-units": {
+   "delete_by_id": {
+    "classe": "C",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "cancellazione logica, anche se reversibile: C (P17, ADR-0035)",
+    "verifica": "apps/api/src/modules/organization-units/repository.ts: organization_unit_is_active = false"
+   },
+   "patch_by_id": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "platform-tenant-assignments": {
+   "post": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "assegnazione di un amministratore di piattaforma a un tenant: governo degli accessi"
+   },
+   "post_by_id_revoke": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/:id/revoke",
+    "ragione": "assegnazione di un amministratore di piattaforma a un tenant: governo degli accessi"
+   }
+  },
+  "position-career-paths": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "position-succession-relevance": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "put": {
+    "classe": "B",
+    "metodo": "PUT",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "positions": {
+   "delete_by_id": {
+    "classe": "C",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "cancellazione logica, anche se reversibile: C (P17, ADR-0035)",
+    "verifica": "apps/api/src/modules/positions/repository.ts: position_is_active = false"
+   },
+   "delete_by_id_kpis_by_kpiid": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id/kpis/:kpiId",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "delete_by_id_skills_by_skillid": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id/skills/:skillId",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "patch_by_id_kpis_by_kpiid": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/:id/kpis/:kpiId",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post_by_id_kpis": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/:id/kpis",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post_by_id_skills": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/:id/skills",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "process-kpi-templates": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "put": {
+    "classe": "B",
+    "metodo": "PUT",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "projects": {
+   "delete_by_id_dependencies_by_dependencyid": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id/dependencies/:dependencyId",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "delete_by_id_members_by_userid": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id/members/:userId",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "delete_by_id_phases_by_phaseid": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id/phases/:phaseId",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "C",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "progetti con membri e avanzamento"
+   },
+   "patch_by_id_phases_by_phaseid": {
+    "classe": "C",
+    "metodo": "PATCH",
+    "percorso": "/:id/phases/:phaseId",
+    "ragione": "progetti con membri e avanzamento"
+   },
+   "patch_by_id_progress": {
+    "classe": "C",
+    "metodo": "PATCH",
+    "percorso": "/:id/progress",
+    "ragione": "progetti con membri e avanzamento"
+   },
+   "post": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "progetti con membri e avanzamento"
+   },
+   "post_by_id_dependencies": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/:id/dependencies",
+    "ragione": "progetti con membri e avanzamento"
+   },
+   "post_by_id_phases": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/:id/phases",
+    "ragione": "progetti con membri e avanzamento"
+   },
+   "put_by_id_members_by_userid": {
+    "classe": "C",
+    "metodo": "PUT",
+    "percorso": "/:id/members/:userId",
+    "ragione": "progetti con membri e avanzamento"
+   }
+  },
+  "reference-sync": {
+   "post_runs": {
+    "fuori": "piattaforma",
+    "metodo": "POST",
+    "percorso": "/runs",
+    "ragione": "sincronizzazione dei riferimenti: lavoro di piattaforma"
+   }
+  },
+  "review-cycles": {
+   "post": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "ciclo di valutazione: tocca tutte le persone del ciclo (ADR-0036 §5: EVALUATION)"
+   },
+   "post_by_cycleid_transition": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/:cycleId/transition",
+    "ragione": "ciclo di valutazione: tocca tutte le persone del ciclo (ADR-0036 §5: EVALUATION)"
+   }
+  },
+  "seed-acquisition-runs": {
+   "delete_by_id": {
+    "fuori": "piattaforma",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "acquisizione dei semi: lavoro di piattaforma"
+   },
+   "patch_by_id": {
+    "fuori": "piattaforma",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "acquisizione dei semi: lavoro di piattaforma"
+   },
+   "post": {
+    "fuori": "piattaforma",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "acquisizione dei semi: lavoro di piattaforma"
+   }
+  },
+  "seed-approval-decisions": {
+   "post": {
+    "fuori": "piattaforma",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "acquisizione dei semi: lavoro di piattaforma"
+   }
+  },
+  "seed-candidate-records": {
+   "post_by_id_decision": {
+    "fuori": "piattaforma",
+    "metodo": "POST",
+    "percorso": "/:id/decision",
+    "ragione": "acquisizione dei semi: lavoro di piattaforma"
+   }
+  },
+  "semantic-matching": {
+   "post_reindex": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/reindex",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "skill-aliases": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "skill-categories": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "skill-families": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "skill-taxonomy-edges": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "skills": {
+   "patch_by_id": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "succession-pools": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "successor-candidates": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "C",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "successore candidato: una singola persona"
+   },
+   "post": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "successore candidato: una singola persona"
+   }
+  },
+  "successor-readiness": {
+   "post": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "prontezza di una singola persona"
+   }
+  },
+  "surveys": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "delete_templates_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/templates/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "C",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "sondaggi rivolti alle persone"
+   },
+   "patch_templates_by_id": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/templates/:id",
+    "ragione": "modello o programma, non una singola persona"
+   },
+   "post": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "sondaggi rivolti alle persone"
+   },
+   "post_templates": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/templates",
+    "ragione": "modello o programma, non una singola persona"
+   }
+  },
+  "teams": {
+   "delete_by_id_members_by_userid": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id/members/:userId",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "C",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "squadre con membri"
+   },
+   "post": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "squadre con membri"
+   },
+   "put_by_id_members_by_userid": {
+    "classe": "C",
+    "metodo": "PUT",
+    "percorso": "/:id/members/:userId",
+    "ragione": "squadre con membri"
+   }
+  },
+  "tenant-blueprints": {
+   "delete_by_id_versions_by_number_processes_by_processid": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id/versions/:number/processes/:processId",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "patch_by_id_versions_by_number_identity": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/:id/versions/:number/identity",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post_by_id_link_tenant": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/:id/link-tenant",
+    "ragione": "lega il fascicolo al tenant vivo"
+   },
+   "post_by_id_versions": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/:id/versions",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post_by_id_versions_by_number_apply": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/:id/versions/:number/apply",
+    "ragione": "applica il modello al tenant vivo: impegna tutta la struttura"
+   },
+   "post_by_id_versions_by_number_apply_research": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/:id/versions/:number/apply-research",
+    "ragione": "applica gli esiti di una ricerca al fascicolo"
+   },
+   "post_by_id_versions_by_number_research": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/:id/versions/:number/research",
+    "ragione": "avvia una ricerca che consuma il modello"
+   },
+   "post_by_id_versions_by_number_submit": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/:id/versions/:number/submit",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "put_by_id_versions_by_number_model": {
+    "classe": "B",
+    "metodo": "PUT",
+    "percorso": "/:id/versions/:number/model",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "put_by_id_versions_by_number_processes_by_processid": {
+    "classe": "B",
+    "metodo": "PUT",
+    "percorso": "/:id/versions/:number/processes/:processId",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "tenant-consolidation": {
+   "post": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "decisioni e corse del consolidamento del tenant (decide solo l'HR manager)"
+   },
+   "post_by_id_apply_changes": {
+    "fuori": "atto-riservato",
+    "metodo": "POST",
+    "percorso": "/:id/apply-changes",
+    "ragione": "solo il pulsante rosso della pagina scrive nel database (specifica del consolidamento)"
+   },
+   "post_by_id_discard_changes": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/:id/discard-changes",
+    "ragione": "decisioni e corse del consolidamento del tenant (decide solo l'HR manager)"
+   },
+   "post_by_id_groups_by_group_close": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/:id/groups/:group/close",
+    "ragione": "decisioni e corse del consolidamento del tenant (decide solo l'HR manager)"
+   },
+   "post_by_id_groups_by_group_run": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/:id/groups/:group/run",
+    "ragione": "decisioni e corse del consolidamento del tenant (decide solo l'HR manager)"
+   },
+   "post_by_id_preview_changes": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/:id/preview-changes",
+    "ragione": "decisioni e corse del consolidamento del tenant (decide solo l'HR manager)"
+   },
+   "post_by_id_status": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/:id/status",
+    "ragione": "decisioni e corse del consolidamento del tenant (decide solo l'HR manager)"
+   },
+   "post_by_runid_alignment_approve": {
+    "fuori": "atto-riservato",
+    "metodo": "POST",
+    "percorso": "/:runId/alignment/approve",
+    "ragione": "solo il pulsante rosso della pagina scrive nel database (specifica del consolidamento)"
+   },
+   "post_by_runid_alignment_discard": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/:runId/alignment/discard",
+    "ragione": "decisioni e corse del consolidamento del tenant (decide solo l'HR manager)"
+   },
+   "post_by_runid_definitive": {
+    "fuori": "atto-riservato",
+    "metodo": "POST",
+    "percorso": "/:runId/definitive",
+    "ragione": "solo il pulsante rosso della pagina scrive nel database (specifica del consolidamento)"
+   },
+   "post_proposals_bulk_decision": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/proposals/bulk-decision",
+    "ragione": "decisioni e corse del consolidamento del tenant (decide solo l'HR manager)"
+   },
+   "post_proposals_by_proposalid_decision": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/proposals/:proposalId/decision",
+    "ragione": "decisioni e corse del consolidamento del tenant (decide solo l'HR manager)"
+   },
+   "post_proposals_confirm_certain": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/proposals/confirm-certain",
+    "ragione": "decisioni e corse del consolidamento del tenant (decide solo l'HR manager)"
+   },
+   "post_receive": {
+    "fuori": "piattaforma",
+    "metodo": "POST",
+    "percorso": "/receive",
+    "ragione": "ingresso macchina dal datastore, non un'azione di una persona"
+   },
+   "put_by_runid_alignment_drafts": {
+    "classe": "C",
+    "metodo": "PUT",
+    "percorso": "/:runId/alignment/drafts",
+    "ragione": "decisioni e corse del consolidamento del tenant (decide solo l'HR manager)"
+   }
+  },
+  "tenant-import-runs": {
+   "post": {
+    "fuori": "piattaforma",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "corse di importazione: lavoro di piattaforma (ADR-0038)"
+   },
+   "post_by_id_submit": {
+    "fuori": "piattaforma",
+    "metodo": "POST",
+    "percorso": "/:id/submit",
+    "ragione": "corse di importazione: lavoro di piattaforma (ADR-0038)"
+   },
+   "post_sources": {
+    "fuori": "piattaforma",
+    "metodo": "POST",
+    "percorso": "/sources",
+    "ragione": "corse di importazione: lavoro di piattaforma (ADR-0038)"
+   }
+  },
+  "tenant-materialization": {
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "tenant-processes": {
+   "patch_by_id_owner": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/:id/owner",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "put_by_id_attivita_by_stepid_apqc": {
+    "classe": "B",
+    "metodo": "PUT",
+    "percorso": "/:id/attivita/:stepId/apqc",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "put_by_id_faccette_by_facet": {
+    "classe": "B",
+    "metodo": "PUT",
+    "percorso": "/:id/faccette/:facet",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "tenants": {
+   "delete_by_id": {
+    "fuori": "piattaforma",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "creare o modificare un tenant è gestione della piattaforma, non lavoro del tenant"
+   },
+   "patch_by_id": {
+    "fuori": "piattaforma",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "creare o modificare un tenant è gestione della piattaforma, non lavoro del tenant"
+   },
+   "post": {
+    "fuori": "piattaforma",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "creare o modificare un tenant è gestione della piattaforma, non lavoro del tenant"
+   },
+   "post_provision": {
+    "fuori": "piattaforma",
+    "metodo": "POST",
+    "percorso": "/provision",
+    "ragione": "creare o modificare un tenant è gestione della piattaforma, non lavoro del tenant"
+   }
+  },
+  "training-initiatives": {
+   "patch_by_id": {
+    "classe": "C",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "iniziative di formazione: impegnano spesa e persone"
+   },
+   "post": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "iniziative di formazione: impegnano spesa e persone"
+   }
+  },
+  "user-career-plans": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "C",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "piano di carriera di una persona"
+   },
+   "post": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "piano di carriera di una persona"
+   }
+  },
+  "user-position-assignments": {
+   "post": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "assegnazione, trasferimento o cessazione di una persona su una posizione"
+   },
+   "post_by_id_terminate": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/:id/terminate",
+    "ragione": "assegnazione, trasferimento o cessazione di una persona su una posizione"
+   },
+   "post_by_id_transfer": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/:id/transfer",
+    "ragione": "assegnazione, trasferimento o cessazione di una persona su una posizione"
+   }
+  },
+  "user-target-positions": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "C",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "posizione obiettivo di una persona"
+   },
+   "post": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "posizione obiettivo di una persona"
+   },
+   "post_by_id_review": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/:id/review",
+    "ragione": "posizione obiettivo di una persona"
+   }
+  },
+  "users": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "delete_by_id_purge": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id/purge",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "delete_by_id_roles_by_grantid": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id/roles/:grantId",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "C",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "anagrafica di una persona"
+   },
+   "post": {
+    "classe": "C",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "anagrafica di una persona"
+   },
+   "post_by_id_roles": {
+    "fuori": "accessi",
+    "metodo": "POST",
+    "percorso": "/:id/roles",
+    "ragione": "assegnare un ruolo è governo degli accessi"
+   }
+  },
+  "visualization-edges": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "visualization-exports": {
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "visualization-graphs": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post_by_id_rigenera": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/:id/rigenera",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post_by_id_versions": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/:id/versions",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "visualization-layouts": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "visualization-node-layouts": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "put": {
+    "classe": "B",
+    "metodo": "PUT",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "visualization-nodes": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "patch_by_id": {
+    "classe": "B",
+    "metodo": "PATCH",
+    "percorso": "/:id",
+    "ragione": "struttura del tenant, non una singola persona"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "visualization-styles": {
+   "delete_by_id": {
+    "fuori": "cancellazione-fisica",
+    "metodo": "DELETE",
+    "percorso": "/:id",
+    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+   },
+   "post": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "struttura del tenant, non una singola persona"
+   }
+  },
+  "whistleblowing": {
+   "patch_reports_by_id": {
+    "fuori": "segnalazioni",
+    "metodo": "PATCH",
+    "percorso": "/reports/:id",
+    "ragione": "isolamento assoluto delle segnalazioni, solo la custodia (ADR-0036 §5, mig 000414)"
+   },
+   "post": {
+    "fuori": "segnalazioni",
+    "metodo": "POST",
+    "percorso": "/",
+    "ragione": "isolamento assoluto delle segnalazioni, solo la custodia (ADR-0036 §5, mig 000414)"
+   }
+  }
+ }
+}

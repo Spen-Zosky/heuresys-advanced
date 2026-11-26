@@ -1,6 +1,6 @@
 # Riesame dei programmi e dei piani sul metro di ADR-0063 (voce Z4, 26/11/2026)
 
-Voce Z4 del [piano Heuresys AI-driven](../PIANO_heuresys-ai-driven_20261126.md), in attuazione di [ADR-0063](../../architecture/adr/0063_heuresys_ai_driven_l_organizzazione_ghost.md) D10: ogni programma aperto si rilegge con il metro dei dodici assi (sezione 3 del piano) e dei sette criteri (ADR-0063 D1). Per ciascuno: l'asse e il criterio che serve, e se **si tiene**, **si assorbe** in una voce del piano AI-driven (la sua tabella resta la fonte delle sue voci) o **si ferma**. Questa tabella è una proposta: niente si ferma né si chiude finché Enzo non risponde, una volta sola, alla scheda del thread «Rileggere i programmi sul metro di ADR-0063».
+Voce Z4 del [piano Heuresys AI-driven](../PIANO_heuresys-ai-driven_20261126.md), in attuazione di [ADR-0063](../../architecture/adr/0063_heuresys_ai_driven_l_organizzazione_ghost.md) D10: ogni programma aperto si rilegge con il metro dei dodici assi (sezione 3 del piano) e dei sette criteri (ADR-0063 D1). Per ciascuno: l'asse e il criterio che serve, e se **si tiene**, **si assorbe** in una voce del piano AI-driven (la sua tabella resta la fonte delle sue voci) o **si ferma**. La proposta della sezione 7 è applicata dal 2026-11-26 in modo reversibile: la sezione 8 dice che cosa è cambiato, su quale base e come si torna indietro.
 
 Metro ADR-0063: asse 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12; criterio 1, 2, 3, 4, 5, 6, 7
 
@@ -101,3 +101,11 @@ Programmi `esecuzione/programmi/001-021`: tutti `CHIUSO`. I fronti aperti stanno
 3. **Riallineare** gli stati dei nove piani che il codice o i file di stato danno per fatti: lo fa un thread Sonnet, una PR per repo, senza toccare la sostanza.
 
 Le cinque voci in attesa (#198, #205, #206, #76, il piano della velocità della CI) restano come sono e non chiedono niente di nuovo. Se Enzo risponde sì, i punti 2 e 3 diventano due voci nuove nel registro delle scoperte del piano; il punto 1 è una riga di stato in quel programma.
+
+## 8. Esito: che cosa è stato applicato, il 2026-11-26
+
+**Base della decisione.** Il coordinatore del progetto ha sciolto la scelta della sezione 7 con l'opzione «tutte e tre le proposte», ricavandola da ciò che Enzo ha già deciso: la risposta 3 dell'intervista («niente passa senza conferma mia», 2026-11-26 alle 03:26 ora di Roma) e ADR-0063 D4, accettato alle 03:47. Non è una risposta nuova di Enzo: se Enzo dice altro, si torna indietro come scritto sotto.
+
+1. **Sospese**: le voci F3-2 e F3-3 di [PROGRAMMA_change_management_20261103](../PROGRAMMA_change_management_20261103.md) hanno lo stato «sospesa per ADR-0063 D4». Nessuna riga è stata cancellata; il ritorno è rimettere «da fare».
+2. **Assorbite**: le righe d'origine portano il rimando alla voce del piano AI-driven che le prende e restano la fonte del dettaglio, con lo stato di prima. Toccate: F0-3, F3-1, F4-1…F4-6 del programma del change management; O4 di [PIANO_endpoint-orfani-ondate_20261117](../PIANO_endpoint-orfani-ondate_20261117.md); T6c di [PIANO_principi-agentici_20261106](../PIANO_principi-agentici_20261106.md); V4 e V7 di [PIANO_assistente-come-claude_20261118](../PIANO_assistente-come-claude_20261118.md); `.programmi/214-…`, `254-…` e `79-…` (riga `riesame-z4` sotto lo stato). Il piano delle applet era già assorbito; #217 e #272 sono rami non uniti e non si toccano da qui.
+3. **Riallineate**: dove il codice mostra il lavoro, la riga ha un'annotazione «nel codice: <file>», senza diventare «fatta», perché la dimostrazione dal vivo (ADR-0026) non è stata riletta in questo riesame. Toccate: V1-V3 dell'assistente come Claude, T6 dei principi agentici, P1 e P2 del consolidamento-applicazione, SA1 e SA2 della scheda Allineamento, V4-V6 e V9 dei turni; la riga «Stato» del riordino della documentazione. Nel datastore gli stessi riallineamenti vanno nella sua PR (EPIC della modellazione, piano 70 voce CC-4, piani 119, 123 e 124).

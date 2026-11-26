@@ -67,6 +67,11 @@ interface ConceptEntry {
   solaLettura: boolean;
   /** Dove l'API monta il modulo, senza `/v1` (ondata 4: `semantic-matching` sta sotto `/matching`). */
   base?: string;
+  /**
+   * F1 (decisione di Enzo del 2026-11-26): il modulo dell'API quando il concetto è uno dei prefissi
+   * di un modulo montato su più indirizzi (`tenant-consolidations` del modulo `tenant-consolidation`).
+   */
+  modulo?: string;
   data: string;
   decisione: string;
   operations: Record<string, AtlasOperation>;
@@ -166,6 +171,11 @@ export class AtlasOperationResolver implements OperationResolver {
   classOf(conceptId: string, operationId: string): "A" | "B" | "C" | undefined {
     const c = this.concepts[conceptId]?.operations[operationId]?.classe;
     return c === "A" || c === "B" || c === "C" ? c : undefined;
+  }
+
+  /** Il modulo dell'API da cui viene il concetto: di solito il concetto stesso. */
+  moduleOf(conceptId: string): string {
+    return this.concepts[conceptId]?.modulo ?? conceptId;
   }
 
   /** Il metodo, o `undefined` se la coppia non esiste. L'ignoto non è una lettura. */

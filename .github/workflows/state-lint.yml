@@ -23,6 +23,7 @@ on:
       - "docs/kb/tools/check_documenti.py"
       - "docs/kb/tools/build_adr_index.py"
       - "docs/kb/tools/build_wiki.py"
+      - "docs/kb/tools/check_metro_adr0063.py"
       - "docs/piani/riordino-documentazione_20261125/**"
   pull_request:
     branches: [main]
@@ -41,6 +42,7 @@ on:
       - "docs/kb/tools/check_documenti.py"
       - "docs/kb/tools/build_adr_index.py"
       - "docs/kb/tools/build_wiki.py"
+      - "docs/kb/tools/check_metro_adr0063.py"
       - "docs/piani/riordino-documentazione_20261125/**"
   # Giro giornaliero (2026-11-20): su main state-lint gira solo quando si toccano i file di stato,
   # e cosi' e' rimasto rosso dal 5 al 20/11 senza che nessuno lo vedesse (SOT_STATE indietro di 31
@@ -113,6 +115,14 @@ jobs:
 
       - name: Indice degli ADR allineato ai file
         run: python3 docs/kb/tools/build_adr_index.py --check
+
+      # Heuresys AI-driven (ADR-0063 D10, voce Z5 del piano): ogni ADR (>= 0064) e ogni piano
+      # (data nel nome >= 20261126) dichiara la riga «Metro ADR-0063: asse N; criterio N».
+      - name: Metro ADR-0063 — self-test dello strumento
+        run: python3 docs/kb/tools/check_metro_adr0063.py --selftest
+
+      - name: Metro ADR-0063 — ogni ADR e piano nuovo dichiara asse e criterio (blocking gate)
+        run: python3 docs/kb/tools/check_metro_adr0063.py
 
       - name: Parti generate del wiki allineate (index, indice analitico, decisioni, storia)
         run: python3 docs/kb/tools/build_wiki.py --check

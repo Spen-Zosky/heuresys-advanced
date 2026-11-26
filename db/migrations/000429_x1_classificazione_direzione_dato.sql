@@ -376,7 +376,18 @@ VALUES
   ('sys_project_dependencies', 'nativo', 'EMENDATO per la mig 000503 (V6 processi e progetti): dipendenze fra le fasi di un progetto, scritte solo dall''API'),
   ('sys_process_facet_values', 'infrastruttura', 'EMENDATO per la mig 000507 (ADR-0061 D4): vocabolario chiuso delle faccette dei processi, catalogo di piattaforma, nessun dato di un tenant'),
   ('sys_tenant_process_facets', 'nativo', 'EMENDATO per la mig 000507 (ADR-0061 D4): valori delle faccette di un processo del tenant, scritti solo dall''API'),
-  ('sys_tenant_process_step_mappings', 'nativo', 'EMENDATO per la mig 000509 (ADR-0061 D7): corrispondenza delle attivita'' del tenant con APQC, scritta solo dall''API');
+  ('sys_tenant_process_step_mappings', 'nativo', 'EMENDATO per la mig 000509 (ADR-0061 D7): corrispondenza delle attivita'' del tenant con APQC, scritta solo dall''API'),
+  ('sys_scenarios', 'nativo', 'EMENDATO per la mig 000515 (ADR-0063 D5, F3a): scenari what-if di una persona del tenant, scritte solo dall''API'),
+  ('sys_scenario_versions', 'nativo', 'EMENDATO per la mig 000515 (ADR-0063 D5, F3a): versioni di uno scenario con l''impronta della fotografia, scritte solo dall''API'),
+  ('sys_scenario_options', 'nativo', 'EMENDATO per la mig 000515 (ADR-0063 D5, F3a): opzioni di una versione di scenario, scritte solo dall''API'),
+  ('sys_scenario_levers', 'nativo', 'EMENDATO per la mig 000515 (ADR-0063 D5, F3a): leve di un''opzione di scenario, scritte solo dall''API'),
+  ('sys_scenario_assumptions', 'nativo', 'EMENDATO per la mig 000515 (ADR-0063 D5, F3a): ipotesi di una versione di scenario, scritte solo dall''API'),
+  ('sys_scenario_results', 'nativo', 'EMENDATO per la mig 000515 (ADR-0063 D5, F3a): risultati calcolati di un''opzione di scenario, scritte solo dall''API'),
+  ('sys_scenario_sources', 'nativo', 'EMENDATO per la mig 000515 (ADR-0063 D5, F3a): fonti cliccabili di ipotesi e risultati di scenario, scritte solo dall''API'),
+  ('sys_scenario_equity_checks', 'nativo', 'EMENDATO per la mig 000515 (ADR-0063 D5, F3a): controlli di equita'' dichiarati di un''opzione di scenario, scritte solo dall''API'),
+  ('sys_scenario_shadow_units', 'nativo', 'EMENDATO per la mig 000515 (ADR-0063 D5, F3a): struttura ombra: unita'' copiate per uno scenario, scritte solo dall''API'),
+  ('sys_scenario_shadow_positions', 'nativo', 'EMENDATO per la mig 000515 (ADR-0063 D5, F3a): struttura ombra: posizioni copiate per uno scenario, scritte solo dall''API'),
+  ('sys_scenario_shadow_assignments', 'nativo', 'EMENDATO per la mig 000515 (ADR-0063 D5, F3a): struttura ombra: titolari copiati per uno scenario, scritte solo dall''API');
 
 INSERT INTO sys.sys_classificazione_direzione_dato (tabella, stato, motivo)
 SELECT tabella, stato, motivo FROM _classificazione_000429
@@ -400,15 +411,15 @@ BEGIN
   -- database vuoto le due misure coincidono (315); su uno gia' popolato le righe in piu'
   -- appartengono ad altri file e non sono un errore di questo.
   SELECT count(*) INTO n_dich FROM _classificazione_000429;
-  IF n_dich <> 325 THEN
-    RAISE EXCEPTION '000429: il file dichiara % righe di classificazione, attese 325', n_dich;
+  IF n_dich <> 336 THEN
+    RAISE EXCEPTION '000429: il file dichiara % righe di classificazione, attese 336', n_dich;
   END IF;
 
   SELECT count(*) INTO n_proprie
     FROM _classificazione_000429 d
     JOIN sys.sys_classificazione_direzione_dato c ON c.tabella = d.tabella AND c.stato = d.stato;
-  IF n_proprie <> 325 THEN
-    RAISE EXCEPTION '000429: attese 325 righe di classificazione di questo file, trovate %', n_proprie;
+  IF n_proprie <> 336 THEN
+    RAISE EXCEPTION '000429: attese 336 righe di classificazione di questo file, trovate %', n_proprie;
   END IF;
 
   SELECT count(*) INTO n_non_class FROM sys.v_tabelle_non_classificate;
@@ -424,14 +435,15 @@ BEGIN
   -- 69 nativo da 000503: sys_project_phases e sys_project_dependencies (era 67).
   -- 70 nativo e 46 infrastruttura da 000507: sys_tenant_process_facets e sys_process_facet_values.
   -- 71 nativo da 000509: sys_tenant_process_step_mappings.
-  IF n_ibrido <> 77 OR n_nativo <> 71 OR n_importato <> 131 OR n_infra <> 46 THEN
-    RAISE EXCEPTION '000429: conteggio inatteso — ibrido=% nativo=% importato=% infrastruttura=% (attesi 77/71/131/46)',
+  -- 82 nativo da 000515: le undici tabelle del motore degli scenari (F3a).
+  IF n_ibrido <> 77 OR n_nativo <> 82 OR n_importato <> 131 OR n_infra <> 46 THEN
+    RAISE EXCEPTION '000429: conteggio inatteso — ibrido=% nativo=% importato=% infrastruttura=% (attesi 77/82/131/46)',
       n_ibrido, n_nativo, n_importato, n_infra;
   END IF;
 
   SELECT count(*) INTO n_tot FROM sys.sys_classificazione_direzione_dato;
   n_altre := n_tot - n_proprie;
-  RAISE NOTICE '000429: 325 tabelle classificate (77 ibrido, 71 nativo, 131 importato, 46 infrastruttura); altre righe gia'' presenti, di altri file: %; v_tabelle_non_classificate a zero.', n_altre;
+  RAISE NOTICE '000429: 336 tabelle classificate (77 ibrido, 82 nativo, 131 importato, 46 infrastruttura); altre righe gia'' presenti, di altri file: %; v_tabelle_non_classificate a zero.', n_altre;
 END $$;
 
 COMMIT;

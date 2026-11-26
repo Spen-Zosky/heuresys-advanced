@@ -219,7 +219,10 @@ BEGIN
     RAISE EXCEPTION '000427: attesi 12 overlay EN (6 permessi x name+description), trovati %', n_en;
   END IF;
 
-  IF (SELECT coalesce(sum(missing), 0) FROM sys.v_reference_translation_coverage) <> 0 THEN
+  IF (SELECT coalesce(sum(missing), 0) FROM sys.v_reference_translation_coverage
+    -- 000516 e 000517: blueprint, etichette delle interfacce e contenuti dei tenant restano fuori.
+   WHERE (entity_table, field) NOT IN (SELECT f.entity_table, f.field
+      FROM sys.sys_translatable_field f WHERE f.note IN ('contenuti dei tenant','contenuto dei blueprint','registro dei processi dei blueprint','etichette delle interfacce'))) <> 0 THEN
     RAISE EXCEPTION '000427: copertura EN globale non a zero dopo questa migrazione (guardia 000255)';
   END IF;
 

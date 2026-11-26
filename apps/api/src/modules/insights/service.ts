@@ -32,7 +32,9 @@ import type {
   SkillGapSegment,
   SkillGapScore,
   SkillGapListResponse,
+  EquitaDichiarazione,
 } from "@heuresys/shared";
+import { leggiTrattiProtetti, valutaEquita } from "../../lib/equita/index.js";
 import * as repo from "./repository.js";
 import { posizioniNelPerimetroOrganizzativo } from "../dashboard/repository.js";
 import { emitNotificationsBulk } from "../../lib/notifications/emit.js";
@@ -314,6 +316,25 @@ function horizonOf(v: number): SuccessionReadinessHorizon {
   return "NOT_READY";
 }
 
+/** Gli ingressi del modello di prontezza, come compaiono nelle spiegazioni (E12 li controlla). */
+export const READINESS_FEATURE_KEYS = ["position_fit", "kpi", "tenure"] as const;
+/** Esito favorevole di una proposta di successione: pronto ora o entro sei mesi. */
+export const READINESS_ORIZZONTI_FAVOREVOLI: ReadonlySet<SuccessionReadinessHorizon> = new Set(["READY_NOW", "READY_6_MONTHS"]);
+
+/**
+ * E12 (F6b): la dichiarazione di equità su chi è proposto come pronto. L'unità è la persona,
+ * favorevole se è pronta per almeno una posizione: chi compare per tre posizioni conta una volta.
+ */
+export async function dichiaraEquitaPronti(items: SuccessionReadinessScore[], tenantId: string | null, oggi = new Date()): Promise<EquitaDichiarazione> {
+  const favorevole = new Map<string, boolean>();
+  for (const r of items) favorevole.set(r.userId, (favorevole.get(r.userId) ?? false) || (r.horizon !== undefined && READINESS_ORIZZONTI_FAVOREVOLI.has(r.horizon)));
+  const tratti = await leggiTrattiProtetti(pool, tenantId, [...favorevole.keys()]);
+  return valutaEquita(
+    [...favorevole.entries()].map(([userId, f]) => ({ userId, favorevole: f, tratti: tratti.get(userId) })),
+    { esitoFavorevole: "PRONTO_ENTRO_6_MESI", ingressi: READINESS_FEATURE_KEYS, oggi },
+  );
+}
+
 /** Pure, deterministic blend → readiness value + horizon + per-feature explanation. */
 export function scoreReadiness(raw: repo.ReadinessFeatureRow): {
   value: number;
@@ -478,7 +499,9 @@ export const insightsService = {
       userIdAllowList: orgAllowList(orgScope),
     });
     const items = rows.map(toReadinessScore).sort((x, y) => (y.value ?? 0) - (x.value ?? 0));
-    return maskItems(a, { scope: { kind: s.kind, tenantId: s.tenantId }, items, total: items.length, generatedAt: new Date().toISOString() }, READINESS_JUDGMENT_FIELDS);
+    // E12 (F6b): il controllo si fa sui valori veri, prima della maschera; esce solo l'aggregato.
+    const equita = await dichiaraEquitaPronti(items, s.tenantId);
+    return maskItems(a, { scope: { kind: s.kind, tenantId: s.tenantId }, items, total: items.length, generatedAt: equita.calcolatoIl, equita }, READINESS_JUDGMENT_FIELDS);
   },
 
   async recomputeReadiness(a: ActorContext): Promise<InsightsRecomputeResponse> {

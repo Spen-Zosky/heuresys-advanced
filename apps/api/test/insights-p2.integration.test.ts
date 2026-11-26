@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
+import { EquitaDichiarazioneSchema } from "@heuresys/shared";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 // Cap③ data-mining P2 — succession-readiness (slice B) + skill-gap (slice C).
@@ -137,5 +138,20 @@ describe("insights API P2 (cap③ succession-readiness + skill-gap)", () => {
     expect(b.scope.kind).toBe("TENANT");
     const tenants = new Set(b.items.map((i) => i.tenantId));
     expect(tenants.size).toBeLessThanOrEqual(1); // own tenant only (or empty)
+  });
+  it("E12 (F6b): la lista dei pronti dichiara il controllo di equità, valido e senza tratti fra gli ingressi", async () => {
+    const r = await list(tenantAdmin, "succession-readiness");
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as { items: RItem[]; equita: unknown };
+    const d = EquitaDichiarazioneSchema.parse(body.equita);
+    expect(d.metodo).toBe("equita-quattro-quinti@1.0.0");
+    expect(d.persone).toBe(new Set(body.items.map((x) => x.userId)).size);
+    expect(d.tratti.map((t) => t.tratto)).toEqual(["GENERE", "ETA", "NAZIONALITA", "STATO_CIVILE"]);
+    expect(d.ingressi).toEqual(["position_fit", "kpi", "tenure"]);
+    expect(d.ingressiProtetti).toEqual([]);
+    // la dichiarazione non porta né identificativi né date di nascita
+    const testo = JSON.stringify(d);
+    for (const x of body.items.slice(0, 5)) expect(testo).not.toContain(x.userId);
+    expect(testo).not.toMatch(/\b(19|20)\d{2}-\d{2}-\d{2}\b/);
   });
 });

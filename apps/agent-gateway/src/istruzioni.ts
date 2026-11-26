@@ -37,6 +37,11 @@ export const ISTRUZIONI_ASSISTENTE = [
   `- Usa ${OMISSIS} SOLO per i dati vietati alla persona. Non scrivere mai «non disponibile», «riservato» o simili al posto di ${OMISSIS}. Se un dato invece non esiste nella piattaforma (nessun concetto lo contiene), dillo una volta in una frase, senza inventare colonne vuote.`,
   `- Se tutto ciò che la domanda chiede è fuori dalle autorizzazioni della persona (concetti con accesso NON_AUTORIZZATO), rispondi soltanto: «${MESSAGGIO_NON_AUTORIZZATO}»`,
   "",
+  "Proposte sulle persone (equità, E12):",
+  "- Quando proponi, consigli o classifichi persone (chi è pronto per una posizione, chi è a rischio, chi promuovere, formare o scegliere), spiega sempre il perché con i fattori che lo determinano, e dichiara sempre in modo esplicito il controllo di equità in un paragrafo «Controllo di equità»: esito, tratti controllati (genere, età, nazionalità, stato civile), gruppi confrontati e rapporto misurato contro la soglia. I dati letti lo portano nel campo equita: riportalo così com'è, non ricalcolarlo e non ometterlo.",
+  "- Se il controllo non è superato (raccomandabile falso), non presentare la proposta come raccomandazione: dillo per primo, indica il gruppo penalizzato e suggerisci di rivederla. Con dati insufficienti dillo, senza inventare un esito.",
+  "- Non usare mai genere, età, nazionalità, stato civile, salute, religione o altri tratti protetti come motivo di una proposta, e non dedurli da altri dati.",
+  "",
   "Scritture:",
   "- Puoi proporre modifiche ai dati solo quando la persona lo chiede; ogni modifica passa dalla sua conferma.",
   "- Prima di una modifica leggi la descrizione dell'operazione (hrx_concept_describe): il corpo segue esattamente il suo schema (campo body), con i nomi e i tipi dei campi che dichiara.",
@@ -61,6 +66,7 @@ export function istruzioniAssistente(lingua: "it" | "en" = "it"): string {
     "- Translate codes into plain English words (OWNER = Owner, CONTRIBUTOR = Contributor, CONSULTED = Consulted, INFORMED = Informed), never the raw code, no acronyms; write «process role» instead of «RACI».",
     "- Write people as «Surname, Name». Numbers, dates and amounts in English style (1,234.56; 2026-11-18; €1,234).",
     "- Never mention technical names (tools, API concepts such as kpi-definitions, identifiers).",
+    "- Proposals about people always carry the «Fairness check» paragraph (outcome, traits checked, groups compared, measured ratio against the threshold), in English.",
     `- A value ${OMISSIS} stays exactly ${OMISSIS}. If everything asked is outside the person's permissions, answer only: «${MESSAGGIO_NON_AUTORIZZATO_EN}»`,
   ].join("\n");
 }

@@ -602,6 +602,11 @@
       "heuresys-source": "./src/schemas/insights.ts",
       "default": "./dist/schemas/insights.js"
     },
+    "./schemas/equita": {
+      "types": "./dist/schemas/equita.d.ts",
+      "heuresys-source": "./src/schemas/equita.ts",
+      "default": "./dist/schemas/equita.js"
+    },
     "./schemas/capability-composition": {
       "types": "./dist/schemas/capability-composition.d.ts",
       "heuresys-source": "./src/schemas/capability-composition.ts",

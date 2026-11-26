@@ -1,6 +1,6 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `5eca9e53` (2026-11-26T12:07:20+00:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `1f177377` (2026-11-26T16:16:39+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
@@ -10,8 +10,8 @@
 | Route API | 757 |
 | Pagine web | 146 |
 | Schemi shared | 140 |
-| Tabelle DB | 436 (vuote: 40) |
-| Viste / matview | 93 / 0 |
+| Tabelle DB | 447 (vuote: 50) |
+| Viste / matview | 96 / 0 |
 | Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 343 |
 
 ## Moduli API
@@ -154,7 +154,6 @@
 
 ## Tabelle DB vuote (feature senza dati — candidate brainstorming)
 
-- `audit.agent_gateway_decisions`
 - `audit.chiavi_idempotenza`
 - `audit.user_self_service_actions`
 - `staging.attivita_processi_dubbi`
@@ -194,6 +193,21 @@
 - `sys.sys_platform_vocabulary_equivalences`
 - `sys.sys_project_dependencies`
 - `sys.sys_project_phases`
+- `sys.sys_scenario_assumptions`
+- `sys.sys_scenario_equity_checks`
+- `sys.sys_scenario_levers`
+- `sys.sys_scenario_options`
+- `sys.sys_scenario_results`
+- `sys.sys_scenario_shadow_assignments`
+- `sys.sys_scenario_shadow_positions`
+- `sys.sys_scenario_shadow_units`
+- `sys.sys_scenario_sources`
+- `sys.sys_scenario_versions`
+- `sys.sys_scenarios`
+
+## Tabelle DB non leggibili dal ruolo di lettura (non contate)
+
+- `staging.fattore_rimosso_undo`
 
 ## Key counts live
 

@@ -212,7 +212,7 @@ export function riepilogoProposta(tool: unknown, input: unknown, massimo = 12): 
   let azione: AzioneProposta = "altro";
   let concetto: string | null = null;
   let id: string | null = null;
-  let corpo: unknown = a;
+  let corpo: unknown;
 
   if (nome === "hrx_entity_query") {
     concetto = typeof a.conceptId === "string" ? a.conceptId : null;

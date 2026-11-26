@@ -155,6 +155,9 @@ ROUTES: list[tuple[str, list[str]]] = [
     ("apps/agent-gateway/", ["typecheck", "agent-gateway-test", "anagrafe-agenti", "letture-agente"]),
     ("db/migrations/000484_la_barra_laterale_per_funzione.sql", ["letture-agente"]),
     ("docs/kb/tools/check_letture_agente.py", ["letture-agente"]),
+    # M1 (ADR-0063): il livello agentico si misura da un comando, e lo strumento si prova su un catalogo sporcato.
+    ("docs/kb/tools/misura_livello_agentico.py", ["livello-agentico"]),
+    ("docs/kb/atlas/agent-operations.json", ["livello-agentico"]),
     ("docs/kb/tools/letture_agente_eccezioni.json", ["letture-agente"]),
     # T5b (P22): l'anagrafe degli agenti e il suo controllo instradano il confronto col codice.
     ("docs/architecture/agenti/", ["anagrafe-agenti"]),
@@ -314,6 +317,8 @@ SUITES: dict[str, tuple[str, str]] = {
     # I3: le letture dell'assistente per ogni voce della barra laterale, o un'eccezione scritta.
     "letture-agente":     ("L0", "python docs/kb/tools/check_letture_agente.py --selftest && "
                                  "python docs/kb/tools/check_letture_agente.py"),
+    "livello-agentico":   ("L0", "python docs/kb/tools/misura_livello_agentico.py --selftest && "
+                                 "python docs/kb/tools/misura_livello_agentico.py"),
     # I test del gateway, che sono anche i guardiani della coerenza fra i perimetri decisi e
     # la mappa generata. L0 nel costo, L1 nella sostanza: girano senza database.
     "agent-gateway-test": ("L1", "pnpm --filter @heuresys/agent-gateway test"),

@@ -109,8 +109,16 @@ Ogni voce è un lotto per un thread suo (regola dei passi piccoli del 21/11), co
 | Z4 | Riesame con il metro di ADR-0063 (D10) di ciò che esiste e dei programmi aperti: per ciascuno l'asse e il criterio che serve, che cosa si tiene, che cosa si assorbe qui, che cosa si ferma | `python3 docs/kb/tools/programmi.py`, piani in `docs/piani/`, `.programmi/`, datastore `esecuzione/programmi/` | Claude (O) | tabella del riesame in `docs/piani/ai-driven_20261126/RIESAME_programmi.md`, proposta a Enzo una volta | aperta, dopo Z2 |
 | Z5 | Controllo del metro: ogni ADR e piano nuovo dichiara asse e criterio di ADR-0063 D1 | `docs/kb/tools/check_metro_adr0063.py` in `state-lint.yml` | Claude (S) | visto rosso su un piano finto senza dichiarazione | aperta, dopo Z2 |
 | M0 | Misura dell'uso reale in produzione, in sola lettura (conversazioni, persone, proposte, capacità e modo, ammessi) | query in `docs/piani/ai-driven_20261126/misura-uso.sql`, eseguita da un thread sulla VM | Claude (S) | numeri nel file della valutazione con l'orario | aperta |
-| M1 | Il livello si misura da un comando: copertura di letture, scritture, pagine, segnalatori, scenari, batteria, uso | `docs/kb/tools/misura_livello_agentico.py` (dall'atlante e da `agent-operations.json`), in `verify_gate.py` | Claude (S) | il comando riproduce i numeri della valutazione; visto rosso togliendo una voce dal catalogo | aperta |
-| M2 | Rito di cancello d'onda: si rimisura il livello con M1 e si scrive l'esito qui | questa tabella | Claude | a ogni fine onda | aperta |
+| M1 | Il livello si misura da un comando: copertura di letture, scritture, pagine, segnalatori, scenari, batteria, uso | `docs/kb/tools/misura_livello_agentico.py` (dall'atlante e da `agent-operations.json`), in `verify_gate.py` | Claude (S) | il comando riproduce i numeri della valutazione; visto rosso togliendo una voce dal catalogo | fatta: 2026-11-26, il comando riproduce 387/415 letture, 28/341 scritture, 111/145 pagine della valutazione; visto rosso togliendo una voce dal catalogo (`--selftest`: 387 → 386); in `verify_gate.py` come suite `livello-agentico` |
+| M2 | Rito di cancello d'onda: si rimisura il livello con M1 e si scrive l'esito qui | questa tabella | Claude | a ogni fine onda | fatta per l'onda 0 (misura di partenza qui sotto); si ripete a ogni fine onda |
+
+#### Esiti dei cancelli d'onda (M2)
+
+Il rito: a fine onda si lancia `python3 docs/kb/tools/misura_livello_agentico.py` e si scrive qui la riga con la data e i numeri. L'onda si chiude con questa misura, non con una dichiarazione.
+
+| cancello | data | letture | scritture | pagine | segnalatori | scenari | batteria |
+|---|---|---|---|---|---|---|---|
+| Onda 0 (misura di partenza) | 2026-11-26 | 387/415 = 93,3% | 28/341 = 8,2% | 111/145 = 76,6% | 0 | 0 | 0 |
 
 ### Onda 1: le fondamenta comuni (E8)
 

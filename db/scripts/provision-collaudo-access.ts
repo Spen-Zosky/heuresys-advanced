@@ -159,6 +159,10 @@ const DISALLINEO_REASON =
 const ADR0050_REASON =
   "ADR-0050 D2 (2026-11-05): chi porta un mandato forte non e' esentabile dal secondo fattore; " +
   "l'identita' di collaudo passa al fattore 'derived-access' come platform-test-admin@.";
+const RIACCENSIONE_REASON =
+  "2026-11-26: riaccesa in un ambiente di collaudo. La copia era stata rinfrescata dalla " +
+  "produzione, dove le utenze di collaudo stanno sospese (D-02, sospendi-collaudo.ts): login 401 " +
+  "in CI con credenziale giusta. Per rispegnerla: pnpm db:sospendi-collaudo --sospendi.";
 const EXEMPTION_REASON =
   "collaudo-access (#169 F2, direttiva Enzo 2026-08-25): utenza di collaudo SERVICE, " +
   "verifiche funzionali e frontend senza il rito di login delle persone reali";
@@ -263,7 +267,7 @@ async function main(): Promise<void> {
     let autore: string | undefined;
     const stats = {
       utenti: 0, ruoli: 0, identita: 0, credenziali: 0, iscrizioni: 0, esenzioni: 0,
-      riallineate: 0, disallineate: 0, fattoriRimossi: 0, fattoriCreatiMfa: 0, esenzioniSpente: 0, invariati: 0,
+      riallineate: 0, disallineate: 0, fattoriRimossi: 0, fattoriCreatiMfa: 0, esenzioniSpente: 0, identitaRiaccese: 0, invariati: 0,
     };
     // #258 — solo per le identita' mfaExempt:false, e solo se l'ambiente e' di collaudo:
     // il segreto (nuovo o gia' esistente) va depositato dove Playwright lo legge.
@@ -398,10 +402,29 @@ async function main(): Promise<void> {
               AND user_auth_role_revoked_at IS NULL`, [userId, roleId, grantTenantId]);
       }
 
-      const ident = await db.query<{ auth_identity_id: string }>(
-        `SELECT auth_identity_id FROM sys.sys_auth_identities
+      const ident = await db.query<{ auth_identity_id: string; auth_identity_is_active: boolean }>(
+        `SELECT auth_identity_id, auth_identity_is_active FROM sys.sys_auth_identities
           WHERE auth_identity_user_id = $1 AND auth_identity_provider = 'LOCAL'`, [userId]);
       let identityId = ident.rows[0]?.auth_identity_id;
+      // 2026-11-26 — STATO DICHIARATO anche per l'identita' SPENTA. heuresys_ci si rinfresca
+      // dalla produzione, dove le utenze di collaudo stanno sospese (D-02, sospendi-collaudo.ts:
+      // auth_identity_is_active = false). Lo script verificava la credenziale ma non l'accensione:
+      // sulla copia appena rinfrescata (13:27 UTC di quel giorno) le cinque utenze di login della
+      // CI rispondevano 401 con credenziale giusta. Qui si arriva SOLO in un ambiente di collaudo:
+      // fuori, la guardia D-02 piu' sopra si e' gia' fermata. Giornale prima della scrittura.
+      if (identityId && ident.rows[0]!.auth_identity_is_active === false) {
+        if (!ambienteDiCollaudo) fail(`${c.email}: identita' spenta fuori dal collaudo (guardia D-02 aggirata)`);
+        stats.identitaRiaccese++; touched = true;
+        if (!DRY) {
+          await db.query(
+            `INSERT INTO staging.collaudo_riallineo_undo (undo_email, undo_specie, undo_valore, undo_ragione)
+             VALUES ($1, 'identita-attiva', 'is_active=false', $2)`,
+            [c.email, RIACCENSIONE_REASON]);
+          await db.query(
+            `UPDATE sys.sys_auth_identities SET auth_identity_is_active = true
+              WHERE auth_identity_id = $1 AND NOT auth_identity_is_active`, [identityId]);
+        }
+      }
       if (!identityId) {
         stats.identita++; touched = true;
         if (!DRY) {
@@ -671,6 +694,7 @@ ${DRY ? "DRY-RUN (nessuna scrittura)" : "ESEGUITO"}
   fattori MFA rimossi ........... ${stats.fattoriRimossi}   [un segreto di troppo su un'utenza esente]
   fattori MFA creati (#258) ..... ${stats.fattoriCreatiMfa}   [identita' non esente: cammina l'MFA vera]
   esenzioni spente (ADR-0050) ... ${stats.esenzioniSpente}   [mandato forte: niente esenzione, fattore vero]
+  identita' RIACCESE ............ ${stats.identitaRiaccese}   [copia rinfrescata dalla produzione, dove stanno sospese]
   gia' a posto (invariati) ...... ${stats.invariati}
   rollback dichiarato ........... pnpm db:provision-collaudo --undo  (elenco esplicito, mai un jolly)
 `);

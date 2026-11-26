@@ -148,9 +148,14 @@ describe('reconciliation F3 imports', () => {
       // vincolato alla provenienza dell'import: la storia C5 aggiunge una riga di
       // rilevanza per ogni posizione critica che ne era scoperta (coda #18), e quelle
       // righe portano il marchio del programma
+      // [2026-11-26] Le rilevanze aggiunte dagli script di rtl-allinea sono giornalizzate come
+      // 'ins:sys_position_succession_relevance': fuori dall'import.
+      const rilevanzeNonAllineate = await fuoriDalGiornale(
+        "staging.rtl_allinea_org_undo", "ins:sys_position_succession_relevance", "position_succession_relevance_id");
       expect(await count(
         `SELECT count(*)::int AS n FROM sys.sys_position_succession_relevance
-          WHERE position_succession_relevance_metadata->>'storia36' IS NULL`,
+          WHERE position_succession_relevance_metadata->>'storia36' IS NULL
+            AND ${rilevanzeNonAllineate}`,
       )).toBe(9);
       expect(await count(
         `SELECT count(*)::int AS n FROM sys.sys_user_learning_assignments

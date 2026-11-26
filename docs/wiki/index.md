@@ -8,7 +8,7 @@ Il wiki segue il modello llm-wiki: fonti grezze (codice, ADR, registri), pagine 
 
 | Pagina | Dominio | Sintesi | Aggiornata il |
 |---|---|---|---|
-| [agenti-ia](domini/agenti-ia.md) | agenti-ia | Agenti e assistente con l'abbonamento di Enzo, dentro i permessi di chi chiede | 2026-11-25 |
+| [agenti-ia](domini/agenti-ia.md) | agenti-ia | Agenti e assistente con l'abbonamento di Enzo, dentro i permessi di chi chiede | 2026-11-26 |
 | [api-backend](domini/api-backend.md) | api-backend | Moduli Fastify in sette passi, catena di plugin fissa, ESS in modulo dedicato | 2026-11-25 |
 | [architettura](domini/architettura.md) | architettura | Monorepo pnpm, API Fastify su PostgreSQL 16, SPA Next.js, separazione dal datastore | 2026-11-25 |
 | [consolidamento-tenant](domini/consolidamento-tenant.md) | consolidamento-tenant | Allineamento e consolidamento del tenant con le corse del datastore | 2026-11-25 |

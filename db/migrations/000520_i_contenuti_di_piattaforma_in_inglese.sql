@@ -19,6 +19,8 @@
 -- stesso testo italiano ha qui un solo inglese. Le coppie sono già nel registro e hanno già
 -- il trigger trg_togli_traduzioni contro gli orfani (000517). I codici citati nelle regole
 -- di derivazione (per esempio DI_PROCESSO) restano come sono.
+-- Due posizioni dei blueprint («Direttore Generale», «Addetto Amministrazione del Personale»)
+-- avevano già un inglese LLM diverso da quello dato allo stesso testo dalla 000517: si allineano.
 --
 -- Idempotenza: ON CONFLICT; si aggiornano solo le righe 'LLM' con testo diverso, quindi
 -- una seconda passata non modifica niente. Le traduzioni di altra fonte restano.

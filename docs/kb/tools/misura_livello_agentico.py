@@ -442,7 +442,18 @@ def piatte(m: dict) -> dict[str, float]:
             out[prefisso] = float(v[0])
     for k in ("letture", "scritture", "pagine", "segnalatori", "applet", "scenari", "batteria", "presenze"):
         vai(k, m[k])
+    # Il minimo guarda i numeratori e le percentuali, non i denominatori: il totale delle rotte, le
+    # scritture «di business» (cambiano quando una categoria si riclassifica, come con #526) o i
+    # previsti del piano possono scendere senza che si sia perso niente. Anche B e C si spostano
+    # fra loro, e le eccezioni e le scoperte sono migliori quando scendono.
+    for k in DENOMINATORI:
+        out.pop(k, None)
     return out
+
+
+DENOMINATORI = ("letture.totali", "scritture.totali", "scritture.di_business", "scritture.B", "scritture.C",
+                "pagine.voci_menu", "pagine.pagine", "pagine.eccezioni", "pagine.scoperte",
+                "segnalatori.previsti", "applet.previste", "scenari.catalogo", "batteria.domini_previsti")
 
 
 def regressioni(m: dict, assi: list[dict], base: dict) -> list[str]:
@@ -523,7 +534,7 @@ def autoprova() -> int:
     if not m1["letture"]["raggiungibili"] == m0["letture"]["raggiungibili"] - 1:
         print("  [KO] togliere una lettura dal catalogo non fa scendere le letture raggiungibili")
         ko += 1
-    if not any("letture.raggiungibili" in r for r in regressioni(m1, a1, base)):
+    if not any("letture.pct" in r for r in regressioni(m1, a1, base)):
         print("  [KO] togliere una lettura dal catalogo non rende rosso il ratchet")
         ko += 1
     # 2. un segno aggiunto nel codice: il gradino sale, nessun rosso
@@ -572,7 +583,7 @@ def main() -> int:
     uso = uso_in_produzione() if "--uso" in a else None
     if "--aggiorna-baseline" in a:
         vecchi = base.get("misure") or {}
-        nuovi = {k: max(v, vecchi.get(k, v)) for k, v in piatte(m).items()}
+        nuovi = {k: max(v, vecchi.get(k, v)) for k, v in piatte(m).items()}  # le chiavi dismesse cadono
         liv = {str(x["n"]): max(x["livello"], (base.get("livelli") or {}).get(str(x["n"]), 0)) for x in assi}
         with io.open(BASELINE, "w", encoding="utf-8", newline="\n") as fh:
             json.dump({"_nota": "Il minimo accettato di ogni misura e livello. Sale solo con --aggiorna-baseline, "

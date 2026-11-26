@@ -199,7 +199,15 @@ export class RegistroConversazione {
         title: titoloDa(opts.prompt),
       });
     }
-    const a = await api.call<{ id: string }>("POST", `/agent-conversations/${c.id}/activities`, { prompt: opts.prompt });
+    // Il controllo qui sopra legge lo stato e due richieste insieme lo passano entrambe: il posto lo
+    // tiene il database (indice unico della 000513), e la seconda riceve 409.
+    let a: { id: string };
+    try {
+      a = await api.call<{ id: string }>("POST", `/agent-conversations/${c.id}/activities`, { prompt: opts.prompt });
+    } catch (e) {
+      if (String(e).includes("-> 409")) throw new ConversazioneOccupata(c.id);
+      throw e;
+    }
     return new RegistroConversazione(api, { id: c.id, sdkSessionRef: c.sdkSessionRef ?? null, personsSeen: c.personsSeen ?? [] }, a.id);
   }
 

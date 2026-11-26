@@ -83,31 +83,188 @@ export function disinnesca(v: string): string {
   return /^[=+\-@\t\r]/.test(v) ? `'${v}` : v;
 }
 
-/** Che cosa farebbe una scrittura proposta, in parole: l'azione e i campi che cambia. */
+/**
+ * Che cosa farebbe una scrittura proposta, in parole: l'azione, l'oggetto e i campi che cambia.
+ * Prova dal vivo di F1 del 2026-11-26 (Valentina Conti, KPI TJB-M003): la scheda in italiano
+ * mostrava «kpi defs», «id», «description» e l'identificativo grezzo. Qui restano solo chiavi
+ * (concetto, campo, riferimento): le parole le mette la lingua scelta (`agente.concetti.*`,
+ * `agente.campi.*`), e i nomi degli oggetti collegati li legge la finestra dall'API.
+ */
+export type AzioneProposta = "crea" | "aggiorna" | "elimina" | "costruisci" | "altro";
+
+export interface CampoProposto {
+  /** Il nome del campo nel contratto (`description`, `ownerUserId`): è una chiave, non un testo. */
+  campo: string;
+  valore: string;
+  /** Il concetto a cui punta il valore, quando il campo è un riferimento (`users`, `positions`). */
+  riferimento?: string;
+  /** Vero quando il valore è un identificativo che non va mostrato com'è. */
+  identificativo?: boolean;
+}
+
 export interface RiepilogoProposta {
-  azione: "crea-aggiorna" | "elimina" | "costruisci" | "altro";
-  oggetto: string;
-  campi: Array<{ nome: string; valore: string }>;
+  azione: AzioneProposta;
+  /** Il concetto dell'API (`kpi-definitions`): la sua etichetta sta in `agente.concetti.*`. */
+  concetto: string | null;
+  /** L'identificativo dell'oggetto che cambia, se esiste già: la finestra ne legge il nome. */
+  id: string | null;
+  campi: CampoProposto[];
+}
+
+/** Gli strumenti con nome del gateway (`apps/agent-gateway/src/mcp-tools.ts`) e il loro concetto. */
+const STRUMENTI_NOMINATI: Record<string, string> = {
+  hrx_org_units: "organization-units",
+  hrx_positions: "positions",
+  hrx_job_roles: "job-roles",
+  hrx_skills: "skills",
+  hrx_kpi_defs: "kpi-definitions",
+  hrx_process_kpi_template: "process-kpi-templates",
+  hrx_orgunit_kpi_template: "organization-unit-kpi-templates",
+  hrx_typing_profile: "enterprise-typing-profiles",
+  hrx_blueprint_activation: "blueprint-activations",
+  hrx_blueprint_override: "blueprint-overrides",
+  hrx_job_families: "job-families",
+  hrx_blueprint_families: "blueprint-families",
+  hrx_blueprint_variants: "blueprint-variants",
+  hrx_blueprint_processes: "blueprint-processes",
+  hrx_tenant: "tenant-materialization",
+};
+
+/** I campi che puntano a un oggetto di cui la finestra sa leggere il nome. */
+const RIFERIMENTI: Record<string, string> = {
+  organizationUnitId: "organization-units",
+  ouId: "organization-units",
+  unitId: "organization-units",
+  jobRoleId: "job-roles",
+  skillId: "skills",
+  parentSkillId: "skills",
+  childSkillId: "skills",
+  kpiId: "kpi-definitions",
+  kpiDefinitionId: "kpi-definitions",
+  jobFamilyId: "job-families",
+  careerPathId: "career-paths",
+  candidateId: "candidates",
+  applicationId: "candidate-applications",
+  interviewId: "interviews",
+  requisitionId: "job-requisitions",
+  postingId: "job-postings",
+  assessmentId: "assessments",
+  poolId: "succession-pools",
+  parentGoalId: "goals",
+  parentOkrId: "okrs",
+  moduleId: "learning-modules",
+  initiativeId: "training-initiatives",
+  graphId: "visualization-graphs",
+  operatingModelId: "operating-models",
+  sizeBandId: "enterprise-size-bands",
+  blueprintProcessId: "blueprint-processes",
+  variantId: "blueprint-variants",
+  activationId: "blueprint-activations",
+};
+
+/**
+ * I concetti di cui l'API ha la scheda `GET /v1/<concetto>/:id` (verificato contro la mappa
+ * dell'agente in `messaggi.test.ts`): solo per questi la finestra chiede il nome.
+ */
+export const CONCETTI_CON_SCHEDA: ReadonlySet<string> = new Set([
+  "activity-classification-mappings", "activity-classifications", "approvals", "assessment-results",
+  "assessments", "blueprint-activations", "blueprint-families", "blueprint-overrides",
+  "blueprint-processes", "blueprint-variants", "candidate-applications", "candidates",
+  "career-path-steps", "career-paths", "content", "engagement-feedback", "enterprise-size-bands",
+  "enterprise-typing-profiles", "goals", "interview-feedback", "interviews", "job-families",
+  "job-offers", "job-postings", "job-requisitions", "job-roles", "kpi-definitions", "learning-gaps",
+  "learning-modules", "learning-path-steps", "learning-paths", "occupation-classifications", "okrs",
+  "operating-models", "organization-unit-history", "organization-unit-kpi-templates",
+  "organization-units", "position-career-paths", "position-succession-relevance", "positions",
+  "process-kpi-templates", "projects", "skill-aliases", "skill-categories", "skill-families",
+  "skill-taxonomy-edges", "skills", "succession-pools", "successor-candidates",
+  "successor-readiness", "surveys", "teams", "tenant-blueprints", "tenant-processes",
+  "training-initiatives", "user-career-plans", "user-position-assignments", "user-target-positions",
+  "users", "visualization-edges", "visualization-exports", "visualization-graphs",
+  "visualization-layouts", "visualization-node-layouts", "visualization-nodes", "visualization-styles",
+]);
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Il concetto a cui punta un campo, se la finestra sa leggerne il nome. */
+export function concettoRiferito(campo: string): string | undefined {
+  if (/(^u|U)serIds?$/.test(campo)) return "users";
+  if (/(^p|P)ositionId$/.test(campo)) return "positions";
+  return RIFERIMENTI[campo];
+}
+
+/** L'azione di una chiamata del catalogo generico, dal prefisso della sua operazione. */
+function azioneDaOperazione(operationId: string, conId: boolean): AzioneProposta {
+  if (operationId.startsWith("delete")) return "elimina";
+  if (operationId.startsWith("patch") || operationId.startsWith("put")) return "aggiorna";
+  if (operationId === "post") return "crea";
+  return conId && operationId === "post_by_id" ? "aggiorna" : "altro";
 }
 
 /**
  * Dal nome dello strumento e dagli argomenti (già oscurati dal gateway) il riepilogo che la persona
- * legge prima di confermare: non si consente una modifica senza sapere quale.
+ * legge prima di confermare: non si consente una modifica senza sapere quale. Vale per gli strumenti
+ * con nome (`hrx_kpi_defs_upsert`) e per il catalogo generico (`hrx_entity_query`, F1 di ADR-0063).
  */
 export function riepilogoProposta(tool: unknown, input: unknown, massimo = 12): RiepilogoProposta {
   const nome = typeof tool === "string" ? (tool.split("__").pop() ?? tool) : "";
-  const azione = /_upsert$/.test(nome) ? "crea-aggiorna" : /_delete$/.test(nome) ? "elimina" : /materialize/.test(nome) ? "costruisci" : "altro";
-  const oggetto = nome.replace(/^hrx_/, "").replace(/_(upsert|delete|materialize)$/, "").replace(/_/g, " ");
-  const campi: Array<{ nome: string; valore: string }> = [];
-  const visita = (v: unknown, prefisso: string) => {
+  const a = input !== null && typeof input === "object" && !Array.isArray(input) ? (input as Record<string, unknown>) : {};
+  let azione: AzioneProposta = "altro";
+  let concetto: string | null = null;
+  let id: string | null = null;
+  let corpo: unknown = a;
+
+  if (nome === "hrx_entity_query") {
+    concetto = typeof a.conceptId === "string" ? a.conceptId : null;
+    const params = a.params !== null && typeof a.params === "object" ? (a.params as Record<string, unknown>) : {};
+    id = typeof params.id === "string" ? params.id : null;
+    azione = azioneDaOperazione(typeof a.operationId === "string" ? a.operationId : "", id !== null);
+    corpo = a.body ?? {};
+  } else {
+    const radice = nome.replace(/_(upsert|delete|materialize)$/, "");
+    concetto = STRUMENTI_NOMINATI[radice] ?? null;
+    id = typeof a.id === "string" && a.id ? a.id : null;
+    if (/_delete$/.test(nome)) azione = "elimina";
+    else if (/_materialize$/.test(nome)) azione = "costruisci";
+    else if (/_upsert$/.test(nome)) azione = id ? "aggiorna" : "crea";
+    corpo = "payload" in a ? a.payload : Object.fromEntries(Object.entries(a).filter(([k]) => k !== "id"));
+  }
+
+  const campi: CampoProposto[] = [];
+  const visita = (v: unknown, campo: string) => {
     if (campi.length >= massimo) return;
     if (v !== null && typeof v === "object" && !Array.isArray(v)) {
-      for (const [k, x] of Object.entries(v as Record<string, unknown>)) visita(x, prefisso && prefisso !== "payload" ? `${prefisso}.${k}` : k);
+      for (const [k, x] of Object.entries(v as Record<string, unknown>)) visita(x, k);
       return;
     }
-    const testo = typeof v === "string" ? v : JSON.stringify(v);
-    campi.push({ nome: prefisso || "valore", valore: (testo ?? "").slice(0, 200) });
+    const testo = typeof v === "string" ? v : v === undefined ? "" : JSON.stringify(v);
+    const riferimento = concettoRiferito(campo);
+    const identificativo = typeof v === "string" && UUID.test(v);
+    campi.push({
+      campo: campo || "valore",
+      valore: (testo ?? "").slice(0, 200),
+      ...(riferimento ? { riferimento } : {}),
+      ...(identificativo || (Array.isArray(v) && v.every((x) => typeof x === "string" && UUID.test(x)) && v.length > 0) ? { identificativo: true } : {}),
+    });
   };
-  visita(input, "");
-  return { azione, oggetto, campi };
+  visita(corpo, "");
+  return { azione, concetto, id, campi };
+}
+
+/**
+ * Il nome di un oggetto letto dalla sua scheda, come lo legge la persona: «Cognome, Nome» per una
+ * persona, altrimenti il nome (o il titolo) con il codice fra parentesi. `null` se non ne ha uno.
+ */
+export function nomeLeggibile(risposta: unknown): string | null {
+  const grezzo = risposta !== null && typeof risposta === "object" ? (risposta as Record<string, unknown>) : null;
+  if (!grezzo) return null;
+  const o = grezzo.data !== null && typeof grezzo.data === "object" && !Array.isArray(grezzo.data) ? (grezzo.data as Record<string, unknown>) : grezzo;
+  const s = (k: string) => (typeof o[k] === "string" && (o[k] as string).trim() ? (o[k] as string).trim() : null);
+  const cognome = s("lastName");
+  const nomeProprio = s("firstName");
+  if (cognome && nomeProprio) return `${cognome}, ${nomeProprio}`;
+  const nome = s("name") ?? s("title") ?? s("label") ?? s("displayName") ?? s("objective");
+  const codice = s("code");
+  if (nome && codice && nome !== codice) return `${nome} (${codice})`;
+  return nome ?? codice;
 }

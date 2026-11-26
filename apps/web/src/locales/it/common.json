@@ -1234,6 +1234,11 @@
     "centrale": "Sede centrale",
     "filiali": "Filiali",
     "riepilogo": "{{unita}} unità, {{persone}} persone",
+    "sede": {
+      "filiale": "Filiale {{n}}",
+      "SEDE_CENTRALE": "Sede centrale",
+      "UFFICIO": "Ufficio"
+    },
     "riepilogoFiliali": "{{sedi}} filiali, {{unita}} unità, {{persone}} persone",
     "persone_one": "{{count}} persona",
     "persone_other": "{{count}} persone",

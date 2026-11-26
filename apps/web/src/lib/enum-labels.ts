@@ -38,3 +38,14 @@ export function useEnumLabel(): EnumLabelFn {
     return t(`enums.${domain}.${value}`, { defaultValue: codiceInParole(value) });
   };
 }
+
+/**
+ * Il codice di sede del modello (`FILIALE_1`, `SEDE_CENTRALE`, `UFFICIO`) nella lingua della
+ * pagina (ADR-0062, frasi composte nel codice): `codiceInParole` da solo lo scriveva sempre in
+ * italiano («Filiale 1» anche in inglese). Un codice nuovo senza etichetta cade ancora in parole.
+ */
+export function sedeInParole(codice: string, t: (k: string, o?: Record<string, unknown>) => string): string {
+  const filiale = /^FILIALE_(\d+)$/.exec(codice);
+  if (filiale) return t("organigramma.sede.filiale", { n: filiale[1] });
+  return t(`organigramma.sede.${codice}`, { defaultValue: codiceInParole(codice) });
+}

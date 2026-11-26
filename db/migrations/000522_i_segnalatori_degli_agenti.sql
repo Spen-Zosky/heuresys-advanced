@@ -32,6 +32,9 @@
 --      mai a chi è titolare della posizione (classe EVALUATION «nonASe» del faldone);
 --   G5 niente doppioni: una sola segnalazione APERTA per destinatario e per chiave.
 --
+-- CANCELLAZIONE DELLA PERSONA: il vincolo sys_agent_signals_recipient_fk è ON DELETE CASCADE, ed è
+--   nell'allowlist della sentinella sys.v_history_cascade_to_users (000303, emendata lì); la tabella è
+--   nel registro GDPR come PERSONAL/DELETE/SUBJECT, come sys_inbox_notifications (sezione 4).
 -- I DATI. La tabella nasce vuota; la riempie solo il segnalatore notturno
 -- (heuresys-advanced-agent-signals.timer). Ragione scritta nell'elenco di storia36.
 -- CLASSIFICAZIONE E REGISTRO: tabella classificata in 000429 e registrata in 000062, file di
@@ -39,10 +42,12 @@
 -- IDEMPOTENTE: IF NOT EXISTS, vincoli in forma DROP/ADD, funzioni CREATE OR REPLACE, trigger
 --   DROP IF EXISTS / CREATE, vista CREATE OR REPLACE.
 -- ROLLBACK DICHIARATO (elenco esplicito):
+--   DELETE FROM sys.sys_gdpr_data_map WHERE (gdpr_map_table_schema, gdpr_map_table_name,
+--     gdpr_map_subject_fk) = ('sys','sys_agent_signals','agent_signal_recipient_user_id');
 --   DROP VIEW sys.v_agent_signals_fuori_perimetro;
 --   DROP TABLE sys.sys_agent_signals;
 --   DROP FUNCTION sys.sys_agent_signal_guardia(), sys.sys_agent_signal_destinatario_ammesso(uuid, uuid, varchar, varchar, uuid);
---   e le righe in 000429, 000062 e db/scripts/audit-storia36-empty-tables.txt.
+--   e le righe in 000303, 000429, 000062 e db/scripts/audit-storia36-empty-tables.txt.
 -- ============================================================================================
 
 \set ON_ERROR_STOP on
@@ -58,7 +63,8 @@ CREATE TABLE IF NOT EXISTS sys.sys_agent_signals (
   agent_signal_domain            varchar(24) NOT NULL,
   agent_signal_subject_type      varchar(24) NOT NULL,
   agent_signal_subject_id        uuid NOT NULL,
-  agent_signal_recipient_user_id uuid NOT NULL REFERENCES sys.sys_users(user_id) ON DELETE CASCADE,
+  agent_signal_recipient_user_id uuid NOT NULL
+    CONSTRAINT sys_agent_signals_recipient_fk REFERENCES sys.sys_users(user_id) ON DELETE CASCADE,
   agent_signal_recipient_basis   varchar(16) NOT NULL,
   agent_signal_severity          varchar(16) NOT NULL,
   agent_signal_dedupe_key        varchar(255) NOT NULL,
@@ -225,7 +231,18 @@ SELECT s.agent_signal_id, s.agent_signal_tenant_id, s.agent_signal_signaler_code
 COMMENT ON VIEW sys.v_agent_signals_fuori_perimetro IS
   'Sentinella (000522): segnalazioni aperte il cui destinatario non ha più titolo a riceverle. Deve essere vuota dopo ogni giro dei segnalatori.';
 
--- ── 4. Post-condizione ───────────────────────────────────────────────────────────────────────
+-- ── 4. GDPR: la segnalazione è indirizzata alla persona e si cancella con lei ─────────────────
+INSERT INTO sys.sys_gdpr_data_map (
+  gdpr_map_table_schema, gdpr_map_table_name, gdpr_map_subject_fk,
+  gdpr_map_data_class, gdpr_map_erasure_strategy, gdpr_map_reference_kind,
+  gdpr_map_retention_days, gdpr_map_age_column, gdpr_map_legal_basis
+) VALUES
+  ('sys', 'sys_agent_signals', 'agent_signal_recipient_user_id',
+   'PERSONAL', 'DELETE', 'SUBJECT', NULL, NULL,
+   'Segnalazioni degli agenti indirizzate alla persona (ADR-0063 E6, mig 000522), come gli avvisi della casella. Si cancellano con la persona.')
+ON CONFLICT (gdpr_map_table_schema, gdpr_map_table_name, gdpr_map_subject_fk) DO NOTHING;
+
+-- ── 5. Post-condizione ───────────────────────────────────────────────────────────────────────
 DO $$
 DECLARE n int;
 BEGIN

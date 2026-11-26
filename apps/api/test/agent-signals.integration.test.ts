@@ -125,9 +125,9 @@ describe("segnalatori F4a: il giro", () => {
          agent_signal_subject_type, agent_signal_subject_id, agent_signal_recipient_user_id, agent_signal_recipient_basis,
          agent_signal_severity, agent_signal_dedupe_key, agent_signal_expires_on)
        VALUES ($1, 'AMPIEZZA_DI_CONTROLLO', 'ORGANIZZAZIONE', 'POSITION', $2, $3, 'MANDATO_HR', 'MEDIUM',
-               'AMPIEZZA_DI_CONTROLLO:prova-' || $2, current_date + 30)
+               $4, current_date + 30)
        RETURNING agent_signal_id AS id`,
-      [tenantId, riga.position_id, riga.user_id],
+      [tenantId, riga.position_id, riga.user_id, `AMPIEZZA_DI_CONTROLLO:prova-${riga.position_id}`],
     );
     const esito = await giro();
     expect(esito.resolved).toBeGreaterThanOrEqual(1);
@@ -185,8 +185,8 @@ describe("segnalatori F4a: la guardia del perimetro nel database (000522)", () =
       `INSERT INTO sys.sys_agent_signals (agent_signal_tenant_id, agent_signal_signaler_code, agent_signal_domain,
          agent_signal_subject_type, agent_signal_subject_id, agent_signal_recipient_user_id, agent_signal_recipient_basis,
          agent_signal_severity, agent_signal_dedupe_key, agent_signal_expires_on)
-       VALUES ($1, $2, 'ORGANIZZAZIONE', 'POSITION', $3, $4, $5, 'MEDIUM', 'prova-guardia:' || $4 || ':' || $2, current_date + 30)`,
-      [tenantId, signaler, subject, recipient, basis],
+       VALUES ($1, $2, 'ORGANIZZAZIONE', 'POSITION', $3, $4, $5, 'MEDIUM', $6, current_date + 30)`,
+      [tenantId, signaler, subject, recipient, basis, `prova-guardia:${recipient}:${signaler}`],
     );
 
   it("il capo dell'unità del soggetto è ammesso con CATENA", async () => {

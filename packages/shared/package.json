@@ -692,6 +692,11 @@
       "heuresys-source": "./src/schemas/agent-capabilities.ts",
       "default": "./dist/schemas/agent-capabilities.js"
     },
+    "./schemas/agent-signals": {
+      "types": "./dist/schemas/agent-signals.d.ts",
+      "heuresys-source": "./src/schemas/agent-signals.ts",
+      "default": "./dist/schemas/agent-signals.js"
+    },
     "./schemas/agent-weekly-summary": {
       "types": "./dist/schemas/agent-weekly-summary.d.ts",
       "heuresys-source": "./src/schemas/agent-weekly-summary.ts",

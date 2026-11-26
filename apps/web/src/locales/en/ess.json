@@ -297,6 +297,18 @@
       "AGENT_WEEKLY_SUMMARY": {
         "subject": "Weekly assistant summary: week from {{from}}",
         "body": "From {{from}} to {{to}}: {{confirmed}} writes confirmed, {{denied}} denied, {{autonomous}} executed without confirmation."
+      },
+      "AGENT_SIGNAL_POSIZIONE_CRITICA_SENZA_SUCCESSORE": {
+        "subject": "Signal: critical position without a ready successor",
+        "body": "The critical position “{{position}}” in “{{unit}}” has no successor ready now: {{candidates}} candidates in the pool, {{ready6Months}} ready within six months."
+      },
+      "AGENT_SIGNAL_AMPIEZZA_DI_CONTROLLO": {
+        "subject": "Signal: span of control above the threshold",
+        "body": "The position “{{position}}” in “{{unit}}” has {{reports}} direct reports, above the threshold of {{threshold}}."
+      },
+      "AGENT_SIGNAL_POSIZIONE_SCOPERTA": {
+        "subject": "Signal: position without an incumbent",
+        "body": "The position “{{position}}” in “{{unit}}” has had no incumbent for {{days}} days."
       }
     },
     "approvals": {

@@ -157,30 +157,55 @@ describe("#156 il file generato sul disco è coerente con la decisione", () => {
     expect(aperti).not.toContain("whistleblowing");
     // Un modulo con dati di persona ora si legge, con il permesso della persona: è l'API a filtrare.
     expect(aperti).toContain("compensation");
-    for (const op of Object.values(vero.operationsOf("compensation"))) expect(op.method).toBe("GET");
+    // F1 (ADR-0063): le sue scritture entrano con la classe C (ADR-0036 §5), le letture con la A.
+    for (const op of Object.values(vero.operationsOf("compensation"))) {
+      expect(op.classe).toBe(op.method === "GET" ? "A" : "C");
+    }
   });
 
-  it("le scritture sono SOLO quelle elencate nei perimetri decisi, e nessuna è una cancellazione", () => {
-    // Fino all'ondata 4 (2026-11-18) la mappa non conteneva nessuna scrittura. Ora un perimetro può
-    // aprirne, ma solo per nome (`scritture`) e con la decisione scritta: l'atteso si deriva da lì.
+  it("F1: le scritture sono SOLO quelle con classe B o C nel registro, e le cancellazioni solo logiche", () => {
+    // Dall'ondata 4 al 2026-11-25 le scritture si aprivano per nome nei perimetri. Da F1 (ADR-0063)
+    // le apre il registro delle classi: l'atteso si deriva da lì, mai da una fotografia.
+    const registro = JSON.parse(
+      readFileSync(join(radiceRepo(), "docs", "kb", "agent-classi-scritture.json"), "utf8"),
+    ) as { scritture: Record<string, Record<string, { metodo: string; classe?: string; fuori?: string; verifica?: string }>> };
     const perimetri = JSON.parse(
       readFileSync(join(radiceRepo(), "docs", "kb", "agent-perimetri.json"), "utf8"),
-    ) as { aperti?: Array<{ concetto: string; sola_lettura?: boolean; scritture?: string[] }> };
-    const ammesse = new Set<string>();
-    for (const v of perimetri.aperti ?? []) {
-      if (!v.sola_lettura) for (const w of v.scritture ?? []) ammesse.add(`${v.concetto}.${w}`);
+    ) as { aperti?: Array<{ concetto: string; scritture?: string[] }> };
+    const aperti = new Set(vero.conceptIds());
+    const attese = new Set<string>();
+    for (const [cid, ops] of Object.entries(registro.scritture)) {
+      if (!aperti.has(cid)) continue; // più prefissi o fuori dalle letture: il concetto non c'è
+      for (const [opId, v] of Object.entries(ops)) if (v.classe === "B" || v.classe === "C") attese.add(`${cid}.${opId}`);
     }
-    expect(ammesse.size, "ondata 4: le scritture decise non si leggono").toBeGreaterThan(0);
+    expect(attese.size, "F1: il registro non apre scritture").toBeGreaterThan(150);
     const trovate = new Set<string>();
     for (const cid of vero.conceptIds()) {
       for (const [opId, op] of Object.entries(vero.operationsOf(cid))) {
-        if (["GET", "HEAD"].includes(op.method)) continue;
-        expect(op.method, `${cid}.${opId}: una cancellazione non si apre all'agente`).not.toBe("DELETE");
-        expect(ammesse.has(`${cid}.${opId}`), `${cid}.${opId} è una scrittura che nessuna decisione elenca`).toBe(true);
+        if (op.method === "GET") {
+          expect(op.classe, `${cid}.${opId}: una lettura è di classe A`).toBe("A");
+          continue;
+        }
+        const riga = registro.scritture[cid]?.[opId];
+        expect(riga?.fuori, `${cid}.${opId}: esclusa nel registro ma presente nella mappa`).toBeUndefined();
+        expect(op.classe, `${cid}.${opId}: la classe della mappa non è quella del registro`).toBe(riga?.classe);
+        if (op.method === "DELETE") {
+          expect(op.classe, `${cid}.${opId}: una cancellazione è sempre C`).toBe("C");
+          expect(riga?.verifica, `${cid}.${opId}: cancellazione senza prova del ritiro logico`).toBeTruthy();
+        }
         trovate.add(`${cid}.${opId}`);
       }
     }
-    expect([...trovate].sort()).toEqual([...ammesse].sort());
+    expect([...trovate].sort()).toEqual([...attese].sort());
+    // Le scritture decise nei perimetri prima di F1 ci sono ancora tutte.
+    for (const v of perimetri.aperti ?? []) {
+      for (const w of v.scritture ?? []) expect(trovate.has(`${v.concetto}.${w}`), `${v.concetto}.${w}`).toBe(true);
+    }
+    // CONTROPROVA: le esclusioni non esistono nella mappa (accessi, governo degli agenti, cancellazioni fisiche).
+    expect(vero.methodOf("agent-capabilities", "post_by_id_mode")).toBeUndefined();
+    expect(vero.methodOf("users", "post_by_id_roles")).toBeUndefined();
+    expect(vero.methodOf("users", "delete_by_id_purge")).toBeUndefined();
+    expect(vero.methodOf("kpi-definitions", "delete_by_id")).toBeUndefined();
   });
 
   it("ogni concetto dichiara la base su cui l'API lo monta (ondata 4)", () => {

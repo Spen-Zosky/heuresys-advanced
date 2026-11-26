@@ -39,6 +39,10 @@
   "cancellazione-fisica": {
    "di_business": true,
    "cosa": "l'API cancella la riga: classe X, fuori dal catalogo finché non diventa un ritiro logico (ADR-0035)"
+  },
+  "caricamento-file": {
+   "di_business": false,
+   "cosa": "caricamento di file in multipart: l'agente non porta file, li carica la persona dalla pagina"
   }
  },
  "scritture": {
@@ -622,10 +626,10 @@
     "ragione": "struttura del tenant, non una singola persona"
    },
    "post_by_id_media": {
-    "classe": "B",
     "metodo": "POST",
     "percorso": "/:id/media",
-    "ragione": "struttura del tenant, non una singola persona"
+    "ragione": "caricamento multipart di un file: lo fa la persona dalla pagina",
+    "fuori": "caricamento-file"
    },
    "post_by_id_publish": {
     "classe": "C",

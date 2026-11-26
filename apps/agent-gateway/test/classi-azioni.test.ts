@@ -70,6 +70,21 @@ describe("lo strumento generico prende la classe dall'operazione risolta", () =>
     expect(classeAzione("hrx_entity_query", { conceptId: "c", operationId: "togli" }, resolver)).toBe("C");
   });
 
+  it("F1: con la classe della mappa, una scrittura è B o C come dice il registro; una GET resta A", () => {
+    const classi: Record<string, "A" | "B" | "C"> = { "c:crea": "B", "c:togli": "C", "c:leggi": "B" };
+    const conClassi = { methodOf: resolver.methodOf, classOf: (c: string, o: string) => classi[`${c}:${o}`] };
+    expect(classeAzione("hrx_entity_query", { conceptId: "c", operationId: "crea" }, conClassi)).toBe("B");
+    expect(classeAzione("hrx_entity_query", { conceptId: "c", operationId: "togli" }, conClassi)).toBe("C");
+    expect(classeAzione("hrx_entity_query", { conceptId: "c", operationId: "leggi" }, conClassi)).toBe("A");
+  });
+
+  it("CONTROPROVA F1: una scrittura senza classe nella mappa, o dichiarata A, è C", () => {
+    const senza = { methodOf: resolver.methodOf, classOf: () => undefined };
+    const mite = { methodOf: resolver.methodOf, classOf: () => "A" as const };
+    expect(classeAzione("hrx_entity_query", { conceptId: "c", operationId: "crea" }, senza)).toBe("C");
+    expect(classeAzione("hrx_entity_query", { conceptId: "c", operationId: "crea" }, mite)).toBe("C");
+  });
+
   it("CONTROPROVA: operazione ignota, input incompleto o risolutore assente non hanno classe", () => {
     expect(classeAzione("hrx_entity_query", { conceptId: "c", operationId: "boh" }, resolver)).toBeUndefined();
     expect(classeAzione("hrx_entity_query", { conceptId: "c" }, resolver)).toBeUndefined();

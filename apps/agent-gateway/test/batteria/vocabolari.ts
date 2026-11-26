@@ -23,14 +23,14 @@ export const VOCABOLARI: Record<string, Record<string, Voce>> = {
     promotion: voce("promozione", "promozioni", "avanzamento"),
   },
   rischio: {
-    LOW: voce("basso"),
-    MEDIUM: voce("medio"),
-    HIGH: voce("alto", "elevato"),
+    LOW: voce("basso", "bassa"),
+    MEDIUM: voce("medio", "media"),
+    HIGH: voce("alto", "alta", "elevato", "elevata"),
   },
   talento: {
     STAR: voce("star", "stella", "talento eccellente", "talento di punta"),
-    HIGH_PERFORMER: voce("high performer", "prestazione elevata", "alte prestazioni", "alta prestazione", "alto rendimento", "prestazioni elevate"),
-    CORE: voce("core", "solido", "pilastro", "nucleo", "contributore chiave", "fondamentale"),
+    HIGH_PERFORMER: voce("high performer", "prestazione elevata", "alte prestazioni", "alta prestazione", "alto rendimento", "prestazioni elevate", "alta performance"),
+    CORE: voce("core", "solido", "pilastro", "nucleo", "contributore chiave", "fondamentale", "centrale"),
   },
   esito: {
     APPROVED: voce("approvata", "approvato", "approvate", "approvati"),

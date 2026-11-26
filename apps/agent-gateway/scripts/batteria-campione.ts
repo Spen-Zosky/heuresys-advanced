@@ -55,7 +55,7 @@ function inParole(x: Atteso): string {
     default: return nomi;
   }
 }
-const cella = (s: string) => s.replace(/\|/g, "\\|").replace(/\r?\n+/g, " <br> ");
+const cella = (s: string) => s.replace(/\\/g, "\\\\").replace(/\|/g, "\\|").replace(/\r?\n+/g, " <br> ");
 
 const scelte = mazzo.slice(0, quante);
 const righe = scelte.map((d, i) => {

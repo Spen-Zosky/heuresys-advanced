@@ -3,7 +3,7 @@
 # risposte attese, pone le domande, ferma il gateway. Si lancia dalla radice del repo, sulla macchina
 # che ha il database e l'API (mai sulla produzione: ogni domanda apre una conversazione).
 #
-#   bash apps/agent-gateway/scripts/batteria-corsa.sh <cartella-uscita> [opzioni di batteria-corri.ts]
+#   BATTERIA_SU_COPIA=1 bash apps/agent-gateway/scripts/batteria-corsa.sh <cartella-uscita> [opzioni di batteria-corri.ts]
 #
 # Variabili: HEURESYS_API (predefinita http://127.0.0.1:8013), BATTERIA_PORTA (8791).
 # Rilanciato sulla stessa cartella riprende la corsa. Uscita: quella di batteria-corri.ts.
@@ -16,6 +16,12 @@ porta="${BATTERIA_PORTA:-8791}"
 mkdir -p "$uscita"
 uscita="$(cd "$uscita" && pwd)"
 cd "$radice/apps/agent-gateway"
+
+# Solo su una copia (due condizioni): lo dichiara chi lancia, e qui non gira la produzione.
+if [ "${BATTERIA_SU_COPIA:-}" != "1" ] || [ -d "$HOME/heuresys-servizio/advanced-produzione" ]; then
+  echo "[batteria] rifiuto: serve BATTERIA_SU_COPIA=1 su una macchina che non serve la produzione" >&2
+  exit 2
+fi
 
 # Il token di lunga durata degli agenti: si carica nell'ambiente, non si stampa.
 . "$HOME/.claude/tools/token-agenti.sh" carica
@@ -40,7 +46,7 @@ done
 
 # Le domande si generano e si verificano sullo stesso database che il gateway legge, una volta per corsa.
 [ -f "$uscita/domande.json" ] || node_modules/.bin/tsx scripts/batteria-genera.ts --esci "$uscita/domande.json"
-node_modules/.bin/tsx scripts/batteria-verifica.ts --domande "$uscita/domande.json" || echo "[batteria] ATTENZIONE: attese vecchie (vedi sopra)"
+node_modules/.bin/tsx scripts/batteria-verifica.ts --domande "$uscita/domande.json" || { echo "[batteria] attese vecchie: rigenera domande.json nella cartella di uscita" >&2; exit 2; }
 
 AGENT_GATEWAY="http://127.0.0.1:$porta" node_modules/.bin/tsx scripts/batteria-corri.ts \
   --domande "$uscita/domande.json" --registro "$uscita/registro.jsonl" "$@"

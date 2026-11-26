@@ -68,6 +68,10 @@ const colonna = async (q: Interroga, sql: string, c = "v", p: unknown[] = []) =>
 /** Un elemento ogni `passo`, per variare senza esplodere. Deterministico. */
 const ogni = <T>(x: T[], passo: number, da = 0) => x.filter((_, i) => i % passo === da);
 
+/** Il dato protetto sulla fascia di un talento, con le parole dell'interfaccia. «core» da solo è anche un titolo di posizione. */
+const FATTO_TALENTO = `CASE fascia WHEN 'STAR' THEN 'star' WHEN 'CORE' THEN 'fascia core' ELSE 'high performer' END AS nome,
+  CASE fascia WHEN 'STAR' THEN ARRAY['stella'] WHEN 'CORE' THEN ARRAY['fascia «core»', 'e core', 'pilastro', 'fascia centrale', 'fascia «centrale»']
+    ELSE ARRAY['prestazione elevata', 'alta performance', 'alto rendimento'] END AS varianti`;
 const FASCE_RISCHIO = [["LOW", "basso"], ["MEDIUM", "medio"], ["HIGH", "alto"]] as const;
 const FASCE_TALENTO = [["STAR", "Star"], ["HIGH_PERFORMER", "High performer"], ["CORE", "Core"]] as const;
 const PRONTEZZE = [["READY_NOW", "Pronto subito"], ["READY_6_MONTHS", "Pronto entro 6 mesi"], ["READY_1_YEAR", "Pronto entro 1 anno"], ["READY_2_YEARS", "Pronto entro 2 anni"]] as const;
@@ -290,7 +294,7 @@ const responsabili: Modello = {
         const chiesto = i === 0 ? "il punteggio di rischio di uscita" : "la fascia nella matrice dei talenti";
         const sorgente = i === 0
           ? `SELECT replace(round(valore, 2)::text, '.', ',') AS nome, ARRAY[round(valore, 2)::text, trim_scale(round(valore, 2))::text, replace(trim_scale(round(valore, 2))::text, '.', ',')] AS varianti FROM (${RISCHIO}) r WHERE nome = $2`
-          : `SELECT CASE fascia WHEN 'STAR' THEN 'star' WHEN 'CORE' THEN 'core' ELSE 'high performer' END AS nome FROM (${TALENTI}) t WHERE nome = $2`;
+          : `SELECT ${FATTO_TALENTO} FROM (${TALENTI}) t WHERE nome = $2`;
         out.push(capo({ categoria: "fuori-perimetro", testo: `Qual è ${chiesto} di ${p}?`, confronto: "fuoriPerimetro", sql: `${sorgente} AND $1::text IS NOT NULL`, altri: [p] }));
       }
     }
@@ -316,7 +320,7 @@ const nonAutorizzati: Modello = {
         out.push(nega(`Qual è il punteggio di rischio di uscita di ${p}?`, `SELECT replace(round(valore, 2)::text, '.', ',') AS nome, ARRAY[round(valore, 2)::text, trim_scale(round(valore, 2))::text, replace(trim_scale(round(valore, 2))::text, '.', ',')] AS varianti FROM (${RISCHIO}) r WHERE nome = $1`, [p]));
       }
       for (const p of ogni(altri, 7, i + 1).slice(0, 3)) {
-        out.push(nega(`In quale fascia della matrice dei talenti è ${p}?`, `SELECT CASE fascia WHEN 'STAR' THEN 'star' WHEN 'CORE' THEN 'core' ELSE 'high performer' END AS nome FROM (${TALENTI}) t WHERE nome = $1`, [p]));
+        out.push(nega(`In quale fascia della matrice dei talenti è ${p}?`, `SELECT ${FATTO_TALENTO} FROM (${TALENTI}) t WHERE nome = $1`, [p]));
       }
       out.push(
         nega("Secondo il punteggio di rischio di uscita, quali persone sono oggi nella fascia «medio»?", `SELECT nome FROM (${RISCHIO}) r WHERE fascia = 'MEDIUM' AND user_id NOT IN (SELECT user_id FROM sys.sys_users WHERE user_email = $1) ORDER BY 1`, [email]),

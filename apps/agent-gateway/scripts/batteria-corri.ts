@@ -2,7 +2,7 @@
  * Il corridore: pone ogni domanda all'assistente (gateway) con l'identità del profilo e confronta.
  *
  *   cd apps/agent-gateway && HEURESYS_API=http://127.0.0.1:8013 AGENT_GATEWAY=http://127.0.0.1:8790 \
- *     pnpm exec tsx scripts/batteria-corri.ts --registro <file.jsonl> [--domande <file>] [--solo <regex sugli id>] [--insieme 3]
+ *     pnpm exec tsx scripts/batteria-corri.ts --registro <file.jsonl> [--domande <file>] [--solo <inizi di id, separati da virgola>] [--insieme 3]
  *
  * Si usa sul gemello: ogni domanda apre una conversazione della persona e scrive nel diario.
  * Le sole conferme che il corridore concede sono quelle di LETTURA (la soglia delle persone, che la
@@ -12,6 +12,8 @@
  */
 import { createHmac } from "node:crypto";
 import { appendFileSync, existsSync, readFileSync } from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
 import { caricaSegretiTotp, totpSecretFor } from "../../api/test/helpers/mfa-fixture-secrets.js";
 import { pool } from "../../api/src/db/client.js";
 import { passwordFor } from "../../api/test/helpers/personas.js";
@@ -144,12 +146,22 @@ async function poni(d: Domanda): Promise<Omit<Riga, "giusta" | "motivo">> {
   return { ...base, risposta: risposta || ultimoTesto, strumenti, conferme: letture, conversazione, durataMs: Date.now() - inizio, ...(guasto ? { guasto } : {}) };
 }
 
+/**
+ * La corsa scrive (conversazioni, diario, accessi): va solo su una copia. Due condizioni: chi lancia
+ * lo dichiara (`BATTERIA_SU_COPIA=1`) e la macchina non è quella che serve la produzione.
+ */
+function pretendiCopia(): void {
+  if (process.env.BATTERIA_SU_COPIA !== "1") throw new Error("manca BATTERIA_SU_COPIA=1: la corsa si fa solo su una copia del database");
+  if (existsSync(join(homedir(), "heuresys-servizio", "advanced-produzione"))) throw new Error("questa macchina serve la produzione: la corsa non parte");
+}
+
 async function main(): Promise<void> {
+  pretendiCopia();
   const registro = opzione("registro");
   if (!registro) throw new Error("serve --registro <file.jsonl>");
   const b = JSON.parse(readFileSync(opzione("domande") ?? BATTERIA, "utf8")) as Batteria;
-  const solo = new RegExp(opzione("solo") ?? ".");
-  const scelte = b.domande.filter((d) => solo.test(d.id));
+  const solo = opzione("solo")?.split(",");
+  const scelte = b.domande.filter((d) => !solo || solo.some((prefisso) => d.id.startsWith(prefisso)));
   const fatte = new Map<string, Riga>();
   if (existsSync(registro)) {
     for (const l of readFileSync(registro, "utf8").split("\n").filter(Boolean)) {

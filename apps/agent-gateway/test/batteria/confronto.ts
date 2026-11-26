@@ -54,6 +54,8 @@ function numeroIn(testo: string): number | null {
   const t = normalizza(testo)
     // «sei» verbo («sei tra le persone»), non il numero.
     .replace(/\bsei(?=\s+(tra|fra|in|nel|nella|tu|autorizzat[oa]|candidat[oa]|il|la|un|una)\b)/g, " ")
+    // «Su 11 posizioni, 7»: il totale di riferimento non è la risposta.
+    .replace(/\bsu\s+\d+\b/g, " ")
     .replace(/\b\d{1,2}\/\d{1,2}\/\d{2,4}\b/g, " ")
     .replace(/\b9[- ]?box\b/g, " ")
     .replace(/\b(entro|in|a)\s+(\d+|un|uno|due)\s+(mesi|mese|anni|anno)\b/g, " ")
@@ -75,7 +77,7 @@ function numeroIn(testo: string): number | null {
 /** Sì o No in apertura di risposta, o in apertura del primo paragrafo che lo dice (dopo una riga di lavoro). */
 export function siNo(risposta: string): boolean | null {
   const t = normalizza(risposta).trim().replace(/^[^\p{L}]+/u, "");
-  const m = /^(si|no)(?![\p{L}'])/u.exec(t) ?? /\n\s*(si|no)\s*[.,:;!]/u.exec(t) ?? /(?<![\p{L}])(?:la risposta e|risposta:)\s*(si|no)(?![\p{L}])/u.exec(t);
+  const m = /^(si|no)(?=\s*(?:[.,:;!(—–-]|$))/u.exec(t) ?? /\n\s*(si|no)\s*[.,:;!]/u.exec(t) ?? /(?<![\p{L}])(?:la risposta e|risposta:)\s*(si|no)(?![\p{L}])/u.exec(t);
   return m ? m[1] === "si" : null;
 }
 
@@ -139,6 +141,8 @@ export function confronta(atteso: Atteso, risposta: string): Esito {
     case "ordine":
     case "primo": {
       const voci = atteso.voci!;
+      // «Nessuna: Tizio e Caio sono fuori» nomina i nomi attesi per escluderli.
+      if (/^\s*(nessun[oa]?\b|no\b)/.test(t)) return no("risponde che non c'è nessuno");
       const mancanti = voci.filter((v) => !presente(t, v));
       if (mancanti.length) return no(`mancano: ${mancanti.map((v) => v.nome).join("; ")}`);
       if (atteso.confronto === "primo") {

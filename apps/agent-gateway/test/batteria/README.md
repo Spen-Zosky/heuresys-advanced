@@ -22,11 +22,11 @@ pnpm exec tsx scripts/batteria-verifica.ts    # uscita 1 se una risposta attesa 
 La corsa, dalla radice del repo, sulla copia del database (il gemello): avvia un gateway proprio sulla porta 8791, genera le domande nella cartella di uscita se mancano, le verifica, le pone, salva `registro.jsonl` e stampa l'esito per categoria e profilo. Rilanciata sulla stessa cartella riprende.
 
 ```bash
-bash apps/agent-gateway/scripts/batteria-corsa.sh <cartella-uscita> --insieme 4
+BATTERIA_SU_COPIA=1 bash apps/agent-gateway/scripts/batteria-corsa.sh <cartella-uscita> --insieme 4
 pnpm --filter @heuresys/agent-gateway exec tsx scripts/batteria-campione.ts --domande <cartella>/domande.json --registro <cartella>/registro.jsonl --esci <file.md>
 ```
 
-Ogni domanda apre una conversazione della persona e scrive nel diario del gateway: per questo la corsa non si fa sulla produzione. Il corridore concede le sole conferme di lettura (la soglia delle persone) e nega ogni scrittura.
+Ogni domanda apre una conversazione della persona e scrive nel diario del gateway: per questo la corsa non si fa sulla produzione, e gli script rifiutano di partire senza `BATTERIA_SU_COPIA=1` o su una macchina che serve la produzione. Se le attese sono vecchie la corsa si ferma. Il corridore concede le sole conferme di lettura (la soglia delle persone) e nega ogni scrittura.
 
 ## Come si scrive una domanda
 

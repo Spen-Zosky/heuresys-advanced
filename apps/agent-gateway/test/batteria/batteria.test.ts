@@ -62,6 +62,8 @@ describe("batteria: il confronto", () => {
     expect(siNo("**Sì**, c'è.")).toBe(true);
     expect(siNo("No: nessuno.")).toBe(false);
     expect(siNo("Non risulta.")).toBeNull();
+    expect(siNo("Si tratta di un caso.")).toBeNull();
+    expect(primoNumero("**Su 11 posizioni critiche, 7 sono scoperte.**")).toBe(7);
     expect(siNo("Ho controllato la posizione.\n\n**No.** Non è fra le critiche.")).toBe(false);
     expect(siNo("Non ho potuto verificarlo.\nNon ti do né un sì né un no.")).toBeNull();
   });
@@ -79,6 +81,7 @@ describe("batteria: il confronto", () => {
     const ord = attesoDaRighe("ordine", righe)!;
     expect(confronta(ord, "1. Rossi, Alice\n2. Gallo, Pietro").giusta).toBe(true);
     expect(confronta(ord, "1. Gallo, Pietro\n2. Rossi, Alice").giusta).toBe(false);
+    expect(confronta(ins, "Nessuna. Rossi, Alice e Gallo, Pietro sono fuori dal perimetro.").giusta).toBe(false);
     expect(attesoDaRighe("ordine", righe.map((r) => ({ ...r, valore: 1 })))).toBeNull();
   });
 

@@ -29,7 +29,8 @@ const b: Batteria = await conSolaLettura(async (q, database) => {
 });
 
 const difetti = controllaBatteria(b, new Set(Object.keys(PROFILI)));
-writeFileSync(uscita, `${JSON.stringify(b, null, 1)}\n`);
-console.log(`scritte ${b.domande.length} domande in ${uscita} (database ${b.database}, ${adesso})`);
+// Una batteria difettosa non si scrive: al rilancio verrebbe riusata senza controlli.
+if (difetti.length === 0) writeFileSync(uscita, `${JSON.stringify(b, null, 1)}\n`);
+console.log(`${difetti.length ? "NON scritte" : "scritte"} ${b.domande.length} domande in ${uscita} (database ${b.database}, ${adesso})`);
 for (const d of difetti) console.error(`DIFETTO ${d}`);
 process.exitCode = difetti.length ? 1 : 0;

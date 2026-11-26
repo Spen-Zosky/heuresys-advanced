@@ -21,7 +21,7 @@ import { useTranslation } from "react-i18next";
 import { RefreshCw } from "lucide-react";
 import { Button } from "@heuresys/ui";
 import { useFormat } from "@/lib/format";
-import { codiceInParole } from "@/lib/enum-labels";
+import { sedeInParole } from "@/lib/enum-labels";
 import { conVertice, gruppi, type Gruppo, type UnitaBlocco } from "@/lib/organigramma-blocchi";
 import { useOrganigramma, aBlocchi } from "./dati";
 import { useScheda } from "@/components/scheda-rapida";
@@ -74,7 +74,7 @@ export function VistaOrganigramma({
   const nome = d.cliente.replace(/[^\p{L}\p{N}]+/gu, "_");
   // Una sede che non è né la centrale né una filiale (per esempio un centro operativo) si chiama
   // con il suo codice del modello, scritto in parole.
-  const titolo = (g: Gruppo) => (g.sede ? codiceInParole(g.sede) : t(`organigramma.${g.chiave}`));
+  const titolo = (g: Gruppo) => (g.sede ? sedeInParole(g.sede, t) : t(`organigramma.${g.chiave}`));
   // Le unità contate sono i riquadri disegnati: la società, quando è l'etichetta del disegno, non lo è.
   const quante = (us: UnitaBlocco[]) => conVertice(us).unita.length;
   const societa = conVertice(blocchi).etichetta;

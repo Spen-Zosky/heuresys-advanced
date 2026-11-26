@@ -749,7 +749,7 @@
     "skills": {
       "title": "Required skills",
       "back": "← Position",
-      "count": "{{count}} skill linked",
+      "count": "{{count}} skills linked",
       "count_one": "{{count}} skill linked",
       "cardTitle": "Requirements",
       "empty": "No required skill declared.",

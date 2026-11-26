@@ -1234,6 +1234,11 @@
     "centrale": "Head office",
     "filiali": "Branches",
     "riepilogo": "{{unita}} units, {{persone}} people",
+    "sede": {
+      "filiale": "Branch {{n}}",
+      "SEDE_CENTRALE": "Head office",
+      "UFFICIO": "Office"
+    },
     "riepilogoFiliali": "{{sedi}} branches, {{unita}} units, {{persone}} people",
     "persone_one": "{{count}} person",
     "persone_other": "{{count}} people",

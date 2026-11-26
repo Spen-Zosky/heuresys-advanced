@@ -172,10 +172,12 @@ describe("#156 il file generato sul disco è coerente con la decisione", () => {
     const perimetri = JSON.parse(
       readFileSync(join(radiceRepo(), "docs", "kb", "agent-perimetri.json"), "utf8"),
     ) as { aperti?: Array<{ concetto: string; scritture?: string[] }> };
-    const aperti = new Set(vero.conceptIds());
+    // Un modulo montato su più prefissi (il consolidamento) si apre come un concetto per prefisso,
+    // ognuno con il suo `modulo`: il conto si fa per modulo, come lo tiene il registro.
+    const aperti = new Set(vero.conceptIds().map((c) => vero.moduleOf(c)));
     const attese = new Set<string>();
     for (const [cid, ops] of Object.entries(registro.scritture)) {
-      if (!aperti.has(cid)) continue; // più prefissi o fuori dalle letture: il concetto non c'è
+      if (!aperti.has(cid)) continue; // fuori dalle letture: il concetto non c'è
       for (const [opId, v] of Object.entries(ops)) if (v.classe === "B" || v.classe === "C") attese.add(`${cid}.${opId}`);
     }
     expect(attese.size, "F1: il registro non apre scritture").toBeGreaterThan(150);
@@ -186,14 +188,15 @@ describe("#156 il file generato sul disco è coerente con la decisione", () => {
           expect(op.classe, `${cid}.${opId}: una lettura è di classe A`).toBe("A");
           continue;
         }
-        const riga = registro.scritture[cid]?.[opId];
+        const modulo = vero.moduleOf(cid);
+        const riga = registro.scritture[modulo]?.[opId];
         expect(riga?.fuori, `${cid}.${opId}: esclusa nel registro ma presente nella mappa`).toBeUndefined();
         expect(op.classe, `${cid}.${opId}: la classe della mappa non è quella del registro`).toBe(riga?.classe);
         if (op.method === "DELETE") {
           expect(op.classe, `${cid}.${opId}: una cancellazione è sempre C`).toBe("C");
           expect(riga?.verifica, `${cid}.${opId}: cancellazione senza prova del ritiro logico`).toBeTruthy();
         }
-        trovate.add(`${cid}.${opId}`);
+        trovate.add(`${modulo}.${opId}`);
       }
     }
     expect([...trovate].sort()).toEqual([...attese].sort());
@@ -206,6 +209,13 @@ describe("#156 il file generato sul disco è coerente con la decisione", () => {
     expect(vero.methodOf("users", "post_by_id_roles")).toBeUndefined();
     expect(vero.methodOf("users", "delete_by_id_purge")).toBeUndefined();
     expect(vero.methodOf("kpi-definitions", "delete_by_id")).toBeUndefined();
+    // Le scritture riservate al pulsante della pagina restano fuori anche dal consolidamento aperto.
+    expect(vero.methodOf("tenant-consolidations", "post_by_id_apply_changes")).toBeUndefined();
+    expect(vero.methodOf("consolidation-runs", "post_by_runid_definitive")).toBeUndefined();
+    expect(vero.methodOf("consolidation-runs", "post_by_runid_alignment_approve")).toBeUndefined();
+    expect(vero.methodOf("consolidation-runs", "post_receive")).toBeUndefined();
+    expect(vero.baseOf("consolidation-runs")).toBe("/consolidation-runs");
+    expect(vero.classOf("tenant-consolidations", "post_proposals_by_proposalid_decision")).toBe("C");
   });
 
   it("ogni concetto dichiara la base su cui l'API lo monta (ondata 4)", () => {

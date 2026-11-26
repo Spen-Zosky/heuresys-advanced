@@ -19,7 +19,7 @@
 import type { Pool, PoolClient } from "pg";
 import { cognomeNomeSql } from "../../lib/nome-persona-sql.js";
 import { ANALYTICS_ROW_CAP, guardResultCap } from "../../lib/result-cap.js";
-import { soloPersone } from "../../lib/scope/persone.js";
+import { personaInForza } from "../../lib/scope/persone.js";
 
 export type DbConnector = Pool | PoolClient;
 
@@ -79,9 +79,9 @@ function num(x: unknown): number | null {
  * primary active assignment (LEFT JOINed by the caller).
  */
 function userScopeClause(scope: ScopeFilter): { sql: string; params: unknown[] } {
-  if (scope.isPlatformScope) return { sql: soloPersone("u"), params: [] };
+  if (scope.isPlatformScope) return { sql: personaInForza("u"), params: [] };
   const params: unknown[] = [scope.tenantId];
-  const clauses = ["u.user_tenant_id = $1", soloPersone("u")];
+  const clauses = ["u.user_tenant_id = $1", personaInForza("u")];
   if (scope.teamPositionIds.length > 0) {
     params.push(scope.teamPositionIds);
     clauses.push(`a.user_position_assignment_position_id = ANY($${params.length}::uuid[])`);
@@ -182,7 +182,7 @@ export async function extractFlightRiskFeatures(
              percent_rank() OVER (PARTITION BY es.src, u.user_tenant_id ORDER BY es.v) AS pct
       FROM eng_src es
       JOIN sys.sys_users u ON u.user_id = es.user_id
-      WHERE es.v IS NOT NULL AND ${soloPersone("u")}
+      WHERE es.v IS NOT NULL AND ${personaInForza("u")}
     ),
     eng AS (
       -- average the available sources' percentiles, map back to the [1,5] the scorer expects
@@ -204,7 +204,7 @@ export async function extractFlightRiskFeatures(
         ON pcp.position_id = a.user_position_assignment_position_id
       JOIN sys.sys_compensation_bands cb
         ON cb.compensation_band_id = pcp.compensation_band_id
-      WHERE cb.compensation_band_mid_eur IS NOT NULL AND ${soloPersone("u")}
+      WHERE cb.compensation_band_mid_eur IS NOT NULL AND ${personaInForza("u")}
     )
     SELECT s.user_id, s.user_tenant_id AS tenant_id, s.user_display_name AS display_name,
            CASE WHEN asg.first_start IS NOT NULL
@@ -337,9 +337,9 @@ function mapStored(r: Record<string, unknown>): StoredScoreRow {
 
 /** Scope WHERE for reads against the flight-risk rows (fr alias + a alias for TEAM). */
 function readScopeClause(scope: ScopeFilter): { sql: string; params: unknown[] } {
-  if (scope.isPlatformScope) return { sql: soloPersone("u"), params: [] };
+  if (scope.isPlatformScope) return { sql: personaInForza("u"), params: [] };
   const params: unknown[] = [scope.tenantId];
-  const clauses = ["fr.flight_risk_score_tenant_id = $1", soloPersone("u")];
+  const clauses = ["fr.flight_risk_score_tenant_id = $1", personaInForza("u")];
   if (scope.teamPositionIds.length > 0) {
     params.push(scope.teamPositionIds);
     clauses.push(`a.user_position_assignment_position_id = ANY($${params.length}::uuid[])`);
@@ -618,10 +618,10 @@ function mapSubjectPosition(r: Record<string, unknown>): StoredSubjectPositionRo
 
 export async function readReadinessScores(q: DbConnector, scope: ScopeFilter): Promise<StoredSubjectPositionRow[]> {
   const params: unknown[] = [];
-  let where = soloPersone("u");
+  let where = personaInForza("u");
   if (!scope.isPlatformScope) {
     params.push(scope.tenantId);
-    const clauses = ["sr.succession_readiness_score_tenant_id = $1", soloPersone("u")];
+    const clauses = ["sr.succession_readiness_score_tenant_id = $1", personaInForza("u")];
     if (scope.teamPositionIds.length > 0) {
       params.push(scope.teamPositionIds);
       clauses.push(`a.user_position_assignment_position_id = ANY($${params.length}::uuid[])`);
@@ -660,10 +660,10 @@ export async function readReadinessScores(q: DbConnector, scope: ScopeFilter): P
 
 export async function readSkillGapScores(q: DbConnector, scope: ScopeFilter): Promise<StoredSubjectPositionRow[]> {
   const params: unknown[] = [];
-  let where = soloPersone("u");
+  let where = personaInForza("u");
   if (!scope.isPlatformScope) {
     params.push(scope.tenantId);
-    const clauses = ["sg.skill_gap_score_tenant_id = $1", soloPersone("u")];
+    const clauses = ["sg.skill_gap_score_tenant_id = $1", personaInForza("u")];
     if (scope.teamPositionIds.length > 0) {
       params.push(scope.teamPositionIds);
       clauses.push(`a.user_position_assignment_position_id = ANY($${params.length}::uuid[])`);

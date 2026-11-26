@@ -6,7 +6,7 @@
  * tables (critical positions / coverage) carry no person rows → tenant filter only.
  */
 import type { Pool, PoolClient } from "pg";
-import { soloPersone } from "../../lib/scope/persone.js";
+import { personaInForza } from "../../lib/scope/persone.js";
 import { K_ANONIMATO_MINIMO } from "../engagement/repository.js";
 import type {
   NineBoxRow, NineBoxListQuery,
@@ -503,7 +503,7 @@ export async function listCriticalCoverage(
               ON sc.successor_candidate_pool_id = sp.succession_pool_id
              AND ($${allow}::uuid[] IS NULL OR sc.successor_candidate_user_id = ANY($${allow}::uuid[]))
              AND EXISTS (SELECT 1 FROM sys.sys_users su
-                          WHERE su.user_id = sc.successor_candidate_user_id AND ${soloPersone("su")})
+                          WHERE su.user_id = sc.successor_candidate_user_id AND ${personaInForza("su")})
        ${wc}
       GROUP BY cp.critical_position_id, cp.critical_position_tenant_id, cp.critical_position_position_id, cp.created_at
       ORDER BY count(DISTINCT sc.successor_candidate_user_id) DESC, 4, cp.critical_position_id

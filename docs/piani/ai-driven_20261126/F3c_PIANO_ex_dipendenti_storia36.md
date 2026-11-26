@@ -1,0 +1,34 @@
+# F3c, passo 2 — Gli ex dipendenti nella storia di RTL (piano, 2026-11-26)
+
+Decisione di Enzo del 2026-11-26, scheda «Come stimare le uscite, visto che la storia di RTL non ne ha nessuna?», risposta «Aggiungere ex dipendenti alla storia»: un seed nuovo di storia36 crea persone già uscite negli ultimi tre anni, a tassi da banca, con le sostituzioni; le persone attive non si toccano. Serve alla voce F3c del [piano AI-driven](../PIANO_heuresys-ai-driven_20261126.md): senza uscite la stima delle uscite è solo un limite superiore e la prova sul periodo tenuto da parte non dice niente ([F3c_probabilita_dalla_storia.md](F3c_probabilita_dalla_storia.md)).
+
+Metro ADR-0063: asse 6, 7; criterio 4
+
+## 1. Che cosa dice la storia oggi (misure in sola lettura del 2026-11-26 sulla produzione)
+
+- Nessuna uscita: `sys_user_employment.user_employment_termination_date` sempre nulla, 158 persone ACTIVE.
+- 18 cambi interni nella finestra nascono da una requisizione INTERNAL_MOBILITY; in 16 casi la posizione di arrivo non ha mai avuto un titolare prima del cambio. È il punto in cui un'uscita si innesta senza riscrivere niente: la posizione era di qualcuno che è uscito, la requisizione si è aperta per sostituirlo, il collega l'ha coperta.
+- I seed di storia36 da 01 a 13 lavorano solo sulle persone `user_status = 'ACTIVE'` (`grep -n "user_status = 'ACTIVE'" db/seeds/storia36/*.sql`): un ex dipendente con un altro stato non riceve righe da loro, quindi la sua storia la scrive il seed nuovo, e una corsa dei seed esistenti non la sporca.
+- Il 2026-08-03/04 la ricostruzione dell'organigramma ha spostato 133 persone su posizioni nuove (`origine_dato = MATERIALIZZAZIONE`): le uscite stanno tutte prima, sulle posizioni della struttura di allora.
+
+## 2. Le voci
+
+| id | cosa | chi | fatta quando | stato |
+|---|---|---|---|---|
+| X0 | «Persona in forza»: un predicato solo (`personaInForza` in `apps/api/src/lib/scope/persone.ts`: non un'utenza tecnica, utenza non disattivata, cessazione non ancora arrivata) usato dove si conta l'organico di oggi o si calcolano punteggi (analytics, cruscotto, insights, revisione dei talenti); la storia (eventi, assunzioni del mese, chi ha lasciato il perimetro) resta su `soloPersone` | Claude | `apps/api/test/persone-in-forza.integration.test.ts` verde in CI: tre persone di prova, due uscite escono dall'organico e restano nella storia | fatta nel codice; la prova, vista rossa con il vecchio predicato e verde con il nuovo sul PostgreSQL locale, entra con la PR |
+| X1 | Indagine: per ognuna delle 16 posizioni, data di apertura della requisizione e data del cambio; quali pagine e API contano le persone e come trattano uno stato diverso da ACTIVE (`apps/api/src/modules/users`, cruscotti, analytics); quali batterie di `verify-storia36.sql` leggono tutte le persone del tenant e non solo le attive | Claude | elenco scritto qui, con i file e le righe | aperta |
+| X2 | Seed `db/seeds/storia36/15_uscite.sql`, il nucleo: per ogni posizione di X1 una persona uscita (anagrafica di fantasia nello stile del tenant, `user_status` non attivo, nessuna credenziale né ruolo di accesso), rapporto di lavoro TERMINATED con data e motivo, contratto TERMINATED, assegnazione PRIMARY ENDED sulla posizione; l'uscita cade fra l'apertura della requisizione e l'arrivo del collega; la requisizione esistente nomina chi ha lasciato il posto nel metadata | Claude | seed idempotente (id `uuid_generate_v5`, `ON CONFLICT DO NOTHING`), due corse = 0 righe | scritto; provato il 2026-11-26 su un PostgreSQL 16.15 locale con le tabelle delle migrazioni 000001-000047, 000164, 000165, 000167 e 000364 e tre posti di prova: due uscite scritte (una DIMISSIONI_VOLONTARIE, una PENSIONAMENTO a 67 anni), il posto con un titolare precedente saltato, seconda corsa 0 righe, C15a-c verdi e ciascuno visto rosso dal suo selftest; resta la prova sulla copia di RTL (X4) |
+| X3 | La loro storia fino all'uscita, un dominio per PR: presenze e assenze (01), buste paga (03), valutazioni (02), formazione (04). Invece di riscrivere la logica, ogni seed esistente allarga la sua popolazione da `user_status = 'ACTIVE'` alle persone del tenant fra assunzione e cessazione, e ogni riga generata cade entro la cessazione; le batterie che dicono «ogni mese dalla assunzione» diventano «dalla assunzione alla cessazione» | Claude | per ogni dominio: batteria nuova vista rossa prima e verde dopo, due corse = 0 righe, nessuna riga delle persone attive cambiata | aperta |
+| X4 | Prova su una copia usa-e-getta del database sul gemello: seed due volte, custodia di storia36 verde, test di integrazione dell'API, stime F3c con la prova sul periodo tenuto da parte | Claude | comandi, output e orario in questa nota | aperta |
+| X5 | Produzione: backup verificato da meno di 24 ore, seed con gli script del repo, custodia verde, `insights:stime -- RTL_BANK` con uscite vere e prova sul periodo tenuto da parte | Claude | comandi, output e orario in questa nota | aperta |
+
+## 3. Simulazione delle voci che scrivono
+
+- X2 e X3 scrivono solo righe nuove con chiavi proprie: nessuna riga di una persona attiva cambia, tranne il metadata delle 16 requisizioni (una chiave in più). Post-condizione: impronta md5 delle righe delle persone attive uguale prima e dopo.
+- Il tasso che ne esce è circa 16 uscite in tre anni su circa 155 persone, poco più del 3% l'anno: sta nella fascia bassa delle banche italiane, dove il turnover volontario è basso. Il numero non si sceglie per far tornare una stima: discende dalle posizioni che la storia ha già lasciato vuote.
+- Rollback: il seed scrive righe riconoscibili (`metadata ? 'storia36'` con il cluster `C15`), quindi la rimozione è un elenco esplicito; prima del rilascio la copia di ritorno è il backup verificato.
+- Serve Enzo? No per X1-X5: la scelta l'ha fatta; il rilascio segue i permessi permanenti del 13/11.
+
+## 4. Che cosa non si chiude in questa sessione
+
+X3 copre i domini letti dai cruscotti; i domini minori (clima, feedback, punteggi calcolati) per gli ex dipendenti restano fuori e si dichiarano qui quando X1 li avrà elencati.

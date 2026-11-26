@@ -174,14 +174,19 @@ export async function nomiPermessi(db: Db, codici: string[]): Promise<Map<string
   return new Map(r.rows.map((x) => [x.code, { it: x.it, en: x.en ?? x.it }]));
 }
 
-/** Le persone a cui va il riepilogo: chi ha il mandato di piattaforma, attive (ADR-0063 D3, E5). */
+/**
+ * Le persone a cui va il riepilogo (ADR-0063 D3, E5): chi governa il registro delle capacità degli
+ * agenti per la piattaforma (`agent_capability:manage`, solo `PLATFORM_ADMIN`, 000481), attive.
+ * Per permesso e non per nome del ruolo (R-1).
+ */
 export async function destinatari(db: Db): Promise<Array<{ user_id: string; tenant_id: string | null }>> {
   const r = await db.query<{ user_id: string; tenant_id: string | null }>(
     `SELECT DISTINCT u.user_id::text AS user_id, u.user_tenant_id::text AS tenant_id
        FROM sys.sys_users u
        JOIN sys.sys_user_auth_roles ur ON ur.user_auth_role_user_id = u.user_id AND ur.user_auth_role_revoked_at IS NULL
-       JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
-      WHERE r.auth_role_code = 'PLATFORM_ADMIN' AND u.user_status = 'ACTIVE'
+       JOIN sys.sys_auth_role_permissions rp ON rp.auth_role_id = ur.user_auth_role_role_id
+       JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
+      WHERE p.auth_permission_code = 'agent_capability:manage' AND u.user_status = 'ACTIVE'
       ORDER BY 1`,
   );
   return r.rows;

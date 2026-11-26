@@ -3,9 +3,12 @@
  * 2026-11-26: il rischio di uscita di 80 persone, con la spiegazione voce per voce di ciascuna, non
  * entrava nella risposta dello strumento, e l'API di quel percorso ignora filtri e pagine). Sopra il
  * tetto il gateway fa ciò che l'API non fa, sui soli dati già letti con il perimetro della persona:
- * applica i filtri che sono campi delle righe, toglie il dettaglio annidato e taglia a pagine,
- * dicendolo nella `nota`. Sotto il tetto la risposta non cambia.
+ * applica i filtri che sono campi leggibili delle righe, toglie il dettaglio annidato e taglia a
+ * pagine, dicendo nella `nota` anche i filtri che non ha applicato. Un campo che la persona non vede
+ * ({omissis}) non si filtra: scartare quelle righe le farebbe sparire dal conto. Sotto il tetto la risposta non cambia.
  */
+
+import { OMISSIS } from "./omissis.js";
 
 /** Il tetto, in caratteri del JSON: sta con margine sotto il limite di uscita di uno strumento. */
 export const TETTO_ELENCO = 40_000;
@@ -31,9 +34,11 @@ export function riduciElenco(dati: unknown, query: Query = {}, tetto = TETTO_ELE
   const completo = righe.length >= totale;
   const note: string[] = [];
 
-  const filtri = Object.entries(query).filter(
-    ([k]) => k !== "limit" && k !== "offset" && righe.every((r) => k in r && semplice(r[k])),
-  );
+  const chiesti = Object.entries(query).filter(([k]) => k !== "limit" && k !== "offset");
+  const filtri = chiesti.filter(([k]) => righe.every((r) => k in r && semplice(r[k]) && r[k] !== OMISSIS));
+  // Se l'API sta già paginando, i filtri sono affar suo: qui non si sa se li ha applicati.
+  const saltati = chiesti.filter((f) => !completo || !filtri.includes(f)).map(([k]) => k);
+  if (saltati.length) note.push(`filtri non applicati: ${saltati.join(", ")} (le righe non sono filtrate su questi)`);
   if (completo && filtri.length) {
     righe = righe.filter((r) => filtri.every(([k, v]) => String(r[k]) === String(v)));
     note.push(`filtro applicato: ${filtri.map(([k, v]) => `${k}=${String(v)}`).join(", ")}`);
@@ -50,7 +55,7 @@ export function riduciElenco(dati: unknown, query: Query = {}, tetto = TETTO_ELE
     pagina = pagina.map((r) =>
       Object.fromEntries(
         Object.entries(r).filter(([k, v]) => {
-          if (k === "masked" || semplice(v)) return true;
+          if (semplice(v)) return true;
           tolti.add(k);
           return false;
         }),

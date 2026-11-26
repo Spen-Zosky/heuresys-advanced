@@ -59,8 +59,16 @@ describe("un elenco troppo grande", () => {
     expect(r.nota).toContain("offset=240");
   });
 
-  it("i campi mascherati restano dichiarati", () => {
-    const d = { items: Array.from({ length: 900 }, (_, i) => ({ ...riga(i), masked: ["score"] })), total: 900 };
-    expect((riduciElenco(d) as Esito).items[0]).toHaveProperty("masked");
+  it("un filtro su un campo mascherato non toglie le righe: {omissis} resta, e la nota lo dice", () => {
+    // La forma vera dopo conOmissis: il valore del campo vietato è la stringa {omissis}.
+    const d = { items: Array.from({ length: 80 }, (_, i) => ({ ...riga(i), band: "{omissis}", features: "{omissis}", score: "{omissis}" })).map((r) => ({ ...r, extra: "x".repeat(600) })), total: 80 };
+    const r = riduciElenco(d, { band: "HIGH" }) as Esito;
+    expect(r.total).toBe(80);
+    expect(r.items[0]?.["band"]).toBe("{omissis}");
+    expect(r.nota).toContain("filtri non applicati: band");
+  });
+
+  it("un filtro che il gateway non sa applicare si dichiara", () => {
+    expect((riduciElenco(elenco(80), { unita: "x" }) as Esito).nota).toContain("filtri non applicati: unita");
   });
 });

@@ -299,7 +299,9 @@ const processProcessiAttivi: Fornitore = async (q, p) => {
             (SELECT count(DISTINCT oup.org_unit_process_org_unit_id) FROM sys.sys_organization_unit_processes oup
               WHERE oup.org_unit_process_tenant_process_id = tp.tenant_process_id) AS unita,
             (SELECT count(*) FROM sys.sys_tenant_process_steps st
-              WHERE st.tenant_process_step_process_id = tp.tenant_process_id) AS value
+               JOIN sys.sys_tenant_processes x ON x.tenant_process_id = st.tenant_process_step_process_id
+              WHERE x.tenant_process_id = tp.tenant_process_id
+                 OR (x.tenant_process_parent_id = tp.tenant_process_id AND x.tenant_process_is_active)) AS value
        FROM sys.sys_tenant_processes tp
       WHERE ($1::uuid IS NULL OR tp.tenant_process_tenant_id = $1::uuid)
         AND tp.tenant_process_level = 1 AND tp.tenant_process_is_active

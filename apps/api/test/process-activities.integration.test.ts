@@ -85,16 +85,19 @@ async function oracolo(p: Possesso): Promise<{ passi: { id: string; n: number }[
                 WHERE a.approval_request_tenant_process_step_id = s.tenant_process_step_id
                   AND a.approval_request_tenant_id = $2) AS n
          FROM sys.sys_tenant_process_steps s
-        WHERE s.tenant_process_step_process_id = $1
-        ORDER BY s.tenant_process_step_ordinal, s.tenant_process_step_code`,
+         JOIN sys.sys_tenant_processes x ON x.tenant_process_id = s.tenant_process_step_process_id
+        WHERE x.tenant_process_id = $1 OR (x.tenant_process_parent_id = $1 AND x.tenant_process_is_active)
+        ORDER BY x.tenant_process_level, x.tenant_process_name, s.tenant_process_step_ordinal, s.tenant_process_step_code`,
       [tp, p.tenant_id],
     )
   ).rows.map((r) => ({ id: r.id, n: Number(r.n) }));
   const totale = Number(
     (
       await pool.query<{ n: string }>(
-        `SELECT count(*) AS n FROM sys.sys_approval_requests
-          WHERE approval_request_tenant_process_id = $1 AND approval_request_tenant_id = $2`,
+        `SELECT count(*) AS n FROM sys.sys_approval_requests a
+           JOIN sys.sys_tenant_processes x ON x.tenant_process_id = a.approval_request_tenant_process_id
+          WHERE (x.tenant_process_id = $1 OR (x.tenant_process_parent_id = $1 AND x.tenant_process_is_active))
+            AND a.approval_request_tenant_id = $2`,
         [tp, p.tenant_id],
       )
     ).rows[0]!.n,
@@ -282,6 +285,28 @@ describe("ADR-0049 — le richieste nascono col processo della regola", () => {
 });
 
 describe("ADR-0049 — l'owner vede le attività del suo processo", () => {
+  it("le attività di un sottoprocesso restano fra quelle del processo", async () => {
+    const sotto = (
+      await pool.query<{ id: string }>(
+        `INSERT INTO sys.sys_tenant_processes
+           (tenant_process_tenant_id, tenant_process_code, tenant_process_name, tenant_process_parent_id, tenant_process_level)
+         VALUES ($1, 'ADR0049-SOTTO', 'Sottoprocesso della prova ADR-0049', $2, 2) RETURNING tenant_process_id AS id`,
+        [scena.tenant_id, scena.process_id],
+      )
+    ).rows[0]!.id;
+    const passo = (
+      await pool.query<{ id: string }>(
+        `INSERT INTO sys.sys_tenant_process_steps
+           (tenant_process_step_tenant_id, tenant_process_step_process_id, tenant_process_step_code,
+            tenant_process_step_name, tenant_process_step_ordinal, tenant_process_step_org_unit_id)
+         VALUES ($1, $2, 'ADR0049.3', 'Attività ADR0049.3', 1, $3) RETURNING tenant_process_step_id AS id`,
+        [scena.tenant_id, sotto, scena.unit_id],
+      )
+    ).rows[0]!.id;
+    const out = (await listProcessActivities(pool, scena.user_id, scena.tenant_id, scena.oup_id))!;
+    expect(out.activities.map((a) => a.stepId)).toContain(passo);
+  });
+
   it("gira su un universo dove PUÒ fallire: owner con processo, attività e richieste", async () => {
     expect(possessi.some((p) => p.user_id === scena.user_id && p.oup_id === scena.oup_id), "l'owner della scena non è fra gli owner").toBe(true);
     const o = await oracolo(scena);

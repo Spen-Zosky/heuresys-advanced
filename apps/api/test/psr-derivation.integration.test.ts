@@ -16,15 +16,30 @@ afterAll(async () => {
 
 describe("② Fase 3 PSR derivation invariants", () => {
   it("requirement rows exist and every row carries a known provenance marker", async () => {
-    const { rows } = await pool.query<{ derived: string; total: string }>(
-      `SELECT count(*) FILTER (WHERE position_skill_requirement_metadata->>'derived_by' = ANY($1))::text AS derived,
+    // [2026-11-26] La provenienza si dichiara in due modi: il motore di derivazione nel
+    // metadata, oppure il GIORNALE dello script che ha scritto la riga. Lo script D1 di
+    // db/scripts/rtl-allinea (11/11/2026, i requisiti di competenza della corsa applicati a
+    // RTL) non scrive derived_by ma giornalizza ogni riga in staging.rtl_allinea_skill_undo.
+    // Una riga senza né l'uno né l'altro resta un difetto, come prima. Su una copia che
+    // precede quello script il giornale non c'è, e conta solo il marcatore.
+    const giornale = await pool.query<{ c: string | null }>(
+      `SELECT to_regclass('staging.rtl_allinea_skill_undo')::text AS c`);
+    const nelGiornale = giornale.rows[0]?.c
+      ? `EXISTS (SELECT 1 FROM staging.rtl_allinea_skill_undo j
+                  WHERE j.tabella = 'sys_position_skill_requirements'
+                    AND j.chiave = r.position_skill_requirement_id)`
+      : "false";
+    const { rows } = await pool.query<{ derived: string; declared: string; total: string }>(
+      `SELECT count(*) FILTER (WHERE r.position_skill_requirement_metadata->>'derived_by' = ANY($1))::text AS derived,
+              count(*) FILTER (WHERE r.position_skill_requirement_metadata->>'derived_by' = ANY($1)
+                                  OR ${nelGiornale})::text AS declared,
               count(*)::text AS total
-         FROM sys.sys_position_skill_requirements`,
+         FROM sys.sys_position_skill_requirements r`,
       [MARKERS],
     );
     expect(Number(rows[0]!.derived)).toBeGreaterThan(0);
-    // every row must declare its derivation engine (no silently-unprovenanced rows).
-    expect(Number(rows[0]!.total)).toBe(Number(rows[0]!.derived));
+    // every row must declare where it comes from (no silently-unprovenanced rows).
+    expect(Number(rows[0]!.total)).toBe(Number(rows[0]!.declared));
   });
 
   it("every derived row has a valid proficiency, criticality, weight and (peer-group) >=2 holders", async () => {

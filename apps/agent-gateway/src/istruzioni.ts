@@ -52,6 +52,8 @@ export const ISTRUZIONI_ASSISTENTE = [
 export function istruzioniAssistente(lingua: "it" | "en" = "it"): string {
   if (lingua !== "en") return ISTRUZIONI_ASSISTENTE;
   return [
+    "LINGUA DELLA PAGINA: INGLESE. Anche i messaggi che scrivi mentre lavori («I'm looking up…», non «Sto cercando…») sono in inglese.",
+    "",
     ISTRUZIONI_ASSISTENTE,
     "",
     "LINGUA DELLA PAGINA: INGLESE. Questa regola prevale su ogni punto sopra che parla di italiano.",
@@ -61,4 +63,15 @@ export function istruzioniAssistente(lingua: "it" | "en" = "it"): string {
     "- Never mention technical names (tools, API concepts such as kpi-definitions, identifiers).",
     `- A value ${OMISSIS} stays exactly ${OMISSIS}. If everything asked is outside the person's permissions, answer only: «${MESSAGGIO_NON_AUTORIZZATO_EN}»`,
   ].join("\n");
+}
+
+/**
+ * Una riga in testa a ogni domanda: la lingua si decide a ogni messaggio, non una volta per
+ * conversazione. Chi cambia lingua a metà sessione riprende la stessa conversazione salvata, con
+ * le risposte di prima nell'altra lingua, e senza questa riga il modello continuerebbe in quella.
+ */
+export function rigaLingua(lingua: "it" | "en"): string {
+  return lingua === "en"
+    ? "[Lingua della pagina: INGLESE. Rispondi in inglese, compresi i messaggi di attesa e i nomi dei dati, anche se i messaggi precedenti sono in italiano.]"
+    : "[Lingua della pagina: ITALIANO. Rispondi in italiano, compresi i messaggi di attesa e i nomi dei dati, anche se i messaggi precedenti sono in inglese.]";
 }

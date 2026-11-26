@@ -832,6 +832,72 @@
    },
    "solaLettura": false
   },
+  "consolidation-runs": {
+   "base": "/consolidation-runs",
+   "data": "2026-11-26",
+   "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi; ADR-0063 F1 (piano accettato da Enzo il 2026-11-26): le scritture con classe B o C in agent-classi-scritture.json, ognuna con la conferma della persona collegata",
+   "modulo": "tenant-consolidation",
+   "operations": {
+    "get": {
+     "classe": "A",
+     "method": "GET",
+     "path": "/",
+     "permission": null
+    },
+    "get_by_runid_alignment": {
+     "classe": "A",
+     "method": "GET",
+     "path": "/:runId/alignment",
+     "permission": null
+    },
+    "get_by_runid_distance": {
+     "classe": "A",
+     "method": "GET",
+     "path": "/:runId/distance",
+     "permission": null
+    },
+    "get_deliveries": {
+     "classe": "A",
+     "method": "GET",
+     "path": "/deliveries",
+     "permission": "consolidation:run"
+    },
+    "post_by_runid_alignment_discard": {
+     "classe": "C",
+     "method": "POST",
+     "path": "/:runId/alignment/discard",
+     "permission": null
+    },
+    "put_by_runid_alignment_drafts": {
+     "classe": "C",
+     "method": "PUT",
+     "path": "/:runId/alignment/drafts",
+     "permission": null
+    }
+   },
+   "solaLettura": false
+  },
+  "consolidation-vocabulary": {
+   "base": "/consolidation-vocabulary",
+   "data": "2026-11-26",
+   "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi; ADR-0063 F1 (piano accettato da Enzo il 2026-11-26): le scritture con classe B o C in agent-classi-scritture.json, ognuna con la conferma della persona collegata",
+   "modulo": "tenant-consolidation",
+   "operations": {
+    "get": {
+     "classe": "A",
+     "method": "GET",
+     "path": "/",
+     "permission": null
+    },
+    "post_by_id_status": {
+     "classe": "C",
+     "method": "POST",
+     "path": "/:id/status",
+     "permission": "vocabulary:approve"
+    }
+   },
+   "solaLettura": false
+  },
   "content": {
    "base": "/content",
    "data": "2026-08-21",
@@ -2923,6 +2989,12 @@
    "data": "2026-11-26",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi; ADR-0063 F1 (piano accettato da Enzo il 2026-11-26): le scritture con classe B o C in agent-classi-scritture.json, ognuna con la conferma della persona collegata",
    "operations": {
+    "delete_by_id_members_by_userid": {
+     "classe": "C",
+     "method": "DELETE",
+     "path": "/:id/members/:userId",
+     "permission": "project:manage"
+    },
     "get": {
      "classe": "A",
      "method": "GET",
@@ -3786,6 +3858,111 @@
    },
    "solaLettura": false
   },
+  "tenant-consolidations": {
+   "base": "/tenant-consolidations",
+   "data": "2026-11-26",
+   "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi; ADR-0063 F1 (piano accettato da Enzo il 2026-11-26): le scritture con classe B o C in agent-classi-scritture.json, ognuna con la conferma della persona collegata",
+   "modulo": "tenant-consolidation",
+   "operations": {
+    "get": {
+     "classe": "A",
+     "method": "GET",
+     "path": "/",
+     "permission": null
+    },
+    "get_access": {
+     "classe": "A",
+     "method": "GET",
+     "path": "/access",
+     "permission": null
+    },
+    "get_by_id": {
+     "classe": "A",
+     "method": "GET",
+     "path": "/:id",
+     "permission": null
+    },
+    "get_by_id_pending_changes": {
+     "classe": "A",
+     "method": "GET",
+     "path": "/:id/pending-changes",
+     "permission": null
+    },
+    "get_by_id_progress": {
+     "classe": "A",
+     "method": "GET",
+     "path": "/:id/progress",
+     "permission": null
+    },
+    "get_by_id_proposals": {
+     "classe": "A",
+     "method": "GET",
+     "path": "/:id/proposals",
+     "permission": null
+    },
+    "get_pending_approval": {
+     "classe": "A",
+     "method": "GET",
+     "path": "/pending-approval",
+     "permission": null
+    },
+    "get_proposals_by_proposalid_cascade": {
+     "classe": "A",
+     "method": "GET",
+     "path": "/proposals/:proposalId/cascade",
+     "permission": null
+    },
+    "post": {
+     "classe": "C",
+     "method": "POST",
+     "path": "/",
+     "permission": "consolidation:run"
+    },
+    "post_by_id_discard_changes": {
+     "classe": "C",
+     "method": "POST",
+     "path": "/:id/discard-changes",
+     "permission": null
+    },
+    "post_by_id_groups_by_group_close": {
+     "classe": "C",
+     "method": "POST",
+     "path": "/:id/groups/:group/close",
+     "permission": "consolidation:run"
+    },
+    "post_by_id_groups_by_group_run": {
+     "classe": "C",
+     "method": "POST",
+     "path": "/:id/groups/:group/run",
+     "permission": "consolidation:run"
+    },
+    "post_by_id_preview_changes": {
+     "classe": "C",
+     "method": "POST",
+     "path": "/:id/preview-changes",
+     "permission": null
+    },
+    "post_proposals_bulk_decision": {
+     "classe": "C",
+     "method": "POST",
+     "path": "/proposals/bulk-decision",
+     "permission": null
+    },
+    "post_proposals_by_proposalid_decision": {
+     "classe": "C",
+     "method": "POST",
+     "path": "/proposals/:proposalId/decision",
+     "permission": null
+    },
+    "post_proposals_confirm_certain": {
+     "classe": "C",
+     "method": "POST",
+     "path": "/proposals/confirm-certain",
+     "permission": null
+    }
+   },
+   "solaLettura": false
+  },
   "tenant-import-runs": {
    "base": "/tenant-import-runs",
    "data": "2026-11-05",
@@ -4093,6 +4270,12 @@
    "data": "2026-11-26",
    "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi; ADR-0063 F1 (piano accettato da Enzo il 2026-11-26): le scritture con classe B o C in agent-classi-scritture.json, ognuna con la conferma della persona collegata",
    "operations": {
+    "delete_by_id": {
+     "classe": "C",
+     "method": "DELETE",
+     "path": "/:id",
+     "permission": "user:delete"
+    },
     "get": {
      "classe": "A",
      "method": "GET",

@@ -51,6 +51,24 @@ UNIT="${CLONE_ARM_UNIT:-heuresys-advanced-clonedb.service}"
 ECO_HOSTS="${ECO_HOSTS:-oracle-vm-default linux-pc}"
 SSH_OPTS=(-o BatchMode=yes -o ConnectTimeout=8)
 
+# La produzione e il catalogo di riferimento stanno sulla VM, che non entra in ssh su se
+# stessa: un host che risolve a un indirizzo di QUESTA macchina si legge in locale, come in
+# verifica-deploy.sh. Senza, dalla VM i verdetti «clone» ed «ecosistema» erano sempre ciechi.
+HOST_PROD="${HOST_PROD:-oracle-vm-default}"
+host_locale() {
+  local nome ip l
+  nome="$(ssh -G "$1" 2>/dev/null | awk '/^hostname /{print $2; exit}')"
+  ip="$(getent hosts "${nome:-$1}" 2>/dev/null | awk '{print $1; exit}')"
+  [ -n "$ip" ] || ip="${nome:-$1}"
+  for l in $(hostname -I 2>/dev/null) $(tailscale ip 2>/dev/null); do
+    [ "$l" = "$ip" ] && return 0
+  done
+  return 1
+}
+su_host() {
+  if host_locale "$1"; then bash -c "$2"; else MSYS_NO_PATHCONV=1 ssh "${SSH_OPTS[@]}" "$1" "$2"; fi
+}
+
 # Il peggiore dei tre vince: un verdetto complessivo che dicesse «a posto» con un lavoro
 # rotto sarebbe la stessa rassicurazione vuota che questo script deve togliere di mezzo.
 PEGGIO=0
@@ -117,7 +135,11 @@ verifica_clone() {
   local q="select count(*) from sys.sys_schema_migrations"
   local n_gem n_prod
   n_gem="$(sul_gemello "sudo -n -u postgres psql -w -tAc \"$q\" heuresys_advanced" | tr -d '[:space:]')"
-  n_prod="$(psql -w -h localhost -p 5433 -U heuresys -d heuresys_advanced -tAc "$q" 2>/dev/null | tr -d '[:space:]')"
+  if host_locale "$HOST_PROD"; then
+    n_prod="$(sudo -n -u postgres psql -w -p 5432 -tAc "$q" heuresys_advanced 2>/dev/null | tr -d '[:space:]')"
+  else
+    n_prod="$(psql -w -h localhost -p 5433 -U heuresys -d heuresys_advanced -tAc "$q" 2>/dev/null | tr -d '[:space:]')"
+  fi
 
   if ! printf '%s' "$n_gem" | grep -qE '^[0-9]+$' || ! printf '%s' "$n_prod" | grep -qE '^[0-9]+$'; then
     riga "migrazioni" "gemello=${n_gem:-?} · produzione=${n_prod:-?}"
@@ -164,14 +186,13 @@ verifica_ecosistema() {
     # un host lasciato a meta' HA ancora la sentinella della corsa PRECEDENTE, e leggerla
     # per prima lo farebbe dichiarare allineato mentre il suo `~/.claude` e' incompleto.
     # E' il caso peggiore possibile per uno strumento di verifica: un verde su un guasto.
-    inc="$(MSYS_NO_PATHCONV=1 ssh "${SSH_OPTS[@]}" "$h" \
-           "cat ~/.claude/.ecosystem-align.INCORSO 2>/dev/null | tr '\n' ' '" 2>/dev/null)"
+    inc="$(su_host "$h" "cat ~/.claude/.ecosystem-align.INCORSO 2>/dev/null | tr '\n' ' '" 2>/dev/null)"
     if [ -n "$inc" ]; then
       riga "$h" "⚠ ALLINEAMENTO LASCIATO A META' — $inc"
       interrotti="$interrotti $h"
       continue
     fi
-    s="$(MSYS_NO_PATHCONV=1 ssh "${SSH_OPTS[@]}" "$h" \
+    s="$(su_host "$h" \
          "sed -n 's/.*\"stamp\":\"\\([^\"]*\\)\".*/\\1/p' ~/.claude/.ecosystem-align.json 2>/dev/null" 2>/dev/null | tr -d '[:space:]')"
     if [ -z "$s" ]; then
       riga "$h" "sentinella assente o host giu'"

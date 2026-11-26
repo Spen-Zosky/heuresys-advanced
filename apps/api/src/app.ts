@@ -28,7 +28,7 @@ import { authPlugin } from "./middleware/auth.js";
 import { tenantContextPlugin } from "./middleware/tenantContext.js";
 import { localePlugin } from "./middleware/locale.js";
 import { csrfPlugin } from "./middleware/csrf.js";
-import { isDatabaseReady } from "./db/client.js";
+import { isDatabaseReady, pool } from "./db/client.js";
 import { COOKIES } from "./config/constants.js";
 import { metricsStore } from "./modules/observability/metrics-store.js";
 import { observeHttp, enablePrometheus, registry } from "./modules/observability/prometheus.js";
@@ -121,6 +121,7 @@ import { compensationRoutes } from "./modules/compensation/routes.js";
 import { dashboardRoutes } from "./modules/dashboard/routes.js";
 import { analyticsRoutes } from "./modules/analytics/routes.js";
 import { addExportHook } from "./lib/export/hook.js";
+import { addTraduzioneRisposta } from "./lib/i18n/traduci-risposta.js";
 import { registerOrgGateAssertion } from "./lib/scope/gate.js";
 import { registerConfermaD5 } from "./lib/scope/conferma.js";
 import { registraGuardiaRotte } from "./lib/scope/guardia.js";
@@ -410,6 +411,10 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   // 10b. Locale (i18n overlay, ADR-0029): decorates req.locale from
   // x-locale header / NEXT_LOCALE cookie / 'it'. Depends on @fastify/cookie.
   await app.register(localePlugin);
+
+  // 10c. Traduzione del dato nella risposta (ADR-0062): per le letture GET /v1/* in inglese,
+  //      ogni stringa uguale al testo italiano di un campo registrato diventa la sua traduzione.
+  addTraduzioneRisposta(app, pool);
 
   // 11. Error handler (catches everything that bubbled up)
   app.setErrorHandler(errorHandler);

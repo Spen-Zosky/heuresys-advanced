@@ -57,10 +57,15 @@ BEGIN
 END $$;
 
 DO $$
+DECLARE
+  v_oid oid := to_regclass('staging.fattore_rimosso_undo');
 BEGIN
-  IF to_regclass('staging.fattore_rimosso_undo') IS NOT NULL
-     AND pg_has_role(current_user,
-       (SELECT relowner FROM pg_class WHERE oid = 'staging.fattore_rimosso_undo'::regclass), 'USAGE') THEN
+  -- Niente cast ::regclass qui: in SQL l'AND non si ferma al primo falso, e il cast di una
+  -- tabella assente fallisce (vista rossa nella prova generale del 2026-11-26).
+  IF v_oid IS NULL THEN
+    RETURN;
+  END IF;
+  IF pg_has_role(current_user, (SELECT relowner FROM pg_class WHERE oid = v_oid), 'USAGE') THEN
     RAISE EXCEPTION '000521: staging.fattore_rimosso_undo e'' ancora presente';
   END IF;
 END $$;

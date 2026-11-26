@@ -749,7 +749,7 @@
     "skills": {
       "title": "Required skills",
       "back": "← Position",
-      "count": "{{count}} skill linked",
+      "count": "{{count}} skills linked",
       "count_one": "{{count}} skill linked",
       "cardTitle": "Requirements",
       "empty": "No required skill declared.",
@@ -2350,7 +2350,9 @@
     },
     "allarme": "Some writes were executed without confirmation: the mode without confirmation is switched off and this should not happen. Check it now.",
     "perPersona": "By person ({{count}})",
+    "perPersona_one": "By person ({{count}})",
     "elenco": "Writes ({{count}})",
+    "elenco_one": "Write ({{count}})",
     "troncato": "Showing the {{mostrate}} most recent of {{totale}}.",
     "nessuna": "No writes with the assistant this week.",
     "personaAssente": "Person no longer present",

@@ -9,7 +9,7 @@ Come si rimisura: `awk -F'\t' 'NR>1{print $10" "$5}' docs/kb/analisi/endpoint-or
 | O1 | Vocabolario comune e distanza dal modello in `/consolidation` (PR #280) | Claude | PR #280 unita e rilasciata, pagina provata dal vivo come Direttore HR | ACTIVE |
 | O2 | Azioni sulle schede esistenti (classe a, ondata 2) | Claude | PR unita e rilasciata, spec `ondata2-azioni-schede.spec.ts` verde, giro reversibile dal vivo | ACTIVE |
 | O3 | Pagine nuove e sicurezza: team (nuova `/teams`, voce di menu da migrazione), mentoring, sondaggi, GDPR, carriere, sicurezza dell'utente | Claude | come sopra, una prova per pagina | ACTIVE |
-| O4 | Strumenti dell'agente (classe b) e prova dal vivo delle 140 letture dell'agente | Claude | strumenti con approvazione in `write-gate.ts`, giro dell'agente provato dal vivo | ACTIVE |
+| O4 | Strumenti dell'agente (classe b) e prova dal vivo delle 140 letture dell'agente | Claude | strumenti con approvazione in `write-gate.ts`, giro dell'agente provato dal vivo | ACTIVE · assorbita in F1 del piano Heuresys AI-driven (riesame Z4 del 2026-11-26, `docs/piani/ai-driven_20261126/RIESAME_programmi.md`); questa riga resta la fonte del dettaglio |
 | O5 | Cataloghi (classe a, ondata 5) e ritiri (classe c, disattivando) | Claude | PR unita e rilasciata; un ritiro si vede come rotta disattivata, nessuna riga cancellata | ACTIVE |
 
 ## Ondata 2 — voci e file

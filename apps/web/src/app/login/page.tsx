@@ -81,6 +81,9 @@ export default function LoginPage() {
     availableKinds: string[];
   } | null>(null);
   const [mfaCode, setMfaCode] = useState("");
+  // Codice di recupero al posto del codice a 6 cifre: 16 caratteri esadecimali, a gruppi di 4.
+  const [recupero, setRecupero] = useState(false);
+  const codiceCompleto = recupero ? mfaCode.replace(/-/g, "").length === 16 : mfaCode.length >= 6;
   // Mandatory-MFA enrollment gate (MVP-4 par.2.5 #4). Null = not gated.
   const [enroll, setEnroll] = useState<EnrollState | null>(null);
   const [enrollCode, setEnrollCode] = useState("");
@@ -144,6 +147,7 @@ export default function LoginPage() {
       const res = await login.mutateAsync(values);
       if (res.status === "mfa_required") {
         setMfaCode("");
+        setRecupero(false);
         setMfa({
           email: values.email,
           password: values.password,
@@ -673,20 +677,34 @@ export default function LoginPage() {
             >
               <div>
                 <label htmlFor="mfaCode" className="block text-sm font-medium mb-1">
-                  {t("auth.login.mfa.codeLabel")}
+                  {t(recupero ? "auth.login.mfa.recoveryLabel" : "auth.login.mfa.codeLabel")}
                 </label>
                 <Input
                   id="mfaCode"
                   type="text"
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
+                  inputMode={recupero ? "text" : "numeric"}
+                  autoComplete={recupero ? "off" : "one-time-code"}
                   autoFocus
-                  maxLength={6}
+                  maxLength={recupero ? 19 : 6}
                   data-testid="login-mfa-code"
-                  placeholder="123456"
+                  placeholder={recupero ? "xxxx-xxxx-xxxx-xxxx" : "123456"}
                   value={mfaCode}
-                  onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ""))}
+                  onChange={(e) =>
+                    setMfaCode(e.target.value.replace(recupero ? /[^0-9a-fA-F-]/g : /\D/g, ""))
+                  }
                 />
+                <button
+                  type="button"
+                  data-testid="login-mfa-recovery-toggle"
+                  className="mt-2 text-xs opacity-70 hover:opacity-100 underline"
+                  onClick={() => {
+                    setRecupero(!recupero);
+                    setMfaCode("");
+                    setFormError(null);
+                  }}
+                >
+                  {t(recupero ? "auth.login.mfa.useCode" : "auth.login.mfa.useRecovery")}
+                </button>
               </div>
 
               {formError && (
@@ -702,7 +720,7 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 data-testid="login-mfa-submit"
-                disabled={busy || mfaCode.length < 6}
+                disabled={busy || !codiceCompleto}
                 className="w-full"
               >
                 {busy ? t("auth.login.submitting") : t("auth.login.mfa.submit")}

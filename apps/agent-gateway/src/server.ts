@@ -374,9 +374,9 @@ const server = createServer(async (req, res) => {
         res.end(JSON.stringify({ error: "PERSON_NOT_ADMITTED" }));
         return;
       }
-      let corpo: { prompt?: unknown; conversationId?: unknown; pagina?: unknown };
+      let corpo: { prompt?: unknown; conversationId?: unknown; pagina?: unknown; lingua?: unknown };
       try {
-        corpo = JSON.parse((await readBody(req)) || "{}") as { prompt?: unknown; conversationId?: unknown; pagina?: unknown };
+        corpo = JSON.parse((await readBody(req)) || "{}") as { prompt?: unknown; conversationId?: unknown; pagina?: unknown; lingua?: unknown };
       } catch {
         res.writeHead(400, { "content-type": "application/json" });
         res.end(JSON.stringify({ error: "BAD_JSON" }));
@@ -422,7 +422,8 @@ const server = createServer(async (req, res) => {
       try {
         // Due client con lo stesso gettone: quello dell'agente alimenta il contatore delle persone,
         // quello del registro no (le risposte del registro non sono letture dell'agente).
-        const client = new HeuresysClient({ baseUrl: HEURESYS_API, session: gettone.session, agente: AGENTE_ASSISTENTE });
+        const lingua = corpo.lingua === "en" ? "en" : "it";
+        const client = new HeuresysClient({ baseUrl: HEURESYS_API, session: gettone.session, agente: AGENTE_ASSISTENTE, lingua });
         const clientRegistro = new HeuresysClient({ baseUrl: HEURESYS_API, session: gettone.session, agente: AGENTE_ASSISTENTE });
         // Le letture del giro (omissis.ts): se sono tutte negate, la risposta è il messaggio fisso.
         const esitiLetture = new EsitiLetture();
@@ -495,7 +496,7 @@ const server = createServer(async (req, res) => {
           scrivi,
           nota: () => notaSugliEsiti(vista.esiti),
           scrittureNonSalvate: () => client.consumaScrittureFallite(),
-          rifiuto: () => esitiLetture.rifiuto(),
+          rifiuto: () => esitiLetture.rifiuto(lingua),
           attesa: { sospendi: posto.sospendi, riprendi: posto.riprendi },
           // Il costo e la durata del giro vanno nel registro delle chiamate dell'agente. Col gettone
           // d'agente: l'API non accetta questa scrittura da nessun altro (403).
@@ -518,6 +519,7 @@ const server = createServer(async (req, res) => {
               audit: auditSink,
               principal,
               maxTurns: LIMITI.giri,
+              lingua,
               abortController: o.abortController,
               contatore: o.contatore,
               conversationId: o.conversationId,

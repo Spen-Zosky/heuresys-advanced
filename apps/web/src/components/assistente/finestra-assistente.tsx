@@ -114,7 +114,16 @@ function FinestraAssistente({ pathname, idonea }: { pathname: string; idonea: bo
   const mostraSimbolo = idonea || aperto || occupato;
   const messaggi = messaggiDaRighe(agent.lines);
   const faseOra = fase(agent.lines);
-  const testoAvviso = agent.notice === null ? null : t(`agente.${agent.notice.code}`, agent.notice.params ?? {});
+  // La decisione arriva come valore tecnico («allow», «deny»): si mostra l'etichetta nella lingua della pagina.
+  const testoAvviso =
+    agent.notice === null
+      ? null
+      : t(`agente.${agent.notice.code}`, {
+          ...(agent.notice.params ?? {}),
+          ...(agent.notice.code === "approvalResolved" && (agent.notice.params?.decision === "allow" || agent.notice.params?.decision === "deny")
+            ? { decision: t(`agente.${agent.notice.params.decision}`) }
+            : {}),
+        });
 
   const invia = (testo: string) => {
     const domanda = testo.trim();

@@ -2,11 +2,11 @@
 
 Stato: **bozza, in attesa del sì di Enzo**. Nessuna voce di attuazione è partita. Richiesta di Enzo del 2026-11-26 (03:09 Roma) nel progetto «ENZO: heuresys ecosystem», thread «Rendere Heuresys davvero AI-driven»: verificare se advanced e datastore sono davvero agentici, a che livello, e che cosa serve perché il prodotto sia AI-driven ad assoluto livello, con l'IA che lavora dentro la piattaforma, scopre fatti sommersi, sostiene decisioni sofisticate, migliora organizzazione e risorse, progetta il cambiamento, ridisegna i processi e assiste ogni funzione presente e futura.
 
-La valutazione di partenza è in [ai-driven_20261126/VALUTAZIONE_agentica_20261126.md](ai-driven_20261126/VALUTAZIONE_agentica_20261126.md): **livello 2 su 5**, governo degli agenti a 4, capacità di agire 1,5, proattività 1, change management 0,5. Le risposte di Enzo all'intervista sono nella sezione 2 e valgono come decisioni di questo piano. L'ADR fondante che le raccoglie, e che orienta tutto il progetto, è [ADR-0062](../architecture/adr/0062_heuresys_ai_driven_l_organizzazione_ghost.md): il piano lo attua.
+La valutazione di partenza è in [ai-driven_20261126/VALUTAZIONE_agentica_20261126.md](ai-driven_20261126/VALUTAZIONE_agentica_20261126.md): **livello 2 su 5**, governo degli agenti a 4, capacità di agire 1,5, proattività 1, change management 0,5. Le risposte di Enzo all'intervista sono nella sezione 2 e valgono come decisioni di questo piano. L'ADR fondante che le raccoglie, e che orienta tutto il progetto, è [ADR-0063](../architecture/adr/0063_heuresys_ai_driven_l_organizzazione_ghost.md): il piano lo attua.
 
 ## 1. Che cosa non si chiude con questo piano
 
-- Questa sessione scrive solo la voce Z0 (questo piano, la valutazione e la proposta di ADR-0062 nel repo). Ogni altra voce parte dopo il sì di Enzo (voce Z1), in un thread suo, con la sua PR, le sue prove e la sua dimostrazione dal vivo su RTL con una persona reale del tenant (ADR-0026).
+- Questa sessione scrive solo la voce Z0 (questo piano, la valutazione e la proposta di ADR-0063 nel repo). Ogni altra voce parte dopo il sì di Enzo (voce Z1), in un thread suo, con la sua PR, le sue prove e la sua dimostrazione dal vivo su RTL con una persona reale del tenant (ADR-0026).
 - Il livello 5 è un traguardo di più mesi, non di una sessione. Il piano è a onde (sezione 5); ogni onda si chiude con la misura del livello (voce M2), non con una dichiarazione.
 - Restano decisioni di Enzo fuori dal piano: i rilasci seguono la delega permanente del 13/11, le spese restano sue, l'apertura a un cliente vero è una sua scelta di prodotto.
 
@@ -28,7 +28,7 @@ La valutazione di partenza è in [ai-driven_20261126/VALUTAZIONE_agentica_202611
 | E12 | Equità | ogni proposta sulle persone passa da un controllo di equità e lo dichiara esplicitamente | 03:42 |
 | E13 | Spiegazioni | fonti cliccabili in ogni risposta e scenario | 03:42 |
 | E14 | Organizzazione ghost | il sistema agentico rappresenta una struttura ghost dei soli ruoli apicali (divisioni e direzioni), con Capi agenti di altissimo livello, consulenziali e prospettici, che attivano squadre di subagenti specializzati nell'area dell'unità | 03:42 |
-| E15 | ADR fondante | tutto ciò che viene dall'intervista confluisce in un ADR fondante che orienta la valutazione dell'esistente e tutti i programmi attuali e futuri: [ADR-0062](../architecture/adr/0062_heuresys_ai_driven_l_organizzazione_ghost.md) | 03:42 |
+| E15 | ADR fondante | tutto ciò che viene dall'intervista confluisce in un ADR fondante che orienta la valutazione dell'esistente e tutti i programmi attuali e futuri: [ADR-0063](../architecture/adr/0063_heuresys_ai_driven_l_organizzazione_ghost.md) | 03:42 |
 
 Obiettivo dichiarato da Enzo: **livello 5 su tutti gli assi**, con gli scenari what-if gestiti in modo eccellente.
 
@@ -102,12 +102,12 @@ Ogni voce è un lotto per un thread suo (regola dei passi piccoli del 21/11), co
 
 | id | cosa | file e comandi | chi | fatta quando | stato |
 |---|---|---|---|---|---|
-| Z0 | Valutazione, piano e proposta di ADR-0062 nel repo, PR in bozza | `docs/piani/PIANO_heuresys-ai-driven_20261126.md`, `docs/piani/ai-driven_20261126/`, `docs/architecture/adr/0062_*.md` | Claude (O) | PR aperta | fatta |
+| Z0 | Valutazione, piano e proposta di ADR-0063 nel repo, PR in bozza | `docs/piani/PIANO_heuresys-ai-driven_20261126.md`, `docs/piani/ai-driven_20261126/`, `docs/architecture/adr/0063_*.md` | Claude (O) | PR aperta | fatta |
 | Z1 | Sì di Enzo al piano | — | Enzo | risposta nel thread | aperta |
-| Z2 | ADR-0062 fondante: le decisioni E1-E15, l'organizzazione ghost, LIBERA spenta (emenda l'uso di ADR-0053), il motore degli scenari sulla struttura ombra, i segnalatori senza scrittura, equità dichiarata, memoria per persona, il metro per tutto il progetto | `docs/architecture/adr/0062_heuresys_ai_driven_l_organizzazione_ghost.md`, `python docs/kb/tools/build_adr_index.py` | Claude (O) scrive; Enzo accetta | stato ACCETTATO nel file | scritto il 2026-11-26 in questa PR; manca il sì |
-| Z3 | Il rimando ad ADR-0062 nei `CLAUDE.md` di advanced e del datastore, nelle sezioni «Com'è oggi» del wiki (`prodotto-visione`, `agenti-ia`; la mappa degli ADR per dominio è già in Z0) | `CLAUDE.md`, `docs/wiki/domini/*.md`; datastore: `CLAUDE.md` con la sua sessione | Claude (S) | `check_documenti.py` e `build_wiki.py --check` verdi nei due repo | aperta, dopo Z2 |
-| Z4 | Riesame con il metro di ADR-0062 (D10) di ciò che esiste e dei programmi aperti: per ciascuno l'asse e il criterio che serve, che cosa si tiene, che cosa si assorbe qui, che cosa si ferma | `python3 docs/kb/tools/programmi.py`, piani in `docs/piani/`, `.programmi/`, datastore `esecuzione/programmi/` | Claude (O) | tabella del riesame in `docs/piani/ai-driven_20261126/RIESAME_programmi.md`, proposta a Enzo una volta | aperta, dopo Z2 |
-| Z5 | Controllo del metro: ogni ADR e piano nuovo dichiara asse e criterio di ADR-0062 D1 | `docs/kb/tools/check_metro_adr0062.py` in `state-lint.yml` | Claude (S) | visto rosso su un piano finto senza dichiarazione | aperta, dopo Z2 |
+| Z2 | ADR-0063 fondante: le decisioni E1-E15, l'organizzazione ghost, LIBERA spenta (emenda l'uso di ADR-0053), il motore degli scenari sulla struttura ombra, i segnalatori senza scrittura, equità dichiarata, memoria per persona, il metro per tutto il progetto | `docs/architecture/adr/0063_heuresys_ai_driven_l_organizzazione_ghost.md`, `python docs/kb/tools/build_adr_index.py` | Claude (O) scrive; Enzo accetta | stato ACCETTATO nel file | scritto il 2026-11-26 in questa PR; manca il sì |
+| Z3 | Il rimando ad ADR-0063 nei `CLAUDE.md` di advanced e del datastore, nelle sezioni «Com'è oggi» del wiki (`prodotto-visione`, `agenti-ia`; la mappa degli ADR per dominio è già in Z0) | `CLAUDE.md`, `docs/wiki/domini/*.md`; datastore: `CLAUDE.md` con la sua sessione | Claude (S) | `check_documenti.py` e `build_wiki.py --check` verdi nei due repo | aperta, dopo Z2 |
+| Z4 | Riesame con il metro di ADR-0063 (D10) di ciò che esiste e dei programmi aperti: per ciascuno l'asse e il criterio che serve, che cosa si tiene, che cosa si assorbe qui, che cosa si ferma | `python3 docs/kb/tools/programmi.py`, piani in `docs/piani/`, `.programmi/`, datastore `esecuzione/programmi/` | Claude (O) | tabella del riesame in `docs/piani/ai-driven_20261126/RIESAME_programmi.md`, proposta a Enzo una volta | aperta, dopo Z2 |
+| Z5 | Controllo del metro: ogni ADR e piano nuovo dichiara asse e criterio di ADR-0063 D1 | `docs/kb/tools/check_metro_adr0063.py` in `state-lint.yml` | Claude (S) | visto rosso su un piano finto senza dichiarazione | aperta, dopo Z2 |
 | M0 | Misura dell'uso reale in produzione, in sola lettura (conversazioni, persone, proposte, capacità e modo, ammessi) | query in `docs/piani/ai-driven_20261126/misura-uso.sql`, eseguita da un thread sulla VM | Claude (S) | numeri nel file della valutazione con l'orario | aperta |
 | M1 | Il livello si misura da un comando: copertura di letture, scritture, pagine, segnalatori, scenari, batteria, uso | `docs/kb/tools/misura_livello_agentico.py` (dall'atlante e da `agent-operations.json`), in `verify_gate.py` | Claude (S) | il comando riproduce i numeri della valutazione; visto rosso togliendo una voce dal catalogo | aperta |
 | M2 | Rito di cancello d'onda: si rimisura il livello con M1 e si scrive l'esito qui | questa tabella | Claude | a ogni fine onda | aperta |
@@ -137,7 +137,7 @@ Ogni voce è un lotto per un thread suo (regola dei passi piccoli del 21/11), co
 | F8 | Cruscotto degli agenti: uso, consumo per agente e persona, tempi, esiti, segnalazioni utili, decisioni prese con l'agente (test del valore, F0-3 del programma del change management), per Capo ghost e per specialista | piano K voce K13, pagina per Enzo | Claude (S) | una settimana di numeri letti da Enzo | aperta |
 | F9 | Heuresys per gli assistenti esterni (E10): accesso con MCP per Claude e altri assistenti, con i permessi della persona, le classi e il cancello di sempre; nessun accesso senza login della persona | gateway, autenticazione, prova avversaria estesa | Claude (O) | una persona di RTL lavora da Claude sul suo perimetro; prova avversaria verde | aperta |
 
-### Onda 1b: l'organizzazione ghost (E14, ADR-0062 D2)
+### Onda 1b: l'organizzazione ghost (E14, ADR-0063 D2)
 
 | id | cosa | file e comandi | chi | fatta quando | stato |
 |---|---|---|---|---|---|
@@ -182,7 +182,7 @@ Base di oggi, per i soli strumenti del catalogo generico (`agent-operations.json
 - **Dati di RTL.** Le persone di RTL sono inventate; le probabilità stimate sulla loro storia valgono per la prova del motore, non come verità statistica, e lo scenario lo dichiara.
 - **Persone e perimetri.** I segnalatori e gli scenari leggono con il perimetro del destinatario (I16-I22); le segnalazioni sulle persone passano dal controllo di equità; le segnalazioni restano dentro la piattaforma (E6), quindi nessuna classe C.
 - **Altri thread.** Gateway agenti (PR #496), permessi, lingue e sottoprocessi lavorano ora: le voci F0a, F9 e G3-G4 toccano il gateway e partono dopo l'unione di #496. Il piano K (PR #272) e il piano delle applet si assorbono, non si duplicano: le loro tabelle restano la fonte delle loro voci. Ogni pagina nuova nasce con il selettore italiano e inglese.
-- **Numeri delle migrazioni e ADR.** ADR-0058 è riservato dal piano K: questo piano usa ADR-0062. Le migrazioni prendono il numero libero al momento della PR, dopo `git fetch`.
+- **Numeri delle migrazioni e ADR.** ADR-0058 è riservato dal piano K: questo piano usa ADR-0063 (ADR-0062 è della PR #498). Le migrazioni prendono il numero libero al momento della PR, dopo `git fetch`.
 - **Chi serve davvero.** Enzo per Z1, Z2 (accettare l'ADR) e le prove dal vivo con le persone di RTL che vuole vedere; la batteria la fa tutta Claude (E11). Tutto il resto lo fanno i thread.
 
 ## 7. Registro delle scoperte (fuori da questo ciclo)

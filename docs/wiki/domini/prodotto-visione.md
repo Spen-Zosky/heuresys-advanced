@@ -24,7 +24,7 @@ concetti: [visione, capacità]
 | [0011](../../architecture/adr/0011_ess_scope_inclusion.md) | Employee Self-Service Portal Inclusion & `self`-Scope Enforcement | Accepted |
 | [0031](../../architecture/adr/0031_ess_self_view_computed_intelligence.md) | Self-view ESS dell'intelligence calcolata (capability + flight-risk) | Accepted |
 | [0054](../../architecture/adr/0054_heuresys_piattaforma_del_cambiamento_organizzativo.md) | Heuresys è la piattaforma del cambiamento organizzativo, per qualunque impresa | ACCETTATO il 2026-11-03 da Enzo Spenuso |
-| [0062](../../architecture/adr/0062_heuresys_ai_driven_l_organizzazione_ghost.md) | Heuresys è AI-driven: un'organizzazione ghost di agenti lavora con le persone del tenant | PROPOSTO il 2026-11-26, in attesa del sì di Enzo Spenuso. |
+| [0063](../../architecture/adr/0063_heuresys_ai_driven_l_organizzazione_ghost.md) | Heuresys è AI-driven: un'organizzazione ghost di agenti lavora con le persone del tenant | PROPOSTO il 2026-11-26, in attesa del sì di Enzo Spenuso. |
 <!-- /generato -->
 
 ## Storia

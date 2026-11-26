@@ -1,4 +1,4 @@
-# ADR-0062 — Heuresys è AI-driven: un'organizzazione ghost di agenti lavora con le persone del tenant
+# ADR-0063 — Heuresys è AI-driven: un'organizzazione ghost di agenti lavora con le persone del tenant
 
 - **Status**: PROPOSTO il 2026-11-26, in attesa del sì di Enzo Spenuso.
 - **Date**: 2026-11-26

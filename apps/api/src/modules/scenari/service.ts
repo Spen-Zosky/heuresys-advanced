@@ -23,7 +23,10 @@
  */
 import type { PoolClient } from "pg";
 import { withTransaction } from "../../db/client.js";
-import { UnprocessableEntityError } from "../../errors/index.js";
+import { ForbiddenError, NotFoundError, UnprocessableEntityError } from "../../errors/index.js";
+import type { ActorContext } from "../../lib/actor.js";
+import type { ScenarioDetail, ScenarioExitsCreate, ScenarioList } from "@heuresys/shared";
+import { dettaglioScenario, elencoScenari } from "./lettura.js";
 import {
   CALCOLATORE_SUCCESSIONE,
   calcolaSuccessione,
@@ -200,3 +203,36 @@ async function scriviOmbraOpzione(
     });
   }
 }
+
+// ── Le rotte (F3b-2) ───────────────────────────────────────────────────────────────────────
+
+/**
+ * Chi può: i permessi `scenario:read` e `scenario:create` li hanno i soli mandati HR del tenant
+ * (migrazione 000524), che vedono tutto il tenant (I22): uno scenario di successione legge le
+ * tavole di tutto il tenant, quindi un perimetro più stretto non basterebbe a tenerlo dentro.
+ * Il servizio pretende un tenant: la piattaforma non calcola scenari per conto di un cliente.
+ */
+function tenantDi(a: ActorContext): string {
+  if (!a.tenantId) throw new ForbiddenError("Uno scenario si calcola dentro un tenant", "SCENARIO_TENANT_REQUIRED");
+  return a.tenantId;
+}
+
+export const scenariService = {
+  async list(a: ActorContext): Promise<ScenarioList> {
+    const items = await elencoScenari(tenantDi(a));
+    return { items, total: items.length };
+  },
+
+  async get(a: ActorContext, scenarioId: string): Promise<ScenarioDetail> {
+    const d = await dettaglioScenario(tenantDi(a), scenarioId);
+    if (!d) throw new NotFoundError("Scenario", "SCENARIO_NOT_FOUND");
+    return d;
+  },
+
+  async createExits(a: ActorContext, body: ScenarioExitsCreate): Promise<ScenarioDetail> {
+    const tenantId = tenantDi(a);
+    const s = await calcolaScenarioUscite({ tenantId, actorUserId: a.userId, userIds: body.userIds, family: body.family });
+    const d = await dettaglioScenario(tenantId, s.scenarioId);
+    return d!;
+  },
+};

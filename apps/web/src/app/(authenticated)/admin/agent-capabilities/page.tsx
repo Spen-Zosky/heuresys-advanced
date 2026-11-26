@@ -12,6 +12,7 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
@@ -152,6 +153,7 @@ export default function AgentCapabilitiesPage() {
   return (
     <div data-testid="agent-capabilities-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader title={t("agentCaps.titolo")} description={t("agentCaps.descrizione")} />
+      <p className="text-sm"><Link className="text-primary underline" href="/admin/agent-weekly-summary" data-testid="agent-capabilities-weekly-link">{t("agentCaps.riepilogoSettimanale")}</Link></p>
       <Card>
         <CardHeader><CardTitle as="h2">{t("agentCaps.elenco", { count: elenco.data?.items.length ?? 0 })}</CardTitle></CardHeader>
         <CardContent className="p-0">

@@ -73,6 +73,7 @@ import { learningGapsRoutes } from "./modules/learning-gaps/routes.js";
 import { delegationsRoutes } from "./modules/delegations/routes.js";
 import { consolidationRunRoutes, consolidationVocabularyRoutes, tenantConsolidationRoutes } from "./modules/tenant-consolidation/routes.js";
 import { agentCapabilitiesRoutes } from "./modules/agent-capabilities/routes.js";
+import { agentWeeklySummaryRoutes } from "./modules/agent-weekly-summary/routes.js";
 import { agentConversationsRoutes } from "./modules/agent-conversations/routes.js";
 import { agentRequestsRoutes } from "./modules/agent-requests/routes.js";
 import { platformTenantAssignmentsRoutes } from "./modules/platform-tenant-assignments/routes.js";
@@ -521,6 +522,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(tenantConsolidationRoutes, { prefix: "/v1/tenant-consolidations" });
   // ADR-0053 A1/A3/D4, piano dei principi agentici T3c: il registro delle capacità degli agenti.
   await app.register(agentCapabilitiesRoutes, { prefix: "/v1/agent-capabilities" });
+  await app.register(agentWeeklySummaryRoutes, { prefix: "/v1/agent-weekly-summary" });
   // ADR-0056 D4, piano dei principi agentici T6a: le conversazioni dell'assistente della persona.
   await app.register(agentConversationsRoutes, { prefix: "/v1/agent-conversations" });
   await app.register(agentRequestsRoutes, { prefix: "/v1/agent-requests" });

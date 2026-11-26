@@ -24,7 +24,7 @@ interface MeNotification {
   type: string;
   subject: string;
   body: string | null;
-  message?: { code: "APPROVAL_REMINDER" | "APPROVAL_OVERDUE" | "GAP_CLOSURE_DUE"; params: Record<string, string | number> } | null;
+  message?: { code: "APPROVAL_REMINDER" | "APPROVAL_OVERDUE" | "GAP_CLOSURE_DUE" | "AGENT_WEEKLY_SUMMARY"; params: Record<string, string | number> } | null;
   status: string;
   priority: string;
   createdAt: string;
@@ -72,14 +72,20 @@ function approvalRequestId(actionUrl: string | null): string | null {
 export default function MeInboxPage() {
   const { t } = useTranslation("ess");
   const enumLabel = useEnumLabel();
-  const { relativo } = useFormat();
+  const { relativo, data: giorno } = useFormat();
   // L'oggetto e il testo di certi avvisi li scrive l'API in italiano: se porta il messaggio strutturato, la frase
   // si compone qui nella lingua di chi guarda; altrimenti resta il testo salvato.
+  // Le date dei parametri (il riepilogo dell'assistente, ADR-0063 D3) si scrivono nel formato della lingua.
+  const parametri = (n: MeNotification): Record<string, string | number> => {
+    const p = { ...(n.message?.params ?? {}) };
+    for (const k of ["from", "to"]) if (typeof p[k] === "string") p[k] = giorno(p[k] as string);
+    return p;
+  };
   const oggettoAvviso = (n: MeNotification): string =>
-    n.message ? t(`inbox.messages.${n.message.code}.subject`, n.message.params) : n.subject;
+    n.message ? t(`inbox.messages.${n.message.code}.subject`, parametri(n)) : n.subject;
   const testoAvviso = (n: MeNotification): string | null => {
     if (!n.message) return n.body;
-    const p = n.message.params;
+    const p = parametri(n);
     const segmento = typeof p["segment"] === "string" ? { segment: t(`inbox.messages.GAP_CLOSURE_DUE.segment.${p["segment"]}`) } : {};
     return t(`inbox.messages.${n.message.code}.body`, { ...p, ...segmento });
   };

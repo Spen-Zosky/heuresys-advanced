@@ -2192,7 +2192,8 @@
       "GIORNALE_UNDO": "undo journal",
       "RIGA_SOSTITUTIVA": "replacement row"
     },
-    "identita": "{{codice}} · v{{versione}} · {{agente}}"
+    "identita": "{{codice}} · v{{versione}} · {{agente}}",
+    "riepilogoSettimanale": "Weekly summary of the writes made with the assistant"
   },
   "catalogoKpi": {
     "titolo": "KPI templates",
@@ -2329,5 +2330,43 @@
     "registroTitolo": "Cost and duration of agent calls",
     "registroTotali": "{{chiamate}} calls · cost {{costo}} · duration {{durata}}",
     "erroreRegistro": "The call log could not be loaded."
+  },
+  "agentWeekly": {
+    "titolo": "Weekly assistant summary",
+    "descrizione": "Every write made with the assistant in the week: those confirmed by the person, those denied and those executed without confirmation, which must stay at zero.",
+    "negato": "The summary is visible to the HR Director, the tenant administrator and the platform.",
+    "erroreCarica": "The summary could not be loaded.",
+    "precedente": "Previous week",
+    "successiva": "Next week",
+    "intervallo": "From {{dal}} to {{al}}",
+    "tenant": "Tenant",
+    "tutti": "All",
+    "totali": {
+      "confermate": "Confirmed",
+      "negate": "Denied",
+      "autonome": "Without confirmation",
+      "persone": "People",
+      "conversazioni": "Conversations"
+    },
+    "allarme": "Some writes were executed without confirmation: the mode without confirmation is switched off and this should not happen. Check it now.",
+    "perPersona": "By person ({{count}})",
+    "elenco": "Writes ({{count}})",
+    "troncato": "Showing the {{mostrate}} most recent of {{totale}}.",
+    "nessuna": "No writes with the assistant this week.",
+    "personaAssente": "Person no longer present",
+    "operazioneSenzaNome": "Operation without description",
+    "colonne": {
+      "persona": "Person",
+      "tenant": "Tenant",
+      "ultima": "Last write",
+      "quando": "When",
+      "operazione": "Operation",
+      "esito": "Outcome"
+    },
+    "esiti": {
+      "CONFERMATA": "Confirmed",
+      "NEGATA": "Denied",
+      "AUTONOMA": "Without confirmation"
+    }
   }
 }

@@ -1,0 +1,30 @@
+# Template — placeholders (@@...@@) are rendered by scripts/vm-bootstrap.sh.
+# Do NOT install this file directly; run the bootstrap script instead.
+#
+# ADR-0063 D3 (piano AI-driven F0c, decisione E5): a ONE-SHOT that puts the weekly
+# summary of the writes made with the assistant (confirmed, denied, autonomous) in the
+# in-app inbox of every PLATFORM_ADMIN. No email (E6). CLI-bypass, no HTTP/auth. Activated by
+# heuresys-advanced-agent-weekly-summary.timer. Re-run: no duplicates.
+[Unit]
+Description=Heuresys Advanced — riepilogo settimanale dell'assistente (F0c, one-shot)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+# S1029: senza questo, un fallimento notturno resta invisibile finche' qualcuno
+# non guarda `systemctl --failed` per caso. L'handler scrive journal + registro letto
+# dal dashboard di sessione.
+OnFailure=heuresys-unit-failure@%n.service
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=@@REPO_DIR@@/apps/api
+# nvm-managed Node (>=22) on PATH; pnpm lives alongside it.
+Environment=PATH=@@NODE_BIN@@:/usr/local/bin:/usr/bin:/bin
+Environment=NODE_ENV=production
+# Lets env.ts locate the repo-root .env + .secrets when run from apps/api.
+Environment=HEURESYS_REPO_ROOT=@@REPO_DIR@@
+# CLI-bypass in-process run (tsx) — devDeps are present (frozen install, not --prod).
+ExecStart=@@NODE_BIN@@/pnpm agents:weekly-summary
+TimeoutStartSec=600

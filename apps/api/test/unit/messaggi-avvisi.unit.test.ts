@@ -9,6 +9,7 @@ import {
   testoPromemoriaApprovazione,
   testoScadenzaApprovazione,
   testoGapCompetenze,
+  testoRiepilogoAgente,
   messaggioDellAvviso,
 } from "../../src/lib/notifications/messaggi.js";
 
@@ -50,6 +51,15 @@ describe("messaggio strutturato degli avvisi", () => {
       code: "GAP_CLOSURE_DUE",
       params: { segment: "UNKNOWN" },
     });
+  });
+
+  it("il riepilogo settimanale dell'assistente (ADR-0063 D3) si riconosce con le sue cifre", () => {
+    const t = testoRiepilogoAgente("2026-11-16", "2026-11-22", 7, 2, 0);
+    expect(messaggioDellAvviso("SYSTEM", t.subject, t.body)).toEqual({
+      code: "AGENT_WEEKLY_SUMMARY",
+      params: { from: "2026-11-16", to: "2026-11-22", confirmed: 7, denied: 2, autonomous: 0 },
+    });
+    expect(messaggioDellAvviso("SYSTEM", t.subject, "testo cambiato a mano")).toBeNull();
   });
 
   it("un avviso di un altro tipo, o con un testo che non e' quello atteso, resta com'e' (null)", () => {

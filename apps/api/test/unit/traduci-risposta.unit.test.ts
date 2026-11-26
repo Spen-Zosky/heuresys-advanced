@@ -3,7 +3,7 @@
  * La prova sul database vero è in test/traduci-risposta.integration.test.ts.
  */
 import { describe, it, expect } from "vitest";
-import { traduciValore, rovescia } from "../../src/lib/i18n/traduci-risposta.js";
+import { traduciValore, rovescia, riceveRitorno } from "../../src/lib/i18n/traduci-risposta.js";
 
 const g = new Map([
   ["Gestione del rischio", "Risk management"],
@@ -66,5 +66,17 @@ describe("rovescia", () => {
     const r = traduciValore(corpo, rovescia(g)) as Record<string, unknown>;
     expect(Object.getPrototypeOf(r)).toBe(Object.prototype);
     expect(r.label).toBe("Finanza");
+  });
+});
+
+describe("riceveRitorno", () => {
+  it("solo le scritture /v1/* fuori dall'accesso ricevono il ritorno", () => {
+    expect(riceveRitorno("/v1/skills/:id", "PATCH")).toBe(true);
+    expect(riceveRitorno("/v1/positions", ["POST", "PUT"])).toBe(true);
+    expect(riceveRitorno("/v1/skills/:id", "GET")).toBe(false);
+    expect(riceveRitorno("/v1/auth/login", "POST")).toBe(false);
+    expect(riceveRitorno("/v1/auth/agent-tokens", "POST")).toBe(false);
+    expect(riceveRitorno("/v1/auth", "POST")).toBe(false);
+    expect(riceveRitorno("/healthz", "POST")).toBe(false);
   });
 });

@@ -38,6 +38,10 @@ describe("traduzione del dato nella risposta", () => {
       ricevuto = req.body;
       return reply.code(204).send();
     });
+    app.post("/v1/auth/eco", async (req, reply) => {
+      ricevuto = req.body;
+      return reply.code(204).send();
+    });
     await app.ready();
   });
 
@@ -76,6 +80,12 @@ describe("traduzione del dato nella risposta", () => {
     await app.inject({ method: "PATCH", url: "/v1/eco", cookies: { NEXT_LOCALE: "it" }, payload: corpo });
     expect(ricevuto).toEqual(corpo);
     await app.inject({ method: "PATCH", url: "/v1/eco", cookies: { NEXT_LOCALE: "en" }, headers: { "x-localize": "off" }, payload: corpo });
+    expect(ricevuto).toEqual(corpo);
+  });
+
+  it("le rotte di accesso non ricevono il ritorno: il corpo arriva com'è", async () => {
+    const corpo = { name: enR };
+    await app.inject({ method: "POST", url: "/v1/auth/eco", cookies: { NEXT_LOCALE: "en" }, payload: corpo });
     expect(ricevuto).toEqual(corpo);
   });
 });

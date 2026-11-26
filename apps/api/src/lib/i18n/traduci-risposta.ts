@@ -26,7 +26,7 @@
  * I nomi delle persone non sono in nessun campo registrato, quindi non si traducono.
  */
 
-import type { FastifyInstance } from "fastify";
+import type { FastifyInstance, preValidationHookHandler } from "fastify";
 import type { Pool } from "pg";
 
 export type Glossario = ReadonlyMap<string, string>;
@@ -219,16 +219,11 @@ export function addTraduzioneRisposta(app: FastifyInstance, db: Pick<Pool, "quer
   });
   // Il ritorno: il corpo di una scrittura in inglese torna all'italiano canonico prima della
   // validazione. Sincrono come l'andata; senza glossario il corpo passa com'è.
-  app.addHook("preValidation", (req, _reply, done) => {
-    if (
-      req.locale !== "en" ||
-      !SCRITTURE.has(req.method) ||
-      !req.url.startsWith("/v1/") ||
-      req.url.startsWith("/v1/auth/") ||
-      req.headers["x-localize"] === "off" ||
-      req.body === null ||
-      typeof req.body !== "object"
-    ) {
+  // Non è un hook globale: si aggancia rotta per rotta, alla registrazione, alle sole scritture
+  // `/v1/*` fuori da `/v1/auth/`. Le rotte di accesso (credenziali, secondo fattore) non lo
+  // ricevono proprio, invece di saltarlo a runtime: il loro corpo non passa mai di qui.
+  const ritorno: preValidationHookHandler = (req, _reply, done) => {
+    if (req.locale !== "en" || req.headers["x-localize"] === "off" || req.body === null || typeof req.body !== "object") {
       done();
       return;
     }
@@ -246,5 +241,18 @@ export function addTraduzioneRisposta(app: FastifyInstance, db: Pick<Pool, "quer
       // la traduzione non rompe mai una scrittura
     }
     done();
+  };
+  app.addHook("onRoute", (r) => {
+    if (!riceveRitorno(r.url, r.method)) return;
+    const prima = r.preValidation === undefined ? [] : Array.isArray(r.preValidation) ? r.preValidation : [r.preValidation];
+    r.preValidation = [ritorno, ...prima];
   });
+}
+
+/** Quali rotte ricevono il ritorno: le scritture `/v1/*`, mai quelle di accesso. */
+export function riceveRitorno(url: string, metodo: string | readonly string[]): boolean {
+  const metodi = typeof metodo === "string" ? [metodo] : metodo;
+  if (!metodi.some((m) => SCRITTURE.has(m))) return false;
+  if (!url.startsWith("/v1/")) return false;
+  return !(url === "/v1/auth" || url.startsWith("/v1/auth/"));
 }

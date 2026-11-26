@@ -2,6 +2,9 @@
  * apps/api/src/modules/agent-signals/service.ts — ADR-0063, voce F4a (decisione E6 di Enzo).
  *
  * @agente segnalatori (anagrafe: docs/architecture/agenti/ANAGRAFE_agenti.md)
+ * @segnalatore D1:posizione-critica-senza-successore
+ * @segnalatore D5:ampiezza-di-controllo
+ * @segnalatore D5:posizione-scoperta
  *
  * I segnalatori osservano il tenant e segnalano, senza cambiare nulla. Tre, uno per domanda:
  *   · POSIZIONE_CRITICA_SENZA_SUCCESSORE (talenti, D1): una posizione critica senza nessun

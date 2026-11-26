@@ -35,6 +35,7 @@ import subprocess
 import sys
 import time
 import urllib.request
+from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import handoff_lint as hl  # noqa: E402
@@ -712,6 +713,62 @@ def sec_decisions():
 
 
 # --- render -------------------------------------------------------------------------------
+# Backup HR sulla VM (restic e pacchetti Git, da cron): non sono unit systemd, quindi il
+# registro OnFailure non li vede, e uno script sparito fallisce in silenzio (fermi dal 10/11
+# al 26/11/2026). Qui si giudica l'esito più recente, e si legge ALLARME.txt.
+BACKUP_HR_COMANDO = (
+    "cd ~/backup-hr 2>/dev/null || { echo CARTELLA_ASSENTE; exit 0; }; "
+    "for s in backup_restic_hr.sh pacchetti-git-drive.sh; do [ -x bin/$s ] || echo \"MANCA|$s\"; done; "
+    "for f in ultimo_esito.txt pacchetti_git_esito.txt; do "
+    "echo \"ESITO|$f|$(head -1 log/$f 2>/dev/null)\"; done; "
+    "tail -3 log/ALLARME.txt 2>/dev/null | sed 's/^/ALLARME|/'"
+)
+
+
+def giudica_backup_hr(testo, adesso):
+    """Righe di BACKUP_HR_COMANDO -> [(va_bene, messaggio)]. Un esito vale 26 ore."""
+    def eta_ore(marca):
+        try:
+            t = datetime.strptime(marca, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+        except ValueError:
+            return None
+        return (adesso - t).total_seconds() / 3600
+
+    righe = []
+    for ln in testo.strip().splitlines():
+        campi = ln.split("|")
+        if campi[0] == "CARTELLA_ASSENTE":
+            righe.append((False, "~/backup-hr assente"))
+        elif campi[0] == "MANCA":
+            righe.append((False, f"script di backup assente: {campi[1]}"))
+        elif campi[0] == "ESITO":
+            parole = campi[2].split()
+            eta = eta_ore(parole[1]) if len(parole) > 1 else None
+            bene = bool(parole) and parole[0] == "OK" and eta is not None and eta < 26
+            righe.append((bene, f"{campi[1]}: {campi[2][:80] or 'assente'}"))
+        elif campi[0] == "ALLARME":
+            parole = campi[1].split()
+            eta = eta_ore(parole[1]) if len(parole) > 1 else None
+            if eta is None or eta < 48:
+                righe.append((False, campi[1][:110]))
+    return righe
+
+
+def sec_backup_hr(no_net):
+    s = Section("BACKUP HR VM (restic, pacchetti Git, ALLARME.txt)")
+    if no_net:
+        s.add(UNK, "--no-net")
+        return s
+    testo = sh("ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=8",
+               "oracle-vm-default", BACKUP_HR_COMANDO, timeout=25)
+    if not testo or not testo.strip():
+        s.add(UNK, "VM non raggiungibile")
+        return s
+    for bene, messaggio in giudica_backup_hr(testo, datetime.now(timezone.utc)):
+        s.add(OK if bene else BAD, messaggio)
+    return s
+
+
 def render(sections, as_md):
     cur = current_session(read(STATE_MD) or "")
     title = f"HEURESYS — STATUS DASHBOARD{f' · S{cur}' if cur else ''}"
@@ -760,6 +817,7 @@ def main():
         sec_ci(args.no_net),
         sec_prod(args.no_net),
         sec_scheduled_jobs(args.no_net),
+        sec_backup_hr(args.no_net),
         db_sec,
         sec_drift(args.no_db, live, sot_md, state_md),
         sec_backlog(args.no_db),

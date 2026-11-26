@@ -35,6 +35,9 @@ const IDENT = /^[a-z_][a-z0-9_]*$/;
 const CHIAVE_ESCLUSA =
   /^(id|ids|code|codes|email|slug|url|href|locale|password|token|secret|otp)$|(Id|Ids|Code|Codes|Email|Url|Href|Slug|Password|Token|Secret|Otp)$/;
 const SCRITTURE = new Set(["POST", "PATCH", "PUT"]);
+// Il corpo di una scrittura arriva dalla persona: una chiave come `__proto__` non si riscrive mai
+// (`copia[k] = v` cambierebbe il prototipo della copia).
+const CHIAVE_PROTOTIPO = new Set(["__proto__", "constructor", "prototype"]);
 const LUNGHEZZA_MIN = 2;
 const DURATA_MS = 5 * 60 * 1000;
 
@@ -119,7 +122,7 @@ export function traduciValore(valore: unknown, g: Glossario, profondita = 0, sos
   if (proto !== Object.prototype && proto !== null) return valore;
   let copia: Record<string, unknown> | null = null;
   for (const [k, v0] of Object.entries(valore as Record<string, unknown>)) {
-    if (CHIAVE_ESCLUSA.test(k)) continue;
+    if (CHIAVE_ESCLUSA.test(k) || CHIAVE_PROTOTIPO.has(k)) continue;
     const v = traduciValore(v0, g, profondita + 1, sostituite);
     if (v !== v0) {
       copia ??= { ...(valore as Record<string, unknown>) };

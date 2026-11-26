@@ -60,4 +60,11 @@ describe("rovescia", () => {
     expect(r).toEqual({ a: "Finance", b: ["Gestione del rischio"], c: "A new English text" });
     expect(tracce).toEqual(["Risk management"]);
   });
+
+  it("una chiave __proto__ nel corpo non cambia il prototipo della copia", () => {
+    const corpo = JSON.parse('{"__proto__": {"name": "Finance"}, "label": "Finance"}') as Record<string, unknown>;
+    const r = traduciValore(corpo, rovescia(g)) as Record<string, unknown>;
+    expect(Object.getPrototypeOf(r)).toBe(Object.prototype);
+    expect(r.label).toBe("Finanza");
+  });
 });

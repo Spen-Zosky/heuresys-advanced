@@ -17,7 +17,7 @@ Il wiki segue il modello llm-wiki: fonti grezze (codice, ADR, registri), pagine 
 | [governo](domini/governo.md) | governo | Chi decide, chi scrive dove, come si apre e si chiude una sessione | 2026-11-25 |
 | [operazioni-infra](domini/operazioni-infra.md) | operazioni-infra | VM di produzione, gemello sulla Debian, CI, rilascio armato e copie ripristinabili | 2026-11-25 |
 | [processi-organizzazione](domini/processi-organizzazione.md) | processi-organizzazione | Posizioni, unità, processi e attività: la partecipazione si lega alla posizione | 2026-11-25 |
-| [prodotto-visione](domini/prodotto-visione.md) | prodotto-visione | Heuresys come piattaforma agentica del cambiamento organizzativo | 2026-11-25 |
+| [prodotto-visione](domini/prodotto-visione.md) | prodotto-visione | Heuresys come piattaforma agentica del cambiamento organizzativo | 2026-11-26 |
 | [qualita-verifica](domini/qualita-verifica.md) | qualita-verifica | Fatto vuol dire dimostrato dal vivo; cancelli in CI e controlli dei documenti | 2026-11-25 |
 | [sicurezza-accessi](domini/sicurezza-accessi.md) | sicurezza-accessi | Autenticazione separata, perimetro gerarchico e modalità funzionale, maschere e mandati | 2026-11-25 |
 | [stato-pianificazione](domini/stato-pianificazione.md) | stato-pianificazione | Dove si legge lo stato, il backlog, i debiti e i piani | 2026-11-25 |

@@ -59,6 +59,9 @@
       "mfa": {
         "title": "Two-factor authentication",
         "prompt": "Enter the code from your authenticator",
+        "recoveryLabel": "Recovery code",
+        "useRecovery": "Use a recovery code",
+        "useCode": "Use the verification code",
         "codeLabel": "Verification code",
         "submit": "Verify",
         "invalid": "Invalid or expired MFA code",

@@ -2,6 +2,7 @@
 
 > **item**: #214
 > **stato**: IN CORSO
+> **riesame-z4**: 2026-11-26, assorbito in F1 del piano Heuresys AI-driven (`docs/piani/ai-driven_20261126/RIESAME_programmi.md`); questo file resta la fonte del dettaglio
 
 Seconda metà della dottrina di Enzo del 2026-08-16 — *«l'agente va su qualunque perimetro dove
 porta valore aggiunto»*. **La domanda è l'ORDINE, non quale.** Per natura non si chiude in una

@@ -281,6 +281,10 @@ BEGIN
       FROM fasi_rtl f
       JOIN sys.sys_tenant_processes tp ON tp.tenant_process_tenant_id = v_rtl AND tp.tenant_process_code = f.processo
       JOIN sys.sys_organization_units u ON u.organization_unit_tenant_id = v_rtl AND u.organization_unit_code = f.unita
+     -- l'attivita' puo' essere stata spostata su un sottoprocesso (db/scripts/processi): non si ricrea sul genitore
+     WHERE NOT EXISTS (SELECT 1 FROM sys.sys_tenant_processes c
+                         JOIN sys.sys_tenant_process_steps cs ON cs.tenant_process_step_process_id = c.tenant_process_id
+                        WHERE c.tenant_process_parent_id = tp.tenant_process_id AND cs.tenant_process_step_code = f.codice)
     ON CONFLICT (tenant_process_step_process_id, tenant_process_step_code) DO NOTHING
     RETURNING tenant_process_step_id
   )

@@ -41,6 +41,7 @@ export const TenantProcessSummarySchema = z.object({
   /** il processo del modello da cui viene, se c'è */
   modelProcessName: z.string().nullable(),
   subprocessCount: z.number().int().min(0),
+  /** le attività del processo, comprese quelle dei suoi sottoprocessi attivi */
   activityCount: z.number().int().min(0),
   unitCount: z.number().int().min(0),
 });

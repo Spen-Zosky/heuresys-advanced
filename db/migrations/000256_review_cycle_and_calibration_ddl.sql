@@ -314,7 +314,10 @@ BEGIN
      AND p.auth_permission_code IN ('performance-review:read','performance-review:write','calibration:manage','review-cycle:manage');
   IF n_trad <> 4 THEN RAISE EXCEPTION 'Traduzioni EN dei permessi: attese 4, trovate %', n_trad; END IF;
 
-  SELECT coalesce(sum(missing),0) INTO n_gap FROM sys.v_reference_translation_coverage;
+  SELECT coalesce(sum(missing),0) INTO n_gap FROM sys.v_reference_translation_coverage
+    -- 000516 e 000517: blueprint, etichette delle interfacce e contenuti dei tenant restano fuori.
+   WHERE (entity_table, field) NOT IN (SELECT f.entity_table, f.field
+      FROM sys.sys_translatable_field f WHERE f.note IN ('contenuti dei tenant','contenuto dei blueprint','registro dei processi dei blueprint','etichette delle interfacce'));
   IF n_gap <> 0 THEN RAISE EXCEPTION 'Copertura EN: % traduzioni mancanti dopo questa migrazione', n_gap; END IF;
 
   RAISE NOTICE 'PASSO 1 OK — 4 tabelle del ciclo di valutazione, FK review_cycle_id sulle review, 4 permessi mappati su % righe RBAC, copertura EN intatta.', n_map;

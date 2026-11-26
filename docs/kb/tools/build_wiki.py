@@ -83,7 +83,7 @@ def blocco_storia(dominio, ritiri, dom_cens):
     testo = (f"Il riordino del 2026-11-25 ha ritirato **{len(mie)}** documenti di questo dominio "
              f"(lotti: {', '.join(f'{k} {v}' for k, v in sorted(lotti.items()))}). "
              f"Si recuperano con `git show <commit>:<percorso>` dai commit {', '.join(commit)}, "
-             "oppure dalla copia nel cestino della cartella del progetto; l'elenco completo è nel "
+             "(il cestino del riordino è stato svuotato il 2026-11-26, voce R14); l'elenco completo è nel "
              "[registro dei ritiri](../../piani/riordino-documentazione_20261125/REGISTRO_RITIRI.tsv).\n\n"
              "Da dove venivano: " + ", ".join(f"`{k}` {v}" for k, v in cartelle.most_common(8)) + ".\n")
     return testo

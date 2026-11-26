@@ -52,7 +52,7 @@ concetti: [migrazione, posizione, tenant, seed]
 ## Storia
 
 <!-- generato:storia -->
-Il riordino del 2026-11-25 ha ritirato **47** documenti di questo dominio (lotti: A4 31, A4-campioni 1, B 15). Si recuperano con `git show <commit>:<percorso>` dai commit 87d7ce9d9, a1872a180, oppure dalla copia nel cestino della cartella del progetto; l'elenco completo è nel [registro dei ritiri](../../piani/riordino-documentazione_20261125/REGISTRO_RITIRI.tsv).
+Il riordino del 2026-11-25 ha ritirato **47** documenti di questo dominio (lotti: A4 31, A4-campioni 1, B 15). Si recuperano con `git show <commit>:<percorso>` dai commit 87d7ce9d9, a1872a180, (il cestino del riordino è stato svuotato il 2026-11-26, voce R14); l'elenco completo è nel [registro dei ritiri](../../piani/riordino-documentazione_20261125/REGISTRO_RITIRI.tsv).
 
 Da dove venivano: `cowork_reserved` 14, `qa_artifacts` 11, `cowork_code_exchange/baselines` 8, `docs/superpowers/specs` 5, `.storia36/analysis` 2, `docs/superpowers/plans` 2, `cowork_code_exchange` 1, `docs/kb/db-forensics` 1.
 <!-- /generato -->

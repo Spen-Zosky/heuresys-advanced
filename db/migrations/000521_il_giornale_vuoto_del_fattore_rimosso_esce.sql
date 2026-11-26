@@ -18,8 +18,9 @@
 --  (a) misura      — righe e chiavi esterne in entrata, misurate qui al momento del DROP
 --  (b) guardia     — se la tabella ha anche una sola riga, o qualcosa la referenzia, si ferma
 --  (c) post        — la tabella non c'e' piu' (se il ruolo che applica la catena poteva toglierla)
---  (d) rollback    — non serve un giornale: la tabella e' vuota per guardia, e la sua forma
---                    sta nel backup heuresys_advanced_20261126T131903Z.dump (verificato)
+--  (d) rollback    — non serve un giornale: la tabella e' vuota per guardia. La sua definizione
+--                    e' salvata sulla VM in pg_dump_snapshots/fattore_rimosso_undo_definizione_20261126.sql
+--                    (il backup delle 13:19 UTC e' di poco precedente alla sua nascita)
 -- ============================================================================
 
 DO $$

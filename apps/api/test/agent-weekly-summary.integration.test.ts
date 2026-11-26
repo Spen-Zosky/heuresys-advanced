@@ -53,7 +53,7 @@ async function personaCon(ruolo: string, diPiattaforma: boolean) {
 }
 
 /** Una riga del diario: `ora` è l'ora di Roma. */
-async function diario(tenant: string, subject: string, ora: string, reason: string, concept = "organization-units", operation = "post") {
+async function diario(tenant: string, subject: string, ora: string, reason: string, concept = "learning-gaps", operation = "post") {
   await pool.query(
     `INSERT INTO audit.agent_gateway_decisions
        (conversation_id, ts, principal_kind, principal_subject, tenant, tool, args_hash, concept, operation, decision, reason)
@@ -108,7 +108,7 @@ describe("il riepilogo settimanale dell'assistente (ADR-0063 D3, E5)", () => {
     const op = s.writes[0]!;
     expect(op.method).toBe("POST");
     expect(op.operationLabel?.it).toBeTruthy();
-    expect(op.operationLabel?.it).not.toMatch(/organization-units|:/);
+    expect(op.operationLabel?.it).not.toMatch(/learning-gaps|gap_analysis|:/);
   });
 
   it("una persona che non c'è più resta contata, senza nome, in fondo all'elenco", async () => {

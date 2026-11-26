@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { pool } from '../src/db/client.js';
+import { fuoriDalGiornale } from './helpers/giornali.js';
 
 // F2 of the reconciliation-closure cycle: bucket-A imports. One block per imported table.
 // Hits the live DB (no mocks). Verifies the imported state, not the seed mechanics
@@ -18,6 +19,11 @@ describe('reconciliation F2 imports', () => {
     // audit.career_paths_junk_archive). The durable invariants: real tracks exist,
     // all legacy-coded, valid kind, single tenant, no test residue.
     it('real legacy-coded tracks, valid kind, single tenant, no test residue', async () => {
+      // [2026-11-26] I percorsi CAR-TJB-* li ha scritti lo script L di rtl-allinea (11/11/2026,
+      // i percorsi della corsa applicati a RTL) e li ha giornalizzati come 'ins:sys_career_paths':
+      // non sono dell'import, e restano fuori da questi invarianti.
+      const nonAllineati = await fuoriDalGiornale(
+        "staging.rtl_allinea_org_undo", "ins:sys_career_paths", "career_path_id");
       const { rows } = await pool.query<{ n: number; bad_code: number; bad_kind: number; tenants: number; residue: number }>(
         `SELECT count(*)::int AS n,
                 count(*) FILTER (WHERE career_path_code NOT LIKE 'LEGACY_CP::%')::int AS bad_code,
@@ -25,7 +31,8 @@ describe('reconciliation F2 imports', () => {
                   ('VERTICAL','LATERAL','SPECIALIST','MANAGERIAL','CROSS_FUNCTIONAL'))::int AS bad_kind,
                 count(DISTINCT career_path_tenant_id)::int AS tenants,
                 count(*) FILTER (WHERE career_path_name IN ('Test Auth Path','test'))::int AS residue
-           FROM sys.sys_career_paths`,
+           FROM sys.sys_career_paths
+          WHERE ${nonAllineati}`,
       );
       expect(rows[0]!.n).toBeGreaterThan(0);
       expect(rows[0]?.bad_code).toBe(0);

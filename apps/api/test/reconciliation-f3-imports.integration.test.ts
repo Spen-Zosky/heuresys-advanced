@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { pool } from '../src/db/client.js';
+import { fuoriDalGiornale, fuoriDaiPostiNuoviC13 } from './helpers/giornali.js';
 
 // F3 of the reconciliation-closure cycle: bridgeable imports across the job->position wall.
 // Hits the live DB (no mocks). #1 + #2 imported; #3 (successor_candidates) was BLOCKED by a
@@ -9,18 +10,6 @@ import { pool } from '../src/db/client.js';
 const count = async (sql: string): Promise<number> => {
   const { rows } = await pool.query<{ n: number }>(sql);
   return rows[0]?.n ?? -1;
-};
-
-// [2026-11-26] Le aggiunte DICHIARATE fuori dall'import non toccano i numeri dell'import.
-// Gli script di allineamento di RTL (db/scripts/rtl-allinea/, novembre 2026) hanno aggiunto
-// percorsi e passi di carriera e li hanno GIORNALIZZATI riga per riga in
-// staging.rtl_allinea_org_undo: è lo stesso uso del giornale della 000361 qui sotto, sapere
-// che cosa è stato aggiunto e da chi. Una copia della CI che precede quegli script non ha il
-// giornale: allora non c'è niente da escludere, e il frammento vale `true`.
-const fuoriDalGiornale = async (giornale: string, tabella: string, colonna: string): Promise<string> => {
-  const { rows } = await pool.query<{ c: string | null }>(`SELECT to_regclass($1)::text AS c`, [giornale]);
-  if (!rows[0]?.c) return "true";
-  return `NOT EXISTS (SELECT 1 FROM ${giornale} j WHERE j.tabella = '${tabella}' AND j.chiave = ${colonna})`;
 };
 
 describe('reconciliation F3 imports', () => {
@@ -100,11 +89,7 @@ describe('reconciliation F3 imports', () => {
        WHERE NOT EXISTS (
          SELECT 1 FROM staging.mig361_requisiti_rischio_undo u
           WHERE u.requisito_id = plr.position_learning_requirement_id)
-         AND NOT EXISTS (
-         SELECT 1 FROM sys.sys_positions np
-          WHERE np.position_id = plr.position_id
-            AND np.position_metadata->>'storia36' = 'C13'
-            AND np.position_metadata->>'origine' = 'potenziamento')`;
+         AND ${fuoriDaiPostiNuoviC13("plr.position_id")}`;
     it('imported 1733 fan-out rows across 153 positions, all resolving a learning_path', async () => {
       expect(await count(`SELECT count(*)::int AS n ${SOLO_IMPORT}`)).toBe(1733);
       expect(await count(`SELECT count(DISTINCT plr.position_id)::int AS n ${SOLO_IMPORT}`)).toBe(153);
@@ -153,7 +138,13 @@ describe('reconciliation F3 imports', () => {
       expect(await count(
         `SELECT count(*)::int AS n FROM sys.sys_career_path_steps s WHERE ${passiNonAllineati}`,
       )).toBe(35);
-      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_critical_positions`)).toBe(8);
+      // [2026-11-26] Lo script D2 di rtl-allinea ha aggiunto i posti CRITICAL che mancavano
+      // e li ha giornalizzati in staging.rtl_allinea_skill_undo: fuori dall'import.
+      const criticiNonAllineati = await fuoriDalGiornale(
+        "staging.rtl_allinea_skill_undo", "sys_critical_positions", "c.critical_position_id");
+      expect(await count(
+        `SELECT count(*)::int AS n FROM sys.sys_critical_positions c WHERE ${criticiNonAllineati}`,
+      )).toBe(8);
       // vincolato alla provenienza dell'import: la storia C5 aggiunge una riga di
       // rilevanza per ogni posizione critica che ne era scoperta (coda #18), e quelle
       // righe portano il marchio del programma

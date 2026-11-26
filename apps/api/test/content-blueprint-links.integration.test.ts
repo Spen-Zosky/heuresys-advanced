@@ -57,7 +57,10 @@ beforeAll(async () => {
   if (pr.rows.length < 2) throw new Error("need ≥2 blueprint processes");
   proc0 = pr.rows[0]!.blueprint_process_id;
   proc1 = pr.rows[1]!.blueprint_process_id;
-  variantId = pr.rows[0]!.blueprint_process_variant_id;
+  // La variante è quella del processo che il test collega nella ricerca inversa (proc1). Fino al
+  // 2026-11-26 si prendeva quella di proc0, e il test passava solo finché i primi due processi
+  // stavano nella stessa variante: sulla copia rinfrescata dalla produzione non è più così.
+  variantId = pr.rows[1]!.blueprint_process_variant_id;
 });
 
 afterAll(async () => {

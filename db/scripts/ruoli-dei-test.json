@@ -31,6 +31,12 @@
       "ruolo": "MANAGER",
       "motivo": "Il perimetro TEAM del cruscotto si prova con un MANAGER titolare di una posizione attiva: in produzione nessun MANAGER ne possiede una.",
       "test": ["dashboard", "dashboard-catalog"]
+    },
+    {
+      "email": "marco.rinaldi@rtl-bank.org",
+      "ruolo": "TEAM_LEADER",
+      "motivo": "Il leader di squadra dei test di teams e del controllo a due assi fra alberi: in produzione dal 2026-10-31 non porta TEAM_LEADER.",
+      "test": ["teams", "two-axis-f4-crosstree"]
     }
   ]
 }

@@ -347,12 +347,24 @@ def scan_db():
     # analizzata, e il 2026-11-06 lo erano su 339 tabelle su 391 della produzione (13 righe
     # invece di 425 in sys_user_auth_roles). Un atlante che e' la SoT interrogabile non puo'
     # scrivere stime. Batch UNION ALL per non moltiplicare i round-trip sul tunnel.
-    raw = psql("SELECT schemaname||'.'||relname||'|'||format('%I.%I', schemaname, relname) "
-               "FROM pg_stat_user_tables ORDER BY 1")
+    # Una tabella che il ruolo di lettura (heuresys_agenti, B2) non puo' leggere non si conta e
+    # non si tace: finisce per nome in `unreadable_tables` e in ATLAS.md. Senza, una sola tabella
+    # nata fuori dalla catena (2026-11-26, di proprieta' di postgres) fermava tutta la
+    # rigenerazione. I permessi non si allargano per far passare l'atlante.
+    raw = psql("SELECT schemaname||'.'||relname||'|'||"
+               "(has_schema_privilege(schemaname, 'USAGE') AND has_any_column_privilege(relid, 'SELECT'))::int"
+               "||'|'||format('%I.%I', schemaname, relname) FROM pg_stat_user_tables ORDER BY 1")
     names = []
+    unreadable = []
     for line in raw.splitlines():
-        name, quoted = line.split("|", 1)
-        names.append((name, quoted))
+        name, readable, quoted = line.split("|", 2)
+        if readable == "1":
+            names.append((name, quoted))
+        else:
+            unreadable.append(name)
+    if unreadable:
+        print(f"[atlas] ATTENZIONE: {len(unreadable)} tabelle non leggibili dal ruolo di lettura, "
+              f"non contate: {', '.join(unreadable)}", file=sys.stderr)
     exact = {}
     for i in range(0, len(names), 25):
         chunk = names[i:i + 25]
@@ -387,8 +399,8 @@ def scan_db():
     for line in psql(union).splitlines():
         k, v = line.rsplit("|", 1)
         key[k] = int(v)
-    return OrderedDict(tables=tables, empty_tables=empty, views=views,
-                       matviews=matviews, extensions=exts, key_counts=key)
+    return OrderedDict(tables=tables, empty_tables=empty, unreadable_tables=unreadable,
+                       views=views, matviews=matviews, extensions=exts, key_counts=key)
 
 
 # ---------------------------------------------------------------- Cross layer
@@ -565,6 +577,12 @@ def write_md(atlas):
         for t in db["empty_tables"]:
             L.append(f"- `{t}`")
         L.append("")
+        if db["unreadable_tables"]:
+            L.append("## Tabelle DB non leggibili dal ruolo di lettura (non contate)")
+            L.append("")
+            for t in db["unreadable_tables"]:
+                L.append(f"- `{t}`")
+            L.append("")
         L.append("## Key counts live")
         L.append("")
         for k, v in db["key_counts"].items():

@@ -48,6 +48,11 @@ PSQL = ["psql", "-h", os.environ.get("PGHOST", "localhost"),
 # Viste `v_*` che NON sono sentinelle: contano stato, non anomalie. Una vista
 # elencata qui non fa mai fallire il cruscotto — e senza motivo non e' una deroga.
 INFORMATIVE = {
+    "v_ghost_units_derivate":
+        "ADR-0063 D2, mig 000523: l'organizzazione ghost derivata dall'albero vivo delle unita', "
+        "una riga per unita' ghost di ogni tenant. Conta stato, non anomalie: lo scarto fra la "
+        "vista e la storia lo misura GET /v1/ghost-units (campo allineata) e lo pretende a zero "
+        "la post-condizione della 000523 a ogni deploy",
     "v_reconciliation_status": "registro delle decisioni di riconciliazione, non un difetto",
     "v_reference_translation_coverage": "copertura traduzioni per entita', metrica",
     "v_pip_completeness": "elenca i PIP incompleti: informativa, ha una soglia propria",

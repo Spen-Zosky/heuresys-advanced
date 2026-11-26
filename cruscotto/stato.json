@@ -1,11 +1,11 @@
 {
  "schema": "cruscotto-stato/1",
  "progetto": "heuresys-advanced",
- "aggiornato_il": "2026-11-25",
- "aggiornato_da": "Claude, thread «Riordinare la documentazione» (25/11/2026)",
+ "aggiornato_il": "2026-11-26",
+ "aggiornato_da": "Claude, thread «Riallineare gli stati dei documenti» (26/11/2026)",
  "fase": "Giro di verifica e correzione di tutte le pagine, con rilascio e prova dal vivo; riordino della documentazione in corso",
  "stato": "giallo",
- "stato_motivo": "produzione su 87d7ce9d (git ls-remote origin refs/heads/prod, 25/11) dopo il giro di verifica delle pagine, riaperto il 25/11 nello stesso mandato; i registri SOT vanno riallineati al lavoro dal 30/10 (piano di riordino, voce R8).",
+ "stato_motivo": "prodotto armato su faed9ae4 (git ls-remote origin refs/heads/prod, 26/11; ultimo DEPLOYATO verificato dd750e70, PR #516); piano AI-driven accettato da Enzo il 26/11 e in attuazione; i registri SOT vanno riallineati al lavoro dal 30/10 (piano di riordino, voce R8).",
  "avanzamento": null,
  "decisioni_attese": [
   {
@@ -35,14 +35,14 @@
   },
   {
    "id": "P-05",
-   "titolo": "Pacchetto v0.3 vero della banca non ancora depositato dal datastore",
+   "titolo": "Pacchetto v0.3 vero della banca non ancora depositato dal datastore (il datastore ha depositato un pacchetto v0.3 per la replica metalmeccanica, non per la banca: STATO_CORRENTE del datastore, G2)",
    "priorita": "media",
    "chi": "esterno",
    "fonte": ".handoff/STATE.md"
   },
   {
    "id": "P-07",
-   "titolo": "Vulnerabilità Dependabot aperte da riesaminare; PR #119 (fastify 5.12.6) con la CI rossa",
+   "titolo": "12 avvisi Dependabot aperti il 26/11 (1 alto, 8 medi, 3 bassi; bilancio del 26/11); la PR #119 (fastify 5.12.6) è chiusa senza unione dal 30/10",
    "priorita": "media",
    "chi": "claude",
    "fonte": "GitHub Actions, corse del 28/10"
@@ -74,14 +74,14 @@
    "id": "R-02",
    "titolo": "Servizi storia36 (custodia, avanzamento) e heuresys-app in stato 'failed' sulla VM",
    "impatto": "medio",
-   "mitigazione": "",
+   "mitigazione": "26/11: `systemctl --failed` sulla VM non elenca niente (letto nel bilancio del 26/11); da riverificare prima di toglierlo",
    "fonte": "systemctl --failed"
   },
   {
    "id": "R-04",
    "titolo": "MFA non obbligatoria in produzione",
    "impatto": "medio",
-   "mitigazione": "",
+   "mitigazione": "26/11: il secondo fattore è in produzione con i codici di recupero al login (PR #497) e il thread è chiuso; che la MFA sia obbligatoria per ogni utenza non è provato qui, da riverificare",
    "fonte": "SOT_STATE.md (S1029)"
   },
   {
@@ -93,7 +93,7 @@
   },
   {
    "id": "R-06",
-   "titolo": "Dipendenza dal datastore: pacchetto v0.3 mancante, l'onda 2 non si chiude senza",
+   "titolo": "Dipendenza dal datastore: pacchetto v0.3 della banca mancante (esiste quello della replica metalmeccanica), l'onda 2 non si chiude senza",
    "impatto": "medio",
    "mitigazione": "",
    "fonte": "SOT_BACKLOG.md #264"

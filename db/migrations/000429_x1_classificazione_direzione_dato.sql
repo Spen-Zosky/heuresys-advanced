@@ -412,15 +412,15 @@ BEGIN
   -- database vuoto le due misure coincidono (315); su uno gia' popolato le righe in piu'
   -- appartengono ad altri file e non sono un errore di questo.
   SELECT count(*) INTO n_dich FROM _classificazione_000429;
-  IF n_dich <> 336 THEN
-    RAISE EXCEPTION '000429: il file dichiara % righe di classificazione, attese 336', n_dich;
+  IF n_dich <> 337 THEN
+    RAISE EXCEPTION '000429: il file dichiara % righe di classificazione, attese 337', n_dich;
   END IF;
 
   SELECT count(*) INTO n_proprie
     FROM _classificazione_000429 d
     JOIN sys.sys_classificazione_direzione_dato c ON c.tabella = d.tabella AND c.stato = d.stato;
-  IF n_proprie <> 336 THEN
-    RAISE EXCEPTION '000429: attese 336 righe di classificazione di questo file, trovate %', n_proprie;
+  IF n_proprie <> 337 THEN
+    RAISE EXCEPTION '000429: attese 337 righe di classificazione di questo file, trovate %', n_proprie;
   END IF;
 
   SELECT count(*) INTO n_non_class FROM sys.v_tabelle_non_classificate;
@@ -437,14 +437,15 @@ BEGIN
   -- 70 nativo e 46 infrastruttura da 000507: sys_tenant_process_facets e sys_process_facet_values.
   -- 71 nativo da 000509: sys_tenant_process_step_mappings.
   -- 82 nativo da 000515: le undici tabelle del motore degli scenari (F3a).
-  IF n_ibrido <> 77 OR n_nativo <> 82 OR n_importato <> 131 OR n_infra <> 46 THEN
-    RAISE EXCEPTION '000429: conteggio inatteso — ibrido=% nativo=% importato=% infrastruttura=% (attesi 77/82/131/46)',
+  -- 83 nativo da 000523: sys_ghost_units, la storia dell'organizzazione ghost (G1).
+  IF n_ibrido <> 77 OR n_nativo <> 83 OR n_importato <> 131 OR n_infra <> 46 THEN
+    RAISE EXCEPTION '000429: conteggio inatteso — ibrido=% nativo=% importato=% infrastruttura=% (attesi 77/83/131/46)',
       n_ibrido, n_nativo, n_importato, n_infra;
   END IF;
 
   SELECT count(*) INTO n_tot FROM sys.sys_classificazione_direzione_dato;
   n_altre := n_tot - n_proprie;
-  RAISE NOTICE '000429: 336 tabelle classificate (77 ibrido, 82 nativo, 131 importato, 46 infrastruttura); altre righe gia'' presenti, di altri file: %; v_tabelle_non_classificate a zero.', n_altre;
+  RAISE NOTICE '000429: 337 tabelle classificate (77 ibrido, 83 nativo, 131 importato, 46 infrastruttura); altre righe gia'' presenti, di altri file: %; v_tabelle_non_classificate a zero.', n_altre;
 END $$;
 
 COMMIT;

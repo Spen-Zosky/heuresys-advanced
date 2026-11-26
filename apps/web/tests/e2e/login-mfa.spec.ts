@@ -94,57 +94,50 @@ test.describe("MVP-3 Tappa E /login — MFA login-gating", () => {
   }) => {
     const setup = await enrollVerifiedTotp(request, MFA_EMAIL);
     try {
+      // --- Attempt 1: password step surfaces the MFA challenge UI ---
+      await page.goto("/login");
+      await submitPassword(page, MFA_EMAIL);
+
+      // #219 F1 firma A — il caso e' CONDIZIONALE alla configurazione, non al codice.
+      // Misurato il 2026-08-21 sulla macchina di produzione: `MFA_ENFORCEMENT_ENABLED`
+      // e' presente e vale `false`, cioe' il gate al login e' SPENTO per decisione di
+      // Enzo (SOT_STATE lo registra dal 2026-08-06). Con il gate spento questo caso
+      // non prova un guasto: prova un mondo diverso da quello configurato, e restava
+      // rosso per quello. ⚠ Il verde NON deve arrivare accendendo l'enforcement —
+      // sarebbe far provare al caso una configurazione che la produzione non ha.
+      // Percio' si osserva il COMPORTAMENTO (la sfida compare?) invece di leggere una
+      // variabile: se domani Enzo riaccende il gate, il caso torna a girare da solo.
+      const sfidaComparsa = await page
+        .getByTestId("login-mfa-form")
+        .waitFor({ state: "visible", timeout: 20_000 })
+        .then(() => true, () => false);
+      test.skip(
+        !sfidaComparsa,
+        "MFA enforcement spento in questo ambiente (MFA_ENFORCEMENT_ENABLED=false): il caso proverebbe una configurazione diversa da quella viva",
+      );
+      await expect(page.getByTestId("login-mfa-form")).toBeVisible();
+      await expect(page.getByTestId("login-mfa-code")).toBeVisible();
+      // Wrong code -> error. It consumes the single-use challenge, and the page asks for a new one.
+      await page.getByTestId("login-mfa-code").fill("000000");
+      await page.getByTestId("login-mfa-submit").click();
+      await expect(page.getByTestId("login-error")).toBeVisible();
+
+      await expect(page.getByTestId("login-mfa-code")).toHaveValue("");
+
+      // --- Attempt 2: same screen, no reload, recovery code -> success redirect ---
+      // (a valid authenticator code through this page is covered by the first test)
       const recRes = await request.post(`${API_BASE}/v1/auth/mfa/recovery-codes`, {
         headers: { "x-csrf-token": setup.csrfToken },
       });
       expect(recRes.status(), "recovery codes").toBe(200);
       const [recovery] = (await recRes.json()).codes as string[];
-
-      // Two rounds on the same page: the authenticator code, then a recovery code.
-      for (const round of ["totp", "recovery"] as const) {
-        // --- Password step surfaces the MFA challenge UI ---
-        await page.context().clearCookies();
-        await page.goto("/login");
-        await submitPassword(page, MFA_EMAIL);
-
-        // #219 F1 firma A — il caso e' CONDIZIONALE alla configurazione, non al codice.
-        // Misurato il 2026-08-21 sulla macchina di produzione: `MFA_ENFORCEMENT_ENABLED`
-        // e' presente e vale `false`, cioe' il gate al login e' SPENTO per decisione di
-        // Enzo (SOT_STATE lo registra dal 2026-08-06). Con il gate spento questo caso
-        // non prova un guasto: prova un mondo diverso da quello configurato, e restava
-        // rosso per quello. ⚠ Il verde NON deve arrivare accendendo l'enforcement —
-        // sarebbe far provare al caso una configurazione che la produzione non ha.
-        // Percio' si osserva il COMPORTAMENTO (la sfida compare?) invece di leggere una
-        // variabile: se domani Enzo riaccende il gate, il caso torna a girare da solo.
-        const sfidaComparsa = await page
-          .getByTestId("login-mfa-form")
-          .waitFor({ state: "visible", timeout: 20_000 })
-          .then(() => true, () => false);
-        test.skip(
-          !sfidaComparsa,
-          "MFA enforcement spento in questo ambiente (MFA_ENFORCEMENT_ENABLED=false): il caso proverebbe una configurazione diversa da quella viva",
-        );
-        await expect(page.getByTestId("login-mfa-form")).toBeVisible();
-        await expect(page.getByTestId("login-mfa-code")).toBeVisible();
-
-        if (round === "totp") {
-          // Wrong code -> error. It consumes the single-use challenge, and the page asks for a new one.
-          await page.getByTestId("login-mfa-code").fill("000000");
-          await page.getByTestId("login-mfa-submit").click();
-          await expect(page.getByTestId("login-error")).toBeVisible();
-          await expect(page.getByTestId("login-mfa-code")).toHaveValue("");
-          // Same screen, no reload, real code -> success redirect.
-          await page.getByTestId("login-mfa-code").fill(genTotp(setup.secret));
-        } else {
-          await page.getByTestId("login-mfa-recovery-toggle").click();
-          await page.getByTestId("login-mfa-code").fill(recovery!);
-          await expect(page.getByTestId("login-mfa-code")).toHaveValue(recovery!);
-        }
-        await page.getByTestId("login-mfa-submit").click();
-        await expect(page).toHaveURL(new RegExp(`${PERSONAS.outsider.expectedLandingPath}`), {
-          timeout: 60_000,
-        });
-      }
+      await page.getByTestId("login-mfa-recovery-toggle").click();
+      await page.getByTestId("login-mfa-code").fill(recovery!);
+      await expect(page.getByTestId("login-mfa-code")).toHaveValue(recovery!);
+      await page.getByTestId("login-mfa-submit").click();
+      await expect(page).toHaveURL(new RegExp(`${PERSONAS.outsider.expectedLandingPath}`), {
+        timeout: 60_000,
+      });
     } finally {
       await deleteFactor(request, setup.factorId, setup.csrfToken);
     }

@@ -16,7 +16,11 @@
  * prossima conversazione.
  *
  * Un registro che non risponde, o che risponde in modo inatteso, non libera niente: la scrittura
- * torna davanti alla persona, come prima di questo file.
+ * torna davanti alla persona, come prima di questo file. *
+ * ⚠ ADR-0063 D4 (2026-11-26): IL MODO LIBERA È SPENTO. Il registro si legge ancora, ma una capacità
+ * che risultasse `LIBERA` non esegue niente da sola: il cancello (`write-gate.ts`, ramo 2d) la
+ * riporta davanti alla persona e scrive `LIBERA_SPENTA` nel diario. Il database rifiuta comunque
+ * un'attivazione `LIBERA` nuova (migrazione 000514) e l'API risponde `AGENT_CAPABILITY_LIBERA_SPENTA`.
  */
 import type { Operazione } from "./operazione.js";
 

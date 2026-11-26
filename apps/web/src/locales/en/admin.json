@@ -2165,6 +2165,7 @@
     "modo": "Mode for this tenant",
     "ragione": "Reason for the decision",
     "decidi": "Decide",
+    "liberaSpenta": "The mode without confirmation is switched off: every assistant write asks for the person's confirmation.",
     "vietato": "You are not allowed to do this.",
     "duplicata": "A capability with this code already exists.",
     "rifiutata": "Refused by the API",
@@ -2184,7 +2185,8 @@
     },
     "modi": {
       "CONFERMA": "With confirmation",
-      "LIBERA": "Freely"
+      "LIBERA": "Freely",
+      "LIBERA_SPENTA": "Freely: switched off, every write asks for confirmation"
     },
     "annullamenti": {
       "GIORNALE_UNDO": "undo journal",

@@ -118,14 +118,23 @@ describe("il catalogo e il modo (000480, ADR-0053)", () => {
     expect(await codiceDi(svc.setStatus(piattaforma, id, "PUBBLICATA"))).toBe("AGENT_CAPABILITY_RULE");
   });
 
-  it("il Direttore decide CONFERMA per il suo tenant, non per un altro; LIBERA solo con informativa e ritorno provato", async () => {
+  it("il Direttore decide CONFERMA per il suo tenant, non per un altro; LIBERA è spenta (ADR-0063 D4)", async () => {
     const c = await svc.decide(direttore, id, { mode: "CONFERMA", reason: "prova del Direttore" });
     expect(c.activation).toMatchObject({ mode: "CONFERMA", tenantId: direttore.tenantId, decidedBy: direttore.userId, source: "PERSONA" });
-    // T5: il registro «per conto di» c'è (000482), quindi restano le due condizioni del database.
-    expect(await codiceDi(svc.decide(direttore, id, { mode: "LIBERA", reason: "prova", rollbackProofRef: "prova-1" }))).toBe("AGENT_CAPABILITY_RULE");
-    expect(await codiceDi(svc.decide(direttore, id, { mode: "LIBERA", reason: "prova", noticeRef: "inf-1" }))).toBe("AGENT_CAPABILITY_RULE");
-    const l = await svc.decide(direttore, id, { mode: "LIBERA", reason: "prova", noticeRef: "inf-1", rollbackProofRef: "prova-1" });
-    expect(l.activation).toMatchObject({ mode: "LIBERA", decidedBy: direttore.userId, source: "PERSONA" });
+    // ADR-0063 D4: anche con informativa e ritorno provato, LIBERA non si attiva. Le condizioni del
+    // database (000480) restano provate da `db/scripts/agenti/prova-000480.sql`.
+    expect(await codiceDi(svc.decide(direttore, id, { mode: "LIBERA", reason: "prova", noticeRef: "inf-1", rollbackProofRef: "prova-1" }))).toBe("AGENT_CAPABILITY_LIBERA_SPENTA");
+    expect((await svc.get(direttore, id)).activation).toMatchObject({ mode: "CONFERMA" });
+    // E il database la rifiuta anche se il servizio la lasciasse passare (000514).
+    const tenta = pool.query(
+      `INSERT INTO sys.sys_agent_capability_activations
+         (agent_capability_activation_tenant_id, agent_capability_activation_capability_id, agent_capability_activation_mode,
+          agent_capability_activation_notice_ref, agent_capability_activation_rollback_proof_ref,
+          agent_capability_activation_reason, agent_capability_activation_decided_by)
+       VALUES ($1, $2, 'LIBERA', 'inf-1', 'prova-1', 'prova', $3)`,
+      [direttore.tenantId, id, direttore.userId],
+    );
+    await expect(tenta).rejects.toThrow(/LIBERA è spento/);
     const altro = await pool.query<{ tenant_id: string }>(`SELECT tenant_id FROM sys.sys_tenancies WHERE tenant_id <> $1 LIMIT 1`, [direttore.tenantId]);
     if (altro.rows[0]) {
       expect(await codiceDi(svc.decide(direttore, id, { mode: "CONFERMA", reason: "prova", tenantId: altro.rows[0].tenant_id }))).toBe("PERMISSION_DENIED");

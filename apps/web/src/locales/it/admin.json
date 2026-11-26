@@ -2165,6 +2165,7 @@
     "modo": "Modo per questo tenant",
     "ragione": "Ragione della decisione",
     "decidi": "Decidi",
+    "liberaSpenta": "Il modo senza conferma è spento: ogni scrittura dell'assistente chiede la conferma della persona.",
     "vietato": "Non hai il permesso per questa operazione.",
     "duplicata": "Esiste già una capacità con questo codice.",
     "rifiutata": "Rifiutata dall'API",
@@ -2184,7 +2185,8 @@
     },
     "modi": {
       "CONFERMA": "Con conferma",
-      "LIBERA": "In libertà"
+      "LIBERA": "In libertà",
+      "LIBERA_SPENTA": "In libertà: spenta, ogni scrittura chiede conferma"
     },
     "annullamenti": {
       "GIORNALE_UNDO": "giornale di annullamento",

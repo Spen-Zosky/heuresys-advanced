@@ -33,6 +33,7 @@ const ANNULLAMENTI = ["GIORNALE_UNDO", "RIGA_SOSTITUTIVA"] as const;
 function messaggio(err: unknown, t: (k: string) => string): string {
   if (isApiError(err)) {
     if (err.status === 403) return t("agentCaps.vietato");
+    if (err.code === "AGENT_CAPABILITY_LIBERA_SPENTA") return t("agentCaps.liberaSpenta");
     if (err.status === 409) return t("agentCaps.duplicata");
     if (err.serverMessage) return `${t("agentCaps.rifiutata")}: ${err.serverMessage}`;
   }
@@ -106,7 +107,8 @@ function Capacita({ c }: { c: AgentCapability }) {
               <label className="w-48 font-medium text-foreground">{t("agentCaps.modo")}
                 <select className={SELECT_CLASS} value={modo.mode} onChange={(e) => setModo({ ...modo, mode: e.target.value as "CONFERMA" | "LIBERA" })} data-testid="agent-capability-mode-select">
                   <option value="CONFERMA">{t("agentCaps.modi.CONFERMA")}</option>
-                  <option value="LIBERA">{t("agentCaps.modi.LIBERA")}</option>
+                  {/* ADR-0063 D4: il modo senza conferma è spento; l'API e il database lo rifiutano comunque. */}
+                  <option value="LIBERA" disabled data-testid="agent-capability-mode-libera">{t("agentCaps.modi.LIBERA_SPENTA")}</option>
                 </select></label>
               <label className="min-w-72 flex-1 font-medium text-foreground">{t("agentCaps.ragione")}
                 <Input value={modo.reason} maxLength={2000} onChange={(e) => setModo({ ...modo, reason: e.target.value })} data-testid="agent-capability-mode-reason" /></label>

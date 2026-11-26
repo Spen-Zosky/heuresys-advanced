@@ -108,6 +108,7 @@ export * from "./schemas/tenant-consolidation.js";
 export * from "./schemas/agent-capabilities.js";
 export * from "./schemas/agent-conversations.js";
 export * from "./schemas/agent-requests.js";
+export * from "./schemas/scenari.js";
 export * from "./schemas/provenance.js";
 export * from "./schemas/evidence.js";
 export * from "./schemas/predictions.js";

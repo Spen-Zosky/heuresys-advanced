@@ -32,6 +32,14 @@ BEGIN
     RETURN;
   END IF;
 
+  -- La tabella e' nata a mano: il suo proprietario puo' non essere il ruolo che applica la
+  -- catena. In quel caso non si rompe il deploy: si avvisa e la si lascia, vuota.
+  IF NOT pg_has_role(current_user,
+       (SELECT relowner FROM pg_class WHERE oid = 'staging.fattore_rimosso_undo'::regclass), 'USAGE') THEN
+    RAISE WARNING '000521: % non e'' proprietario di staging.fattore_rimosso_undo: resta', current_user;
+    RETURN;
+  END IF;
+
   EXECUTE 'SELECT count(*) FROM staging.fattore_rimosso_undo' INTO v_righe;
   IF v_righe <> 0 THEN
     RAISE EXCEPTION '000521: staging.fattore_rimosso_undo ha % righe: non si toglie cosi''', v_righe;
@@ -42,14 +50,6 @@ BEGIN
    WHERE contype = 'f' AND confrelid = 'staging.fattore_rimosso_undo'::regclass;
   IF v_fk <> 0 THEN
     RAISE EXCEPTION '000521: % chiavi esterne puntano a staging.fattore_rimosso_undo', v_fk;
-  END IF;
-
-  -- La tabella e' nata a mano: il suo proprietario puo' non essere il ruolo che applica la
-  -- catena. In quel caso non si rompe il deploy: si avvisa e la si lascia, vuota.
-  IF NOT pg_has_role(current_user,
-       (SELECT relowner FROM pg_class WHERE oid = 'staging.fattore_rimosso_undo'::regclass), 'USAGE') THEN
-    RAISE WARNING '000521: % non e'' proprietario di staging.fattore_rimosso_undo: resta, vuota', current_user;
-    RETURN;
   END IF;
 
   DROP TABLE staging.fattore_rimosso_undo;

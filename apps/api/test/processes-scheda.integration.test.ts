@@ -73,8 +73,9 @@ describe("/v1/processes", () => {
     expect(s.process.processId).toBe(conSotto!.processId);
     expect(s.subprocesses.length).toBe(conSotto!.subprocessCount);
     for (const sp of s.subprocesses) expect(sp.parentId).toBe(conSotto!.processId);
-    const attese = conSotto!.activityCount + s.subprocesses.reduce((n, sp) => n + sp.activityCount, 0);
-    expect(s.activities.length).toBe(attese);
+    // il conteggio del processo comprende già quello dei sottoprocessi
+    expect(s.activities.length).toBe(conSotto!.activityCount);
+    expect(conSotto!.activityCount).toBeGreaterThanOrEqual(s.subprocesses.reduce((n, sp) => n + sp.activityCount, 0));
     const ids = new Set([s.process.processId, ...s.subprocesses.map((x) => x.processId)]);
     for (const a of s.activities) expect(ids.has(a.processId)).toBe(true);
   });

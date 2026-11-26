@@ -59,6 +59,9 @@
       "mfa": {
         "title": "Autenticazione a due fattori",
         "prompt": "Inserisci il codice dal tuo authenticator",
+        "recoveryLabel": "Codice di recupero",
+        "useRecovery": "Usa un codice di recupero",
+        "useCode": "Usa il codice di verifica",
         "codeLabel": "Codice di verifica",
         "submit": "Verifica",
         "invalid": "Codice MFA non valido o scaduto",

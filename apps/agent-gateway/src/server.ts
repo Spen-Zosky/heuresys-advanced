@@ -101,6 +101,8 @@ const MODELLO = modelloAgenti();
 const conversazioni = new ConversazioniAperte(LIMITI);
 const pool = auditPool();
 const auditSink: AuditSink = pool ? new DbAuditSink(pool) : new FileAuditSink();
+// R8: dove va il diario si dice all'avvio, nel journal, così si misura senza leggere l'ambiente.
+console.log(JSON.stringify({ level: "info", phase: "agent-gateway", msg: "diario del gate", sede: pool ? "database" : "file" }));
 // ADR-0053 A3 (piano T3b): il registro delle capacità si legge dallo stesso database del diario.
 // Senza database non c'è registro, e ogni scrittura passa dal ponte di approvazione come prima.
 const registroCapacita = pool ? new DbRegistroCapacita(pool) : undefined;

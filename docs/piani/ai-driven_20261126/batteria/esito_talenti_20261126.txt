@@ -1,0 +1,33 @@
+PER CATEGORIA
+  carriere-per-unita         0/7   0%
+  confronto-unita            0/6   0%
+  fuori-perimetro           10/10  100%
+  mentoring                 11/11  100%
+  non-autorizzato           23/25  92%
+  perche                     0/5   0%
+  percorsi                  19/19  100%
+  perimetro-carriere         5/5   100%
+  perimetro-critiche         5/5   100%
+  perimetro-rischio          8/10  80%
+  perimetro-successori       7/9   78%
+  perimetro-talenti         10/10  100%
+  piani-carriera             0/4   0%
+  posizioni-critiche        13/17  76%
+  posizioni-obiettivo        0/4   0%
+  prontezza                  4/45  9%
+  rischio-uscita             0/28  0%
+  successori                 0/46  0%
+  talenti                    0/16  0%
+  talenti-per-unita          0/7   0%
+PER PROFILO
+  capo-crediti               9/9   100%
+  capo-finanza              10/10  100%
+  capo-it                   10/10  100%
+  capo-operations            9/10  90%
+  capo-retail                7/10  70%
+  dipendente                18/18  100%
+  hr                        41/209 20%
+  responsabile-rischi       11/13  85%
+TOTALE 115/289 (39.8%), guasti 0
+(2026-11-26T18:30:37.062Z, soglia 90%)
+bbc769d1ed0883c17ba93fa1f4ad22621b3659badc2589b648dc410e0fb280f5  domande.json

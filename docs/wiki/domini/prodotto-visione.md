@@ -2,9 +2,9 @@
 dominio: prodotto-visione
 natura: riferimento
 stato: vivo
-aggiornato_il: 2026-11-25
+aggiornato_il: 2026-11-26
 sintesi: Heuresys come piattaforma agentica del cambiamento organizzativo
-fonti: [docs/architecture/adr/0054_heuresys_piattaforma_del_cambiamento_organizzativo.md, docs/product]
+fonti: [docs/architecture/adr/0063_heuresys_ai_driven_l_organizzazione_ghost.md, docs/architecture/adr/0054_heuresys_piattaforma_del_cambiamento_organizzativo.md, docs/product]
 concetti: [visione, capacità]
 ---
 
@@ -13,6 +13,7 @@ concetti: [visione, capacità]
 ## Com'è oggi
 
 - Heuresys è la piattaforma del cambiamento organizzativo, per qualunque impresa (ADR-0054): una piattaforma agentica specialista di modellazione organizzativa.
+- Heuresys è AI-driven secondo ADR-0063: tutte le funzioni dell'HR manager sono centrali quanto il cambiamento organizzativo, e ogni lavoro si misura sui suoi dodici assi e sette criteri.
 - Il prodotto è descritto in `docs/product/`, a partire dal [registro delle capacità](../../product/FUNCTIONAL_CAPABILITY_LEDGER.md) e dalla [visione integrata](../../product/VISIONE_INTEGRATA_HEURESYS_20261103.md).
 - Il programma `project-dream` (`docs/vision/**`) ha una sessione dedicata.
 
@@ -24,7 +25,7 @@ concetti: [visione, capacità]
 | [0011](../../architecture/adr/0011_ess_scope_inclusion.md) | Employee Self-Service Portal Inclusion & `self`-Scope Enforcement | Accepted |
 | [0031](../../architecture/adr/0031_ess_self_view_computed_intelligence.md) | Self-view ESS dell'intelligence calcolata (capability + flight-risk) | Accepted |
 | [0054](../../architecture/adr/0054_heuresys_piattaforma_del_cambiamento_organizzativo.md) | Heuresys è la piattaforma del cambiamento organizzativo, per qualunque impresa | ACCETTATO il 2026-11-03 da Enzo Spenuso |
-| [0063](../../architecture/adr/0063_heuresys_ai_driven_l_organizzazione_ghost.md) | Heuresys è AI-driven: un'organizzazione ghost di agenti lavora con le persone del tenant | PROPOSTO il 2026-11-26, in attesa del sì di Enzo Spenuso. |
+| [0063](../../architecture/adr/0063_heuresys_ai_driven_l_organizzazione_ghost.md) | Heuresys è AI-driven: un'organizzazione ghost di agenti lavora con le persone del tenant | ACCETTATO il 2026-11-26 da Enzo Spenuso |
 <!-- /generato -->
 
 ## Storia

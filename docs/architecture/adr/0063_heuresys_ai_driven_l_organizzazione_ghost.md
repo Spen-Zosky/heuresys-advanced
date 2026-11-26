@@ -1,6 +1,6 @@
 # ADR-0063 — Heuresys è AI-driven: un'organizzazione ghost di agenti lavora con le persone del tenant
 
-- **Status**: PROPOSTO il 2026-11-26, in attesa del sì di Enzo Spenuso.
+- **Status**: ACCETTATO il 2026-11-26 da Enzo Spenuso (alle 02:47 UTC, 03:47 ora di Roma, nel thread «Rendere Heuresys davvero AI-driven», sulla scheda «Accetti l'ADR e il piano per rendere Heuresys AI-driven?»: «Sì, accetto ADR e piano»). La scheda citava il numero provvisorio ADR-0062, rinumerato in 0063 perché lo 0062 è della PR #498; il testo accettato è questo.
 - **Date**: 2026-11-26
 - **Redatto da**: Claude Code, thread «Rendere Heuresys davvero AI-driven» del progetto «ENZO: heuresys ecosystem».
 - **Richiesta**: Enzo Spenuso, 2026-11-26 alle 03:09 ora di Roma: verificare se advanced e datastore sono davvero agentici, a che livello, e che cosa va fatto perché il prodotto sia AI-driven ad assoluto livello. Alle 03:42 ora di Roma: «tutto quello che deriva dalla tua intervista e dalle mie indicazioni deve confluire in un ADR fondante del progetto/repo e che dovrà orientare tutte le valutazioni su quello che c'è già oggi e su tutti i programmi e le attività di sviluppo attuali e future».

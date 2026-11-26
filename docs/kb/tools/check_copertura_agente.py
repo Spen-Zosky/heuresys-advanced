@@ -38,6 +38,7 @@ QUI = os.path.dirname(os.path.abspath(__file__))
 RADICE = os.path.abspath(os.path.join(QUI, "..", "..", ".."))
 REGISTRO = os.path.join(RADICE, "docs", "kb", "agent-classi-scritture.json")
 PERIMETRI = os.path.join(RADICE, "docs", "kb", "agent-perimetri.json")
+MAPPA = os.path.join(RADICE, "docs", "kb", "atlas", "agent-operations.json")
 
 sys.path.insert(0, QUI)
 
@@ -116,6 +117,24 @@ def verifica(codice: dict, registro: dict, perimetri: dict) -> tuple[list[str], 
     return rossi, conti
 
 
+def raggiungibili(registro: dict) -> tuple[int, list[str]]:
+    """Quante scritture del catalogo l'agente raggiunge davvero nella mappa generata, e quali no.
+
+    Informativo, non rosso: la mappa si rigenera dall'atlante, che si rigenera dopo l'unione.
+    È però la misura onesta di M1 (piano AI-driven, F1): una classe che la mappa non porta è
+    una scrittura che l'agente non può proporre."""
+    try:
+        with io.open(MAPPA, encoding="utf-8") as fh:
+            concetti = json.load(fh).get("concepts") or {}
+    except (OSError, ValueError):
+        return 0, ["la mappa %s non si legge" % os.path.relpath(MAPPA, RADICE)]
+    nella_mappa = {(c.get("modulo") or cid, oid) for cid, c in concetti.items()
+                   for oid, op in (c.get("operations") or {}).items() if op.get("method") != "GET"}
+    catalogo = {(m, o) for m, ops in (registro.get("scritture") or {}).items()
+                for o, v in ops.items() if v.get("classe") in ("B", "C")}
+    return len(catalogo & nella_mappa), sorted("%s %s" % k for k in catalogo - nella_mappa)
+
+
 def leggi(percorso: str) -> dict:
     try:
         with io.open(percorso, encoding="utf-8") as fh:
@@ -158,6 +177,7 @@ def main() -> int:
         return selftest(codice, registro, perimetri)
     rossi, conti = verifica(codice, registro, perimetri)
     if "--json" in sys.argv:
+        conti["raggiungibili"], conti["fuori_mappa"] = raggiungibili(registro)
         print(json.dumps({"rossi": rossi, "conti": conti}, ensure_ascii=False, indent=1))
     else:
         fuori = ", ".join("%s %d" % kv for kv in sorted(conti["fuori"].items()))
@@ -165,6 +185,9 @@ def main() -> int:
               % (conti["scritture"], conti["catalogo"], conti["B"], conti["C"], fuori))
         print("scritture di business %d, nel catalogo %s%%"
               % (conti["di_business"], conti["copertura_business_pct"]))
+        n, fuori_mappa = raggiungibili(registro)
+        print("raggiungibili dall'agente nella mappa: %d su %d del catalogo%s"
+              % (n, conti["catalogo"], (" (mancano: %s)" % ", ".join(fuori_mappa)) if fuori_mappa else ""))
         for r in rossi:
             print("  ROSSO " + r)
         print("esito: %s" % ("ROSSO, %d rilievi" % len(rossi) if rossi else "VERDE"))

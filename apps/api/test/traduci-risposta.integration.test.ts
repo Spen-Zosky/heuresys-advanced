@@ -16,6 +16,7 @@ let it0 = "";
 let en0 = "";
 let itR = "";
 let enR = "";
+let ricevuto: unknown = null;
 
 describe("traduzione del dato nella risposta", () => {
   beforeAll(async () => {
@@ -32,7 +33,11 @@ describe("traduzione del dato nella risposta", () => {
     addTraduzioneRisposta(app, pool);
     app.get("/v1/prova", async () => ({ items: [{ id: it0, name: it0, owner: "Rossi, Mario" }] }));
     app.post("/v1/prova", async () => ({ name: it0 }));
-    app.patch("/v1/eco", async (req) => req.body);
+    // Il corpo arrivato all'handler si guarda da qui, non si rimanda nella risposta.
+    app.patch("/v1/eco", async (req, reply) => {
+      ricevuto = req.body;
+      return reply.code(204).send();
+    });
     await app.ready();
   });
 
@@ -66,11 +71,11 @@ describe("traduzione del dato nella risposta", () => {
 
   it("in inglese una scrittura riporta la traduzione all'italiano canonico; il resto passa com'è", async () => {
     const corpo = { name: enR, id: enR, title: "A brand new English title written on purpose", note: "Testo nuovo scritto dalla persona", n: 3 };
-    const en = await app.inject({ method: "PATCH", url: "/v1/eco", cookies: { NEXT_LOCALE: "en" }, payload: corpo });
-    expect(en.json()).toEqual({ ...corpo, name: itR });
-    const ita = await app.inject({ method: "PATCH", url: "/v1/eco", cookies: { NEXT_LOCALE: "it" }, payload: corpo });
-    expect(ita.json()).toEqual(corpo);
-    const off = await app.inject({ method: "PATCH", url: "/v1/eco", cookies: { NEXT_LOCALE: "en" }, headers: { "x-localize": "off" }, payload: corpo });
-    expect(off.json()).toEqual(corpo);
+    await app.inject({ method: "PATCH", url: "/v1/eco", cookies: { NEXT_LOCALE: "en" }, payload: corpo });
+    expect(ricevuto).toEqual({ ...corpo, name: itR });
+    await app.inject({ method: "PATCH", url: "/v1/eco", cookies: { NEXT_LOCALE: "it" }, payload: corpo });
+    expect(ricevuto).toEqual(corpo);
+    await app.inject({ method: "PATCH", url: "/v1/eco", cookies: { NEXT_LOCALE: "en" }, headers: { "x-localize": "off" }, payload: corpo });
+    expect(ricevuto).toEqual(corpo);
   });
 });

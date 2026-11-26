@@ -9,7 +9,7 @@
  */
 
 import { pool } from "../../db/client.js";
-import { isPlatform, type ActorContext } from "../../lib/actor.js";
+import { puoVedereCliente, type ActorContext } from "../../lib/actor.js";
 import { ForbiddenError, NotFoundError } from "../../errors/index.js";
 import type {
   GhostRiformaResponse,
@@ -18,21 +18,16 @@ import type {
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 
+// Il tenant si sceglie per perimetro di clienti (lib/actor.ts), non per nome di ruolo: chi ha il
+// mandato di piattaforma ne nomina uno, gli altri leggono il proprio (o quelli assegnati).
 async function resolveTenant(actor: ActorContext, requested?: string): Promise<string> {
-  if (isPlatform(actor)) {
-    const t = requested ?? actor.tenantId;
-    if (!t) {
-      throw new ForbiddenError("PLATFORM_ADMIN must supply tenantId", "TENANT_ID_REQUIRED");
-    }
-    if (!(await repo.tenantExists(pool, t))) throw new NotFoundError("Tenant");
-    return t;
-  }
-  if (!actor.tenantId) throw new ForbiddenError("Tenant context required");
-  // un tenant diverso dal proprio non si legge: la richiesta vale per il proprio
-  if (requested && requested !== actor.tenantId) {
+  const t = requested ?? actor.tenantId;
+  if (!t) throw new ForbiddenError("A tenantId is required", "TENANT_ID_REQUIRED");
+  if (!puoVedereCliente(actor, t)) {
     throw new ForbiddenError("Ghost units of another tenant are not visible", "PERMISSION_DENIED");
   }
-  return actor.tenantId;
+  if (!(await repo.tenantExists(pool, t))) throw new NotFoundError("Tenant");
+  return t;
 }
 
 export const ghostUnitsService = {

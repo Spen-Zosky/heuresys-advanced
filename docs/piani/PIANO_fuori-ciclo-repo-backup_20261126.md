@@ -1,5 +1,7 @@
 # Fuori ciclo: repo e backup sulla VM (26/11/2026)
 
+Metro ADR-0063: asse 1 (governo e sicurezza: copie e allarmi dell'infrastruttura); criterio 7 (qualità e valore misurati)
+
 Mandato di Enzo («esegui tutti i fuori ciclo»). Rapporto di partenza: https://claude.ai/artifact/JvqAoTpr11jt3Db5n8p3q4 (punti 4-12).
 
 Trovato il 26/11: `~/backup-hr/bin`, `log` e `locks` non esistevano più (cartella modificata l'11/11 00:24 UTC; causa non trovata). Ultima copia restic e ultimi pacchetti Git del 10/11; cron falliva in silenzio perché la cartella dei registri mancava.

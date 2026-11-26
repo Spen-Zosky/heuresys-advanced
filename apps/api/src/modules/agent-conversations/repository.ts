@@ -160,7 +160,29 @@ export async function update(
   return (r.rowCount ?? 0) > 0;
 }
 
-/** Apre un'attività nella conversazione della persona; `undefined` se la conversazione non è sua. */
+/**
+ * Chiude, come già si leggono, le attività aperte della conversazione rimaste oltre
+ * `AGENT_ACTIVITY_STALE_MINUTES`: l'indice unico della 000513 ammette un solo giro aperto, e uno
+ * scaduto non deve occupare il posto del nuovo.
+ */
+export async function closeStaleActivities(db: Q, chi: Proprietario, conversationId: string): Promise<void> {
+  await db.query(
+    `UPDATE sys.sys_agent_activities a
+        SET agent_activity_status = 'INTERROTTA', agent_activity_ended_at = now()
+       FROM sys.sys_agent_conversations c
+      WHERE c.agent_conversation_id = a.agent_activity_conversation_id
+        AND a.agent_activity_conversation_id = $1
+        AND c.agent_conversation_tenant_id = $2 AND c.agent_conversation_user_id = $3
+        AND a.agent_activity_status IN ('IN_CORSO', 'IN_ATTESA')
+        AND a.agent_activity_started_at < now() - interval '${AGENT_ACTIVITY_STALE_MINUTES} minutes'`,
+    [conversationId, chi.tenantId, chi.userId],
+  );
+}
+
+/**
+ * Apre un'attività nella conversazione della persona; `undefined` se la conversazione non è sua.
+ * Se la conversazione ha già un giro aperto il database rifiuta la riga (23505, indice della 000513).
+ */
 export async function createActivity(db: Q, chi: Proprietario, conversationId: string, prompt: string): Promise<string | undefined> {
   const r = await db.query<{ id: string }>(
     `WITH c AS (

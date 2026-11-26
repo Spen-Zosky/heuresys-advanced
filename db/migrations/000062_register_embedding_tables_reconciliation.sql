@@ -222,7 +222,29 @@ VALUES
   ('sys_tenant_process_facets', 'D', 'EXCLUDE', NULL,
    '[sign-off: EXCLUDE — faccette di un processo del tenant (ADR-0061 D4, mig 000507): righe scritte solo dall''API o proposte dall''agente, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000507.]'),
   ('sys_tenant_process_step_mappings', 'D', 'EXCLUDE', NULL,
-   '[sign-off: EXCLUDE — corrispondenza delle attivita'' del tenant con APQC (ADR-0061 D7, mig 000509): righe scritte solo dall''API o proposte dall''agente, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000509.]')
+   '[sign-off: EXCLUDE — corrispondenza delle attivita'' del tenant con APQC (ADR-0061 D7, mig 000509): righe scritte solo dall''API o proposte dall''agente, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000509.]'),
+  ('sys_scenarios', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — scenari what-if di una persona del tenant (ADR-0063 D5, mig 000515): righe scritte solo dall''API, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000515.]'),
+  ('sys_scenario_versions', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — versioni di uno scenario con l''impronta della fotografia (ADR-0063 D5, mig 000515): righe scritte solo dall''API, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000515.]'),
+  ('sys_scenario_options', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — opzioni di una versione di scenario (ADR-0063 D5, mig 000515): righe scritte solo dall''API, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000515.]'),
+  ('sys_scenario_levers', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — leve di un''opzione di scenario (ADR-0063 D5, mig 000515): righe scritte solo dall''API, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000515.]'),
+  ('sys_scenario_assumptions', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — ipotesi di una versione di scenario (ADR-0063 D5, mig 000515): righe scritte solo dall''API, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000515.]'),
+  ('sys_scenario_results', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — risultati calcolati di un''opzione di scenario (ADR-0063 D5, mig 000515): righe scritte solo dall''API, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000515.]'),
+  ('sys_scenario_sources', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — fonti cliccabili di ipotesi e risultati di scenario (ADR-0063 D5, mig 000515): righe scritte solo dall''API, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000515.]'),
+  ('sys_scenario_equity_checks', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — controlli di equita'' dichiarati di un''opzione di scenario (ADR-0063 D5, mig 000515): righe scritte solo dall''API, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000515.]'),
+  ('sys_scenario_shadow_units', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — struttura ombra: unita'' copiate per uno scenario (ADR-0063 D5, mig 000515): righe scritte solo dall''API, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000515.]'),
+  ('sys_scenario_shadow_positions', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — struttura ombra: posizioni copiate per uno scenario (ADR-0063 D5, mig 000515): righe scritte solo dall''API, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000515.]'),
+  ('sys_scenario_shadow_assignments', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — struttura ombra: titolari copiati per uno scenario (ADR-0063 D5, mig 000515): righe scritte solo dall''API, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000515.]')
 ON CONFLICT (reconciliation_registry_table_name) DO NOTHING;
 
 DO $$

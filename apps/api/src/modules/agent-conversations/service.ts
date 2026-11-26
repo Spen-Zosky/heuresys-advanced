@@ -93,15 +93,23 @@ export const agentConversationsService = {
 
   async createActivity(actor: ActorContext, conversationId: string, body: CreateAgentActivityBody): Promise<AgentActivity> {
     const chi = proprietario(actor);
-    let id: string | undefined;
-    try {
-      id = await repo.createActivity(pool, chi, conversationId, body.prompt);
-    } catch (e) {
-      dalDatabase(e);
-    }
-    if (!id) throw new NotFoundError("Agent conversation");
-    const a = await repo.getActivity(pool, chi, id);
-    return a as AgentActivity;
+    // Un giro alla volta per conversazione (000513): si chiudono gli scaduti e si apre il nuovo nella
+    // stessa transazione; se un altro giro è aperto, o si apre nello stesso istante, l'indice unico
+    // rifiuta la seconda riga.
+    return withTransaction(async (db) => {
+      let id: string | undefined;
+      try {
+        await repo.closeStaleActivities(db, chi, conversationId);
+        id = await repo.createActivity(db, chi, conversationId, body.prompt);
+      } catch (e) {
+        if ((e as { code?: string } | null)?.code === "23505") {
+          throw new ConflictError("The conversation already has an open turn", E.CONVERSATION_BUSY);
+        }
+        dalDatabase(e);
+      }
+      if (!id) throw new NotFoundError("Agent conversation");
+      return (await repo.getActivity(db, chi, id)) as AgentActivity;
+    });
   },
 
   /** Cambia lo stato di un'attività aperta; una chiusa (o letta come interrotta) non cambia più. */

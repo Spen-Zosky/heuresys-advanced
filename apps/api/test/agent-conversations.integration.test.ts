@@ -191,6 +191,40 @@ describe("attività, eventi e proposte", () => {
     expect(await codiceDi(svc.appendEvents(agente, b.id, { events: [{ kind: "TESTO", payload: {} }] }))).toBe("AGENT_ACTIVITY_CLOSED");
   });
 
+  it("un solo giro aperto per conversazione: il secondo riceve AGENT_CONVERSATION_BUSY (000513)", async () => {
+    const c = await svc.create(agente, { agentCode: "assistente-hr", title: "Un giro alla volta" });
+    const a = await svc.createActivity(agente, c.id, { prompt: "primo" });
+    expect(await codiceDi(svc.createActivity(agente, c.id, { prompt: "secondo, nello stesso istante" })))
+      .toBe("AGENT_CONVERSATION_BUSY");
+    // Il database lo tiene anche senza il servizio: una seconda riga aperta è rifiutata.
+    expect(await codiceDi(pool.query(
+      `INSERT INTO sys.sys_agent_activities (agent_activity_conversation_id, agent_activity_prompt) VALUES ($1, 'diretto')`,
+      [c.id],
+    ))).toBe("23505");
+    // Chiuso il primo, il secondo si apre.
+    await svc.updateActivity(agente, a.id, { status: "FATTA", result: "Fatto." });
+    const b = await svc.createActivity(agente, c.id, { prompt: "secondo" });
+    expect(b.status).toBe("IN_CORSO");
+  });
+
+  it("un giro aperto e scaduto non occupa il posto: si chiude INTERROTTA e il nuovo si apre", async () => {
+    const c = await svc.create(agente, { agentCode: "assistente-hr", title: "Giro scaduto" });
+    const vecchio = await svc.createActivity(agente, c.id, { prompt: "rimasto aperto" });
+    await pool.query(
+      `UPDATE sys.sys_agent_activities SET agent_activity_started_at = now() - interval '31 minutes'
+        WHERE agent_activity_id = $1`,
+      [vecchio.id],
+    );
+    const nuovo = await svc.createActivity(agente, c.id, { prompt: "nuovo" });
+    expect(nuovo.status).toBe("IN_CORSO");
+    const r = await pool.query<{ s: string; fine: Date | null }>(
+      `SELECT agent_activity_status AS s, agent_activity_ended_at AS fine FROM sys.sys_agent_activities WHERE agent_activity_id = $1`,
+      [vecchio.id],
+    );
+    expect(r.rows[0]?.s).toBe("INTERROTTA");
+    expect(r.rows[0]?.fine).not.toBeNull();
+  });
+
   it("il database rifiuta uno scarto senza motivo anche se il servizio lo lasciasse passare", async () => {
     const c = await svc.create(agente, { agentCode: "assistente-hr", title: "Vincolo" });
     const a = await svc.createActivity(agente, c.id, { prompt: "scrivi" });

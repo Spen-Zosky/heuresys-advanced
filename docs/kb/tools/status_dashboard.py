@@ -754,13 +754,33 @@ def giudica_backup_hr(testo, adesso):
     return righe
 
 
+def host_e_locale(nome):
+    """True se `nome` (alias ssh) risolve a un indirizzo di QUESTA macchina."""
+    import socket
+    host = nome
+    cfg = sh("ssh", "-G", nome, timeout=8)
+    for ln in (cfg or "").splitlines():
+        if ln.startswith("hostname "):
+            host = ln.split()[1]
+            break
+    try:
+        ip = socket.gethostbyname(host)
+    except OSError:
+        return False
+    locali = set((sh("hostname", "-I") or "").split()) | set((sh("tailscale", "ip") or "").split())
+    return ip in locali or ip.startswith("127.")
+
+
 def sec_backup_hr(no_net):
     s = Section("BACKUP HR VM (restic, pacchetti Git, ALLARME.txt)")
     if no_net:
         s.add(UNK, "--no-net")
         return s
-    testo = sh("ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=8",
-               "oracle-vm-default", BACKUP_HR_COMANDO, timeout=25)
+    if host_e_locale("oracle-vm-default"):
+        testo = sh("bash", "-c", BACKUP_HR_COMANDO, timeout=25)  # sulla VM stessa: niente ssh su se stessa
+    else:
+        testo = sh("ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=8",
+                   "oracle-vm-default", BACKUP_HR_COMANDO, timeout=25)
     if not testo or not testo.strip():
         s.add(UNK, "VM non raggiungibile")
         return s

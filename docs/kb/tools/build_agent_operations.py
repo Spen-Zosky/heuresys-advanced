@@ -180,6 +180,41 @@ def base_di(cid, prefissi):
     return p[0][len("/v1"):] or "/"
 
 
+APP_TS = os.path.join("apps", "api", "src", "app.ts")
+MODULI = os.path.join("apps", "api", "src", "modules")
+
+
+def blocchi_dal_codice(radice, cid):
+    """Un modulo montato su più prefissi: {prefisso: {(metodo, percorso)}} letto dal codice.
+
+    F1 (decisione di Enzo del 2026-11-26): il consolidamento ha tre funzioni di rotte nello stesso
+    `routes.ts`, ognuna registrata in `app.ts` con il suo prefisso. L'atlante elenca le rotte del
+    modulo senza dire a quale prefisso appartiene ciascuna; il codice lo dice, e si legge da lì.
+    Una funzione registrata due volte, o una rotta che non si attribuisce, fermano la costruzione.
+    """
+    app_ts = io.open(os.path.join(radice, APP_TS), encoding="utf-8").read()
+    rotte_ts = io.open(os.path.join(radice, MODULI, cid, "routes.ts"), encoding="utf-8").read()
+    importate = set()
+    for m in re.finditer(r"import\s*\{([^}]*)\}\s*from\s*\"\./modules/%s/routes\.js\"" % re.escape(cid), app_ts):
+        importate |= {x.strip() for x in m.group(1).split(",") if x.strip()}
+    prefisso_di = {}
+    for m in re.finditer(r"app\.register\(\s*([A-Za-z0-9_]+)\s*,\s*\{\s*prefix:\s*\"(/v1/[^\"]+)\"", app_ts):
+        if m.group(1) in importate:
+            if m.group(1) in prefisso_di:
+                ceco("%s: la funzione %s è registrata due volte" % (cid, m.group(1)), "un solo prefisso per funzione")
+            prefisso_di[m.group(1)] = m.group(2).rstrip("/")
+    out = {}
+    inizi = [(m.start(), m.group(1)) for m in re.finditer(r"^export const ([A-Za-z0-9_]+)\s*:", rotte_ts, re.M)]
+    for i, (pos, nome) in enumerate(inizi):
+        if nome not in prefisso_di:
+            continue
+        fine = inizi[i + 1][0] if i + 1 < len(inizi) else len(rotte_ts)
+        rotte = {(m.group(1).upper(), m.group(2)) for m in
+                 re.finditer(r"app\.(get|post|put|patch|delete)\(\s*\"([^\"]+)\"", rotte_ts[pos:fine])}
+        out[prefisso_di[nome]] = rotte
+    return out
+
+
 def costruisci(radice="."):
     atlas_p = os.path.join(radice, ATLAS)
     perim_p = os.path.join(radice, PERIMETRI)
@@ -267,7 +302,43 @@ def costruisci(radice="."):
             continue
         base = base_di(cid, prefissi)
         if base is None:
-            # più prefissi: l'indirizzo di ogni lettura non è deducibile, quindi non si apre
+            # Più prefissi: l'atlante non dice dove sta ogni rotta. Se il modulo ha scritture con
+            # classe, il codice dice a quale prefisso appartiene ognuna e il modulo si apre come un
+            # concetto per prefisso (`tenant-consolidations`, `consolidation-runs`, ...), con
+            # `modulo` che rimanda alla riga del registro. Senza scritture con classe resta fuori.
+            if len(prefissi.get(cid) or []) < 2 or not any(
+                    classe_di(cid, operation_id(r["method"], r["path"])) for r in righe
+                    if r.get("path") and r["method"].upper() != "GET"):
+                continue
+            blocchi = blocchi_dal_codice(radice, cid)
+            if sorted(blocchi) != sorted(p.rstrip("/") for p in prefissi[cid]):
+                ceco("%s: i prefissi del codice (%s) non sono quelli dell'atlante (%s)"
+                     % (cid, ", ".join(sorted(blocchi)), ", ".join(prefissi[cid])),
+                     "rigenerare l'atlante: python docs/kb/tools/build_atlas.py")
+            attribuite = set()
+            for pref, chiavi in sorted(blocchi.items()):
+                sub = pref[len("/v1/"):].replace("/", "-")
+                if sub in rotte and sub != cid:
+                    ceco("%s: il concetto %s esiste già come modulo" % (cid, sub), "un nome per concetto")
+                righe_sub = [r for r in righe if r.get("path") and (r["method"].upper(), r["path"]) in chiavi]
+                attribuite |= {(r["method"].upper(), r["path"]) for r in righe_sub}
+                ops = operazioni(cid, righe_sub, False)
+                if not ops:
+                    continue
+                scrive = any(o["method"] != "GET" for o in ops.values())
+                out[sub] = {
+                    "solaLettura": not scrive,
+                    "base": pref[len("/v1"):],
+                    "modulo": cid,
+                    "data": DATA_SCRITTURE if scrive else DATA_LETTURE,
+                    "decisione": DECISIONE_LETTURE + ("; " + DECISIONE_SCRITTURE if scrive else ""),
+                    "operations": ops,
+                }
+            orfane = [r for r in righe if r.get("path") and (r["method"].upper(), r["path"]) not in attribuite]
+            if orfane:
+                ceco("%s: rotte dell'atlante che il codice non attribuisce a un prefisso: %s"
+                     % (cid, ", ".join("%s %s" % (r["method"], r["path"]) for r in orfane)),
+                     "rigenerare l'atlante o correggere il lettore delle funzioni di rotte")
             continue
         ops = operazioni(cid, righe, False)
         if ops:

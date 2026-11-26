@@ -118,13 +118,16 @@ export function traduciValore(valore: unknown, g: Glossario, profondita = 0): un
   return copia ?? valore;
 }
 
-/** Glossario in memoria con rinfresco a intervalli; una sola costruzione in volo. */
+/**
+ * Glossario in memoria con rinfresco a intervalli; una sola costruzione in volo.
+ * `attuale()` è sincrono e non aspetta mai: se il glossario è scaduto avvia il rinfresco in
+ * background e intanto restituisce quello di prima (o null se non ce n'è ancora uno).
+ */
 export function cacheGlossario(db: Pick<Pool, "query">, durataMs = DURATA_MS) {
   let valore: Glossario | null = null;
   let scade = 0;
   let inVolo: Promise<Glossario | null> | null = null;
-  return async function leggi(): Promise<Glossario | null> {
-    if (valore && Date.now() < scade) return valore;
+  function rinfresca(): Promise<Glossario | null> {
     inVolo ??= costruisciGlossario(db)
       .then((g) => {
         valore = g;
@@ -140,21 +143,44 @@ export function cacheGlossario(db: Pick<Pool, "query">, durataMs = DURATA_MS) {
         inVolo = null;
       });
     return inVolo;
-  };
+  }
+  function attuale(): Glossario | null {
+    if (Date.now() >= scade) void rinfresca();
+    return valore;
+  }
+  return { attuale, rinfresca };
 }
 
 export function addTraduzioneRisposta(app: FastifyInstance, db: Pick<Pool, "query">): void {
   const glossario = cacheGlossario(db);
-  app.addHook("preSerialization", async (req, reply, payload) => {
-    if (req.locale !== "en" || req.method !== "GET") return payload;
-    if (!req.url.startsWith("/v1/") || reply.statusCode >= 300) return payload;
-    if (req.headers["x-localize"] === "off") return payload;
-    if (payload === null || typeof payload !== "object") return payload;
-    try {
-      const g = await glossario();
-      return g && g.size > 0 ? traduciValore(payload, g) : payload;
-    } catch {
-      return payload; // la traduzione non rompe mai una risposta
+  // Il glossario si carica all'avvio (prima che il server ascolti) e poi si rinfresca in
+  // background. Il hook è SINCRONO di proposito: un hook che aspetta una query su ogni risposta
+  // lascia aperta la finestra in cui un handler `async (req, reply) => { reply.send(x) }` si
+  // risolve prima che la risposta parta, e Fastify la riscrive («Reply was already sent»,
+  // stessa classe di valore/registro.ts e della F-7).
+  app.addHook("onReady", async () => {
+    await glossario.rinfresca();
+  });
+  app.addHook("preSerialization", (req, reply, payload, done) => {
+    if (
+      req.locale !== "en" ||
+      req.method !== "GET" ||
+      !req.url.startsWith("/v1/") ||
+      reply.statusCode >= 300 ||
+      req.headers["x-localize"] === "off" ||
+      payload === null ||
+      typeof payload !== "object"
+    ) {
+      done(null, payload);
+      return;
     }
+    let uscita: unknown = payload;
+    try {
+      const g = glossario.attuale();
+      if (g && g.size > 0) uscita = traduciValore(payload, g);
+    } catch {
+      uscita = payload; // la traduzione non rompe mai una risposta
+    }
+    done(null, uscita);
   });
 }

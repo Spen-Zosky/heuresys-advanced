@@ -27,6 +27,9 @@
 -- IDEMPOTENTE: la seconda passata non trova niente da spostare.
 \set ON_ERROR_STOP on
 BEGIN;
+-- Blocco contro scritture concorrenti fra la lettura e lo spostamento.
+LOCK TABLE sys.sys_tenant_process_steps IN SHARE ROW EXCLUSIVE MODE;
+LOCK TABLE sys.sys_tenant_process_activity_rules, sys.sys_approval_requests IN SHARE MODE;
 
 CREATE TABLE IF NOT EXISTS staging.attivita_sottoprocessi_undo (
   salvato_il    timestamptz NOT NULL DEFAULT clock_timestamp(),
@@ -67,21 +70,24 @@ SELECT count(*) n, md5(string_agg((to_jsonb(s) - 'tenant_process_step_process_id
   FROM sys.sys_tenant_process_steps s;
 
 DO $$
-DECLARE n_map int; n_trov int; n_cit int;
+DECLARE n_map int; n_trov int; n_dist int; n_cit int;
 BEGIN
   SELECT count(*) INTO n_map FROM mappa;
   SELECT count(*) INTO n_trov FROM da_fare;
+  SELECT count(DISTINCT (genitore, apqc)) INTO n_dist FROM da_fare;
   SELECT count(*) INTO n_cit FROM da_fare WHERE citata AND attuale = gid;
   RAISE NOTICE 'misura: % voci in mappa, % trovate, % citate da regole o richieste (restano sul genitore)', n_map, n_trov, n_cit;
-  IF n_trov <> n_map THEN RAISE EXCEPTION 'guardia: % voci della mappa senza attivita'' o senza sottoprocesso atteso, niente scritto', n_map - n_trov; END IF;
+  IF n_trov <> n_map OR n_dist <> n_map THEN RAISE EXCEPTION 'guardia: attese % attivita'', trovate % (% voci distinte): mancano, sono doppie o manca il sottoprocesso atteso; niente scritto', n_map, n_trov, n_dist; END IF;
 END $$;
 
 INSERT INTO staging.attivita_sottoprocessi_undo (attivita_id, processo_prima, ordinale_prima, processo_dopo)
 SELECT sid, gid, ord_prima, fid FROM da_fare WHERE attuale = gid AND NOT citata
-ON CONFLICT (attivita_id) DO NOTHING;
+ON CONFLICT (attivita_id) DO UPDATE SET salvato_il = clock_timestamp(), processo_prima = EXCLUDED.processo_prima,
+  ordinale_prima = EXCLUDED.ordinale_prima, processo_dopo = EXCLUDED.processo_dopo;
 
 WITH nuovo AS (
-  SELECT sid, fid, row_number() OVER (PARTITION BY fid ORDER BY ord_prima, apqc) AS o
+  SELECT sid, fid, row_number() OVER (PARTITION BY fid ORDER BY ord_prima, apqc)
+         + coalesce((SELECT max(x.tenant_process_step_ordinal) FROM sys.sys_tenant_process_steps x WHERE x.tenant_process_step_process_id = fid), 0) AS o
     FROM da_fare WHERE attuale = gid AND NOT citata
 )
 UPDATE sys.sys_tenant_process_steps st

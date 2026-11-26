@@ -26,6 +26,7 @@
  */
 // DEVE restare il primo import: neutralizza le credenziali API prima che
 // qualunque altro modulo del grafo (incl. l'SDK) possa leggerle.
+import { rigaLingua } from "./istruzioni.js";
 import "./subscription-auth.js";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { ApprovalRegistry, type ApprovalDecision } from "./approval-bridge.js";
@@ -483,7 +484,7 @@ const server = createServer(async (req, res) => {
         // va al modello in un blocco marcato, e i comandi della vista tornano alla finestra.
         const pagina = leggiPagina(corpo.pagina);
         const vista = new PonteVista({ pagina, registro: esitiVista, owner: gettone.persona.userId, scrivi, finestraAperta });
-        const mandato = pagina ? `${contestoPagina(pagina)}\n\n${prompt}` : prompt;
+        const mandato = `${rigaLingua(lingua)}\n\n${pagina ? `${contestoPagina(pagina)}\n\n${prompt}` : prompt}`;
 
         await eseguiGiro({
           registro,

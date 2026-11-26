@@ -64,6 +64,24 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_users"
     ]
   },
+  "agent-signals": {
+    "prefissi": [
+      "/v1/agent-signals"
+    ],
+    "tabelle": [
+      "sys_agent_signals",
+      "sys_auth_roles",
+      "sys_critical_positions",
+      "sys_organization_units",
+      "sys_positions",
+      "sys_succession_pools",
+      "sys_successor_candidates",
+      "sys_user_auth_roles",
+      "sys_user_position_assignments",
+      "sys_users",
+      "v_agent_signals_fuori_perimetro"
+    ]
+  },
   "agent-tokens": {
     "prefissi": [
       "/v1/auth/agent-tokens"

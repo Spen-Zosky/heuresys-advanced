@@ -87,6 +87,7 @@ import {
   Users,
   UsersRound,
   Workflow,
+  LogOut,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useCurrentUser, useCurrentUserPermissions, useLogout, useMyInterfaces, useMyPreferences, useUpdateMyPreferences } from "../../lib/api/auth";
@@ -485,10 +486,15 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
                 variant="outline"
                 size="sm"
                 data-testid="app-logout"
-                className="w-full"
+                className="w-full gap-2"
+                title={t("shell:logout")}
+                aria-label={t("shell:logout")}
                 onClick={handleLogout}
               >
-                {t("shell:logout")}
+                {/* F8 (giro 25/11): a barra compressa (72 px) resta la sola icona, l'etichetta
+                    («nav-label») sparisce con le altre invece di non starci nel pulsante. */}
+                <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" />
+                <span className="nav-label">{t("shell:logout")}</span>
               </Button>
             </div>
           }

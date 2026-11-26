@@ -191,10 +191,15 @@ jobs:
       # a HEAD è idempotente e provato a due passate.
       - name: Apply migrations (idempotent, brings the clone to HEAD)
         run: |
+          # Il file porta la password del database: nasce nella cartella temporanea della corsa
+          # (RUNNER_TEMP, svuotata dal runner a fine job), leggibile solo dal runner, e si toglie
+          # anche se migrate.sh fallisce. Mai in /tmp, dove restava se il passo cadeva.
+          umask 077
+          ENV_TMP="$(mktemp "${RUNNER_TEMP:?}/ci-migrate.XXXXXX")"
+          trap 'rm -f "$ENV_TMP"' EXIT
           printf 'POSTGRES_HOST=%s\nPOSTGRES_PORT=%s\nPOSTGRES_DB=%s\nPOSTGRES_USER=%s\nPOSTGRES_PASSWORD=%s\n' \
-            "${POSTGRES_HOST:-localhost}" "${POSTGRES_PORT:-5432}" "$POSTGRES_DB" "$POSTGRES_USER" "$POSTGRES_PASSWORD" > /tmp/ci-migrate-integrale.env
-          bash db/scripts/migrate.sh /tmp/ci-migrate-integrale.env
-          rm -f /tmp/ci-migrate-integrale.env
+            "${POSTGRES_HOST:-localhost}" "${POSTGRES_PORT:-5432}" "$POSTGRES_DB" "$POSTGRES_USER" "$POSTGRES_PASSWORD" > "$ENV_TMP"
+          bash db/scripts/migrate.sh "$ENV_TMP"
 
       # Le migrazioni portano i RUOLI, non l'autenticazione delle persone: una
       # persona nata dopo il clone non potrebbe entrare (S1027).
@@ -208,6 +213,14 @@ jobs:
       # test-integration.yml (stesso runner label [self-hosted, off-prod]).
       - name: Seed collaudo-access identities (idempotent)
         run: pnpm db:provision-collaudo
+
+      # 2026-11-26: heuresys_ci si rinfresca dalla produzione, dove i ruoli seguono il lavoro, e il
+      # rinfresco di quel giorno ha tolto le concessioni che i test usano (25 file rossi). Le
+      # concessioni su persone di RTL che i test danno per scontate sono DICHIARATE in
+      # db/scripts/ruoli-dei-test.json e la corsa ce le porta da sé; la guardia del collaudo
+      # (NODE_ENV=test e database di collaudo) le rifiuta fuori dalla CI.
+      - name: Ruoli dichiarati dai test (solo database di collaudo)
+        run: pnpm db:ruoli-dei-test
 
       - name: Ricostruisci il fascicolo di RTL (dato creato da script, non da migrazione)
         working-directory: apps/api

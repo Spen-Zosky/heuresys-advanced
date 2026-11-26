@@ -11,6 +11,18 @@ const count = async (sql: string): Promise<number> => {
   return rows[0]?.n ?? -1;
 };
 
+// [2026-11-26] Le aggiunte DICHIARATE fuori dall'import non toccano i numeri dell'import.
+// Gli script di allineamento di RTL (db/scripts/rtl-allinea/, novembre 2026) hanno aggiunto
+// percorsi e passi di carriera e li hanno GIORNALIZZATI riga per riga in
+// staging.rtl_allinea_org_undo: è lo stesso uso del giornale della 000361 qui sotto, sapere
+// che cosa è stato aggiunto e da chi. Una copia della CI che precede quegli script non ha il
+// giornale: allora non c'è niente da escludere, e il frammento vale `true`.
+const fuoriDalGiornale = async (giornale: string, tabella: string, colonna: string): Promise<string> => {
+  const { rows } = await pool.query<{ c: string | null }>(`SELECT to_regclass($1)::text AS c`, [giornale]);
+  if (!rows[0]?.c) return "true";
+  return `NOT EXISTS (SELECT 1 FROM ${giornale} j WHERE j.tabella = '${tabella}' AND j.chiave = ${colonna})`;
+};
+
 describe('reconciliation F3 imports', () => {
   describe('position_career_paths (#1) — employee bridge', () => {
     it('imported 38 rows, tenant-coherent, all FKs resolved', async () => {
@@ -29,9 +41,15 @@ describe('reconciliation F3 imports', () => {
       // Il numero resta FISSO apposta, come per i requisiti formativi qui sotto:
       // derivarlo dal database renderebbe il test tautologico — conterebbe se
       // stesso invece di sorvegliare che l'import non si eroda in silenzio.
+      //
+      // [2026-11-26] Lo script O di rtl-allinea ha collegato 62 posti ai percorsi della corsa
+      // (metadata `allinea = O`), giornalizzati come 'ins:sys_position_career_paths': restano
+      // fuori dal perimetro dell'import, che resta 38.
+      const nonAllineate = await fuoriDalGiornale(
+        "staging.rtl_allinea_org_undo", "ins:sys_position_career_paths", "position_career_path_id");
       expect(await count(
         `SELECT count(*)::int AS n FROM sys.sys_position_career_paths
-          WHERE position_career_path_metadata->>'storia36' IS NULL`,
+          WHERE position_career_path_metadata->>'storia36' IS NULL AND ${nonAllineate}`,
       )).toBe(38);
       expect(await count(
         `SELECT count(*)::int AS n FROM sys.sys_position_career_paths pcp
@@ -71,11 +89,22 @@ describe('reconciliation F3 imports', () => {
     // fisso), mentre un'aggiunta dichiarata e tracciata non lo tocca. Un'aggiunta
     // NON tracciata, invece, lo farebbe arrossare — ed e' giusto: significherebbe
     // che qualcuno ha scritto in quella tabella senza lasciare traccia.
+    //
+    // [2026-11-26] Stessa regola per i quattro posti nuovi di storia36 C13 (14_selezione.sql,
+    // scelta di Enzo del 2026-11-06): nascono con `position_metadata.storia36 = 'C13'` e
+    // `origine = 'potenziamento'`, e ricevono una COPIA del profilo del posto modello, 45 righe
+    // di requisiti formativi. Sono riconoscibili dal posto che le porta, non sono import, e
+    // restano fuori dal perimetro.
     const SOLO_IMPORT = `
       FROM sys.sys_position_learning_requirements plr
        WHERE NOT EXISTS (
          SELECT 1 FROM staging.mig361_requisiti_rischio_undo u
-          WHERE u.requisito_id = plr.position_learning_requirement_id)`;
+          WHERE u.requisito_id = plr.position_learning_requirement_id)
+         AND NOT EXISTS (
+         SELECT 1 FROM sys.sys_positions np
+          WHERE np.position_id = plr.position_id
+            AND np.position_metadata->>'storia36' = 'C13'
+            AND np.position_metadata->>'origine' = 'potenziamento')`;
     it('imported 1733 fan-out rows across 153 positions, all resolving a learning_path', async () => {
       expect(await count(`SELECT count(*)::int AS n ${SOLO_IMPORT}`)).toBe(1733);
       expect(await count(`SELECT count(DISTINCT plr.position_id)::int AS n ${SOLO_IMPORT}`)).toBe(153);
@@ -117,7 +146,13 @@ describe('reconciliation F3 imports', () => {
 
   describe('PARTIAL subset imports (closure)', () => {
     it('career_path_steps 35, critical_positions 8, position_succession_relevance 9, user_learning_assignments 1990', async () => {
-      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_career_path_steps`)).toBe(35);
+      // [2026-11-26] I passi dei percorsi CAR-TJB-* (script L di rtl-allinea, `allinea = L`)
+      // stanno sotto percorsi giornalizzati come 'ins:sys_career_paths': fuori dall'import.
+      const passiNonAllineati = await fuoriDalGiornale(
+        "staging.rtl_allinea_org_undo", "ins:sys_career_paths", "s.career_path_step_path_id");
+      expect(await count(
+        `SELECT count(*)::int AS n FROM sys.sys_career_path_steps s WHERE ${passiNonAllineati}`,
+      )).toBe(35);
       expect(await count(`SELECT count(*)::int AS n FROM sys.sys_critical_positions`)).toBe(8);
       // vincolato alla provenienza dell'import: la storia C5 aggiunge una riga di
       // rilevanza per ogni posizione critica che ne era scoperta (coda #18), e quelle

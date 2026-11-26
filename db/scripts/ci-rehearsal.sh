@@ -102,12 +102,15 @@ case "$DB" in
 esac
 
 cleanup() {
+  # Il file d'ambiente porta la password del database: si toglie SEMPRE, prima di tutto,
+  # anche con --keep (che conserva il database, non le credenziali). Fino al 2026-11-26 il
+  # ramo --keep usciva prima di questa riga e lasciava il file in /tmp.
+  rm -f "${ENV_TMP:-}" 2>/dev/null || true
   if [ "$KEEP" = 1 ]; then
     say "database di prova CONSERVATO: $DB (rimuovilo con: sudo -u postgres dropdb $DB)"
     return
   fi
   case "$DB" in heuresys_rehearsal_*) sudo -u postgres dropdb --force --if-exists -p "$PGPORT_LOCAL" "$DB" >/dev/null 2>&1 || true ;; esac
-  rm -f "${ENV_TMP:-}" 2>/dev/null || true
   [ -n "${MIG_TMP:-}" ] && rm -rf "$MIG_TMP"
   # `return 0` OBBLIGATORIO: in un trap EXIT l'esito dell'ULTIMO comando diventa il codice
   # d'uscita dello script. La riga qui sopra esce 1 quando MIG_TMP e' vuoto (il caso
@@ -185,8 +188,15 @@ done
 
 # --- 3. la catena --------------------------------------------------------------------
 # L'env-file si sintetizza: migrate.sh ne pretende uno, e non deve poter sorgere per sbaglio
-# il .env vero, che punta alla produzione. Permessi 600, cancellato dal trap.
-ENV_TMP="$(mktemp)"; chmod 600 "$ENV_TMP"
+# il .env vero, che punta alla produzione. Nasce fuori da /tmp, in una cartella dell'utente
+# (XDG_RUNTIME_DIR, in memoria e privata, oppure ~/.cache), con permessi 600; si toglie appena
+# la catena e' applicata e, comunque, dal trap.
+ENV_DIR="${XDG_RUNTIME_DIR:-}"
+if [ -z "$ENV_DIR" ] || [ ! -d "$ENV_DIR" ] || [ ! -w "$ENV_DIR" ]; then
+  ENV_DIR="$HOME/.cache/heuresys-rehearsal"
+fi
+mkdir -p "$ENV_DIR"; chmod 700 "$ENV_DIR"
+ENV_TMP="$(umask 077; mktemp "$ENV_DIR/ci-rehearsal.XXXXXX")"
 {
   printf 'POSTGRES_HOST=%s\n' "127.0.0.1"
   printf 'POSTGRES_PORT=%s\n' "$PGPORT_LOCAL"
@@ -238,6 +248,8 @@ if [ "$chain_rc" = 0 ]; then
     say "allowlist). Il rimedio e' emendare QUEL file, non aggiungerne uno dopo."
   fi
 fi
+# La catena e' applicata: le credenziali non servono piu'.
+rm -f "$ENV_TMP"
 
 if [ "$chain_rc" != 0 ]; then
   if [ "$MODE" = "like-ci" ]; then

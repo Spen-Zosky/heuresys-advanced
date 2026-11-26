@@ -17,8 +17,12 @@
  *     i rami che cambiano;
  *   - non guarda le chiavi che portano identificativi o codici (`id`, `…Id`, `code`, `…Code`,
  *     `email`, `slug`, `url`), così un valore usato come chiave non cambia;
- *   - `x-localize: off` lo spegne per una richiesta: serve ai moduli di modifica, che devono
- *     precompilare il testo canonico italiano e non la traduzione.
+ *   - `x-localize: off` lo spegne per una richiesta.
+ * Il ritorno (passo 5 di ADR-0062): un modulo di modifica in una pagina inglese si precompila
+ * con il testo inglese e, salvando, lo rimanderebbe al posto dell'italiano canonico. Un secondo
+ * hook, sulle scritture `/v1/*` in inglese, riporta all'italiano ogni stringa del corpo uguale a
+ * una traduzione del glossario, solo quando quella traduzione viene da un testo italiano solo;
+ * un testo nuovo scritto dalla persona passa com'è. Vale per tutti i moduli, come l'andata.
  * I nomi delle persone non sono in nessun campo registrato, quindi non si traducono.
  */
 
@@ -28,7 +32,9 @@ import type { Pool } from "pg";
 export type Glossario = ReadonlyMap<string, string>;
 
 const IDENT = /^[a-z_][a-z0-9_]*$/;
-const CHIAVE_ESCLUSA = /^(id|ids|code|codes|email|slug|url|href|locale)$|(Id|Ids|Code|Codes|Email|Url|Href|Slug)$/;
+const CHIAVE_ESCLUSA =
+  /^(id|ids|code|codes|email|slug|url|href|locale|password|token|secret|otp)$|(Id|Ids|Code|Codes|Email|Url|Href|Slug|Password|Token|Secret|Otp)$/;
+const SCRITTURE = new Set(["POST", "PATCH", "PUT"]);
 const LUNGHEZZA_MIN = 2;
 const DURATA_MS = 5 * 60 * 1000;
 
@@ -119,18 +125,35 @@ export function traduciValore(valore: unknown, g: Glossario, profondita = 0): un
 }
 
 /**
+ * Il glossario rovesciato, inglese → italiano, per le scritture. Una traduzione che viene da più
+ * testi italiani diversi non si rovescia: non si saprebbe quale rimettere.
+ */
+export function rovescia(g: Glossario): Map<string, string> {
+  const inverso = new Map<string, string>();
+  const doppi = new Set<string>();
+  for (const [it, en] of g) {
+    if (inverso.has(en) && inverso.get(en) !== it) doppi.add(en);
+    else inverso.set(en, it);
+  }
+  for (const en of doppi) inverso.delete(en);
+  return inverso;
+}
+
+/**
  * Glossario in memoria con rinfresco a intervalli; una sola costruzione in volo.
  * `attuale()` è sincrono e non aspetta mai: se il glossario è scaduto avvia il rinfresco in
  * background e intanto restituisce quello di prima (o null se non ce n'è ancora uno).
  */
 export function cacheGlossario(db: Pick<Pool, "query">, durataMs = DURATA_MS) {
   let valore: Glossario | null = null;
+  let inverso: Glossario | null = null;
   let scade = 0;
   let inVolo: Promise<Glossario | null> | null = null;
   function rinfresca(): Promise<Glossario | null> {
     inVolo ??= costruisciGlossario(db)
       .then((g) => {
         valore = g;
+        inverso = rovescia(g);
         scade = Date.now() + durataMs;
         return g;
       })
@@ -148,7 +171,11 @@ export function cacheGlossario(db: Pick<Pool, "query">, durataMs = DURATA_MS) {
     if (Date.now() >= scade) void rinfresca();
     return valore;
   }
-  return { attuale, rinfresca };
+  function attualeInverso(): Glossario | null {
+    if (Date.now() >= scade) void rinfresca();
+    return inverso;
+  }
+  return { attuale, attualeInverso, rinfresca };
 }
 
 export function addTraduzioneRisposta(app: FastifyInstance, db: Pick<Pool, "query">): void {
@@ -182,5 +209,28 @@ export function addTraduzioneRisposta(app: FastifyInstance, db: Pick<Pool, "quer
       uscita = payload; // la traduzione non rompe mai una risposta
     }
     done(null, uscita);
+  });
+  // Il ritorno: il corpo di una scrittura in inglese torna all'italiano canonico prima della
+  // validazione. Sincrono come l'andata; senza glossario il corpo passa com'è.
+  app.addHook("preValidation", (req, _reply, done) => {
+    if (
+      req.locale !== "en" ||
+      !SCRITTURE.has(req.method) ||
+      !req.url.startsWith("/v1/") ||
+      req.url.startsWith("/v1/auth/") ||
+      req.headers["x-localize"] === "off" ||
+      req.body === null ||
+      typeof req.body !== "object"
+    ) {
+      done();
+      return;
+    }
+    try {
+      const g = glossario.attualeInverso();
+      if (g && g.size > 0) req.body = traduciValore(req.body, g);
+    } catch {
+      // la traduzione non rompe mai una scrittura
+    }
+    done();
   });
 }

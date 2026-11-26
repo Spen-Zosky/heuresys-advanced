@@ -130,6 +130,23 @@ test.describe("MVP-3 Tappa E /login — MFA login-gating", () => {
       await expect(page).toHaveURL(new RegExp(`${PERSONAS.outsider.expectedLandingPath}`), {
         timeout: 60_000,
       });
+
+      // --- Attempt 3: a recovery code can be typed on the same page and signs in ---
+      const recRes = await request.post(`${API_BASE}/v1/auth/mfa/recovery-codes`, {
+        headers: { "x-csrf-token": setup.csrfToken },
+      });
+      expect(recRes.status(), "recovery codes").toBe(200);
+      const [recovery] = (await recRes.json()).codes as string[];
+      await page.context().clearCookies();
+      await page.goto("/login");
+      await submitPassword(page, MFA_EMAIL);
+      await page.getByTestId("login-mfa-recovery-toggle").click();
+      await page.getByTestId("login-mfa-code").fill(recovery!);
+      await expect(page.getByTestId("login-mfa-code")).toHaveValue(recovery!);
+      await page.getByTestId("login-mfa-submit").click();
+      await expect(page).toHaveURL(new RegExp(`${PERSONAS.outsider.expectedLandingPath}`), {
+        timeout: 60_000,
+      });
     } finally {
       await deleteFactor(request, setup.factorId, setup.csrfToken);
     }

@@ -153,10 +153,15 @@ jobs:
           # migrate.sh insists on an env FILE (arg 1); synthesize it from the
           # job env (runner EnvironmentFile + the heuresys_ci override above)
           # so the script cannot accidentally source a PROD-pointing .env.
+          # Il file porta la password del database: nasce nella cartella temporanea della corsa
+          # (RUNNER_TEMP, svuotata dal runner a fine job), leggibile solo dal runner, e si toglie
+          # anche se migrate.sh fallisce. Mai in /tmp, dove restava se il passo cadeva.
+          umask 077
+          ENV_TMP="$(mktemp "${RUNNER_TEMP:?}/ci-migrate.XXXXXX")"
+          trap 'rm -f "$ENV_TMP"' EXIT
           printf 'POSTGRES_HOST=%s\nPOSTGRES_PORT=%s\nPOSTGRES_DB=%s\nPOSTGRES_USER=%s\nPOSTGRES_PASSWORD=%s\n' \
-            "${POSTGRES_HOST:-localhost}" "${POSTGRES_PORT:-5432}" "$POSTGRES_DB" "$POSTGRES_USER" "$POSTGRES_PASSWORD" > /tmp/ci-migrate.env
-          bash db/scripts/migrate.sh /tmp/ci-migrate.env
-          rm -f /tmp/ci-migrate.env
+            "${POSTGRES_HOST:-localhost}" "${POSTGRES_PORT:-5432}" "$POSTGRES_DB" "$POSTGRES_USER" "$POSTGRES_PASSWORD" > "$ENV_TMP"
+          bash db/scripts/migrate.sh "$ENV_TMP"
 
       # S1027 (same class as the smoke fix): persona AUTH lives outside the
       # migrations — a persona added after the clone (S1026 custodian) has no
@@ -173,6 +178,14 @@ jobs:
       # systemd del runner (chiave dedicata a CI, isolata da quella di produzione).
       - name: Seed collaudo-access identities (idempotent)
         run: pnpm db:provision-collaudo
+
+      # 2026-11-26: heuresys_ci si rinfresca dalla produzione, dove i ruoli seguono il lavoro, e il
+      # rinfresco di quel giorno ha tolto le concessioni che i test usano (25 file rossi). Le
+      # concessioni su persone di RTL che i test danno per scontate sono DICHIARATE in
+      # db/scripts/ruoli-dei-test.json e la corsa ce le porta da sé; la guardia del collaudo
+      # (NODE_ENV=test e database di collaudo) le rifiuta fuori dalla CI.
+      - name: Ruoli dichiarati dai test (solo database di collaudo)
+        run: pnpm db:ruoli-dei-test
 
       # S1027: the occupation axis (mig 000206) ships its dataset as VERSIONED
       # CSVs + an idempotent fail-loud loader (db/data/occupations/) — unlike

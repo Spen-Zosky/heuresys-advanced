@@ -79,7 +79,7 @@ const iso = (d: unknown): string => (d as Date).toISOString();
 const isoN = (d: unknown): string | null => (d ? (d as Date).toISOString() : null);
 
 function slugify(s: string): string {
-  return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 200) || "untitled";
+  return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 200) || "untitled";
 }
 
 /* --- categories --------------------------------------------------------- */

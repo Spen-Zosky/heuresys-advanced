@@ -40,6 +40,11 @@ export const AGENT_CAPABILITY_ERRORS = {
    * voce T5 del piano: finché non c'è, nessuna capacità si libera.
    */
   ONBEHALF_REGISTER_MISSING: "AGENT_ONBEHALF_REGISTER_MISSING",
+  /**
+   * Il modo `LIBERA` è spento (ADR-0063 D4, decisione E3 di Enzo del 2026-11-26): ogni scrittura
+   * dell'agente passa dalla conferma della persona. Si riaccende solo con una decisione nuova di Enzo.
+   */
+  LIBERA_SPENTA: "AGENT_CAPABILITY_LIBERA_SPENTA",
   /** Il database ha rifiutato il cambiamento (bozza chiusa, classe, condizioni previe). */
   CAPABILITY_RULE: "AGENT_CAPABILITY_RULE",
   /** Una capacità in bozza non ha ancora un modo da decidere. */

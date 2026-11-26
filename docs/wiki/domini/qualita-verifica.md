@@ -37,7 +37,7 @@ concetti: [prova-dal-vivo, cancello, ci]
 ## Storia
 
 <!-- generato:storia -->
-Il riordino del 2026-11-25 ha ritirato **70** documenti di questo dominio (lotti: A4 45, ACC-1 5, B 20). Si recuperano con `git show <commit>:<percorso>` dai commit 87d7ce9d9, a1872a180, dbd339511, oppure dalla copia nel cestino della cartella del progetto; l'elenco completo è nel [registro dei ritiri](../../piani/riordino-documentazione_20261125/REGISTRO_RITIRI.tsv).
+Il riordino del 2026-11-25 ha ritirato **70** documenti di questo dominio (lotti: A4 45, ACC-1 5, B 20). Si recuperano con `git show <commit>:<percorso>` dai commit 87d7ce9d9, a1872a180, dbd339511, (il cestino del riordino è stato svuotato il 2026-11-26, voce R14); l'elenco completo è nel [registro dei ritiri](../../piani/riordino-documentazione_20261125/REGISTRO_RITIRI.tsv).
 
 Da dove venivano: `qa_artifacts` 46, `docs/kb/improvement/FINDINGS` 12, `docs/piani/forense-frontend_20261115` 5, `ux-design/heuresys_uxix_brand_identity_bundle_v1/governance` 5, `audit` 1, `qa_artifacts/data_integrity/20260531_s952` 1.
 <!-- /generato -->

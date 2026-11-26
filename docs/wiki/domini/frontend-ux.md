@@ -38,7 +38,7 @@ concetti: [design-system, dati-vivi, organigramma]
 ## Storia
 
 <!-- generato:storia -->
-Il riordino del 2026-11-25 ha ritirato **26** documenti di questo dominio (lotti: B 25, B-campioni 1). Si recuperano con `git show <commit>:<percorso>` dai commit 87d7ce9d9, a1872a180, oppure dalla copia nel cestino della cartella del progetto; l'elenco completo è nel [registro dei ritiri](../../piani/riordino-documentazione_20261125/REGISTRO_RITIRI.tsv).
+Il riordino del 2026-11-25 ha ritirato **26** documenti di questo dominio (lotti: B 25, B-campioni 1). Si recuperano con `git show <commit>:<percorso>` dai commit 87d7ce9d9, a1872a180, (il cestino del riordino è stato svuotato il 2026-11-26, voce R14); l'elenco completo è nel [registro dei ritiri](../../piani/riordino-documentazione_20261125/REGISTRO_RITIRI.tsv).
 
 Da dove venivano: `ux-design/heuresys_uxix_brand_identity_bundle_v1/docs` 9, `ux-design/heuresys_uxix_brand_identity_bundle_v1/templates` 5, `ux-design/heuresys_uxix_brand_identity_bundle_v1` 3, `docs/superpowers/plans` 2, `ux-design/heuresys_uxix_brand_identity_bundle_v1/prompts` 2, `ux-design/heuresys_uxix_brand_identity_bundle_v1/showcase` 2, `docs` 1, `ux-design/heuresys_uxix_brand_identity_bundle_v1/assets` 1.
 <!-- /generato -->

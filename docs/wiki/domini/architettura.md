@@ -45,7 +45,7 @@ concetti: [monorepo, contratto-zod, datastore]
 ## Storia
 
 <!-- generato:storia -->
-Il riordino del 2026-11-25 ha ritirato **25** documenti di questo dominio (lotti: ACC-1 1, B 24). Si recuperano con `git show <commit>:<percorso>` dai commit a1872a180, dbd339511, oppure dalla copia nel cestino della cartella del progetto; l'elenco completo è nel [registro dei ritiri](../../piani/riordino-documentazione_20261125/REGISTRO_RITIRI.tsv).
+Il riordino del 2026-11-25 ha ritirato **25** documenti di questo dominio (lotti: ACC-1 1, B 24). Si recuperano con `git show <commit>:<percorso>` dai commit a1872a180, dbd339511, (il cestino del riordino è stato svuotato il 2026-11-26, voce R14); l'elenco completo è nel [registro dei ritiri](../../piani/riordino-documentazione_20261125/REGISTRO_RITIRI.tsv).
 
 Da dove venivano: `docs/kb/improvement/DOSSIERS` 15, `docs/source_bundle/extracted_bootstrap/bootstrap_agent` 3, `docs/source_bundle/extracted_bootstrap/universal_hrms_framework` 3, `docs/source_bundle/extracted_bootstrap/bootstrap_agent/checklists` 1, `docs/source_bundle/extracted_bootstrap/bootstrap_agent/specs` 1, `docs/source_bundle/extracted_bootstrap/bootstrap_agent/templates` 1, `docs/kb/improvement` 1.
 <!-- /generato -->

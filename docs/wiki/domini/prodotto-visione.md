@@ -29,7 +29,7 @@ concetti: [visione, capacità]
 ## Storia
 
 <!-- generato:storia -->
-Il riordino del 2026-11-25 ha ritirato **20** documenti di questo dominio (lotti: ACC-1 4, B 16). Si recuperano con `git show <commit>:<percorso>` dai commit a1872a180, dbd339511, oppure dalla copia nel cestino della cartella del progetto; l'elenco completo è nel [registro dei ritiri](../../piani/riordino-documentazione_20261125/REGISTRO_RITIRI.tsv).
+Il riordino del 2026-11-25 ha ritirato **20** documenti di questo dominio (lotti: ACC-1 4, B 16). Si recuperano con `git show <commit>:<percorso>` dai commit a1872a180, dbd339511, (il cestino del riordino è stato svuotato il 2026-11-26, voce R14); l'elenco completo è nel [registro dei ritiri](../../piani/riordino-documentazione_20261125/REGISTRO_RITIRI.tsv).
 
 Da dove venivano: `docs/due-diligence/workstreams` 13, `docs/product` 4, `docs/due-diligence` 1, `docs/superpowers/plans` 1, `docs/superpowers/specs` 1.
 <!-- /generato -->

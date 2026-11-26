@@ -212,7 +212,7 @@ Un documento superato esce anche se lo citano solo archivi (`docs/archive/`), mi
 | R11 | fatta | `build_wiki.py --check` verde in `state-lint` |
 | R12 | in parte | A1-A5 e A9 in CI; A10 (`scripts/lint-verita.sh`) provato in cloud con un agente finto, da installare sulla VM |
 | R13 | fatta | sezione «Documentazione» in `CLAUDE.md` di advanced (PR #485) e sottosezione del datastore (PR #44) |
-| R14 | da fare | solo con il sì di Enzo |
+| R14 | fatta il 2026-11-26 | sì di Enzo nel thread («procediamo con tutto, partendo da 1»). Fase 1: le 662 copie dei repo (565 di advanced, 97 del datastore), ciascuna verificata identica (SHA-256) al file nel commit di recupero su `main`. Fase 2: i 204 file che stavano solo nel cestino (179 della cartella del progetto, 25 dei dati delle persone RTL), ciascuno con la sede di oggi o superato secondo il censimento. Una riga per file in [REGISTRO_CANCELLAZIONI_R14.tsv](riordino-documentazione_20261125/REGISTRO_CANCELLAZIONI_R14.tsv); `_da_eliminare/` della cartella del progetto è vuota. I ritirati si recuperano con `git show <commit>:<percorso>` dal registro dei ritiri |
 
 ## 12. Accorpamento dei «da accorpare» (2026-11-25, notte)
 

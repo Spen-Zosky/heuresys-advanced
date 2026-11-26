@@ -41,7 +41,7 @@ concetti: [rilascio, gemello, copia-di-fase, turno]
 ## Storia
 
 <!-- generato:storia -->
-Il riordino del 2026-11-25 ha ritirato **6** documenti di questo dominio (lotti: B 5, B-campioni 1). Si recuperano con `git show <commit>:<percorso>` dai commit 87d7ce9d9, a1872a180, oppure dalla copia nel cestino della cartella del progetto; l'elenco completo è nel [registro dei ritiri](../../piani/riordino-documentazione_20261125/REGISTRO_RITIRI.tsv).
+Il riordino del 2026-11-25 ha ritirato **6** documenti di questo dominio (lotti: B 5, B-campioni 1). Si recuperano con `git show <commit>:<percorso>` dai commit 87d7ce9d9, a1872a180, (il cestino del riordino è stato svuotato il 2026-11-26, voce R14); l'elenco completo è nel [registro dei ritiri](../../piani/riordino-documentazione_20261125/REGISTRO_RITIRI.tsv).
 
 Da dove venivano: `docs/piani` 3, `docs/superpowers/plans` 2, `docs/superpowers/specs` 1.
 <!-- /generato -->

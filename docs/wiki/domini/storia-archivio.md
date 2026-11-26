@@ -36,7 +36,7 @@ concetti: [ritiro, legacy, brownfield]
 ## Storia
 
 <!-- generato:storia -->
-Il riordino del 2026-11-25 ha ritirato **319** documenti di questo dominio (lotti: A4 217, A4-campioni 1, B 101). Si recuperano con `git show <commit>:<percorso>` dai commit 87d7ce9d9, a1872a180, oppure dalla copia nel cestino della cartella del progetto; l'elenco completo è nel [registro dei ritiri](../../piani/riordino-documentazione_20261125/REGISTRO_RITIRI.tsv).
+Il riordino del 2026-11-25 ha ritirato **319** documenti di questo dominio (lotti: A4 217, A4-campioni 1, B 101). Si recuperano con `git show <commit>:<percorso>` dai commit 87d7ce9d9, a1872a180, (il cestino del riordino è stato svuotato il 2026-11-26, voce R14); l'elenco completo è nel [registro dei ritiri](../../piani/riordino-documentazione_20261125/REGISTRO_RITIRI.tsv).
 
 Da dove venivano: `cowork_code_exchange` 79, `cowork_code_exchange/.inbox/cowork/read` 35, `cowork_code_exchange/.inbox/cli/read` 27, `docs/superpowers/plans` 14, `cowork_reserved/batch_c1/class_b_diagnostics` 13, `cowork_reserved/batch_c3/sdbi_scale` 12, `cowork_reserved/batch_c1/goals_pilot/mapping_cards` 10, `docs/source_bundle/extracted_bootstrap/brownfield_adaptation` 9.
 <!-- /generato -->

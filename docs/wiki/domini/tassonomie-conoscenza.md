@@ -32,7 +32,7 @@ concetti: [tassonomia, competenza, ccnl, glossario]
 ## Storia
 
 <!-- generato:storia -->
-Il riordino del 2026-11-25 ha ritirato **20** documenti di questo dominio (lotti: A4 1, B 19). Si recuperano con `git show <commit>:<percorso>` dai commit 87d7ce9d9, a1872a180, oppure dalla copia nel cestino della cartella del progetto; l'elenco completo è nel [registro dei ritiri](../../piani/riordino-documentazione_20261125/REGISTRO_RITIRI.tsv).
+Il riordino del 2026-11-25 ha ritirato **20** documenti di questo dominio (lotti: A4 1, B 19). Si recuperano con `git show <commit>:<percorso>` dai commit 87d7ce9d9, a1872a180, (il cestino del riordino è stato svuotato il 2026-11-26, voce R14); l'elenco completo è nel [registro dei ritiri](../../piani/riordino-documentazione_20261125/REGISTRO_RITIRI.tsv).
 
 Da dove venivano: `docs/source_bundle/extracted_bootstrap/seed_acquisition/prompts` 8, `docs/source_bundle/extracted_bootstrap/seed_acquisition` 5, `docs/integrations` 2, `docs/superpowers/specs` 2, `qa_artifacts/data_integrity/20260531_s952` 1, `cowork_code_exchange` 1, `docs/kb/tools/atlas-sweep-templates` 1.
 <!-- /generato -->

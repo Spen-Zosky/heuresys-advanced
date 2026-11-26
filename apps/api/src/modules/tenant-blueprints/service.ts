@@ -13,6 +13,10 @@
  * trattativa) resta visibile solo a PLATFORM_ADMIN: non appartiene a nessun cliente
  * assegnabile.
  *
+ * ECCEZIONE (Enzo, 2026-11-26, F14): BLUEPRINT_MANAGER e' il gestore dei modelli e apre ogni
+ * fascicolo, in elenco e in scheda, come gia' faceva per confronto e versioni. L'assegnazione
+ * ai clienti resta il perimetro degli altri ruoli di piattaforma e di TENANT_ADMIN.
+ *
  * Ogni rifiuto porta il suo codice: mai un errore nudo (§9 della specifica).
  */
 import { pool, withTransaction } from "../../db/client.js";
@@ -24,6 +28,7 @@ import {
   ValidationError,
 } from "../../errors/index.js";
 import { isPlatform, perimetroClienti, type ActorContext } from "../../lib/actor.js";
+import { haMandatoGestioneModelli } from "../../lib/scope/mandati.js";
 import * as repo from "./repository.js";
 import { proposeModel, isPublishedVariantVersion } from "./derivation.js";
 import { diffVersions, diffAgainstModelLatest } from "./diff.js";
@@ -113,18 +118,24 @@ async function esisteFascicolo(id: string): Promise<TenantBlueprint> {
   return b;
 }
 
+/** Perimetro dei clienti per i fascicoli: il gestore dei modelli non ne ha (F14). */
+function perimetroFascicoli(a: ActorContext): Set<string> | undefined {
+  if (haMandatoGestioneModelli(a)) return undefined;
+  return perimetroClienti(a);
+}
+
 export const tenantBlueprintsService = {
   async list(
     a: ActorContext,
     query: TenantBlueprintListQuery,
   ): Promise<{ items: TenantBlueprint[]; total: number }> {
-    const perimetro = perimetroClienti(a);
+    const perimetro = perimetroFascicoli(a);
     return repo.listBlueprints(pool, query, perimetro ? [...perimetro] : undefined);
   },
 
   async getById(a: ActorContext, id: string): Promise<TenantBlueprintDetail> {
     const b = await esisteFascicolo(id);
-    const perimetro = perimetroClienti(a);
+    const perimetro = perimetroFascicoli(a);
     // Un fascicolo senza tenant non appartiene a nessun cliente assegnabile: fuori
     // perimetro per chiunque non sia PLATFORM_ADMIN. 404, non 403 (I-G).
     if (perimetro && (!b.tenantId || !perimetro.has(b.tenantId))) {

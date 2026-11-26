@@ -50,6 +50,8 @@ export const AGENT_CONVERSATION_ERRORS = {
   PROPOSAL_EXPIRED: "AGENT_PROPOSAL_EXPIRED",
   /** L'attività è chiusa: non riceve eventi, proposte né un altro stato. */
   ACTIVITY_CLOSED: "AGENT_ACTIVITY_CLOSED",
+  /** La conversazione ha già un giro aperto: uno alla volta (000513). */
+  CONVERSATION_BUSY: "AGENT_CONVERSATION_BUSY",
   /** Il database ha rifiutato la riga (forma, misura, scadenza). */
   RULE: "AGENT_CONVERSATION_RULE",
 } as const;

@@ -6,7 +6,7 @@
  * Classi Q del giro del 25/11/2026: quando un fascicolo (o una sua versione) non si apre, la pagina
  * restava un riquadro isolato, senza titolo e senza una strada per tornare indietro, e il testo
  * generico del 404 («non esiste, oppure non è visibile») lasciava il dubbio. L'autorizzazione non
- * cambia: il servizio risponde 404 anche a chi è fuori perimetro (I-G), e la pagina non lo distingue.
+ * cambia: il servizio risponde 404 anche a chi è fuori perimetro (I-G; il gestore dei modelli non ne ha, F14), e la pagina non lo distingue.
  * Dice però una cosa vera in entrambi i casi — il fascicolo non è fra quelli che il profilo apre —
  * con l'intestazione della pagina e il collegamento all'elenco.
  *

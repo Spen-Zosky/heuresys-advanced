@@ -8,7 +8,7 @@ Il wiki segue il modello llm-wiki: fonti grezze (codice, ADR, registri), pagine 
 
 | Pagina | Dominio | Sintesi | Aggiornata il |
 |---|---|---|---|
-| [agenti-ia](domini/agenti-ia.md) | agenti-ia | Agenti e assistente con l'abbonamento di Enzo, dentro i permessi di chi chiede | 2026-11-25 |
+| [agenti-ia](domini/agenti-ia.md) | agenti-ia | Agenti e assistente con l'abbonamento di Enzo, dentro i permessi di chi chiede | 2026-11-26 |
 | [api-backend](domini/api-backend.md) | api-backend | Moduli Fastify in sette passi, catena di plugin fissa, ESS in modulo dedicato | 2026-11-25 |
 | [architettura](domini/architettura.md) | architettura | Monorepo pnpm, API Fastify su PostgreSQL 16, SPA Next.js, separazione dal datastore | 2026-11-25 |
 | [consolidamento-tenant](domini/consolidamento-tenant.md) | consolidamento-tenant | Allineamento e consolidamento del tenant con le corse del datastore | 2026-11-25 |
@@ -17,7 +17,7 @@ Il wiki segue il modello llm-wiki: fonti grezze (codice, ADR, registri), pagine 
 | [governo](domini/governo.md) | governo | Chi decide, chi scrive dove, come si apre e si chiude una sessione | 2026-11-25 |
 | [operazioni-infra](domini/operazioni-infra.md) | operazioni-infra | VM di produzione, gemello sulla Debian, CI, rilascio armato e copie ripristinabili | 2026-11-25 |
 | [processi-organizzazione](domini/processi-organizzazione.md) | processi-organizzazione | Posizioni, unità, processi e attività: la partecipazione si lega alla posizione | 2026-11-25 |
-| [prodotto-visione](domini/prodotto-visione.md) | prodotto-visione | Heuresys come piattaforma agentica del cambiamento organizzativo | 2026-11-25 |
+| [prodotto-visione](domini/prodotto-visione.md) | prodotto-visione | Heuresys come piattaforma agentica del cambiamento organizzativo | 2026-11-26 |
 | [qualita-verifica](domini/qualita-verifica.md) | qualita-verifica | Fatto vuol dire dimostrato dal vivo; cancelli in CI e controlli dei documenti | 2026-11-25 |
 | [sicurezza-accessi](domini/sicurezza-accessi.md) | sicurezza-accessi | Autenticazione separata, perimetro gerarchico e modalità funzionale, maschere e mandati | 2026-11-25 |
 | [stato-pianificazione](domini/stato-pianificazione.md) | stato-pianificazione | Dove si legge lo stato, il backlog, i debiti e i piani | 2026-11-25 |

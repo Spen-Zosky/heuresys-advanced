@@ -4,7 +4,7 @@
 > Le descrizioni gia' curate sono preservate a ogni rigenerazione; per gli ADR che non
 > ne avevano una, la colonna riporta il titolo ed e' marcata *(dal titolo)*.
 
-**59 ADR** in `docs/architecture/adr/`.
+**60 ADR** in `docs/architecture/adr/`.
 
 | # | Titolo | Status | Descrizione | Data |
 |---|---|---|---|---|
@@ -58,7 +58,7 @@
 | [0050](adr/0050_identificazione_legata_al_mandato.md) | La forza dell'identificazione segue il mandato funzionale | ACCETTATO il 2026-11-03 da Enzo Spenuso | La forza dell'identificazione segue il mandato funzionale *(dal titolo)* | 2026-10-31 |
 | [0051](adr/0051_attivita_delegate_lungo_la_catena.md) | Le attività delegate lungo la catena | ACCETTATO il 2026-10-31 da Enzo Spenuso | Le attività delegate lungo la catena *(dal titolo)* | 2026-10-31 |
 | [0052](adr/0052_la_copia_ripristinabile_a_ogni_fine_fase.md) | La copia ripristinabile di advanced a ogni fine fase | ACCETTATO il 2026-11-01 da Enzo Spenuso | La copia ripristinabile di advanced a ogni fine fase *(dal titolo)* | 2026-11-01 |
-| [0053](adr/0053_gli_agenti_agiscono_senza_conferma_una_capacita_alla_volta.md) | Gli agenti agiscono senza conferma anche in produzione, una capacità alla volta | ACCETTATO il 2026-11-03 da Enzo Spenuso | Gli agenti agiscono senza conferma anche in produzione, una capacità alla volta *(dal titolo)* | 2026-11-03 |
+| [0053](adr/0053_gli_agenti_agiscono_senza_conferma_una_capacita_alla_volta.md) | Gli agenti agiscono senza conferma anche in produzione, una capacità alla volta | ACCETTATO il 2026-11-03 da Enzo Spenuso · in parte superato da ADR-0063 | Gli agenti agiscono senza conferma anche in produzione, una capacità alla volta *(dal titolo)* | 2026-11-03 |
 | [0054](adr/0054_heuresys_piattaforma_del_cambiamento_organizzativo.md) | Heuresys è la piattaforma del cambiamento organizzativo, per qualunque impresa | ACCETTATO il 2026-11-03 da Enzo Spenuso | Heuresys è la piattaforma del cambiamento organizzativo, per qualunque impresa *(dal titolo)* | 2026-11-03 |
 | [0055](adr/0055_la_piattaforma_concede_ruoli_nel_cliente_con_un_motivo.md) | La piattaforma concede ruoli dentro un cliente solo con un motivo scritto | ACCETTATO il 2026-11-06 da Enzo Spenuso, alle 01:22 UTC | La piattaforma concede ruoli dentro un cliente solo con un motivo scritto *(dal titolo)* | 2026-11-06 |
 | [0056](adr/0056_i_principi_agentici_dottrina_comune_degli_agenti.md) | I principi agentici sono la dottrina comune degli agenti di advanced e del datastore | ACCETTATO il 2026-11-06 da Enzo Spenuso, alle 04:00 UTC | I principi agentici sono la dottrina comune degli agenti di advanced e del datastore *(dal titolo)* | 2026-11-06 (proposto e accettato lo stesso giorno) |
@@ -67,6 +67,7 @@
 | [0060](adr/0060_le_applet_dell_assistente.md) | Le applet dell'assistente: il lavoro che l'assistente costruisce e svolge, entro i permessi di chi lo chiede | ACCETTATO il 2026-11-18 da Enzo Spenuso, alle 15:50 UTC | Le applet dell'assistente: il lavoro che l'assistente costruisce e svolge, entro i permessi di chi lo chiede *(dal titolo)* | 2026-11-18 |
 | [0061](adr/0061_tassonomia_e_metamodel_dei_processi.md) | Tassonomia multidimensionale e metamodel dei processi | ACCETTATO il 2026-11-22 da Enzo Spenuso, alle 03:21 UTC | Tassonomia multidimensionale e metamodel dei processi *(dal titolo)* | 2026-11-22 |
 | [0062](adr/0062_traduzione_del_dato_nella_risposta.md) | Traduzione del dato nella risposta dell'API | PROPOSTO il 2026-11-26 | Traduzione del dato nella risposta dell'API *(dal titolo)* | 2026-11-26 |
+| [0063](adr/0063_heuresys_ai_driven_l_organizzazione_ghost.md) | Heuresys è AI-driven: un'organizzazione ghost di agenti lavora con le persone del tenant | ACCETTATO il 2026-11-26 da Enzo Spenuso | Heuresys è AI-driven: un'organizzazione ghost di agenti lavora con le persone del tenant *(dal titolo)* | 2026-11-26 |
 
 Numeri mai usati (nessun file, nessuna decisione): 0019, 0022, 0058.
 

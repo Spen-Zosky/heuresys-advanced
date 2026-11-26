@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { ISTRUZIONI_ASSISTENTE, istruzioniAssistente } from "../src/istruzioni.js";
+import { ISTRUZIONI_ASSISTENTE, istruzioniAssistente, rigaLingua } from "../src/istruzioni.js";
 import { MESSAGGIO_NON_AUTORIZZATO, MESSAGGIO_NON_AUTORIZZATO_EN, EsitiLetture } from "../src/omissis.js";
 
 describe("la lingua dell'assistente segue quella della pagina", () => {
@@ -18,5 +18,11 @@ describe("la lingua dell'assistente segue quella della pagina", () => {
     e.negata();
     expect(e.rifiuto()).toBe(MESSAGGIO_NON_AUTORIZZATO);
     expect(e.rifiuto("en")).toBe(MESSAGGIO_NON_AUTORIZZATO_EN);
+  });
+
+  it("ogni domanda porta la sua lingua, anche dopo un cambio a metà conversazione", () => {
+    expect(rigaLingua("en")).toContain("INGLESE");
+    expect(rigaLingua("it")).toContain("ITALIANO");
+    expect(istruzioniAssistente("en").startsWith("LINGUA DELLA PAGINA: INGLESE")).toBe(true);
   });
 });

@@ -467,7 +467,7 @@ export function useAgentStream(opzioni: OpzioniAgentStream = {}): UseAgentStream
         abortRef.current = null;
       }
     },
-    [running, handleSseBlock, conversationId, pushLine],
+    [running, handleSseBlock, conversationId, pushLine, lingua],
   );
 
   const stop = useCallback(() => {

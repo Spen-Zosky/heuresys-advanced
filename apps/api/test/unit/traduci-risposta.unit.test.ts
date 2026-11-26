@@ -3,7 +3,7 @@
  * La prova sul database vero è in test/traduci-risposta.integration.test.ts.
  */
 import { describe, it, expect } from "vitest";
-import { traduciValore } from "../../src/lib/i18n/traduci-risposta.js";
+import { traduciValore, rovescia, riceveRitorno } from "../../src/lib/i18n/traduci-risposta.js";
 
 const g = new Map([
   ["Gestione del rischio", "Risk management"],
@@ -39,5 +39,44 @@ describe("traduciValore", () => {
     const d = new Date(0);
     const v = { d, n: 3, z: null, b: true };
     expect(traduciValore(v, g)).toBe(v);
+  });
+});
+
+describe("rovescia", () => {
+  it("rovescia le traduzioni che vengono da un testo italiano solo", () => {
+    const r = rovescia(new Map([["Finanza", "Finance"], ["Finanze", "Finance"], ["Gestione del rischio", "Risk management"]]));
+    expect([...r.entries()]).toEqual([["Risk management", "Gestione del rischio"]]);
+  });
+
+  it("le chiavi di segreti non si toccano", () => {
+    const v = { password: "Finance", resetToken: "Finance", label: "Finance" };
+    expect(traduciValore(v, rovescia(g))).toEqual({ ...v, label: "Finanza" });
+  });
+
+  it("un'ambiguità resta com'è e ogni sostituzione si conta", () => {
+    const inv = rovescia(new Map([["Finanza", "Finance"], ["Finanze", "Finance"], ["Gestione del rischio", "Risk management"]]));
+    const tracce: string[] = [];
+    const r = traduciValore({ a: "Finance", b: ["Risk management"], c: "A new English text" }, inv, 0, tracce);
+    expect(r).toEqual({ a: "Finance", b: ["Gestione del rischio"], c: "A new English text" });
+    expect(tracce).toEqual(["Risk management"]);
+  });
+
+  it("una chiave __proto__ nel corpo non cambia il prototipo della copia", () => {
+    const corpo = JSON.parse('{"__proto__": {"name": "Finance"}, "label": "Finance"}') as Record<string, unknown>;
+    const r = traduciValore(corpo, rovescia(g)) as Record<string, unknown>;
+    expect(Object.getPrototypeOf(r)).toBe(Object.prototype);
+    expect(r.label).toBe("Finanza");
+  });
+});
+
+describe("riceveRitorno", () => {
+  it("solo le scritture /v1/* fuori dall'accesso ricevono il ritorno", () => {
+    expect(riceveRitorno("/v1/skills/:id", "PATCH")).toBe(true);
+    expect(riceveRitorno("/v1/positions", ["POST", "PUT"])).toBe(true);
+    expect(riceveRitorno("/v1/skills/:id", "GET")).toBe(false);
+    expect(riceveRitorno("/v1/auth/login", "POST")).toBe(false);
+    expect(riceveRitorno("/v1/auth/agent-tokens", "POST")).toBe(false);
+    expect(riceveRitorno("/v1/auth", "POST")).toBe(false);
+    expect(riceveRitorno("/healthz", "POST")).toBe(false);
   });
 });

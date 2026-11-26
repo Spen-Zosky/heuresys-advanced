@@ -17,18 +17,26 @@
  *     i rami che cambiano;
  *   - non guarda le chiavi che portano identificativi o codici (`id`, `…Id`, `code`, `…Code`,
  *     `email`, `slug`, `url`), così un valore usato come chiave non cambia;
- *   - `x-localize: off` lo spegne per una richiesta: serve ai moduli di modifica, che devono
- *     precompilare il testo canonico italiano e non la traduzione.
+ *   - `x-localize: off` lo spegne per una richiesta.
+ * Il ritorno (passo 5 di ADR-0062): un modulo di modifica in una pagina inglese si precompila
+ * con il testo inglese e, salvando, lo rimanderebbe al posto dell'italiano canonico. Un secondo
+ * hook, sulle scritture `/v1/*` in inglese, riporta all'italiano ogni stringa del corpo uguale a
+ * una traduzione del glossario, solo quando quella traduzione viene da un testo italiano solo;
+ * un testo nuovo scritto dalla persona passa com'è. Vale per tutti i moduli, come l'andata.
  * I nomi delle persone non sono in nessun campo registrato, quindi non si traducono.
  */
 
-import type { FastifyInstance } from "fastify";
+import type { FastifyInstance, preValidationHookHandler } from "fastify";
 import type { Pool } from "pg";
 
 export type Glossario = ReadonlyMap<string, string>;
 
 const IDENT = /^[a-z_][a-z0-9_]*$/;
-const CHIAVE_ESCLUSA = /^(id|ids|code|codes|email|slug|url|href|locale)$|(Id|Ids|Code|Codes|Email|Url|Href|Slug)$/;
+const CHIAVE_ESCLUSA =
+  /^(id|ids|code|codes|email|slug|url|href|locale|password|token|secret|otp)$|(Id|Ids|Code|Codes|Email|Url|Href|Slug|Password|Token|Secret|Otp)$/;
+const SCRITTURE = new Set(["POST", "PATCH", "PUT"]);
+// Il corpo di una scrittura arriva dalla persona: le chiavi del prototipo non si traducono.
+const CHIAVE_PROTOTIPO = new Set(["__proto__", "constructor", "prototype"]);
 const LUNGHEZZA_MIN = 2;
 const DURATA_MS = 5 * 60 * 1000;
 
@@ -89,14 +97,19 @@ export async function costruisciGlossario(db: Pick<Pool, "query">): Promise<Map<
  * Restituisce il valore con le stringhe tradotte. Lo stesso riferimento se niente cambia,
  * altrimenti una copia dei soli rami toccati.
  */
-export function traduciValore(valore: unknown, g: Glossario, profondita = 0): unknown {
-  if (typeof valore === "string") return g.get(valore) ?? valore;
+export function traduciValore(valore: unknown, g: Glossario, profondita = 0, sostituite?: string[]): unknown {
+  if (typeof valore === "string") {
+    const t = g.get(valore);
+    if (t === undefined) return valore;
+    sostituite?.push(valore);
+    return t;
+  }
   if (valore === null || typeof valore !== "object" || profondita > 40) return valore;
   if (valore instanceof Date || Buffer.isBuffer(valore)) return valore;
   if (Array.isArray(valore)) {
     let copia: unknown[] | null = null;
     for (let i = 0; i < valore.length; i++) {
-      const v = traduciValore(valore[i], g, profondita + 1);
+      const v = traduciValore(valore[i], g, profondita + 1, sostituite);
       if (v !== valore[i]) {
         copia ??= valore.slice();
         copia[i] = v;
@@ -106,16 +119,31 @@ export function traduciValore(valore: unknown, g: Glossario, profondita = 0): un
   }
   const proto = Object.getPrototypeOf(valore);
   if (proto !== Object.prototype && proto !== null) return valore;
-  let copia: Record<string, unknown> | null = null;
-  for (const [k, v0] of Object.entries(valore as Record<string, unknown>)) {
-    if (CHIAVE_ESCLUSA.test(k)) continue;
-    const v = traduciValore(v0, g, profondita + 1);
-    if (v !== v0) {
-      copia ??= { ...(valore as Record<string, unknown>) };
-      copia[k] = v;
-    }
+  // La copia si ricostruisce con Object.fromEntries, che crea proprietà proprie: nessuna chiave
+  // del corpo (nemmeno `__proto__`) può cambiare il prototipo della copia.
+  let cambiato = false;
+  const voci = Object.entries(valore as Record<string, unknown>).map(([k, v0]): [string, unknown] => {
+    if (CHIAVE_ESCLUSA.test(k) || CHIAVE_PROTOTIPO.has(k)) return [k, v0];
+    const v = traduciValore(v0, g, profondita + 1, sostituite);
+    if (v !== v0) cambiato = true;
+    return [k, v];
+  });
+  return cambiato ? Object.fromEntries(voci) : valore;
+}
+
+/**
+ * Il glossario rovesciato, inglese → italiano, per le scritture. Una traduzione che viene da più
+ * testi italiani diversi non si rovescia: non si saprebbe quale rimettere.
+ */
+export function rovescia(g: Glossario): Map<string, string> {
+  const inverso = new Map<string, string>();
+  const doppi = new Set<string>();
+  for (const [it, en] of g) {
+    if (inverso.has(en) && inverso.get(en) !== it) doppi.add(en);
+    else inverso.set(en, it);
   }
-  return copia ?? valore;
+  for (const en of doppi) inverso.delete(en);
+  return inverso;
 }
 
 /**
@@ -125,12 +153,14 @@ export function traduciValore(valore: unknown, g: Glossario, profondita = 0): un
  */
 export function cacheGlossario(db: Pick<Pool, "query">, durataMs = DURATA_MS) {
   let valore: Glossario | null = null;
+  let inverso: Glossario | null = null;
   let scade = 0;
   let inVolo: Promise<Glossario | null> | null = null;
   function rinfresca(): Promise<Glossario | null> {
     inVolo ??= costruisciGlossario(db)
       .then((g) => {
         valore = g;
+        inverso = rovescia(g);
         scade = Date.now() + durataMs;
         return g;
       })
@@ -148,7 +178,11 @@ export function cacheGlossario(db: Pick<Pool, "query">, durataMs = DURATA_MS) {
     if (Date.now() >= scade) void rinfresca();
     return valore;
   }
-  return { attuale, rinfresca };
+  function attualeInverso(): Glossario | null {
+    if (Date.now() >= scade) void rinfresca();
+    return inverso;
+  }
+  return { attuale, attualeInverso, rinfresca };
 }
 
 export function addTraduzioneRisposta(app: FastifyInstance, db: Pick<Pool, "query">): void {
@@ -183,4 +217,42 @@ export function addTraduzioneRisposta(app: FastifyInstance, db: Pick<Pool, "quer
     }
     done(null, uscita);
   });
+  // Il ritorno: il corpo di una scrittura in inglese torna all'italiano canonico prima della
+  // validazione. Sincrono come l'andata; senza glossario il corpo passa com'è.
+  // Non è un hook globale: si aggancia rotta per rotta, alla registrazione, alle sole scritture
+  // `/v1/*` fuori da `/v1/auth/`. Le rotte di accesso (credenziali, secondo fattore) non lo
+  // ricevono proprio, invece di saltarlo a runtime: il loro corpo non passa mai di qui.
+  const ritorno: preValidationHookHandler = (req, _reply, done) => {
+    if (req.locale !== "en" || req.headers["x-localize"] === "off" || req.body === null || typeof req.body !== "object") {
+      done();
+      return;
+    }
+    try {
+      const g = glossario.attualeInverso();
+      if (g && g.size > 0) {
+        const sostituite: string[] = [];
+        req.body = traduciValore(req.body, g, 0, sostituite);
+        // La traccia di ogni ritorno: quali testi inglesi sono tornati all'italiano, e dove.
+        if (sostituite.length > 0) {
+          req.log.info({ ritornoItaliano: sostituite, url: req.url, method: req.method }, "ADR-0062: testi inglesi riportati all'italiano canonico");
+        }
+      }
+    } catch {
+      // la traduzione non rompe mai una scrittura
+    }
+    done();
+  };
+  app.addHook("onRoute", (r) => {
+    if (!riceveRitorno(r.url, r.method)) return;
+    const prima = r.preValidation === undefined ? [] : Array.isArray(r.preValidation) ? r.preValidation : [r.preValidation];
+    r.preValidation = [ritorno, ...prima];
+  });
+}
+
+/** Quali rotte ricevono il ritorno: le scritture `/v1/*`, mai quelle di accesso. */
+export function riceveRitorno(url: string, metodo: string | readonly string[]): boolean {
+  const metodi = typeof metodo === "string" ? [metodo] : metodo;
+  if (!metodi.some((m) => SCRITTURE.has(m))) return false;
+  if (!url.startsWith("/v1/")) return false;
+  return !(url === "/v1/auth" || url.startsWith("/v1/auth/"));
 }

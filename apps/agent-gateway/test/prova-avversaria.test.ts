@@ -48,7 +48,8 @@ function gate(approve = vi.fn(async () => false), extra: Parameters<typeof makeC
     audit,
     persone: { conta: () => 0, livello: () => "silenzioso" },
     principal: { principal: "user", subject: PERSONA, tenant: "RTL_BANK", conversationId: "c-1" },
-    capacita: { registro: liberaTutto, agentCode: "assistente-hr" },
+    // Il caso peggiore: il meccanismo di ADR-0053 acceso (ADR-0063 D4 lo spegne in servizio).
+    capacita: { registro: liberaTutto, agentCode: "assistente-hr", liberaAccesa: true },
     ...extra,
   });
   return { canUseTool, approve, audit };

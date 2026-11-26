@@ -167,7 +167,17 @@ export interface GateOptions {
    * non lo montano. Il contatore del tetto di volume nasce dentro `makeCanUseTool`, una volta per
    * conversazione.
    */
-  capacita?: { registro: RegistroCapacita; agentCode: string };
+  capacita?: {
+    registro: RegistroCapacita;
+    agentCode: string;
+    /**
+     * ADR-0063 D4: il modo `LIBERA` è spento. Una capacità che il registro dichiarasse libera torna
+     * comunque davanti alla persona, e il diario lo dice (`LIBERA_SPENTA`). Solo le prove del
+     * meccanismo di ADR-0053 passano `true`; il server non lo passa mai, e una prova lo controlla
+     * (`test/libera-spenta.test.ts`).
+     */
+    liberaAccesa?: boolean;
+  };
 }
 
 const DENY_NOT_APPROVED = "write not approved (compliance gate)";
@@ -411,6 +421,7 @@ export function makeCanUseTool(approve: ApproveFn, opts: GateOptions = {}) {
     //     Qualunque dubbio (registro assente o guasto, operazione non risolta, tenant ignoto) porta
     //     al ponte qui sotto, cioè a una persona: mai a un'esecuzione e mai a un diniego nuovo.
     let oltreIlTetto: { code: string; version: number } | undefined;
+    let spenta: { code: string; version: number } | undefined;
     // Una scrittura autonoma deve poter dire per conto di chi e in quale giro (ADR-0053 A2): senza
     // persona o senza conversazione la capacità non si legge nemmeno, e la scrittura va al ponte.
     if (classeAz === "B" && opts.capacita && who.tenant && perContoDi && who.conversationId) {
@@ -423,7 +434,10 @@ export function makeCanUseTool(approve: ApproveFn, opts: GateOptions = {}) {
           libera = undefined;
         }
       }
-      if (libera) {
+      if (libera && opts.capacita.liberaAccesa !== true) {
+        // ADR-0063 D4: il registro dice LIBERA, ma il modo è spento. Si chiede alla persona.
+        spenta = { code: libera.code, version: libera.version };
+      } else if (libera) {
         const capability = { code: libera.code, version: libera.version };
         if (volume.prenota(libera)) {
           const d: ToolDecision = { behavior: "allow", updatedInput: input as Record<string, unknown> };
@@ -460,13 +474,18 @@ export function makeCanUseTool(approve: ApproveFn, opts: GateOptions = {}) {
       ? { behavior: "allow", updatedInput: input as Record<string, unknown> }
       : { behavior: "deny", message: DENY_NOT_APPROVED };
     const ragione = approved ? "WRITE_HUMAN_APPROVED" : "WRITE_DENIED_OR_TIMEOUT";
+    const conCapacita = oltreIlTetto ?? spenta;
     auditDecision(
       name, input, d,
-      oltreIlTetto ? `${ragione} OVER_VOLUME_CAP ${oltreIlTetto.code}@${oltreIlTetto.version}` : ragione,
+      oltreIlTetto
+        ? `${ragione} OVER_VOLUME_CAP ${oltreIlTetto.code}@${oltreIlTetto.version}`
+        : spenta
+          ? `${ragione} LIBERA_SPENTA ${spenta.code}@${spenta.version}`
+          : ragione,
       {
         outcome: approved ? "allow-write" : "deny",
         actionClass: classeAz,
-        ...(oltreIlTetto ? { capability: oltreIlTetto } : {}),
+        ...(conCapacita ? { capability: conCapacita } : {}),
       },
     );
     return d;

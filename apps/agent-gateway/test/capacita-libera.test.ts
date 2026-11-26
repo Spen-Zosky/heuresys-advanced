@@ -41,7 +41,8 @@ function gate(
     audit,
     persone: { conta: () => 0, livello: () => "silenzioso" },
     principal: { ...principal, ...(tenant ? { tenant } : {}) },
-    ...(reg ? { capacita: { registro: reg, agentCode: "assistente-hr" } } : {}),
+    // Queste prove esercitano il meccanismo di ADR-0053, che ADR-0063 D4 spegne in servizio.
+    ...(reg ? { capacita: { registro: reg, agentCode: "assistente-hr", liberaAccesa: true } } : {}),
   });
   return { canUseTool, approve, audit };
 }

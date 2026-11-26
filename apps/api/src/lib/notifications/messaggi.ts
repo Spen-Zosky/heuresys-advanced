@@ -13,7 +13,7 @@
  */
 
 export interface MessaggioAvviso {
-  code: "APPROVAL_REMINDER" | "APPROVAL_OVERDUE" | "GAP_CLOSURE_DUE";
+  code: "APPROVAL_REMINDER" | "APPROVAL_OVERDUE" | "GAP_CLOSURE_DUE" | "AGENT_WEEKLY_SUMMARY";
   params: Record<string, string | number>;
 }
 
@@ -50,6 +50,19 @@ export function testoGapCompetenze(segmento: string): { subject: string; body: s
   };
 }
 
+const PREFISSO_RIEPILOGO = "Riepilogo settimanale dell'assistente: ";
+const RIEPILOGO_CORPO = /^Dal (\d{4}-\d{2}-\d{2}) al (\d{4}-\d{2}-\d{2}): (\d+) scritture confermate, (\d+) negate, (\d+) eseguite senza conferma\.$/;
+
+/** ADR-0063 D3 (E5): il riepilogo settimanale delle scritture fatte con l'assistente, per la piattaforma. */
+export function testoRiepilogoAgente(
+  dal: string, al: string, confermate: number, negate: number, autonome: number,
+): { subject: string; body: string } {
+  return {
+    subject: `${PREFISSO_RIEPILOGO}${dal}`,
+    body: `Dal ${dal} al ${al}: ${confermate} scritture confermate, ${negate} negate, ${autonome} eseguite senza conferma.`,
+  };
+}
+
 /** Il significato strutturato di un avviso salvato, o null se non e' uno di quelli che l'API scrive da se'. */
 export function messaggioDellAvviso(type: string, subject: string, body: string | null): MessaggioAvviso | null {
   if (type === "APPROVAL_REMINDER" && subject.startsWith(PREFISSO_PROMEMORIA) && body === CORPO_PROMEMORIA) {
@@ -61,6 +74,16 @@ export function messaggioDellAvviso(type: string, subject: string, body: string 
       return {
         code: "APPROVAL_OVERDUE",
         params: { title: subject.slice(PREFISSO_SCADENZA.length), cycles: Number(m[1]) },
+      };
+    }
+    return null;
+  }
+  if (type === "SYSTEM" && subject.startsWith(PREFISSO_RIEPILOGO) && body !== null) {
+    const m = RIEPILOGO_CORPO.exec(body);
+    if (m) {
+      return {
+        code: "AGENT_WEEKLY_SUMMARY",
+        params: { from: m[1]!, to: m[2]!, confirmed: Number(m[3]), denied: Number(m[4]), autonomous: Number(m[5]) },
       };
     }
     return null;

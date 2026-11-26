@@ -753,7 +753,7 @@ export const MeInboxNotificationSchema = z.object({
    */
   message: z
     .object({
-      code: z.enum(["APPROVAL_REMINDER", "APPROVAL_OVERDUE", "GAP_CLOSURE_DUE"]),
+      code: z.enum(["APPROVAL_REMINDER", "APPROVAL_OVERDUE", "GAP_CLOSURE_DUE", "AGENT_WEEKLY_SUMMARY"]),
       params: z.record(z.string(), z.union([z.string(), z.number()])),
     })
     .nullable(),

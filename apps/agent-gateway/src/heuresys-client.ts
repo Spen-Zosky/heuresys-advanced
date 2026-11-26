@@ -59,6 +59,12 @@ export interface HeuresysClientOptions {
    * È contesto, non identità: chi agisce resta la persona del cookie.
    */
   agente?: string;
+  /**
+   * La lingua della pagina da cui arriva la domanda, dichiarata all'API in `x-locale`: i testi dei
+   * campi registrati tornano nella stessa lingua della pagina (ADR-0062), e l'assistente non
+   * mostra in italiano un nome che la persona vede in inglese.
+   */
+  lingua?: "it" | "en";
 }
 
 /**
@@ -75,6 +81,7 @@ export class HeuresysClient {
   private session: Session;
   private readonly fetchImpl: FetchLike;
   private readonly superficie: string;
+  private readonly lingua: "it" | "en" | undefined;
   private refreshing: Promise<boolean> | null = null;
   private contatore: OsservatoreRisposte | undefined;
 
@@ -83,6 +90,7 @@ export class HeuresysClient {
     this.session = opts.session;
     this.fetchImpl = opts.fetchImpl ?? (globalThis.fetch as unknown as FetchLike);
     this.superficie = `agente:${opts.agente ?? "assistente-hr"}`;
+    this.lingua = opts.lingua;
   }
 
   private headers(method: string): Record<string, string> {
@@ -91,6 +99,7 @@ export class HeuresysClient {
       cookie: `hrx_access=${this.session.cookieAccess}; hrx_csrf=${this.session.cookieCsrf}`,
       "x-heuresys-superficie": this.superficie,
     };
+    if (this.lingua) h["x-locale"] = this.lingua;
     if (!SAFE_METHODS.has(method)) h["x-csrf-token"] = this.session.csrf; // CSRF on writes only
     return h;
   }

@@ -46,7 +46,7 @@ Ordine proposto: F0 subito; F1 e F2 in parallelo dopo F0-1; F3 dopo F0-2 e F6-1;
 
 | id | cosa | modello e sforzo | fatto quando | serve Enzo | stato |
 |---|---|---|---|---|---|
-| F0-1 | ADR del posizionamento (numero dopo lo 0053): change management al centro, modellazione organizzativa di ogni impresa, primi clienti, confini; riscrive `docs/product/README.md` e marca come storico il PRD di giugno | Opus, alto | ADR accettato da questo thread per delega, indice degli ADR aggiornato, PR unita | no | da fare |
+| F0-1 | ADR del posizionamento (numero dopo lo 0053): change management al centro, modellazione organizzativa di ogni impresa, primi clienti, confini; riscrive `docs/product/README.md` e marca come storico il PRD di giugno | Opus, alto | ADR accettato da questo thread per delega, indice degli ADR aggiornato, PR unita | no | fatta: ADR-0054 ACCETTATO il 2026-11-03 da Enzo, PR #156 unita il 2026-11-03 |
 | F0-2 | ADR-0053, agenti liberi in produzione per capacità | Opus per la stesura; Fable per l'ultima revisione prima dell'accettazione | già avviato: PR #155 in bozza, thread «Liberare gli agenti IA in produzione»; deve contenere le due condizioni della scheda del 3/11 (informativa, ritorno provato) e la regola «una capacità alla volta» | accettazione dell'ADR | avviato |
 | F0-3 | Il test del valore come misura: una tabella di eventi d'uso e decisione (chi, quale pagina o agente, quale decisione, quando) e la definizione unica di «decisione tracciabile»; senza pagina, solo registro e query | Opus per il disegno, Sonnet per migrazione e API; medio | una query restituisce, per tenant e per settimana, le decisioni tracciabili; prova rossa prima e verde dopo; dimostrazione su RTL | frase per leggere in produzione | da fare · assorbita in F8 del piano Heuresys AI-driven (riesame Z4 del 2026-11-26, `docs/piani/ai-driven_20261126/RIESAME_programmi.md`); questa riga resta la fonte del dettaglio |
 
@@ -93,7 +93,7 @@ Voci del piano interfacce anticipate, scelte perché un Direttore HR o un capo d
 
 | id | cosa | modello e sforzo | fatto quando | stato |
 |---|---|---|---|---|
-| F5-1 | Misura: quante voci hanno in comune il prototipo bancario e quello metalmeccanico, per gruppo (unità, posizioni, processi, competenze) | Haiku, basso | tabella misurata nel datastore, con il comando che la produce | da fare |
+| F5-1 | Misura: quante voci hanno in comune il prototipo bancario e quello metalmeccanico, per gruppo (unità, posizioni, processi, competenze) | Haiku, basso | tabella misurata nel datastore, con il comando che la produce | fatta: PR #23 del datastore unita il 2026-11-03 (`scripts/misura_voci_comuni_settori.py`, `esecuzione/_misure/F5_1_VOCI_COMUNI_20261103.md`) |
 | F5-2 | Separare nel datastore il modello comune a ogni impresa dalle parti di settore, sulla base di F5-1 | Opus per il disegno, Sonnet per l'attuazione; alto | un prototipo per un settore mai visto parte dal modello comune e passa il contratto v0.3 | da fare |
 | F5-3 | Il prototipo metalmeccanico consegnato ad advanced su una copia (zona libera), materializzato in un tenant di prova e consolidato | Sonnet, medio | il tenant di prova esiste solo sulla copia; nessun terzo tenant in produzione senza un ADR che cambi I15 | da fare |
 

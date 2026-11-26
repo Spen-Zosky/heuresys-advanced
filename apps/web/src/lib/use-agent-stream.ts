@@ -28,6 +28,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { AgentConversationSummary } from "@heuresys/shared/schemas/agent-conversations";
 import { csrfStore } from "./api/csrf-store";
 import { MAX_RIGA, domandaDaPrompt, righeDaMessaggio } from "./agente/risposta";
@@ -275,6 +276,9 @@ export function parsePageCommand(data: string): { commandId: string; nome: strin
 }
 
 export function useAgentStream(opzioni: OpzioniAgentStream = {}): UseAgentStream {
+  // La lingua della pagina viaggia con la domanda: l'assistente risponde in quella (ADR-0062).
+  const { i18n } = useTranslation();
+  const lingua = i18n.language?.startsWith("en") ? "en" : "it";
   const comandoRef = useRef(opzioni.onPageCommand);
   useEffect(() => {
     comandoRef.current = opzioni.onPageCommand;
@@ -413,7 +417,7 @@ export function useAgentStream(opzioni: OpzioniAgentStream = {}): UseAgentStream
           method: "POST",
           headers: { "content-type": "application/json" },
           credentials: "include", // inoltra i cookie hrx_access / hrx_csrf al gateway
-          body: JSON.stringify({ prompt, ...(conversationId ? { conversationId } : {}), ...(pagina ? { pagina } : {}) }),
+          body: JSON.stringify({ prompt, lingua, ...(conversationId ? { conversationId } : {}), ...(pagina ? { pagina } : {}) }),
           signal: controller.signal,
         });
 

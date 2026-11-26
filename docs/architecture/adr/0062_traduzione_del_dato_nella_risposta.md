@@ -1,6 +1,6 @@
 # ADR-0062 — Traduzione del dato nella risposta dell'API
 
-- **Status**: PROPOSTO il 2026-11-26 (raccomandazione portata al coordinatore del progetto; in vigore come estensione tecnica di ADR-0029 finché Enzo non sceglie diversamente)
+- **Status**: ACCETTATO il 2026-11-26 da Enzo Spenuso, che ha risposto «sì» alla domanda «Lo segno ACCETTATO?» del coordinatore del progetto (alle 14:27 UTC, 15:27 ora di Roma); proposto lo stesso giorno, già in codice e in produzione con le PR #498 e #513
 - **Date**: 2026-11-26
 - **Redatto da**: Claude Code, thread «Tradurre i dati nelle pagine in inglese»
 - **Richiesta**: Enzo Spenuso, regola delle lingue: ogni pagina è interamente nella lingua scelta, l'italiano è la lingua predefinita, un testo nell'altra lingua è un difetto. Voce fuori ciclo X3 del giro di verifica del 24-25/11 (`docs/piani/forense-frontend_20261123/RAPPORTO_giro-verifica-25-11.md`)

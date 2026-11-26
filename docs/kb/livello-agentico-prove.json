@@ -1,0 +1,10 @@
+{
+  "_nota": "Le prove dal vivo dei sette criteri di ADR-0063 D1: un criterio è VERDE solo con la misura sopra soglia e almeno una prova qui. Una prova porta data, comando o persona, esito e il riferimento dove è descritta. Le scrive chi chiude la voce, nello stesso commit. Letto da docs/kb/tools/misura_livello_agentico.py.",
+  "1": [
+    {
+      "data": "2026-11-26",
+      "prova": "Valentina Conti (HRMS_MANAGER) su /admin/catalogo-kpi chiede all'assistente di cambiare la descrizione del KPI TJB-M003: la conferma compare, Nega, dato invariato",
+      "riferimento": "docs/piani/PIANO_heuresys-ai-driven_20261126.md, voce F1"
+    }
+  ]
+}

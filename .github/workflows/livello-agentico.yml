@@ -1,0 +1,76 @@
+name: Livello agentico (la misura non scende)
+
+# Piano Heuresys AI-driven, voce M1 (ADR-0063 D1): il livello agentico di ciascuno dei dodici assi
+# si misura da un comando e non scende sotto il minimo registrato in
+# docs/kb/livello-agentico-baseline.json. Togliere una voce dal catalogo dell'agente, una classe
+# delle scritture o un segno dal codice rende rossa la PR. Il minimo sale solo a mano.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/api/src/**"
+      - "apps/agent-gateway/**"
+      - "packages/*/src/**"
+      - "db/migrations/**"
+      - "docs/kb/agent-classi-scritture.json"
+      - "docs/kb/agent-perimetri.json"
+      - "docs/kb/atlas/agent-operations.json"
+      - "docs/kb/livello-agentico-*.json"
+      - "docs/piani/PIANO_heuresys-ai-driven_20261126.md"
+      - "docs/kb/tools/misura_livello_agentico.py"
+      - "docs/kb/tools/check_*_agente.py"
+      - "docs/kb/tools/build_atlas.py"
+      - "docs/kb/tools/build_agent_operations.py"
+      - ".github/workflows/livello-agentico.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/api/src/**"
+      - "apps/agent-gateway/**"
+      - "packages/*/src/**"
+      - "db/migrations/**"
+      - "docs/kb/agent-classi-scritture.json"
+      - "docs/kb/agent-perimetri.json"
+      - "docs/kb/atlas/agent-operations.json"
+      - "docs/kb/livello-agentico-*.json"
+      - "docs/piani/PIANO_heuresys-ai-driven_20261126.md"
+      - "docs/kb/tools/misura_livello_agentico.py"
+      - "docs/kb/tools/check_*_agente.py"
+      - "docs/kb/tools/build_atlas.py"
+      - "docs/kb/tools/build_agent_operations.py"
+      - ".github/workflows/livello-agentico.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+concurrency:
+  group: livello-agentico-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Seconda passata = doppione? Se l'albero e' gia' verde nella PR, su main il job si salta.
+  tree:
+    permissions:
+      contents: read
+      actions: read
+    uses: ./.github/workflows/tree-gia-verificato.yml
+    with:
+      workflow-file: livello-agentico.yml
+  livello-agentico:
+    needs: tree
+    # Come state-lint (D-08): il runner sta sull'host di produzione, niente PR da fork.
+    if: ${{ !cancelled() && needs.tree.outputs.skip != 'true' && ((github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && !contains(github.event.pull_request.labels.*.name, 'defer-major')) }}
+    runs-on: [self-hosted, leggero]
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 1
+
+      - name: La misura sa diventare rossa
+        run: python3 docs/kb/tools/misura_livello_agentico.py --selftest
+
+      - name: Il livello agentico non scende (M1)
+        run: python3 docs/kb/tools/misura_livello_agentico.py

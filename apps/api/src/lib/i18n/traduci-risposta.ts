@@ -95,14 +95,19 @@ export async function costruisciGlossario(db: Pick<Pool, "query">): Promise<Map<
  * Restituisce il valore con le stringhe tradotte. Lo stesso riferimento se niente cambia,
  * altrimenti una copia dei soli rami toccati.
  */
-export function traduciValore(valore: unknown, g: Glossario, profondita = 0): unknown {
-  if (typeof valore === "string") return g.get(valore) ?? valore;
+export function traduciValore(valore: unknown, g: Glossario, profondita = 0, sostituite?: string[]): unknown {
+  if (typeof valore === "string") {
+    const t = g.get(valore);
+    if (t === undefined) return valore;
+    sostituite?.push(valore);
+    return t;
+  }
   if (valore === null || typeof valore !== "object" || profondita > 40) return valore;
   if (valore instanceof Date || Buffer.isBuffer(valore)) return valore;
   if (Array.isArray(valore)) {
     let copia: unknown[] | null = null;
     for (let i = 0; i < valore.length; i++) {
-      const v = traduciValore(valore[i], g, profondita + 1);
+      const v = traduciValore(valore[i], g, profondita + 1, sostituite);
       if (v !== valore[i]) {
         copia ??= valore.slice();
         copia[i] = v;
@@ -115,7 +120,7 @@ export function traduciValore(valore: unknown, g: Glossario, profondita = 0): un
   let copia: Record<string, unknown> | null = null;
   for (const [k, v0] of Object.entries(valore as Record<string, unknown>)) {
     if (CHIAVE_ESCLUSA.test(k)) continue;
-    const v = traduciValore(v0, g, profondita + 1);
+    const v = traduciValore(v0, g, profondita + 1, sostituite);
     if (v !== v0) {
       copia ??= { ...(valore as Record<string, unknown>) };
       copia[k] = v;
@@ -227,7 +232,14 @@ export function addTraduzioneRisposta(app: FastifyInstance, db: Pick<Pool, "quer
     }
     try {
       const g = glossario.attualeInverso();
-      if (g && g.size > 0) req.body = traduciValore(req.body, g);
+      if (g && g.size > 0) {
+        const sostituite: string[] = [];
+        req.body = traduciValore(req.body, g, 0, sostituite);
+        // La traccia di ogni ritorno: quali testi inglesi sono tornati all'italiano, e dove.
+        if (sostituite.length > 0) {
+          req.log.info({ ritornoItaliano: sostituite, url: req.url, method: req.method }, "ADR-0062: testi inglesi riportati all'italiano canonico");
+        }
+      }
     } catch {
       // la traduzione non rompe mai una scrittura
     }

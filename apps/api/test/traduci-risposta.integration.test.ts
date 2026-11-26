@@ -65,7 +65,7 @@ describe("traduzione del dato nella risposta", () => {
   });
 
   it("in inglese una scrittura riporta la traduzione all'italiano canonico; il resto passa com'è", async () => {
-    const corpo = { name: enR, id: enR, note: "Testo nuovo scritto dalla persona", n: 3 };
+    const corpo = { name: enR, id: enR, title: "A brand new English title written on purpose", note: "Testo nuovo scritto dalla persona", n: 3 };
     const en = await app.inject({ method: "PATCH", url: "/v1/eco", cookies: { NEXT_LOCALE: "en" }, payload: corpo });
     expect(en.json()).toEqual({ ...corpo, name: itR });
     const ita = await app.inject({ method: "PATCH", url: "/v1/eco", cookies: { NEXT_LOCALE: "it" }, payload: corpo });

@@ -52,4 +52,12 @@ describe("rovescia", () => {
     const v = { password: "Finance", resetToken: "Finance", label: "Finance" };
     expect(traduciValore(v, rovescia(g))).toEqual({ ...v, label: "Finanza" });
   });
+
+  it("un'ambiguità resta com'è e ogni sostituzione si conta", () => {
+    const inv = rovescia(new Map([["Finanza", "Finance"], ["Finanze", "Finance"], ["Gestione del rischio", "Risk management"]]));
+    const tracce: string[] = [];
+    const r = traduciValore({ a: "Finance", b: ["Risk management"], c: "A new English text" }, inv, 0, tracce);
+    expect(r).toEqual({ a: "Finance", b: ["Gestione del rischio"], c: "A new English text" });
+    expect(tracce).toEqual(["Risk management"]);
+  });
 });

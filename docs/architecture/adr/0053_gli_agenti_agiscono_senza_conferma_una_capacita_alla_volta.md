@@ -1,6 +1,7 @@
 # ADR-0053 — Gli agenti agiscono senza conferma anche in produzione, una capacità alla volta
 
 - **Status**: ACCETTATO il 2026-11-03 da Enzo Spenuso (alle 14:20 UTC, 15:20 ora di Roma, nel thread «Liberare gli agenti IA in produzione»: «Sì, accetto»). L'attuazione procede per capacità, nell'ordine di §2 D6 e §3.
+- **Superseded in part by**: ADR-0063 D4, del 2026-11-26, nell'uso e non nel meccanismo: nessuna capacità si attiva in modo `LIBERA` finché Enzo non lo decide con una decisione nuova; il registro delle capacità e il modo `CONFERMA` restano.
 - **Date**: 2026-11-03
 - **Redatto da**: Claude Code, thread «Liberare gli agenti IA in produzione»
 - **Decided by**: Enzo Spenuso, 2026-11-03 alle 04:39 ora di Roma, sulla scheda «Dove lasciamo liberi gli agenti per vedere fin dove arrivano?» del thread «Ricostruire la visione completa di Heuresys»: «anche in produzione», cioè agenti che scrivono senza conferma sui dati veri di RTL, con due condizioni previe (informativa ai lavoratori e ritorno provato). Alla base, la sua risposta 5 dello stesso giorno: «prima liberiamo i cavalli della AI per capire fino a dove può arrivare, poi decideremo le regole».

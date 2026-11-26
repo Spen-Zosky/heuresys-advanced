@@ -16,6 +16,10 @@ Perciò: **non sollevare la questione**, né come blocco né come domanda a Enzo
 
 Accesso degli agenti (regola di Enzo del 2026-11-13, vale per gli agenti già creati e per quelli futuri): ogni agente che pensa con Claude (unit systemd, timer, script con `claude -p` o l'Agent SDK) carica il token di lunga durata dell'abbonamento da `~/.config/claude-agenti/token.env` (`CLAUDE_CODE_OAUTH_TOKEN`), non il login interattivo, che scade. Una unit nuova va aggiunta a `~/.claude/tools/token-agenti.unita` e collegata con `bash ~/.claude/tools/token-agenti.sh collega`; uno script fa `. ~/.claude/tools/token-agenti.sh carica`. Il token non si stampa, non si copia e non entra nel repo; Remote Control resta sul login claude.ai. Stato e scadenza: `bash ~/.claude/tools/token-agenti.sh verifica`.
 
+## Heuresys AI-driven: il metro di ogni lavoro
+
+ADR-0063 (accettato da Enzo il 2026-11-26) è l'ADR fondante: Heuresys è AI-driven quando un'organizzazione ghost di agenti (un Capo per ogni divisione e direzione, con la sua squadra di subagenti) lavora con le persone del tenant, ognuna con i suoi permessi, su tutte le funzioni dell'HR manager e sugli scenari what-if. Gli agenti preparano, leggono e segnalano; nessuna scrittura parte senza la conferma della persona collegata che la chiede, e il modo `LIBERA` di ADR-0053 resta spento (D4). Ogni piano, programma o revisione si misura sui dodici assi e sui sette criteri di ADR-0063; il piano di attuazione è `docs/piani/PIANO_heuresys-ai-driven_20261126.md`.
+
 ## Quando un lavoro è finito
 
 Un passo si chiude solo con una dimostrazione dal vivo su dati reali: comando, output, percorso e orario (ADR-0026). Un test verde o un mock che funziona significano «in corso». Per le pagine autenticate la dimostrazione è un login con una persona reale del tenant e l'uso secondo il suo profilo. Se manca un input che solo Enzo può dare, lo stato è `blocked-on-Enzo: <cosa, perché>`. Nessun mock, fixture o endpoint finto nel frontend: ogni dato arriva da una chiamata `/v1/*` reale.

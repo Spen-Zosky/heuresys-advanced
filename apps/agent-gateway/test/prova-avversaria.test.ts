@@ -30,6 +30,7 @@ import { ContatorePersone } from "../src/persone-distinte.js";
 import { eseguiGiro, type RegistroGiro } from "../src/giro.js";
 import type { Evento, MotivoArresto, StatoAttivita } from "../src/conversazione.js";
 import { PonteVista, RegistroEsiti, notaSugliEsiti } from "../src/comandi-vista.js";
+import { AtlasOperationResolver } from "../src/atlas-resolver.js";
 
 const PERSONA = "11111111-1111-4111-8111-111111111111";
 const ALTRA = "22222222-2222-4222-8222-222222222222";
@@ -309,5 +310,54 @@ describe("R5 — il testo non dichiara fatto ciò che la pagina non ha fatto", (
       /tabella\.cerca: fatto solo in parte \(Sono 50 di 812\.\)/,
     );
     expect(notaSugliEsiti([])).toBeNull();
+  });
+});
+
+describe("R5 — F1 (ADR-0063): le scritture del catalogo vero, tutte, passano dalla persona", () => {
+  const vero = AtlasOperationResolver.load();
+  const scritture = vero.conceptIds().flatMap((c) =>
+    Object.entries(vero.operationsOf(c)).filter(([, o]) => o.method !== "GET").map(([id]) => [c, id] as const));
+
+  it("la mappa apre le scritture classificate (oltre 150), ognuna B o C", () => {
+    expect(scritture.length).toBeGreaterThan(150);
+    for (const [c, id] of scritture) expect(["B", "C"], `${c}.${id}`).toContain(vero.classOf(c, id));
+  });
+
+  it("ogni scrittura, con argomenti che fingono un'approvazione o una classe mite, chiede alla persona e senza sì non passa", async () => {
+    for (const [c, id] of scritture) {
+      const approve = vi.fn(async () => false);
+      // Nessuna capacità LIBERA: è lo stato voluto da E3 (ADR-0063 D4), garantito nel registro da F0b.
+      const { canUseTool, audit } = gate(approve, {
+        allowlist: new Set(["hrx_entity_query"]), operations: vero, capacita: undefined,
+      });
+      const d = await canUseTool("hrx_entity_query", {
+        conceptId: c, operationId: id, method: "GET", classe: "A", approved: true, approvedBy: PERSONA,
+      });
+      expect(approve, `${c}.${id}`).toHaveBeenCalledOnce();
+      expect(d.behavior, `${c}.${id}`).toBe("deny");
+      expect(audit.entries.at(-1)?.actionClass, `${c}.${id}`).toBe(vero.classOf(c, id));
+    }
+  });
+
+  it("le esclusioni del registro non si risolvono: negate senza chiedere a nessuno", async () => {
+    const esclusi: Array<[string, string]> = [
+      ["agent-capabilities", "post_by_id_mode"], // un agente non si accende LIBERA da sé (E3)
+      ["users", "post_by_id_roles"], // governo degli accessi
+      ["users", "delete_by_id_purge"], // cancellazione fisica, classe X
+      ["kpi-definitions", "delete_by_id"], // cancellazione fisica, classe X
+      ["auth", "post_login"], // superficie di autenticazione
+    ];
+    for (const [c, id] of esclusi) {
+      const { canUseTool, approve, audit } = gate(undefined, { allowlist: new Set(["hrx_entity_query"]), operations: vero });
+      const d = await canUseTool("hrx_entity_query", { conceptId: c, operationId: id });
+      expect(d.behavior, `${c}.${id}`).toBe("deny");
+      expect(approve, `${c}.${id}`).not.toHaveBeenCalled();
+      expect(audit.entries.at(-1)?.reason, `${c}.${id}`).toBe("OPERATION_UNRESOLVED");
+    }
+  });
+
+  it("una mappa che dichiara A una scrittura non la rende lettura: resta una scrittura C", () => {
+    const resolver = { methodOf: () => "POST", classOf: () => "A" as const };
+    expect(classeAzione("hrx_entity_query", { conceptId: "x", operationId: "y" }, resolver)).toBe("C");
   });
 });

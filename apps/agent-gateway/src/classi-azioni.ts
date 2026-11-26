@@ -23,9 +23,11 @@
  * prudente fra le due ammesse.
  *
  * LO STRUMENTO GENERICO (`hrx_entity_query`) non ha una classe sua: la prende dall'operazione
- * risolta, come già fa il gate per la lettura e la scrittura (ADR-0033 §5.2). GET è A; ogni altra
- * è C, perché la mappa dell'atlante non dice se un'operazione tocca la struttura o una persona,
- * e chi non lo sa sceglie la classe che non diventa mai automatica.
+ * risolta, come già fa il gate per la lettura e la scrittura (ADR-0033 §5.2). Dal 2026-11-26 (F1,
+ * ADR-0063) la classe di ogni scrittura è scritta in `docs/kb/agent-classi-scritture.json` e la
+ * mappa delle operazioni la porta: si usa quella. Due regole fail-closed: una GET è sempre A, e
+ * una scrittura non può mai diventare A, qualunque cosa dica la mappa; se la mappa non porta la
+ * classe, la scrittura è C, la classe che non diventa mai automatica.
  */
 import { bareToolName, isParametricToolName } from "./mcp-tool-names.js";
 
@@ -100,6 +102,8 @@ export const CLASSI_STRUMENTI: Readonly<Record<string, ClasseAzione>> = Object.f
 /** Risolve il metodo HTTP di un'operazione dell'atlante (lo stesso contratto del gate). */
 export interface RisolutoreMetodo {
   methodOf(conceptId: string, operationId: string): string | undefined;
+  /** F1: la classe dichiarata dalla mappa; facoltativa, chi non la dà ripiega sul metodo. */
+  classOf?(conceptId: string, operationId: string): ClasseAzione | undefined;
 }
 
 /**
@@ -117,5 +121,7 @@ export function classeAzione(
   if (typeof a.conceptId !== "string" || typeof a.operationId !== "string" || !resolver) return undefined;
   const metodo = resolver.methodOf(a.conceptId, a.operationId)?.toUpperCase();
   if (!metodo) return undefined;
-  return metodo === "GET" ? "A" : "C";
+  if (metodo === "GET") return "A";
+  const dichiarata = resolver.classOf?.(a.conceptId, a.operationId);
+  return dichiarata === "B" || dichiarata === "C" ? dichiarata : "C";
 }

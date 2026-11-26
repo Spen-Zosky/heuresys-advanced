@@ -17,7 +17,14 @@ IL PERIMETRO E' UN DATO, NON UN LETTERALE. I concetti aperti stanno in
 La dottrina di Enzo (2026-08-16) e' che l'agente vada **ovunque porti valore aggiunto**:
 quell'elenco cresce, e questo strumento non va toccato quando cresce.
 
-FAIL-CLOSED DUE VOLTE:
+LE SCRITTURE, DAL 2026-11-26 (F1, ADR-0063). Ogni scrittura con una classe B o C in
+`docs/kb/agent-classi-scritture.json` entra nel catalogo, su ogni modulo, con la sua classe.
+Il registro e' una decisione scritta riga per riga; `check_copertura_agente.py` lo tiene
+allineato al codice in CI. Con LIBERA spenta (ADR-0063 D4) ogni scrittura, B o C, passa
+dalla conferma della persona collegata. Le esclusioni (accessi, governo degli agenti,
+cancellazioni fisiche...) non escono: non sono filtrate a valle, non esistono nella mappa.
+
+FAIL-CLOSED DUE VOLTE (la storia di prima di F1):
   · le SCRITTURE escono **solo** per cio' che e' dichiarato aperto. Dal 2026-11-05 (#254,
     ADR-0040 §5) le LETTURE escono per ogni modulo, tranne quelli in FUORI_DALLE_LETTURE:
     il perimetro delle letture lo fa l'API, con i permessi della persona senza mandati;
@@ -43,6 +50,9 @@ import sys
 
 ATLAS = os.path.join("docs", "kb", "atlas", "atlas.yaml")
 PERIMETRI = os.path.join("docs", "kb", "agent-perimetri.json")
+# F1 del piano Heuresys AI-driven (ADR-0063): la classe d'azione di ogni scrittura. Una scrittura
+# entra nel catalogo solo se qui ha `classe` B o C; `fuori` e l'assenza la lasciano fuori.
+CLASSI = os.path.join("docs", "kb", "agent-classi-scritture.json")
 USCITA = os.path.join("docs", "kb", "atlas", "agent-operations.json")
 
 # #254 (ADR-0040 §5, piano interfacce L10 A-13): l'agente LEGGE cio' che legge la persona, su
@@ -52,6 +62,9 @@ USCITA = os.path.join("docs", "kb", "atlas", "agent-operations.json")
 DECISIONE_LETTURE = ("ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge "
                      "la persona, senza mandati; le scritture restano dei soli perimetri decisi")
 DATA_LETTURE = "2026-11-05"
+DECISIONE_SCRITTURE = ("ADR-0063 F1 (piano accettato da Enzo il 2026-11-26): le scritture con classe B o C "
+                       "in agent-classi-scritture.json, ognuna con la conferma della persona collegata")
+DATA_SCRITTURE = "2026-11-26"
 # Fuori anche dalle letture, uno per uno con la ragione (mai un jolly):
 FUORI_DALLE_LETTURE = {
     "auth": "superficie di autenticazione: il gettone d'agente non la tocca (L9, A-3)",
@@ -175,6 +188,33 @@ def costruisci(radice="."):
     if not os.path.isfile(perim_p):
         ceco("i perimetri non esistono in %s" % PERIMETRI, "eseguire dalla radice del repo")
 
+    classi_p = os.path.join(radice, CLASSI)
+    if not os.path.isfile(classi_p):
+        ceco("il registro delle classi non esiste in %s" % CLASSI, "eseguire dalla radice del repo")
+    registro = json.loads(io.open(classi_p, encoding="utf-8").read()).get("scritture") or {}
+
+    def classe_di(cid, oid):
+        """B o C dal registro; None per una scrittura esclusa o senza riga (resta fuori)."""
+        v = (registro.get(cid) or {}).get(oid) or {}
+        return v.get("classe") if v.get("classe") in ("B", "C") else None
+
+    def operazioni(cid, righe, solo_lettura):
+        ops = {}
+        for r in righe:
+            if not r.get("path"):
+                continue
+            metodo = (r["method"] or "").upper()
+            oid = operation_id(r["method"], r["path"])
+            if metodo == "GET":
+                classe = "A"
+            else:
+                classe = None if solo_lettura else classe_di(cid, oid)
+                if classe is None:
+                    continue
+            ops[oid] = {"method": metodo, "path": r["path"], "permission": r.get("permission"),
+                        "classe": classe}
+        return ops
+
     perim = json.loads(io.open(perim_p, encoding="utf-8").read())
     aperti = perim.get("aperti") or []
     if not aperti:
@@ -204,30 +244,16 @@ def costruisci(radice="."):
             ceco("il perimetro aperto '%s' non ha un prefisso unico nell'atlante (%s)"
                  % (cid, ", ".join(prefissi.get(cid) or ["nessuno"])),
                  "l'operazione non saprebbe a quale indirizzo andare")
-        # Ondata 4: `scritture` elenca le SOLE scritture aperte del perimetro, per operationId.
-        # Senza l'elenco un perimetro in scrittura aprirebbe anche le cancellazioni.
-        scritture = voce.get("scritture")
-        if not solo_lettura and not scritture:
-            ceco("il perimetro '%s' apre le scritture senza elencarle in `scritture`" % cid,
-                 "una scrittura si apre per nome, mai per modulo intero")
-        ops = {}
-        for r in rotte[cid]:
-            if not r.get("path"):
-                continue
-            metodo = (r["method"] or "").upper()
-            oid = operation_id(r["method"], r["path"])
-            if metodo != "GET" and (solo_lettura or oid not in scritture):
-                continue
-            ops[oid] = {
-                "method": metodo,
-                "path": r["path"],
-                "permission": r.get("permission"),
-            }
-        if not solo_lettura:
-            ignote = sorted(set(scritture) - set(ops))
-            if ignote:
-                ceco("il perimetro '%s' elenca scritture che l'atlante non ha: %s" % (cid, ", ".join(ignote)),
-                     "il nome dell'operazione e' sbagliato, o l'atlante e' superato")
+        # Ondata 4: `scritture` elencava le sole scritture aperte del perimetro. Da F1 le apre il
+        # registro delle classi; l'elenco resta come cronaca e deve ancora esistere e avere classe.
+        # F1 (ADR-0063, piano accettato da Enzo il 2026-11-26): il registro delle classi supera i
+        # `sola_lettura` delle aperture di agosto e settembre, che restano come cronaca.
+        ops = operazioni(cid, rotte[cid], False)
+        solo_lettura = not any(o["method"] != "GET" for o in ops.values())
+        for oid in voce.get("scritture") or []:
+            if oid not in ops:
+                ceco("il perimetro '%s' apre la scrittura '%s', che non esiste o non ha classe B o C "
+                     "in %s" % (cid, oid, CLASSI), "il nome e' sbagliato, o manca la riga nel registro")
         out[cid] = {
             "solaLettura": solo_lettura,
             "base": base,
@@ -243,20 +269,14 @@ def costruisci(radice="."):
         if base is None:
             # più prefissi: l'indirizzo di ogni lettura non è deducibile, quindi non si apre
             continue
-        ops = {}
-        for r in righe:
-            if r.get("path") and (r["method"] or "").upper() == "GET":
-                ops[operation_id(r["method"], r["path"])] = {
-                    "method": "GET",
-                    "path": r["path"],
-                    "permission": r.get("permission"),
-                }
+        ops = operazioni(cid, righe, False)
         if ops:
+            scrive = any(o["method"] != "GET" for o in ops.values())
             out[cid] = {
-                "solaLettura": True,
+                "solaLettura": not scrive,
                 "base": base,
-                "data": DATA_LETTURE,
-                "decisione": DECISIONE_LETTURE,
+                "data": DATA_SCRITTURE if scrive else DATA_LETTURE,
+                "decisione": DECISIONE_LETTURE + ("; " + DECISIONE_SCRITTURE if scrive else ""),
                 "operations": ops,
             }
     if mancanti:
@@ -271,7 +291,7 @@ def main():
     dati = costruisci(radice)
     testo = json.dumps({
         "_generato_da": "docs/kb/tools/build_agent_operations.py — non modificare a mano",
-        "_fonti": [ATLAS.replace("\\", "/"), PERIMETRI.replace("\\", "/")],
+        "_fonti": [ATLAS.replace("\\", "/"), PERIMETRI.replace("\\", "/"), CLASSI.replace("\\", "/")],
         "concepts": dati,
         # Prova dal vivo del 2026-11-20: una domanda sulle segnalazioni riceveva «nel catalogo non
         # c'è» invece del rifiuto. Il gateway deve sapere che questi concetti esistono e sono vietati.

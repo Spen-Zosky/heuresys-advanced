@@ -27,6 +27,7 @@ concetti: [agente, assistente, applet]
 | [0053](../../architecture/adr/0053_gli_agenti_agiscono_senza_conferma_una_capacita_alla_volta.md) | Gli agenti agiscono senza conferma anche in produzione, una capacità alla volta | ACCETTATO il 2026-11-03 da Enzo Spenuso |
 | [0056](../../architecture/adr/0056_i_principi_agentici_dottrina_comune_degli_agenti.md) | I principi agentici sono la dottrina comune degli agenti di advanced e del datastore | ACCETTATO il 2026-11-06 da Enzo Spenuso, alle 04:00 UTC |
 | [0060](../../architecture/adr/0060_le_applet_dell_assistente.md) | Le applet dell'assistente: il lavoro che l'assistente costruisce e svolge, entro i permessi di chi lo chiede | ACCETTATO il 2026-11-18 da Enzo Spenuso, alle 15:50 UTC |
+| [0062](../../architecture/adr/0062_heuresys_ai_driven_l_organizzazione_ghost.md) | Heuresys è AI-driven: un'organizzazione ghost di agenti lavora con le persone del tenant | PROPOSTO il 2026-11-26, in attesa del sì di Enzo Spenuso. |
 <!-- /generato -->
 
 ## Come si fa

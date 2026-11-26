@@ -46,7 +46,7 @@ Restano fuori per scelta l'autenticazione e le segnalazioni (whistleblowing). Co
 
 L'assistente si apre su 111 delle 145 pagine web (`apps/web/src/lib/agente/pagine-idonee.generated.ts`); i comandi della vista (cerca, filtra, ordina) arrivano da ogni tabella generica (`components/data-table-panel.tsx`); solo due pagine dichiarano un contesto più ricco (`approvals/[id]`, `tenant-blueprints/[id]`).
 
-Limiti di servizio: al massimo 2 conversazioni per persona e 4 in tutto il servizio insieme, 30 giri e 15 minuti per conversazione (`limiti.ts`). Chi può usarlo è un elenco chiuso di persone o tenant nella configurazione della VM, vuoto vuol dire nessuno (`limiti.ts`, `personeAmmesse`); per decisione di Enzo, oggi solo lui (ADR-0056 D3).
+Limiti di servizio: al massimo 2 conversazioni per persona e 4 in tutto il servizio insieme, 30 giri e 15 minuti per conversazione (`limiti.ts`). Chi può usarlo è un elenco chiuso di persone o tenant nella configurazione della VM, vuoto vuol dire nessuno (`limiti.ts`, `personeAmmesse`); la configurazione misurata il 2026-11-26 ammette i tenant RTL Bank e Heuresys System per intero (§2.6).
 
 ### 2.3 Le «intelligenze» che non sono IA
 
@@ -67,9 +67,9 @@ Limiti di servizio: al massimo 2 conversazioni per persona e 4 in tutto il servi
 
 È la parte più generativa del progetto: il banco costruisce un'impresa tipo con il modello, in una cascata di 31 file di passo, ciascuno con un validatore e fino a tre tentativi, e porta le fonti (`src/passi/pensatore.ts`, `src/passi/forma_del_banco.ts`). Il consolidamento porta quel modello nel tenant con il giudice. L'assistente della console invece è di sola lettura e non ricorda le conversazioni oltre la sessione del browser.
 
-### 2.6 Che cosa non ho potuto misurare
+### 2.6 L'uso in produzione
 
-L'uso reale in produzione (quante conversazioni, quante persone, quante capacità sono in modo LIBERA, quante proposte approvate): la lettura del database di produzione dal PC mi è stata negata dal controllo dei permessi della sessione. La rifà un thread con accesso alla VM, in sola lettura; la query è pronta. Finché non c'è, nessuna cifra d'uso in questo documento.
+L'uso reale in produzione (voce M0), misurato in sola lettura su `heuresys_advanced` il 2026-11-26 alle 02:31 UTC, in una transazione di sola lettura poi annullata, dal thread del gateway degli agenti: il dettaglio è in `docs/piani/MISURE_gateway-agenti_20261126.md` (PR #500), questa sessione non l'ha rieseguito. Conversazioni con l'assistente: 37, di 3 persone, tutte di RTL Bank, dal 2026-11-10 al 2026-11-24. Righe in `sys_agent_activities` 38, proposte 31, `call_log` 28, decisioni in `audit.agent_gateway_decisions` 0. Richieste degli agenti (`sys_agent_requests`) 0 in ogni stato; capacità registrate (`sys_agent_capabilities`) 0 e attivazioni correnti 0, quindi nessuna capacità in modo LIBERA. Ammessi dalla configurazione del gateway: 1 persona nominata, che appartiene già a un tenant ammesso, e 2 tenant interi, RTL Bank (167 utenti attivi, 158 standard) e Heuresys System (9 attivi, 3 standard). Lettura: l'assistente è aperto a tutto RTL, ma lo usano 3 persone; il registro delle capacità e le richieste degli agenti non sono mai stati usati. Conferma il livello 2 dell'asse «Autonomia» e dell'asse «Assistenza».
 
 ## 3. Il ranking, asse per asse
 

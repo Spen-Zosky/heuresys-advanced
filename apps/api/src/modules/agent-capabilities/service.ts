@@ -13,7 +13,7 @@
  *
  * `LIBERA` È SPENTA (ADR-0063 D4, 2026-11-26). Enzo ha deciso «niente passa senza conferma»: la
  * richiesta `LIBERA` risponde `AGENT_CAPABILITY_LIBERA_SPENTA` per chiunque, e il database la rifiuta
- * comunque (migrazione 000514). Il meccanismo qui sotto resta, per il giorno in cui Enzo decidesse altro.
+ * comunque (migrazione 000518). Il meccanismo qui sotto resta, per il giorno in cui Enzo decidesse altro.
  *
  * Prima di ADR-0063, ADR-0053 D2 chiede tre condizioni previe: l'informativa, il ritorno
  * provato e il registro «per conto di» (passo A2). Le prime due le controlla il database; il
@@ -48,7 +48,7 @@ export const REGISTRO_PER_CONTO_DI = true;
 /**
  * ADR-0063 D4: il modo `LIBERA` resta spento finché Enzo non decide altro. Non è un interruttore
  * d'ambiente: si cambia solo con una decisione nuova, una PR e la migrazione che toglie il grilletto
- * di 000514.
+ * di 000518.
  */
 export const MODO_LIBERA_SPENTO = true;
 

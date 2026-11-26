@@ -199,7 +199,10 @@ BEGIN
     RAISE EXCEPTION '000428: G-D2 non e'' vuota dopo una migrazione senza ritiri previsti';
   END IF;
 
-  SELECT coalesce(sum(missing), 0) INTO n_gap FROM sys.v_reference_translation_coverage;
+  SELECT coalesce(sum(missing), 0) INTO n_gap FROM sys.v_reference_translation_coverage
+    -- 000516 e 000517: blueprint, etichette delle interfacce e contenuti dei tenant restano fuori.
+   WHERE (entity_table, field) NOT IN (SELECT f.entity_table, f.field
+      FROM sys.sys_translatable_field f WHERE f.note IN ('contenuti dei tenant','contenuto dei blueprint','registro dei processi dei blueprint','etichette delle interfacce'));
   IF n_gap <> 0 THEN
     RAISE EXCEPTION '000428: copertura EN globale non a zero dopo questa migrazione (guardia 000255), % mancanti', n_gap;
   END IF;

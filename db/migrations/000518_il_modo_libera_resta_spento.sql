@@ -1,4 +1,4 @@
--- 000514 — ADR-0063 D4, piano «Heuresys AI-driven» voce F0b: il modo LIBERA resta spento.
+-- 000518 — ADR-0063 D4, piano «Heuresys AI-driven» voce F0b: il modo LIBERA resta spento.
 --
 -- IL FATTO. ADR-0053 ha dato agli agenti un modo `LIBERA` (una capacità pubblicata, per un tenant,
 -- scrive senza ponte di approvazione); 000480 ne ha fatto il registro e il cancello del gateway lo
@@ -51,7 +51,7 @@ CREATE TRIGGER trg_agent_capability_libera_spenta
   FOR EACH ROW EXECUTE FUNCTION sys.f_agent_capability_libera_spenta();
 
 COMMENT ON FUNCTION sys.f_agent_capability_libera_spenta() IS
-  '000514 (ADR-0063 D4) — rifiuta ogni attivazione LIBERA. Eccezione solo per le prove del meccanismo: database di collaudo dal nome e SET LOCAL heuresys.prova_libera = on; mai su heuresys_advanced.';
+  '000518 (ADR-0063 D4) — rifiuta ogni attivazione LIBERA. Eccezione solo per le prove del meccanismo: database di collaudo dal nome e SET LOCAL heuresys.prova_libera = on; mai su heuresys_advanced.';
 
 -- ② ciò che fosse già libero torna a CONFERMA, con una riga nuova che sostituisce la vecchia.
 DO $spegni$
@@ -64,12 +64,12 @@ BEGIN
           agent_capability_activation_reason, agent_capability_activation_supersedes_id)
   SELECT v.agent_capability_activation_tenant_id, v.agent_capability_activation_capability_id,
          'CONFERMA', 'AUTOMATICO',
-         'ADR-0063 D4: il modo LIBERA resta spento finché Enzo non decide altro (migrazione 000514)',
+         'ADR-0063 D4: il modo LIBERA resta spento finché Enzo non decide altro (migrazione 000518)',
          v.agent_capability_activation_id
     FROM sys.v_agent_capability_activations_current v
    WHERE v.agent_capability_activation_mode = 'LIBERA';
   GET DIAGNOSTICS v_n = ROW_COUNT;
-  RAISE NOTICE '000514: attivazioni LIBERA riportate a CONFERMA: %', v_n;
+  RAISE NOTICE '000518: attivazioni LIBERA riportate a CONFERMA: %', v_n;
 END $spegni$;
 
 -- La sentinella: deve restare a zero righe.
@@ -83,4 +83,4 @@ SELECT v.agent_capability_activation_id,
  WHERE v.agent_capability_activation_mode = 'LIBERA';
 
 COMMENT ON VIEW sys.v_agent_capability_libera_in_vigore IS
-  '000514 (ADR-0063 D4) — sentinella: le capacità oggi in modo LIBERA. Deve restare vuota finché Enzo non decide altro.';
+  '000518 (ADR-0063 D4) — sentinella: le capacità oggi in modo LIBERA. Deve restare vuota finché Enzo non decide altro.';

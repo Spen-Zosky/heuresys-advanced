@@ -125,7 +125,7 @@ describe("il catalogo e il modo (000480, ADR-0053)", () => {
     // database (000480) restano provate da `db/scripts/agenti/prova-000480.sql`.
     expect(await codiceDi(svc.decide(direttore, id, { mode: "LIBERA", reason: "prova", noticeRef: "inf-1", rollbackProofRef: "prova-1" }))).toBe("AGENT_CAPABILITY_LIBERA_SPENTA");
     expect((await svc.get(direttore, id)).activation).toMatchObject({ mode: "CONFERMA" });
-    // E il database la rifiuta anche se il servizio la lasciasse passare (000514).
+    // E il database la rifiuta anche se il servizio la lasciasse passare (000518).
     const tenta = pool.query(
       `INSERT INTO sys.sys_agent_capability_activations
          (agent_capability_activation_tenant_id, agent_capability_activation_capability_id, agent_capability_activation_mode,

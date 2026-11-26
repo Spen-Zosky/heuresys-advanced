@@ -144,6 +144,8 @@ export const TITOLI_EN: Readonly<Record<string, string>> = {
   "Punteggi di talento": "Talent scores",
   "Rischio di uscita": "Flight risk",
   "Previsioni dei modelli": "Model predictions",
+  "Unità negli scenari what-if": "Units in what-if scenarios",
+  "Presenza negli scenari what-if": "Presence in what-if scenarios",
   "Prontezza": "Readiness",
   "Punteggi di successione": "Succession scores",
   "Prontezza alla successione": "Succession readiness",
@@ -211,6 +213,8 @@ export const TITOLI_EN: Readonly<Record<string, string>> = {
   "Attivazioni delle capacità": "Capability activations",
   "Richieste dell'agente": "Agent requests",
   "Costo e durata delle chiamate dell'agente": "Agent call cost and duration",
+  "Scenari what-if": "What-if scenarios",
+  "Versioni degli scenari": "Scenario versions",
   // Modelli e configurazione
   "Attivazioni dei modelli": "Blueprint activations",
   "Personalizzazioni dei modelli": "Blueprint overrides",

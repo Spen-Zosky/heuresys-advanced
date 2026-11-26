@@ -1874,6 +1874,12 @@ export async function listProcessCollaborators(
   };
 }
 
+/** Il processo `$1` del tenant `$2` e i suoi sottoprocessi attivi: le attività di un sottoprocesso
+ *  restano attività del processo di chi lo possiede. */
+const PROCESSO_E_SOTTOPROCESSI_SQL = `(SELECT x.tenant_process_id FROM sys.sys_tenant_processes x
+   WHERE x.tenant_process_tenant_id = $2
+     AND (x.tenant_process_id = $1 OR (x.tenant_process_parent_id = $1 AND x.tenant_process_is_active)))`;
+
 /** Le attività di un processo che possiedo, e quanto lavoro vi appartiene (ADR-0049).
  *
  *  Stesso appoggio di `listProcessCollaborators`: l'unità-processo indicata deve essere una in cui
@@ -1935,12 +1941,13 @@ export async function listProcessActivities(
               WHERE a.approval_request_tenant_id = $2
                 AND a.approval_request_tenant_process_step_id = s.tenant_process_step_id) AS request_count
        FROM sys.sys_tenant_process_steps s
+       JOIN sys.sys_tenant_processes tp ON tp.tenant_process_id = s.tenant_process_step_process_id
        LEFT JOIN sys.sys_organization_units ou
               ON ou.organization_unit_id = s.tenant_process_step_org_unit_id
              AND ou.organization_unit_tenant_id = $2
-      WHERE s.tenant_process_step_process_id = $1
+      WHERE s.tenant_process_step_process_id IN ${PROCESSO_E_SOTTOPROCESSI_SQL}
         AND s.tenant_process_step_tenant_id = $2
-      ORDER BY s.tenant_process_step_ordinal, s.tenant_process_step_code`,
+      ORDER BY tp.tenant_process_level, tp.tenant_process_name, s.tenant_process_step_ordinal, s.tenant_process_step_code`,
     [processo.tenant_process_id, tenantId],
   );
   const conti = await q.query<{ resource_type: string | null; status: string; step_code: string | null; n: string }>(
@@ -1950,7 +1957,7 @@ export async function listProcessActivities(
        LEFT JOIN sys.sys_tenant_process_steps s
               ON s.tenant_process_step_id = a.approval_request_tenant_process_step_id
       WHERE a.approval_request_tenant_id = $2
-        AND a.approval_request_tenant_process_id = $1
+        AND a.approval_request_tenant_process_id IN ${PROCESSO_E_SOTTOPROCESSI_SQL}
       GROUP BY 1, 2, 3
       ORDER BY 1 NULLS LAST, 2, 3 NULLS FIRST`,
     [processo.tenant_process_id, tenantId],

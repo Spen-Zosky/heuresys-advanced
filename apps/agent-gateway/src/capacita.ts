@@ -20,7 +20,7 @@
  * ⚠ ADR-0063 D4 (2026-11-26): IL MODO LIBERA È SPENTO. Il registro si legge ancora, ma una capacità
  * che risultasse `LIBERA` non esegue niente da sola: il cancello (`write-gate.ts`, ramo 2d) la
  * riporta davanti alla persona e scrive `LIBERA_SPENTA` nel diario. Il database rifiuta comunque
- * un'attivazione `LIBERA` nuova (migrazione 000514) e l'API risponde `AGENT_CAPABILITY_LIBERA_SPENTA`.
+ * un'attivazione `LIBERA` nuova (migrazione 000518) e l'API risponde `AGENT_CAPABILITY_LIBERA_SPENTA`.
  */
 import type { Operazione } from "./operazione.js";
 

@@ -329,7 +329,10 @@ export function makeCanUseTool(approve: ApproveFn, opts: GateOptions = {}) {
         ...registro,
         ...(perContoDi !== undefined ? { onBehalfOf: perContoDi } : {}),
       })
-      .catch(() => {});
+      // R8: la decisione non cambia, ma una voce persa si dice nel journal invece di sparire.
+      .catch((e: unknown) => {
+        console.error(JSON.stringify({ level: "error", phase: "agent-gateway-audit", msg: "voce del diario non salvata", tool, error: String(e) }));
+      });
   };
 
   return async function canUseTool(name: string, input: unknown): Promise<ToolDecision> {

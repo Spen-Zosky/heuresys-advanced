@@ -2,7 +2,7 @@
  * ADR-0063 D4, piano «Heuresys AI-driven» voce F0b: il modo LIBERA resta spento.
  *
  * Anche se il registro delle capacità dichiarasse LIBERA un'operazione per RTL (un'attivazione
- * finta, il caso che il database con la migrazione 000514 non accetta più), il cancello non la
+ * finta, il caso che il database con la migrazione 000518 non accetta più), il cancello non la
  * esegue da sola: la porta davanti alla persona e scrive nel diario `LIBERA_SPENTA`. E il
  * servizio non accende mai il meccanismo: la sola via per farlo (`liberaAccesa`) non compare né
  * in `server.ts` né in `sdk-agent.ts`.

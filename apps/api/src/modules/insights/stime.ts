@@ -171,5 +171,6 @@ export async function stimeDallaStoria(
     nota: passaggi.length > 0 ? null : "nessun candidato con due valutazioni",
   });
 
-  return { tenantId, dal, storiaGenerata: generata, stime, provaUscite };
+  // La finestra comincia dal trimestre che contiene `dal`: si dichiara quello, come fa la frase delle uscite.
+  return { tenantId, dal: trimestri[0]?.inizio ?? dal, storiaGenerata: generata, stime, provaUscite };
 }

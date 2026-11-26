@@ -2390,7 +2390,9 @@
     "nonRaccomandabile": "Questa proposta non è una raccomandazione: penalizza un gruppo protetto oltre la soglia, o usa un tratto protetto nel calcolo. Va rivista prima di decidere.",
     "metodo": "Metodo dei quattro quinti: per ogni tratto si confronta, gruppo per gruppo, la quota di persone con esito favorevole ({{favorevole}}) su {{persone}} persone; il rapporto fra la quota più bassa e la più alta deve essere almeno {{soglia}}. I gruppi con meno di {{minimo}} persone sono riuniti e non confrontati, così nessun tratto individuale si può dedurre.",
     "favorevole": {
-      "PRONTO_ENTRO_6_MESI": "pronta ora o entro sei mesi"
+      "PRONTO_ENTRO_6_MESI": "pronta ora o entro sei mesi",
+      "NON_A_RISCHIO_ALTO": "non segnalata a rischio di uscita alto o critico",
+      "DIVARIO_AL_PIU_LIEVE": "allineata al ruolo o con un divario lieve"
     },
     "colTratto": "Tratto protetto",
     "colGruppi": "Gruppi",
@@ -2439,7 +2441,13 @@
     "ingresso": {
       "tenure": "anzianità",
       "position_fit": "aderenza alla posizione",
-      "kpi": "risultati sui KPI"
+      "kpi": "risultati sui KPI",
+      "attendance": "presenze e straordinari",
+      "engagement": "clima e coinvolgimento",
+      "comp": "posizione nella fascia retributiva",
+      "promotion": "tempo dall'ultimo passaggio",
+      "role_fit_gap": "distanza dal ruolo",
+      "evidence_sparsity": "scarsità di evidenze"
     }
   }
 }

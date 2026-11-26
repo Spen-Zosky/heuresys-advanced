@@ -148,10 +148,22 @@ describe("insights API P2 (cap③ succession-readiness + skill-gap)", () => {
     expect(d.persone).toBe(new Set(body.items.map((x) => x.userId)).size);
     expect(d.tratti.map((t) => t.tratto)).toEqual(["GENERE", "ETA", "NAZIONALITA", "STATO_CIVILE"]);
     expect(d.ingressi).toEqual(["position_fit", "kpi", "tenure"]);
+    for (const x of body.items) for (const f of x.features ?? []) expect(d.ingressi).toContain(f.feature);
     expect(d.ingressiProtetti).toEqual([]);
     // la dichiarazione non porta né identificativi né date di nascita
     const testo = JSON.stringify(d);
     for (const x of body.items.slice(0, 5)) expect(testo).not.toContain(x.userId);
     expect(testo).not.toMatch(/\b(19|20)\d{2}-\d{2}-\d{2}\b/);
   });
+  it("E12 (F6b): anche il divario di competenze dichiara l'equità, con gli ingressi del suo modello", async () => {
+    const r = await list(tenantAdmin, "skill-gap");
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as { items: { userId: string; features?: Feature[] }[]; equita: unknown };
+    const d = EquitaDichiarazioneSchema.parse(body.equita);
+    expect(d.esitoFavorevole).toBe("DIVARIO_AL_PIU_LIEVE");
+    expect(d.persone).toBe(new Set(body.items.map((x) => x.userId)).size);
+    for (const x of body.items) for (const f of x.features ?? []) expect(d.ingressi).toContain(f.feature);
+    expect(d.ingressiProtetti).toEqual([]);
+  });
+
 });

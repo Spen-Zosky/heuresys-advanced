@@ -316,24 +316,38 @@ function horizonOf(v: number): SuccessionReadinessHorizon {
   return "NOT_READY";
 }
 
+/** Gli ingressi dei modelli di rischio di uscita e di divario, come compaiono nelle spiegazioni (E12). */
+export const FLIGHT_RISK_FEATURE_KEYS = ["tenure", "attendance", "kpi", "engagement", "comp", "promotion"] as const;
+export const SKILL_GAP_FEATURE_KEYS = ["role_fit_gap", "evidence_sparsity"] as const;
 /** Gli ingressi del modello di prontezza, come compaiono nelle spiegazioni (E12 li controlla). */
 export const READINESS_FEATURE_KEYS = ["position_fit", "kpi", "tenure"] as const;
 /** Esito favorevole di una proposta di successione: pronto ora o entro sei mesi. */
 export const READINESS_ORIZZONTI_FAVOREVOLI: ReadonlySet<SuccessionReadinessHorizon> = new Set(["READY_NOW", "READY_6_MONTHS"]);
 
 /**
- * E12 (F6b): la dichiarazione di equità su chi è proposto come pronto. L'unità è la persona,
- * favorevole se è pronta per almeno una posizione: chi compare per tre posizioni conta una volta.
+ * E12 (F6b): la dichiarazione di equità di una proposta sulle persone. L'unità è la persona,
+ * favorevole se lo è per almeno una riga: chi compare per tre posizioni conta una volta. Si calcola
+ * sui valori veri, prima della maschera, ed esce solo aggregata.
  */
-export async function dichiaraEquitaPronti(items: SuccessionReadinessScore[], tenantId: string | null, oggi = new Date()): Promise<EquitaDichiarazione> {
+async function dichiaraEquita<T extends { userId: string }>(
+  items: readonly T[],
+  tenantId: string | null,
+  favorevoleDi: (r: T) => boolean,
+  esitoFavorevole: string,
+  ingressi: readonly string[],
+  oggi = new Date(),
+): Promise<EquitaDichiarazione> {
   const favorevole = new Map<string, boolean>();
-  for (const r of items) favorevole.set(r.userId, (favorevole.get(r.userId) ?? false) || (r.horizon !== undefined && READINESS_ORIZZONTI_FAVOREVOLI.has(r.horizon)));
+  for (const r of items) favorevole.set(r.userId, (favorevole.get(r.userId) ?? false) || favorevoleDi(r));
   const tratti = await leggiTrattiProtetti(pool, tenantId, [...favorevole.keys()]);
   return valutaEquita(
     [...favorevole.entries()].map(([userId, f]) => ({ userId, favorevole: f, tratti: tratti.get(userId) })),
-    { esitoFavorevole: "PRONTO_ENTRO_6_MESI", ingressi: READINESS_FEATURE_KEYS, oggi },
+    { esitoFavorevole, ingressi, oggi },
   );
 }
+
+export const dichiaraEquitaPronti = (items: SuccessionReadinessScore[], tenantId: string | null, oggi = new Date()) =>
+  dichiaraEquita(items, tenantId, (r) => r.horizon !== undefined && READINESS_ORIZZONTI_FAVOREVOLI.has(r.horizon), "PRONTO_ENTRO_6_MESI", READINESS_FEATURE_KEYS, oggi);
 
 /** Pure, deterministic blend → readiness value + horizon + per-feature explanation. */
 export function scoreReadiness(raw: repo.ReadinessFeatureRow): {
@@ -438,11 +452,13 @@ export const insightsService = {
       userIdAllowList: orgAllowList(orgScope),
     });
     const items = rows.map(toFlightRiskScore).sort((x, y) => (y.score ?? 0) - (x.score ?? 0));
+    const equita = await dichiaraEquita(items, s.tenantId, (r) => r.band === "LOW" || r.band === "MEDIUM", "NON_A_RISCHIO_ALTO", FLIGHT_RISK_FEATURE_KEYS);
     return maskItems(a, {
       scope: { kind: s.kind, tenantId: s.tenantId },
       items,
       total: items.length,
-      generatedAt: new Date().toISOString(),
+      generatedAt: equita.calcolatoIl,
+      equita,
     }, FLIGHT_RISK_JUDGMENT_FIELDS);
   },
 
@@ -530,7 +546,8 @@ export const insightsService = {
       userIdAllowList: orgAllowList(orgScope),
     });
     const items = rows.map(toSkillGapScore).sort((x, y) => (y.value ?? 0) - (x.value ?? 0));
-    return maskItems(a, { scope: { kind: s.kind, tenantId: s.tenantId }, items, total: items.length, generatedAt: new Date().toISOString() }, SKILL_GAP_JUDGMENT_FIELDS);
+    const equita = await dichiaraEquita(items, s.tenantId, (r) => r.segment === "ALIGNED" || r.segment === "MINOR_GAP", "DIVARIO_AL_PIU_LIEVE", SKILL_GAP_FEATURE_KEYS);
+    return maskItems(a, { scope: { kind: s.kind, tenantId: s.tenantId }, items, total: items.length, generatedAt: equita.calcolatoIl, equita }, SKILL_GAP_JUDGMENT_FIELDS);
   },
 
   async recomputeSkillGap(a: ActorContext): Promise<InsightsRecomputeResponse> {

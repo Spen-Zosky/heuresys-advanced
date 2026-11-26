@@ -2390,7 +2390,9 @@
     "nonRaccomandabile": "This proposal is not a recommendation: it penalises a protected group beyond the threshold, or uses a protected trait in the calculation. Review it before deciding.",
     "metodo": "Four-fifths method: for each trait the share of people with a favourable outcome ({{favorevole}}) is compared group by group across {{persone}} people; the ratio between the lowest and the highest share must be at least {{soglia}}. Groups with fewer than {{minimo}} people are merged and not compared, so no individual trait can be inferred.",
     "favorevole": {
-      "PRONTO_ENTRO_6_MESI": "ready now or within six months"
+      "PRONTO_ENTRO_6_MESI": "ready now or within six months",
+      "NON_A_RISCHIO_ALTO": "not flagged at high or critical risk of leaving",
+      "DIVARIO_AL_PIU_LIEVE": "aligned with the role or with a minor gap"
     },
     "colTratto": "Protected trait",
     "colGruppi": "Groups",
@@ -2439,7 +2441,13 @@
     "ingresso": {
       "tenure": "length of service",
       "position_fit": "fit with the position",
-      "kpi": "KPI results"
+      "kpi": "KPI results",
+      "attendance": "attendance and overtime",
+      "engagement": "engagement",
+      "comp": "position in the pay band",
+      "promotion": "time since the last move",
+      "role_fit_gap": "distance from the role",
+      "evidence_sparsity": "sparse evidence"
     }
   }
 }

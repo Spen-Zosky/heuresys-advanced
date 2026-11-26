@@ -18,6 +18,7 @@ import { EvidenceDrawer } from "@/components/evidence-drawer";
 import { useFormat } from "@/lib/format";
 import { NomeOppure } from "@/components/senza-nome";
 import { LavoroInCorso } from "@/components/lavoro-in-corso";
+import { DichiarazioneEquita } from "@/components/dichiarazione-equita";
 
 // Higher value = larger gap = worse: ALIGNED → success, MAJOR_GAP → destructive.
 // Only confirmed @heuresys/ui Badge variants + registered text tokens.
@@ -117,6 +118,13 @@ export default function SkillGapPage() {
         emptyDescription={t("insightsSkillGap.emptyDescription")}
         caption={t("insightsSkillGap.caption")}
       />
+
+      {/* E12 (F6b): ogni proposta sulle persone dichiara il suo controllo di equità. */}
+      {data.data?.equita && (
+        <div className="mx-auto max-w-7xl px-6">
+          <DichiarazioneEquita equita={data.data.equita} />
+        </div>
+      )}
 
       <LavoroInCorso attivo={recompute.isPending} titolo={t("insightsSkillGap.recomputing")} dettaglio={t("common:attesa.siSbloccaAllaFine")} />
 

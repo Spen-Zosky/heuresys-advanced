@@ -6,11 +6,12 @@
  * rifiuta ogni destinatario fuori perimetro.
  */
 import type { Pool, PoolClient } from "pg";
+import { HR_MANDATED_ROLES } from "../../lib/scope/resolver.js";
 
 export type Db = Pool | PoolClient;
 
-/** Ruoli con il mandato HR sul tenant: lo stesso insieme di HR_MANDATED_ROLES (lib/scope/resolver.ts) e della guardia 000522. */
-export const RUOLI_MANDATO_HR = ["TENANT_ADMIN", "HRMS_MANAGER", "PEOPLE_MANAGER"] as const;
+/** Ruoli con il mandato HR sul tenant: HR_MANDATED_ROLES, lo stesso insieme che ricontrolla la guardia 000522. */
+export const RUOLI_MANDATO_HR: readonly string[] = [...HR_MANDATED_ROLES];
 
 export interface PosizioneCriticaSenzaSuccessore {
   tenant_id: string;

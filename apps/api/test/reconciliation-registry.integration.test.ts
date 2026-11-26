@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { pool } from '../src/db/client.js';
+import { fuoriDalGiornale } from './helpers/giornali.js';
 
 // F1 of the reconciliation-closure cycle. Asserts the registry + view shipped by
 // migration 000058 + seed 04_registry.sql. Hits the live DB via the tunnel (no mocks),
@@ -133,12 +134,24 @@ describe('reconciliation registry — B-50 residual-wall terminal close (S972) +
     sys_succession_pools: 'succession_pool_metadata',
     sys_successor_candidates: 'successor_candidate_metadata',
   };
+  // [2026-11-26] Le righe scritte a mano dagli script di allineamento di RTL (db/scripts/rtl-allinea/
+  // K, N, O, T, novembre 2026) non portano il marcatore storia36 ma sono giornalizzate una per una
+  // in staging.rtl_allinea_org_undo come 'ins:<tabella>': sono autorate, non un import, e restano
+  // fuori dal conteggio delle righe senza provenienza.
+  const ID_COLUMN: Record<string, string> = {
+    sys_successor_readiness: 'successor_readiness_id',
+  };
   const countAuthored = async (table: string, authored: boolean): Promise<number> => {
     const col = PROVENANCE_COLUMN[table];
     if (!col) throw new Error(`no provenance column declared for sys.${table}`);
+    const idCol = ID_COLUMN[table];
+    const nonGiornalizzate = !authored && idCol
+      ? await fuoriDalGiornale('staging.rtl_allinea_org_undo', `ins:${table}`, idCol)
+      : 'true';
     const { rows } = await pool.query<{ n: number }>(
       `SELECT count(*)::int AS n FROM sys.${table}
-        WHERE ${col}->>'storia36' IS ${authored ? 'NOT NULL' : 'NULL'}`,
+        WHERE ${col}->>'storia36' IS ${authored ? 'NOT NULL' : 'NULL'}
+          AND ${nonGiornalizzate}`,
     );
     return rows[0]?.n ?? -1;
   };

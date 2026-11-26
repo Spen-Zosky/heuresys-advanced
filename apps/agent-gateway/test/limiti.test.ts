@@ -1,9 +1,12 @@
 /**
  * ADR-0056, piano dei principi agentici voce T3: il modello per nome e i limiti della conversazione.
  */
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import {
   ConversazioniAperte,
+  PRIORITA_NUOVA,
+  PRIORITA_RIPRESA,
+  type OpzioniCoda,
   LIMITI_DEFAULT,
   MODELLO_DEFAULT,
   ModelloNonValido,
@@ -61,7 +64,7 @@ describe("leggiLimiti", () => {
         AGENT_GATEWAY_MAX_GIRI: "12",
         AGENT_GATEWAY_MAX_DURATA_MS: "60000",
       }),
-    ).toEqual({ perPersona: 1, totali: 3, giri: 12, durataMs: 60_000 });
+    ).toEqual({ perPersona: 1, totali: 3, giri: 12, durataMs: 60_000, codaMs: 180_000 });
   });
 });
 
@@ -187,5 +190,86 @@ describe("ammessoAllAssistente: persona nominata o tenant nominato (ADR-0056 D3)
   it("rifiuta una persona di un tenant non nominato, e chi non ha tenant e non è nominato", () => {
     expect(ammessoAllAssistente({ userId: "altro", tenantId: "cliente-nuovo" }, env)).toBe(false);
     expect(ammessoAllAssistente({ userId: "altro", tenantId: null }, env)).toBe(false);
+  });
+});
+
+describe("ConversazioniAperte.attendi (coda con priorità, piano AI-driven F0a)", () => {
+  const opz = (priorita = PRIORITA_NUOVA, extra: Partial<OpzioniCoda> = {}): OpzioniCoda => ({ priorita, attesaMaxMs: 60_000, ...extra });
+
+  it("con un posto libero entra subito, senza coda", async () => {
+    const c = new ConversazioniAperte({ perPersona: 2, totali: 1 });
+    const r = await c.attendi("anna", opz());
+    expect(r.ok).toBe(true);
+    expect(c.inCoda).toBe(0);
+  });
+
+  it("a servizio pieno aspetta, e entra quando un posto si libera; chi riprende passa avanti", async () => {
+    const c = new ConversazioniAperte({ perPersona: 2, totali: 1 });
+    const primo = c.entra("anna");
+    if (!primo.ok) throw new Error("doveva entrare");
+    const ordine: string[] = [];
+    const nuova = c.attendi("bruno", opz(PRIORITA_NUOVA)).then((r) => { ordine.push("bruno"); return r; });
+    const ripresa = c.attendi("carla", opz(PRIORITA_RIPRESA)).then((r) => { ordine.push("carla"); return r; });
+    expect(c.inCoda).toBe(2);
+    primo.esci();
+    const rc = await ripresa;
+    expect(rc.ok).toBe(true);
+    expect(ordine).toEqual(["carla"]);
+    if (rc.ok) rc.esci();
+    const rb = await nuova;
+    expect(rb.ok).toBe(true);
+    expect(ordine).toEqual(["carla", "bruno"]);
+  });
+
+  it("a pari priorità vale l'ordine di arrivo e ognuno sa la sua posizione", async () => {
+    const c = new ConversazioniAperte({ perPersona: 2, totali: 1 });
+    const primo = c.entra("anna");
+    if (!primo.ok) throw new Error("doveva entrare");
+    const pos: Record<string, number[]> = { b: [], c: [] };
+    const b = c.attendi("bruno", opz(PRIORITA_NUOVA, { posizione: (p) => pos.b!.push(p) }));
+    const k = c.attendi("carla", opz(PRIORITA_NUOVA, { posizione: (p) => pos.c!.push(p) }));
+    primo.esci();
+    const rb = await b;
+    expect(rb.ok).toBe(true);
+    expect(pos.b).toEqual([1, 1]);
+    expect(pos.c).toEqual([2, 1]);
+    if (rb.ok) rb.esci();
+    expect((await k).ok).toBe(true);
+  });
+
+  it("il tetto personale resta un rifiuto, anche contando chi è già in coda", async () => {
+    const c = new ConversazioniAperte({ perPersona: 1, totali: 1 });
+    const primo = c.entra("anna");
+    if (!primo.ok) throw new Error("doveva entrare");
+    void c.attendi("bruno", opz());
+    expect(await c.attendi("bruno", opz())).toEqual({ ok: false, motivo: "PERSONA" });
+    expect(await c.attendi("anna", opz())).toEqual({ ok: false, motivo: "PERSONA" });
+  });
+
+  it("oltre l'attesa massima esce dalla coda con ATTESA_SCADUTA", async () => {
+    vi.useFakeTimers();
+    try {
+      const c = new ConversazioniAperte({ perPersona: 2, totali: 1 });
+      c.entra("anna");
+      const p = c.attendi("bruno", opz(PRIORITA_NUOVA, { attesaMaxMs: 1000 }));
+      await vi.advanceTimersByTimeAsync(1001);
+      expect(await p).toEqual({ ok: false, motivo: "ATTESA_SCADUTA" });
+      expect(c.inCoda).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("se la persona chiude la finestra, esce dalla coda e non occupa un posto", async () => {
+    const c = new ConversazioniAperte({ perPersona: 2, totali: 1 });
+    const primo = c.entra("anna");
+    if (!primo.ok) throw new Error("doveva entrare");
+    const ac = new AbortController();
+    const p = c.attendi("bruno", opz(PRIORITA_NUOVA, { segnale: ac.signal }));
+    ac.abort();
+    expect(await p).toEqual({ ok: false, motivo: "ANNULLATA" });
+    primo.esci();
+    expect(c.aperte).toBe(0);
+    expect(c.inCoda).toBe(0);
   });
 });

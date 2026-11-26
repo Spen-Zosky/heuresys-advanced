@@ -1,0 +1,179 @@
+# Piano: Heuresys davvero AI-driven, livello 5 su ogni asse (2026-11-26)
+
+Stato: **bozza, in attesa del sì di Enzo**. Nessuna voce di attuazione è partita. Richiesta di Enzo del 2026-11-26 (03:09 Roma) nel progetto «ENZO: heuresys ecosystem», thread «Rendere Heuresys davvero AI-driven»: verificare se advanced e datastore sono davvero agentici, a che livello, e che cosa serve perché il prodotto sia AI-driven ad assoluto livello, con l'IA che lavora dentro la piattaforma, scopre fatti sommersi, sostiene decisioni sofisticate, migliora organizzazione e risorse, progetta il cambiamento, ridisegna i processi e assiste ogni funzione presente e futura.
+
+La valutazione di partenza è in [ai-driven_20261126/VALUTAZIONE_agentica_20261126.md](ai-driven_20261126/VALUTAZIONE_agentica_20261126.md): **livello 2 su 5**, governo degli agenti a 4, capacità di agire 1,5, proattività 1, change management 0,5. Le risposte di Enzo all'intervista sono nella sezione 2 e valgono come decisioni di questo piano.
+
+## 1. Che cosa non si chiude con questo piano
+
+- Questa sessione scrive solo la voce Z0 (questo piano e la valutazione nel repo). Ogni altra voce parte dopo il sì di Enzo (voce Z1), in un thread suo, con la sua PR, le sue prove e la sua dimostrazione dal vivo su RTL con una persona reale del tenant (ADR-0026).
+- Il livello 5 è un traguardo di più mesi, non di una sessione. Il piano è a onde (sezione 5); ogni onda si chiude con la misura del livello (voce M2), non con una dichiarazione.
+- Restano decisioni di Enzo fuori dal piano: i rilasci seguono la delega permanente del 13/11, le spese restano sue, l'apertura a un cliente vero è una sua scelta di prodotto.
+
+## 2. Le decisioni di Enzo (intervista del 2026-11-26)
+
+| id | domanda | decisione | quando |
+|---|---|---|---|
+| E1 | Chi usa l'IA | tutte le persone di RTL, ognuna con i suoi permessi | 03:26 Roma |
+| E2 | Prima missione | il cambiamento organizzativo dall'inizio alla fine, ma senza limitarsi a quello: tutte le funzioni dell'HR manager sono centrali | 03:26 |
+| E3 | Autonomia | niente passa senza conferma: nessuna scrittura automatica, il modo LIBERA di ADR-0053 resta spento | 03:26 |
+| E4 | Misura | i sette criteri della valutazione (sezione 5 di quel file), ognuno chiuso con una prova dal vivo | 03:26 |
+| E5 | Chi conferma | la persona collegata che ha chiesto; niente parte da solo; riepilogo settimanale a Enzo di tutto ciò che è stato confermato | 03:29 |
+| E6 | Agenti che segnalano | sì, senza scrivere, a ciascuno nel suo perimetro, in una casella dentro la piattaforma, per ora senza posta | 03:29 |
+| E7 | Scenari what-if | sì, e vanno ampliati verso direzioni molto raffinate | 03:29 |
+| E8 | Ordine | prima le fondamenta comuni, poi talenti, rimpiazzo e carriere; competenze e formazione; KPI e valutazioni; selezione; organizzazione e cambiamento; processi | 03:29 |
+| E9 | Memoria | sì, per persona, visibile e cancellabile da lei | 03:29 |
+| E10 | Agenti esterni | proposta: sì, come ultima onda | in attesa |
+| E11 | Prova della qualità | proposta: 200 domande per dominio, Enzo ne corregge 30, soglia 9 su 10 | in attesa |
+| E12 | Equità | proposta: ogni proposta sulle persone mostra il perché e passa da un controllo di equità | in attesa |
+| E13 | Spiegazioni | proposta: fonti cliccabili in ogni risposta e scenario | in attesa |
+
+Obiettivo dichiarato da Enzo: **livello 5 su tutti gli assi**, con gli scenari what-if gestiti in modo eccellente.
+
+## 3. Il traguardo: che cosa vuol dire livello 5, asse per asse
+
+Lo stesso metro della valutazione. Ogni asse ha una misura che la voce M1 rende automatica, così il livello si legge da un comando e non da un giudizio.
+
+| # | Asse | Oggi | Livello 5 vuol dire | Misura |
+|---|---|---|---|---|
+| 1 | Governo e sicurezza | 4 | cruscotto degli agenti con uso, consumo, esiti e valore; ogni versione di agente promossa con le sue prove | cruscotto vivo, versioni promosse = versioni in servizio |
+| 2 | Profondità di lettura | 3,5 | tutte le letture, più documenti, regole e politiche come conoscenza, più la memoria della persona | letture raggiungibili ≥ 98%, domande sui documenti nella batteria |
+| 3 | Capacità di agire | 1,5 | ogni scrittura di business raggiungibile con la sua classe, e lavori in più passi (applet) con anteprima e ritorno | scritture raggiungibili ≥ 90%, applet per dominio ≥ 3 |
+| 4 | Autonomia e proattività | 1 | agenti in background che osservano e segnalano a ogni ruolo; preparano da soli il lavoro, che la persona conferma (E3) | segnalatori attivi per dominio ≥ 3, segnalazioni giudicate utili ≥ 70% |
+| 5 | Fatti sommersi | 1,5 | diagnosi delle cause, anomalie, incoerenze fra domini, con la fonte | casi di diagnosi nella batteria superati ≥ 90% |
+| 6 | Decisioni sofisticate | 2 | scenari what-if a più opzioni, combinati, nel tempo, sotto vincoli, con incertezza dichiarata | catalogo scenari (sezione 4) disponibile e provato dal vivo |
+| 7 | Organizzazione e risorse | 2,5 | riorganizzazioni modellate con impatto, ampiezza di controllo, livelli, costi, confronto col settore | scenari S-O provati, confronto col datastore |
+| 8 | Change management | 0,5 | il cambiamento come oggetto: motivo, stato attuale e futuro, impatto, prontezza, piano di adozione, avanzamento misurato | un cambiamento di RTL portato dall'inizio alla fine |
+| 9 | Ridisegno dei processi | 1,5 | come il processo è eseguito davvero, il disegno nuovo con impatto su posizioni e competenze | scenari S-P provati su un processo di RTL |
+| 10 | Assistenza in ogni funzione | 2,5 | ogni pagina con il suo contesto e i suoi comandi; ogni funzione nuova nasce con la sua voce per l'agente | pagine con contesto dichiarato = pagine idonee; controllo in CI |
+| 11 | Qualità e apprendimento | 1 | batteria per dominio sopra soglia, equità controllata, la memoria e le correzioni migliorano le proposte | soglia E11 su ogni dominio |
+| 12 | Generazione di modelli | 3 | il modello di settore del datastore entra negli scenari come termine di confronto e come proposta | scenari con confronto di settore provati |
+
+## 4. Il catalogo degli scenari what-if (E7)
+
+Il motore è uno solo (voce F3): uno scenario è un oggetto con ipotesi, opzioni e risultati, calcolato su una **struttura ombra** del tenant, mai sulle tabelle vere. I numeri li calcola il codice; il modello compone lo scenario dalla domanda, sceglie le leve, confronta le opzioni, spiega e cita. Ogni scenario mostra almeno due opzioni, l'incertezza e le fonti, e diventa lavoro vero solo con un'applet confermata dalla persona (E3, E5).
+
+Cinque famiglie di calcolo, in ordine di raffinatezza:
+
+1. **Effetto diretto**: una leva, un risultato (chi tocca, quanto costa, che cosa scopre).
+2. **Cascata**: una leva che ne muove altre (un'uscita apre una posizione, il successore lascia la sua, e così via fino in fondo).
+3. **Nel tempo**: proiezione a 6, 12 e 36 mesi con le probabilità (uscite, prontezza, tempi di formazione e di selezione), con una banda di incertezza simulata a molte estrazioni e non un solo numero. Le probabilità si stimano sulla storia di 36 mesi di RTL (`db/scripts/storia36.sh`), dichiarando che è una storia generata.
+4. **Sotto vincoli**: la soluzione migliore che rispetta budget, tempi, perimetri, contratti (CCNL del credito per RTL) ed equità (E12): ottimizzazione, non tentativi.
+5. **Combinati e di resistenza**: più leve insieme e prove di resistenza della struttura, con il confronto col modello di settore del datastore.
+
+| id | dominio | scenario |
+|---|---|---|
+| S-T1 | talenti e rimpiazzo | esce una persona chiave: successori, prontezza, tempi, formazione per colmare, costo del vuoto |
+| S-T2 | talenti e rimpiazzo | catena di rimpiazzo a cascata: chi si sposta dopo chi, quali posizioni restano scoperte alla fine della catena |
+| S-T3 | talenti e rimpiazzo | resistenza: e se nei prossimi 12 mesi esce il 10% dei talenti, con le probabilità per persona; quali unità cedono per prime |
+| S-T4 | carriere e percorsi | piano di sviluppo per portare N successori a «pronto» entro una data, con formazione, mentorato e incarichi; probabilità di riuscita |
+| S-T5 | carriere e mobilità | mobilità interna ottimale: assegnare persone a posizioni aperte massimizzando corrispondenza delle competenze e minimizzando i vuoti creati |
+| S-C1 | competenze e formazione | il budget della formazione cambia (per esempio meno 20%): quali lacune restano, in quali posizioni critiche, con quale rischio |
+| S-C2 | competenze | comprare, costruire o prendere in prestito una competenza: selezione esterna, formazione interna, consulenza; costo, tempo, rischio |
+| S-C3 | competenze | competenze emergenti del settore (datastore, ESCO): chi è più vicino, quanto costa riqualificare, chi resta scoperto |
+| S-C4 | formazione | portafoglio ottimale di iniziative sotto un budget: massima riduzione delle lacune pesate per criticità della posizione |
+| S-K1 | KPI e valutazioni | cambiano i pesi di KPI e obiettivi nella valutazione: chi cambia fascia, chi supera le soglie di premio, quanto costa |
+| S-K2 | valutazioni | calibrazione: incoerenze fra valutatori e unità, scarti non spiegati dai KPI, proposte di riallineamento |
+| S-K3 | compensi | distribuzione del budget di merito sotto vincoli (equità interna, fasce del CCNL, prestazioni); divario retributivo prima e dopo |
+| S-K4 | obiettivi | a cascata: un obiettivo di vertice cambia, quali obiettivi di unità e di persona vanno riallineati |
+| S-S1 | selezione | coprire N posizioni dall'interno o dall'esterno: costo, tempi, catena di rimpiazzo creata, rischio di non coprire |
+| S-S2 | selezione | la pipeline dei candidati: probabilità di coprire entro una data, colli di bottiglia per fase |
+| S-S3 | selezione | il profilo della posizione: ruolo, competenze, livello CCNL e fascia proposti dal modello di settore e dalle posizioni simili |
+| S-O1 | organizzazione | fondere, dividere o spostare unità: persone, posizioni, processi, riporti, costi, ampiezza di controllo prima e dopo |
+| S-O2 | organizzazione | ampiezza di controllo e livelli: struttura alternativa che rispetta i limiti scelti, con chi cambia responsabile |
+| S-O3 | organizzazione | confronto della struttura con il modello di settore del datastore: dove RTL si scosta e quanto costa avvicinarsi |
+| S-O4 | organico | piano dell'organico a 12 e 36 mesi sotto un vincolo di costo: assunzioni, uscite, mobilità |
+| S-M1 | cambiamento | un cambiamento come oggetto: stato attuale e futuro, impatto calcolato, prontezza per unità, piano di adozione con le tappe |
+| S-M2 | cambiamento | prontezza e resistenza: per unità, sui sondaggi di engagement aggregati sopra soglia, carico di cambiamenti già in corso |
+| S-M3 | cambiamento | sequenza: in che ordine introdurre più cambiamenti per non sovraccaricare le stesse unità |
+| S-P1 | processi | ridisegno: togliere, unire o automatizzare attività; effetto su posizioni, competenze, carico delle unità, KPI del processo |
+| S-P2 | processi | l'IA nelle attività: quali attività passano da persona ad assistita o automatizzata, con quale impatto su organico e competenze |
+| S-P3 | processi | confronto col processo di riferimento del settore (datastore, APQC): passi mancanti, ruoli scoperti |
+| S-X1 | combinato | fusione di due unità con le uscite previste, i successori e il piano di formazione insieme, in un solo scenario |
+| S-X2 | combinato | piano strategico: un obiettivo del vertice tradotto in organico, competenze, formazione, selezione e cambiamento, con il costo totale |
+
+## 5. Le voci
+
+Ogni voce è un lotto per un thread suo (regola dei passi piccoli del 21/11), con il modello minimo adatto (regola del 07/11): **S** Sonnet, **O** Opus. «Fatta quando» è sempre una prova dal vivo su RTL con comando, esito, percorso e orario.
+
+### Onda 0: decisioni e misura
+
+| id | cosa | file e comandi | chi | fatta quando | stato |
+|---|---|---|---|---|---|
+| Z0 | Valutazione e piano nel repo, PR in bozza | `docs/piani/PIANO_heuresys-ai-driven_20261126.md`, `docs/piani/ai-driven_20261126/` | Claude (O) | PR aperta | fatta |
+| Z1 | Sì di Enzo al piano e alle proposte E10-E13 | — | Enzo | risposta nel thread | aperta |
+| Z2 | ADR-0062 «Heuresys AI-driven»: le decisioni E1-E13, LIBERA spenta (emenda l'uso di ADR-0053 per RTL), il motore degli scenari sulla struttura ombra, i segnalatori senza scrittura, la memoria per persona | `docs/architecture/adr/0062_*.md`, `python docs/kb/tools/build_adr_index.py` | Claude (O); Enzo accetta | stato ACCETTATO nel file | aperta |
+| M0 | Misura dell'uso reale in produzione, in sola lettura (conversazioni, persone, proposte, capacità e modo, ammessi) | query in `docs/piani/ai-driven_20261126/misura-uso.sql`, eseguita da un thread sulla VM | Claude (S) | numeri nel file della valutazione con l'orario | aperta |
+| M1 | Il livello si misura da un comando: copertura di letture, scritture, pagine, segnalatori, scenari, batteria, uso | `docs/kb/tools/misura_livello_agentico.py` (dall'atlante e da `agent-operations.json`), in `verify_gate.py` | Claude (S) | il comando riproduce i numeri della valutazione; visto rosso togliendo una voce dal catalogo | aperta |
+| M2 | Rito di cancello d'onda: si rimisura il livello con M1 e si scrive l'esito qui | questa tabella | Claude | a ogni fine onda | aperta |
+
+### Onda 1: le fondamenta comuni (E8)
+
+| id | cosa | file e comandi | chi | fatta quando | stato |
+|---|---|---|---|---|---|
+| F0a | Aprire l'assistente a tutte le persone di RTL (E1): tenant RTL ammesso, limiti di servizio adeguati, coda con priorità invece del rifiuto quando l'abbonamento è pieno | drop-in del gateway sulla VM, `apps/agent-gateway/src/limiti.ts` | Claude (S) | tre persone di RTL con profili diversi conversano dal vivo, ognuna vede solo il suo perimetro | aperta |
+| F0b | Garanzia di E3: nessuna attivazione LIBERA possibile per RTL finché Enzo non dice altro; il cancello lo ricontrolla | migrazione nuova, `capacita.ts`, prova | Claude (S) | prova rossa con un'attivazione finta, verde senza | aperta |
+| F0c | Riepilogo settimanale a Enzo di ogni scrittura confermata con l'agente (E5) | rotta di sola lettura, pagina, timer | Claude (S) | il riepilogo della prima settimana letto da Enzo | aperta |
+| F1 | Copertura d'azione: ogni scrittura di business nel catalogo con la sua classe (oggi circa 28 su 341); le C sempre con conferma, le B con conferma per E3; nessuna cancellazione fisica | `docs/kb/agent-perimetri.json`, `build_agent_operations.py`, `classi-azioni.ts`, prova avversaria estesa | Claude (O) per la classificazione, (S) per i lotti | M1 ≥ 90% delle scritture; prova avversaria verde | aperta |
+| F1b | Ogni funzione nuova nasce con la sua voce per l'agente (P1): controllo in CI che rende rossa una rotta senza classe né esclusione dichiarata | `docs/kb/tools/check_copertura_agente.py`, `state-lint.yml` | Claude (S) | visto rosso con una rotta finta | aperta |
+| F2 | Conoscenza e memoria: si assorbe il piano K della PR #272 (documenti, politiche e regole consultabili, ricerca per parole e significato, memoria personale per E9) | voci K1-K10 e K15 di quel piano | Claude (O) | come nel piano K; memoria vista e cancellata da una persona di RTL | aperta |
+| F3a | ADR e schema del motore degli scenari: scenario, versioni, ipotesi, leve, opzioni, risultati, struttura ombra (copia logica del tenant su cui si calcola senza toccare le tabelle vere) | ADR in Z2, migrazioni, `packages/shared/src/schemas/scenari.ts` | Claude (O) | catena provata sul gemello con `ci-rehearsal.sh`; nessuna scrittura sulle tabelle vere (post-condizione) | aperta |
+| F3b | Calcolatori deterministici delle cinque famiglie (effetto diretto, cascata, nel tempo con simulazione a molte estrazioni, sotto vincoli, combinati) | `apps/api/src/modules/scenari/` | Claude (O) | prove con risultati attesi calcolati a mano; tempi sotto la soglia di P25 | aperta |
+| F3c | Le probabilità stimate sulla storia di RTL (uscite, prontezza, tempi di formazione e selezione), al posto della regola lineare del rischio di uscita, con la banda di incertezza e la dichiarazione che la storia è generata | `apps/api/src/modules/insights/`, `db/scripts/storia36.sh` | Claude (O) | confronto fra stima e storia su un periodo tenuto da parte | aperta |
+| F3d | L'agente degli scenari: dalla domanda allo scenario, confronto delle opzioni, spiegazione con le fonti; strumenti di classe A (lo scenario non scrive sulle tabelle vere) | gateway, istruzioni, catalogo | Claude (O) | S-T1 e S-O1 dal vivo con Valentina Conti | aperta |
+| F3e | La pagina degli scenari: opzioni affiancate, grafici, banda di incertezza, modali a cascata sulle fonti, barra di avanzamento nei calcoli lunghi | `apps/web/src/app/(authenticated)/scenari/`, `@heuresys/ui` | Claude (S) | uso dal vivo con il profilo dell'HR manager | aperta |
+| F4a | I segnalatori (E6): agenti in background che osservano e non scrivono; ogni segnalazione ha destinatario, perimetro, fonte, gravità, scadenza; niente doppioni | migrazione `sys_agent_signals`, timer con il token degli agenti, `docs/architecture/agenti/ANAGRAFE_agenti.md` | Claude (O) | tre segnalazioni vere su RTL arrivano alle persone giuste, nessuna fuori perimetro (prova) | aperta |
+| F4b | La casella delle segnalazioni nella piattaforma, con «utile» e «non utile» che diventano la misura dell'asse 4 | pagina, rotte, `@heuresys/ui` | Claude (S) | uso dal vivo | aperta |
+| F5 | Lavoro in più passi: si attua il piano delle applet (ADR-0060, voci P2 e P4-P14), con la conferma della persona per ogni applet (E3) | `docs/piani/PIANO_applet-assistente_20261118.md` | Claude (O) | come nel piano delle applet | aperta |
+| F6a | La batteria della qualità per dominio (E11): domande vere con la risposta attesa ricavata dai dati, campione corretto da Enzo, soglia | `apps/agent-gateway/test/batteria/`, script di corsa sul gemello | Claude (S) prepara; Enzo corregge il campione | prima corsa con l'esito per dominio | aperta |
+| F6b | Il controllo di equità (E12) su ogni proposta che riguarda persone: rapporto fra gruppi per genere ed età, spiegazione obbligatoria, rifiuto sotto soglia | `apps/api/src/lib/equita/`, prova | Claude (O) | visto rosso su una proposta sbilanciata costruita apposta | aperta |
+| F6c | Fonti cliccabili (E13): ogni risposta e ogni scenario portano i riferimenti a dato, pagina e regola, aperti in modale | `istruzioni.ts`, `risposta-assistente.tsx` | Claude (S) | dal vivo su tre risposte | aperta |
+| F7 | Squadra di specialisti: l'assistente personale coordina un agente per dominio (P7), ciascuno con istruzioni, strumenti, batteria e versione promossa (P23) | gateway (sotto-agenti dell'SDK), anagrafe | Claude (O) | una domanda che attraversa tre domini risolta dal vivo | aperta |
+| F8 | Cruscotto degli agenti: uso, consumo per agente e persona, tempi, esiti, segnalazioni utili, decisioni prese con l'agente (test del valore, F0-3 del programma del change management) | piano K voce K13, pagina per Enzo | Claude (S) | una settimana di numeri letti da Enzo | aperta |
+
+### Onde 2-7: i domini (ordine di E8)
+
+Per ogni dominio lo stesso schema di cinque voci, così ogni dominio arriva al livello 5 allo stesso modo:
+
+- **a, scritture**: le scritture del dominio nel catalogo con la classe (parte di F1);
+- **b, specialista**: istruzioni, conoscenza del dominio, batteria sopra soglia (F6a, F7);
+- **c, segnalatori**: almeno tre, elencati sotto (F4);
+- **d, scenari**: quelli della sezione 4 per il dominio (F3);
+- **e, applet**: almeno tre lavori in più passi (F5), dimostrati dal vivo con la persona del profilo giusto.
+
+Base di oggi, per i soli strumenti del catalogo generico (`agent-operations.json` contro `atlas.yaml`, misura del 2026-11-26): letture al 100% in quasi tutti i domini; scritture talenti e carriere 6 su 33, competenze e formazione 1 su 46, KPI e valutazioni 2 su 29, selezione 0 su 14, organizzazione 0 su 55 (più gli strumenti con nome proprio su unità e posizioni), processi 2 su 23, persone e amministrazione 0 su 21.
+
+| id | dominio | segnalatori (c) | scenari (d) | applet (e) | stato |
+|---|---|---|---|---|---|
+| D1 | Talenti, tavole di rimpiazzo, carriere e percorsi | posizione critica senza successore pronto; successore ad alto rischio di uscita; carriera ferma oltre la soglia | S-T1…S-T5 | piano di successione di un'unità; percorso di sviluppo per N successori; revisione dei talenti preparata | aperta |
+| D2 | Competenze e formazione | lacuna critica in crescita; formazione obbligatoria in scadenza; competenza del settore assente nel tenant | S-C1…S-C4 | piano formativo sotto budget; riqualificazione di un gruppo; aggiornamento delle competenze di un ruolo | aperta |
+| D3 | KPI, obiettivi, valutazioni e compensi | valutazioni incoerenti con i KPI; scarto fra valutatori; divario retributivo oltre soglia | S-K1…S-K4 | sessione di calibrazione preparata; riallineamento degli obiettivi a cascata; distribuzione del merito | aperta |
+| D4 | Selezione interna ed esterna | richiesta ferma oltre i tempi; candidato interno idoneo non considerato; offerta fuori fascia | S-S1…S-S3 | apertura di una posizione con profilo e annuncio; confronto interno-esterno; pianificazione dei colloqui | aperta |
+| D5 | Organizzazione e cambiamento | ampiezza di controllo fuori limite; unità con troppi cambiamenti insieme; posizioni senza titolare da tempo | S-O1…S-O4, S-M1…S-M3, S-X1, S-X2 | riorganizzazione di un'unità dall'inizio alla fine (E2); piano di adozione; comunicazione alle persone toccate, preparata e confermata | aperta |
+| D6 | Processi | attività senza responsabile; processo con passi mancanti rispetto al riferimento; carico fuori misura su un'unità | S-P1…S-P3 | ridisegno di un processo; classificazione e mappatura verso APQC di un gruppo di processi | aperta |
+| D7 | Persone e amministrazione (presenze, ferie, straordinari, engagement, faldone) | carico eccessivo prolungato; assenze anomale per unità, solo aggregate; calo di engagement | effetto su organico e carico (dentro S-O4) | pianificazione delle ferie di un'unità; risposta alle richieste dei dipendenti con le fonti | aperta |
+| D8 | Datastore | prototipo di settore cambiato rispetto a quello del tenant | il modello di settore come termine di confronto in S-O3, S-C3, S-P3 | console con memoria (piano K, voce K15) | aperta |
+
+### Onda 8: agenti esterni (E10, se Enzo dice sì)
+
+| id | cosa | file e comandi | chi | fatta quando | stato |
+|---|---|---|---|---|---|
+| X1 | Heuresys esposto agli assistenti esterni con MCP, con i permessi della persona, le classi e il cancello di sempre | gateway, autenticazione | Claude (O) | una persona di RTL lavora da Claude Desktop sul suo perimetro, prova avversaria verde | aperta |
+
+## 6. Simulazione, scritta prima di eseguire
+
+- **Dove si calcola uno scenario.** Sulla struttura ombra, mai sulle tabelle `sys.*` vere: la post-condizione di ogni prova conta le righe delle tabelle di business prima e dopo (regola delle scritture di massa). Lo scenario diventa lavoro solo con un'applet, che scrive con l'identità e i permessi della persona dopo la sua conferma (ADR-0060 E1, decisione E3).
+- **Che cosa calcola il modello e che cosa il codice.** I numeri li calcola sempre il codice (riproducibili, provati); il modello sceglie leve e opzioni, spiega e cita. Un numero scritto dal modello senza calcolo è un difetto che la batteria deve vedere.
+- **Capacità dell'abbonamento.** Aprire a tutte le persone di RTL (E1) e accendere i segnalatori consuma la capacità condivisa con i thread di sviluppo. Per questo i segnalatori girano a lotti con un tetto giornaliero (piano K, decisione D4), le domande vanno in coda con priorità e il consumo si vede (F8). Se la capacità non basta, lo si dice con la misura, non lo si presume.
+- **Dati di RTL.** Le persone di RTL sono inventate; le probabilità stimate sulla loro storia valgono per la prova del motore, non come verità statistica, e lo scenario lo dichiara.
+- **Persone e perimetri.** I segnalatori e gli scenari leggono con il perimetro del destinatario (I16-I22); le segnalazioni sulle persone passano dal controllo di equità; le segnalazioni restano dentro la piattaforma (E6), quindi nessuna classe C.
+- **Altri thread.** Gateway agenti (PR #496), permessi, lingue e sottoprocessi lavorano ora: le voci F0a e F7 toccano il gateway e partono dopo l'unione di #496. Il piano K (PR #272) e il piano delle applet si assorbono, non si duplicano: le loro tabelle restano la fonte delle loro voci. Ogni pagina nuova nasce con il selettore italiano e inglese.
+- **Numeri delle migrazioni e ADR.** ADR-0058 è riservato dal piano K: questo piano usa ADR-0062. Le migrazioni prendono il numero libero al momento della PR, dopo `git fetch`.
+- **Chi serve davvero.** Enzo per Z1, Z2 (accettare l'ADR), il campione della batteria (F6a) e le prove dal vivo con le persone di RTL che vuole vedere. Tutto il resto lo fanno i thread.
+
+## 7. Registro delle scoperte (fuori da questo ciclo)
+
+- La tabella del piano dell'assistente come Claude ha V1-V4 «da fare», ma V2 e V3 esistono nel codice (`omissis.ts`, `istruzioni.ts`).
+- ADR-0033 è PROPOSED mentre il catalogo generico è in servizio.
+- Le migrazioni 000510-000512 scrivono `fonte AGENTE` per regole SQL: l'etichetta promette un agente che non c'è.
+- Il README del gateway descrive l'adattatore di un plugin oggi disattivato.

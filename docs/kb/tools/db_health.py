@@ -126,6 +126,11 @@ INFORMATIVE = {
         "vi compaiono sempre, perche' i loro ruoli li scrive il provisioning e non un atto. Le "
         "sentinelle vere della stessa migrazione sono v_mandati_incompatibili (D7) e "
         "v_mandato_revisione_scaduta, che restano a zero.",
+    "v_ruoli_di_comando_attesi":
+        "ADR-0057 R2 (mig 000495): il ruolo di comando che l'organigramma ASSEGNA, una riga per "
+        "titolare di unita' attiva. Conta stato, non anomalie: righe qui sono l'atteso (40 su RTL "
+        "il 2026-11-26), non un difetto. Lo scarto fra atteso e concesso lo misura "
+        "v_ruoli_fuori_modello.",
 }
 
 # Soglie: superate = allarme. Derivano dalla misura del 2026-08-03, non da teoria.

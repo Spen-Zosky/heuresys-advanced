@@ -28,6 +28,7 @@ import {
   ValidationError,
 } from "../../errors/index.js";
 import { isPlatform, perimetroClienti, type ActorContext } from "../../lib/actor.js";
+import { haMandatoGestioneModelli } from "../../lib/scope/mandati.js";
 import * as repo from "./repository.js";
 import { proposeModel, isPublishedVariantVersion } from "./derivation.js";
 import { diffVersions, diffAgainstModelLatest } from "./diff.js";
@@ -119,7 +120,7 @@ async function esisteFascicolo(id: string): Promise<TenantBlueprint> {
 
 /** Perimetro dei clienti per i fascicoli: il gestore dei modelli non ne ha (F14). */
 function perimetroFascicoli(a: ActorContext): Set<string> | undefined {
-  if (a.roles.includes("BLUEPRINT_MANAGER")) return undefined;
+  if (haMandatoGestioneModelli(a)) return undefined;
   return perimetroClienti(a);
 }
 

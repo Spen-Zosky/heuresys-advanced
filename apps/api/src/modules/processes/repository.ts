@@ -51,7 +51,9 @@ const SINTESI = `
          (SELECT count(*)::int FROM sys.sys_tenant_processes c
            WHERE c.tenant_process_parent_id = tp.tenant_process_id AND c.tenant_process_is_active) AS "subprocessCount",
          (SELECT count(*)::int FROM sys.sys_tenant_process_steps st
-           WHERE st.tenant_process_step_process_id = tp.tenant_process_id) AS "activityCount",
+            JOIN sys.sys_tenant_processes x ON x.tenant_process_id = st.tenant_process_step_process_id
+           WHERE x.tenant_process_id = tp.tenant_process_id
+              OR (x.tenant_process_parent_id = tp.tenant_process_id AND x.tenant_process_is_active)) AS "activityCount",
          (SELECT count(DISTINCT oup.org_unit_process_org_unit_id)::int FROM sys.sys_organization_unit_processes oup
            WHERE oup.org_unit_process_tenant_process_id = tp.tenant_process_id) AS "unitCount"
     FROM sys.sys_tenant_processes tp

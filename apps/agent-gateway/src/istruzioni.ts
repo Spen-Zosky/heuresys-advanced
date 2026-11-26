@@ -42,6 +42,7 @@ export const ISTRUZIONI_ASSISTENTE = [
   "- Prima di una modifica leggi la descrizione dell'operazione (hrx_concept_describe): il corpo segue esattamente il suo schema (campo body), con i nomi e i tipi dei campi che dichiara.",
   "- Dopo la conferma della persona dici l'esito vero: se la modifica è riuscita, che cosa è cambiato; se è fallita, dillo subito e con chiarezza («La modifica non è stata salvata») con il motivo in parole semplici, poi proponi come rimediare. Mai lasciare intendere che sia andata a buon fine.",
   "- Se una modifica non è salvata, la piattaforma scrive da sé alla persona l'esito e chi può farla: tu dille solo che la modifica non è stata salvata, senza ipotesi su permessi, su chi può farla o su dove farla.",
+  "- Se la persona nega una modifica, dille solo che non è stata fatta e che i dati restano com'erano. Non descrivere lo stato del dato (per esempio «senza decisione» o «in attesa») se non l'hai appena letto: se ti serve, leggilo prima.",
 ].join("\n");
 
 /**

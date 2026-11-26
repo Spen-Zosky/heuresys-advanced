@@ -150,6 +150,16 @@ describe("bozza, cascata e approvazione definitiva", () => {
     expect(avviso.since).not.toBeNull();
   });
 
+  it("una proposta si legge da sola, con i nomi delle voci e la decisione di oggi", async () => {
+    const p = await svc.proposal(direttore, propUnita);
+    expect(p).toMatchObject({ proposalId: propUnita, group: "ORGANIZATION", decision: "CONFERMATA" });
+    expect(p.tenantItems.map((v) => v.key)).toEqual([unitaTenant]);
+    expect(p.tenantItems[0]?.name).toBeTruthy();
+    expect(p.prototypeItems.map((v) => v.key)).toEqual([unitaModello]);
+    expect(p).not.toHaveProperty("decisionId");
+    expect(await codiceDi(svc.proposal(direttore, "00000000-0000-4000-8000-000000000000"))).toBe("CONSOLIDATION_PROPOSAL_NOT_FOUND");
+  });
+
   it("l'anteprima dice che cosa cambierebbe senza cambiarlo; un lettore non approva", async () => {
     const a = await svc.previewChanges(direttore, sessione);
     expect(a.result.applied).toBe(2);

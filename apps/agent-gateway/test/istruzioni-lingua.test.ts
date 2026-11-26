@@ -25,4 +25,9 @@ describe("la lingua dell'assistente segue quella della pagina", () => {
     expect(rigaLingua("it")).toContain("ITALIANO");
     expect(istruzioniAssistente("en").startsWith("LINGUA DELLA PAGINA: INGLESE")).toBe(true);
   });
+
+  it("dopo una modifica negata non si afferma lo stato del dato senza averlo letto", () => {
+    expect(ISTRUZIONI_ASSISTENTE).toContain("Se la persona nega una modifica");
+    expect(ISTRUZIONI_ASSISTENTE).toContain("se non l'hai appena letto");
+  });
 });

@@ -37,8 +37,8 @@
    "cosa": "un atto che una decisione di Enzo riserva a un pulsante della pagina"
   },
   "cancellazione-fisica": {
-   "di_business": true,
-   "cosa": "l'API cancella la riga: classe X, fuori dal catalogo finché non diventa un ritiro logico (ADR-0035)"
+   "di_business": false,
+   "cosa": "l'API cancella la riga: classe X, l'agente non la esegue mai. Decisione di Enzo del 2026-11-26 (F1): le cancellazioni fisiche restano alle persone, che le fanno dalla pagina; l'agente può proporle. Non entrano nel conto del 90%; il ritiro logico si fa tabella per tabella dove un caso d'uso lo chiede (ADR-0061)"
   },
   "caricamento-file": {
    "di_business": false,
@@ -1482,10 +1482,11 @@
     "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
    },
    "delete_by_id_members_by_userid": {
-    "fuori": "cancellazione-fisica",
+    "classe": "C",
     "metodo": "DELETE",
     "percorso": "/:id/members/:userId",
-    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+    "ragione": "chiude la partecipazione di una persona al progetto (project_member_ends_on), non la cancella: tocca una sola persona, C (P17)",
+    "verifica": "apps/api/src/modules/projects/repository.ts: closeMember, project_member_ends_on = CURRENT_DATE"
    },
    "delete_by_id_phases_by_phaseid": {
     "fuori": "cancellazione-fisica",
@@ -2124,10 +2125,11 @@
   },
   "users": {
    "delete_by_id": {
-    "fuori": "cancellazione-fisica",
+    "classe": "C",
     "metodo": "DELETE",
     "percorso": "/:id",
-    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+    "ragione": "disattivazione di una persona (user_status DEACTIVATED), non una cancellazione: tocca una sola persona, C (P17)",
+    "verifica": "apps/api/src/modules/users/repository.ts: deactivateUser, user_status = 'DEACTIVATED'"
    },
    "delete_by_id_purge": {
     "fuori": "cancellazione-fisica",
@@ -2136,10 +2138,10 @@
     "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
    },
    "delete_by_id_roles_by_grantid": {
-    "fuori": "cancellazione-fisica",
+    "fuori": "accessi",
     "metodo": "DELETE",
     "percorso": "/:id/roles/:grantId",
-    "ragione": "l'API cancella la riga (DELETE FROM): classe X, mai nel catalogo (P17, ADR-0035, ADR-0063 F1)"
+    "ragione": "revocare un ruolo (user_auth_role_revoked_at) è governo degli accessi, come assegnarlo"
    },
    "patch_by_id": {
     "classe": "C",

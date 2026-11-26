@@ -1700,6 +1700,107 @@
     }
    }
   },
+  "consolidation-runs": {
+   "post_by_runid_alignment_discard": {
+    "schema": "(nessun corpo)",
+    "body": {
+     "type": "object",
+     "properties": {},
+     "additionalProperties": false
+    }
+   },
+   "put_by_runid_alignment_drafts": {
+    "schema": "AlignmentDraftBodySchema",
+    "body": {
+     "$schema": "https://json-schema.org/draft/2020-12/schema",
+     "type": "object",
+     "properties": {
+      "voci": {
+       "minItems": 1,
+       "maxItems": 5000,
+       "type": "array",
+       "items": {
+        "type": "object",
+        "properties": {
+         "dominio": {
+          "type": "string",
+          "enum": [
+           "ateco",
+           "classe",
+           "ccnl",
+           "processi",
+           "unita",
+           "organigramma",
+           "obblighi",
+           "ruoli",
+           "copertura",
+           "inquadramento",
+           "fasi",
+           "skill",
+           "obiettivi",
+           "metriche",
+           "derivati",
+           "bersagli",
+           "formazione",
+           "carriere",
+           "incentivi",
+           "commesse",
+           "criticita",
+           "condizioni",
+           "ruoli_funzionali",
+           "utenti"
+          ]
+         },
+         "chiave": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+         },
+         "decisione": {
+          "type": "string",
+          "enum": [
+           "UNISCO",
+           "ADOTTO",
+           "TENGO",
+           "TOLGO"
+          ]
+         }
+        },
+        "required": [
+         "dominio",
+         "chiave",
+         "decisione"
+        ]
+       }
+      }
+     },
+     "required": [
+      "voci"
+     ]
+    }
+   }
+  },
+  "consolidation-vocabulary": {
+   "post_by_id_status": {
+    "schema": "VocabularyDecideBodySchema",
+    "body": {
+     "$schema": "https://json-schema.org/draft/2020-12/schema",
+     "type": "object",
+     "properties": {
+      "status": {
+       "type": "string",
+       "enum": [
+        "APPROVATA",
+        "RITIRATA"
+       ]
+      }
+     },
+     "required": [
+      "status"
+     ],
+     "additionalProperties": false
+    }
+   }
+  },
   "content": {
    "patch_by_id": {
     "schema": "ContentDocumentUpdateSchema",
@@ -9232,6 +9333,183 @@
      "required": [
       "inclusion",
       "rationale"
+     ]
+    }
+   }
+  },
+  "tenant-consolidations": {
+   "post": {
+    "schema": "StartConsolidationBodySchema",
+    "body": {
+     "$schema": "https://json-schema.org/draft/2020-12/schema",
+     "type": "object",
+     "properties": {
+      "variantVersionId": {
+       "type": "string",
+       "format": "uuid",
+       "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+      },
+      "runId": {
+       "type": "string",
+       "format": "uuid",
+       "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+      },
+      "closeOpen": {
+       "type": "boolean"
+      },
+      "trigger": {
+       "type": "string",
+       "enum": [
+        "RILASCIO",
+        "VERSIONE_NUOVA",
+        "RICHIESTA"
+       ]
+      }
+     },
+     "required": [
+      "trigger"
+     ]
+    }
+   },
+   "post_by_id_discard_changes": {
+    "schema": "DiscardChangesBodySchema",
+    "body": {
+     "$schema": "https://json-schema.org/draft/2020-12/schema",
+     "type": "object",
+     "properties": {
+      "proposalIds": {
+       "minItems": 1,
+       "maxItems": 1000,
+       "type": "array",
+       "items": {
+        "type": "string",
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+       }
+      }
+     },
+     "additionalProperties": false
+    }
+   },
+   "post_by_id_groups_by_group_close": {
+    "schema": "(nessun corpo)",
+    "body": {
+     "type": "object",
+     "properties": {},
+     "additionalProperties": false
+    }
+   },
+   "post_by_id_groups_by_group_run": {
+    "schema": "(nessun corpo)",
+    "body": {
+     "type": "object",
+     "properties": {},
+     "additionalProperties": false
+    }
+   },
+   "post_by_id_preview_changes": {
+    "schema": "(nessun corpo)",
+    "body": {
+     "type": "object",
+     "properties": {},
+     "additionalProperties": false
+    }
+   },
+   "post_proposals_bulk_decision": {
+    "schema": "BulkDecideBodySchema",
+    "body": {
+     "$schema": "https://json-schema.org/draft/2020-12/schema",
+     "type": "object",
+     "properties": {
+      "proposalIds": {
+       "minItems": 1,
+       "maxItems": 1000,
+       "type": "array",
+       "items": {
+        "type": "string",
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+       }
+      },
+      "mode": {
+       "type": "string",
+       "enum": [
+        "RACCOMANDATA",
+        "RIFIUTO",
+        "CASCATA"
+       ]
+      },
+      "cascade": {
+       "type": "boolean"
+      },
+      "onlyUndecided": {
+       "type": "boolean"
+      }
+     },
+     "required": [
+      "proposalIds",
+      "mode"
+     ],
+     "additionalProperties": false
+    }
+   },
+   "post_proposals_by_proposalid_decision": {
+    "schema": "DecideProposalBodySchema",
+    "body": {
+     "$schema": "https://json-schema.org/draft/2020-12/schema",
+     "type": "object",
+     "properties": {
+      "decision": {
+       "type": "string",
+       "enum": [
+        "CONFERMATA",
+        "RIFIUTATA",
+        "ADOTTATA",
+        "NON_ADOTTATA",
+        "PERSONALIZZAZIONE"
+       ]
+      },
+      "form": {
+       "type": "string",
+       "enum": [
+        "NORMALIZZATA",
+        "FORMA_TENANT",
+        "NOME_PROTOTIPO"
+       ]
+      },
+      "reason": {
+       "type": "string",
+       "maxLength": 1000
+      },
+      "cascade": {
+       "type": "boolean"
+      }
+     },
+     "required": [
+      "decision"
+     ],
+     "additionalProperties": false
+    }
+   },
+   "post_proposals_confirm_certain": {
+    "schema": "ConfirmCertainBodySchema",
+    "body": {
+     "$schema": "https://json-schema.org/draft/2020-12/schema",
+     "type": "object",
+     "properties": {
+      "proposalIds": {
+       "minItems": 1,
+       "maxItems": 500,
+       "type": "array",
+       "items": {
+        "type": "string",
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+       }
+      }
+     },
+     "required": [
+      "proposalIds"
      ]
     }
    }

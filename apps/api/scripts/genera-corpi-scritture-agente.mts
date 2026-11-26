@@ -30,7 +30,7 @@ const CATALOGO = join(RADICE, "docs/kb/atlas/agent-operations.json");
 const USCITA = join(RADICE, "docs/kb/atlas/agent-write-bodies.json");
 
 interface Operazione { method: string; path: string; permission: string }
-interface Catalogo { concepts: Record<string, { base: string; operations: Record<string, Operazione> }> }
+interface Catalogo { concepts: Record<string, { base: string; modulo?: string; operations: Record<string, Operazione> }> }
 
 const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -61,7 +61,8 @@ for (const [concetto, voce] of Object.entries(catalogo.concepts)) {
   for (const [id, op] of Object.entries(voce.operations)) {
     if (op.method.toUpperCase() === "GET" || op.method.toUpperCase() === "DELETE") continue;
     try {
-      const nome = schemaDelCorpo(concetto, op.method, op.path);
+      // Un concetto aperto da un modulo con più prefissi (F1, consolidamento) porta `modulo`.
+      const nome = schemaDelCorpo(voce.modulo ?? concetto, op.method, op.path);
       if (nome === null) {
         (corpi[concetto] ??= {})[id] = { schema: "(nessun corpo)", body: { type: "object", properties: {}, additionalProperties: false } };
         continue;

@@ -17,6 +17,9 @@ Environment=NODE_ENV=production
 Environment=AGENT_GATEWAY_PORT=8790
 Environment=AGENT_GATEWAY_SUBSCRIPTION_AUTH=1
 Environment=HEURESYS_API=http://127.0.0.1:@@API_PORT@@
+# R8: il diario del gate e il registro delle capacità leggono il database. Dal .env della copia il
+# gateway prende solo POSTGRES_HOST/PORT/DB/SSL e l'identità heuresys_app (src/db-pool.ts), niente altro.
+Environment=HEURESYS_REPO_ROOT=@@REPO_DIR@@
 UnsetEnvironment=ANTHROPIC_API_KEY
 EnvironmentFile=-/etc/heuresys/agent-gateway-consolidation.conf
 # Token di lunga durata dell'abbonamento (CLAUDE_CODE_OAUTH_TOKEN), unico per tutti gli agenti della macchina:

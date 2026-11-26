@@ -64,4 +64,14 @@ test.describe("Amministrazione della piattaforma", () => {
     await expect(page.getByTestId("agent-capabilities-page")).toBeVisible({ timeout: 45_000 });
     await expect(page.getByTestId("agent-capability-row")).toHaveCount(c.items.length, { timeout: 30_000 });
   });
+
+  test("riepilogo settimanale dell'assistente (ADR-0063 D3): i totali vengono dall'API", async ({ page, request }) => {
+    const s = await leggi<{ weekStart: string; totals: { confirmed: number; autonomous: number }; writesTotal: number }>(
+      request, "/v1/agent-weekly-summary");
+    await page.goto(`/admin/agent-weekly-summary?week=${s.weekStart}`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+    await expect(page.getByTestId("agent-weekly-summary-page")).toBeVisible({ timeout: 45_000 });
+    await expect(page.getByTestId("agent-weekly-total-confermate")).toContainText(String(s.totals.confirmed), { timeout: 30_000 });
+    await expect(page.getByTestId("agent-weekly-total-autonome")).toContainText("0");
+    await expect(page.getByTestId("agent-weekly-write-row")).toHaveCount(Math.min(s.writesTotal, 500));
+  });
 });

@@ -293,6 +293,10 @@
           "ALIGNED": "aligned",
           "UNKNOWN": "gap to assess"
         }
+      },
+      "AGENT_WEEKLY_SUMMARY": {
+        "subject": "Weekly assistant summary: week from {{from}}",
+        "body": "From {{from}} to {{to}}: {{confirmed}} writes confirmed, {{denied}} denied, {{autonomous}} executed without confirmation."
       }
     },
     "approvals": {

@@ -108,13 +108,13 @@ describe("mandato K, R-5 — BLUEPRINT_MANAGER e TENANT_ADMIN sui fascicoli", ()
     expect(r.statusCode).toBe(200);
   });
 
-  it("BLUEPRINT_MANAGER su un fascicolo FUORI dal suo perimetro -> 404 (mandato R-5)", async () => {
+  it("BLUEPRINT_MANAGER apre anche un fascicolo FUORI dai clienti assegnati -> 200 (F14, come il confronto)", async () => {
     const r = await suite.app.inject({
       method: "GET",
       url: `/v1/tenant-blueprints/${fascicoloFuori}`,
       headers: headers(bm),
     });
-    expect(r.statusCode).toBe(404);
+    expect(r.statusCode).toBe(200);
   });
 
   it("Controprova: PLATFORM_ADMIN vede il fascicolo fuori dal perimetro di BLUEPRINT_MANAGER -> 200", async () => {

@@ -74,6 +74,9 @@ function isWriteStatement(args: any[]): boolean {
   const stmt = firstStatement(args);
   if (/^(INSERT|UPDATE|DELETE|MERGE|TRUNCATE)\b/.test(stmt)) return true;
   if (stmt.startsWith("WITH")) return /\b(INSERT|UPDATE|DELETE|MERGE)\b/.test(stmt);
+  // Funzioni che scrivono chiamate con SELECT (e che le prove fanno fallire apposta):
+  // la fotografia del motore degli scenari (000515) rifiuta una seconda fotografia.
+  if (/\bSYS_SCENARIO_FOTOGRAFA\s*\(/.test(stmt)) return true;  // stmt è già in maiuscolo
   return false;
 }
 

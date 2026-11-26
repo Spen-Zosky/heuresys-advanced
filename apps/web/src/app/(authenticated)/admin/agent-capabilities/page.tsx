@@ -12,6 +12,7 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
@@ -33,6 +34,7 @@ const ANNULLAMENTI = ["GIORNALE_UNDO", "RIGA_SOSTITUTIVA"] as const;
 function messaggio(err: unknown, t: (k: string) => string): string {
   if (isApiError(err)) {
     if (err.status === 403) return t("agentCaps.vietato");
+    if (err.code === "AGENT_CAPABILITY_LIBERA_SPENTA") return t("agentCaps.liberaSpenta");
     if (err.status === 409) return t("agentCaps.duplicata");
     if (err.serverMessage) return `${t("agentCaps.rifiutata")}: ${err.serverMessage}`;
   }
@@ -106,7 +108,8 @@ function Capacita({ c }: { c: AgentCapability }) {
               <label className="w-48 font-medium text-foreground">{t("agentCaps.modo")}
                 <select className={SELECT_CLASS} value={modo.mode} onChange={(e) => setModo({ ...modo, mode: e.target.value as "CONFERMA" | "LIBERA" })} data-testid="agent-capability-mode-select">
                   <option value="CONFERMA">{t("agentCaps.modi.CONFERMA")}</option>
-                  <option value="LIBERA">{t("agentCaps.modi.LIBERA")}</option>
+                  {/* ADR-0063 D4: il modo senza conferma è spento; l'API e il database lo rifiutano comunque. */}
+                  <option value="LIBERA" disabled data-testid="agent-capability-mode-libera">{t("agentCaps.modi.LIBERA_SPENTA")}</option>
                 </select></label>
               <label className="min-w-72 flex-1 font-medium text-foreground">{t("agentCaps.ragione")}
                 <Input value={modo.reason} maxLength={2000} onChange={(e) => setModo({ ...modo, reason: e.target.value })} data-testid="agent-capability-mode-reason" /></label>
@@ -150,6 +153,7 @@ export default function AgentCapabilitiesPage() {
   return (
     <div data-testid="agent-capabilities-page" className="mx-auto max-w-7xl space-y-6 px-6 pb-8">
       <PageHeader title={t("agentCaps.titolo")} description={t("agentCaps.descrizione")} />
+      <p className="text-sm"><Link className="text-primary underline" href="/admin/agent-weekly-summary" data-testid="agent-capabilities-weekly-link">{t("agentCaps.riepilogoSettimanale")}</Link></p>
       <Card>
         <CardHeader><CardTitle as="h2">{t("agentCaps.elenco", { count: elenco.data?.items.length ?? 0 })}</CardTitle></CardHeader>
         <CardContent className="p-0">

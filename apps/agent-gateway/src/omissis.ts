@@ -20,6 +20,9 @@ export const OMISSIS = "{omissis}";
 export const MESSAGGIO_NON_AUTORIZZATO =
   "Non hai le autorizzazioni necessarie per la gestione di queste informazioni. Puoi inviare una richiesta all'Amministratore del Sistema.";
 
+export const MESSAGGIO_NON_AUTORIZZATO_EN =
+  "You do not have the necessary permissions to see this information. You can send a request to the System Administrator.";
+
 /** L'esito che il modello riceve al posto di una lettura negata dall'API. */
 export interface LetturaNegata {
   esito: "NON_AUTORIZZATO";
@@ -79,7 +82,7 @@ export class EsitiLetture {
   }
 
   /** Il messaggio fisso quando tutto ciò che il giro ha cercato di leggere era vietato. */
-  rifiuto(): string | null {
-    return this.negate > 0 && this.riuscite === 0 ? MESSAGGIO_NON_AUTORIZZATO : null;
+  rifiuto(lingua: "it" | "en" = "it"): string | null {
+    return this.negate > 0 && this.riuscite === 0 ? (lingua === "en" ? MESSAGGIO_NON_AUTORIZZATO_EN : MESSAGGIO_NON_AUTORIZZATO) : null;
   }
 }

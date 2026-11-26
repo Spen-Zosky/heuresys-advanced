@@ -92,6 +92,19 @@ beforeAll(async () => {
   delegato = { userId: altri.rows[0]!.user_id, tenantId: direttore.tenantId, roles: await ruoliDi(altri.rows[0]!.user_id) };
   estraneo = { userId: altri.rows[1]!.user_id, tenantId: direttore.tenantId, roles: await ruoliDi(altri.rows[1]!.user_id) };
 
+  // [2026-11-26] Una copia rinfrescata dalla produzione porta la sessione vera del tenant, se ce
+  // n'è una aperta (RTL ne ha una IN_CONFERMA dal 15/11): un tenant ne tiene una sola aperta
+  // (sys_tenant_consolidations_one_open_uq), quindi questi test partono dal tenant senza sessione
+  // aperta. La chiusura è la stessa di `closeOpen` e vive solo nella transazione del file, che
+  // si annulla alla fine: la sessione vera non la tocca nessuno.
+  await pool.query(
+    `UPDATE sys.sys_tenant_consolidations
+        SET tenant_consolidation_status = 'CHIUSA', tenant_consolidation_open_group = NULL,
+            tenant_consolidation_closed_at = now()
+      WHERE tenant_consolidation_tenant_id = $1 AND tenant_consolidation_status IN ('GIRI', 'IN_CONFERMA')`,
+    [direttore.tenantId],
+  );
+
   await pool.query(
     `INSERT INTO sys.sys_user_delegations
        (user_delegation_tenant_id, user_delegation_delegator_id, user_delegation_delegate_id,

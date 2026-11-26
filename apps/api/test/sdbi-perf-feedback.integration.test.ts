@@ -35,6 +35,30 @@ const PR_IMPORT = `p.review_natural_key NOT LIKE 'STORIA36%'
                    WHERE u.user_id = p.review_subject_user_id
                      AND u.user_tenant_id <> p.review_tenant_id)`;
 
+// [2026-11-26] Una riga d'import tolta DI PROPOSITO, con il suo giornale, resta nel conto
+// dell'import: il numero fisso continua a sorvegliare che l'import non si eroda in silenzio, e
+// una rimozione dichiarata non lo fa arrossare. Lo script J4 di db/scripts/rtl-allinea ha tolto
+// un feedback continuo che era un residuo di prova («QA test», alice.esposito a se stessa) e
+// lo ha conservato intero in staging.rtl_residui_prova_undo. Una copia della CI che precede lo
+// script non ha il giornale, e non c'è niente da aggiungere. `filtro` è la stessa condizione
+// del conteggio, scritta sulla riga conservata (`f` è il record ricostruito dal jsonb).
+const feedbackRimossiDichiarati = async (filtro: string): Promise<number> => {
+  const { rows } = await pool.query<{ c: string | null }>(
+    `SELECT to_regclass('staging.rtl_residui_prova_undo')::text AS c`);
+  if (!rows[0]?.c) return 0;
+  return count(
+    `SELECT count(*)::int AS n
+       FROM staging.rtl_residui_prova_undo j,
+            LATERAL jsonb_populate_record(NULL::sys.sys_continuous_feedback, j.riga) f
+      WHERE j.tabella = 'sys_continuous_feedback'
+        AND NOT EXISTS (SELECT 1 FROM sys.sys_continuous_feedback x WHERE x.feedback_id = j.chiave)
+        AND f.feedback_natural_key NOT LIKE 'STORIA36%' AND ${filtro}`);
+};
+const feedbackImport = async (filtro = 'true'): Promise<number> =>
+  (await count(`SELECT count(*)::int AS n FROM sys.sys_continuous_feedback f
+     WHERE f.feedback_natural_key NOT LIKE 'STORIA36%' AND ${filtro}`)) +
+  (await feedbackRimossiDichiarati(filtro));
+
 describe('SDBI Option-B — perf reviews + feedback360', () => {
   it('the 4 sys.* tables hold exactly the RTL-resolvable IMPORT counts', async () => {
     // Scoped to SDBI-import provenance: the storia36 backfill (natural keys
@@ -79,8 +103,7 @@ describe('SDBI Option-B — perf reviews + feedback360', () => {
       WHERE rating_natural_key NOT LIKE 'STORIA36%'`)).toBe(465);
     expect(await count(`SELECT count(*)::int AS n FROM sys.sys_feedback_360_responses
       WHERE response_natural_key NOT LIKE 'STORIA36%'`)).toBe(390);
-    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_continuous_feedback
-      WHERE feedback_natural_key NOT LIKE 'STORIA36%'`)).toBe(474);
+    expect(await feedbackImport()).toBe(474);
   });
 
   it('I5 — every row belongs to the single canonical RTL tenant (FK + middleware, never RLS)', async () => {
@@ -215,12 +238,9 @@ describe('SDBI Option-B — perf reviews + feedback360', () => {
     expect(await count(
       `SELECT count(*)::int AS n FROM sys.sys_performance_reviews p
         WHERE ${PR_IMPORT} AND p.review_reviewer_user_id IS NOT NULL`)).toBe(157);
-    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_continuous_feedback
-      WHERE feedback_natural_key NOT LIKE 'STORIA36%' AND feedback_to_user_id IS NOT NULL`)).toBe(474);
-    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_continuous_feedback
-      WHERE feedback_natural_key NOT LIKE 'STORIA36%' AND feedback_from_user_id IS NOT NULL`)).toBe(473);
-    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_continuous_feedback
-      WHERE feedback_natural_key NOT LIKE 'STORIA36%' AND feedback_related_goal_id IS NOT NULL`)).toBe(146);
+    expect(await feedbackImport('f.feedback_to_user_id IS NOT NULL')).toBe(474);
+    expect(await feedbackImport('f.feedback_from_user_id IS NOT NULL')).toBe(473);
+    expect(await feedbackImport('f.feedback_related_goal_id IS NOT NULL')).toBe(146);
     expect(await count(
       `SELECT count(*)::int AS n FROM sys.sys_feedback_360_responses
         WHERE response_natural_key NOT LIKE 'STORIA36%'

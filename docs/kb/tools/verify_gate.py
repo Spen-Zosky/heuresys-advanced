@@ -156,6 +156,12 @@ ROUTES: list[tuple[str, list[str]]] = [
     ("db/migrations/000484_la_barra_laterale_per_funzione.sql", ["letture-agente"]),
     ("docs/kb/tools/check_letture_agente.py", ["letture-agente"]),
     ("docs/kb/tools/letture_agente_eccezioni.json", ["letture-agente"]),
+    # M1 (piano AI-driven): il livello agentico non scende sotto il minimo registrato. Lo rendono rosso
+    # togliere una voce dal catalogo dell'agente, una classe delle scritture o un segno dal codice.
+    ("docs/kb/tools/misura_livello_agentico.py", ["livello-agentico"]),
+    ("docs/kb/livello-agentico-baseline.json", ["livello-agentico"]),
+    ("docs/kb/livello-agentico-prove.json", ["livello-agentico"]),
+    ("docs/kb/agent-classi-scritture.json", ["livello-agentico"]),
     # T5b (P22): l'anagrafe degli agenti e il suo controllo instradano il confronto col codice.
     ("docs/architecture/agenti/", ["anagrafe-agenti"]),
     ("docs/kb/tools/check_anagrafe_agenti.py", ["anagrafe-agenti"]),
@@ -227,7 +233,7 @@ ROUTES: list[tuple[str, list[str]]] = [
     # `atlas-freshness` non basta: guarda se l'atlante e' vecchio, non se i due elenchi
     # combaciano — sono due domande diverse.
     ("docs/kb/agent-perimetri.json", ["agent-gateway-test"]),
-    ("docs/kb/atlas/agent-operations.json", ["agent-gateway-test"]),
+    ("docs/kb/atlas/agent-operations.json", ["agent-gateway-test", "livello-agentico"]),
     (".handoff/",        ["handoff-lint"]),
     # Un piano si rompe in due modi: cambiando il piano, o cambiando il parser che lo legge.
     # Entrambi instradano la stessa suite, o meta' dei difetti resta invisibile.
@@ -314,6 +320,9 @@ SUITES: dict[str, tuple[str, str]] = {
     # I3: le letture dell'assistente per ogni voce della barra laterale, o un'eccezione scritta.
     "letture-agente":     ("L0", "python docs/kb/tools/check_letture_agente.py --selftest && "
                                  "python docs/kb/tools/check_letture_agente.py"),
+    # M1: il livello agentico misurato da un comando, con il minimo che non si può abbassare.
+    "livello-agentico":   ("L0", "python docs/kb/tools/misura_livello_agentico.py --selftest && "
+                                 "python docs/kb/tools/misura_livello_agentico.py"),
     # I test del gateway, che sono anche i guardiani della coerenza fra i perimetri decisi e
     # la mappa generata. L0 nel costo, L1 nella sostanza: girano senza database.
     "agent-gateway-test": ("L1", "pnpm --filter @heuresys/agent-gateway test"),

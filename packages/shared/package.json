@@ -317,6 +317,11 @@
       "heuresys-source": "./src/schemas/organization-unit-history.ts",
       "default": "./dist/schemas/organization-unit-history.js"
     },
+    "./schemas/ghost-units": {
+      "types": "./dist/schemas/ghost-units.d.ts",
+      "heuresys-source": "./src/schemas/ghost-units.ts",
+      "default": "./dist/schemas/ghost-units.js"
+    },
     "./schemas/succession-pools": {
       "types": "./dist/schemas/succession-pools.d.ts",
       "heuresys-source": "./src/schemas/succession-pools.ts",

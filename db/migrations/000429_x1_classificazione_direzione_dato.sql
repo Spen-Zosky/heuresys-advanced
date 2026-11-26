@@ -387,7 +387,8 @@ VALUES
   ('sys_scenario_equity_checks', 'nativo', 'EMENDATO per la mig 000515 (ADR-0063 D5, F3a): controlli di equita'' dichiarati di un''opzione di scenario, scritte solo dall''API'),
   ('sys_scenario_shadow_units', 'nativo', 'EMENDATO per la mig 000515 (ADR-0063 D5, F3a): struttura ombra: unita'' copiate per uno scenario, scritte solo dall''API'),
   ('sys_scenario_shadow_positions', 'nativo', 'EMENDATO per la mig 000515 (ADR-0063 D5, F3a): struttura ombra: posizioni copiate per uno scenario, scritte solo dall''API'),
-  ('sys_scenario_shadow_assignments', 'nativo', 'EMENDATO per la mig 000515 (ADR-0063 D5, F3a): struttura ombra: titolari copiati per uno scenario, scritte solo dall''API');
+  ('sys_scenario_shadow_assignments', 'nativo', 'EMENDATO per la mig 000515 (ADR-0063 D5, F3a): struttura ombra: titolari copiati per uno scenario, scritte solo dall''API'),
+  ('sys_ghost_units', 'nativo', 'EMENDATO per la mig 000523 (ADR-0063 D2, G1): storia dell''organizzazione ghost, derivata dall''albero delle unita'' e scritta solo da sys.sys_ghost_riforma');
 
 INSERT INTO sys.sys_classificazione_direzione_dato (tabella, stato, motivo)
 SELECT tabella, stato, motivo FROM _classificazione_000429

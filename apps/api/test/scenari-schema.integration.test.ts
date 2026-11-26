@@ -230,6 +230,6 @@ describe("000515 — lo schema del motore degli scenari", () => {
          VALUES ($1, $2, 'BUDGET_FORMAZIONE', 'TENANT')`,
         [a, altro.rows[0]!.tenant_id],
       ),
-    ).rejects.toThrow(/foreign key/);
+    ).rejects.toMatchObject({ code: "23503", constraint: "sys_scenario_levers_option_fk" }); // la lingua del messaggio dipende dal server
   });
 });

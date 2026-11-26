@@ -1,5 +1,5 @@
 -- =====================================================================================
--- 000513 — La piattaforma revoca ruoli e decide il consolidamento nel cliente solo con una
+-- 000517 — La piattaforma revoca ruoli e decide il consolidamento nel cliente solo con una
 --          traccia: due colonne d'autore escono dalla sentinella generica del confine e
 --          ricevono ciascuna una sentinella sua (stessa forma di ADR-0055, mig 000479).
 --
@@ -35,11 +35,11 @@ INSERT INTO sys.sys_tenant_boundary_author_columns (author_column_name, author_c
 VALUES
   ('user_auth_role_revoked_by',
    'Chi ha revocato il ruolo. Fuori dal cliente è legittimo solo per un PLATFORM_ADMIN con la '
-   'revoca nel giornale staging.modello_ruoli_undo (mig 000513): lo guarda '
+   'revoca nel giornale staging.modello_ruoli_undo (mig 000517): lo guarda '
    'sys.v_revoche_fuori_cliente_senza_traccia.'),
   ('tenant_consolidation_decision_decided_by',
    'Chi ha deciso la proposta di consolidamento. Fuori dal cliente è legittimo solo per un '
-   'PLATFORM_ADMIN con motivo scritto (mig 000513): lo guarda '
+   'PLATFORM_ADMIN con motivo scritto (mig 000517): lo guarda '
    'sys.v_decisioni_consolidamento_fuori_cliente_senza_motivo.')
 ON CONFLICT (author_column_name) DO NOTHING;
 
@@ -86,7 +86,7 @@ SELECT user_auth_role_id,
  WHERE NOT (revocante_di_piattaforma AND nel_giornale);
 
 COMMENT ON VIEW sys.v_revoche_fuori_cliente_senza_traccia IS
-  'mig 000513: revoche di ruolo in un tenant fatte da un utente di un altro tenant senza '
+  'mig 000517: revoche di ruolo in un tenant fatte da un utente di un altro tenant senza '
   'PLATFORM_ADMIN attivo o senza la riga REVOCA nel giornale staging.modello_ruoli_undo. '
   'Pretende zero.';
 
@@ -127,7 +127,7 @@ SELECT tenant_consolidation_decision_id,
  WHERE NOT (decisore_di_piattaforma AND con_motivo);
 
 COMMENT ON VIEW sys.v_decisioni_consolidamento_fuori_cliente_senza_motivo IS
-  'mig 000513: decisioni di consolidamento di un tenant prese da un utente di un altro tenant '
+  'mig 000517: decisioni di consolidamento di un tenant prese da un utente di un altro tenant '
   'senza PLATFORM_ADMIN attivo o senza motivo scritto. Pretende zero.';
 
 -- 4. Misura dopo: si dichiara, non si impone (la copia della CI può non avere queste righe)
@@ -137,7 +137,7 @@ BEGIN
   SELECT count(*) INTO n_r FROM sys.v_revoche_fuori_cliente_senza_traccia;
   SELECT count(*) INTO n_d FROM sys.v_decisioni_consolidamento_fuori_cliente_senza_motivo;
   SELECT count(*) INTO n_c FROM sys.v_tenant_boundary_violations_full;
-  RAISE NOTICE '000513: revoche fuori cliente senza traccia %, decisioni fuori cliente senza motivo %, confine generico %',
+  RAISE NOTICE '000517: revoche fuori cliente senza traccia %, decisioni fuori cliente senza motivo %, confine generico %',
     n_r, n_d, n_c;
 END
 $$;

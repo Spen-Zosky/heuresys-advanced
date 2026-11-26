@@ -31,6 +31,12 @@ export const ISTRUZIONI_ASSISTENTE = [
   "- Per una struttura gerarchica o un flusso puoi usare un diagramma ```mermaid```.",
   "- Per un testo da copiare così com'è (una lettera, una formula) usa un blocco di codice con la lingua giusta.",
   "",
+  "Fonti (ogni risposta con dati e ogni scenario):",
+  "- Quando la risposta poggia su dati letti, su una pagina della piattaforma o su una regola, chiudila con UN solo blocco ```fonti```: un array JSON, al massimo 6 voci, ognuna `{\"tipo\":\"dato\"|\"pagina\"|\"regola\",\"titolo\":\"…\",\"dettaglio\":\"…\",\"percorso\":\"/…\"}`. La persona le vede come pulsanti e le apre in una finestra.",
+  "- Una voce per ogni fonte davvero usata, mai di più: `dato` = ciò che hai letto, con il dettaglio in parole semplici (che cosa, quante righe, quale filtro o periodo); `regola` = la regola o la politica applicata, con il suo testo in una frase; `pagina` = dove la persona può vedere e verificare il dato. Mai una fonte che non hai letto o che non conosci.",
+  "- `titolo` e `dettaglio` sono nella lingua della pagina, senza nomi tecnici, sigle o identificativi. `percorso` è facoltativo (solo `pagina` e `dato`): l'indirizzo della pagina della piattaforma che mostra quel dato, solo se lo conosci con certezza; altrimenti omettilo.",
+  "- Niente blocco se non c'è nessuna fonte (un saluto, una domanda sul tuo funzionamento) e mai dentro il rifiuto per dati non autorizzati. Il blocco va sempre in fondo, dopo il testo della risposta.",
+  "",
   "Dati che la persona non può vedere:",
   `- Un valore ${OMISSIS} è un dato che la persona collegata non è autorizzata a vedere. Riportalo esattamente come ${OMISSIS}, nella stessa posizione (anche nelle tabelle). Non stimarlo, non dedurlo, non dire che cosa potrebbe contenere.`,
   `- Una lettura con esito NON_AUTORIZZATO riguarda dati che la persona non può vedere: dove servirebbero scrivi ${OMISSIS} e prosegui con ciò che puoi mostrare.`,
@@ -61,6 +67,7 @@ export function istruzioniAssistente(lingua: "it" | "en" = "it"): string {
     "- Translate codes into plain English words (OWNER = Owner, CONTRIBUTOR = Contributor, CONSULTED = Consulted, INFORMED = Informed), never the raw code, no acronyms; write «process role» instead of «RACI».",
     "- Write people as «Surname, Name». Numbers, dates and amounts in English style (1,234.56; 2026-11-18; €1,234).",
     "- Never mention technical names (tools, API concepts such as kpi-definitions, identifiers).",
+    "- Sources: the `fonti` block keeps its JSON keys and values `dato`/`pagina`/`regola` exactly as written, but `titolo` and `dettaglio` are in English.",
     `- A value ${OMISSIS} stays exactly ${OMISSIS}. If everything asked is outside the person's permissions, answer only: «${MESSAGGIO_NON_AUTORIZZATO_EN}»`,
   ].join("\n");
 }

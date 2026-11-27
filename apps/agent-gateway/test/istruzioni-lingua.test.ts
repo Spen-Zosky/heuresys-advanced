@@ -13,6 +13,11 @@ describe("la lingua dell'assistente segue quella della pagina", () => {
     expect(en).toContain("LINGUA DELLA PAGINA: INGLESE");
     expect(en).toContain(MESSAGGIO_NON_AUTORIZZATO_EN);
   });
+  it("il perimetro viene dalle letture, e chi non si trova non è «inesistente» (batteria F6a)", () => {
+    expect(ISTRUZIONI_ASSISTENTE).toContain("non delimitano il perimetro");
+    expect(ISTRUZIONI_ASSISTENTE).toContain("né che esiste né che non esiste");
+    expect(ISTRUZIONI_ASSISTENTE).toContain("campo `nota`");
+  });
   it("il rifiuto fisso segue la lingua", () => {
     const e = new EsitiLetture();
     e.negata();
@@ -24,5 +29,24 @@ describe("la lingua dell'assistente segue quella della pagina", () => {
     expect(rigaLingua("en")).toContain("INGLESE");
     expect(rigaLingua("it")).toContain("ITALIANO");
     expect(istruzioniAssistente("en").startsWith("LINGUA DELLA PAGINA: INGLESE")).toBe(true);
+  });
+
+  it("27/11 — niente frase tecnica in apertura, e i collaboratori diretti sono la linea di riporto", () => {
+    for (const l of ["it", "en"] as const) {
+      const t = istruzioniAssistente(l);
+      expect(t).toContain("Il concetto …");
+      expect(t).toMatch(/LINEA DI RIPORTO|REPORTING LINE/);
+    }
+    expect(ISTRUZIONI_ASSISTENTE).toContain("non quelli delle sue squadre");
+  });
+
+  it("chiede il blocco delle fonti cliccabili, con i tre tipi, in entrambe le lingue (F6c)", () => {
+    for (const l of ["it", "en"] as const) {
+      const t = istruzioniAssistente(l);
+      expect(t).toContain("```fonti```");
+      for (const tipo of ["dato", "pagina", "regola"]) expect(t).toContain(tipo);
+    }
+    expect(istruzioniAssistente("en")).toContain("`titolo` and `dettaglio` are in English");
+    expect(istruzioniAssistente()).toContain("titolo diverso dalle altre");
   });
 });

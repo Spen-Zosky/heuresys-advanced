@@ -782,6 +782,14 @@
     "ragione": "diritti dell'interessato ed esecuzione della conservazione: atti del DPO, non dell'agente"
    }
   },
+  "ghost-units": {
+   "post_riforma": {
+    "fuori": "governo-agenti",
+    "metodo": "POST",
+    "percorso": "/riforma",
+    "ragione": "la riforma riallinea l'organizzazione ghost all'albero reale (ADR-0063 D2): un agente non riforma l'organizzazione di cui fa parte, lo fa la persona che governa l'organigramma"
+   }
+  },
   "goals": {
    "delete_by_id": {
     "fuori": "cancellazione-fisica",
@@ -1549,6 +1557,14 @@
     "metodo": "POST",
     "percorso": "/:cycleId/transition",
     "ragione": "ciclo di valutazione: tocca tutte le persone del ciclo (ADR-0036 §5: EVALUATION)"
+   }
+  },
+  "scenari": {
+   "post_uscite": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/uscite",
+    "ragione": "calcola uno scenario what-if: scrive solo le tabelle degli scenari e della struttura ombra, mai la struttura del tenant né una persona (ADR-0063 D3, D5)"
    }
   },
   "seed-acquisition-runs": {

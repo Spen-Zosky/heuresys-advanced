@@ -4,6 +4,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { traduciValore, rovescia, riceveRitorno } from "../../src/lib/i18n/traduci-risposta.js";
+import { separaModifiche, idDellaRisorsa } from "../../src/lib/i18n/traduzione-della-riga.js";
 
 const g = new Map([
   ["Gestione del rischio", "Risk management"],
@@ -78,5 +79,35 @@ describe("riceveRitorno", () => {
     expect(riceveRitorno("/v1/auth/agent-tokens", "POST")).toBe(false);
     expect(riceveRitorno("/v1/auth", "POST")).toBe(false);
     expect(riceveRitorno("/healthz", "POST")).toBe(false);
+  });
+});
+
+
+describe("modifiche fatte in inglese (3b)", () => {
+  const id = "11111111-1111-4111-8111-111111111111";
+  const trovati = [
+    { tabella: "sys_skills", campo: "name", it: "Gestione del rischio", en: "Risk management" },
+    { tabella: "sys_skills", campo: "description", it: "Descrizione italiana", en: "English description" },
+  ];
+
+  it("un testo non cambiato torna all'italiano; uno cambiato va nella traduzione e l'italiano resta", () => {
+    const r = separaModifiche({ name: "Risk management", description: "A new English description", level: 3 }, id, trovati);
+    expect(r.corpo).toEqual({ name: "Gestione del rischio", description: "Descrizione italiana", level: 3 });
+    expect(r.modifiche).toEqual([
+      { tabella: "sys_skills", id, campo: "description", testo: "A new English description", it: "Descrizione italiana" },
+    ]);
+    expect([...r.campi].sort()).toEqual(["description", "name"]);
+  });
+
+  it("senza italiano nella riga il testo resta com'è; null e numeri non si toccano", () => {
+    const r = separaModifiche({ name: "Brand new", description: null }, id, [{ tabella: "t", campo: "name", it: null, en: null }]);
+    expect(r.corpo).toEqual({ name: "Brand new", description: null });
+    expect(r.modifiche).toEqual([]);
+  });
+
+  it("l'id è il parametro dell'ultimo segmento, solo se è un uuid", () => {
+    expect(idDellaRisorsa("/v1/skills/:id", { id })).toBe(id);
+    expect(idDellaRisorsa("/v1/positions/:positionId/skills", { positionId: id })).toBeNull();
+    expect(idDellaRisorsa("/v1/skills/:id", { id: "abc" })).toBeNull();
   });
 });

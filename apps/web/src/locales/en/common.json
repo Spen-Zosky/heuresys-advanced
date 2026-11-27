@@ -1146,6 +1146,12 @@
     "ispettoreTesto": "Text",
     "ispettoreDiagramma": "Diagram",
     "ispettoreAiuto": "Drag the bottom-right corner to resize.",
+    "fonti": "Sources",
+    "fonteDato": "Data read",
+    "fonteRegola": "Rule applied",
+    "fontePagina": "Page",
+    "fonteSenzaDettaglio": "No further detail for this source.",
+    "fonteApriPagina": "Open the page",
     "rifiutoTitolo": "Restricted information",
     "tu": "You",
     "approvazioneTitolo": "The assistant asks for your confirmation",
@@ -1218,6 +1224,7 @@
     "concetti": {
       "activity-classification-mappings": "Activity classification mapping",
       "activity-classifications": "Activity classification",
+      "scenari": "Scenario",
       "approvals": "Approval request",
       "assessment-results": "Assessment result",
       "assessments": "Assessment",
@@ -1301,6 +1308,7 @@
     "campi": {
       "actionNotes": "Action notes",
       "actionUrl": "Action link",
+      "family": "Family",
       "activationId": "Activation",
       "actualEnd": "Actual end",
       "actualStart": "Actual start",

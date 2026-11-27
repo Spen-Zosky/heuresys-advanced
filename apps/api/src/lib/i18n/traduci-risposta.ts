@@ -26,8 +26,17 @@
  * I nomi delle persone non sono in nessun campo registrato, quindi non si traducono.
  */
 
-import type { FastifyInstance, preValidationHookHandler } from "fastify";
+import type { FastifyInstance, FastifyRequest, onResponseAsyncHookHandler, preValidationAsyncHookHandler } from "fastify";
 import type { Pool } from "pg";
+import {
+  campiDellaRiga,
+  idDellaRisorsa,
+  leggiRegistroRighe,
+  scriviTraduzioni,
+  separaModifiche,
+  type CampoDellaRiga,
+  type ModificaInglese,
+} from "./traduzione-della-riga.js";
 
 export type Glossario = ReadonlyMap<string, string>;
 
@@ -152,14 +161,16 @@ export function rovescia(g: Glossario): Map<string, string> {
  * background e intanto restituisce quello di prima (o null se non ce n'è ancora uno).
  */
 export function cacheGlossario(db: Pick<Pool, "query">, durataMs = DURATA_MS) {
-  let valore: Glossario | null = null;
+  let valore: Map<string, string> | null = null;
   let inverso: Glossario | null = null;
+  let registro: CampoDellaRiga[] | null = null;
   let scade = 0;
   let inVolo: Promise<Glossario | null> | null = null;
   function rinfresca(): Promise<Glossario | null> {
-    inVolo ??= costruisciGlossario(db)
-      .then((g) => {
+    inVolo ??= Promise.all([costruisciGlossario(db), leggiRegistroRighe(db)])
+      .then(([g, r]) => {
         valore = g;
+        registro = r;
         inverso = rovescia(g);
         scade = Date.now() + durataMs;
         return g;
@@ -182,7 +193,16 @@ export function cacheGlossario(db: Pick<Pool, "query">, durataMs = DURATA_MS) {
     if (Date.now() >= scade) void rinfresca();
     return inverso;
   }
-  return { attuale, attualeInverso, rinfresca };
+  function registroRighe(): readonly CampoDellaRiga[] | null {
+    return registro;
+  }
+  /** Una modifica inglese appena scritta vale subito anche per le letture che seguono. */
+  function aggiorna(modifiche: readonly ModificaInglese[]): void {
+    if (!valore) return;
+    for (const m of modifiche) valore.set(m.it, m.testo);
+    inverso = rovescia(valore);
+  }
+  return { attuale, attualeInverso, rinfresca, registroRighe, aggiorna };
 }
 
 export function addTraduzioneRisposta(app: FastifyInstance, db: Pick<Pool, "query">): void {
@@ -218,20 +238,46 @@ export function addTraduzioneRisposta(app: FastifyInstance, db: Pick<Pool, "quer
     done(null, uscita);
   });
   // Il ritorno: il corpo di una scrittura in inglese torna all'italiano canonico prima della
-  // validazione. Sincrono come l'andata; senza glossario il corpo passa com'è.
+  // validazione, e una modifica fatta in inglese va nella traduzione inglese (3b).
   // Non è un hook globale: si aggancia rotta per rotta, alla registrazione, alle sole scritture
   // `/v1/*` fuori da `/v1/auth/`. Le rotte di accesso (credenziali, secondo fattore) non lo
   // ricevono proprio, invece di saltarlo a runtime: il loro corpo non passa mai di qui.
-  const ritorno: preValidationHookHandler = (req, _reply, done) => {
-    if (req.locale !== "en" || req.headers["x-localize"] === "off" || req.body === null || typeof req.body !== "object") {
-      done();
-      return;
+  // È asincrono perché legge la riga: prima dell'handler non c'è la finestra di «Reply was
+  // already sent», che riguarda i hook dopo l'handler.
+  const pendenti = new WeakMap<FastifyRequest, ModificaInglese[]>();
+  const ritorno: preValidationAsyncHookHandler = async (req) => {
+    if (req.locale !== "en" || req.headers["x-localize"] === "off" || req.body === null || typeof req.body !== "object") return;
+    let corpo = req.body;
+    let gestiti = new Set<string>();
+    try {
+      const registro = glossario.registroRighe();
+      const id = req.method === "GET" || Array.isArray(corpo) ? null : idDellaRisorsa(req.routeOptions.url, req.params);
+      if (registro && id && (req.method === "PATCH" || req.method === "PUT")) {
+        const piatto = corpo as Record<string, unknown>;
+        const trovati = await campiDellaRiga(db, registro, id, new Set(Object.keys(piatto)));
+        if (trovati.length > 0) {
+          const s = separaModifiche(piatto, id, trovati);
+          corpo = s.corpo;
+          gestiti = s.campi;
+          if (s.modifiche.length > 0) pendenti.set(req, s.modifiche);
+        }
+      }
+    } catch (err) {
+      req.log.warn({ err, url: req.url }, "ADR-0062: campi della riga non letti, resta il solo glossario");
     }
     try {
       const g = glossario.attualeInverso();
       if (g && g.size > 0) {
         const sostituite: string[] = [];
-        req.body = traduciValore(req.body, g, 0, sostituite);
+        if (gestiti.size === 0) {
+          corpo = traduciValore(corpo, g, 0, sostituite) as typeof corpo;
+        } else {
+          // I campi già decisi per riga non ripassano dal glossario.
+          const piatto = corpo as Record<string, unknown>;
+          const resto = Object.fromEntries(Object.entries(piatto).filter(([k]) => !gestiti.has(k)));
+          const tradotto = traduciValore(resto, g, 0, sostituite) as Record<string, unknown>;
+          corpo = Object.fromEntries(Object.entries(piatto).map(([k, v]) => [k, gestiti.has(k) ? v : tradotto[k]]));
+        }
         // La traccia di ogni ritorno: quali testi inglesi sono tornati all'italiano, e dove.
         if (sostituite.length > 0) {
           req.log.info({ ritornoItaliano: sostituite, url: req.url, method: req.method }, "ADR-0062: testi inglesi riportati all'italiano canonico");
@@ -240,12 +286,32 @@ export function addTraduzioneRisposta(app: FastifyInstance, db: Pick<Pool, "quer
     } catch {
       // la traduzione non rompe mai una scrittura
     }
-    done();
+    req.body = corpo;
+  };
+  // Le modifiche inglesi si scrivono solo dopo che la scrittura è riuscita (l'handler ha
+  // controllato permessi e perimetro); dopo la risposta, come il registro del valore.
+  const dopo: onResponseAsyncHookHandler = async (req, reply) => {
+    const modifiche = pendenti.get(req);
+    if (!modifiche) return;
+    pendenti.delete(req);
+    if (reply.statusCode >= 300) return;
+    try {
+      await scriviTraduzioni(db, modifiche);
+      glossario.aggiorna(modifiche);
+      req.log.info(
+        { traduzioneInglese: modifiche.map((m) => ({ tabella: m.tabella, id: m.id, campo: m.campo })), url: req.url },
+        "ADR-0062: modifica fatta in inglese scritta nella traduzione inglese",
+      );
+    } catch (err) {
+      req.log.error({ err, url: req.url }, "ADR-0062: traduzione inglese non scritta");
+    }
   };
   app.addHook("onRoute", (r) => {
     if (!riceveRitorno(r.url, r.method)) return;
     const prima = r.preValidation === undefined ? [] : Array.isArray(r.preValidation) ? r.preValidation : [r.preValidation];
     r.preValidation = [ritorno, ...prima];
+    const poi = r.onResponse === undefined ? [] : Array.isArray(r.onResponse) ? r.onResponse : [r.onResponse];
+    r.onResponse = [...poi, dopo];
   });
 }
 

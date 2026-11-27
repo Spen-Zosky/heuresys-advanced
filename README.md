@@ -167,7 +167,7 @@ Open `http://localhost:3000`, log in as one of the seeded personas (password fro
 > ⚠ **The password is not a shared literal**: since Z-262 it is **derived per e-mail** from
 > the master key in `.secrets/` (gitignored). Using `TEST_ADMIN_PASSWORD` directly returns
 > `LOGIN_INVALID` for every persona. Login is a **two-step** call (MFA is on, the second
-> factor is a derived TOTP) — see `apps/api/scripts/verify-derived-login.mjs`.
+> factor is a real, random TOTP that cannot be derived: `apps/api/scripts/verify-derived-login.mjs` checks the password and the challenge only).
 
 ---
 

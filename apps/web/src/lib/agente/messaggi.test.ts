@@ -20,6 +20,27 @@ describe("messaggiDaRighe", () => {
     expect(JSON.stringify(m)).not.toContain("hrx_");
   });
 
+  it("27/11 — i messaggi di lavorazione prima di uno strumento non restano nella risposta", () => {
+    const m = messaggiDaRighe([
+      r(1, "prompt", "Quali indicatori sono sotto obiettivo?"),
+      r(2, "message", "Sto cercando dove sono registrate le misure."),
+      r(3, "tool", "hrx_concept_describe"),
+      r(4, "message", "La pagina si appoggia a «analytics get_kpi». Guardo i filtri."),
+      r(5, "tool", "hrx_entity_query"),
+      r(6, "message", "Sono sotto obiettivo 9 indicatori."),
+      r(7, "done", "{}"),
+      r(8, "prompt", "E quanti sono sopra?"),
+      r(9, "message", "Altri 4."),
+    ]);
+    expect(m.map((x) => x.testo)).toEqual([
+      "Quali indicatori sono sotto obiettivo?",
+      "Sono sotto obiettivo 9 indicatori.",
+      "E quanti sono sopra?",
+      "Altri 4.",
+    ]);
+    expect(JSON.stringify(m)).not.toContain("analytics get_kpi");
+  });
+
   it("il rifiuto prende il posto della risposta di quella domanda, non delle precedenti", () => {
     const m = messaggiDaRighe([
       r(1, "prompt", "prima"),

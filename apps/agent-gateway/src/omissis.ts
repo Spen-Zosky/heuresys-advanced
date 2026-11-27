@@ -24,6 +24,22 @@ export const MESSAGGIO_NON_AUTORIZZATO_EN =
   "You do not have the necessary permissions to see this information. You can send a request to the System Administrator.";
 
 /**
+ * Il messaggio fisso, se il modello l'ha scritto da sé nella risposta (le istruzioni gli dicono di
+ * ripeterlo quando tutto è fuori dalle autorizzazioni, e può farlo senza leggere niente: allora
+ * nessuna lettura negata lo fa scattare). Il rifiuto deve passare sempre dall'evento dedicato,
+ * non restare testo normale: la finestra lo mostra nel riquadro del rifiuto.
+ */
+export function rifiutoNelTesto(testo: string): string | null {
+  const t = testo.replace(/\s+/g, " ");
+  // Solo se la risposta è quasi tutta il messaggio fisso: una risposta con dati veri e una
+  // frase di rifiuto in coda non va sostituita, perderebbe ciò che la persona può vedere.
+  for (const m of [MESSAGGIO_NON_AUTORIZZATO, MESSAGGIO_NON_AUTORIZZATO_EN]) {
+    if (t.includes(m) && t.replace(m, "").replace(/[\s«»"'.]/g, "").length <= 20) return m;
+  }
+  return null;
+}
+
+/**
  * ADR-0050 D5: una lettura per mandato di retribuzione o valutazioni che chiede una conferma
  * recente del secondo fattore. Non è un diniego: la persona può leggere, ma deve confermare,
  * e l'assistente non può farlo per lei (A-3). Il messaggio lo dice invece di «non autorizzato».

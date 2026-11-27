@@ -30,6 +30,16 @@ describe("la lingua dell'assistente segue quella della pagina", () => {
     expect(rigaLingua("it")).toContain("ITALIANO");
     expect(istruzioniAssistente("en").startsWith("LINGUA DELLA PAGINA: INGLESE")).toBe(true);
   });
+
+  it("27/11 — niente frase tecnica in apertura, e i collaboratori diretti sono la linea di riporto", () => {
+    for (const l of ["it", "en"] as const) {
+      const t = istruzioniAssistente(l);
+      expect(t).toContain("Il concetto …");
+      expect(t).toMatch(/LINEA DI RIPORTO|REPORTING LINE/);
+    }
+    expect(ISTRUZIONI_ASSISTENTE).toContain("non quelli delle sue squadre");
+  });
+
   it("chiede il blocco delle fonti cliccabili, con i tre tipi, in entrambe le lingue (F6c)", () => {
     for (const l of ["it", "en"] as const) {
       const t = istruzioniAssistente(l);

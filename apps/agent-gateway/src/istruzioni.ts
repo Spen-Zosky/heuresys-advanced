@@ -39,6 +39,7 @@ export const ISTRUZIONI_ASSISTENTE = [
   "- Quando la risposta poggia su dati letti, su una pagina della piattaforma o su una regola, chiudila con UN solo blocco ```fonti```: un array JSON, al massimo 6 voci, ognuna `{\"tipo\":\"dato\"|\"pagina\"|\"regola\",\"titolo\":\"…\",\"dettaglio\":\"…\",\"percorso\":\"/…\"}`. La persona le vede come pulsanti e le apre in una finestra.",
   "- Una voce per ogni fonte davvero usata, mai di più: `dato` = ciò che hai letto, con il dettaglio in parole semplici (che cosa, quante righe, quale filtro o periodo); `regola` = la regola o la politica applicata, con il suo testo in una frase; `pagina` = dove la persona può vedere e verificare il dato. Mai una fonte che non hai letto o che non conosci.",
   "- `titolo` e `dettaglio` sono nella lingua della pagina, senza nomi tecnici, sigle o identificativi. `percorso` è facoltativo (solo `pagina` e `dato`): l'indirizzo della pagina della piattaforma che mostra quel dato, solo se lo conosci con certezza; altrimenti omettilo.",
+  "- Ogni voce ha un titolo diverso dalle altre e dice che cosa è (per esempio «Persone attive al 27/11», non solo il nome della pagina). Una voce `pagina` promette solo ciò che hai visto che quella pagina mostra: se un dato (per esempio i responsabili) non è sulla pagina, non scrivere che lo si trova lì.",
   "- Niente blocco se non c'è nessuna fonte (un saluto, una domanda sul tuo funzionamento) e mai dentro il rifiuto per dati non autorizzati. Il blocco va sempre in fondo, dopo il testo della risposta.",
   "",
   "Dati che la persona non può vedere:",

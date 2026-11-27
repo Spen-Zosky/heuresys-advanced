@@ -27,15 +27,17 @@ import { AGENT_DEV_ENABLED, useAgentStream, type PendingApproval } from "@/lib/u
 import { paginaIdonea } from "@/lib/agente/idoneita";
 import { titoloLeggibile } from "@/lib/agente/risposta";
 import {
-  CONCETTI_CON_SCHEDA,
+  eCodice,
   fase,
   messaggiDaRighe,
   nomeLeggibile,
+  percorsoScheda,
   riepilogoProposta,
   type Messaggio,
   type RiepilogoProposta,
 } from "@/lib/agente/messaggi";
 import { apiFetch } from "@/lib/api/fetch";
+import { codiceInParole } from "@/lib/enum-labels";
 import { useContestoDichiarato, useVistaAttuale } from "@/lib/agente/contesto";
 import { LavoroInCorso } from "@/components/lavoro-in-corso";
 import { IspettoreAssistente, type ContenutoIspezionabile } from "./ispettore-assistente";
@@ -536,9 +538,10 @@ function RiepilogoScrittura({ riepilogo }: { riepilogo: RiepilogoProposta }) {
     for (const c of riepilogo.campi) if (c.riferimento && c.identificativo && !c.valore.startsWith("[")) daLeggere.push([c.riferimento, c.valore]);
     const ctrl = new AbortController();
     for (const [concetto, id] of daLeggere) {
-      if (!CONCETTI_CON_SCHEDA.has(concetto)) continue;
+      const percorso = percorsoScheda(concetto, id);
+      if (!percorso) continue;
       const chiave = `${concetto}/${id}`;
-      apiFetch<unknown>(`/v1/${concetto}/${encodeURIComponent(id)}`, { signal: ctrl.signal })
+      apiFetch<unknown>(percorso, { signal: ctrl.signal })
         .then((r) => setNomi((n) => ({ ...n, [chiave]: nomeLeggibile(r) })))
         .catch(() => setNomi((n) => ({ ...n, [chiave]: null })));
     }
@@ -563,6 +566,7 @@ function RiepilogoScrittura({ riepilogo }: { riepilogo: RiepilogoProposta }) {
     if (c.valore === "true") return t("agente.valoreSi");
     if (c.valore === "false") return t("agente.valoreNo");
     if (c.valore === "" || c.valore === "null") return t("agente.valoreVuoto");
+    if (eCodice(c.valore)) return t(`agente.valori.${c.valore}`, { defaultValue: codiceInParole(c.valore) });
     return c.valore;
   };
   return (

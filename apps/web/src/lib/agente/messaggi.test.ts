@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
-import { CONCETTI_CON_SCHEDA, concettoRiferito, csvDa, fase, messaggiDaRighe, nomeLeggibile, riepilogoProposta, tsvDa } from "./messaggi";
+import { CONCETTI_CON_SCHEDA, concettoRiferito, csvDa, eCodice, fase, messaggiDaRighe, nomeLeggibile, percorsoScheda, riepilogoProposta, tsvDa } from "./messaggi";
 
 const r = (id: number, kind: string, text: string) => ({ id, kind, text });
 
@@ -123,6 +123,31 @@ describe("riepilogoProposta", () => {
     expect(riepilogoProposta("hrx_entity_query", { conceptId: "positions", operationId: "delete_by_id", params: { id: "p" } }).azione).toBe("elimina");
     expect(riepilogoProposta("hrx_entity_query", { conceptId: "approvals", operationId: "post_by_id_approve", params: { id: "a" } }).azione).toBe("altro");
   });
+
+  it("gli altri parametri del percorso dicono su che cosa si agisce: la proposta di una decisione", () => {
+    const pid = "6f1c2d3e-4a5b-4c6d-8e7f-0a1b2c3d4e5f";
+    const r = riepilogoProposta("hrx_entity_query", {
+      conceptId: "tenant-consolidations",
+      operationId: "post_proposals_by_proposalid_decision",
+      params: { proposalId: pid },
+      body: { decision: "RIFIUTATA", reason: "Non corrisponde" },
+    });
+    expect(r.campi).toEqual([
+      { campo: "proposalId", valore: pid, riferimento: "consolidation-proposals", identificativo: true },
+      { campo: "decision", valore: "RIFIUTATA" },
+      { campo: "reason", valore: "Non corrisponde" },
+    ]);
+    expect(percorsoScheda("consolidation-proposals", pid)).toBe(`/v1/tenant-consolidations/proposals/${pid}`);
+    expect(percorsoScheda("goals", "g1")).toBe("/v1/goals/g1");
+    expect(percorsoScheda("tenant-consolidations", "x")).toBeNull();
+  });
+
+  it("un codice di lavoro si riconosce, una parola no", () => {
+    expect(eCodice("RIFIUTATA")).toBe(true);
+    expect(eCodice("IN_PROGRESS")).toBe(true);
+    expect(eCodice("Ridurre i tempi")).toBe(false);
+    expect(eCodice("A")).toBe(false);
+  });
 });
 
 describe("nomeLeggibile", () => {
@@ -130,6 +155,8 @@ describe("nomeLeggibile", () => {
     expect(nomeLeggibile({ firstName: "Valentina", lastName: "Conti", displayName: "Valentina Conti" })).toBe("Conti, Valentina");
     expect(nomeLeggibile({ name: "Tempo medio di istruttoria", code: "TJB-M003" })).toBe("Tempo medio di istruttoria (TJB-M003)");
     expect(nomeLeggibile({ data: { title: "Analista" } })).toBe("Analista");
+    expect(nomeLeggibile({ tenantItems: [{ key: "u1", name: "Direzione Crediti" }], prototypeItems: [{ key: "M277", name: "Crediti" }] })).toBe("Direzione Crediti");
+    expect(nomeLeggibile({ tenantItems: [], prototypeItems: [{ key: "M277", name: "Crediti" }] })).toBe("Crediti");
     expect(nomeLeggibile({ id: "x" })).toBeNull();
     expect(nomeLeggibile(null)).toBeNull();
   });
@@ -147,7 +174,7 @@ describe("scheda di conferma: etichette per tutta la mappa", () => {
   type Operazione = { method: string; path: string };
   const mappa = leggi<{ concepts: Record<string, { base: string; operations: Record<string, Operazione> }> }>("docs/kb/atlas/agent-operations.json").concepts;
   const corpi = leggi<{ corpi: Record<string, Record<string, { body: unknown }>> }>("docs/kb/atlas/agent-write-bodies.json").corpi;
-  const lingue = ["it", "en"].map((l) => [l, leggi<{ agente: { concetti: Record<string, string>; campi: Record<string, string> } }>(`apps/web/src/locales/${l}/common.json`).agente] as const);
+  const lingue = ["it", "en"].map((l) => [l, leggi<{ agente: { concetti: Record<string, string>; campi: Record<string, string>; valori?: Record<string, string> } }>(`apps/web/src/locales/${l}/common.json`).agente] as const);
 
   it("ogni concetto con scritture ha il nome nelle due lingue", () => {
     const conScritture = Object.entries(mappa).filter(([, c]) => Object.values(c.operations).some((o) => o.method !== "GET")).map(([k]) => k);
@@ -173,6 +200,30 @@ describe("scheda di conferma: etichette per tutta la mappa", () => {
     for (const ops of Object.values(corpi)) for (const op of Object.values(ops)) visita(op.body);
     expect(campi.size).toBeGreaterThan(200);
     for (const [l, a] of lingue) expect([...campi].filter((k) => !a.campi[k]?.trim()), l).toEqual([]);
+  });
+
+  it("ogni parametro del percorso delle scritture ha l'etichetta nelle due lingue", () => {
+    const parametri = new Set<string>();
+    for (const c of Object.values(mappa)) for (const o of Object.values(c.operations)) {
+      if (o.method === "GET") continue;
+      for (const m of o.path.matchAll(/:(\w+)/g)) if (m[1] !== "id") parametri.add(m[1]!);
+    }
+    expect(parametri.size).toBeGreaterThan(5);
+    for (const [l, a] of lingue) expect([...parametri].filter((k) => !a.campi[k]?.trim()), l).toEqual([]);
+  });
+
+  it("ogni codice dei corpi delle scritture ha la sua etichetta nelle due lingue (mai il codice a video)", () => {
+    const codici = new Set<string>();
+    const visita = (s: unknown) => {
+      if (Array.isArray(s)) return s.forEach(visita);
+      if (s === null || typeof s !== "object") return;
+      const o = s as Record<string, unknown>;
+      if (Array.isArray(o.enum)) for (const v of o.enum) if (typeof v === "string" && eCodice(v)) codici.add(v);
+      Object.values(o).forEach(visita);
+    };
+    for (const ops of Object.values(corpi)) for (const op of Object.values(ops)) visita(op.body);
+    expect(codici.has("RIFIUTATA")).toBe(true);
+    for (const [l, a] of lingue) expect([...codici].filter((k) => !a.valori?.[k]?.trim()), l).toEqual([]);
   });
 
   it("i concetti di cui la finestra legge il nome hanno la scheda GET /:id con la base uguale al concetto", () => {

@@ -39,7 +39,17 @@ import { eseguiGiro } from "./giro.js";
 import { PonteVista, RegistroEsiti, contestoPagina, leggiEsito, leggiPagina, notaSugliEsiti } from "./comandi-vista.js";
 import { ContatorePersone } from "./persone-distinte.js";
 import { caricaSoglie } from "./soglie-persone.js";
-import { ConversazioniAperte, ammessoAllAssistente, leggiLimiti, modelloAgenti } from "./limiti.js";
+import {
+  ConversazioniAperte,
+  PRIORITA_NUOVA,
+  PRIORITA_RIPRESA,
+  ammessoAllAssistente,
+  leggiLimiti,
+  modelloAgenti,
+  testoCodaScaduta,
+  testoInCoda,
+  type IngressoInCoda,
+} from "./limiti.js";
 import { DbRegistroCapacita } from "./capacita.js";
 import { runHrAgent } from "./sdk-agent.js";
 import { servi, type RichiestaProposta } from "./research-propose.js";
@@ -411,19 +421,49 @@ const server = createServer(async (req, res) => {
       // ADR-0056 T3: quante conversazioni insieme, per persona e in tutto il servizio. Il posto si
       // prende dopo il gettone, perché è il gettone a dire chi è la persona, e si libera nel
       // `finally` qui sotto quando il GIRO finisce, non quando si chiude la finestra (T6b).
-      const posto = conversazioni.entra(gettone.persona.userId);
-      if (!posto.ok) {
+      const lingua = corpo.lingua === "en" ? "en" : "it";
+      let posto: Extract<IngressoInCoda, { ok: true }>;
+      const subito = conversazioni.entra(gettone.persona.userId);
+      if (subito.ok) {
+        posto = subito;
+      } else if (subito.motivo === "PERSONA") {
         res.writeHead(429, { "content-type": "application/json" });
-        res.end(JSON.stringify({
-          error: posto.motivo === "PERSONA" ? "TOO_MANY_CONVERSATIONS_PERSON" : "TOO_MANY_CONVERSATIONS",
-          limite: posto.motivo === "PERSONA" ? LIMITI.perPersona : LIMITI.totali,
-        }));
+        res.end(JSON.stringify({ error: "TOO_MANY_CONVERSATIONS_PERSON", limite: LIMITI.perPersona }));
         return;
+      } else {
+        // Il servizio è pieno: l'abbonamento è uno solo e le persone di un tenant intero ci passano
+        // (piano AI-driven F0a). Invece del rifiuto la conversazione aspetta il suo turno, e la
+        // persona vede a che punto è. Chi riprende una conversazione già aperta passa avanti.
+        res.writeHead(200, {
+          "content-type": "text/event-stream",
+          "cache-control": "no-cache, no-transform",
+          connection: "keep-alive",
+          "x-accel-buffering": "no",
+        });
+        const chiusa = new AbortController();
+        res.on("close", () => chiusa.abort());
+        const scriviCoda = (testo: string) => {
+          if (!res.writableEnded && !res.destroyed) res.write(`event: nota\ndata: ${JSON.stringify({ testo })}\n\n`);
+        };
+        const attesa = await conversazioni.attendi(gettone.persona.userId, {
+          priorita: typeof conversationId === "string" ? PRIORITA_RIPRESA : PRIORITA_NUOVA,
+          attesaMaxMs: LIMITI.codaMs,
+          segnale: chiusa.signal,
+          posizione: (pos, tot) => scriviCoda(testoInCoda(lingua, pos, tot)),
+        });
+        if (!attesa.ok) {
+          if (attesa.motivo === "ATTESA_SCADUTA" && !res.writableEnded && !res.destroyed) {
+            res.write(`event: error\ndata: ${JSON.stringify({ message: "QUEUE_TIMEOUT" })}\n\n`);
+            scriviCoda(testoCodaScaduta(lingua));
+          }
+          if (!res.writableEnded && !res.destroyed) res.end();
+          return;
+        }
+        posto = attesa;
       }
       try {
         // Due client con lo stesso gettone: quello dell'agente alimenta il contatore delle persone,
         // quello del registro no (le risposte del registro non sono letture dell'agente).
-        const lingua = corpo.lingua === "en" ? "en" : "it";
         const client = new HeuresysClient({ baseUrl: HEURESYS_API, session: gettone.session, agente: AGENTE_ASSISTENTE, lingua });
         const clientRegistro = new HeuresysClient({ baseUrl: HEURESYS_API, session: gettone.session, agente: AGENTE_ASSISTENTE });
         // Le letture del giro (omissis.ts): se sono tutte negate, la risposta è il messaggio fisso.
@@ -465,7 +505,7 @@ const server = createServer(async (req, res) => {
           registro.conversazione.personsSeen,
         );
 
-        res.writeHead(200, {
+        if (!res.headersSent) res.writeHead(200, {
           "content-type": "text/event-stream",
           // no-transform: senza, la compressione di Next sul rewrite /agent-gateway accumula lo
           // stream e i page_command arrivano alla pagina a fine giro, dopo che l'attesa dell'esito

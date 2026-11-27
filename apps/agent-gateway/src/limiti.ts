@@ -91,6 +91,8 @@ export interface Limiti {
   giri: number;
   /** Durata massima di una conversazione, in millisecondi. */
   durataMs: number;
+  /** Quanto una conversazione può aspettare in coda quando il servizio è pieno, in millisecondi. */
+  codaMs: number;
 }
 
 export const LIMITI_DEFAULT: Readonly<Limiti> = Object.freeze({
@@ -98,6 +100,7 @@ export const LIMITI_DEFAULT: Readonly<Limiti> = Object.freeze({
   totali: 4,
   giri: 30,
   durataMs: 15 * 60_000,
+  codaMs: 3 * 60_000,
 });
 
 function intero(valore: string | undefined, predefinito: number): number {
@@ -112,6 +115,7 @@ export function leggiLimiti(env: Record<string, string | undefined> = process.en
     totali: intero(env.AGENT_GATEWAY_MAX_CONVERSAZIONI, LIMITI_DEFAULT.totali),
     giri: intero(env.AGENT_GATEWAY_MAX_GIRI, LIMITI_DEFAULT.giri),
     durataMs: intero(env.AGENT_GATEWAY_MAX_DURATA_MS, LIMITI_DEFAULT.durataMs),
+    codaMs: intero(env.AGENT_GATEWAY_MAX_CODA_MS, LIMITI_DEFAULT.codaMs),
   };
 }
 
@@ -129,6 +133,33 @@ export type Ingresso =
     }
   | { ok: false; motivo: "PERSONA" | "SERVIZIO" };
 
+/** Priorità in coda: più basso passa prima. Chi sta riprendendo una conversazione già aperta finisce
+ * prima di chi ne comincia una nuova; a parità, l'ordine di arrivo. */
+export const PRIORITA_RIPRESA = 0;
+export const PRIORITA_NUOVA = 1;
+
+export type IngressoInCoda =
+  | Extract<Ingresso, { ok: true }>
+  | { ok: false; motivo: "PERSONA" | "ATTESA_SCADUTA" | "ANNULLATA" };
+
+export interface OpzioniCoda {
+  priorita: number;
+  /** Quanto aspettare al massimo. */
+  attesaMaxMs: number;
+  /** Chiamata a ogni cambio di posizione (1 = il prossimo a entrare). */
+  posizione?: (posizione: number, inCoda: number) => void;
+  /** Se la persona chiude prima di entrare, l'attesa finisce. */
+  segnale?: AbortSignal;
+}
+
+interface InAttesa {
+  persona: string;
+  priorita: number;
+  seq: number;
+  opzioni: OpzioniCoda;
+  fine: (esito: IngressoInCoda) => void;
+}
+
 /**
  * Il registro delle conversazioni aperte. Uno per processo, come il registro delle approvazioni.
  * `entra` occupa un posto, e il posto si libera chiamando `esci` (una volta sola: le chiamate in
@@ -140,11 +171,85 @@ export class ConversazioniAperte {
    * persona non riempie il servizio di giri in attesa (revisione di sicurezza del 2026-11-20). */
   private readonly sospese = new Map<string, number>();
   private totale = 0;
+  private readonly coda: InAttesa[] = [];
+  private seq = 0;
 
   constructor(private readonly limiti: Pick<Limiti, "perPersona" | "totali">) {}
 
   get aperte(): number {
     return this.totale;
+  }
+
+  get inCoda(): number {
+    return this.coda.length;
+  }
+
+  /**
+   * Come `entra`, ma quando il SERVIZIO è pieno la conversazione aspetta il suo turno invece di
+   * essere rifiutata (piano AI-driven F0a: l'abbonamento è uno solo e le persone di un tenant
+   * intero ci passano). Il tetto personale resta un rifiuto: chi ha già `perPersona` conversazioni,
+   * fra aperte e in coda, ne ha abbastanza. Ordine: priorità, poi arrivo. Oltre `attesaMaxMs` la
+   * conversazione esce dalla coda con ATTESA_SCADUTA, e la persona lo sa.
+   */
+  attendi(persona: string, opzioni: OpzioniCoda): Promise<IngressoInCoda> {
+    const inAttesaSue = this.coda.filter((w) => w.persona === persona).length;
+    if ((this.perPersona.get(persona) ?? 0) + inAttesaSue >= this.limiti.perPersona) {
+      return Promise.resolve({ ok: false, motivo: "PERSONA" });
+    }
+    if (this.coda.length === 0) {
+      const subito = this.entra(persona);
+      if (subito.ok) return Promise.resolve(subito);
+      if (subito.motivo === "PERSONA") return Promise.resolve({ ok: false, motivo: "PERSONA" });
+    }
+    return new Promise<IngressoInCoda>((risolvi) => {
+      let chiuso = false;
+      const w: InAttesa = {
+        persona,
+        priorita: opzioni.priorita,
+        seq: this.seq++,
+        opzioni,
+        fine: (esito) => {
+          if (chiuso) return;
+          chiuso = true;
+          clearTimeout(timer);
+          opzioni.segnale?.removeEventListener("abort", annulla);
+          risolvi(esito);
+        },
+      };
+      const esce = (motivo: "ATTESA_SCADUTA" | "ANNULLATA") => {
+        const i = this.coda.indexOf(w);
+        if (i >= 0) this.coda.splice(i, 1);
+        w.fine({ ok: false, motivo });
+        this.avvisa();
+      };
+      const timer = setTimeout(() => esce("ATTESA_SCADUTA"), opzioni.attesaMaxMs);
+      const annulla = () => esce("ANNULLATA");
+      if (opzioni.segnale?.aborted) {
+        clearTimeout(timer);
+        risolvi({ ok: false, motivo: "ANNULLATA" });
+        return;
+      }
+      opzioni.segnale?.addEventListener("abort", annulla, { once: true });
+      this.coda.push(w);
+      this.coda.sort((a, b) => a.priorita - b.priorita || a.seq - b.seq);
+      this.avvisa();
+    });
+  }
+
+  /** Dice a ognuno in coda a che punto è. */
+  private avvisa(): void {
+    this.coda.forEach((w, i) => w.opzioni.posizione?.(i + 1, this.coda.length));
+  }
+
+  /** Un posto si è liberato: entra chi è primo in coda, finché ce n'è. */
+  private scorri(): void {
+    while (this.coda.length > 0 && this.totale < this.limiti.totali) {
+      const w = this.coda.shift();
+      if (!w) break;
+      const ingresso = this.entra(w.persona);
+      w.fine(ingresso.ok ? ingresso : { ok: false, motivo: "PERSONA" });
+    }
+    this.avvisa();
   }
 
   entra(persona: string): Ingresso {
@@ -167,6 +272,7 @@ export class ConversazioniAperte {
         uscito = true;
         sposta(sospeso ? this.sospese : this.perPersona, -1);
         this.totale -= 1;
+        this.scorri();
       },
       sospendi: () => {
         if (uscito || sospeso) return;
@@ -186,4 +292,17 @@ export class ConversazioniAperte {
       },
     };
   }
+}
+
+/** Ciò che la persona legge mentre aspetta il suo turno, nella lingua della pagina. */
+export function testoInCoda(lingua: "it" | "en", posizione: number, inCoda: number): string {
+  return lingua === "en"
+    ? `The assistant is busy with other conversations. You are number ${posizione} of ${inCoda} in the queue; I will start as soon as it is your turn.`
+    : `L'assistente è occupato con altre conversazioni. Sei in coda al posto ${posizione} di ${inCoda}: parto appena tocca a te.`;
+}
+
+export function testoCodaScaduta(lingua: "it" | "en"): string {
+  return lingua === "en"
+    ? "The queue was too long and your turn did not come in time. Please try again in a moment."
+    : "La coda è stata troppo lunga e il tuo turno non è arrivato in tempo. Riprova fra un momento.";
 }

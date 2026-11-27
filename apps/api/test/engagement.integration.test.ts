@@ -137,9 +137,11 @@ describe("engagement normalized read-model (m2b)", () => {
     );
     expect(rb.total).toBe(Number(atteso.rows[0]!.n));
     expect(new Set(rb.items.map((x) => x.tenantId))).toEqual(new Set([atteso.rows[0]!.tenant]));
-    const custom = rb.items.find((x) => x.name === "Custom Engagement Survey");
-    expect(custom?.questionCount).toBe(5);
-    expect(custom?.type).toBe("custom");
+    // Il modello si riconosce dal tipo, non dal nome: i nomi dei dati di RTL sono in italiano
+    // (ADR-0062), e «Custom Engagement Survey» oggi è «Indagine sul coinvolgimento personalizzata».
+    const custom = rb.items.filter((x) => x.type === "custom");
+    expect(custom.length, "RTL non ha più un modello di tipo custom").toBeGreaterThan(0);
+    expect(custom.map((x) => x.questionCount)).toContain(5);
 
     const all = (await get("/v1/engagement/templates", admin)).json() as { items: { tenantId: string }[]; total: number };
     // PLATFORM_ADMIN unfiltered: RTL + HEURESYS mapped templates.

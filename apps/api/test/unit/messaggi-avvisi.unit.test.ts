@@ -75,7 +75,7 @@ describe("messaggio strutturato degli avvisi", () => {
     const c = testoSegnalazioneScoperta("Cassiere", "Filiale Sesto San Giovanni", 94);
     expect(messaggioDellAvviso("SYSTEM", c.subject, c.body)).toEqual({
       code: "AGENT_SIGNAL_POSIZIONE_SCOPERTA",
-      params: { position: "Cassiere", unit: "Filiale Sesto San Giovanni", days: 94 },
+      params: { position: "Cassiere", unit: "Filiale Sesto San Giovanni", count: 94 },
     });
     expect(messaggioDellAvviso("SYSTEM", c.subject, "testo cambiato a mano")).toBeNull();
   });

@@ -334,7 +334,8 @@
       },
       "AGENT_SIGNAL_POSIZIONE_SCOPERTA": {
         "subject": "Segnalazione: posizione senza titolare",
-        "body": "La posizione «{{position}}» dell'unità «{{unit}}» è senza titolare da {{days}} giorni."
+        "body_one": "La posizione «{{position}}» dell'unità «{{unit}}» è senza titolare da {{count}} giorno.",
+        "body_other": "La posizione «{{position}}» dell'unità «{{unit}}» è senza titolare da {{count}} giorni."
       }
     },
     "approvals": {

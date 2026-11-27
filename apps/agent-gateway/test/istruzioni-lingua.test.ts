@@ -13,6 +13,11 @@ describe("la lingua dell'assistente segue quella della pagina", () => {
     expect(en).toContain("LINGUA DELLA PAGINA: INGLESE");
     expect(en).toContain(MESSAGGIO_NON_AUTORIZZATO_EN);
   });
+  it("il perimetro viene dalle letture, e chi non si trova non è «inesistente» (batteria F6a)", () => {
+    expect(ISTRUZIONI_ASSISTENTE).toContain("non delimitano il perimetro");
+    expect(ISTRUZIONI_ASSISTENTE).toContain("né che esiste né che non esiste");
+    expect(ISTRUZIONI_ASSISTENTE).toContain("campo `nota`");
+  });
   it("il rifiuto fisso segue la lingua", () => {
     const e = new EsitiLetture();
     e.negata();

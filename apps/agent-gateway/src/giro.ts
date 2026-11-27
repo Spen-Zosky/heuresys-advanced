@@ -80,6 +80,12 @@ export interface GiroDeps {
    * il modello, e prende il posto della sua risposta. `null`, la risposta resta quella del modello.
    */
   rifiuto?: () => string | null;
+  /**
+   * ADR-0050 D5: vero se nel giro una lettura chiedeva la conferma del secondo fattore. La finestra
+   * riceve l'evento `conferma_richiesta` e offre alla persona il codice dentro la finestra stessa,
+   * senza esenzioni: la conferma resta della persona e vale quindici minuti.
+   */
+  serveConferma?: () => boolean;
   /** Il posto della conversazione (limiti.ts): si sospende mentre il giro aspetta la persona. */
   attesa?: { sospendi: () => void; riprendi: () => void };
   /**
@@ -227,6 +233,8 @@ export async function eseguiGiro(d: GiroDeps): Promise<EsitoGiro> {
     registro.aggiungi([{ kind: "TESTO", payload: { testo: rifiuto, origine: "piattaforma", rifiuto: true } }]);
     d.scrivi(evento("rifiuto", { testo: rifiuto }));
   }
+
+  if (motivo === undefined && !errore && d.serveConferma?.()) d.scrivi(evento("conferma_richiesta", {}));
 
   let esito: EsitoGiro;
   if (motivo !== undefined) {

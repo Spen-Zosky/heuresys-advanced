@@ -45,10 +45,16 @@ export function rifiutoNelTesto(testo: string): string | null {
  * e l'assistente non può farlo per lei (A-3). Il messaggio lo dice invece di «non autorizzato».
  */
 export const MESSAGGIO_CONFERMA_RICHIESTA =
-  "Per questi dati serve una conferma recente del tuo secondo fattore. Confermalo dalla pagina che li mostra (ti viene chiesto il codice) e poi ripeti la domanda.";
+  "Per questi dati serve una conferma recente del tuo secondo fattore. Confermalo qui sotto, nella finestra dell'assistente (ti viene chiesto il codice), e poi ripeti la domanda.";
 
 export const MESSAGGIO_CONFERMA_RICHIESTA_EN =
-  "These data need a recent confirmation of your second factor. Confirm it from the page that shows them (you will be asked for the code) and then ask again.";
+  "These data need a recent confirmation of your second factor. Confirm it below, in the assistant window (you will be asked for the code), and then ask again.";
+
+export const MESSAGGIO_CONFERMA_PARZIALE =
+  "Una parte di questi dati è rimasta fuori: serve una conferma recente del tuo secondo fattore. Confermalo qui sotto, nella finestra dell'assistente (ti viene chiesto il codice), e poi ripeti la domanda.";
+
+export const MESSAGGIO_CONFERMA_PARZIALE_EN =
+  "Part of these data was left out: a recent confirmation of your second factor is needed. Confirm it below, in the assistant window (you will be asked for the code), and then ask again.";
 
 /** L'esito che il modello riceve al posto di una lettura che chiede la conferma del secondo fattore. */
 export interface LetturaDaConfermare {
@@ -60,7 +66,7 @@ export function letturaDaConfermare(): LetturaDaConfermare {
   return {
     esito: "CONFERMA_SECONDO_FATTORE",
     istruzione:
-      "La persona può vedere questi dati ma deve prima confermare il secondo fattore dalla pagina; tu non puoi farlo per lei. Non citarli e non stimarli: dille di confermare e di ripetere la domanda.",
+      "La persona può vedere questi dati ma deve prima confermare il secondo fattore: la conferma la dà lei, con il suo codice, dal pulsante che la finestra dell'assistente le mostra. Non citarli e non stimarli. Dille di confermare con quel pulsante e di ripetere la domanda; non dire che «si può fare solo dalla pagina» e non dire che non puoi aiutarla.",
   };
 }
 
@@ -126,6 +132,21 @@ export class EsitiLetture {
 
   conteggio(): { riuscite: number; negate: number; daConfermare: number } {
     return { riuscite: this.riuscite, negate: this.negate, daConfermare: this.daConfermare };
+  }
+
+  /** Vero se almeno una lettura del giro chiedeva la conferma del secondo fattore. */
+  serveConferma(): boolean {
+    return this.daConfermare > 0;
+  }
+
+  /**
+   * Il messaggio sulla conferma quando nel giro altre letture sono riuscite: il testo del modello
+   * resta, e il gateway ci aggiunge sotto questa frase (senza, la persona non saprebbe che una
+   * parte dei dati è rimasta fuori). Se nessuna lettura è riuscita lo dice già `rifiuto()`.
+   */
+  notaConferma(lingua: "it" | "en" = "it"): string | null {
+    if (this.daConfermare === 0 || this.riuscite === 0) return null;
+    return lingua === "en" ? MESSAGGIO_CONFERMA_PARZIALE_EN : MESSAGGIO_CONFERMA_PARZIALE;
   }
 
   /**

@@ -11,6 +11,12 @@
  *     nuovo va nella traduzione inglese (`sys_reference_translations`, fonte `MANUAL`, che le
  *     migrazioni non sovrascrivono), ma solo dopo che la scrittura è riuscita.
  * Una riga senza italiano (campo vuoto) non si tocca: il testo nuovo diventa il canonico.
+ *
+ * Il legame con la richiesta (difetto segnalato dal controllo di sicurezza, 27/11): si guarda
+ * una sola tabella, quella della rotta (`/v1/<risorsa>/:id` → `sys.sys_<risorsa>`), solo i
+ * campi che lo schema del corpo della rotta accetta, e solo una riga del tenant di chi scrive
+ * (o una riga di catalogo senza tenant). Così un id di un'altra tabella o di un altro tenant
+ * non porta niente nel corpo e non riceve nessuna traduzione.
  */
 
 import type { Pool } from "pg";
@@ -23,6 +29,13 @@ export interface CampoDellaRiga {
   entity_pk_column: string;
   field: string;
   entity_field_column: string;
+  /** La colonna del tenant della riga (`<chiave>_tenant_id`), se la tabella ne ha una. */
+  tenant_column: string | null;
+}
+
+/** Chi scrive: il suo tenant, o nessuno per un mandato di piattaforma senza tenant. */
+export interface Scrivente {
+  tenantId: string | null;
 }
 
 export interface CampoTrovato {
@@ -43,7 +56,8 @@ export interface ModificaInglese {
 /** I campi registrati utilizzabili: tabelle che esistono, nomi sicuri, chiave uuid. */
 export async function leggiRegistroRighe(db: Pick<Pool, "query">): Promise<CampoDellaRiga[]> {
   const reg = await db.query<CampoDellaRiga>(
-    `SELECT f.entity_table, f.entity_pk_column, f.field, f.entity_field_column
+    `SELECT f.entity_table, f.entity_pk_column, f.field, f.entity_field_column,
+            t.column_name::text AS tenant_column
        FROM sys.sys_translatable_field f
        JOIN information_schema.columns c
          ON c.table_schema = 'sys' AND c.table_name = f.entity_table
@@ -51,37 +65,81 @@ export async function leggiRegistroRighe(db: Pick<Pool, "query">): Promise<Campo
        JOIN information_schema.columns v
          ON v.table_schema = 'sys' AND v.table_name = f.entity_table
         AND v.column_name = f.entity_field_column
+       LEFT JOIN information_schema.columns t
+         ON t.table_schema = 'sys' AND t.table_name = f.entity_table
+        AND t.column_name = regexp_replace(f.entity_pk_column, '_id$', '_tenant_id')
+        AND t.data_type = 'uuid'
       WHERE f.canonical_locale = 'it'
       ORDER BY f.entity_table, f.field`,
   );
-  return reg.rows.filter((c) =>
-    [c.entity_table, c.entity_pk_column, c.entity_field_column, c.field].every((x) => IDENT.test(x)),
+  return reg.rows.filter(
+    (c) =>
+      [c.entity_table, c.entity_pk_column, c.entity_field_column, c.field].every((x) => IDENT.test(x)) &&
+      (c.tenant_column === null || IDENT.test(c.tenant_column)),
   );
 }
 
-/** I campi registrati della riga con quell'id, con l'italiano e l'inglese di oggi. */
+/**
+ * I campi registrati della riga con quell'id nella tabella della rotta, con l'italiano e
+ * l'inglese di oggi. Solo i campi in `chiavi` (quelli del corpo che la rotta accetta) e solo
+ * una riga del tenant di chi scrive o senza tenant; un mandato di piattaforma senza tenant
+ * vede ogni riga, come nel suo handler.
+ */
 export async function campiDellaRiga(
   db: Pick<Pool, "query">,
   registro: readonly CampoDellaRiga[],
+  tabella: string,
   id: string,
   chiavi: ReadonlySet<string>,
+  scrivente: Scrivente,
 ): Promise<CampoTrovato[]> {
-  if (!UUID.test(id)) return [];
-  const utili = registro.filter((c) => chiavi.has(c.field));
+  if (!UUID.test(id) || !IDENT.test(tabella)) return [];
+  const utili = registro.filter((c) => c.entity_table === tabella && chiavi.has(c.field));
   if (utili.length === 0) return [];
+  if (scrivente.tenantId !== null && !UUID.test(scrivente.tenantId)) return [];
+  const conTenant = scrivente.tenantId !== null && utili.some((c) => c.tenant_column !== null);
+  const parametri: string[] = conTenant ? [id, scrivente.tenantId!] : [id];
   // I nomi vengono dal registro e sono già passati per IDENT: si possono scrivere nel testo.
-  const parti = utili.map(
-    (c) =>
-      `SELECT '${c.entity_table}'::text AS tabella, '${c.field}'::text AS campo,
+  const parti = utili.map((c) => {
+    const delTenant =
+      conTenant && c.tenant_column !== null
+        ? ` AND (e.${c.tenant_column} IS NULL OR e.${c.tenant_column} = $2::uuid)`
+        : "";
+    return `SELECT '${c.entity_table}'::text AS tabella, '${c.field}'::text AS campo,
               e.${c.entity_field_column}::text AS it, x.text AS en
          FROM sys.${c.entity_table} e
          LEFT JOIN sys.sys_reference_translations x
            ON x.entity_table = '${c.entity_table}' AND x.field = '${c.field}'
           AND x.locale = 'en' AND x.entity_id = e.${c.entity_pk_column}
-        WHERE e.${c.entity_pk_column} = $1::uuid`,
-  );
-  const res = await db.query<CampoTrovato>(parti.join("\n UNION ALL \n"), [id]);
+        WHERE e.${c.entity_pk_column} = $1::uuid${delTenant}`;
+  });
+  const res = await db.query<CampoTrovato>(parti.join("\n UNION ALL \n"), parametri);
   return res.rows;
+}
+
+/** La tabella della rotta: `…/<risorsa>/:id` → `sys_<risorsa>` (trattini in sottolineature). */
+export function tabellaDellaRotta(urlRotta: string | undefined): string | null {
+  if (!urlRotta) return null;
+  const m = /\/([a-z][a-z0-9-]*)\/:[A-Za-z_][A-Za-z0-9_]*$/.exec(urlRotta);
+  if (!m) return null;
+  const t = `sys_${m[1]!.replace(/-/g, "_")}`;
+  return IDENT.test(t) ? t : null;
+}
+
+/**
+ * I campi che lo schema del corpo della rotta accetta (le chiavi di un oggetto Zod). Uno schema
+ * che non si lascia leggere (assente, una trasformazione) non ne accetta nessuno: niente 3b.
+ */
+export function campiAccettati(schemaCorpo: unknown): Set<string> {
+  if (schemaCorpo === null || typeof schemaCorpo !== "object") return new Set();
+  let forma: unknown;
+  try {
+    forma = (schemaCorpo as { shape?: unknown }).shape;
+  } catch {
+    return new Set();
+  }
+  if (forma === null || typeof forma !== "object") return new Set();
+  return new Set(Object.keys(forma));
 }
 
 /**

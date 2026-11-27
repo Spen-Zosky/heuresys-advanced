@@ -10,8 +10,7 @@ import {
   testoScadenzaApprovazione,
   testoGapCompetenze,
   testoRiepilogoAgente,
-  messaggioDellAvviso,
-} from "../../src/lib/notifications/messaggi.js";
+  messaggioDellAvviso, testoSegnalazioneAmpiezza, testoSegnalazioneScoperta, testoSegnalazioneSuccessione } from "../../src/lib/notifications/messaggi.js";
 
 describe("messaggio strutturato degli avvisi", () => {
   it("promemoria di approvazione: codice e titolo", () => {
@@ -60,6 +59,25 @@ describe("messaggio strutturato degli avvisi", () => {
       params: { from: "2026-11-16", to: "2026-11-22", confirmed: 7, denied: 2, autonomous: 0 },
     });
     expect(messaggioDellAvviso("SYSTEM", t.subject, "testo cambiato a mano")).toBeNull();
+  });
+
+  it("le segnalazioni degli agenti (ADR-0063 E6) si riconoscono con titolo, unità e numeri", () => {
+    const a = testoSegnalazioneSuccessione("Direttore Risorse Umane", "Divisione Risorse Umane e Organizzazione", 2, 1);
+    expect(messaggioDellAvviso("SYSTEM", a.subject, a.body)).toEqual({
+      code: "AGENT_SIGNAL_POSIZIONE_CRITICA_SENZA_SUCCESSORE",
+      params: { position: "Direttore Risorse Umane", unit: "Divisione Risorse Umane e Organizzazione", candidates: 2, ready6Months: 1 },
+    });
+    const b = testoSegnalazioneAmpiezza("Direttore Generale", "Direzione Generale", 12, 10);
+    expect(messaggioDellAvviso("SYSTEM", b.subject, b.body)).toEqual({
+      code: "AGENT_SIGNAL_AMPIEZZA_DI_CONTROLLO",
+      params: { position: "Direttore Generale", unit: "Direzione Generale", reports: 12, threshold: 10 },
+    });
+    const c = testoSegnalazioneScoperta("Cassiere", "Filiale Sesto San Giovanni", 94);
+    expect(messaggioDellAvviso("SYSTEM", c.subject, c.body)).toEqual({
+      code: "AGENT_SIGNAL_POSIZIONE_SCOPERTA",
+      params: { position: "Cassiere", unit: "Filiale Sesto San Giovanni", days: 94 },
+    });
+    expect(messaggioDellAvviso("SYSTEM", c.subject, "testo cambiato a mano")).toBeNull();
   });
 
   it("un avviso di un altro tipo, o con un testo che non e' quello atteso, resta com'e' (null)", () => {

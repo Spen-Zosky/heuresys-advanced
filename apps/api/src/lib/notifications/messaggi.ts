@@ -13,7 +13,14 @@
  */
 
 export interface MessaggioAvviso {
-  code: "APPROVAL_REMINDER" | "APPROVAL_OVERDUE" | "GAP_CLOSURE_DUE" | "AGENT_WEEKLY_SUMMARY";
+  code:
+    | "APPROVAL_REMINDER"
+    | "APPROVAL_OVERDUE"
+    | "GAP_CLOSURE_DUE"
+    | "AGENT_WEEKLY_SUMMARY"
+    | "AGENT_SIGNAL_POSIZIONE_CRITICA_SENZA_SUCCESSORE"
+    | "AGENT_SIGNAL_AMPIEZZA_DI_CONTROLLO"
+    | "AGENT_SIGNAL_POSIZIONE_SCOPERTA";
   params: Record<string, string | number>;
 }
 
@@ -63,6 +70,63 @@ export function testoRiepilogoAgente(
   };
 }
 
+// ── I segnalatori (ADR-0063 E6, voce F4a): un oggetto fisso per segnalatore, il corpo con i numeri.
+const OGGETTO_SUCCESSIONE = "Segnalazione: posizione critica senza successore pronto";
+const OGGETTO_AMPIEZZA = "Segnalazione: ampiezza di controllo oltre la soglia";
+const OGGETTO_SCOPERTA = "Segnalazione: posizione senza titolare";
+const CORPO_SUCCESSIONE = /^La posizione critica «(.+)» dell'unità «(.+)» non ha un successore pronto ora: (\d+) candidati nel bacino, (\d+) pronti entro sei mesi\.$/;
+const CORPO_AMPIEZZA = /^La posizione «(.+)» dell'unità «(.+)» ha (\d+) riporti diretti, oltre la soglia di (\d+)\.$/;
+const CORPO_SCOPERTA = /^La posizione «(.+)» dell'unità «(.+)» è senza titolare da (\d+) giorni\.$/;
+
+export function testoSegnalazioneSuccessione(
+  posizione: string, unita: string, candidati: number, entroSeiMesi: number,
+): { subject: string; body: string } {
+  return {
+    subject: OGGETTO_SUCCESSIONE,
+    body: `La posizione critica «${posizione}» dell'unità «${unita}» non ha un successore pronto ora: ${candidati} candidati nel bacino, ${entroSeiMesi} pronti entro sei mesi.`,
+  };
+}
+
+export function testoSegnalazioneAmpiezza(
+  posizione: string, unita: string, riporti: number, soglia: number,
+): { subject: string; body: string } {
+  return {
+    subject: OGGETTO_AMPIEZZA,
+    body: `La posizione «${posizione}» dell'unità «${unita}» ha ${riporti} riporti diretti, oltre la soglia di ${soglia}.`,
+  };
+}
+
+export function testoSegnalazioneScoperta(posizione: string, unita: string, giorni: number): { subject: string; body: string } {
+  return {
+    subject: OGGETTO_SCOPERTA,
+    body: `La posizione «${posizione}» dell'unità «${unita}» è senza titolare da ${giorni} giorni.`,
+  };
+}
+
+function messaggioSegnalazione(subject: string, body: string): MessaggioAvviso | null {
+  if (subject === OGGETTO_SUCCESSIONE) {
+    const m = CORPO_SUCCESSIONE.exec(body);
+    return m
+      ? { code: "AGENT_SIGNAL_POSIZIONE_CRITICA_SENZA_SUCCESSORE",
+          params: { position: m[1]!, unit: m[2]!, candidates: Number(m[3]), ready6Months: Number(m[4]) } }
+      : null;
+  }
+  if (subject === OGGETTO_AMPIEZZA) {
+    const m = CORPO_AMPIEZZA.exec(body);
+    return m
+      ? { code: "AGENT_SIGNAL_AMPIEZZA_DI_CONTROLLO",
+          params: { position: m[1]!, unit: m[2]!, reports: Number(m[3]), threshold: Number(m[4]) } }
+      : null;
+  }
+  if (subject === OGGETTO_SCOPERTA) {
+    const m = CORPO_SCOPERTA.exec(body);
+    return m
+      ? { code: "AGENT_SIGNAL_POSIZIONE_SCOPERTA", params: { position: m[1]!, unit: m[2]!, count: Number(m[3]) } }
+      : null;
+  }
+  return null;
+}
+
 /** Il significato strutturato di un avviso salvato, o null se non e' uno di quelli che l'API scrive da se'. */
 export function messaggioDellAvviso(type: string, subject: string, body: string | null): MessaggioAvviso | null {
   if (type === "APPROVAL_REMINDER" && subject.startsWith(PREFISSO_PROMEMORIA) && body === CORPO_PROMEMORIA) {
@@ -77,6 +141,9 @@ export function messaggioDellAvviso(type: string, subject: string, body: string 
       };
     }
     return null;
+  }
+  if (type === "SYSTEM" && subject.startsWith("Segnalazione: ") && body !== null) {
+    return messaggioSegnalazione(subject, body);
   }
   if (type === "SYSTEM" && subject.startsWith(PREFISSO_RIEPILOGO) && body !== null) {
     const m = RIEPILOGO_CORPO.exec(body);

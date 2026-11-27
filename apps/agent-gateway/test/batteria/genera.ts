@@ -51,6 +51,8 @@ const delVocabolario = (voc: string | undefined, codice: unknown): Voce => {
  * ambiguità (nessun fatto, un pareggio in una classifica): la domanda si scarta.
  */
 export function attesoDaRighe(confronto: Confronto, righe: Riga[], vocabolario?: string): Atteso | null {
+  // `dentro` assente: la query elenca solo chi è dentro. NULL (confronto su un dato che manca): fuori.
+  const eDentro = (r: Riga) => r.dentro === undefined || r.dentro === true;
   const voce = (r: Riga) => voceDa(String(r.nome), Array.isArray(r.varianti) ? (r.varianti as string[]) : []);
   switch (confronto) {
     case "numero":
@@ -66,12 +68,12 @@ export function attesoDaRighe(confronto: Confronto, righe: Riga[], vocabolario?:
       return { confronto, etichetta: delVocabolario(vocabolario, codice), etichetteVietate: altre };
     }
     case "coppie": {
-      const dentro = righe.filter((r) => r.dentro !== false);
+      const dentro = righe.filter(eDentro);
       if (!dentro.length) return null;
       return {
         confronto,
         coppie: dentro.map((r) => ({ voce: voce(r), etichetta: delVocabolario(vocabolario, r.etichetta) })),
-        vietate: righe.filter((r) => r.dentro === false).map(voce),
+        vietate: righe.filter((r) => !eDentro(r)).map(voce),
       };
     }
     case "rifiuto":
@@ -80,14 +82,14 @@ export function attesoDaRighe(confronto: Confronto, righe: Riga[], vocabolario?:
     case "insieme":
     case "ordine":
     case "primo": {
-      const dentro = righe.filter((r) => r.dentro !== false);
+      const dentro = righe.filter(eDentro);
       if (!dentro.length || (confronto === "primo" && dentro.length !== 1)) return null;
       if (confronto === "ordine") {
         // Un pareggio fra i nominati, o fra l'ultimo nominato e il primo escluso, rende la classifica opinabile.
         const valori = righe.slice(0, dentro.length + 1).map((r) => String(r.valore));
         if (new Set(valori).size !== valori.length) return null;
       }
-      return { confronto, voci: dentro.map(voce), vietate: righe.filter((r) => r.dentro === false).map(voce) };
+      return { confronto, voci: dentro.map(voce), vietate: righe.filter((r) => !eDentro(r)).map(voce) };
     }
   }
 }

@@ -12,6 +12,7 @@ import { MaskedCell, isMasked } from "@/components/masked-cell";
 import { useFormat } from "@/lib/format";
 import { NomeOppure } from "@/components/senza-nome";
 import { LavoroInCorso } from "@/components/lavoro-in-corso";
+import { DichiarazioneEquita } from "@/components/dichiarazione-equita";
 
 // Band → @heuresys/ui Badge variant (only confirmed variants) + registered text token.
 const BAND_BADGE: Record<FlightRiskBand, "success" | "secondary" | "destructive"> = {
@@ -108,6 +109,13 @@ export default function InsightsPage() {
         emptyDescription={t("insights.emptyDescription")}
         caption={t("insights.caption")}
       />
+
+      {/* E12 (F6b): ogni proposta sulle persone dichiara il suo controllo di equità. */}
+      {data.data?.equita && (
+        <div className="mx-auto max-w-7xl px-6">
+          <DichiarazioneEquita equita={data.data.equita} />
+        </div>
+      )}
 
       <LavoroInCorso attivo={recompute.isPending} titolo={t("insights.recomputing")} dettaglio={t("common:attesa.siSbloccaAllaFine")} />
 

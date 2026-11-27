@@ -52,5 +52,6 @@ describe("la lingua dell'assistente segue quella della pagina", () => {
       for (const tipo of ["dato", "pagina", "regola"]) expect(t).toContain(tipo);
     }
     expect(istruzioniAssistente("en")).toContain("`titolo` and `dettaglio` are in English");
+    expect(istruzioniAssistente()).toContain("titolo diverso dalle altre");
   });
 });

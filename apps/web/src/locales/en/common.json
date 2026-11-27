@@ -1224,6 +1224,7 @@
     "concetti": {
       "activity-classification-mappings": "Activity classification mapping",
       "activity-classifications": "Activity classification",
+      "scenari": "Scenario",
       "approvals": "Approval request",
       "assessment-results": "Assessment result",
       "assessments": "Assessment",
@@ -1307,6 +1308,7 @@
     "campi": {
       "actionNotes": "Action notes",
       "actionUrl": "Action link",
+      "family": "Family",
       "activationId": "Activation",
       "actualEnd": "Actual end",
       "actualStart": "Actual start",
@@ -2692,5 +2694,80 @@
       "testo": "The model process names process roles; the tenant process binds them to positions; the person comes from who holds the position at the date. No process names a person directly."
     },
     "chiudi": "Close"
+  },
+  "equita": {
+    "titolo": "Fairness check",
+    "esito": {
+      "SUPERATO": "Passed",
+      "NON_SUPERATO": "Not passed",
+      "DATI_INSUFFICIENTI": "Insufficient data"
+    },
+    "sintesi": {
+      "SUPERATO": "The proposal does not penalise any group by gender, age, nationality or marital status: every measured ratio is above the threshold.",
+      "NON_SUPERATO": "The proposal does not pass the check.",
+      "DATI_INSUFFICIENTI": "The groups are too small to measure a ratio: the check was run and says so, without inventing an outcome."
+    },
+    "nonRaccomandabile": "This proposal is not a recommendation: it penalises a protected group beyond the threshold, or uses a protected trait in the calculation. Review it before deciding.",
+    "metodo": "Four-fifths method: for each trait the share of people with a favourable outcome ({{favorevole}}) is compared group by group across {{persone}} people; the ratio between the lowest and the highest share must be at least {{soglia}}. Groups with fewer than {{minimo}} people are merged and not compared, so no individual trait can be inferred.",
+    "favorevole": {
+      "PRONTO_ENTRO_6_MESI": "ready now or within six months",
+      "NON_A_RISCHIO_ALTO": "not flagged at high or critical risk of leaving",
+      "DIVARIO_AL_PIU_LIEVE": "aligned with the role or with a minor gap"
+    },
+    "colTratto": "Protected trait",
+    "colGruppi": "Groups",
+    "colRapporto": "Ratio",
+    "colEsito": "Outcome",
+    "tratto": {
+      "GENERE": "Gender",
+      "ETA": "Age",
+      "NAZIONALITA": "Nationality",
+      "STATO_CIVILE": "Marital status"
+    },
+    "gruppo": {
+      "GENERE": {
+        "MALE": "Men",
+        "FEMALE": "Women",
+        "OTHER": "Other gender"
+      },
+      "ETA": {
+        "MENO_DI_30": "Under 30",
+        "DA_30_A_39": "30 to 39",
+        "DA_40_A_49": "40 to 49",
+        "DA_50_IN_SU": "50 and over"
+      },
+      "STATO_CIVILE": {
+        "SINGLE": "Single",
+        "MARRIED": "Married",
+        "DIVORCED": "Divorced",
+        "WIDOWED": "Widowed",
+        "SEPARATED": "Separated",
+        "CIVIL_UNION": "Civil union",
+        "OTHER": "Other"
+      }
+    },
+    "gruppoSpeciale": {
+      "NON_DICHIARATO": "Not declared",
+      "GRUPPI_PICCOLI": "Small groups merged"
+    },
+    "gruppoConQuota": "{{gruppo}}: {{favorevoli}} of {{persone}} ({{quota}})",
+    "gruppoSenzaQuota": "{{gruppo}}: {{persone}}, not compared",
+    "nessunGruppo": "No people",
+    "nonMisurato": "Not measured",
+    "ingressiPuliti": "No protected trait enters the calculation.",
+    "ingressiProtetti": "The calculation uses a protected trait: {{ingressi}}.",
+    "ingressiVicini": "Inputs close to a protected trait, to keep an eye on: {{elenco}}.",
+    "vicino": "{{ingresso}} (close to {{tratto}})",
+    "ingresso": {
+      "tenure": "length of service",
+      "position_fit": "fit with the position",
+      "kpi": "KPI results",
+      "attendance": "attendance and overtime",
+      "engagement": "engagement",
+      "comp": "position in the pay band",
+      "promotion": "time since the last move",
+      "role_fit_gap": "distance from the role",
+      "evidence_sparsity": "sparse evidence"
+    }
   }
 }

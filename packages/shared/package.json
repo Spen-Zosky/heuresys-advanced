@@ -317,6 +317,11 @@
       "heuresys-source": "./src/schemas/organization-unit-history.ts",
       "default": "./dist/schemas/organization-unit-history.js"
     },
+    "./schemas/ghost-units": {
+      "types": "./dist/schemas/ghost-units.d.ts",
+      "heuresys-source": "./src/schemas/ghost-units.ts",
+      "default": "./dist/schemas/ghost-units.js"
+    },
     "./schemas/succession-pools": {
       "types": "./dist/schemas/succession-pools.d.ts",
       "heuresys-source": "./src/schemas/succession-pools.ts",
@@ -602,6 +607,11 @@
       "heuresys-source": "./src/schemas/insights.ts",
       "default": "./dist/schemas/insights.js"
     },
+    "./schemas/equita": {
+      "types": "./dist/schemas/equita.d.ts",
+      "heuresys-source": "./src/schemas/equita.ts",
+      "default": "./dist/schemas/equita.js"
+    },
     "./schemas/capability-composition": {
       "types": "./dist/schemas/capability-composition.d.ts",
       "heuresys-source": "./src/schemas/capability-composition.ts",
@@ -691,6 +701,11 @@
       "types": "./dist/schemas/agent-capabilities.d.ts",
       "heuresys-source": "./src/schemas/agent-capabilities.ts",
       "default": "./dist/schemas/agent-capabilities.js"
+    },
+    "./schemas/agent-signals": {
+      "types": "./dist/schemas/agent-signals.d.ts",
+      "heuresys-source": "./src/schemas/agent-signals.ts",
+      "default": "./dist/schemas/agent-signals.js"
     },
     "./schemas/agent-weekly-summary": {
       "types": "./dist/schemas/agent-weekly-summary.d.ts",

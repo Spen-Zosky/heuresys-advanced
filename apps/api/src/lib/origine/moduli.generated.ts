@@ -64,6 +64,24 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_users"
     ]
   },
+  "agent-signals": {
+    "prefissi": [
+      "/v1/agent-signals"
+    ],
+    "tabelle": [
+      "sys_agent_signals",
+      "sys_auth_roles",
+      "sys_critical_positions",
+      "sys_organization_units",
+      "sys_positions",
+      "sys_succession_pools",
+      "sys_successor_candidates",
+      "sys_user_auth_roles",
+      "sys_user_position_assignments",
+      "sys_users",
+      "v_agent_signals_fuori_perimetro"
+    ]
+  },
   "agent-tokens": {
     "prefissi": [
       "/v1/auth/agent-tokens"
@@ -518,6 +536,19 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
     ],
     "tabelle": [
       "sys_generated_record_origins"
+    ]
+  },
+  "ghost-units": {
+    "prefissi": [
+      "/v1/ghost-units"
+    ],
+    "tabelle": [
+      "sys_ghost_riforma",
+      "sys_ghost_units",
+      "sys_organization_units",
+      "sys_tenancies",
+      "sys_users",
+      "v_ghost_units_derivate"
     ]
   },
   "goals": {

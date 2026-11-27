@@ -1224,6 +1224,7 @@
     "concetti": {
       "activity-classification-mappings": "Corrispondenza della classificazione delle attività",
       "activity-classifications": "Classificazione delle attività",
+      "scenari": "Scenario",
       "approvals": "Richiesta di approvazione",
       "assessment-results": "Esito di una valutazione",
       "assessments": "Valutazione",
@@ -1307,6 +1308,7 @@
     "campi": {
       "actionNotes": "Note sulle azioni",
       "actionUrl": "Indirizzo dell'azione",
+      "family": "Famiglia",
       "activationId": "Attivazione",
       "actualEnd": "Fine effettiva",
       "actualStart": "Inizio effettivo",
@@ -2692,5 +2694,80 @@
       "testo": "Il processo del modello nomina ruoli di processo; il processo del tenant li lega a posizioni; la persona si ricava da chi occupa la posizione alla data. Nessun processo nomina direttamente una persona."
     },
     "chiudi": "Chiudi"
+  },
+  "equita": {
+    "titolo": "Controllo di equità",
+    "esito": {
+      "SUPERATO": "Superato",
+      "NON_SUPERATO": "Non superato",
+      "DATI_INSUFFICIENTI": "Dati insufficienti"
+    },
+    "sintesi": {
+      "SUPERATO": "La proposta non penalizza nessun gruppo per genere, età, nazionalità o stato civile: ogni rapporto misurato è sopra la soglia.",
+      "NON_SUPERATO": "La proposta non supera il controllo.",
+      "DATI_INSUFFICIENTI": "I gruppi non sono abbastanza numerosi per misurare un rapporto: il controllo è stato fatto e lo dice, senza inventare un esito."
+    },
+    "nonRaccomandabile": "Questa proposta non è una raccomandazione: penalizza un gruppo protetto oltre la soglia, o usa un tratto protetto nel calcolo. Va rivista prima di decidere.",
+    "metodo": "Metodo dei quattro quinti: per ogni tratto si confronta, gruppo per gruppo, la quota di persone con esito favorevole ({{favorevole}}) su {{persone}} persone; il rapporto fra la quota più bassa e la più alta deve essere almeno {{soglia}}. I gruppi con meno di {{minimo}} persone sono riuniti e non confrontati, così nessun tratto individuale si può dedurre.",
+    "favorevole": {
+      "PRONTO_ENTRO_6_MESI": "pronta ora o entro sei mesi",
+      "NON_A_RISCHIO_ALTO": "non segnalata a rischio di uscita alto o critico",
+      "DIVARIO_AL_PIU_LIEVE": "allineata al ruolo o con un divario lieve"
+    },
+    "colTratto": "Tratto protetto",
+    "colGruppi": "Gruppi",
+    "colRapporto": "Rapporto",
+    "colEsito": "Esito",
+    "tratto": {
+      "GENERE": "Genere",
+      "ETA": "Età",
+      "NAZIONALITA": "Nazionalità",
+      "STATO_CIVILE": "Stato civile"
+    },
+    "gruppo": {
+      "GENERE": {
+        "MALE": "Uomini",
+        "FEMALE": "Donne",
+        "OTHER": "Altro genere"
+      },
+      "ETA": {
+        "MENO_DI_30": "Meno di 30 anni",
+        "DA_30_A_39": "Da 30 a 39 anni",
+        "DA_40_A_49": "Da 40 a 49 anni",
+        "DA_50_IN_SU": "50 anni e oltre"
+      },
+      "STATO_CIVILE": {
+        "SINGLE": "Celibi e nubili",
+        "MARRIED": "Coniugati",
+        "DIVORCED": "Divorziati",
+        "WIDOWED": "Vedovi",
+        "SEPARATED": "Separati",
+        "CIVIL_UNION": "Unione civile",
+        "OTHER": "Altro"
+      }
+    },
+    "gruppoSpeciale": {
+      "NON_DICHIARATO": "Non dichiarato",
+      "GRUPPI_PICCOLI": "Gruppi piccoli riuniti"
+    },
+    "gruppoConQuota": "{{gruppo}}: {{favorevoli}} su {{persone}} ({{quota}})",
+    "gruppoSenzaQuota": "{{gruppo}}: {{persone}}, non confrontati",
+    "nessunGruppo": "Nessuna persona",
+    "nonMisurato": "Non misurato",
+    "ingressiPuliti": "Nessun tratto protetto entra nel calcolo.",
+    "ingressiProtetti": "Il calcolo usa un tratto protetto: {{ingressi}}.",
+    "ingressiVicini": "Ingressi vicini a un tratto protetto, da tenere d'occhio: {{elenco}}.",
+    "vicino": "{{ingresso}} (vicino a {{tratto}})",
+    "ingresso": {
+      "tenure": "anzianità",
+      "position_fit": "aderenza alla posizione",
+      "kpi": "risultati sui KPI",
+      "attendance": "presenze e straordinari",
+      "engagement": "clima e coinvolgimento",
+      "comp": "posizione nella fascia retributiva",
+      "promotion": "tempo dall'ultimo passaggio",
+      "role_fit_gap": "distanza dal ruolo",
+      "evidence_sparsity": "scarsità di evidenze"
+    }
   }
 }

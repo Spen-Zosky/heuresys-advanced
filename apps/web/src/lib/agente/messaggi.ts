@@ -21,6 +21,12 @@ export interface Messaggio {
  * Le righe dello stream, nell'ordine, diventano messaggi: la domanda della persona, la risposta
  * dell'assistente (i pezzi consecutivi in un messaggio solo) e gli avvisi. Un `rifiuto` sostituisce
  * la risposta della domanda a cui si riferisce.
+ *
+ * La risposta è solo il testo scritto DOPO l'ultima consultazione dei dati. Ciò che il modello
+ * scrive prima di uno strumento o di un comando di pagina («Leggo le assegnazioni…», «Guardo i
+ * filtri di analytics get_kpi») è un messaggio di lavorazione: non resta nel testo finale
+ * (prova dal vivo del 27/11, F6c: 4 risposte su 4 con messaggi di lavorazione, 1 su 4 con un nome
+ * tecnico). Lo stato di lavoro lo racconta `fase()`, non il testo.
  */
 export function messaggiDaRighe(righe: readonly StreamLine[]): Messaggio[] {
   const out: Messaggio[] = [];
@@ -34,6 +40,11 @@ export function messaggiDaRighe(righe: readonly StreamLine[]): Messaggio[] {
       const ultimo = out[out.length - 1];
       if (ultimo && ultimo.ruolo === "assistente" && !ultimo.rifiuto) ultimo.testo = `${ultimo.testo}\n\n${r.text}`;
       else out.push({ id: r.id, ruolo: "assistente", testo: r.text });
+    } else if (r.kind === "tool" || r.kind === "page_command") {
+      for (let i = out.length - 1; i >= inizioRisposta; i -= 1) {
+        const m = out[i];
+        if (m && m.ruolo === "assistente" && !m.rifiuto) out.splice(i, 1);
+      }
     } else if (r.kind === "rifiuto") {
       out.splice(inizioRisposta);
       out.push({ id: r.id, ruolo: "assistente", testo: r.text, rifiuto: true });

@@ -246,6 +246,9 @@ const TABELLE: Record<string, Riga> = {
   "sys.sys_scenario_versions": ["ACTIVITY", "Assistente e agenti", "Versioni degli scenari"],
   "sys.sys_scenario_shadow_units": ["EVALUATION", "Talento e successione", "Unità negli scenari what-if", "nonASe"],
   "sys.sys_scenario_shadow_assignments": ["EVALUATION", "Talento e successione", "Presenza negli scenari what-if", "nonASe"],
+  // Segnalatori (000522, ADR-0063 E6): le segnalazioni che una persona ha ricevuto nel suo perimetro.
+  // Riguardano posizioni, non la persona; la successione non va mai al titolare (guardia G4).
+  "sys.sys_agent_signals": ["ACTIVITY", "Assistente e agenti", "Segnalazioni ricevute dagli agenti"],
   // ── Modelli e configurazione (la persona vi compare come autrice o approvatrice)
   "sys.sys_blueprint_activations": ["ACTIVITY", "Modelli e configurazione", "Attivazioni dei modelli"],
   "sys.sys_blueprint_overrides": ["ACTIVITY", "Modelli e configurazione", "Personalizzazioni dei modelli"],
@@ -375,6 +378,7 @@ const SOGGETTO: ReadonlySet<string> = new Set([
   "sys.sys_agent_call_log.agent_call_user_id",
   "sys.sys_scenarios.scenario_owner_user_id",
   "sys.sys_scenario_shadow_assignments.shadow_assignment_user_id",
+  "sys.sys_agent_signals.agent_signal_recipient_user_id",
   "sys.sys_assessments.assessment_subject_user_id",
   "sys.sys_attendance.attendance_subject_user_id",
   "sys.sys_auth_identities.auth_identity_user_id",

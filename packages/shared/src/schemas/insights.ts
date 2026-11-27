@@ -12,6 +12,7 @@
  * Zod v4 API (z.uuid()/z.iso.datetime()).
  */
 import { z } from "zod";
+import { EquitaDichiarazioneSchema } from "./equita.js";
 
 export const FlightRiskBandEnum = z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]);
 export type FlightRiskBand = z.infer<typeof FlightRiskBandEnum>;
@@ -73,6 +74,8 @@ export const FlightRiskListResponseSchema = z.object({
   items: z.array(FlightRiskScoreSchema),
   total: z.number().int().min(0),
   generatedAt: z.iso.datetime(),
+  /** E12 (F6b): il controllo di equità dichiarato; esito favorevole = chi non è segnalato a rischio alto o critico. */
+  equita: EquitaDichiarazioneSchema,
 });
 export type FlightRiskListResponse = z.infer<typeof FlightRiskListResponseSchema>;
 
@@ -117,6 +120,8 @@ export const SuccessionReadinessListResponseSchema = z.object({
   items: z.array(SuccessionReadinessScoreSchema),
   total: z.number().int().min(0),
   generatedAt: z.iso.datetime(),
+  /** E12 (F6b): il controllo di equità dichiarato su chi è proposto come pronto. */
+  equita: EquitaDichiarazioneSchema,
 });
 export type SuccessionReadinessListResponse = z.infer<typeof SuccessionReadinessListResponseSchema>;
 
@@ -149,5 +154,7 @@ export const SkillGapListResponseSchema = z.object({
   items: z.array(SkillGapScoreSchema),
   total: z.number().int().min(0),
   generatedAt: z.iso.datetime(),
+  /** E12 (F6b): il controllo di equità dichiarato; esito favorevole = chi è allineato al ruolo o ha un divario lieve. */
+  equita: EquitaDichiarazioneSchema,
 });
 export type SkillGapListResponse = z.infer<typeof SkillGapListResponseSchema>;

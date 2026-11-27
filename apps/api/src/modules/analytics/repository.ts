@@ -18,7 +18,7 @@
  */
 
 import type { Pool, PoolClient } from "pg";
-import { soloPersone } from "../../lib/scope/persone.js";
+import { personaInForza } from "../../lib/scope/persone.js";
 
 export type DbConnector = Pool | PoolClient;
 
@@ -64,7 +64,7 @@ export interface KpiAchievement {
 // L'organico conta persone, non utenze tecniche: le utenze di servizio (agenti, collaudo)
 // restano fuori. Senza questo filtro /analytics/workforce mostrava 167 invece di 158 su RTL
 // (analisi interfacce del 2026-10-31, V6).
-const ONLY_PEOPLE = soloPersone("u");
+const ONLY_PEOPLE = personaInForza("u");
 
 function userScopeClause(scope: ScopeFilter): { sql: string; params: unknown[] } {
   if (scope.isPlatformScope) {

@@ -198,11 +198,20 @@ describe("#57 F3 — organizational health index", () => {
     const ranked = b.units.filter((u) => u.standing !== "UNRANKED");
     expect(ranked.length).toBeGreaterThan(2);
 
+    // Il percentile pubblicato è ARROTONDATO a quattro decimali (round4 nel servizio), mentre
+    // la fascia si decide sul valore esatto. Su un confine esatto (un terzo, due terzi: capita
+    // quando il numero delle unità meno uno è multiplo di tre, come nella copia di produzione
+    // del 2026-11-26) 0,3333 pubblicato vale 1/3 esatto, cioè MIDDLE. Il confronto quindi
+    // ammette lo scarto dell'arrotondamento, e solo quello.
+    const SCARTO = 0.5e-4;
+    const fasceAmmesse = (p: number): Standing[] => {
+      const f = (x: number): Standing => (x >= 2 / 3 ? "LEADING" : x >= 1 / 3 ? "MIDDLE" : "LAGGING");
+      return [...new Set([f(p - SCARTO), f(p), f(p + SCARTO)])];
+    };
     for (const u of ranked) {
       expect(u.percentile).not.toBeNull();
       const p = u.percentile as number;
-      const expected = p >= 2 / 3 ? "LEADING" : p >= 1 / 3 ? "MIDDLE" : "LAGGING";
-      expect(u.standing).toBe(expected);
+      expect(fasceAmmesse(p), `unità con percentile ${p}`).toContain(u.standing);
     }
     // an unranked unit carries no percentile, and vice versa
     for (const u of b.units.filter((x) => x.standing === "UNRANKED")) {

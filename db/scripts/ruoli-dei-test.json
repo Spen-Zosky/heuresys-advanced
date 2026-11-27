@@ -1,0 +1,42 @@
+{
+  "_cosa": "Le concessioni di ruolo su persone di RTL che i test di integrazione danno per scontate. Le porta su un database di collaudo db/scripts/ruoli-dei-test.ts (pnpm db:ruoli-dei-test), mai in produzione.",
+  "_perche": "heuresys_ci si rinfresca dalla produzione, dove i ruoli seguono il lavoro (regola di Enzo del 2026-10-31, db/scripts/rtl-ruolo-segue-lavoro.sql). Il 2026-11-26 il rinfresco ha tolto alla copia della CI 194 concessioni che i test usavano, e 25 file sono diventati rossi senza che il codice fosse cambiato. Le utenze di collaudo hanno già i loro ruoli dichiarati in apps/api/scripts/collaudo-access.mjs; qui stanno solo le persone di RTL.",
+  "_regola": "Una riga per concessione, con il motivo e i file che la usano. Si aggiunge una riga quando un test nuovo pretende un ruolo su una persona nominata; si toglie quando nessun test la usa più.",
+  "concessioni": [
+    {
+      "email": "federica.marchetti@rtl-bank.org",
+      "ruolo": "TENANT_ADMIN",
+      "motivo": "Il mandato HR nominato dai test: in produzione lo porta valentina.conti dal 2026-10-31.",
+      "test": [
+        "advisor-suggestions", "analytics-aggregate-mask", "approvals", "approvals-elenco-completo",
+        "content-blueprint-links", "delegations", "delegations-chain", "engagement", "evidence-mask",
+        "goals-life", "insights-mask", "learning-gaps-position", "mfa-policy",
+        "organization-unit-processes", "predictions-mask", "scope-org", "time-off"
+      ]
+    },
+    {
+      "email": "maria.colombo@rtl-bank.org",
+      "ruolo": "HRMS_MANAGER",
+      "motivo": "La controprova del perimetro di HIRING_MANAGER legge con lei: in produzione dal 2026-10-31 porta PEOPLE_MANAGER.",
+      "test": ["recruiting-scope"]
+    },
+    {
+      "email": "alberto.rossetti@rtl-bank.org",
+      "ruolo": "READ_ONLY",
+      "motivo": "Serve almeno una persona READ_ONLY impersonabile per la sfida MFA obbligatoria: in produzione non ce n'è nessuna dal 2026-10-31.",
+      "test": ["auth-mfa-mandatory"]
+    },
+    {
+      "email": "alice.esposito@rtl-bank.org",
+      "ruolo": "MANAGER",
+      "motivo": "Il perimetro TEAM del cruscotto si prova con un MANAGER titolare di una posizione attiva: in produzione nessun MANAGER ne possiede una.",
+      "test": ["dashboard", "dashboard-catalog"]
+    },
+    {
+      "email": "marco.rinaldi@rtl-bank.org",
+      "ruolo": "TEAM_LEADER",
+      "motivo": "Il leader di squadra dei test di teams e del controllo a due assi fra alberi: in produzione dal 2026-10-31 non porta TEAM_LEADER.",
+      "test": ["teams", "two-axis-f4-crosstree"]
+    }
+  ]
+}

@@ -13,7 +13,10 @@
  * fetchImpl is injectable so the client is unit-testable without live heuresys.
  */
 
-import { conOmissis, letturaNegata, type EsitiLetture } from "./omissis.js";
+import { conOmissis, letturaDaConfermare, letturaNegata, type EsitiLetture } from "./omissis.js";
+
+/** ADR-0050 D5: lo stesso codice di `packages/shared/src/schemas/mfa.ts` (il gateway non dipende da shared). */
+const STEP_UP_REQUIRED_CODE = "STEP_UP_REQUIRED";
 
 export interface Session {
   cookieAccess: string;
@@ -239,6 +242,17 @@ export class HeuresysClient {
     // Richiesta di Enzo del 2026-11-18: una lettura che l'API nega alla persona non è un guasto,
     // è un'informazione per la risposta. Torna al modello come esito NON_AUTORIZZATO e si conta.
     if (lettura && res.status === 403) {
+      // ADR-0050 D5: «serve la conferma del secondo fattore» non è «non autorizzato».
+      let codice: string | undefined;
+      try {
+        codice = codiceErrore(await res.text());
+      } catch {
+        /* nessun corpo leggibile: resta il diniego */
+      }
+      if (codice === STEP_UP_REQUIRED_CODE) {
+        this.esiti?.daConfermareSecondoFattore();
+        return letturaDaConfermare() as T;
+      }
       this.esiti?.negata();
       return letturaNegata() as T;
     }

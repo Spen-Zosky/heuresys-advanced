@@ -323,6 +323,18 @@
       "AGENT_WEEKLY_SUMMARY": {
         "subject": "Riepilogo settimanale dell'assistente: settimana dal {{from}}",
         "body": "Dal {{from}} al {{to}}: {{confirmed}} scritture confermate, {{denied}} negate, {{autonomous}} eseguite senza conferma."
+      },
+      "AGENT_SIGNAL_POSIZIONE_CRITICA_SENZA_SUCCESSORE": {
+        "subject": "Segnalazione: posizione critica senza successore pronto",
+        "body": "La posizione critica «{{position}}» dell'unità «{{unit}}» non ha un successore pronto ora: {{candidates}} candidati nel bacino, {{ready6Months}} pronti entro sei mesi."
+      },
+      "AGENT_SIGNAL_AMPIEZZA_DI_CONTROLLO": {
+        "subject": "Segnalazione: ampiezza di controllo oltre la soglia",
+        "body": "La posizione «{{position}}» dell'unità «{{unit}}» ha {{reports}} riporti diretti, oltre la soglia di {{threshold}}."
+      },
+      "AGENT_SIGNAL_POSIZIONE_SCOPERTA": {
+        "subject": "Segnalazione: posizione senza titolare",
+        "body": "La posizione «{{position}}» dell'unità «{{unit}}» è senza titolare da {{days}} giorni."
       }
     },
     "approvals": {

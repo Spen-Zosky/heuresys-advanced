@@ -245,6 +245,8 @@ VALUES
    '[sign-off: EXCLUDE — struttura ombra: posizioni copiate per uno scenario (ADR-0063 D5, mig 000515): righe scritte solo dall''API, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000515.]'),
   ('sys_scenario_shadow_assignments', 'D', 'EXCLUDE', NULL,
    '[sign-off: EXCLUDE — struttura ombra: titolari copiati per uno scenario (ADR-0063 D5, mig 000515): righe scritte solo dall''API, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000515.]'),
+  ('sys_agent_signals', 'D', 'EXCLUDE', NULL,
+   '[sign-off: EXCLUDE — segnalazioni degli agenti a una persona del tenant (ADR-0063 E6, mig 000522): righe scritte solo dal segnalatore, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000522.]'),
   ('sys_ghost_units', 'D', 'EXCLUDE', NULL,
    '[sign-off: EXCLUDE — storia dell''organizzazione ghost (ADR-0063 D2, mig 000523): righe derivate dall''albero delle unita'' del tenant da sys.sys_ghost_riforma, nessuna sorgente nel legacy (ADR-0038). Registrata qui e non in 000523.]')
 ON CONFLICT (reconciliation_registry_table_name) DO NOTHING;

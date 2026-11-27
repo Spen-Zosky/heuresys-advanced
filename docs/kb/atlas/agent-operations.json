@@ -150,6 +150,20 @@
    },
    "solaLettura": true
   },
+  "agent-signals": {
+   "base": "/agent-signals",
+   "data": "2026-11-05",
+   "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi",
+   "operations": {
+    "get": {
+     "classe": "A",
+     "method": "GET",
+     "path": "/",
+     "permission": "notification:read:self"
+    }
+   },
+   "solaLettura": true
+  },
   "agent-weekly-summary": {
    "base": "/agent-weekly-summary",
    "data": "2026-11-05",
@@ -3166,6 +3180,32 @@
      "method": "POST",
      "path": "/:cycleId/transition",
      "permission": "review-cycle:manage"
+    }
+   },
+   "solaLettura": false
+  },
+  "scenari": {
+   "base": "/scenari",
+   "data": "2026-11-26",
+   "decisione": "ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge la persona, senza mandati; le scritture restano dei soli perimetri decisi; ADR-0063 F1 (piano accettato da Enzo il 2026-11-26): le scritture con classe B o C in agent-classi-scritture.json, ognuna con la conferma della persona collegata",
+   "operations": {
+    "get": {
+     "classe": "A",
+     "method": "GET",
+     "path": "/",
+     "permission": "scenario:read"
+    },
+    "get_by_id": {
+     "classe": "A",
+     "method": "GET",
+     "path": "/:id",
+     "permission": "scenario:read"
+    },
+    "post_uscite": {
+     "classe": "B",
+     "method": "POST",
+     "path": "/uscite",
+     "permission": "scenario:create"
     }
    },
    "solaLettura": false

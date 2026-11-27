@@ -43,6 +43,7 @@ describe("la lingua dell'assistente segue quella della pagina", () => {
       expect(t).toMatch(/LINEA DI RIPORTO|REPORTING LINE/);
     }
     expect(ISTRUZIONI_ASSISTENTE).toContain("non quelli delle sue squadre");
+    expect(ISTRUZIONI_ASSISTENTE).toContain("reportsToPositionId");
   });
 
   it("chiede il blocco delle fonti cliccabili, con i tre tipi, in entrambe le lingue (F6c)", () => {

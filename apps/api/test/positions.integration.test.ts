@@ -167,6 +167,27 @@ describe("/v1/positions/* integration", () => {
     expect((none.json() as { total: number }).total).toBe(0);
   });
 
+  it("LIST: `reportsToPositionId` restituisce solo le posizioni che riportano a quella (linea di riporto)", async () => {
+    const all = await suite.app.inject({
+      method: "GET", url: "/v1/positions?limit=200",
+      headers: { cookie: cookieHeader(tenantS.cookies) },
+    });
+    expect(all.statusCode).toBe(200);
+    const items = (all.json() as { items: { positionId: string; reportsToPositionId: string | null }[] }).items;
+    const capo = items.find((p) => p.reportsToPositionId && items.some((x) => x.reportsToPositionId === p.reportsToPositionId));
+    expect(capo, "nessuna posizione con riporto nel perimetro").toBeDefined();
+    const attesi = items.filter((p) => p.reportsToPositionId === capo!.reportsToPositionId).map((p) => p.positionId).sort();
+    const r = await suite.app.inject({
+      method: "GET", url: `/v1/positions?reportsToPositionId=${capo!.reportsToPositionId}&limit=200`,
+      headers: { cookie: cookieHeader(tenantS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const got = r.json() as { items: { positionId: string; reportsToPositionId: string | null }[]; total: number };
+    expect(got.total).toBe(attesi.length);
+    expect(got.items.map((p) => p.positionId).sort()).toEqual(attesi);
+    for (const p of got.items) expect(p.reportsToPositionId).toBe(capo!.reportsToPositionId);
+  });
+
   /**
    * Repertorio interfacce (blocco B2, 10/11/2026). R2: l'elenco è per titolo e ogni riga
    * porta titolare, unità, sede e tenant (null quando il dato non c'è). R5: il filtro

@@ -181,7 +181,9 @@ def letture_e_scritture(moduli: dict, catalogo: dict) -> dict:
     from build_agent_operations import operation_id
     import check_copertura_agente as cop
 
-    nel_catalogo = {(m, o["method"], o.get("path", "/"))
+    # La chiave è il modulo del codice: un concetto può chiamarsi diversamente dal suo modulo
+    # (tenant-consolidations sta in tenant-consolidation) e il catalogo lo dichiara in `modulo`.
+    nel_catalogo = {((v or {}).get("modulo") or m, o["method"], o.get("path", "/"))
                     for m, v in (catalogo.get("concepts") or {}).items()
                     for o in ((v or {}).get("operations") or {}).values()}
     get_tot = get_ok = 0

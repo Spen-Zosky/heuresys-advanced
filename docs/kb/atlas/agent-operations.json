@@ -3906,6 +3906,12 @@
      "path": "/pending-approval",
      "permission": null
     },
+    "get_proposals_by_proposalid": {
+     "classe": "A",
+     "method": "GET",
+     "path": "/proposals/:proposalId",
+     "permission": null
+    },
     "get_proposals_by_proposalid_cascade": {
      "classe": "A",
      "method": "GET",

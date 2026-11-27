@@ -283,6 +283,11 @@ function percentileIn(xs: number[], v: number): number {
   return below / (xs.length - 1);
 }
 
+/** Demanded by positions but held by nobody: an absence, not a rare asset. */
+function isGapGroup(g: { holders: number; positionsRequiring: number }): boolean {
+  return g.holders === 0 && g.positionsRequiring > 0;
+}
+
 /**
  * Classifies every in-play capability. Pure and deterministic: no I/O, no clock.
  * Each dimension lands in [0,1]; the verdict is the Barney lattice read over the
@@ -333,14 +338,19 @@ export function computeVrio(inputs: repo.VrioInputs): VrioCapabilityItem[] {
   const sortedAsc = (pick: (r: (typeof raw)[number]) => number) => raw.map(pick).sort((a, b) => a - b);
   const dist = {
     value: sortedAsc((r) => r.value),
-    rarity: sortedAsc((r) => r.rarity),
+    // Rarity ranks only the capabilities someone holds. A gap (demanded, held by nobody) reads raw
+    // rarity 1.0 and is classified CAPABILITY_GAP outside the lattice anyway; left in the
+    // distribution, the gaps tie at the top and push every held capability under the threshold.
+    // Measured 2026-11-26 on a copy refreshed from production: 77 gaps out of 94, best held
+    // percentile 0.18, isRare false everywhere.
+    rarity: raw.filter((r) => !isGapGroup(r.g)).map((r) => r.rarity).sort((a, b) => a - b),
     inimitability: sortedAsc((r) => r.inimitability),
     organization: sortedAsc((r) => r.organization),
   };
 
   const items = raw.map(({ g, econ, crit, ...m }): VrioCapabilityItem => {
     const value = percentileIn(dist.value, m.value);
-    const rarity = percentileIn(dist.rarity, m.rarity);
+    const rarity = clamp(percentileIn(dist.rarity, m.rarity), 0, 1);
     const inimitability = percentileIn(dist.inimitability, m.inimitability);
     const organization = percentileIn(dist.organization, m.organization);
 
@@ -351,7 +361,7 @@ export function computeVrio(inputs: repo.VrioInputs): VrioCapabilityItem[] {
 
     // A capability the organization demands but nobody holds is an absence, not a rare asset:
     // raw rarity would read 1.0 and flatter it into an "advantage". Classify it as the gap it is.
-    const isGap = g.holders === 0 && g.positionsRequiring > 0;
+    const isGap = isGapGroup(g);
 
     const verdict: VrioVerdict =
       isGap ? "CAPABILITY_GAP"

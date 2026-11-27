@@ -1,18 +1,18 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `aec8b5ba` (2026-11-26T21:41:17+01:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `caaff036` (2026-11-27T11:21:11+00:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
 | Layer | Valore |
 |---|---|
-| Moduli API | 126 |
-| Route API | 757 |
+| Moduli API | 128 |
+| Route API | 761 |
 | Pagine web | 146 |
-| Schemi shared | 140 |
+| Schemi shared | 141 |
 | Tabelle DB | 447 (vuote: 50) |
 | Viste / matview | 96 / 0 |
-| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 343 |
+| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 347 |
 
 ## Moduli API
 
@@ -24,6 +24,7 @@
 | agent-capabilities | /v1/agent-capabilities | 7 | 0 | 5 | 1 |
 | agent-conversations | /v1/agent-conversations | 10 | 0 | 4 | 1 |
 | agent-requests | /v1/agent-requests | 5 | 0 | 3 | 1 |
+| agent-signals | /v1/agent-signals | 1 | 1 | 11 | 1 |
 | agent-tokens | /v1/auth/agent-tokens | 1 | 0 | 2 | 0 |
 | agent-weekly-summary | /v1/agent-weekly-summary | 1 | 1 | 8 | 1 |
 | analytics | /v1/analytics | 10 | 1 | 15 | 6 |
@@ -107,6 +108,7 @@
 | research | — | 0 | 0 | 20 | 1 |
 | review-cycles | /v1/review-cycles | 4 | 2 | 1 | 2 |
 | rubrica | — | 0 | 0 | 4 | 2 |
+| scenari | /v1/scenari | 3 | 2 | 14 | 3 |
 | seed-acquisition-runs | /v1/seed-acquisition-runs | 6 | 3 | 1 | 1 |
 | seed-approval-decisions | /v1/seed-approval-decisions | 3 | 2 | 2 | 1 |
 | seed-candidate-records | /v1/seed-candidate-records | 5 | 2 | 3 | 1 |

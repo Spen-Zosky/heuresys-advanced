@@ -1,0 +1,20 @@
+Verifica in locale dei due difetti minori sul gemello, dopo la revisione: 2026-11-26 20:59-21:04 UTC, codice del ramo non ancora su main (impronta di istruzioni.ts acc89f111a975903, uguale prima e dopo la corsa), 80 domande dei profili senza mandato HR.
+PER CATEGORIA
+  fuori-perimetro           10/10  100%
+  non-autorizzato           25/25  100%
+  percorsi                   6/6   100%
+  perimetro-carriere         5/5   100%
+  perimetro-critiche         5/5   100%
+  perimetro-rischio         10/10  100%
+  perimetro-successori       9/9   100%
+  perimetro-talenti         10/10  100%
+PER PROFILO
+  capo-crediti               9/9   100%
+  capo-finanza              10/10  100%
+  capo-it                   10/10  100%
+  capo-operations           10/10  100%
+  capo-retail               10/10  100%
+  dipendente                18/18  100%
+  responsabile-rischi       13/13  100%
+TOTALE 80/80 (100.0%), guasti 0
+(2026-11-26T21:04:33.283Z, soglia 90%)

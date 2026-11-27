@@ -409,3 +409,32 @@ export const ScenarioCreateSchema = z
   })
   .strict();
 export type ScenarioCreate = z.infer<typeof ScenarioCreateSchema>;
+
+// ── Le rotte (voce F3b-2) ───────────────────────────────────────────────────────────────────
+
+/** Lo scenario di uscita (S-T1 effetto diretto, S-T2 cascata): chi esce e fin dove si copre. */
+export const ScenarioExitsCreateSchema = z
+  .object({
+    userIds: z.array(z.string().uuid()).min(1).max(20),
+    family: z.enum(["EFFETTO_DIRETTO", "CASCATA"]),
+  })
+  .strict();
+export type ScenarioExitsCreate = z.infer<typeof ScenarioExitsCreateSchema>;
+
+/** Uno scenario con la sua versione più recente (null se non ne ha ancora una). */
+export const ScenarioDetailSchema = z
+  .object({
+    scenario: ScenarioSchema,
+    version: ScenarioVersionSchema.nullable(),
+  })
+  .strict();
+export type ScenarioDetail = z.infer<typeof ScenarioDetailSchema>;
+
+/** L'elenco degli scenari del tenant: tutti, con il loro numero (niente elenchi troncati, R5). */
+export const ScenarioListSchema = z
+  .object({
+    items: z.array(ScenarioSchema),
+    total: z.number().int().nonnegative(),
+  })
+  .strict();
+export type ScenarioList = z.infer<typeof ScenarioListSchema>;

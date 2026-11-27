@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { pool } from '../src/db/client.js';
+import { fuoriDaiPostiNuoviC13 } from './helpers/giornali.js';
 
 // S970 #1 bridge job->position (KPI leg). sys_position_kpi_requirements is seeded from legacy
 // tenant_job_kpis via the EMPLOYEE-MEDIATED bridge (I14): position.legacy_employee_id -> employee ->
@@ -21,9 +22,13 @@ describe('reconciliation S970 KPI bridge', () => {
   // I numeri restano fissi apposta: questo test sorveglia che il ponte S970 non
   // perda righe in silenzio, ed e' un compito che un conteggio derivato dal DB non
   // potrebbe svolgere (si adeguerebbe alla perdita invece di segnalarla).
+  //
+  // [2026-11-26] I quattro posti nuovi di storia36 C13 ricevono una copia dei KPI del posto
+  // modello (14_selezione.sql): non sono il ponte S970, e restano fuori dal perimetro.
   it('position_kpi_requirements POPULATED at the measured coverage (168 rows / 42 positions / 1 tenant)', async () => {
-    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_position_kpi_requirements`)).toBe(168);
-    expect(await count(`SELECT count(DISTINCT position_id)::int AS n FROM sys.sys_position_kpi_requirements`)).toBe(42);
+    const ponte = `FROM sys.sys_position_kpi_requirements r WHERE ${fuoriDaiPostiNuoviC13("r.position_id")}`;
+    expect(await count(`SELECT count(*)::int AS n ${ponte}`)).toBe(168);
+    expect(await count(`SELECT count(DISTINCT r.position_id)::int AS n ${ponte}`)).toBe(42);
     expect(await count(`SELECT count(DISTINCT position_kpi_requirement_tenant_id)::int AS n FROM sys.sys_position_kpi_requirements`)).toBe(1);
     expect(await count(`SELECT count(*)::int AS n FROM sys.v_reconciliation_status
       WHERE table_name='sys_position_kpi_requirements' AND resolved_status='POPULATED'`)).toBe(1);

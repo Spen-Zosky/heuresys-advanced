@@ -36,6 +36,7 @@ concetti: [agente, assistente, applet]
 | cosa | comando |
 |---|---|
 | perimetri dei concetti dell'agente | `python docs/kb/tools/check_concetti_agente.py` |
+| livello agentico, asse per asse, e i sette criteri (non scende sotto il minimo registrato) | `python docs/kb/tools/misura_livello_agentico.py` (`--md` per il piano, `--uso` sulla VM) |
 
 ## Costi, rischi e ritorno del gateway
 

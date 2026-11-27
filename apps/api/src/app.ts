@@ -74,6 +74,8 @@ import { delegationsRoutes } from "./modules/delegations/routes.js";
 import { consolidationRunRoutes, consolidationVocabularyRoutes, tenantConsolidationRoutes } from "./modules/tenant-consolidation/routes.js";
 import { agentCapabilitiesRoutes } from "./modules/agent-capabilities/routes.js";
 import { agentWeeklySummaryRoutes } from "./modules/agent-weekly-summary/routes.js";
+import { agentSignalsRoutes } from "./modules/agent-signals/routes.js";
+import { scenariRoutes } from "./modules/scenari/routes.js";
 import { agentConversationsRoutes } from "./modules/agent-conversations/routes.js";
 import { agentRequestsRoutes } from "./modules/agent-requests/routes.js";
 import { platformTenantAssignmentsRoutes } from "./modules/platform-tenant-assignments/routes.js";
@@ -82,6 +84,7 @@ import { careerPathStepsRoutes } from "./modules/career-path-steps/routes.js";
 import { userCareerPlansRoutes } from "./modules/user-career-plans/routes.js";
 import { userTargetPositionsRoutes } from "./modules/user-target-positions/routes.js";
 import { organizationUnitHistoryRoutes } from "./modules/organization-unit-history/routes.js";
+import { ghostUnitsRoutes } from "./modules/ghost-units/routes.js";
 import { hierarchyLevelsRoutes } from "./modules/hierarchy-levels/routes.js";
 import { successionPoolsRoutes } from "./modules/succession-pools/routes.js";
 import { successorCandidatesRoutes } from "./modules/successor-candidates/routes.js";
@@ -528,6 +531,8 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   // ADR-0053 A1/A3/D4, piano dei principi agentici T3c: il registro delle capacità degli agenti.
   await app.register(agentCapabilitiesRoutes, { prefix: "/v1/agent-capabilities" });
   await app.register(agentWeeklySummaryRoutes, { prefix: "/v1/agent-weekly-summary" });
+  await app.register(agentSignalsRoutes, { prefix: "/v1/agent-signals" });
+  await app.register(scenariRoutes, { prefix: "/v1/scenari" });
   // ADR-0056 D4, piano dei principi agentici T6a: le conversazioni dell'assistente della persona.
   await app.register(agentConversationsRoutes, { prefix: "/v1/agent-conversations" });
   await app.register(agentRequestsRoutes, { prefix: "/v1/agent-requests" });
@@ -539,6 +544,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(userCareerPlansRoutes, { prefix: "/v1/user-career-plans" });
   await app.register(userTargetPositionsRoutes, { prefix: "/v1/user-target-positions" });
   await app.register(organizationUnitHistoryRoutes, { prefix: "/v1/organization-unit-history" });
+  await app.register(ghostUnitsRoutes, { prefix: "/v1/ghost-units" });
   await app.register(hierarchyLevelsRoutes, { prefix: "/v1/hierarchy-levels" });
   await app.register(successionPoolsRoutes, { prefix: "/v1/succession-pools" });
   await app.register(successorCandidatesRoutes, { prefix: "/v1/successor-candidates" });

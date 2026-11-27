@@ -19,6 +19,9 @@
  *      nell'access token (claim `sua`): la decisione non va al database. Il login con il
  *      secondo fattore la mette, `/v1/auth/mfa/step-up/verify` la rinnova e riemette il token,
  *      il rinnovo del token la porta avanti senza rinnovarla (colonna della mig. 000476).
+ *      Per un gettone d'agente l'ora non viene dal gettone ma dalla sessione della persona
+ *      (`middleware/auth.ts`, stessa lettura che controlla la sessione viva): l'assistente legge
+ *      con la conferma che la persona ha dato in quella sessione, e non può darla da sé (A-3).
  *   3. LA DECISIONE. `serveConferma` dice se QUESTA lettura chiede una conferma che la
  *      sessione non ha. Il risolutore la chiama sulle rotte marcate e risponde 403
  *      `STEP_UP_REQUIRED`; la pagina chiede il codice e ripete la richiesta.

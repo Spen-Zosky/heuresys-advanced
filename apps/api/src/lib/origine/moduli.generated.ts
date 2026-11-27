@@ -64,6 +64,24 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_users"
     ]
   },
+  "agent-signals": {
+    "prefissi": [
+      "/v1/agent-signals"
+    ],
+    "tabelle": [
+      "sys_agent_signals",
+      "sys_auth_roles",
+      "sys_critical_positions",
+      "sys_organization_units",
+      "sys_positions",
+      "sys_succession_pools",
+      "sys_successor_candidates",
+      "sys_user_auth_roles",
+      "sys_user_position_assignments",
+      "sys_users",
+      "v_agent_signals_fuori_perimetro"
+    ]
+  },
   "agent-tokens": {
     "prefissi": [
       "/v1/auth/agent-tokens"
@@ -1085,6 +1103,27 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
     ],
     "tabelle": [
       "sys_review_cycles"
+    ]
+  },
+  "scenari": {
+    "prefissi": [
+      "/v1/scenari"
+    ],
+    "tabelle": [
+      "sys_scenario_assumptions",
+      "sys_scenario_equity_checks",
+      "sys_scenario_fotografa",
+      "sys_scenario_levers",
+      "sys_scenario_options",
+      "sys_scenario_results",
+      "sys_scenario_shadow_assignments",
+      "sys_scenario_shadow_positions",
+      "sys_scenario_sources",
+      "sys_scenario_versions",
+      "sys_scenarios",
+      "sys_succession_pools",
+      "sys_successor_candidates",
+      "sys_users"
     ]
   },
   "seed-acquisition-runs": {

@@ -11,6 +11,7 @@ import { ContatorePersone } from "../src/persone-distinte.js";
 import { eseguiGiro, MARGINE_GETTONE_MS, type ChiamataGiro, type OpzioniEsecuzione, type RegistroGiro } from "../src/giro.js";
 import type { Evento, MotivoArresto, StatoAttivita } from "../src/conversazione.js";
 import { riduci, fineDi, misuraDi, titoloDa } from "../src/conversazione.js";
+import { MESSAGGIO_NON_AUTORIZZATO, MESSAGGIO_NON_AUTORIZZATO_EN } from "../src/omissis.js";
 
 const PERSONA = "11111111-1111-4111-8111-111111111111";
 const ALTRA = "22222222-2222-4222-8222-222222222222";
@@ -122,6 +123,30 @@ describe("2026-11-18 — la domanda tutta su dati vietati riceve il messaggio fi
     expect(reg.eventi.at(-1)).toEqual({ kind: "TESTO", payload: { testo: "Non hai le autorizzazioni necessarie.", origine: "piattaforma", rifiuto: true } });
     expect(scritti.join("")).toContain("event: rifiuto");
     expect(reg.stati.at(-1)).toEqual({ status: "FATTA", result: "Non hai le autorizzazioni necessarie." });
+  });
+
+  it("27/11 — se il modello scrive da sé il messaggio fisso, passa comunque dall'evento di rifiuto", async () => {
+    for (const msg of [MESSAGGIO_NON_AUTORIZZATO, MESSAGGIO_NON_AUTORIZZATO_EN]) {
+      const reg = new RegistroFinto({ id: CONV, sdkSessionRef: null, personsSeen: [] });
+      const { d, scritti } = deps(reg, async function* () {
+        yield testo(msg);
+        yield risultato(msg);
+      }, { rifiuto: () => null });
+      await eseguiGiro(d);
+      expect(scritti.join("")).toContain("event: rifiuto");
+      expect(reg.eventi.at(-1)).toEqual({ kind: "TESTO", payload: { testo: msg, origine: "piattaforma", rifiuto: true } });
+    }
+  });
+
+  it("una risposta con dati veri e una frase di rifiuto in coda non viene sostituita", async () => {
+    const reg = new RegistroFinto({ id: CONV, sdkSessionRef: null, personsSeen: [] });
+    const lunga = `Ecco i tuoi due collaboratori: Rossi, Mario e Bianchi, Anna. Per il resto: ${MESSAGGIO_NON_AUTORIZZATO}`;
+    const { d, scritti } = deps(reg, async function* () {
+      yield testo(lunga);
+      yield risultato(lunga);
+    }, { rifiuto: () => null });
+    await eseguiGiro(d);
+    expect(scritti.join("")).not.toContain("event: rifiuto");
   });
 
   it("senza rifiuto il risultato resta quello del modello", async () => {

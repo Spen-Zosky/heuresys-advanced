@@ -9,15 +9,18 @@
  * non serve una dipendenza in più. La tabella si copia per un foglio di calcolo e si scarica in CSV.
  */
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Maximize2, Minimize2, Copy, Download, Check } from "lucide-react";
 import { Button, Dialog, DialogContent, DialogDescription, DialogTitle } from "@heuresys/ui";
 import { csvDa, tsvDa } from "@/lib/agente/messaggi";
+import type { Fonte } from "@/lib/agente/fonti";
 
 export type ContenutoIspezionabile =
   | { tipo: "tabella"; righe: string[][] }
   | { tipo: "testo"; testo: string; lingua: string | null }
-  | { tipo: "diagramma"; nodo: React.ReactNode };
+  | { tipo: "diagramma"; nodo: React.ReactNode }
+  | { tipo: "fonte"; fonte: Fonte };
 
 export function IspettoreAssistente({
   contenuto,
@@ -29,9 +32,12 @@ export function IspettoreAssistente({
   const { t } = useTranslation("common");
   const [grande, setGrande] = useState(false);
   const [copiato, setCopiato] = useState(false);
+  const router = useRouter();
 
   const titolo =
-    contenuto?.tipo === "tabella"
+    contenuto?.tipo === "fonte"
+      ? contenuto.fonte.titolo
+      : contenuto?.tipo === "tabella"
       ? t("agente.ispettoreTabella", { righe: Math.max(0, contenuto.righe.length - 1) })
       : contenuto?.tipo === "diagramma"
         ? t("agente.ispettoreDiagramma")
@@ -82,7 +88,7 @@ export function IspettoreAssistente({
             <DialogDescription className="text-xs">{t("agente.ispettoreAiuto")}</DialogDescription>
           </div>
           <div className="flex shrink-0 items-center gap-1">
-            {contenuto?.tipo !== "diagramma" && (
+            {(contenuto?.tipo === "tabella" || contenuto?.tipo === "testo") && (
               <Button variant="ghost" size="sm" onClick={() => void copia()} data-testid="agente-ispettore-copia">
                 {copiato ? <Check className="h-4 w-4" aria-hidden /> : <Copy className="h-4 w-4" aria-hidden />}
                 <span className="ml-1 hidden sm:inline">{copiato ? t("agente.copiato") : t("agente.copia")}</span>
@@ -110,10 +116,38 @@ export function IspettoreAssistente({
           {contenuto?.tipo === "testo" && (
             <pre className="whitespace-pre-wrap break-words p-4 font-mono text-sm leading-relaxed">{contenuto.testo}</pre>
           )}
+          {contenuto?.tipo === "fonte" && (
+            <SchedaFonte
+              fonte={contenuto.fonte}
+              onApriPagina={(percorso) => {
+                onChiudi();
+                router.push(percorso);
+              }}
+            />
+          )}
           {contenuto?.tipo === "diagramma" && <div className="flex min-h-full items-center justify-center p-4">{contenuto.nodo}</div>}
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function SchedaFonte({ fonte, onApriPagina }: { fonte: Fonte; onApriPagina: (percorso: string) => void }) {
+  const { t } = useTranslation("common");
+  return (
+    <div className="flex flex-col gap-4 p-4 text-sm" data-testid="agente-ispettore-fonte">
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        {t(fonte.tipo === "dato" ? "agente.fonteDato" : fonte.tipo === "regola" ? "agente.fonteRegola" : "agente.fontePagina")}
+      </p>
+      {fonte.dettaglio ? <p className="whitespace-pre-wrap break-words leading-relaxed">{fonte.dettaglio}</p> : <p className="text-muted-foreground">{t("agente.fonteSenzaDettaglio")}</p>}
+      {fonte.percorso && (
+        <div>
+          <Button variant="outline" size="sm" onClick={() => onApriPagina(fonte.percorso as string)} data-testid="agente-fonte-apri-pagina">
+            {t("agente.fonteApriPagina")}
+          </Button>
+        </div>
+      )}
+    </div>
   );
 }
 

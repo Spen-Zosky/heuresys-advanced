@@ -108,6 +108,20 @@ const esitiVista = new RegistroEsiti();
 // e non solo alla prima conversazione: un nome sbagliato nell'ambiente ferma il servizio subito,
 // invece di scoprirsi davanti alla prima persona.
 const LIMITI = leggiLimiti();
+
+/**
+ * Il passaggio del sito verso il gateway (rewrite di Next) chiude dopo 30 secondi senza dati: prova
+ * dal vivo del 2026-11-26, la quinta conversazione in coda cadeva con «network error». Finché lo
+ * stream è aperto si manda una riga vuota ogni 10 secondi: il lettore SSE della pagina la ignora.
+ */
+const BATTITO_MS = 10_000;
+function battito(res: ServerResponse): () => void {
+  const t = setInterval(() => {
+    if (res.headersSent && !res.writableEnded && !res.destroyed) res.write("\n\n");
+  }, BATTITO_MS);
+  t.unref();
+  return () => clearInterval(t);
+}
 const MODELLO = modelloAgenti();
 const conversazioni = new ConversazioniAperte(LIMITI);
 const pool = auditPool();
@@ -445,12 +459,13 @@ const server = createServer(async (req, res) => {
         const scriviCoda = (testo: string) => {
           if (!res.writableEnded && !res.destroyed) res.write(`event: nota\ndata: ${JSON.stringify({ testo })}\n\n`);
         };
+        const fermaBattito = battito(res);
         const attesa = await conversazioni.attendi(gettone.persona.userId, {
           priorita: typeof conversationId === "string" ? PRIORITA_RIPRESA : PRIORITA_NUOVA,
           attesaMaxMs: LIMITI.codaMs,
           segnale: chiusa.signal,
           posizione: (pos, tot) => scriviCoda(testoInCoda(lingua, pos, tot)),
-        });
+        }).finally(fermaBattito);
         if (!attesa.ok) {
           if (attesa.motivo === "ATTESA_SCADUTA" && !res.writableEnded && !res.destroyed) {
             res.write(`event: error\ndata: ${JSON.stringify({ message: "QUEUE_TIMEOUT" })}\n\n`);
@@ -461,6 +476,7 @@ const server = createServer(async (req, res) => {
         }
         posto = attesa;
       }
+      const fermaBattitoGiro = battito(res);
       try {
         // Due client con lo stesso gettone: quello dell'agente alimenta il contatore delle persone,
         // quello del registro no (le risposte del registro non sono letture dell'agente).
@@ -570,6 +586,7 @@ const server = createServer(async (req, res) => {
         });
         if (!res.writableEnded && !res.destroyed) res.end();
       } finally {
+        fermaBattitoGiro();
         posto.esci();
       }
       return;

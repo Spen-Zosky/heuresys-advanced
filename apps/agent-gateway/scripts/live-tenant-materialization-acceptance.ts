@@ -2,7 +2,7 @@
  * Live WI-C acceptance for #9 — the agent orchestrates the tenant-materialization
  * generator END-TO-END on real data (DoD: live, no mock).
  *
- * As enzo.spenuso@heuresys.com (PLATFORM_ADMIN) through the gateway /agent SSE stream, the
+ * As a PLATFORM_ADMIN identity (default platform-test-admin@collaudo.invalid), through the gateway /agent SSE stream, the
  * agent is asked to call the heuresys MCP tool `hrx_tenant_materialize` in PLAN mode
  * (mode:"plan" → READ-ONLY: computes would-create/skipped/total counts, NO DB
  * mutation) for the RTL_BANK tenant + a MODEL version read live from the API. The
@@ -18,15 +18,16 @@
  * modelli.
  *
  * Run (from apps/agent-gateway, key UNSET → MAX subscription):
- *   ACC_EMAIL=enzo.spenuso@heuresys.com pnpm exec tsx scripts/live-tenant-materialization-acceptance.ts
+ *   ACC_EMAIL=platform-test-admin@collaudo.invalid pnpm exec tsx scripts/live-tenant-materialization-acceptance.ts
  */
 import { createHmac } from "node:crypto";
-import { FIXTURE_TOTP_SECRETS } from "../../api/test/helpers/mfa-fixture-secrets.js";
+import { passwordDiProva, segretoTotp } from "./live-accesso.js";
 
 const API = (process.env.HEURESYS_API ?? "http://localhost:3001").replace(/\/$/, "");
 const GATEWAY = (process.env.AGENT_GATEWAY ?? "http://localhost:8790").replace(/\/$/, "");
-const EMAIL = process.env.ACC_EMAIL ?? "enzo.spenuso@heuresys.com";
-const PASSWORD = process.env.ACC_PASSWORD ?? process.env.TEST_ADMIN_PASSWORD ?? "";
+// L'identità di collaudo di piattaforma risultava respinta il 2026-11-26 (LOGIN_INVALID): finché
+// non è riattivata servono ACC_EMAIL e ACC_PASSWORD di un PLATFORM_ADMIN con un fattore di prova.
+const EMAIL = process.env.ACC_EMAIL ?? "platform-test-admin@collaudo.invalid";
 const RTL_TENANT = "86ba7a65-217f-48ba-8ce5-5c09b40a66b0";
 
 
@@ -56,14 +57,14 @@ function setCookies(res: Response): string[] { return res.headers.getSetCookie?.
 function cookieHeader(raw: string[]): string { return raw.map((c) => c.split(";")[0]).join("; "); }
 
 async function login(): Promise<string> {
-  const r1 = await fetch(`${API}/v1/auth/login`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email: EMAIL, password: PASSWORD }) });
+  const r1 = await fetch(`${API}/v1/auth/login`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email: EMAIL, password: passwordDiProva(EMAIL) }) });
   const j1 = (await r1.json()) as { status: string; challengeToken?: string };
   console.log(`[login] step1 → ${r1.status} status=${j1.status}`);
   let raw = setCookies(r1);
   if (j1.status === "mfa_required") {
-    const secret = FIXTURE_TOTP_SECRETS[EMAIL];
+    const secret = await segretoTotp(EMAIL);
     if (!secret) throw new Error(`no fixture TOTP secret for ${EMAIL}`);
-    const r2 = await fetch(`${API}/v1/auth/login`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email: EMAIL, password: PASSWORD, challengeToken: j1.challengeToken, mfaCode: totp(secret) }) });
+    const r2 = await fetch(`${API}/v1/auth/login`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email: EMAIL, password: passwordDiProva(EMAIL), challengeToken: j1.challengeToken, mfaCode: totp(secret) }) });
     const j2 = (await r2.json()) as { status: string };
     console.log(`[login] step2 (TOTP) → ${r2.status} status=${j2.status}`);
     if (j2.status !== "success") throw new Error(`MFA step failed: ${JSON.stringify(j2)}`);

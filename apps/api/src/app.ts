@@ -75,6 +75,7 @@ import { consolidationRunRoutes, consolidationVocabularyRoutes, tenantConsolidat
 import { agentCapabilitiesRoutes } from "./modules/agent-capabilities/routes.js";
 import { agentWeeklySummaryRoutes } from "./modules/agent-weekly-summary/routes.js";
 import { agentSignalsRoutes } from "./modules/agent-signals/routes.js";
+import { scenariRoutes } from "./modules/scenari/routes.js";
 import { agentConversationsRoutes } from "./modules/agent-conversations/routes.js";
 import { agentRequestsRoutes } from "./modules/agent-requests/routes.js";
 import { platformTenantAssignmentsRoutes } from "./modules/platform-tenant-assignments/routes.js";
@@ -530,6 +531,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(agentCapabilitiesRoutes, { prefix: "/v1/agent-capabilities" });
   await app.register(agentWeeklySummaryRoutes, { prefix: "/v1/agent-weekly-summary" });
   await app.register(agentSignalsRoutes, { prefix: "/v1/agent-signals" });
+  await app.register(scenariRoutes, { prefix: "/v1/scenari" });
   // ADR-0056 D4, piano dei principi agentici T6a: le conversazioni dell'assistente della persona.
   await app.register(agentConversationsRoutes, { prefix: "/v1/agent-conversations" });
   await app.register(agentRequestsRoutes, { prefix: "/v1/agent-requests" });

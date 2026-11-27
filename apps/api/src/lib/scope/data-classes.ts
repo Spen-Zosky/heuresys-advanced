@@ -346,6 +346,8 @@ export const RESOURCE_DATA_CLASS: Readonly<Record<string, DataClass>> = {
   goal: "EVALUATION",
   okr: "EVALUATION",
   career_succession: "EVALUATION",
+  // F3b-2 del piano AI-driven (ADR-0063 D5): gli scenari di successione nominano chi esce e chi copre.
+  scenario: "EVALUATION",
   predictions: "EVALUATION",
   insights: "EVALUATION",
   evidence: "EVALUATION", // #27 (S1018): the explainability layer over EVALUATION/SKILL evidence

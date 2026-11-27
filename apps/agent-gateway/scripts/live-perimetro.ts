@@ -46,8 +46,7 @@
 import { createHmac } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { FIXTURE_TOTP_SECRETS } from "../../api/test/helpers/mfa-fixture-secrets.js";
-import { passwordFor } from "../../api/test/helpers/personas.js";
+import { passwordDiProva, segretoTotp } from "./live-accesso.js";
 // #252 — le soglie si LEGGONO dalla stessa fonte del gate (misure generate + criterio in
 // codice), non si scrivono qui: un numero copiato in uno script di prova invecchia in silenzio
 // e la prova finirebbe per misurare una soglia che in produzione non esiste più.
@@ -55,7 +54,7 @@ import { caricaSoglie, PERCORSO_MISURE } from "../src/soglie-persone.js";
 
 const API = (process.env.HEURESYS_API ?? "http://localhost:3001").replace(/\/$/, "");
 const GATEWAY = (process.env.AGENT_GATEWAY ?? "http://localhost:8790").replace(/\/$/, "");
-const EMAIL = process.env.ACC_EMAIL ?? "enzo.spenuso@heuresys.com";
+const EMAIL = process.env.ACC_EMAIL ?? "valentina.conti@rtl-bank.org";
 // Lo stesso default di FileAuditSink: un percorso scritto a mano che non combacia col sink
 // produce un diario «vuoto» che si legge come «nessun problema». Costò una corsa in S1067.
 const AUDIT = process.env.AGENT_GATEWAY_AUDIT_PATH ?? join(process.cwd(), ".data", "agent-audit.jsonl");
@@ -127,7 +126,7 @@ function totp(secretBase32: string): string {
 }
 
 async function login(): Promise<string> {
-  const password = passwordFor(EMAIL);
+  const password = passwordDiProva(EMAIL);
   const cookiesFrom = (r: Response) => (r.headers.getSetCookie?.() ?? []).map((c) => c.split(";")[0]).join("; ");
   const r1 = await fetch(`${API}/v1/auth/login`, {
     method: "POST", headers: { "content-type": "application/json" },
@@ -135,7 +134,7 @@ async function login(): Promise<string> {
   });
   const j1 = (await r1.json()) as { status: string; challengeToken?: string };
   if (j1.status === "success") return cookiesFrom(r1);
-  const secret = FIXTURE_TOTP_SECRETS[EMAIL];
+  const secret = await segretoTotp(EMAIL);
   if (j1.status !== "mfa_required" || !j1.challengeToken || !secret) {
     throw new Error(`login inatteso: ${JSON.stringify(j1)}`);
   }

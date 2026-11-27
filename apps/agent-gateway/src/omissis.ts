@@ -23,6 +23,31 @@ export const MESSAGGIO_NON_AUTORIZZATO =
 export const MESSAGGIO_NON_AUTORIZZATO_EN =
   "You do not have the necessary permissions to see this information. You can send a request to the System Administrator.";
 
+/**
+ * ADR-0050 D5: una lettura per mandato di retribuzione o valutazioni che chiede una conferma
+ * recente del secondo fattore. Non è un diniego: la persona può leggere, ma deve confermare,
+ * e l'assistente non può farlo per lei (A-3). Il messaggio lo dice invece di «non autorizzato».
+ */
+export const MESSAGGIO_CONFERMA_RICHIESTA =
+  "Per questi dati serve una conferma recente del tuo secondo fattore. Confermalo dalla pagina che li mostra (ti viene chiesto il codice) e poi ripeti la domanda.";
+
+export const MESSAGGIO_CONFERMA_RICHIESTA_EN =
+  "These data need a recent confirmation of your second factor. Confirm it from the page that shows them (you will be asked for the code) and then ask again.";
+
+/** L'esito che il modello riceve al posto di una lettura che chiede la conferma del secondo fattore. */
+export interface LetturaDaConfermare {
+  esito: "CONFERMA_SECONDO_FATTORE";
+  istruzione: string;
+}
+
+export function letturaDaConfermare(): LetturaDaConfermare {
+  return {
+    esito: "CONFERMA_SECONDO_FATTORE",
+    istruzione:
+      "La persona può vedere questi dati ma deve prima confermare il secondo fattore dalla pagina; tu non puoi farlo per lei. Non citarli e non stimarli: dille di confermare e di ripetere la domanda.",
+  };
+}
+
 /** L'esito che il modello riceve al posto di una lettura negata dall'API. */
 export interface LetturaNegata {
   esito: "NON_AUTORIZZATO";
@@ -68,6 +93,7 @@ export function conOmissis(dati: unknown, visti: WeakSet<object> = new WeakSet()
 export class EsitiLetture {
   private riuscite = 0;
   private negate = 0;
+  private daConfermare = 0;
 
   riuscita(): void {
     this.riuscite += 1;
@@ -77,12 +103,22 @@ export class EsitiLetture {
     this.negate += 1;
   }
 
-  conteggio(): { riuscite: number; negate: number } {
-    return { riuscite: this.riuscite, negate: this.negate };
+  /** ADR-0050 D5: una lettura che chiede la conferma del secondo fattore (non è un diniego). */
+  daConfermareSecondoFattore(): void {
+    this.daConfermare += 1;
   }
 
-  /** Il messaggio fisso quando tutto ciò che il giro ha cercato di leggere era vietato. */
+  conteggio(): { riuscite: number; negate: number; daConfermare: number } {
+    return { riuscite: this.riuscite, negate: this.negate, daConfermare: this.daConfermare };
+  }
+
+  /**
+   * Il messaggio fisso quando nessuna lettura del giro è riuscita: la conferma del secondo
+   * fattore se almeno una la chiedeva (la persona può sbloccarla), altrimenti il diniego.
+   */
   rifiuto(lingua: "it" | "en" = "it"): string | null {
-    return this.negate > 0 && this.riuscite === 0 ? (lingua === "en" ? MESSAGGIO_NON_AUTORIZZATO_EN : MESSAGGIO_NON_AUTORIZZATO) : null;
+    if (this.riuscite > 0) return null;
+    if (this.daConfermare > 0) return lingua === "en" ? MESSAGGIO_CONFERMA_RICHIESTA_EN : MESSAGGIO_CONFERMA_RICHIESTA;
+    return this.negate > 0 ? (lingua === "en" ? MESSAGGIO_NON_AUTORIZZATO_EN : MESSAGGIO_NON_AUTORIZZATO) : null;
   }
 }

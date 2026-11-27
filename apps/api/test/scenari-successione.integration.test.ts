@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { pool } from "../src/db/client.js";
 import { calcolaScenarioUscite, METODO_EQUITA_PROVVISORIO } from "../src/modules/scenari/service.js";
-import { CALCOLATORE_SUCCESSIONE, PROFONDITA_CASCATA } from "../src/modules/scenari/calcolatori/successione.js";
+import { CALCOLATORE_SUCCESSIONE, MESI_DI_PRONTEZZA, PROFONDITA_CASCATA, type Prontezza } from "../src/modules/scenari/calcolatori/successione.js";
 
 /**
  * F3b-1 del piano Heuresys AI-driven (ADR-0063 D5): lo scenario di uscita calcolato su RTL.
@@ -53,8 +53,8 @@ beforeAll(async () => {
   if (!t.rows[0]) throw new Error("il tenant RTL_BANK non c'è: il caso da provare non c'è");
   tenantId = t.rows[0].tenant_id;
   // il titolare di una posizione con un successore pronto che è a sua volta titolare di una posizione
-  const c = await pool.query<{ uscente: string; successore: string }>(
-    `SELECT a.user_position_assignment_user_id AS uscente, sc.successor_candidate_user_id AS successore
+  const c = await pool.query<{ uscente: string; posizione: string }>(
+    `SELECT a.user_position_assignment_user_id AS uscente, p.position_id AS posizione
        FROM sys.sys_user_position_assignments a
        JOIN sys.sys_positions p ON p.position_id = a.user_position_assignment_position_id AND p.position_is_active
        JOIN sys.sys_succession_pools sp ON sp.succession_pool_position_id = p.position_id AND sp.succession_pool_status = 'ACTIVE'
@@ -79,7 +79,26 @@ beforeAll(async () => {
   );
   if (!c.rows[0]) throw new Error("in RTL non c'è una posizione con un successore pronto che sia titolare: il caso da provare non c'è");
   uscente = c.rows[0].uscente;
-  successore = c.rows[0].successore;
+  // chi copre lo sceglie la regola del calcolatore, non l'ordine della query: prontezza più vicina,
+  // poi il candidato confermato, poi l'identificativo più piccolo (MESI_DI_PRONTEZZA)
+  const cand = await pool.query<{ user_id: string; readiness: Prontezza; status: string }>(
+    `SELECT sc.successor_candidate_user_id AS user_id, sc.successor_candidate_readiness_level AS readiness,
+            sc.successor_candidate_status AS status
+       FROM sys.sys_successor_candidates sc
+       JOIN sys.sys_succession_pools sp ON sp.succession_pool_id = sc.successor_candidate_pool_id
+        AND sp.succession_pool_status = 'ACTIVE' AND sp.succession_pool_position_id = $2
+      WHERE sc.successor_candidate_tenant_id = $1 AND sc.successor_candidate_status IN ('CANDIDATE', 'CONFIRMED')
+        AND sc.successor_candidate_readiness_level IN ('READY_NOW', 'READY_6_MONTHS', 'READY_1_YEAR', 'READY_2_YEARS')
+        AND sc.successor_candidate_user_id <> $3`,
+    [tenantId, c.rows[0].posizione, uscente],
+  );
+  const [primo] = [...cand.rows].sort(
+    (x, y) =>
+      MESI_DI_PRONTEZZA[x.readiness]! - MESI_DI_PRONTEZZA[y.readiness]! ||
+      Number(y.status === "CONFIRMED") - Number(x.status === "CONFIRMED") ||
+      (x.user_id < y.user_id ? -1 : x.user_id > y.user_id ? 1 : 0),
+  );
+  successore = primo!.user_id;
 });
 
 describe("F3b-1 — lo scenario di uscita calcolato su RTL", () => {

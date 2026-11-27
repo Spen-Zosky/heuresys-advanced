@@ -16,8 +16,8 @@
  * Regole, scritte una volta:
  *   1. Una posizione si libera quando esce (o si sposta) un suo titolare PRIMARY e non resta nessun
  *      altro titolare PRIMARY. Le assegnazioni SECONDARY, INTERIM e ACTING non coprono e non liberano.
- *   2. È candidabile chi è nella tavola della posizione con una prontezza diversa da NOT_READY (o
- *      assente), non esce, non si è già spostato in questa catena e non è già titolare di quella
+ *   2. È candidabile chi è nella tavola della posizione con una prontezza dichiarata e diversa da
+ *      NOT_READY (senza prontezza non lo è), non esce, non si è già spostato in questa catena e non è già titolare di quella
  *      posizione.
  *   3. Si sceglie la prontezza più vicina (READY_NOW 0 mesi, READY_6_MONTHS 6, READY_1_YEAR 12,
  *      READY_2_YEARS 24); a parità il candidato CONFERMATO; a parità ancora l'identificativo più

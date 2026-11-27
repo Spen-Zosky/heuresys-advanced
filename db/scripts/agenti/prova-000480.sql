@@ -17,6 +17,10 @@ BEGIN
   END IF;
 END $guardia$;
 
+-- ADR-0063 D4 (000518): il modo LIBERA è spento. Questa prova esercita il meccanismo di ADR-0053, che
+-- resta nel codice: su una copia che si dichiara di collaudo lo si riapre per questa sola transazione.
+SET LOCAL heuresys.prova_libera = 'on';
+
 CREATE TEMP TABLE prova_esiti (caso text, verde boolean) ON COMMIT DROP;
 
 CREATE OR REPLACE FUNCTION pg_temp.deve_fallire(caso text, istruzione text) RETURNS void
@@ -129,6 +133,16 @@ SELECT pg_temp.deve_fallire('una persona che non dice chi è', format($$INSERT I
   (agent_capability_activation_tenant_id, agent_capability_activation_capability_id, agent_capability_activation_mode,
    agent_capability_activation_reason)
   VALUES (%L, '00000000-0000-4000-8000-000000000b01', 'CONFERMA', 'prova')$$, :'t'));
+
+-- 000518 (ADR-0063 D4): con tutte le condizioni ma senza la richiesta esplicita di prova, LIBERA è rifiutata.
+SET LOCAL heuresys.prova_libera = 'off';
+SELECT pg_temp.deve_fallire('LIBERA con le condizioni, a modo spento (ADR-0063 D4)', format($$INSERT INTO sys.sys_agent_capability_activations
+  (agent_capability_activation_tenant_id, agent_capability_activation_capability_id,
+   agent_capability_activation_mode, agent_capability_activation_notice_ref, agent_capability_activation_rollback_proof_ref,
+   agent_capability_activation_reason, agent_capability_activation_decided_by)
+  VALUES (%L, '00000000-0000-4000-8000-000000000b01', 'LIBERA',
+          'informativa v1', 'ritorno provato', 'prova', %L)$$, :'t', :'u'));
+SET LOCAL heuresys.prova_libera = 'on';
 
 SELECT pg_temp.deve_passare('LIBERA con le condizioni', format($$INSERT INTO sys.sys_agent_capability_activations
   (agent_capability_activation_id, agent_capability_activation_tenant_id, agent_capability_activation_capability_id,

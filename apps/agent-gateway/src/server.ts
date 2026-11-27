@@ -26,6 +26,7 @@
  */
 // DEVE restare il primo import: neutralizza le credenziali API prima che
 // qualunque altro modulo del grafo (incl. l'SDK) possa leggerle.
+import { rigaLingua } from "./istruzioni.js";
 import "./subscription-auth.js";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { ApprovalRegistry, type ApprovalDecision } from "./approval-bridge.js";
@@ -38,7 +39,17 @@ import { eseguiGiro } from "./giro.js";
 import { PonteVista, RegistroEsiti, contestoPagina, leggiEsito, leggiPagina, notaSugliEsiti } from "./comandi-vista.js";
 import { ContatorePersone } from "./persone-distinte.js";
 import { caricaSoglie } from "./soglie-persone.js";
-import { ConversazioniAperte, ammessoAllAssistente, leggiLimiti, modelloAgenti } from "./limiti.js";
+import {
+  ConversazioniAperte,
+  PRIORITA_NUOVA,
+  PRIORITA_RIPRESA,
+  ammessoAllAssistente,
+  leggiLimiti,
+  modelloAgenti,
+  testoCodaScaduta,
+  testoInCoda,
+  type IngressoInCoda,
+} from "./limiti.js";
 import { DbRegistroCapacita } from "./capacita.js";
 import { runHrAgent } from "./sdk-agent.js";
 import { servi, type RichiestaProposta } from "./research-propose.js";
@@ -97,10 +108,26 @@ const esitiVista = new RegistroEsiti();
 // e non solo alla prima conversazione: un nome sbagliato nell'ambiente ferma il servizio subito,
 // invece di scoprirsi davanti alla prima persona.
 const LIMITI = leggiLimiti();
+
+/**
+ * Il passaggio del sito verso il gateway (rewrite di Next) chiude dopo 30 secondi senza dati: prova
+ * dal vivo del 2026-11-26, la quinta conversazione in coda cadeva con «network error». Finché lo
+ * stream è aperto si manda una riga vuota ogni 10 secondi: il lettore SSE della pagina la ignora.
+ */
+const BATTITO_MS = 10_000;
+function battito(res: ServerResponse): () => void {
+  const t = setInterval(() => {
+    if (res.headersSent && !res.writableEnded && !res.destroyed) res.write("\n\n");
+  }, BATTITO_MS);
+  t.unref();
+  return () => clearInterval(t);
+}
 const MODELLO = modelloAgenti();
 const conversazioni = new ConversazioniAperte(LIMITI);
 const pool = auditPool();
 const auditSink: AuditSink = pool ? new DbAuditSink(pool) : new FileAuditSink();
+// R8: dove va il diario si dice all'avvio, nel journal, così si misura senza leggere l'ambiente.
+console.log(JSON.stringify({ level: "info", phase: "agent-gateway", msg: "diario del gate", sede: pool ? "database" : "file" }));
 // ADR-0053 A3 (piano T3b): il registro delle capacità si legge dallo stesso database del diario.
 // Senza database non c'è registro, e ogni scrittura passa dal ponte di approvazione come prima.
 const registroCapacita = pool ? new DbRegistroCapacita(pool) : undefined;
@@ -372,9 +399,9 @@ const server = createServer(async (req, res) => {
         res.end(JSON.stringify({ error: "PERSON_NOT_ADMITTED" }));
         return;
       }
-      let corpo: { prompt?: unknown; conversationId?: unknown; pagina?: unknown };
+      let corpo: { prompt?: unknown; conversationId?: unknown; pagina?: unknown; lingua?: unknown };
       try {
-        corpo = JSON.parse((await readBody(req)) || "{}") as { prompt?: unknown; conversationId?: unknown; pagina?: unknown };
+        corpo = JSON.parse((await readBody(req)) || "{}") as { prompt?: unknown; conversationId?: unknown; pagina?: unknown; lingua?: unknown };
       } catch {
         res.writeHead(400, { "content-type": "application/json" });
         res.end(JSON.stringify({ error: "BAD_JSON" }));
@@ -408,19 +435,52 @@ const server = createServer(async (req, res) => {
       // ADR-0056 T3: quante conversazioni insieme, per persona e in tutto il servizio. Il posto si
       // prende dopo il gettone, perché è il gettone a dire chi è la persona, e si libera nel
       // `finally` qui sotto quando il GIRO finisce, non quando si chiude la finestra (T6b).
-      const posto = conversazioni.entra(gettone.persona.userId);
-      if (!posto.ok) {
+      const lingua = corpo.lingua === "en" ? "en" : "it";
+      let posto: Extract<IngressoInCoda, { ok: true }>;
+      const subito = conversazioni.entra(gettone.persona.userId);
+      if (subito.ok) {
+        posto = subito;
+      } else if (subito.motivo === "PERSONA") {
         res.writeHead(429, { "content-type": "application/json" });
-        res.end(JSON.stringify({
-          error: posto.motivo === "PERSONA" ? "TOO_MANY_CONVERSATIONS_PERSON" : "TOO_MANY_CONVERSATIONS",
-          limite: posto.motivo === "PERSONA" ? LIMITI.perPersona : LIMITI.totali,
-        }));
+        res.end(JSON.stringify({ error: "TOO_MANY_CONVERSATIONS_PERSON", limite: LIMITI.perPersona }));
         return;
+      } else {
+        // Il servizio è pieno: l'abbonamento è uno solo e le persone di un tenant intero ci passano
+        // (piano AI-driven F0a). Invece del rifiuto la conversazione aspetta il suo turno, e la
+        // persona vede a che punto è. Chi riprende una conversazione già aperta passa avanti.
+        res.writeHead(200, {
+          "content-type": "text/event-stream",
+          "cache-control": "no-cache, no-transform",
+          connection: "keep-alive",
+          "x-accel-buffering": "no",
+        });
+        const chiusa = new AbortController();
+        res.on("close", () => chiusa.abort());
+        const scriviCoda = (testo: string) => {
+          if (!res.writableEnded && !res.destroyed) res.write(`event: nota\ndata: ${JSON.stringify({ testo })}\n\n`);
+        };
+        const fermaBattito = battito(res);
+        const attesa = await conversazioni.attendi(gettone.persona.userId, {
+          priorita: typeof conversationId === "string" ? PRIORITA_RIPRESA : PRIORITA_NUOVA,
+          attesaMaxMs: LIMITI.codaMs,
+          segnale: chiusa.signal,
+          posizione: (pos, tot) => scriviCoda(testoInCoda(lingua, pos, tot)),
+        }).finally(fermaBattito);
+        if (!attesa.ok) {
+          if (attesa.motivo === "ATTESA_SCADUTA" && !res.writableEnded && !res.destroyed) {
+            res.write(`event: error\ndata: ${JSON.stringify({ message: "QUEUE_TIMEOUT" })}\n\n`);
+            scriviCoda(testoCodaScaduta(lingua));
+          }
+          if (!res.writableEnded && !res.destroyed) res.end();
+          return;
+        }
+        posto = attesa;
       }
+      const fermaBattitoGiro = battito(res);
       try {
         // Due client con lo stesso gettone: quello dell'agente alimenta il contatore delle persone,
         // quello del registro no (le risposte del registro non sono letture dell'agente).
-        const client = new HeuresysClient({ baseUrl: HEURESYS_API, session: gettone.session, agente: AGENTE_ASSISTENTE });
+        const client = new HeuresysClient({ baseUrl: HEURESYS_API, session: gettone.session, agente: AGENTE_ASSISTENTE, lingua });
         const clientRegistro = new HeuresysClient({ baseUrl: HEURESYS_API, session: gettone.session, agente: AGENTE_ASSISTENTE });
         // Le letture del giro (omissis.ts): se sono tutte negate, la risposta è il messaggio fisso.
         const esitiLetture = new EsitiLetture();
@@ -461,7 +521,7 @@ const server = createServer(async (req, res) => {
           registro.conversazione.personsSeen,
         );
 
-        res.writeHead(200, {
+        if (!res.headersSent) res.writeHead(200, {
           "content-type": "text/event-stream",
           // no-transform: senza, la compressione di Next sul rewrite /agent-gateway accumula lo
           // stream e i page_command arrivano alla pagina a fine giro, dopo che l'attesa dell'esito
@@ -480,7 +540,7 @@ const server = createServer(async (req, res) => {
         // va al modello in un blocco marcato, e i comandi della vista tornano alla finestra.
         const pagina = leggiPagina(corpo.pagina);
         const vista = new PonteVista({ pagina, registro: esitiVista, owner: gettone.persona.userId, scrivi, finestraAperta });
-        const mandato = pagina ? `${contestoPagina(pagina)}\n\n${prompt}` : prompt;
+        const mandato = `${rigaLingua(lingua)}\n\n${pagina ? `${contestoPagina(pagina)}\n\n${prompt}` : prompt}`;
 
         await eseguiGiro({
           registro,
@@ -493,7 +553,7 @@ const server = createServer(async (req, res) => {
           scrivi,
           nota: () => notaSugliEsiti(vista.esiti),
           scrittureNonSalvate: () => client.consumaScrittureFallite(),
-          rifiuto: () => esitiLetture.rifiuto(),
+          rifiuto: () => esitiLetture.rifiuto(lingua),
           attesa: { sospendi: posto.sospendi, riprendi: posto.riprendi },
           // Il costo e la durata del giro vanno nel registro delle chiamate dell'agente. Col gettone
           // d'agente: l'API non accetta questa scrittura da nessun altro (403).
@@ -516,6 +576,7 @@ const server = createServer(async (req, res) => {
               audit: auditSink,
               principal,
               maxTurns: LIMITI.giri,
+              lingua,
               abortController: o.abortController,
               contatore: o.contatore,
               conversationId: o.conversationId,
@@ -525,6 +586,7 @@ const server = createServer(async (req, res) => {
         });
         if (!res.writableEnded && !res.destroyed) res.end();
       } finally {
+        fermaBattitoGiro();
         posto.esci();
       }
       return;

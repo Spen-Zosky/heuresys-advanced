@@ -4,7 +4,7 @@
 > Le descrizioni gia' curate sono preservate a ogni rigenerazione; per gli ADR che non
 > ne avevano una, la colonna riporta il titolo ed e' marcata *(dal titolo)*.
 
-**59 ADR** in `docs/architecture/adr/`.
+**60 ADR** in `docs/architecture/adr/`.
 
 | # | Titolo | Status | Descrizione | Data |
 |---|---|---|---|---|
@@ -66,9 +66,10 @@
 | [0059](adr/0059_allineamento_e_consolidamento_due_modi.md) | Allineamento e Consolidamento: due modi dello stesso motore | ACCETTATO il 2026-11-16 da Enzo Spenuso, alle 01:35 UTC | Allineamento e Consolidamento: due modi dello stesso motore *(dal titolo)* | 2026-11-16 |
 | [0060](adr/0060_le_applet_dell_assistente.md) | Le applet dell'assistente: il lavoro che l'assistente costruisce e svolge, entro i permessi di chi lo chiede | ACCETTATO il 2026-11-18 da Enzo Spenuso, alle 15:50 UTC | Le applet dell'assistente: il lavoro che l'assistente costruisce e svolge, entro i permessi di chi lo chiede *(dal titolo)* | 2026-11-18 |
 | [0061](adr/0061_tassonomia_e_metamodel_dei_processi.md) | Tassonomia multidimensionale e metamodel dei processi | ACCETTATO il 2026-11-22 da Enzo Spenuso, alle 03:21 UTC | Tassonomia multidimensionale e metamodel dei processi *(dal titolo)* | 2026-11-22 |
+| [0062](adr/0062_traduzione_del_dato_nella_risposta.md) | Traduzione del dato nella risposta dell'API | ACCETTATO il 2026-11-26 da Enzo Spenuso, che ha risposto «sì» alla domanda «Lo segno ACCETTATO?» del coordinatore del progetto | Traduzione del dato nella risposta dell'API *(dal titolo)* | 2026-11-26 |
 | [0063](adr/0063_heuresys_ai_driven_l_organizzazione_ghost.md) | Heuresys è AI-driven: un'organizzazione ghost di agenti lavora con le persone del tenant | ACCETTATO il 2026-11-26 da Enzo Spenuso | Heuresys è AI-driven: un'organizzazione ghost di agenti lavora con le persone del tenant *(dal titolo)* | 2026-11-26 |
 
-Numeri mai usati (nessun file, nessuna decisione): 0019, 0022, 0058, 0062.
+Numeri mai usati (nessun file, nessuna decisione): 0019, 0022, 0058.
 
 ## Conventions
 

@@ -319,6 +319,10 @@
           "ALIGNED": "allineato",
           "UNKNOWN": "gap da valutare"
         }
+      },
+      "AGENT_WEEKLY_SUMMARY": {
+        "subject": "Riepilogo settimanale dell'assistente: settimana dal {{from}}",
+        "body": "Dal {{from}} al {{to}}: {{confirmed}} scritture confermate, {{denied}} negate, {{autonomous}} eseguite senza conferma."
       }
     },
     "approvals": {

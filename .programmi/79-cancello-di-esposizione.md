@@ -2,6 +2,7 @@
 
 > **item**: #79
 > **stato**: IN CORSO
+> **riesame-z4**: 2026-11-26, assorbito in F1b del piano Heuresys AI-driven (`docs/piani/ai-driven_20261126/RIESAME_programmi.md`); questo file resta la fonte del dettaglio
 
 **Regola di Enzo (S1034), vincolante e RETROATTIVA**: un dato che nessuna API espone **non è nel
 prodotto**. Nessun cluster si chiude finché ciò che ha scritto non è raggiungibile — endpoint,

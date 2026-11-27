@@ -28,7 +28,7 @@ import { authPlugin } from "./middleware/auth.js";
 import { tenantContextPlugin } from "./middleware/tenantContext.js";
 import { localePlugin } from "./middleware/locale.js";
 import { csrfPlugin } from "./middleware/csrf.js";
-import { isDatabaseReady } from "./db/client.js";
+import { isDatabaseReady, pool } from "./db/client.js";
 import { COOKIES } from "./config/constants.js";
 import { metricsStore } from "./modules/observability/metrics-store.js";
 import { observeHttp, enablePrometheus, registry } from "./modules/observability/prometheus.js";
@@ -73,6 +73,8 @@ import { learningGapsRoutes } from "./modules/learning-gaps/routes.js";
 import { delegationsRoutes } from "./modules/delegations/routes.js";
 import { consolidationRunRoutes, consolidationVocabularyRoutes, tenantConsolidationRoutes } from "./modules/tenant-consolidation/routes.js";
 import { agentCapabilitiesRoutes } from "./modules/agent-capabilities/routes.js";
+import { agentWeeklySummaryRoutes } from "./modules/agent-weekly-summary/routes.js";
+import { scenariRoutes } from "./modules/scenari/routes.js";
 import { agentConversationsRoutes } from "./modules/agent-conversations/routes.js";
 import { agentRequestsRoutes } from "./modules/agent-requests/routes.js";
 import { platformTenantAssignmentsRoutes } from "./modules/platform-tenant-assignments/routes.js";
@@ -121,6 +123,7 @@ import { compensationRoutes } from "./modules/compensation/routes.js";
 import { dashboardRoutes } from "./modules/dashboard/routes.js";
 import { analyticsRoutes } from "./modules/analytics/routes.js";
 import { addExportHook } from "./lib/export/hook.js";
+import { addTraduzioneRisposta } from "./lib/i18n/traduci-risposta.js";
 import { registerOrgGateAssertion } from "./lib/scope/gate.js";
 import { registerConfermaD5 } from "./lib/scope/conferma.js";
 import { registraGuardiaRotte } from "./lib/scope/guardia.js";
@@ -411,6 +414,10 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   // x-locale header / NEXT_LOCALE cookie / 'it'. Depends on @fastify/cookie.
   await app.register(localePlugin);
 
+  // 10c. Traduzione del dato nella risposta (ADR-0062): per le letture GET /v1/* in inglese,
+  //      ogni stringa uguale al testo italiano di un campo registrato diventa la sua traduzione.
+  addTraduzioneRisposta(app, pool);
+
   // 11. Error handler (catches everything that bubbled up)
   app.setErrorHandler(errorHandler);
 
@@ -521,6 +528,8 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(tenantConsolidationRoutes, { prefix: "/v1/tenant-consolidations" });
   // ADR-0053 A1/A3/D4, piano dei principi agentici T3c: il registro delle capacità degli agenti.
   await app.register(agentCapabilitiesRoutes, { prefix: "/v1/agent-capabilities" });
+  await app.register(agentWeeklySummaryRoutes, { prefix: "/v1/agent-weekly-summary" });
+  await app.register(scenariRoutes, { prefix: "/v1/scenari" });
   // ADR-0056 D4, piano dei principi agentici T6a: le conversazioni dell'assistente della persona.
   await app.register(agentConversationsRoutes, { prefix: "/v1/agent-conversations" });
   await app.register(agentRequestsRoutes, { prefix: "/v1/agent-requests" });

@@ -18,7 +18,7 @@
  * contesto) e compone primitive di @heuresys/ui. Dietro il flag `NEXT_PUBLIC_ENABLE_AGENT_DEV`.
  */
 import { formati } from "@/lib/format";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { History, Lock, Maximize2, Minimize2, PanelLeftClose, SendHorizontal, Square, SquarePen, X } from "lucide-react";
@@ -26,7 +26,16 @@ import { AgentLauncher, AgentSymbol, Button, type AgentActivityStatus } from "@h
 import { AGENT_DEV_ENABLED, useAgentStream, type PendingApproval } from "@/lib/use-agent-stream";
 import { paginaIdonea } from "@/lib/agente/idoneita";
 import { titoloLeggibile } from "@/lib/agente/risposta";
-import { fase, messaggiDaRighe, riepilogoProposta, type Messaggio } from "@/lib/agente/messaggi";
+import {
+  CONCETTI_CON_SCHEDA,
+  fase,
+  messaggiDaRighe,
+  nomeLeggibile,
+  riepilogoProposta,
+  type Messaggio,
+  type RiepilogoProposta,
+} from "@/lib/agente/messaggi";
+import { apiFetch } from "@/lib/api/fetch";
 import { useContestoDichiarato, useVistaAttuale } from "@/lib/agente/contesto";
 import { LavoroInCorso } from "@/components/lavoro-in-corso";
 import { IspettoreAssistente, type ContenutoIspezionabile } from "./ispettore-assistente";
@@ -105,7 +114,16 @@ function FinestraAssistente({ pathname, idonea }: { pathname: string; idonea: bo
   const mostraSimbolo = idonea || aperto || occupato;
   const messaggi = messaggiDaRighe(agent.lines);
   const faseOra = fase(agent.lines);
-  const testoAvviso = agent.notice === null ? null : t(`agente.${agent.notice.code}`, agent.notice.params ?? {});
+  // La decisione arriva come valore tecnico («allow», «deny»): si mostra l'etichetta nella lingua della pagina.
+  const testoAvviso =
+    agent.notice === null
+      ? null
+      : t(`agente.${agent.notice.code}`, {
+          ...(agent.notice.params ?? {}),
+          ...(agent.notice.code === "approvalResolved" && (agent.notice.params?.decision === "allow" || agent.notice.params?.decision === "deny")
+            ? { decision: t(`agente.${agent.notice.params.decision}`) }
+            : {}),
+        });
 
   const invia = (testo: string) => {
     const domanda = testo.trim();
@@ -453,28 +471,15 @@ function Approvazione({
         : t("agente.approvazioneLettura", { persone: approval.personeDistinte })
       : t("agente.approvazioneScrittura");
   // Una scrittura si conferma sapendo quale: l'azione, l'oggetto e i campi che cambia.
-  const riepilogo = approval.classe === "read" ? null : riepilogoProposta(approval.tool, approval.input);
+  const riepilogo = useMemo(
+    () => (approval.classe === "read" ? null : riepilogoProposta(approval.tool, approval.input)),
+    [approval.classe, approval.tool, approval.input],
+  );
   return (
     <div data-testid="agente-approval" className="rounded-lg border border-primary/40 bg-primary/5 px-4 py-3 text-sm">
       <p className="font-semibold">{t("agente.approvazioneTitolo")}</p>
       <p className="mt-1">{descrizione}</p>
-      {riepilogo && (
-        <div data-testid="agente-approval-riepilogo" className="mt-2 rounded-md border border-border bg-background px-3 py-2">
-          <p className="font-medium">
-            {t(`agente.azione_${riepilogo.azione}`)}: {riepilogo.oggetto}
-          </p>
-          {riepilogo.campi.length > 0 && (
-            <dl className="mt-1 grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-xs">
-              {riepilogo.campi.map((c, i) => (
-                <div key={i} className="contents">
-                  <dt className="text-muted-foreground">{c.nome}</dt>
-                  <dd className="break-words">{c.valore}</dd>
-                </div>
-              ))}
-            </dl>
-          )}
-        </div>
-      )}
+      {riepilogo && <RiepilogoScrittura riepilogo={riepilogo} />}
       {scade && (
         <p className="mt-1 text-xs text-muted-foreground">
           {t("agente.approvalExpires")} {scade}
@@ -511,6 +516,70 @@ function Approvazione({
             {t("agente.deny")}
           </Button>
         </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Il riepilogo di una scrittura nella lingua della persona (prova dal vivo di F1, 2026-11-26): il
+ * nome dell'oggetto e degli oggetti collegati al posto degli identificativi, le etichette dei campi
+ * al posto dei nomi del contratto. Un nome che non si legge (oggetto fuori perimetro, scheda che
+ * non risponde) diventa «un elemento collegato», mai l'identificativo.
+ */
+function RiepilogoScrittura({ riepilogo }: { riepilogo: RiepilogoProposta }) {
+  const { t } = useTranslation("common");
+  const [nomi, setNomi] = useState<Record<string, string | null>>({});
+  useEffect(() => {
+    const daLeggere: Array<[string, string]> = [];
+    if (riepilogo.concetto && riepilogo.id) daLeggere.push([riepilogo.concetto, riepilogo.id]);
+    for (const c of riepilogo.campi) if (c.riferimento && c.identificativo && !c.valore.startsWith("[")) daLeggere.push([c.riferimento, c.valore]);
+    const ctrl = new AbortController();
+    for (const [concetto, id] of daLeggere) {
+      if (!CONCETTI_CON_SCHEDA.has(concetto)) continue;
+      const chiave = `${concetto}/${id}`;
+      apiFetch<unknown>(`/v1/${concetto}/${encodeURIComponent(id)}`, { signal: ctrl.signal })
+        .then((r) => setNomi((n) => ({ ...n, [chiave]: nomeLeggibile(r) })))
+        .catch(() => setNomi((n) => ({ ...n, [chiave]: null })));
+    }
+    return () => ctrl.abort();
+  }, [riepilogo]);
+  const collegato = t("agente.elementoCollegato");
+  const nomeDi = (concetto: string | undefined, id: string) => (concetto ? nomi[`${concetto}/${id}`] : null) ?? collegato;
+  const oggetto = riepilogo.concetto
+    ? t(`agente.concetti.${riepilogo.concetto}`, { defaultValue: t("agente.oggettoGenerico") })
+    : t("agente.oggettoGenerico");
+  const valore = (c: RiepilogoProposta["campi"][number]) => {
+    if (c.identificativo) {
+      if (c.valore.startsWith("[")) {
+        try {
+          return (JSON.parse(c.valore) as string[]).map(() => collegato).join(", ");
+        } catch {
+          return collegato;
+        }
+      }
+      return nomeDi(c.riferimento, c.valore);
+    }
+    if (c.valore === "true") return t("agente.valoreSi");
+    if (c.valore === "false") return t("agente.valoreNo");
+    if (c.valore === "" || c.valore === "null") return t("agente.valoreVuoto");
+    return c.valore;
+  };
+  return (
+    <div data-testid="agente-approval-riepilogo" className="mt-2 rounded-md border border-border bg-background px-3 py-2">
+      <p className="font-medium">
+        {t(`agente.azione_${riepilogo.azione}`)}: {oggetto}
+        {riepilogo.id && <span data-testid="agente-approval-oggetto"> — {nomeDi(riepilogo.concetto ?? undefined, riepilogo.id)}</span>}
+      </p>
+      {riepilogo.campi.length > 0 && (
+        <dl className="mt-1 grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-xs">
+          {riepilogo.campi.map((c, i) => (
+            <div key={i} className="contents">
+              <dt className="text-muted-foreground">{t(`agente.campi.${c.campo}`, { defaultValue: t("agente.campoAltro") })}</dt>
+              <dd className="break-words">{valore(c)}</dd>
+            </div>
+          ))}
+        </dl>
       )}
     </div>
   );

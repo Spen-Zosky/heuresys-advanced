@@ -2165,6 +2165,7 @@
     "modo": "Modo per questo tenant",
     "ragione": "Ragione della decisione",
     "decidi": "Decidi",
+    "liberaSpenta": "Il modo senza conferma è spento: ogni scrittura dell'assistente chiede la conferma della persona.",
     "vietato": "Non hai il permesso per questa operazione.",
     "duplicata": "Esiste già una capacità con questo codice.",
     "rifiutata": "Rifiutata dall'API",
@@ -2184,13 +2185,15 @@
     },
     "modi": {
       "CONFERMA": "Con conferma",
-      "LIBERA": "In libertà"
+      "LIBERA": "In libertà",
+      "LIBERA_SPENTA": "In libertà: spenta, ogni scrittura chiede conferma"
     },
     "annullamenti": {
       "GIORNALE_UNDO": "giornale di annullamento",
       "RIGA_SOSTITUTIVA": "riga sostitutiva"
     },
-    "identita": "{{codice}} · v{{versione}} · {{agente}}"
+    "identita": "{{codice}} · v{{versione}} · {{agente}}",
+    "riepilogoSettimanale": "Riepilogo settimanale delle scritture fatte con l'assistente"
   },
   "catalogoKpi": {
     "titolo": "Modelli dei KPI",
@@ -2327,5 +2330,45 @@
     "registroTitolo": "Costo e durata delle chiamate dell'agente",
     "registroTotali": "{{chiamate}} chiamate · costo {{costo}} · durata {{durata}}",
     "erroreRegistro": "Non è stato possibile caricare il registro delle chiamate."
+  },
+  "agentWeekly": {
+    "titolo": "Riepilogo settimanale dell'assistente",
+    "descrizione": "Ogni scrittura fatta con l'assistente nella settimana: quelle confermate dalla persona, quelle negate e quelle eseguite senza conferma, che devono restare zero.",
+    "negato": "Il riepilogo è visibile al Direttore HR, all'amministratore del tenant e alla piattaforma.",
+    "erroreCarica": "Non è stato possibile caricare il riepilogo.",
+    "precedente": "Settimana precedente",
+    "successiva": "Settimana successiva",
+    "intervallo": "Dal {{dal}} al {{al}}",
+    "tenant": "Tenant",
+    "tutti": "Tutti",
+    "totali": {
+      "confermate": "Confermate",
+      "negate": "Negate",
+      "autonome": "Senza conferma",
+      "persone": "Persone",
+      "conversazioni": "Conversazioni"
+    },
+    "allarme": "Ci sono scritture eseguite senza conferma: il modo senza conferma è spento e non dovrebbe accadere. Va verificato subito.",
+    "perPersona": "Per persona ({{count}})",
+    "perPersona_one": "Per persona ({{count}})",
+    "elenco": "Scritture ({{count}})",
+    "elenco_one": "Scrittura ({{count}})",
+    "troncato": "Sono mostrate le {{mostrate}} più recenti di {{totale}}.",
+    "nessuna": "Nessuna scrittura con l'assistente in questa settimana.",
+    "personaAssente": "Persona non più presente",
+    "operazioneSenzaNome": "Operazione senza descrizione",
+    "colonne": {
+      "persona": "Persona",
+      "tenant": "Tenant",
+      "ultima": "Ultima scrittura",
+      "quando": "Quando",
+      "operazione": "Operazione",
+      "esito": "Esito"
+    },
+    "esiti": {
+      "CONFERMATA": "Confermata",
+      "NEGATA": "Negata",
+      "AUTONOMA": "Senza conferma"
+    }
   }
 }

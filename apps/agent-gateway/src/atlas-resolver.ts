@@ -59,12 +59,19 @@ export interface AtlasOperation {
   method: string;
   path: string;
   permission: string | null;
+  /** F1 (ADR-0063): la classe d'azione dal registro `docs/kb/agent-classi-scritture.json`. */
+  classe?: "A" | "B" | "C";
 }
 
 interface ConceptEntry {
   solaLettura: boolean;
   /** Dove l'API monta il modulo, senza `/v1` (ondata 4: `semantic-matching` sta sotto `/matching`). */
   base?: string;
+  /**
+   * F1 (decisione di Enzo del 2026-11-26): il modulo dell'API quando il concetto è uno dei prefissi
+   * di un modulo montato su più indirizzi (`tenant-consolidations` del modulo `tenant-consolidation`).
+   */
+  modulo?: string;
   data: string;
   decisione: string;
   operations: Record<string, AtlasOperation>;
@@ -154,6 +161,21 @@ export class AtlasOperationResolver implements OperationResolver {
   /** Lo schema JSON del corpo di una scrittura dichiarata, o `undefined` se non è dichiarato. */
   bodyOf(conceptId: string, operationId: string): unknown {
     return this.corpi[conceptId]?.[operationId]?.body;
+  }
+
+  /**
+   * F1 (ADR-0063): la classe d'azione dichiarata dalla mappa, o `undefined` se la coppia non esiste
+   * o la mappa non la porta. Una classe che non è A, B o C vale come assente: chi riceve `undefined`
+   * ripiega sulla regola prudente del metodo (`classi-azioni.ts`).
+   */
+  classOf(conceptId: string, operationId: string): "A" | "B" | "C" | undefined {
+    const c = this.concepts[conceptId]?.operations[operationId]?.classe;
+    return c === "A" || c === "B" || c === "C" ? c : undefined;
+  }
+
+  /** Il modulo dell'API da cui viene il concetto: di solito il concetto stesso. */
+  moduleOf(conceptId: string): string {
+    return this.concepts[conceptId]?.modulo ?? conceptId;
   }
 
   /** Il metodo, o `undefined` se la coppia non esiste. L'ignoto non è una lettura. */

@@ -17,7 +17,14 @@ IL PERIMETRO E' UN DATO, NON UN LETTERALE. I concetti aperti stanno in
 La dottrina di Enzo (2026-08-16) e' che l'agente vada **ovunque porti valore aggiunto**:
 quell'elenco cresce, e questo strumento non va toccato quando cresce.
 
-FAIL-CLOSED DUE VOLTE:
+LE SCRITTURE, DAL 2026-11-26 (F1, ADR-0063). Ogni scrittura con una classe B o C in
+`docs/kb/agent-classi-scritture.json` entra nel catalogo, su ogni modulo, con la sua classe.
+Il registro e' una decisione scritta riga per riga; `check_copertura_agente.py` lo tiene
+allineato al codice in CI. Con LIBERA spenta (ADR-0063 D4) ogni scrittura, B o C, passa
+dalla conferma della persona collegata. Le esclusioni (accessi, governo degli agenti,
+cancellazioni fisiche...) non escono: non sono filtrate a valle, non esistono nella mappa.
+
+FAIL-CLOSED DUE VOLTE (la storia di prima di F1):
   · le SCRITTURE escono **solo** per cio' che e' dichiarato aperto. Dal 2026-11-05 (#254,
     ADR-0040 §5) le LETTURE escono per ogni modulo, tranne quelli in FUORI_DALLE_LETTURE:
     il perimetro delle letture lo fa l'API, con i permessi della persona senza mandati;
@@ -43,6 +50,9 @@ import sys
 
 ATLAS = os.path.join("docs", "kb", "atlas", "atlas.yaml")
 PERIMETRI = os.path.join("docs", "kb", "agent-perimetri.json")
+# F1 del piano Heuresys AI-driven (ADR-0063): la classe d'azione di ogni scrittura. Una scrittura
+# entra nel catalogo solo se qui ha `classe` B o C; `fuori` e l'assenza la lasciano fuori.
+CLASSI = os.path.join("docs", "kb", "agent-classi-scritture.json")
 USCITA = os.path.join("docs", "kb", "atlas", "agent-operations.json")
 
 # #254 (ADR-0040 §5, piano interfacce L10 A-13): l'agente LEGGE cio' che legge la persona, su
@@ -52,6 +62,9 @@ USCITA = os.path.join("docs", "kb", "atlas", "agent-operations.json")
 DECISIONE_LETTURE = ("ADR-0040 §5 (#254, piano interfacce L10 A-13): l'agente legge cio' che legge "
                      "la persona, senza mandati; le scritture restano dei soli perimetri decisi")
 DATA_LETTURE = "2026-11-05"
+DECISIONE_SCRITTURE = ("ADR-0063 F1 (piano accettato da Enzo il 2026-11-26): le scritture con classe B o C "
+                       "in agent-classi-scritture.json, ognuna con la conferma della persona collegata")
+DATA_SCRITTURE = "2026-11-26"
 # Fuori anche dalle letture, uno per uno con la ragione (mai un jolly):
 FUORI_DALLE_LETTURE = {
     "auth": "superficie di autenticazione: il gettone d'agente non la tocca (L9, A-3)",
@@ -167,6 +180,41 @@ def base_di(cid, prefissi):
     return p[0][len("/v1"):] or "/"
 
 
+APP_TS = os.path.join("apps", "api", "src", "app.ts")
+MODULI = os.path.join("apps", "api", "src", "modules")
+
+
+def blocchi_dal_codice(radice, cid):
+    """Un modulo montato su più prefissi: {prefisso: {(metodo, percorso)}} letto dal codice.
+
+    F1 (decisione di Enzo del 2026-11-26): il consolidamento ha tre funzioni di rotte nello stesso
+    `routes.ts`, ognuna registrata in `app.ts` con il suo prefisso. L'atlante elenca le rotte del
+    modulo senza dire a quale prefisso appartiene ciascuna; il codice lo dice, e si legge da lì.
+    Una funzione registrata due volte, o una rotta che non si attribuisce, fermano la costruzione.
+    """
+    app_ts = io.open(os.path.join(radice, APP_TS), encoding="utf-8").read()
+    rotte_ts = io.open(os.path.join(radice, MODULI, cid, "routes.ts"), encoding="utf-8").read()
+    importate = set()
+    for m in re.finditer(r"import\s*\{([^}]*)\}\s*from\s*\"\./modules/%s/routes\.js\"" % re.escape(cid), app_ts):
+        importate |= {x.strip() for x in m.group(1).split(",") if x.strip()}
+    prefisso_di = {}
+    for m in re.finditer(r"app\.register\(\s*([A-Za-z0-9_]+)\s*,\s*\{\s*prefix:\s*\"(/v1/[^\"]+)\"", app_ts):
+        if m.group(1) in importate:
+            if m.group(1) in prefisso_di:
+                ceco("%s: la funzione %s è registrata due volte" % (cid, m.group(1)), "un solo prefisso per funzione")
+            prefisso_di[m.group(1)] = m.group(2).rstrip("/")
+    out = {}
+    inizi = [(m.start(), m.group(1)) for m in re.finditer(r"^export const ([A-Za-z0-9_]+)\s*:", rotte_ts, re.M)]
+    for i, (pos, nome) in enumerate(inizi):
+        if nome not in prefisso_di:
+            continue
+        fine = inizi[i + 1][0] if i + 1 < len(inizi) else len(rotte_ts)
+        rotte = {(m.group(1).upper(), m.group(2)) for m in
+                 re.finditer(r"app\.(get|post|put|patch|delete)\(\s*\"([^\"]+)\"", rotte_ts[pos:fine])}
+        out[prefisso_di[nome]] = rotte
+    return out
+
+
 def costruisci(radice="."):
     atlas_p = os.path.join(radice, ATLAS)
     perim_p = os.path.join(radice, PERIMETRI)
@@ -174,6 +222,33 @@ def costruisci(radice="."):
         ceco("l'atlante non esiste in %s" % ATLAS, "python docs/kb/tools/build_atlas.py")
     if not os.path.isfile(perim_p):
         ceco("i perimetri non esistono in %s" % PERIMETRI, "eseguire dalla radice del repo")
+
+    classi_p = os.path.join(radice, CLASSI)
+    if not os.path.isfile(classi_p):
+        ceco("il registro delle classi non esiste in %s" % CLASSI, "eseguire dalla radice del repo")
+    registro = json.loads(io.open(classi_p, encoding="utf-8").read()).get("scritture") or {}
+
+    def classe_di(cid, oid):
+        """B o C dal registro; None per una scrittura esclusa o senza riga (resta fuori)."""
+        v = (registro.get(cid) or {}).get(oid) or {}
+        return v.get("classe") if v.get("classe") in ("B", "C") else None
+
+    def operazioni(cid, righe, solo_lettura):
+        ops = {}
+        for r in righe:
+            if not r.get("path"):
+                continue
+            metodo = (r["method"] or "").upper()
+            oid = operation_id(r["method"], r["path"])
+            if metodo == "GET":
+                classe = "A"
+            else:
+                classe = None if solo_lettura else classe_di(cid, oid)
+                if classe is None:
+                    continue
+            ops[oid] = {"method": metodo, "path": r["path"], "permission": r.get("permission"),
+                        "classe": classe}
+        return ops
 
     perim = json.loads(io.open(perim_p, encoding="utf-8").read())
     aperti = perim.get("aperti") or []
@@ -204,30 +279,16 @@ def costruisci(radice="."):
             ceco("il perimetro aperto '%s' non ha un prefisso unico nell'atlante (%s)"
                  % (cid, ", ".join(prefissi.get(cid) or ["nessuno"])),
                  "l'operazione non saprebbe a quale indirizzo andare")
-        # Ondata 4: `scritture` elenca le SOLE scritture aperte del perimetro, per operationId.
-        # Senza l'elenco un perimetro in scrittura aprirebbe anche le cancellazioni.
-        scritture = voce.get("scritture")
-        if not solo_lettura and not scritture:
-            ceco("il perimetro '%s' apre le scritture senza elencarle in `scritture`" % cid,
-                 "una scrittura si apre per nome, mai per modulo intero")
-        ops = {}
-        for r in rotte[cid]:
-            if not r.get("path"):
-                continue
-            metodo = (r["method"] or "").upper()
-            oid = operation_id(r["method"], r["path"])
-            if metodo != "GET" and (solo_lettura or oid not in scritture):
-                continue
-            ops[oid] = {
-                "method": metodo,
-                "path": r["path"],
-                "permission": r.get("permission"),
-            }
-        if not solo_lettura:
-            ignote = sorted(set(scritture) - set(ops))
-            if ignote:
-                ceco("il perimetro '%s' elenca scritture che l'atlante non ha: %s" % (cid, ", ".join(ignote)),
-                     "il nome dell'operazione e' sbagliato, o l'atlante e' superato")
+        # Ondata 4: `scritture` elencava le sole scritture aperte del perimetro. Da F1 le apre il
+        # registro delle classi; l'elenco resta come cronaca e deve ancora esistere e avere classe.
+        # F1 (ADR-0063, piano accettato da Enzo il 2026-11-26): il registro delle classi supera i
+        # `sola_lettura` delle aperture di agosto e settembre, che restano come cronaca.
+        ops = operazioni(cid, rotte[cid], False)
+        solo_lettura = not any(o["method"] != "GET" for o in ops.values())
+        for oid in voce.get("scritture") or []:
+            if oid not in ops:
+                ceco("il perimetro '%s' apre la scrittura '%s', che non esiste o non ha classe B o C "
+                     "in %s" % (cid, oid, CLASSI), "il nome e' sbagliato, o manca la riga nel registro")
         out[cid] = {
             "solaLettura": solo_lettura,
             "base": base,
@@ -241,22 +302,52 @@ def costruisci(radice="."):
             continue
         base = base_di(cid, prefissi)
         if base is None:
-            # più prefissi: l'indirizzo di ogni lettura non è deducibile, quindi non si apre
-            continue
-        ops = {}
-        for r in righe:
-            if r.get("path") and (r["method"] or "").upper() == "GET":
-                ops[operation_id(r["method"], r["path"])] = {
-                    "method": "GET",
-                    "path": r["path"],
-                    "permission": r.get("permission"),
+            # Più prefissi: l'atlante non dice dove sta ogni rotta. Se il modulo ha scritture con
+            # classe, il codice dice a quale prefisso appartiene ognuna e il modulo si apre come un
+            # concetto per prefisso (`tenant-consolidations`, `consolidation-runs`, ...), con
+            # `modulo` che rimanda alla riga del registro. Senza scritture con classe resta fuori.
+            if len(prefissi.get(cid) or []) < 2 or not any(
+                    classe_di(cid, operation_id(r["method"], r["path"])) for r in righe
+                    if r.get("path") and r["method"].upper() != "GET"):
+                continue
+            blocchi = blocchi_dal_codice(radice, cid)
+            if sorted(blocchi) != sorted(p.rstrip("/") for p in prefissi[cid]):
+                ceco("%s: i prefissi del codice (%s) non sono quelli dell'atlante (%s)"
+                     % (cid, ", ".join(sorted(blocchi)), ", ".join(prefissi[cid])),
+                     "rigenerare l'atlante: python docs/kb/tools/build_atlas.py")
+            attribuite = set()
+            for pref, chiavi in sorted(blocchi.items()):
+                sub = pref[len("/v1/"):].replace("/", "-")
+                if sub in rotte and sub != cid:
+                    ceco("%s: il concetto %s esiste già come modulo" % (cid, sub), "un nome per concetto")
+                righe_sub = [r for r in righe if r.get("path") and (r["method"].upper(), r["path"]) in chiavi]
+                attribuite |= {(r["method"].upper(), r["path"]) for r in righe_sub}
+                ops = operazioni(cid, righe_sub, False)
+                if not ops:
+                    continue
+                scrive = any(o["method"] != "GET" for o in ops.values())
+                out[sub] = {
+                    "solaLettura": not scrive,
+                    "base": pref[len("/v1"):],
+                    "modulo": cid,
+                    "data": DATA_SCRITTURE if scrive else DATA_LETTURE,
+                    "decisione": DECISIONE_LETTURE + ("; " + DECISIONE_SCRITTURE if scrive else ""),
+                    "operations": ops,
                 }
+            orfane = [r for r in righe if r.get("path") and (r["method"].upper(), r["path"]) not in attribuite]
+            if orfane:
+                ceco("%s: rotte dell'atlante che il codice non attribuisce a un prefisso: %s"
+                     % (cid, ", ".join("%s %s" % (r["method"], r["path"]) for r in orfane)),
+                     "rigenerare l'atlante o correggere il lettore delle funzioni di rotte")
+            continue
+        ops = operazioni(cid, righe, False)
         if ops:
+            scrive = any(o["method"] != "GET" for o in ops.values())
             out[cid] = {
-                "solaLettura": True,
+                "solaLettura": not scrive,
                 "base": base,
-                "data": DATA_LETTURE,
-                "decisione": DECISIONE_LETTURE,
+                "data": DATA_SCRITTURE if scrive else DATA_LETTURE,
+                "decisione": DECISIONE_LETTURE + ("; " + DECISIONE_SCRITTURE if scrive else ""),
                 "operations": ops,
             }
     if mancanti:
@@ -271,7 +362,7 @@ def main():
     dati = costruisci(radice)
     testo = json.dumps({
         "_generato_da": "docs/kb/tools/build_agent_operations.py — non modificare a mano",
-        "_fonti": [ATLAS.replace("\\", "/"), PERIMETRI.replace("\\", "/")],
+        "_fonti": [ATLAS.replace("\\", "/"), PERIMETRI.replace("\\", "/"), CLASSI.replace("\\", "/")],
         "concepts": dati,
         # Prova dal vivo del 2026-11-20: una domanda sulle segnalazioni riceveva «nel catalogo non
         # c'è» invece del rifiuto. Il gateway deve sapere che questi concetti esistono e sono vietati.

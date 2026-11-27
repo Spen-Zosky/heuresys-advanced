@@ -14,7 +14,7 @@
 import { randomUUID } from "node:crypto";
 import { query } from "@anthropic-ai/claude-agent-sdk";
 import { buildHeuresysMcp } from "./mcp-tools.js";
-import { ISTRUZIONI_ASSISTENTE } from "./istruzioni.js";
+import { istruzioniAssistente } from "./istruzioni.js";
 
 /** Gli unici strumenti integrati di Claude Code che l'assistente conserva. */
 export const STRUMENTI_INTEGRATI = ["ToolSearch", "Skill"] as const;
@@ -74,6 +74,8 @@ export interface RunHrAgentOptions {
    * la stessa cosa. Assente, se ne genera uno come prima.
    */
   conversationId?: string;
+  /** La lingua della pagina da cui arriva la domanda: l'assistente risponde in quella. */
+  lingua?: "it" | "en";
   /**
    * ADR-0056 D4 (piano T6b): la sessione dell'SDK da riprendere, salvata con la conversazione.
    * Il contatore delle persone che continua lo passa chi chiama, in `contatore`.
@@ -143,7 +145,7 @@ export async function* runHrAgent(
       // su un perimetro sano. L'agente HR ragiona sul prompt e sugli strumenti MCP: basta.
       settingSources: [],
       // 2026-11-18: le istruzioni proprie dell'assistente (lingua, formato, {omissis}): istruzioni.ts.
-      systemPrompt: ISTRUZIONI_ASSISTENTE,
+      systemPrompt: istruzioniAssistente(opts.lingua),
       // CRITICAL (M-2): do NOT put `mcp__heuresys__*` in allowedTools — per the SDK,
       // allowedTools are "auto-allowed without prompting", which BYPASSES canUseTool.
       // That would let WRITE tools execute with no human approval. Instead every

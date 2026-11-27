@@ -93,7 +93,16 @@ function PannelloAgenteAcceso({ pathname, idonea }: { pathname: string; idonea: 
 
   const contesto = dichiarato ?? (titolo ? t("agente.contestoPagina", { titolo }) : t("agente.contestoPaginaSenzaNome"));
 
-  const testoAvviso = agent.notice === null ? null : t(`agente.${agent.notice.code}`, agent.notice.params ?? {});
+  // La decisione arriva come valore tecnico («allow», «deny»): si mostra l'etichetta nella lingua della pagina.
+  const testoAvviso =
+    agent.notice === null
+      ? null
+      : t(`agente.${agent.notice.code}`, {
+          ...(agent.notice.params ?? {}),
+          ...(agent.notice.code === "approvalResolved" && (agent.notice.params?.decision === "allow" || agent.notice.params?.decision === "deny")
+            ? { decision: t(`agente.${agent.notice.params.decision}`) }
+            : {}),
+        });
   const descrizioneApprovazione =
     agent.approval?.classe === "read"
       ? agent.approval.personeDistinte === undefined

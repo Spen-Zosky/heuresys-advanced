@@ -13,7 +13,10 @@
  * fetchImpl is injectable so the client is unit-testable without live heuresys.
  */
 
-import { conOmissis, letturaNegata, type EsitiLetture } from "./omissis.js";
+import { conOmissis, letturaDaConfermare, letturaNegata, type EsitiLetture } from "./omissis.js";
+
+/** ADR-0050 D5: lo stesso codice di `packages/shared/src/schemas/mfa.ts` (il gateway non dipende da shared). */
+const STEP_UP_REQUIRED_CODE = "STEP_UP_REQUIRED";
 
 export interface Session {
   cookieAccess: string;
@@ -59,6 +62,12 @@ export interface HeuresysClientOptions {
    * È contesto, non identità: chi agisce resta la persona del cookie.
    */
   agente?: string;
+  /**
+   * La lingua della pagina da cui arriva la domanda, dichiarata all'API in `x-locale`: i testi dei
+   * campi registrati tornano nella stessa lingua della pagina (ADR-0062), e l'assistente non
+   * mostra in italiano un nome che la persona vede in inglese.
+   */
+  lingua?: "it" | "en";
 }
 
 /**
@@ -75,6 +84,7 @@ export class HeuresysClient {
   private session: Session;
   private readonly fetchImpl: FetchLike;
   private readonly superficie: string;
+  private readonly lingua: "it" | "en" | undefined;
   private refreshing: Promise<boolean> | null = null;
   private contatore: OsservatoreRisposte | undefined;
 
@@ -83,6 +93,7 @@ export class HeuresysClient {
     this.session = opts.session;
     this.fetchImpl = opts.fetchImpl ?? (globalThis.fetch as unknown as FetchLike);
     this.superficie = `agente:${opts.agente ?? "assistente-hr"}`;
+    this.lingua = opts.lingua;
   }
 
   private headers(method: string): Record<string, string> {
@@ -91,6 +102,7 @@ export class HeuresysClient {
       cookie: `hrx_access=${this.session.cookieAccess}; hrx_csrf=${this.session.cookieCsrf}`,
       "x-heuresys-superficie": this.superficie,
     };
+    if (this.lingua) h["x-locale"] = this.lingua;
     if (!SAFE_METHODS.has(method)) h["x-csrf-token"] = this.session.csrf; // CSRF on writes only
     return h;
   }
@@ -230,6 +242,17 @@ export class HeuresysClient {
     // Richiesta di Enzo del 2026-11-18: una lettura che l'API nega alla persona non è un guasto,
     // è un'informazione per la risposta. Torna al modello come esito NON_AUTORIZZATO e si conta.
     if (lettura && res.status === 403) {
+      // ADR-0050 D5: «serve la conferma del secondo fattore» non è «non autorizzato».
+      let codice: string | undefined;
+      try {
+        codice = codiceErrore(await res.text());
+      } catch {
+        /* nessun corpo leggibile: resta il diniego */
+      }
+      if (codice === STEP_UP_REQUIRED_CODE) {
+        this.esiti?.daConfermareSecondoFattore();
+        return letturaDaConfermare() as T;
+      }
       this.esiti?.negata();
       return letturaNegata() as T;
     }

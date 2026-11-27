@@ -110,7 +110,10 @@ BEGIN
     RAISE EXCEPTION '000421: concessioni = % invece di 1 (solo PLATFORM_ADMIN, D9)', n_grant;
   END IF;
 
-  SELECT coalesce(sum(missing), 0) INTO n_gap FROM sys.v_reference_translation_coverage;
+  SELECT coalesce(sum(missing), 0) INTO n_gap FROM sys.v_reference_translation_coverage
+    -- 000516 e 000517: blueprint, etichette delle interfacce e contenuti dei tenant restano fuori.
+   WHERE (entity_table, field) NOT IN (SELECT f.entity_table, f.field
+      FROM sys.sys_translatable_field f WHERE f.note IN ('contenuti dei tenant','contenuto dei blueprint','registro dei processi dei blueprint','etichette delle interfacce'));
   IF n_gap <> 0 THEN
     RAISE EXCEPTION '000421: restano % traduzioni EN mancanti', n_gap;
   END IF;

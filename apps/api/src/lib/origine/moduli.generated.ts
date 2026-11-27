@@ -73,6 +73,20 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_tenancies"
     ]
   },
+  "agent-weekly-summary": {
+    "prefissi": [
+      "/v1/agent-weekly-summary"
+    ],
+    "tabelle": [
+      "sys_auth_permissions",
+      "sys_auth_role_permissions",
+      "sys_inbox_notifications",
+      "sys_reference_translations",
+      "sys_tenancies",
+      "sys_user_auth_roles",
+      "sys_users"
+    ]
+  },
   "analytics": {
     "prefissi": [
       "/v1/analytics"
@@ -1071,6 +1085,27 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
     ],
     "tabelle": [
       "sys_review_cycles"
+    ]
+  },
+  "scenari": {
+    "prefissi": [
+      "/v1/scenari"
+    ],
+    "tabelle": [
+      "sys_scenario_assumptions",
+      "sys_scenario_equity_checks",
+      "sys_scenario_fotografa",
+      "sys_scenario_levers",
+      "sys_scenario_options",
+      "sys_scenario_results",
+      "sys_scenario_shadow_assignments",
+      "sys_scenario_shadow_positions",
+      "sys_scenario_sources",
+      "sys_scenario_versions",
+      "sys_scenarios",
+      "sys_succession_pools",
+      "sys_successor_candidates",
+      "sys_users"
     ]
   },
   "seed-acquisition-runs": {

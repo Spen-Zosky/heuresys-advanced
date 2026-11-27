@@ -692,6 +692,11 @@
       "heuresys-source": "./src/schemas/agent-capabilities.ts",
       "default": "./dist/schemas/agent-capabilities.js"
     },
+    "./schemas/agent-weekly-summary": {
+      "types": "./dist/schemas/agent-weekly-summary.d.ts",
+      "heuresys-source": "./src/schemas/agent-weekly-summary.ts",
+      "default": "./dist/schemas/agent-weekly-summary.js"
+    },
     "./schemas/agent-conversations": {
       "types": "./dist/schemas/agent-conversations.d.ts",
       "heuresys-source": "./src/schemas/agent-conversations.ts",
@@ -701,6 +706,11 @@
       "types": "./dist/schemas/agent-requests.d.ts",
       "heuresys-source": "./src/schemas/agent-requests.ts",
       "default": "./dist/schemas/agent-requests.js"
+    },
+    "./schemas/scenari": {
+      "types": "./dist/schemas/scenari.d.ts",
+      "heuresys-source": "./src/schemas/scenari.ts",
+      "default": "./dist/schemas/scenari.js"
     }
   },
   "scripts": {

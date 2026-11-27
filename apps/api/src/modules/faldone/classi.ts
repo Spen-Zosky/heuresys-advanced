@@ -239,6 +239,13 @@ const TABELLE: Record<string, Riga> = {
   "sys.sys_agent_capability_activations": ["ACTIVITY", "Assistente e agenti", "Attivazioni delle capacità"],
   "sys.sys_agent_requests": ["ACTIVITY", "Assistente e agenti", "Richieste dell'agente"],
   "sys.sys_agent_call_log": ["ACTIVITY", "Assistente e agenti", "Costo e durata delle chiamate dell'agente"],
+  // Motore degli scenari (000515, ADR-0063 D5): lo scenario è della persona per cui si lavora; chi
+  // compare nella struttura ombra (titolare, responsabile di unità) è oggetto di un'ipotesi di talento
+  // o di organizzazione, che non si comunica alla persona stessa, come la successione.
+  "sys.sys_scenarios": ["ACTIVITY", "Assistente e agenti", "Scenari what-if"],
+  "sys.sys_scenario_versions": ["ACTIVITY", "Assistente e agenti", "Versioni degli scenari"],
+  "sys.sys_scenario_shadow_units": ["EVALUATION", "Talento e successione", "Unità negli scenari what-if", "nonASe"],
+  "sys.sys_scenario_shadow_assignments": ["EVALUATION", "Talento e successione", "Presenza negli scenari what-if", "nonASe"],
   // ── Modelli e configurazione (la persona vi compare come autrice o approvatrice)
   "sys.sys_blueprint_activations": ["ACTIVITY", "Modelli e configurazione", "Attivazioni dei modelli"],
   "sys.sys_blueprint_overrides": ["ACTIVITY", "Modelli e configurazione", "Personalizzazioni dei modelli"],
@@ -366,6 +373,8 @@ const SOGGETTO: ReadonlySet<string> = new Set([
   "sys.sys_agent_conversations.agent_conversation_user_id",
   "sys.sys_agent_requests.agent_request_requester_id",
   "sys.sys_agent_call_log.agent_call_user_id",
+  "sys.sys_scenarios.scenario_owner_user_id",
+  "sys.sys_scenario_shadow_assignments.shadow_assignment_user_id",
   "sys.sys_assessments.assessment_subject_user_id",
   "sys.sys_attendance.attendance_subject_user_id",
   "sys.sys_auth_identities.auth_identity_user_id",

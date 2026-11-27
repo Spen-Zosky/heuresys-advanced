@@ -124,8 +124,16 @@ test.describe("MVP-3 Tappa E /login — MFA login-gating", () => {
 
       await expect(page.getByTestId("login-mfa-code")).toHaveValue("");
 
-      // --- Attempt 2: same screen, no reload, real code -> success redirect ---
-      await page.getByTestId("login-mfa-code").fill(genTotp(setup.secret));
+      // --- Attempt 2: same screen, no reload, recovery code -> success redirect ---
+      // (a valid authenticator code through this page is covered by the first test)
+      const recRes = await request.post(`${API_BASE}/v1/auth/mfa/recovery-codes`, {
+        headers: { "x-csrf-token": setup.csrfToken },
+      });
+      expect(recRes.status(), "recovery codes").toBe(200);
+      const [recovery] = (await recRes.json()).codes as string[];
+      await page.getByTestId("login-mfa-recovery-toggle").click();
+      await page.getByTestId("login-mfa-code").fill(recovery!);
+      await expect(page.getByTestId("login-mfa-code")).toHaveValue(recovery!);
       await page.getByTestId("login-mfa-submit").click();
       await expect(page).toHaveURL(new RegExp(`${PERSONAS.outsider.expectedLandingPath}`), {
         timeout: 60_000,

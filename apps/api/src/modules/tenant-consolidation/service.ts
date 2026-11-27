@@ -639,6 +639,25 @@ export const tenantConsolidationService = {
     return { pending: da.length, consolidationId: aperta.consolidationId, since: rows[0]?.t ? rows[0].t.toISOString() : null };
   },
 
+  /**
+   * Una proposta, con i nomi delle sue voci e la decisione che ha oggi. La legge la scheda di
+   * conferma dell'assistente (F1 di ADR-0063): chi conferma una decisione deve vedere su quale
+   * proposta, e se ne ha già una, non soltanto un identificativo.
+   */
+  async proposal(actor: ActorContext, proposalId: string): Promise<ConsolidationProposal> {
+    const tenantId = tenantDi(actor);
+    const leggibili = await gruppiLeggibili(actor);
+    const [p] = await repo.getProposals(pool, tenantId, [proposalId]);
+    if (!p) throw new NotFoundError("Proposta non trovata", "CONSOLIDATION_PROPOSAL_NOT_FOUND");
+    if (leggibili !== null && !leggibili.includes(p.group)) {
+      throw new ForbiddenError("La proposta è fuori dai gruppi della delega", "PERMISSION_DENIED");
+    }
+    const { decisionId: _decisionId, status: _status, ...proposta } = p;
+    const s = await sessione(tenantId, p.consolidationId);
+    const [conIlNome] = await conNomi(tenantId, s, [proposta]);
+    return conIlNome!;
+  },
+
   /** La cascata di una proposta, con i nomi delle voci, prima di decidere. */
   async cascade(actor: ActorContext, proposalId: string): Promise<CascadeResponse> {
     const tenantId = tenantDi(actor);

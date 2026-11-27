@@ -31,6 +31,11 @@ describe("la lingua dell'assistente segue quella della pagina", () => {
     expect(istruzioniAssistente("en").startsWith("LINGUA DELLA PAGINA: INGLESE")).toBe(true);
   });
 
+  it("dopo una modifica negata non si afferma lo stato del dato senza averlo letto", () => {
+    expect(ISTRUZIONI_ASSISTENTE).toContain("Se la persona nega una modifica");
+    expect(ISTRUZIONI_ASSISTENTE).toContain("se non l'hai appena letto");
+  });
+
   it("27/11 — niente frase tecnica in apertura, e i collaboratori diretti sono la linea di riporto", () => {
     for (const l of ["it", "en"] as const) {
       const t = istruzioniAssistente(l);

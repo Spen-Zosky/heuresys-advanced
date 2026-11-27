@@ -21,6 +21,12 @@ export interface Messaggio {
  * Le righe dello stream, nell'ordine, diventano messaggi: la domanda della persona, la risposta
  * dell'assistente (i pezzi consecutivi in un messaggio solo) e gli avvisi. Un `rifiuto` sostituisce
  * la risposta della domanda a cui si riferisce.
+ *
+ * La risposta è solo il testo scritto DOPO l'ultima consultazione dei dati. Ciò che il modello
+ * scrive prima di uno strumento o di un comando di pagina («Leggo le assegnazioni…», «Guardo i
+ * filtri di analytics get_kpi») è un messaggio di lavorazione: non resta nel testo finale
+ * (prova dal vivo del 27/11, F6c: 4 risposte su 4 con messaggi di lavorazione, 1 su 4 con un nome
+ * tecnico). Lo stato di lavoro lo racconta `fase()`, non il testo.
  */
 export function messaggiDaRighe(righe: readonly StreamLine[]): Messaggio[] {
   const out: Messaggio[] = [];
@@ -34,6 +40,11 @@ export function messaggiDaRighe(righe: readonly StreamLine[]): Messaggio[] {
       const ultimo = out[out.length - 1];
       if (ultimo && ultimo.ruolo === "assistente" && !ultimo.rifiuto) ultimo.testo = `${ultimo.testo}\n\n${r.text}`;
       else out.push({ id: r.id, ruolo: "assistente", testo: r.text });
+    } else if (r.kind === "tool" || r.kind === "page_command") {
+      for (let i = out.length - 1; i >= inizioRisposta; i -= 1) {
+        const m = out[i];
+        if (m && m.ruolo === "assistente" && !m.rifiuto) out.splice(i, 1);
+      }
     } else if (r.kind === "rifiuto") {
       out.splice(inizioRisposta);
       out.push({ id: r.id, ruolo: "assistente", testo: r.text, rifiuto: true });
@@ -160,7 +171,29 @@ const RIFERIMENTI: Record<string, string> = {
   blueprintProcessId: "blueprint-processes",
   variantId: "blueprint-variants",
   activationId: "blueprint-activations",
+  proposalId: "consolidation-proposals",
 };
+
+/**
+ * Le schede che non stanno a `GET /v1/<concetto>/:id`: la proposta del consolidamento si legge da
+ * `GET /v1/tenant-consolidations/proposals/:proposalId` (prova dal vivo di F1, 2026-11-26: la
+ * scheda di una decisione non diceva su quale proposta).
+ */
+const SCHEDE_FUORI_BASE: Record<string, (id: string) => string> = {
+  "consolidation-proposals": (id) => `/v1/tenant-consolidations/proposals/${encodeURIComponent(id)}`,
+};
+
+/** Dove la finestra legge il nome di un oggetto, o `null` se l'API non ha la sua scheda. */
+export function percorsoScheda(concetto: string, id: string): string | null {
+  const fuori = SCHEDE_FUORI_BASE[concetto];
+  if (fuori) return fuori(id);
+  return CONCETTI_CON_SCHEDA.has(concetto) ? `/v1/${concetto}/${encodeURIComponent(id)}` : null;
+}
+
+/** Un codice di lavoro (`RIFIUTATA`, `IN_PROGRESS`): a video si mostra la sua etichetta, mai il codice. */
+export function eCodice(valore: string): boolean {
+  return /^[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*$/.test(valore) && valore.length > 1;
+}
 
 /**
  * I concetti di cui l'API ha la scheda `GET /v1/<concetto>/:id` (verificato contro la mappa
@@ -219,7 +252,10 @@ export function riepilogoProposta(tool: unknown, input: unknown, massimo = 12): 
     const params = a.params !== null && typeof a.params === "object" ? (a.params as Record<string, unknown>) : {};
     id = typeof params.id === "string" ? params.id : null;
     azione = azioneDaOperazione(typeof a.operationId === "string" ? a.operationId : "", id !== null);
-    corpo = a.body ?? {};
+    // Gli altri parametri del percorso dicono su che cosa si agisce (`proposalId` di una decisione):
+    // vanno nel riepilogo prima del contenuto.
+    const altri = Object.fromEntries(Object.entries(params).filter(([k]) => k !== "id"));
+    corpo = Object.keys(altri).length > 0 ? { ...altri, ...((a.body as Record<string, unknown> | undefined) ?? {}) } : (a.body ?? {});
   } else {
     const radice = nome.replace(/_(upsert|delete|materialize)$/, "");
     concetto = STRUMENTI_NOMINATI[radice] ?? null;
@@ -260,6 +296,11 @@ export function nomeLeggibile(risposta: unknown): string | null {
   if (!grezzo) return null;
   const o = grezzo.data !== null && typeof grezzo.data === "object" && !Array.isArray(grezzo.data) ? (grezzo.data as Record<string, unknown>) : grezzo;
   const s = (k: string) => (typeof o[k] === "string" && (o[k] as string).trim() ? (o[k] as string).trim() : null);
+  // Una proposta del consolidamento: i nomi delle sue voci, quelle del tenant per prime.
+  const voci = (k: string) => (Array.isArray(o[k]) ? (o[k] as Array<{ name?: unknown }>).map((v) => (typeof v?.name === "string" ? v.name : null)).filter((n): n is string => !!n) : []);
+  const delTenant = voci("tenantItems");
+  const delModello = voci("prototypeItems");
+  if (delTenant.length > 0 || delModello.length > 0) return (delTenant.length > 0 ? delTenant : delModello).join(", ");
   const cognome = s("lastName");
   const nomeProprio = s("firstName");
   if (cognome && nomeProprio) return `${cognome}, ${nomeProprio}`;

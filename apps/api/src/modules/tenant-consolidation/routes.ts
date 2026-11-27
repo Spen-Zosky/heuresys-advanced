@@ -176,6 +176,12 @@ export const tenantConsolidationRoutes: FastifyPluginAsyncZod = async (app) => {
     schema: { response: { 200: PendingApprovalSchema } },
   }, async (req) => svc.pendingApproval(actor(req)));
 
+  app.get("/proposals/:proposalId", {
+    config: conf,
+    preHandler: [LEGGE],
+    schema: { params: PROPOSTA, response: { 200: ConsolidationProposalSchema } },
+  }, async (req) => svc.proposal(actor(req), req.params.proposalId));
+
   app.get("/proposals/:proposalId/cascade", {
     config: conf,
     preHandler: [LEGGE],

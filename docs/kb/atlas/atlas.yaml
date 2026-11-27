@@ -5339,6 +5339,52 @@ api:
     tests:
       - generated-origins.integration.test.ts
     files: 3
+  ghost-units:
+    prefixes:
+      - /v1/ghost-units
+    routes:
+      - method: GET
+        path: /
+        permission: "organization_unit:list"
+        csrf: false
+        orgGate: null
+        params:
+          querystring:
+            schema: GhostUnitsQuerySchema
+            fields: null
+            unresolved: true
+      - method: GET
+        path: /storia
+        permission: "organization_unit:list"
+        csrf: false
+        orgGate: null
+        params:
+          querystring:
+            schema: GhostUnitsQuerySchema
+            fields: null
+            unresolved: true
+      - method: POST
+        path: /riforma
+        permission: "organization_unit:update"
+        csrf: true
+        orgGate: null
+        params:
+          body:
+            schema: GhostRiformaBodySchema
+            fields: null
+            unresolved: true
+    tables:
+      - sys.sys_ghost_riforma
+      - sys.sys_ghost_units
+      - sys.sys_organization_units
+      - sys.sys_tenancies
+      - sys.sys_users
+      - sys.v_ghost_units_derivate
+    schemas:
+      - ghost-units
+    tests:
+      - ghost-units.integration.test.ts
+    files: 3
   goals:
     prefixes:
       - /v1/goals
@@ -15434,6 +15480,16 @@ api:
         csrf: false
         orgGate: null
       - method: GET
+        path: "/proposals/:proposalId"
+        permission: null
+        csrf: false
+        orgGate: null
+        params:
+          params:
+            schema: PROPOSTA
+            fields: null
+            unresolved: true
+      - method: GET
         path: "/proposals/:proposalId/cascade"
         permission: null
         csrf: false
@@ -21373,6 +21429,7 @@ cross:
     - /v1/tenant-consolidations/access
     - /v1/tenant-consolidations/deliveries
     - /v1/tenant-consolidations/pending-approval
+    - "/v1/tenant-consolidations/proposals/:param"
     - "/v1/tenant-consolidations/proposals/:param/decision"
     - /v1/tenant-consolidations/proposals/confirm-certain
     - /v1/tenant-consolidations/receive

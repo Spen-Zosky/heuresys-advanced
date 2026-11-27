@@ -19,6 +19,7 @@
  */
 import type { ApprovalRegistry } from "./approval-bridge.js";
 import { redact } from "./redact.js";
+import { rifiutoNelTesto } from "./omissis.js";
 import type { ContatorePersone } from "./persone-distinte.js";
 import type { ApprovalRequest, ApproveFn } from "./write-gate.js";
 import {
@@ -176,6 +177,7 @@ export async function eseguiGiro(d: GiroDeps): Promise<EsitoGiro> {
   let sessione = registro.conversazione.sdkSessionRef ?? undefined;
   let fine: ReturnType<typeof fineDi>;
   let errore = false;
+  let testoModello = "";
   try {
     for await (const ev of d.esegui({
       approve,
@@ -193,6 +195,7 @@ export async function eseguiGiro(d: GiroDeps): Promise<EsitoGiro> {
       fine = fineDi(ev) ?? fine;
       misura = misuraDi(ev) ?? misura;
       const visti = riduci(ev);
+      for (const v of visti) if (v.kind === "TESTO" && typeof v.payload.testo === "string") testoModello += `${v.payload.testo}\n`;
       if (visti.length > 0) {
         registro.aggiungi(visti);
         void registro.svuota();
@@ -219,7 +222,7 @@ export async function eseguiGiro(d: GiroDeps): Promise<EsitoGiro> {
     d.scrivi(evento("nota", { testo: nota }));
   }
 
-  const rifiuto = motivo === undefined && !errore ? (d.rifiuto?.() ?? null) : null;
+  const rifiuto = motivo === undefined && !errore ? (d.rifiuto?.() ?? rifiutoNelTesto(testoModello)) : null;
   if (rifiuto) {
     registro.aggiungi([{ kind: "TESTO", payload: { testo: rifiuto, origine: "piattaforma", rifiuto: true } }]);
     d.scrivi(evento("rifiuto", { testo: rifiuto }));

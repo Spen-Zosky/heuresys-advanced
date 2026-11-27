@@ -121,18 +121,31 @@ function agenteSuAutenticazione(method: string, url: string): boolean {
  * Il gettone vive al più quanto la sessione della persona da cui nasce: chiusa la sessione
  * (uscita, revoca, cambio di parola d'ordine), il gettone smette di valere subito, non alla
  * sua scadenza. Solo per i gettoni d'agente: le sessioni delle persone restano senza database.
+ *
+ * ADR-0050 D5: la stessa lettura porta l'ora dell'ultima verifica del secondo fattore della
+ * sessione (il massimo sulle righe vive della famiglia, mig. 000476). L'agente legge con la
+ * conferma che la persona ha dato in QUESTA sessione, né prima né dopo: se lei conferma dalla
+ * pagina, l'assistente passa subito; quando la finestra di 15 minuti si chiude per lei, si
+ * chiude anche per l'agente. L'agente non può confermare da sé (A-3, `agenteSuAutenticazione`).
+ * Restituisce null se la sessione non è viva.
  */
-async function sessioneDellaPersonaViva(familyId: string, userId: string): Promise<boolean> {
-  const { rowCount } = await pool.query(
-    `SELECT 1 FROM sys.sys_auth_refresh_tokens
+async function sessioneDellaPersonaViva(
+  familyId: string,
+  userId: string,
+): Promise<{ stepUpAt: number | null } | null> {
+  const { rows } = await pool.query<{ vive: number; sua: number | null }>(
+    `SELECT count(*)::int AS vive,
+            floor(extract(epoch FROM max(auth_refresh_token_step_up_at)))::bigint::float8 AS sua
+       FROM sys.sys_auth_refresh_tokens
       WHERE auth_refresh_token_family_id = $1
         AND auth_refresh_token_user_id = $2
         AND auth_refresh_token_revoked_at IS NULL
-        AND auth_refresh_token_expires_at > now()
-      LIMIT 1`,
+        AND auth_refresh_token_expires_at > now()`,
     [familyId, userId],
   );
-  return (rowCount ?? 0) > 0;
+  const r = rows[0];
+  if (!r || r.vive === 0) return null;
+  return { stepUpAt: typeof r.sua === "number" ? r.sua : null };
 }
 
 /**
@@ -167,16 +180,15 @@ const plugin: FastifyPluginAsync = async (app) => {
         rl?: RoleCode[];
       }>(token);
       const agt = payload.agt;
+      // ADR-0050 D5: per un gettone d'agente l'ora della conferma viene dalla sessione della
+      // persona, mai da un claim del gettone.
+      let stepUpAt: number | undefined = typeof payload.sua === "number" ? payload.sua : undefined;
       if (agt) {
         // Un gettone d'agente senza la sessione della persona viva non vale: niente utente.
-        if (
-          typeof agt.cod !== "string" ||
-          typeof agt.cmp !== "string" ||
-          !payload.fam ||
-          !(await sessioneDellaPersonaViva(payload.fam, payload.sub))
-        ) {
-          return;
-        }
+        if (typeof agt.cod !== "string" || typeof agt.cmp !== "string" || !payload.fam) return;
+        const sessione = await sessioneDellaPersonaViva(payload.fam, payload.sub);
+        if (!sessione) return;
+        stepUpAt = sessione.stepUpAt ?? undefined;
       }
       req.user = {
         userId: payload.sub,
@@ -185,7 +197,7 @@ const plugin: FastifyPluginAsync = async (app) => {
         jti: payload.jti,
         familyId: payload.fam,
         enrollmentOnly: payload.enr === true,
-        ...(typeof payload.sua === "number" ? { stepUpAt: payload.sua } : {}),
+        ...(stepUpAt !== undefined ? { stepUpAt } : {}),
         ...(agt
           ? {
               agente: {

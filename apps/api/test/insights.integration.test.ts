@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
+import { EquitaDichiarazioneSchema } from "@heuresys/shared";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 // Cap③ data-mining — in-platform flight-risk scoring (/v1/insights/*). Real login + live DB.
@@ -254,5 +255,16 @@ describe("insights API (cap③ flight-risk)", () => {
       method: "GET", url: `/v1/insights/users/${plainUser.userId}/flight-risk`, headers: { cookie: ch(plainUser.cookies) },
     });
     expect(r.statusCode).toBe(403);
+  });
+  it("E12 (F6b): la lista del rischio di uscita dichiara l'equità, con gli ingressi del suo modello", async () => {
+    const r = await suite.app.inject({ method: "GET", url: "/v1/insights/flight-risk", headers: { cookie: ch(tenantAdmin.cookies) } });
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as { items: { userId: string; features?: { feature: string }[] }[]; equita: unknown };
+    const d = EquitaDichiarazioneSchema.parse(body.equita);
+    expect(d.esitoFavorevole).toBe("NON_A_RISCHIO_ALTO");
+    expect(d.persone).toBe(new Set(body.items.map((x) => x.userId)).size);
+    for (const x of body.items) for (const f of x.features ?? []) expect(d.ingressi).toContain(f.feature);
+    expect(d.ingressiProtetti).toEqual([]);
+    expect(d.ingressiVicini.map((v) => v.ingresso)).toContain("tenure");
   });
 });

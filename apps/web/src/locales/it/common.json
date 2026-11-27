@@ -1224,6 +1224,7 @@
     "concetti": {
       "activity-classification-mappings": "Corrispondenza della classificazione delle attività",
       "activity-classifications": "Classificazione delle attività",
+      "scenari": "Scenario",
       "approvals": "Richiesta di approvazione",
       "assessment-results": "Esito di una valutazione",
       "assessments": "Valutazione",
@@ -1307,6 +1308,7 @@
     "campi": {
       "actionNotes": "Note sulle azioni",
       "actionUrl": "Indirizzo dell'azione",
+      "family": "Famiglia",
       "activationId": "Attivazione",
       "actualEnd": "Fine effettiva",
       "actualStart": "Inizio effettivo",

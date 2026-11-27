@@ -205,6 +205,17 @@ SELECT v.code, 'Richieste dell''agente con previsione di spesa: decidere e legge
   ) AS v(code)
 ON CONFLICT (permission_code) DO NOTHING;
 
+-- [motore degli scenari F3b-2, mig 000524] gli scenari what-if leggono le tavole di successione di tutto
+-- il tenant: per decisione vanno ai soli mandati HR (I22) finché il calcolo non legge con un perimetro
+-- più stretto (voci F3d e G5 del piano AI-driven). È la regola, non un debito.
+INSERT INTO sys.sys_permessi_plenipotenziari_ammessi (permission_code, motivo, data)
+SELECT v.code, 'ADR-0063 D5, piano AI-driven F3b-2: uno scenario legge le tavole di successione di tutto il tenant, quindi va ai soli mandati HR (I22) finché il calcolo non legge con un perimetro più stretto. E'' la regola, non un debito.', DATE '2026-11-26'
+  FROM (VALUES
+  ('scenario:read'),
+  ('scenario:create')
+  ) AS v(code)
+ON CONFLICT (permission_code) DO NOTHING;
+
 CREATE OR REPLACE VIEW sys.v_permessi_solo_plenipotenziari AS
 WITH titolari AS (
   SELECT p.auth_permission_code AS permission_code,

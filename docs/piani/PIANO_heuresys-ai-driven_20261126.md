@@ -110,7 +110,15 @@ Ogni voce è un lotto per un thread suo (regola dei passi piccoli del 21/11), co
 | Z5 | Controllo del metro: ogni ADR e piano nuovo dichiara asse e criterio di ADR-0063 D1 | `docs/kb/tools/check_metro_adr0063.py` in `state-lint.yml` | Claude (S) | visto rosso su un piano finto senza dichiarazione | fatta: il controllo è in `state-lint.yml` (self-test più repo); dichiarazione richiesta: una riga `Metro ADR-0063: asse N; criterio N` in ogni ADR dal 0064 e in ogni piano con data nel nome dal 2026-11-26; prova rossa/verde nel self-test, 2026-11-26 |
 | M0 | Misura dell'uso reale in produzione, in sola lettura (conversazioni, persone, proposte, capacità e modo, ammessi) | query in `docs/piani/ai-driven_20261126/misura-uso.sql`, eseguita da un thread sulla VM | Claude (S) | numeri nel file della valutazione con l'orario | fatta: misura del 2026-11-26 alle 02:31 UTC, nella valutazione §2.6 |
 | M1 | Il livello si misura da un comando: copertura di letture, scritture, pagine, segnalatori, scenari, batteria, uso | `docs/kb/tools/misura_livello_agentico.py` (dall'atlante e da `agent-operations.json`), in `verify_gate.py` | Claude (S) | il comando riproduce i numeri della valutazione; visto rosso togliendo una voce dal catalogo | fatta nel codice il 2026-11-26: `python3 docs/kb/tools/misura_livello_agentico.py` misura i dodici assi (cinque gradini ciascuno, ognuno con la sua fonte) e i sette criteri (verdi solo con misura e prova dal vivo in `docs/kb/livello-agentico-prove.json`), senza database; il minimo di ogni misura e livello sta in `docs/kb/livello-agentico-baseline.json` e sale solo con `--aggiorna-baseline`; instradato in `verify_gate.py` (`livello-agentico`) e in CI (`livello-agentico.yml`). Riproduce la valutazione: letture 388 su 416 (93,3%) contro 387 su 415 (93%) con la rotta aggiunta dopo, scritture di business 194 su 255 (76,1%) contro 28 su 341. Visto rosso: tolta una GET dal catalogo dell'agente, letture 387 e 93,0% sotto il minimo 388 e 93,3%, esito ROSSO; autoprova a sette casi verde. Convenzioni per chi costruisce le voci: segni `@scenario S-xx`, `@segnalatore Dn:<codice>`, `@applet Dn:<codice>` nel sorgente, batteria in `apps/agent-gateway/test/batteria/<Dn>.json` con `ESITO.json`, prova dal vivo di un criterio nel file delle prove. Livello medio misurato 2,1 su 5. L'uso in produzione (`--uso`) si legge sulla VM e non è provato qui |
-| M2 | Rito di cancello d'onda: si rimisura il livello con M1 e si scrive l'esito qui | questa tabella | Claude | a ogni fine onda | aperta |
+| M2 | Rito di cancello d'onda: si rimisura il livello con M1 e si scrive l'esito qui | questa tabella | Claude | a ogni fine onda | fatta per l'onda 0 (misura di partenza qui sotto); si ripete a ogni fine onda |
+
+#### Esiti dei cancelli d'onda (M2)
+
+Il rito: a fine onda si lancia `python3 docs/kb/tools/misura_livello_agentico.py` e si scrive qui la riga con la data e i numeri. L'onda si chiude con questa misura, non con una dichiarazione.
+
+| cancello | data | livello medio | letture | scritture | pagine idonee | segnalatori | applet | scenari calcolati | batteria |
+|---|---|---|---|---|---|---|---|---|---|
+| Onda 0 (misura di partenza) | 2026-11-27 | 2,1 su 5 | 390/418 = 93,3% | 197 nel catalogo | 112/146 | 0/22 | 0/20 | 0/28 | 0 domande |
 
 ### Onda 1: le fondamenta comuni (E8)
 

@@ -6,7 +6,7 @@
 
 import type { Pool, PoolClient } from "pg";
 import { cognomeNomeSql } from "../../lib/nome-persona-sql.js";
-import { soloPersone } from "../../lib/scope/persone.js";
+import { personaInForza, soloPersone } from "../../lib/scope/persone.js";
 import type {
   DashboardCounters,
   DashboardLearningDeadline,
@@ -51,7 +51,7 @@ export async function getDashboardCounters(
          JOIN sys.sys_users u ON u.user_id = a.user_position_assignment_user_id
         WHERE a.user_position_assignment_position_id = ANY($1::uuid[])
           AND a.user_position_assignment_status = 'ACTIVE'
-          AND ${soloPersone("u")}`,
+          AND ${personaInForza("u")}`,
       [scope.teamPositionIds],
     );
     userCount = Number(r1.rows[0]?.c ?? 0);
@@ -91,7 +91,7 @@ export async function getDashboardCounters(
       learning_gaps: string;
     }>(
       `SELECT
-         (SELECT count(*) FROM sys.sys_users u WHERE u.user_tenant_id = $1 AND ${soloPersone("u")})::text AS users,
+         (SELECT count(*) FROM sys.sys_users u WHERE u.user_tenant_id = $1 AND ${personaInForza("u")})::text AS users,
          (SELECT count(*) FROM sys.sys_positions WHERE position_tenant_id = $1 AND position_is_active = true)::text AS positions,
          (SELECT count(*) FROM sys.sys_organization_units WHERE organization_unit_tenant_id = $1)::text AS ous,
          (SELECT count(*) FROM sys.sys_learning_paths WHERE learning_path_tenant_id = $1)::text AS learning_paths,
@@ -114,7 +114,7 @@ export async function getDashboardCounters(
       learning_gaps: string;
     }>(
       `SELECT
-         (SELECT count(*) FROM sys.sys_users u WHERE ${soloPersone("u")})::text AS users,
+         (SELECT count(*) FROM sys.sys_users u WHERE ${personaInForza("u")})::text AS users,
          (SELECT count(*) FROM sys.sys_positions WHERE position_is_active = true)::text AS positions,
          (SELECT count(*) FROM sys.sys_organization_units)::text AS ous,
          (SELECT count(*) FROM sys.sys_learning_paths)::text AS learning_paths,

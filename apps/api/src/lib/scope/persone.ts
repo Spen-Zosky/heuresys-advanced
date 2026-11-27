@@ -11,3 +11,21 @@
 export function soloPersone(alias = "u"): string {
   return `${alias}.user_type IS DISTINCT FROM 'SERVICE'`;
 }
+
+/**
+ * Predicato SQL: l'alias è una persona IN FORZA oggi, cioè una persona (non un'utenza tecnica)
+ * che non è uscita dall'organizzazione. Un ex dipendente resta nel tenant con la sua storia, ma
+ * non si conta nell'organico di oggi né riceve punteggi su ciò che farà (F3c, 2026-11-26: prima
+ * di questo punto la piattaforma dava per scontato che nessuno uscisse mai). Uscito vuol dire
+ * utenza disattivata o rapporto di lavoro con la data di cessazione arrivata.
+ *
+ * Per la storia (eventi passati, assunzioni del mese, chi ha lasciato il perimetro) si usa
+ * `soloPersone`, che gli ex dipendenti li tiene.
+ */
+export function personaInForza(alias = "u"): string {
+  return `(${soloPersone(alias)}
+           AND ${alias}.user_status IS DISTINCT FROM 'DEACTIVATED'
+           AND NOT EXISTS (SELECT 1 FROM sys.sys_user_employment ue_inforza
+                            WHERE ue_inforza.user_employment_user_id = ${alias}.user_id
+                              AND ue_inforza.user_employment_termination_date <= current_date))`;
+}

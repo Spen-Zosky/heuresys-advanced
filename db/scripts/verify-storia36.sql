@@ -5128,6 +5128,99 @@ BEGIN
 END $fn$;
 
 -- ============================================================================
+-- C15 — LE USCITE (db/seeds/storia36/15_uscite.sql, voce F3c del piano AI-driven)
+-- ============================================================================
+-- C15a: ogni ex dipendente è uscito davvero e in un modo solo: utenza disattivata e
+-- senza accesso, rapporto e contratto cessati nello stesso giorno, una sola
+-- assegnazione PRIMARY chiusa quel giorno, nessuna assegnazione in corso.
+CREATE OR REPLACE FUNCTION staging.storia36_check_c15a()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_cnt  bigint;
+  v_smpl text;
+BEGIN
+  SELECT count(*), min(u.user_email) INTO v_cnt, v_smpl
+    FROM sys.sys_users u
+    LEFT JOIN sys.sys_user_employment e ON e.user_employment_user_id = u.user_id
+   WHERE u.user_metadata->>'storia36' = 'C15'
+     AND (u.user_status <> 'DEACTIVATED'
+          OR e.user_employment_id IS NULL
+          OR e.user_employment_status <> 'TERMINATED'
+          OR e.user_employment_termination_date IS NULL
+          OR e.user_employment_termination_reason IS NULL
+          OR EXISTS (SELECT 1 FROM sys.sys_auth_identities ai WHERE ai.auth_identity_user_id = u.user_id)
+          OR EXISTS (SELECT 1 FROM sys.sys_user_auth_roles ur WHERE ur.user_auth_role_user_id = u.user_id)
+          OR NOT EXISTS (SELECT 1 FROM sys.sys_user_contracts c
+                          WHERE c.user_contract_user_id = u.user_id AND c.user_contract_status = 'TERMINATED'
+                            AND c.user_contract_termination_date = e.user_employment_termination_date)
+          OR (SELECT count(*) FROM sys.sys_user_position_assignments a
+               WHERE a.user_position_assignment_user_id = u.user_id
+                 AND a.user_position_assignment_kind = 'PRIMARY'
+                 AND a.user_position_assignment_status = 'ENDED'
+                 AND a.user_position_assignment_end_date = e.user_employment_termination_date) <> 1
+          OR EXISTS (SELECT 1 FROM sys.sys_user_position_assignments a
+                      WHERE a.user_position_assignment_user_id = u.user_id
+                        AND a.user_position_assignment_status <> 'ENDED'));
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C15a: % ex dipendenti non usciti in modo coerente (es. %)', v_cnt, v_smpl;
+  END IF;
+END $fn$;
+
+-- C15b: le date tengono. Ingresso prima della finestra e dopo i 22 anni; uscita dopo la
+-- comunicazione e prima dell'arrivo di chi ha preso il posto; la comunicazione non dopo
+-- l'apertura della selezione che lo sostituisce; ogni posto lasciato ha la sua requisizione.
+CREATE OR REPLACE FUNCTION staging.storia36_check_c15b()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_cnt  bigint;
+  v_smpl text;
+BEGIN
+  SELECT count(*), min(u.user_email) INTO v_cnt, v_smpl
+    FROM sys.sys_users u
+    JOIN sys.sys_user_employment e ON e.user_employment_user_id = u.user_id
+    LEFT JOIN sys.sys_user_demographics d ON d.user_demographics_user_id = u.user_id
+    LEFT JOIN sys.sys_job_requisitions rq ON rq.requisition_metadata->>'posto_lasciato_da' = u.user_id::text
+   WHERE u.user_metadata->>'storia36' = 'C15'
+     AND (e.user_employment_hire_date >= DATE '2023-08-01'
+          OR d.user_demographics_birth_date IS NULL
+          OR e.user_employment_hire_date < d.user_demographics_birth_date + interval '22 years'
+          OR rq.requisition_id IS NULL
+          OR (e.user_employment_metadata->>'comunicazione_uscita')::date > rq.requisition_opened_on
+          OR (e.user_employment_metadata->>'comunicazione_uscita')::date >= e.user_employment_termination_date
+          OR NOT EXISTS (SELECT 1 FROM sys.sys_user_position_assignments a
+                          WHERE a.user_position_assignment_position_id = rq.requisition_position_id
+                            AND a.user_position_assignment_kind = 'PRIMARY'
+                            AND a.user_position_assignment_user_id <> u.user_id
+                            AND a.user_position_assignment_start_date > e.user_employment_termination_date));
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C15b: % uscite con date incoerenti o senza la selezione che le sostituisce (es. %)', v_cnt, v_smpl;
+  END IF;
+END $fn$;
+
+-- C15c: niente dopo l'uscita: nessuna presenza e nessuna busta paga con data successiva
+-- alla cessazione (i domini della voce X3 si aggiungono qui quando arrivano).
+CREATE OR REPLACE FUNCTION staging.storia36_check_c15c()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_cnt  bigint;
+  v_smpl text;
+BEGIN
+  SELECT count(*), min(u.user_email) INTO v_cnt, v_smpl
+    FROM sys.sys_users u
+    JOIN sys.sys_user_employment e ON e.user_employment_user_id = u.user_id
+   WHERE u.user_metadata->>'storia36' = 'C15'
+     AND (EXISTS (SELECT 1 FROM sys.sys_attendance at
+                   WHERE at.attendance_subject_user_id = u.user_id
+                     AND at.attendance_date > e.user_employment_termination_date)
+          OR EXISTS (SELECT 1 FROM sys.sys_user_pay_slips ps
+                      WHERE ps.user_pay_slip_user_id = u.user_id
+                        AND ps.user_pay_slip_period_start > e.user_employment_termination_date));
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C15c: % ex dipendenti con righe dopo l''uscita (es. %)', v_cnt, v_smpl;
+  END IF;
+END $fn$;
+
+-- ============================================================================
 -- SELFTEST (con -v selftest=1) — la falsificabilità: per ogni check nuovo si
 -- inietta una violazione in SUBTRANSAZIONE (rollback garantito dal pattern
 -- exception) e si pretende che il check scatti. Un check mai visto fallire non
@@ -7768,6 +7861,57 @@ BEGIN
     IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C13d(agenda) FALLITO: una candidatura in colloquio senza agenda è passata'; END IF;
     RAISE NOTICE '[OK] SELFTEST C13d(agenda) (colloqui in agenda annullati, rollback)';
 
+
+    -- ST-C15a: un ex dipendente a cui si riattiva l'utenza
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_users SET user_status = 'ACTIVE'
+       WHERE user_id = (SELECT user_id FROM sys.sys_users WHERE user_metadata->>'storia36' = 'C15' ORDER BY user_id LIMIT 1);
+      IF NOT FOUND THEN RAISE EXCEPTION 'ST_NO_BAIT'; END IF;
+      PERFORM staging.storia36_check_c15a();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE '%C15a:%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C15a FALLITO: un ex dipendente con l''utenza attiva è passato'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C15a (ex dipendente riattivato, rollback)';
+
+    -- ST-C15b: un'uscita spostata a dopo l'arrivo di chi ha preso il posto
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_user_employment SET user_employment_termination_date = user_employment_termination_date + 400
+       WHERE user_employment_user_id = (SELECT user_id FROM sys.sys_users WHERE user_metadata->>'storia36' = 'C15' ORDER BY user_id LIMIT 1);
+      IF NOT FOUND THEN RAISE EXCEPTION 'ST_NO_BAIT'; END IF;
+      PERFORM staging.storia36_check_c15b();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE '%C15b:%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C15b FALLITO: un''uscita dopo l''arrivo del sostituto è passata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C15b (uscita dopo l''arrivo del sostituto, rollback)';
+
+    -- ST-C15c: una presenza il giorno dopo l'uscita
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_attendance SET attendance_subject_user_id = (
+               SELECT user_id FROM sys.sys_users WHERE user_metadata->>'storia36' = 'C15' ORDER BY user_id LIMIT 1),
+             attendance_date = current_date
+       WHERE attendance_id = (SELECT attendance_id FROM sys.sys_attendance ORDER BY attendance_id LIMIT 1);
+      IF NOT FOUND THEN RAISE EXCEPTION 'ST_NO_BAIT'; END IF;
+      PERFORM staging.storia36_check_c15c();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE '%C15c:%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C15c FALLITO: una presenza dopo l''uscita è passata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C15c (presenza dopo l''uscita, rollback)';
+
   END;
 END $$;
 \endif
@@ -8365,6 +8509,30 @@ BEGIN
   EXCEPTION WHEN OTHERS THEN
     GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
     v_failed := array_append(v_failed, 'C13d'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c15a();
+    RAISE NOTICE '[OK] C15a ogni ex dipendente è uscito in modo coerente, senza accesso';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C15a'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c15b();
+    RAISE NOTICE '[OK] C15b le date delle uscite tengono e ogni posto lasciato ha la sua selezione';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C15b'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c15c();
+    RAISE NOTICE '[OK] C15c nessuna riga degli ex dipendenti dopo l''uscita';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C15c'); RAISE WARNING '[ROSSO] %', v_msg;
   END;
 
   IF array_length(v_failed, 1) > 0 THEN

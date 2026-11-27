@@ -121,7 +121,7 @@ function messaggioSegnalazione(subject: string, body: string): MessaggioAvviso |
   if (subject === OGGETTO_SCOPERTA) {
     const m = CORPO_SCOPERTA.exec(body);
     return m
-      ? { code: "AGENT_SIGNAL_POSIZIONE_SCOPERTA", params: { position: m[1]!, unit: m[2]!, days: Number(m[3]) } }
+      ? { code: "AGENT_SIGNAL_POSIZIONE_SCOPERTA", params: { position: m[1]!, unit: m[2]!, count: Number(m[3]) } }
       : null;
   }
   return null;

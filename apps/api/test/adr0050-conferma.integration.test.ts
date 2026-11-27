@@ -234,6 +234,78 @@ describe("ADR-0050 D5 — conferma recente del secondo fattore per le letture pe
     expect(rinnovato["fam"]).toBe(claims(fresca)["fam"]);
   });
 
+  describe("l'assistente legge con la conferma della persona (gettone d'agente)", () => {
+    /** Il gettone d'agente nella sessione della persona: i suoi cookie, l'accesso sostituito, niente rinnovo. */
+    async function dellAgente(persona: Auth): Promise<Auth> {
+      const r = await suite.app.inject({
+        method: "POST", url: "/v1/auth/agent-tokens", headers: headers(persona),
+        payload: { agentCode: "assistente-hr", task: "prova D5: leggere la retribuzione variabile" },
+      });
+      expect(r.statusCode, r.body).toBe(201);
+      const cookies = new Map(persona.cookies);
+      cookies.set(COOKIES.ACCESS, (r.json() as { token: string }).token);
+      cookies.delete(COOKIES.REFRESH);
+      return { cookies, csrfToken: persona.csrfToken };
+    }
+    /** Sposta indietro l'ora della conferma sulla sessione (la famiglia di rinnovo). */
+    async function confermaDiSessioneFa(a: Auth, minuti: number): Promise<void> {
+      await pool.query(
+        `UPDATE sys.sys_auth_refresh_tokens
+            SET auth_refresh_token_step_up_at = now() - make_interval(mins => $2::int)
+          WHERE auth_refresh_token_family_id = $1`,
+        [claims(a)["fam"], minuti],
+      );
+    }
+
+    it("sessione appena confermata: l'agente legge per mandato come la persona", async () => {
+      const persona = await login(GOVERNO);
+      const agente = await dellAgente(persona);
+      const r = await variablePay(agente);
+      expect(r.statusCode, r.body).toBe(200);
+    });
+
+    it("conferma della sessione scaduta: l'agente riceve STEP_UP_REQUIRED come la persona, e non può confermare", async () => {
+      const persona = await login(GOVERNO);
+      const agente = await dellAgente(persona);
+      await confermaDiSessioneFa(persona, STEP_UP_WINDOW_MINUTES + 5);
+      const r = await variablePay(agente);
+      expect(r.statusCode, r.body).toBe(403);
+      expect((r.json() as ErrBody).error.code).toBe(STEP_UP_REQUIRED_CODE);
+      // A-3: la conferma è della persona, l'agente non la chiede
+      const begin = await suite.app.inject({ method: "POST", url: "/v1/auth/mfa/step-up/begin", headers: headers(agente), payload: {} });
+      expect(begin.statusCode, begin.body).toBe(403);
+      expect((begin.json() as ErrBody).error.code).toBe("AGENT_FORBIDDEN_AUTH");
+    });
+
+    it("quando la persona conferma dalla pagina, lo stesso gettone dell'agente ripassa subito", async () => {
+      const persona = await login(GOVERNO);
+      const agente = await dellAgente(persona);
+      await confermaDiSessioneFa(persona, STEP_UP_WINDOW_MINUTES + 5);
+      expect((await variablePay(agente)).statusCode).toBe(403);
+      const begin = await suite.app.inject({ method: "POST", url: "/v1/auth/mfa/step-up/begin", headers: headers(persona), payload: {} });
+      expect(begin.statusCode, begin.body).toBe(200);
+      const { challengeToken } = begin.json() as { challengeToken: string };
+      const verify = await suite.app.inject({
+        method: "POST", url: "/v1/auth/mfa/step-up/verify", headers: headers(persona),
+        payload: { challengeToken, code: totpFor(GOVERNO) },
+      });
+      expect(verify.statusCode, verify.body).toBe(200);
+      const r = await variablePay(agente);
+      expect(r.statusCode, r.body).toBe(200);
+    });
+
+    it("un claim `sua` nel gettone d'agente non conta: vale solo la conferma della sessione", async () => {
+      const persona = await login(GOVERNO);
+      const agente = await dellAgente(persona);
+      await confermaDiSessioneFa(persona, STEP_UP_WINDOW_MINUTES + 5);
+      const { iat: _i, exp: _e, ...resto } = claims(agente);
+      const forgiato = await suite.app.jwt.sign({ ...resto, sua: Math.floor(Date.now() / 1000) } as never);
+      const r = await variablePay(conCookie(agente, COOKIES.ACCESS, forgiato));
+      expect(r.statusCode, r.body).toBe(403);
+      expect((r.json() as ErrBody).error.code).toBe(STEP_UP_REQUIRED_CODE);
+    });
+  });
+
   it("la catena non chiede la conferma (I18), un estraneo sì", async () => {
     const capo = await unCapoConSottoposti(pool);
     const sotto = await unSottopostoOrganizzativo(pool, capo.userId);

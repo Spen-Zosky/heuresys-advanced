@@ -85,6 +85,12 @@ describe("batteria: il confronto", () => {
     expect(attesoDaRighe("ordine", righe.map((r) => ({ ...r, valore: 1 })))).toBeNull();
   });
 
+  it("dentro NULL (un confronto su un dato che manca) vale fuori, non dentro", () => {
+    const a = attesoDaRighe("insieme", [{ nome: "Rossi, Alice", dentro: true }, { nome: "Gallo, Pietro", dentro: null }])!;
+    expect(a.voci!.map((v) => v.nome)).toEqual(["Rossi, Alice"]);
+    expect(a.vietate!.map((v) => v.nome)).toEqual(["Gallo, Pietro"]);
+  });
+
   it("coppie ed etichette", () => {
     const c = attesoDaRighe("coppie", [{ nome: "Rossi, Alice", etichetta: "READY_NOW" }, { nome: "Gallo, Pietro", etichetta: "READY_1_YEAR" }], "prontezza")!;
     expect(confronta(c, "| Rossi, Alice | Pronto subito |\n| Gallo, Pietro | Entro 1 anno |").giusta).toBe(true);

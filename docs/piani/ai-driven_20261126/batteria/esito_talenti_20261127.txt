@@ -1,0 +1,45 @@
+Batteria D1 (talenti), seconda corsa completa del 2026-11-27, 13:53-14:22 UTC
+Dove: mod-hpz420workstation (Z420, Debian), copia di programma al commit di produzione 97bbf44b e database temporaneo ripristinato dal backup verificato heuresys_advanced_20261127T013156Z.dump. Il gemello era spento.
+Comando: BATTERIA_SU_COPIA=1 HEURESYS_API=http://127.0.0.1:18013 bash apps/agent-gateway/scripts/batteria-corsa.sh <cartella> --insieme 4
+
+Andamento: 258 domande al primo giro; 31 fermate dal limite di accessi dell'API (HTTP 429 sul login di due profili), poste dopo la scadenza della finestra, a codice invariato. Poi una risposta attesa errata corretta (D1-talento-005: due candidati senza valutazione contati come «Star», perché il generatore leggeva NULL come dentro) e riposta quella sola domanda.
+
+PER CATEGORIA
+  carriere-per-unita         7/7   100%
+  confronto-unita            6/6   100%
+  fuori-perimetro           10/10  100%
+  mentoring                 11/11  100%
+  non-autorizzato           25/25  100%
+  perche                     5/5   100%
+  percorsi                  19/19  100%
+  perimetro-carriere         5/5   100%
+  perimetro-critiche         5/5   100%
+  perimetro-rischio         10/10  100%
+  perimetro-successori       9/9   100%
+  perimetro-talenti         10/10  100%
+  piani-carriera             4/4   100%
+  posizioni-critiche        16/17  94%
+  posizioni-obiettivo        3/4   75%
+  prontezza                 42/45  93%
+  rischio-uscita            25/28  89%
+  successori                44/46  96%
+  talenti                   15/16  94%
+  talenti-per-unita          6/7   86%
+PER PROFILO
+  capo-crediti               9/9   100%
+  capo-finanza              10/10  100%
+  capo-it                   10/10  100%
+  capo-operations           10/10  100%
+  capo-retail               10/10  100%
+  dipendente                18/18  100%
+  hr                       197/209 94%
+  responsabile-rischi       13/13  100%
+TOTALE 277/289 (95.8%), guasti 0
+(2026-11-27T14:21:16.122Z, soglia 90%)
+
+Controllo a mano delle 12 sbagliate (il punteggio sopra resta quello del confronto automatico):
+- 10 con il contenuto richiesto corretto e in più, come contesto, nomi che il confronto vieta: D1-critiche-005, D1-rimpiazzo-014, -019, -024, -066, -067, D1-rischio-004, -006, -008, D1-talento-005.
+- 1 domanda ambigua: D1-talento-022 (contate 20 persone nelle unità attive, dicendo che con le due aree disattivate sono 22, che è l'attesa).
+- 1 errore vero: D1-carriere-005 (ha letto il campo vuoto nei piani di carriera invece delle posizioni obiettivo e ha risposto 0; l'attesa è 255).
+Campione di 30 (CAMPIONE_30_talenti_20261127.md): 30 giuste per il confronto; ricontrollate a mano le voci 4, 8, 10, 12, 13, 17, 23, 25, 26, 27, 30 sulla parte iniziale della risposta, concordi.
+Attese cambiate rispetto al 26/11 per i dati ricalcolati o per la correzione: D1-rischio-004, -005, -006, D1-talento-005, D1-carriere-009, D1-negate-008.

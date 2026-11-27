@@ -12,9 +12,10 @@
 import dynamic from "next/dynamic";
 import { isValidElement, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Copy, Check, Expand } from "lucide-react";
+import { Copy, Check, Expand, Database, FileText, Scale } from "lucide-react";
 import { MarkdownView } from "@heuresys/ui";
 import type { ContenutoIspezionabile } from "./ispettore-assistente";
+import { leggiFonti, type Fonte } from "@/lib/agente/fonti";
 
 const MermaidDiagram = dynamic(() => import("@heuresys/ui/markdown").then((m) => ({ default: m.MermaidDiagram })), {
   ssr: false,
@@ -80,6 +81,34 @@ function TabellaRisposta({ onApri, ...props }: { onApri: Apri } & React.TableHTM
   );
 }
 
+const ICONE_FONTE = { dato: Database, pagina: FileText, regola: Scale } as const;
+
+function FontiRisposta({ fonti, onApri }: { fonti: Fonte[]; onApri: Apri }) {
+  const { t } = useTranslation("common");
+  return (
+    <div className="not-prose my-3 flex flex-wrap items-center gap-1.5" data-testid="agente-risposta-fonti">
+      <span className="text-xs font-semibold text-muted-foreground">{t("agente.fonti")}</span>
+      {fonti.map((f, i) => {
+        const Icona = ICONE_FONTE[f.tipo];
+        return (
+          <button
+            key={i}
+            type="button"
+            onClick={() => onApri({ tipo: "fonte", fonte: f })}
+            data-testid="agente-fonte"
+            data-tipo={f.tipo}
+            title={t(f.tipo === "dato" ? "agente.fonteDato" : f.tipo === "regola" ? "agente.fonteRegola" : "agente.fontePagina")}
+            className="inline-flex max-w-full items-center gap-1 rounded-2xl border border-border px-2.5 py-1 text-xs hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <Icona className="h-3.5 w-3.5 shrink-0" aria-hidden />
+            <span className="break-words text-left">{f.titolo}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 /** Il testo e la lingua di un blocco di codice dal suo figlio `<code class="language-x">`. */
 function codiceDi(children: ReactNode): { testo: string; lingua: string | null } {
   const figlio = Array.isArray(children) ? children[0] : children;
@@ -94,6 +123,12 @@ function BloccoRisposta({ onApri, children }: { onApri: Apri; children: ReactNod
   const { t } = useTranslation("common");
   const [copiato, setCopiato] = useState(false);
   const { testo, lingua } = codiceDi(children);
+
+  if (lingua === "fonti") {
+    // Un blocco che non si legge non si mostra: sarebbe il JSON grezzo in mezzo alla risposta.
+    const fonti = leggiFonti(testo);
+    return fonti && fonti.length > 0 ? <FontiRisposta fonti={fonti} onApri={onApri} /> : null;
+  }
 
   if (lingua === "mermaid") {
     return (

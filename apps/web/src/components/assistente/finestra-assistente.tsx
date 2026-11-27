@@ -347,6 +347,7 @@ function FinestraAssistente({ pathname, idonea }: { pathname: string; idonea: bo
                       onDecidi={(d, motivo) => void agent.resolveApproval(d, motivo)}
                     />
                   )}
+                  {agent.confermaRichiesta && !agent.running && <ConfermaSecondoFattore onConferma={agent.confermaSecondoFattore} />}
                   {agent.notice && testoAvviso && (
                     <p
                       role={agent.notice.kind === "err" ? "alert" : "status"}
@@ -449,6 +450,33 @@ function Bolla({ m, onApri }: { m: Messaggio; onApri: (c: ContenutoIspezionabile
       <AgentSymbol className="mt-1 h-5 w-5 shrink-0 text-primary" />
       <div className="min-w-0 flex-1 text-sm">
         <RispostaAssistente testo={m.testo} onApri={onApri} />
+      </div>
+    </div>
+  );
+}
+
+/** ADR-0050 D5: la conferma del secondo fattore dentro la finestra. La dà la persona, con il suo codice. */
+function ConfermaSecondoFattore({ onConferma }: { onConferma: () => Promise<boolean> }) {
+  const { t } = useTranslation("common");
+  const [occupata, setOccupata] = useState(false);
+  return (
+    <div data-testid="agente-conferma-secondo-fattore" className="flex gap-3 rounded-lg border border-primary/40 bg-primary/5 px-4 py-3 text-sm">
+      <Lock className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
+      <div className="min-w-0 flex-1">
+        <p className="font-semibold">{t("agente.confermaTitolo")}</p>
+        <p className="mt-1 text-muted-foreground">{t("agente.confermaTesto")}</p>
+        <Button
+          size="sm"
+          className="mt-2"
+          disabled={occupata}
+          onClick={() => {
+            setOccupata(true);
+            void onConferma().finally(() => setOccupata(false));
+          }}
+          data-testid="agente-conferma-pulsante"
+        >
+          {t("agente.confermaPulsante")}
+        </Button>
       </div>
     </div>
   );

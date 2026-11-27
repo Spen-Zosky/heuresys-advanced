@@ -35,8 +35,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { createHmac } from "node:crypto";
 import { join } from "node:path";
-import { FIXTURE_TOTP_SECRETS } from "../../api/test/helpers/mfa-fixture-secrets.js";
-import { passwordFor } from "../../api/test/helpers/personas.js";
+import { passwordDiProva, segretoTotp } from "./live-accesso.js";
 import { AtlasOperationResolver } from "../src/atlas-resolver.js";
 import {
   FileAuditSink,
@@ -84,7 +83,7 @@ function totp(segretoBase32: string): string {
 }
 
 async function accedi(): Promise<{ access: string; csrf: string }> {
-  const password = passwordFor(EMAIL);
+  const password = passwordDiProva(EMAIL);
   const biscotti = (r: Response): Record<string, string> => {
     const out: Record<string, string> = {};
     for (const c of r.headers.getSetCookie?.() ?? []) {
@@ -100,7 +99,7 @@ async function accedi(): Promise<{ access: string; csrf: string }> {
   const j1 = (await r1.json()) as { status: string; challengeToken?: string };
   let cookies = biscotti(r1);
   if (j1.status !== "success") {
-    const segreto = FIXTURE_TOTP_SECRETS[EMAIL];
+    const segreto = await segretoTotp(EMAIL);
     if (j1.status !== "mfa_required" || !j1.challengeToken || !segreto) {
       throw new Error(`login inatteso: ${JSON.stringify(j1)}`);
     }

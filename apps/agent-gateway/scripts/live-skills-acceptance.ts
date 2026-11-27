@@ -22,19 +22,18 @@
  * "BLOCKED: agent credential required" message — it MUST NOT fake-pass.
  *
  * Run (from repo root) — DO NOT run live until a credential is provisioned (Enzo):
- *   ACC_EMAIL=enzo.spenuso@heuresys.com ACC_PASSWORD='<password>' \
+ *   ACC_EMAIL=valentina.conti@rtl-bank.org \
  *   pnpm --filter @heuresys/agent-gateway exec tsx scripts/live-skills-acceptance.ts
  *
  * TOTP is computed inline (RFC 6238, node:crypto) — no extra dep. Fixture secrets
  * are repo test fixtures (no real production secret; R10/R11 unaffected).
  */
 import { createHmac } from "node:crypto";
-import { FIXTURE_TOTP_SECRETS } from "../../api/test/helpers/mfa-fixture-secrets.js";
+import { passwordDiProva, segretoTotp } from "./live-accesso.js";
 
 const API = (process.env.HEURESYS_API ?? "http://localhost:3001").replace(/\/$/, "");
 const GATEWAY = (process.env.AGENT_GATEWAY ?? "http://localhost:8790").replace(/\/$/, "");
-const EMAIL = process.env.ACC_EMAIL ?? "enzo.spenuso@heuresys.com";
-const PASSWORD = process.env.ACC_PASSWORD ?? process.env.TEST_ADMIN_PASSWORD ?? "";
+const EMAIL = process.env.ACC_EMAIL ?? "valentina.conti@rtl-bank.org";
 
 /** The 3 pinned skills + a prompt designed to route the model into each skill. */
 interface SkillCase {
@@ -113,7 +112,7 @@ async function login(): Promise<string> {
   const r1 = await fetch(`${API}/v1/auth/login`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ email: EMAIL, password: PASSWORD }),
+    body: JSON.stringify({ email: EMAIL, password: passwordDiProva(EMAIL) }),
   });
   const j1 = (await r1.json()) as { status: string; challengeToken?: string };
   console.log(`[login] step1 → ${r1.status} status=${j1.status}`);
@@ -121,12 +120,12 @@ async function login(): Promise<string> {
   if (j1.status !== "mfa_required" || !j1.challengeToken) {
     throw new Error(`unexpected login state: ${JSON.stringify(j1)}`);
   }
-  const secret = FIXTURE_TOTP_SECRETS[EMAIL];
+  const secret = await segretoTotp(EMAIL);
   if (!secret) throw new Error(`no fixture TOTP secret for ${EMAIL}`);
   const r2 = await fetch(`${API}/v1/auth/login`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ email: EMAIL, password: PASSWORD, challengeToken: j1.challengeToken, mfaCode: totp(secret) }),
+    body: JSON.stringify({ email: EMAIL, password: passwordDiProva(EMAIL), challengeToken: j1.challengeToken, mfaCode: totp(secret) }),
   });
   const j2 = (await r2.json()) as { status: string };
   console.log(`[login] step2 (TOTP) → ${r2.status} status=${j2.status}`);

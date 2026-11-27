@@ -120,6 +120,7 @@ SELECT con.conname   AS constraint_name,
    AND n.nspname = 'sys'
    AND con.confdeltype = 'c'
    AND con.conname NOT IN (
+    'sys_agent_signals_recipient_fk',  -- EMENDATO per la mig 000522 (ADR-0063 E6): la segnalazione è indirizzata alla persona e si cancella con lei
     'sys_agent_conversations_user_fk',  -- EMENDATO per la mig 000483 (ADR-0056 D4): la conversazione con l'assistente è possesso della persona
     'sys_assessments_assessment_subject_user_id_fkey',
     'sys_auth_identities_auth_identity_user_id_fkey',

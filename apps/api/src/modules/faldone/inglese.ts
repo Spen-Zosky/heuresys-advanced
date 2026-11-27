@@ -215,6 +215,7 @@ export const TITOLI_EN: Readonly<Record<string, string>> = {
   "Costo e durata delle chiamate dell'agente": "Agent call cost and duration",
   "Scenari what-if": "What-if scenarios",
   "Versioni degli scenari": "Scenario versions",
+  "Segnalazioni ricevute dagli agenti": "Signals received from agents",
   // Modelli e configurazione
   "Attivazioni dei modelli": "Blueprint activations",
   "Personalizzazioni dei modelli": "Blueprint overrides",

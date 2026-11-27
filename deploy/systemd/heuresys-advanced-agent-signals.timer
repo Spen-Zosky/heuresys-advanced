@@ -1,0 +1,18 @@
+# Static unit (no placeholders) — installed verbatim by scripts/vm-bootstrap.sh.
+#
+# ADR-0063 (piano AI-driven F4a, decisione E6): every morning the signalers look at every
+# tenant and put what a person must know in their in-app inbox, before the working day.
+# After the insights recompute and the daily digest of the night.
+[Unit]
+Description=Heuresys Advanced — agent signalers (F4a)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+
+[Timer]
+OnCalendar=*-*-* 06:45:00 Europe/Rome
+RandomizedDelaySec=300
+# Run a missed occurrence after downtime; the CLI does not duplicate a signal.
+Persistent=true
+Unit=heuresys-advanced-agent-signals.service
+
+[Install]
+WantedBy=timers.target

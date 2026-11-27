@@ -162,7 +162,7 @@ NEXT_PUBLIC_API_BASE_URL="http://$PUBLIC_HOST:$API_PORT/v1" \
 #    (the timers fire them).
 log "systemd: render templates + install + restart"
 tmp="$(mktemp -d)"
-for svc in api web scraping insights backup reindex notifications-digest auth-housekeeping dr-drill approvals-sla agent-weekly-summary; do
+for svc in api web scraping insights backup reindex notifications-digest auth-housekeeping dr-drill approvals-sla agent-weekly-summary agent-signals; do
   sed -e "s#@@REPO_DIR@@#$REPO_DIR#g" \
       -e "s#@@NODE_BIN@@#$NODE_BIN#g" \
       -e "s#@@PUBLIC_HOST@@#$PUBLIC_HOST#g" \
@@ -192,6 +192,8 @@ sudo install -m 644 -o root -g root "$REPO_DIR/deploy/systemd/heuresys-advanced-
     "/etc/systemd/system/heuresys-advanced-approvals-sla.timer"
 sudo install -m 644 -o root -g root "$REPO_DIR/deploy/systemd/heuresys-advanced-agent-weekly-summary.timer" \
     "/etc/systemd/system/heuresys-advanced-agent-weekly-summary.timer"
+sudo install -m 644 -o root -g root "$REPO_DIR/deploy/systemd/heuresys-advanced-agent-signals.timer" \
+    "/etc/systemd/system/heuresys-advanced-agent-signals.timer"
 rm -rf "$tmp"
 sudo systemctl daemon-reload
 sudo systemctl enable heuresys-advanced-api.service heuresys-advanced-web.service >/dev/null
@@ -212,6 +214,8 @@ sudo systemctl enable --now heuresys-advanced-dr-drill.timer >/dev/null
 sudo systemctl enable --now heuresys-advanced-approvals-sla.timer >/dev/null
 # weekly assistant summary (ADR-0063 D3, F0c) — enable + start the TIMER (in-app one-shot, no email).
 sudo systemctl enable --now heuresys-advanced-agent-weekly-summary.timer >/dev/null
+# daily agent signalers (ADR-0063 E6, F4a) — enable + start the TIMER (in-app one-shot, no email).
+sudo systemctl enable --now heuresys-advanced-agent-signals.timer >/dev/null
 sudo systemctl restart heuresys-advanced-api.service
 sleep 5
 sudo systemctl restart heuresys-advanced-web.service

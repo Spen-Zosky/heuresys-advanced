@@ -24,7 +24,17 @@ interface MeNotification {
   type: string;
   subject: string;
   body: string | null;
-  message?: { code: "APPROVAL_REMINDER" | "APPROVAL_OVERDUE" | "GAP_CLOSURE_DUE" | "AGENT_WEEKLY_SUMMARY"; params: Record<string, string | number> } | null;
+  message?: {
+    code:
+      | "APPROVAL_REMINDER"
+      | "APPROVAL_OVERDUE"
+      | "GAP_CLOSURE_DUE"
+      | "AGENT_WEEKLY_SUMMARY"
+      | "AGENT_SIGNAL_POSIZIONE_CRITICA_SENZA_SUCCESSORE"
+      | "AGENT_SIGNAL_AMPIEZZA_DI_CONTROLLO"
+      | "AGENT_SIGNAL_POSIZIONE_SCOPERTA";
+    params: Record<string, string | number>;
+  } | null;
   status: string;
   priority: string;
   createdAt: string;

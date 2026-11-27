@@ -31,6 +31,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { AgentConversationSummary } from "@heuresys/shared/schemas/agent-conversations";
 import { csrfStore } from "./api/csrf-store";
+import { chiediConferma } from "./api/step-up";
 import { MAX_RIGA, domandaDaPrompt, righeDaMessaggio } from "./agente/risposta";
 import {
   elencoConversazioni,
@@ -96,6 +97,10 @@ export interface AgentNotice {
     // una conversazione con un giro aperto non si riprende due volte; una che non c'è non si apre.
     | "reasonRequired"
     | "approvalNotRecorded"
+    // La proposta è scaduta mentre la finestra era aperta: la scheda sparisce e la persona lo sa.
+    | "approvalExpired"
+    // ADR-0050 D5: la persona ha confermato il secondo fattore dentro la finestra.
+    | "stepUpConfirmed"
     | "conversationBusy"
     | "conversationNotFound";
   params?: Record<string, string>;
@@ -200,6 +205,10 @@ export interface UseAgentStream {
   running: boolean;
   lines: StreamLine[];
   approval: PendingApproval | null;
+  /** ADR-0050 D5: il giro ha trovato dati che chiedono il secondo fattore: la finestra offre il codice. */
+  confermaRichiesta: boolean;
+  /** Chiede il codice alla persona; se lo dà, la scheda sparisce e un avviso dice di ripetere la domanda. */
+  confermaSecondoFattore: () => Promise<boolean>;
   notice: AgentNotice | null;
   /**
    * Apre lo stream per questo prompt. Non fa nulla se una corsa è già in volo o il prompt è vuoto.
@@ -286,6 +295,7 @@ export function useAgentStream(opzioni: OpzioniAgentStream = {}): UseAgentStream
   const [running, setRunning] = useState(false);
   const [lines, setLines] = useState<StreamLine[]>([]);
   const [approval, setApproval] = useState<PendingApproval | null>(null);
+  const [confermaRichiesta, setConfermaRichiesta] = useState(false);
   const [notice, setNotice] = useState<AgentNotice | null>(null);
 
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -308,6 +318,10 @@ export function useAgentStream(opzioni: OpzioniAgentStream = {}): UseAgentStream
       if (kind === "approval_required") {
         const richiesta = parseApprovalPayload(data);
         if (richiesta) setApproval(richiesta);
+      }
+      if (kind === "conferma_richiesta") {
+        setConfermaRichiesta(true);
+        return;
       }
       if (kind === "conversation") {
         const c = parseConversationPayload(data);
@@ -400,12 +414,41 @@ export function useAgentStream(opzioni: OpzioniAgentStream = {}): UseAgentStream
     [approval],
   );
 
+  // Una proposta scaduta non si decide più: il gateway la rifiuterebbe (409). La scheda sparisce
+  // all'ora di scadenza, invece di restare a video con due pulsanti che non fanno più niente.
+  const scadenza = approval?.expiresAt;
+  useEffect(() => {
+    if (!scadenza) return;
+    const apprId = approval?.approvalId;
+    const chiudi = () => {
+      setApproval((a) => (a && a.approvalId === apprId ? null : a));
+      setNotice({ kind: "err", code: "approvalExpired" });
+    };
+    const resta = Date.parse(scadenza) - Date.now();
+    if (resta <= 0) {
+      chiudi();
+      return;
+    }
+    const timer = setTimeout(chiudi, Math.min(resta, 2_147_000_000));
+    return () => clearTimeout(timer);
+  }, [scadenza, approval?.approvalId]);
+
+  const confermaSecondoFattore = useCallback(async () => {
+    const ok = await chiediConferma();
+    if (ok) {
+      setConfermaRichiesta(false);
+      setNotice({ kind: "ok", code: "stepUpConfirmed" });
+    }
+    return ok;
+  }, []);
+
   const run = useCallback(
     async (prompt: string, pagina?: PaginaPerAgente) => {
       if (running || !prompt.trim()) return;
       setRunning(true);
       setNotice(null);
       setApproval(null);
+      setConfermaRichiesta(false);
       // La conversazione resta a video: la domanda si aggiunge sotto le precedenti.
       pushLine("prompt", domandaDaPrompt(prompt).slice(0, MAX_RIGA));
 
@@ -489,6 +532,7 @@ export function useAgentStream(opzioni: OpzioniAgentStream = {}): UseAgentStream
       if (running) return;
       setNotice(null);
       setApproval(null);
+      setConfermaRichiesta(false);
       try {
         const c = await leggiConversazione(id);
         setConversationId(c.id);
@@ -533,6 +577,7 @@ export function useAgentStream(opzioni: OpzioniAgentStream = {}): UseAgentStream
     if (running) return;
     setConversationId(null);
     setApproval(null);
+    setConfermaRichiesta(false);
     setLines([]);
     lineIdRef.current = 0;
   }, [running]);
@@ -541,6 +586,8 @@ export function useAgentStream(opzioni: OpzioniAgentStream = {}): UseAgentStream
     running,
     lines,
     approval,
+    confermaRichiesta,
+    confermaSecondoFattore,
     notice,
     run,
     stop,

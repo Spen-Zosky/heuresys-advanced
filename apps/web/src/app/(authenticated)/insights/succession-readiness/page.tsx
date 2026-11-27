@@ -17,6 +17,7 @@ import { MaskedCell, isMasked } from "@/components/masked-cell";
 import { useFormat } from "@/lib/format";
 import { LavoroInCorso } from "@/components/lavoro-in-corso";
 import { NomePersona } from "@/components/nome-persona";
+import { DichiarazioneEquita } from "@/components/dichiarazione-equita";
 
 // Higher readiness = better: READY_NOW → success, NOT_READY → destructive.
 // Only confirmed @heuresys/ui Badge variants + registered text tokens.
@@ -117,6 +118,13 @@ export default function SuccessionReadinessPage() {
         emptyDescription={t("insightsReadiness.emptyDescription")}
         caption={t("insightsReadiness.caption")}
       />
+
+      {/* E12 (F6b): ogni proposta sulle persone dichiara il suo controllo di equità. */}
+      {data.data?.equita && (
+        <div className="mx-auto max-w-7xl px-6">
+          <DichiarazioneEquita equita={data.data.equita} />
+        </div>
+      )}
 
       <LavoroInCorso attivo={recompute.isPending} titolo={t("insightsReadiness.recomputing")} dettaglio={t("common:attesa.siSbloccaAllaFine")} />
 

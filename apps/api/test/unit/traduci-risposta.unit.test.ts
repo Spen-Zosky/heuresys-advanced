@@ -4,7 +4,8 @@
  */
 import { describe, it, expect } from "vitest";
 import { traduciValore, rovescia, riceveRitorno } from "../../src/lib/i18n/traduci-risposta.js";
-import { separaModifiche, idDellaRisorsa } from "../../src/lib/i18n/traduzione-della-riga.js";
+import { z } from "zod";
+import { separaModifiche, idDellaRisorsa, tabellaDellaRotta, campiAccettati } from "../../src/lib/i18n/traduzione-della-riga.js";
 
 const g = new Map([
   ["Gestione del rischio", "Risk management"],
@@ -109,5 +110,22 @@ describe("modifiche fatte in inglese (3b)", () => {
     expect(idDellaRisorsa("/v1/skills/:id", { id })).toBe(id);
     expect(idDellaRisorsa("/v1/positions/:positionId/skills", { positionId: id })).toBeNull();
     expect(idDellaRisorsa("/v1/skills/:id", { id: "abc" })).toBeNull();
+  });
+});
+
+describe("legame della modifica con la richiesta (3b)", () => {
+  it("la tabella è quella della rotta, e solo quella", () => {
+    expect(tabellaDellaRotta("/v1/skills/:id")).toBe("sys_skills");
+    expect(tabellaDellaRotta("/v1/organization-units/:id")).toBe("sys_organization_units");
+    expect(tabellaDellaRotta("/v1/positions/:positionId/skills")).toBeNull();
+    expect(tabellaDellaRotta("/v1/skills")).toBeNull();
+    expect(tabellaDellaRotta(undefined)).toBeNull();
+  });
+
+  it("i campi sono quelli che lo schema del corpo accetta; uno schema illeggibile non ne accetta", () => {
+    expect([...campiAccettati(z.object({ name: z.string(), note: z.string() }).partial())]).toEqual(["name", "note"]);
+    expect(campiAccettati(z.object({ name: z.string() }).transform((x) => x)).size).toBe(0);
+    expect(campiAccettati(undefined).size).toBe(0);
+    expect(campiAccettati({ shape: null }).size).toBe(0);
   });
 });

@@ -147,6 +147,24 @@ describe("2026-11-18 — ciò che la persona non vede: {omissis} e letture negat
     expect(esiti.rifiuto("en")).toBe(MESSAGGIO_CONFERMA_RICHIESTA_EN);
     await c.call("GET", "/positions");
     expect(esiti.rifiuto()).toBeNull();
+    // Difetto del 2026-11-27: con una lettura riuscita nello stesso giro il messaggio sparisce.
+    // Ora il gateway aggiunge sotto il testo del modello la frase sulla conferma, e la finestra
+    // riceve comunque l'invito a dare il codice.
+    expect(esiti.serveConferma()).toBe(true);
+    expect(esiti.notaConferma()).toMatch(/Una parte di questi dati è rimasta fuori/);
+    expect(esiti.notaConferma("en")).toMatch(/Part of these data was left out/);
+  });
+
+  it("senza letture che chiedono la conferma non c'è né nota né invito; senza letture riuscite c'è solo il rifiuto", () => {
+    const e = new EsitiLetture();
+    e.riuscita();
+    expect(e.serveConferma()).toBe(false);
+    expect(e.notaConferma()).toBeNull();
+    const f = new EsitiLetture();
+    f.daConfermareSecondoFattore();
+    expect(f.notaConferma()).toBeNull();
+    expect(f.rifiuto()).toBe(MESSAGGIO_CONFERMA_RICHIESTA);
+    expect(MESSAGGIO_CONFERMA_RICHIESTA).not.toMatch(/dalla pagina/);
   });
 
   it("i campi tolti dall'API tornano come {omissis}, anche annidati, e `masked` sparisce", async () => {

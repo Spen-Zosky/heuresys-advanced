@@ -15480,6 +15480,16 @@ api:
         csrf: false
         orgGate: null
       - method: GET
+        path: "/proposals/:proposalId"
+        permission: null
+        csrf: false
+        orgGate: null
+        params:
+          params:
+            schema: PROPOSTA
+            fields: null
+            unresolved: true
+      - method: GET
         path: "/proposals/:proposalId/cascade"
         permission: null
         csrf: false
@@ -21419,6 +21429,7 @@ cross:
     - /v1/tenant-consolidations/access
     - /v1/tenant-consolidations/deliveries
     - /v1/tenant-consolidations/pending-approval
+    - "/v1/tenant-consolidations/proposals/:param"
     - "/v1/tenant-consolidations/proposals/:param/decision"
     - /v1/tenant-consolidations/proposals/confirm-certain
     - /v1/tenant-consolidations/receive

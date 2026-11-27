@@ -112,6 +112,31 @@ describe("T6b — il giro continua a finestra chiusa", () => {
   });
 });
 
+describe("2026-11-27 — la conferma del secondo fattore si offre dentro la finestra", () => {
+  it("se una lettura chiedeva la conferma, la finestra riceve l'evento; la nota resta sotto il testo del modello", async () => {
+    const reg = new RegistroFinto({ id: CONV, sdkSessionRef: null, personsSeen: [] });
+    const { d, scritti } = deps(reg, async function* () {
+      yield testo("Ecco i dati che posso mostrarti.");
+      yield risultato("Ecco i dati che posso mostrarti.");
+    }, { serveConferma: () => true, nota: () => "Una parte di questi dati è rimasta fuori." });
+    await eseguiGiro(d);
+    const uscita = scritti.join("");
+    expect(uscita).toContain("event: conferma_richiesta");
+    expect(uscita).toContain("event: nota");
+    expect(uscita).not.toContain("event: rifiuto");
+  });
+
+  it("senza lettura da confermare l'evento non parte", async () => {
+    const reg = new RegistroFinto({ id: CONV, sdkSessionRef: null, personsSeen: [] });
+    const { d, scritti } = deps(reg, async function* () {
+      yield testo("ok");
+      yield risultato("ok");
+    }, { serveConferma: () => false });
+    await eseguiGiro(d);
+    expect(scritti.join("")).not.toContain("conferma_richiesta");
+  });
+});
+
 describe("2026-11-18 — la domanda tutta su dati vietati riceve il messaggio fisso", () => {
   it("con il rifiuto, il registro, la finestra e il risultato portano il messaggio, non il testo del modello", async () => {
     const reg = new RegistroFinto({ id: CONV, sdkSessionRef: null, personsSeen: [] });

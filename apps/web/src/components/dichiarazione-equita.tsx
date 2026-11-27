@@ -5,7 +5,7 @@
  * (E12, ADR-0063, voce F6b) che accompagna ogni proposta sulle persone.
  *
  * Dice, in chiaro: se la proposta ha superato il controllo, quali tratti protetti sono stati
- * guardati, quali gruppi sono stati confrontati, il rapporto misurato contro la soglia, che
+ * guardati (e, nella sintesi, solo quelli misurati), quali gruppi sono stati confrontati, il rapporto misurato contro la soglia, che
  * nessun tratto protetto entra nel calcolo e quali ingressi gli sono vicini. Sotto soglia la
  * proposta si annuncia come non raccomandabile. Compone primitive di @heuresys/ui; è specifico
  * di advanced perché legge il contratto `EquitaDichiarazione` di @heuresys/shared.
@@ -22,8 +22,19 @@ const ESITO_BADGE: Record<EquitaEsito, "success" | "destructive" | "secondary"> 
 };
 
 export function DichiarazioneEquita({ equita }: { equita: EquitaDichiarazione }) {
-  const { t } = useTranslation("common");
+  const { t, i18n } = useTranslation("common");
   const fmt = useFormat();
+  // Un elenco di tratti nella lingua scelta («genere, età e stato civile»).
+  const elencoTratti = (tratti: EquitaTratto[]): string =>
+    new Intl.ListFormat(i18n.language, { style: "long", type: "conjunction" }).format(tratti.map((x) => t(`equita.trattoNelTesto.${x}`)));
+  // La sintesi nomina solo i tratti davvero misurati: un tratto con dati insufficienti non si dichiara «non penalizzato».
+  const misurati = equita.tratti.filter((c) => c.esito !== "DATI_INSUFFICIENTI").map((c) => c.tratto);
+  const nonMisurati = equita.tratti.filter((c) => c.esito === "DATI_INSUFFICIENTI").map((c) => c.tratto);
+  const sintesi = (): string => {
+    if (!equita.raccomandabile) return t("equita.nonRaccomandabile");
+    const base = equita.esito === "SUPERATO" ? t("equita.sintesi.SUPERATO", { tratti: elencoTratti(misurati) }) : t(`equita.sintesi.${equita.esito}`);
+    return equita.esito === "SUPERATO" && nonMisurati.length > 0 ? `${base} ${t("equita.nonMisurati", { tratti: elencoTratti(nonMisurati) })}` : base;
+  };
 
   const nomeGruppo = (tratto: EquitaTratto, g: string): string => {
     if (g === "NON_DICHIARATO" || g === "GRUPPI_PICCOLI") return t(`equita.gruppoSpeciale.${g}`);
@@ -31,7 +42,7 @@ export function DichiarazioneEquita({ equita }: { equita: EquitaDichiarazione })
     return t(`equita.gruppo.${tratto}.${g}`, { defaultValue: g });
   };
   const descriviGruppo = (tratto: EquitaTratto, g: EquitaGruppo): string =>
-    g.confrontato && g.quota !== null
+    g.confrontato && g.quota !== null && g.favorevoli !== null
       ? t("equita.gruppoConQuota", { gruppo: nomeGruppo(tratto, g.gruppo), favorevoli: fmt.numero(g.favorevoli), persone: fmt.numero(g.persone), quota: fmt.percento(g.quota, "0-1") })
       : t("equita.gruppoSenzaQuota", { gruppo: nomeGruppo(tratto, g.gruppo), persone: fmt.numero(g.persone) });
 
@@ -45,7 +56,7 @@ export function DichiarazioneEquita({ equita }: { equita: EquitaDichiarazione })
       </CardHeader>
       <CardContent className="space-y-3 text-sm">
         <p data-testid="equita-sintesi" className={equita.raccomandabile ? "text-foreground" : "font-semibold text-danger"} role={equita.raccomandabile ? undefined : "alert"}>
-          {equita.raccomandabile ? t(`equita.sintesi.${equita.esito}`) : t("equita.nonRaccomandabile")}
+          {sintesi()}
         </p>
         <p className="text-muted-foreground">
           {t("equita.metodo", {

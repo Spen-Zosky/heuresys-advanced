@@ -12,7 +12,9 @@
  * quota di persone con l'esito favorevole; il rapporto fra la quota più bassa e la più alta deve
  * stare almeno a 0,8. Un gruppo sotto il minimo di persone non entra nel confronto e non viene
  * mostrato da solo (finisce in «gruppi piccoli»), così la dichiarazione non rivela il tratto di
- * una persona. I valori mancanti stanno in «non dichiarato» e non entrano nel confronto.
+ * una persona da sola, e i suoi favorevoli non escono. Non è una garanzia di anonimato: incrociando i
+ * totali di più tratti si può a volte risalire al conteggio di un gruppo piccolo, quindi la pagina non la
+ * promette. I valori mancanti stanno in «non dichiarato» e non entrano nel confronto.
  *
  * Il controllo guarda anche gli ingressi del calcolo: un tratto protetto fra gli ingressi rende
  * la proposta non raccomandabile in ogni caso; un ingresso vicino a un tratto (l'anzianità
@@ -43,12 +45,17 @@ export const EquitaGruppoSchema = z
     /** Il valore del tratto (FEMALE, DA_40_A_49, IT…) oppure NON_DICHIARATO o GRUPPI_PICCOLI. */
     gruppo: z.string().min(1).max(32),
     persone: z.number().int().min(0),
-    favorevoli: z.number().int().min(0),
+    /** Persone con l'esito favorevole; null quando il gruppo non entra nel confronto (non si mostra). */
+    favorevoli: z.number().int().min(0).nullable(),
     /** Quota con l'esito favorevole, 0..1; null quando il gruppo non entra nel confronto. */
     quota: z.number().min(0).max(1).nullable(),
     confrontato: z.boolean(),
   })
-  .strict();
+  .strict()
+  .refine((g) => g.confrontato === (g.favorevoli !== null && g.quota !== null), {
+    message: "un gruppo confrontato porta favorevoli e quota; uno non confrontato non li mostra",
+    path: ["favorevoli"],
+  });
 export type EquitaGruppo = z.infer<typeof EquitaGruppoSchema>;
 
 export const EquitaControlloTrattoSchema = z

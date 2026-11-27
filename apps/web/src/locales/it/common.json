@@ -2708,12 +2708,13 @@
       "DATI_INSUFFICIENTI": "Dati insufficienti"
     },
     "sintesi": {
-      "SUPERATO": "La proposta non penalizza nessun gruppo per genere, età, nazionalità o stato civile: ogni rapporto misurato è sopra la soglia.",
+      "SUPERATO": "La proposta non penalizza nessun gruppo per {{tratti}}: ogni rapporto misurato è sopra la soglia.",
       "NON_SUPERATO": "La proposta non supera il controllo.",
       "DATI_INSUFFICIENTI": "I gruppi non sono abbastanza numerosi per misurare un rapporto: il controllo è stato fatto e lo dice, senza inventare un esito."
     },
+    "nonMisurati": "Non misurato per dati insufficienti: {{tratti}}.",
     "nonRaccomandabile": "Questa proposta non è una raccomandazione: penalizza un gruppo protetto oltre la soglia, o usa un tratto protetto nel calcolo. Va rivista prima di decidere.",
-    "metodo": "Metodo dei quattro quinti: per ogni tratto si confronta, gruppo per gruppo, la quota di persone con esito favorevole ({{favorevole}}) su {{persone}} persone; il rapporto fra la quota più bassa e la più alta deve essere almeno {{soglia}}. I gruppi con meno di {{minimo}} persone sono riuniti e non confrontati, così nessun tratto individuale si può dedurre.",
+    "metodo": "Metodo dei quattro quinti: per ogni tratto si confronta, gruppo per gruppo, la quota di persone con esito favorevole ({{favorevole}}) su {{persone}} persone; il rapporto fra la quota più bassa e la più alta deve essere almeno {{soglia}}. I gruppi con meno di {{minimo}} persone sono riuniti e non confrontati, e per loro non si mostra quante persone hanno l'esito favorevole.",
     "favorevole": {
       "PRONTO_ENTRO_6_MESI": "pronta ora o entro sei mesi",
       "NON_A_RISCHIO_ALTO": "non segnalata a rischio di uscita alto o critico",
@@ -2728,6 +2729,12 @@
       "ETA": "Età",
       "NAZIONALITA": "Nazionalità",
       "STATO_CIVILE": "Stato civile"
+    },
+    "trattoNelTesto": {
+      "GENERE": "genere",
+      "ETA": "età",
+      "NAZIONALITA": "nazionalità",
+      "STATO_CIVILE": "stato civile"
     },
     "gruppo": {
       "GENERE": {

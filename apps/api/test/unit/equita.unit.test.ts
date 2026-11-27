@@ -53,12 +53,13 @@ describe("controllo di equità (E12)", () => {
     expect(d.raccomandabile).toBe(false);
   });
 
-  it("riunisce i gruppi piccoli senza quota, così non rivela il tratto di nessuno", () => {
+  it("riunisce i gruppi piccoli senza favorevoli né quota (null, non zero)", () => {
     const d = valutaEquita([...persone("MALE", 10, 5), ...persone("FEMALE", 10, 5), ...persone("OTHER", 1, 0)], opz);
     const genere = d.tratti.find((t) => t.tratto === "GENERE")!;
     expect(genere.gruppi.map((g) => g.gruppo)).not.toContain("OTHER");
     const piccoli = genere.gruppi.find((g) => g.gruppo === "GRUPPI_PICCOLI")!;
-    expect(piccoli).toMatchObject({ persone: 1, quota: null, confrontato: false });
+    expect(piccoli).toMatchObject({ persone: 1, favorevoli: null, quota: null, confrontato: false });
+    expect(EquitaDichiarazioneSchema.parse(d)).toBeTruthy();
     expect(genere.esito).toBe("SUPERATO");
   });
 

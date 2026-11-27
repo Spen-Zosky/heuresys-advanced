@@ -308,7 +308,8 @@
       },
       "AGENT_SIGNAL_POSIZIONE_SCOPERTA": {
         "subject": "Signal: position without an incumbent",
-        "body": "The position “{{position}}” in “{{unit}}” has had no incumbent for {{days}} days."
+        "body_one": "The position “{{position}}” in “{{unit}}” has had no incumbent for {{count}} day.",
+        "body_other": "The position “{{position}}” in “{{unit}}” has had no incumbent for {{count}} days."
       }
     },
     "approvals": {

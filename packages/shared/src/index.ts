@@ -56,6 +56,7 @@ export * from "./schemas/career-path-steps.js";
 export * from "./schemas/user-career-plans.js";
 export * from "./schemas/user-target-positions.js";
 export * from "./schemas/organization-unit-history.js";
+export * from "./schemas/ghost-units.js";
 export * from "./schemas/hierarchy-levels.js";
 export * from "./schemas/succession-pools.js";
 export * from "./schemas/successor-candidates.js";

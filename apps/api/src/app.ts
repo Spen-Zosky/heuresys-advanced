@@ -84,6 +84,7 @@ import { careerPathStepsRoutes } from "./modules/career-path-steps/routes.js";
 import { userCareerPlansRoutes } from "./modules/user-career-plans/routes.js";
 import { userTargetPositionsRoutes } from "./modules/user-target-positions/routes.js";
 import { organizationUnitHistoryRoutes } from "./modules/organization-unit-history/routes.js";
+import { ghostUnitsRoutes } from "./modules/ghost-units/routes.js";
 import { hierarchyLevelsRoutes } from "./modules/hierarchy-levels/routes.js";
 import { successionPoolsRoutes } from "./modules/succession-pools/routes.js";
 import { successorCandidatesRoutes } from "./modules/successor-candidates/routes.js";
@@ -543,6 +544,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(userCareerPlansRoutes, { prefix: "/v1/user-career-plans" });
   await app.register(userTargetPositionsRoutes, { prefix: "/v1/user-target-positions" });
   await app.register(organizationUnitHistoryRoutes, { prefix: "/v1/organization-unit-history" });
+  await app.register(ghostUnitsRoutes, { prefix: "/v1/ghost-units" });
   await app.register(hierarchyLevelsRoutes, { prefix: "/v1/hierarchy-levels" });
   await app.register(successionPoolsRoutes, { prefix: "/v1/succession-pools" });
   await app.register(successorCandidatesRoutes, { prefix: "/v1/successor-candidates" });

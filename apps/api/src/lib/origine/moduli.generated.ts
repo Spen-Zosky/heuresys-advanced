@@ -538,6 +538,19 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_generated_record_origins"
     ]
   },
+  "ghost-units": {
+    "prefissi": [
+      "/v1/ghost-units"
+    ],
+    "tabelle": [
+      "sys_ghost_riforma",
+      "sys_ghost_units",
+      "sys_organization_units",
+      "sys_tenancies",
+      "sys_users",
+      "v_ghost_units_derivate"
+    ]
+  },
   "goals": {
     "prefissi": [
       "/v1/goals"

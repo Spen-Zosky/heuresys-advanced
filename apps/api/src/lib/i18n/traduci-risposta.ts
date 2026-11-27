@@ -30,10 +30,12 @@ import type { FastifyInstance, FastifyRequest, onResponseAsyncHookHandler, preVa
 import type { Pool } from "pg";
 import {
   campiDellaRiga,
+  campiAccettati,
   idDellaRisorsa,
   leggiRegistroRighe,
   scriviTraduzioni,
   separaModifiche,
+  tabellaDellaRotta,
   type CampoDellaRiga,
   type ModificaInglese,
 } from "./traduzione-della-riga.js";
@@ -252,9 +254,16 @@ export function addTraduzioneRisposta(app: FastifyInstance, db: Pick<Pool, "quer
     try {
       const registro = glossario.registroRighe();
       const id = req.method === "GET" || Array.isArray(corpo) ? null : idDellaRisorsa(req.routeOptions.url, req.params);
-      if (registro && id && (req.method === "PATCH" || req.method === "PUT")) {
+      const tabella = tabellaDellaRotta(req.routeOptions.url);
+      const utente = req.user;
+      if (registro && id && tabella && utente && (req.method === "PATCH" || req.method === "PUT")) {
         const piatto = corpo as Record<string, unknown>;
-        const trovati = await campiDellaRiga(db, registro, id, new Set(Object.keys(piatto)));
+        // Solo i campi che la rotta accetta: una chiave che la validazione scarterebbe non
+        // riceve una traduzione che l'handler non ha mai autorizzato.
+        const accettati = campiAccettati(req.routeOptions.schema?.body);
+        const chiavi = new Set(Object.keys(piatto).filter((k) => accettati.has(k)));
+        const scrivente = { tenantId: utente.tenantId ?? null };
+        const trovati = await campiDellaRiga(db, registro, tabella, id, chiavi, scrivente);
         if (trovati.length > 0) {
           const s = separaModifiche(piatto, id, trovati);
           corpo = s.corpo;

@@ -11,7 +11,9 @@
  * Perché non `DashboardSidebar` di `@heuresys/ui`: quella rende il titolo come un solo pulsante e
  * non lascia posto a una maniglia né a un ordine deciso fuori. Qui l'involucro (scheda a destra,
  * comando di compressione, memoria dei gruppi chiusi, classi `sidebar-group*`) è lo stesso, così
- * stile, stato e prove restano quelli di prima. Quando il riordino sarà richiesto da un secondo
+ * stile, stato e prove restano quelli di prima. Il gruppo chiuso si nasconde con `data-chiuso`
+ * (regola in `globals.css`): la regola del guscio vale solo se pulsante ed elenco sono fratelli
+ * adiacenti, e qui il pulsante sta in una testata con la maniglia (difetto del 28/11). Quando il riordino sarà richiesto da un secondo
  * repo si porta in `ux-design-shared`.
  *
  * L'ordine scelto si salva sul server, accanto alle altre preferenze della persona
@@ -19,12 +21,14 @@
  * Chi non l'ha mai cambiato (`null`) vede l'ordine standard del registro; «Ripristina ordine
  * standard» riporta il valore a `null`.
  */
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type KeyboardEvent, type PointerEvent, type ReactNode } from "react";
 import type { NavGroup } from "@heuresys/ui";
+import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import { applicaOrdine, spostaPrima } from "@/lib/menu-testi";
+import { CHIAVE_GRUPPI, eAperto, impostaTutti, iscrivi, istantanea, leggiMemoria, scrivi } from "@/lib/menu-aperture";
 
 const STORAGE_SIDEBAR = "heuresys-sidebar";
-const STORAGE_GROUPS = "heuresys-sidebar-groups";
+const memoriaGruppi = () => istantanea(CHIAVE_GRUPPI);
 function applySidebarState(collapsed: boolean) {
   const grid = document.querySelector<HTMLElement>('[data-shell="grid"]');
   if (collapsed) {
@@ -42,6 +46,9 @@ export interface BarraLateraleProps {
   ordineSalvato: string[] | null;
   /** Salva il nuovo ordine; `null` = ripristina quello standard. */
   onCambiaOrdine: (ordine: string[] | null) => void;
+  /** Testi del comando che chiude o riapre tutti i gruppi principali. */
+  etichettaChiudiTutti: string;
+  etichettaApriTutti: string;
   /** Testo del comando «Ripristina ordine standard». */
   etichettaRipristina: string;
   title: ReactNode;
@@ -69,6 +76,13 @@ export function BarraLaterale(p: BarraLateraleProps) {
   const setSalvato = (valore: string[] | null) => setLocale({ base: p.ordineSalvato, valore });
   const ordine = useMemo(() => applicaOrdine(predefinito, salvato), [predefinito, salvato]);
   const perId = useMemo(() => new Map(p.groups.map((g) => [g.id, g])), [p.groups]);
+
+  // Aperto o chiuso, per ogni gruppo principale: una memoria sola (`lib/menu-aperture.ts`), così il
+  // comando «Chiudi tutti i gruppi» e il clic sul titolo leggono e scrivono la stessa cosa.
+  const memoria = leggiMemoria(useSyncExternalStore(iscrivi, memoriaGruppi, () => "{}"));
+  const tuttiChiusi = ordine.length > 0 && ordine.every((id) => !eAperto(memoria, id));
+  const chiudiOApriTutti = () => scrivi(CHIAVE_GRUPPI, (m) => impostaTutti(m, ordine, tuttiChiusi));
+  const etichettaTutti = tuttiChiusi ? p.etichettaApriTutti : p.etichettaChiudiTutti;
 
   const [drag, setDrag] = useState<Trascinamento | null>(null);
   const navRef = useRef<HTMLElement | null>(null);
@@ -146,6 +160,18 @@ export function BarraLaterale(p: BarraLateraleProps) {
       <div className="flex h-full min-h-0 flex-col">
         <div className="flex h-11 shrink-0 items-center justify-between border-b border-border px-3">
           <span className="sidebar-section-label text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{p.title}</span>
+          <div className="flex items-center gap-0.5">
+          <button
+            type="button"
+            data-testid="menu-chiudi-apri-tutti"
+            data-tutti-chiusi={tuttiChiusi ? "" : undefined}
+            aria-label={etichettaTutti}
+            title={etichettaTutti}
+            onClick={chiudiOApriTutti}
+            className="sidebar-tutti inline-flex h-8 w-8 items-center justify-center rounded-control text-muted-foreground transition hover:bg-accent hover:text-foreground"
+          >
+            {tuttiChiusi ? <ChevronsUpDown className="h-4 w-4" aria-hidden /> : <ChevronsDownUp className="h-4 w-4" aria-hidden />}
+          </button>
           <button
             id="js-sidebar-toggle"
             type="button"
@@ -164,6 +190,7 @@ export function BarraLaterale(p: BarraLateraleProps) {
               <polyline points="11 9 14 12 11 15" />
             </svg>
           </button>
+          </div>
         </div>
         <nav ref={navRef} className="min-h-0 flex-1 overflow-y-auto px-2 py-3" data-trascinamento={drag ? "" : undefined}>
           {ordine.map((id) => {
@@ -176,6 +203,8 @@ export function BarraLaterale(p: BarraLateraleProps) {
                 key={id}
                 group={g}
                 titolo={titolo}
+                aperto={eAperto(memoria, id)}
+                onCambia={() => scrivi(CHIAVE_GRUPPI, (m) => ({ ...m, [id]: !eAperto(m, id) }))}
                 maniglia={{
                   etichetta: p.etichettaManiglia(titolo),
                   suggerimento: p.suggerimentoManiglia,
@@ -224,39 +253,16 @@ interface Maniglia {
   onKeyDown: (e: KeyboardEvent<HTMLButtonElement>) => void;
 }
 
-function GruppoBarra({ group, titolo, maniglia, trascinato, linea }: { group: NavGroup; titolo: string; maniglia: Maniglia; trascinato: boolean; linea: "prima" | undefined }) {
-  const [aperto, setAperto] = useState(group.defaultExpanded ?? true);
-  useEffect(() => {
-    try {
-      const stato = JSON.parse(window.localStorage.getItem(STORAGE_GROUPS) || "{}") as Record<string, boolean>;
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- memoria del browser, letta dopo l'idratazione
-      if (stato[group.id] === false) setAperto(false);
-    } catch {
-      /* memoria illeggibile: aperto */
-    }
-  }, [group.id]);
-  function cambia() {
-    setAperto((prev) => {
-      const next = !prev;
-      try {
-        const stato = JSON.parse(window.localStorage.getItem(STORAGE_GROUPS) || "{}") as Record<string, boolean>;
-        stato[group.id] = next;
-        window.localStorage.setItem(STORAGE_GROUPS, JSON.stringify(stato));
-      } catch {
-        /* idem */
-      }
-      return next;
-    });
-  }
+function GruppoBarra({ group, titolo, aperto, onCambia, maniglia, trascinato, linea }: { group: NavGroup; titolo: string; aperto: boolean; onCambia: () => void; maniglia: Maniglia; trascinato: boolean; linea: "prima" | undefined }) {
   return (
-    <div className="sidebar-group" data-group={group.id} data-trascinato={trascinato ? "" : undefined}>
+    <div className="sidebar-group" data-group={group.id} data-chiuso={aperto ? undefined : ""} data-trascinato={trascinato ? "" : undefined}>
       <div className="sidebar-drop-line" data-visibile={linea ? "" : undefined} aria-hidden />
       <div className="sidebar-group-testata flex items-center">
         <button
           type="button"
           data-group-toggle={group.id}
           aria-expanded={aperto}
-          onClick={cambia}
+          onClick={onCambia}
           className="sidebar-group-toggle flex min-h-6 min-w-0 flex-1 items-center gap-1.5 rounded-control px-2 py-1 text-left text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground transition hover:text-foreground"
         >
           <svg data-group-chevron className="h-3 w-3 shrink-0 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

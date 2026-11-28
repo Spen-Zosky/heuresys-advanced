@@ -92,8 +92,20 @@ nav[data-trascinamento] {
   outline: 2px solid var(--primary);
   outline-offset: 1px;
 }
-body[data-sidebar="collapsed"] aside .sidebar-group-handle {
+body[data-sidebar="collapsed"] aside .sidebar-group-handle,
+body[data-sidebar="collapsed"] aside .sidebar-tutti {
   display: none;
+}
+/* Gruppo chiuso (Enzo, 28/11: «non riesco mai ad avere tutti i gruppi principali chiusi»). La
+   regola del guscio `.sidebar-group-toggle[aria-expanded="false"] + .sidebar-group-content` qui non
+   vale: il pulsante sta nella testata con la maniglia, non accanto all'elenco. A barra ridotta alle
+   sole icone i titoli dei gruppi spariscono, quindi le icone restano tutte visibili: un gruppo
+   chiuso non deve far sparire voci che non si potrebbero più riaprire. */
+.sidebar-group[data-chiuso] > .sidebar-group-content {
+  display: none;
+}
+body[data-sidebar="collapsed"] aside .sidebar-group[data-chiuso] > .sidebar-group-content {
+  display: block;
 }
 @media (prefers-reduced-motion: reduce) {
   .sidebar-group[data-trascinato] {

@@ -476,6 +476,8 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
           etichettaManiglia={(gruppo) => t("shell:ui.moveGroup", { gruppo })}
           suggerimentoManiglia={t("shell:ui.moveGroupHint")}
           etichettaRipristina={t("shell:ui.restoreOrder")}
+          etichettaChiudiTutti={t("shell:ui.collapseAllGroups")}
+          etichettaApriTutti={t("shell:ui.expandAllGroups")}
           title={t("shell:ui.navigation")}
           ariaLabel={t("shell:ui.navigationAria")}
           toggleLabel={t("shell:ui.toggleSidebar")}

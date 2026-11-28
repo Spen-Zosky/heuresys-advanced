@@ -13,44 +13,23 @@
  * in vista se è fuori dallo schermo.
  *
  * I rami (secondo e terzo livello) vengono da `lib/menu-albero.ts`; si aprono e si chiudono con
- * un clic, ricordano lo stato, e il ramo che contiene la pagina attiva è sempre aperto.
+ * un clic e ricordano lo stato; il ramo che contiene la pagina attiva si apre da sé quando si arriva
+ * sulla pagina, e dopo si chiude come gli altri (`lib/menu-aperture.ts`).
  */
 import { useCallback, useEffect, useSyncExternalStore, type ReactNode } from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { Ramo, VoceMenu } from "@/lib/menu-albero";
+import { apriVersoPagina, catenaVersoPagina, CHIAVE_RAMI, eAperto, iscrivi, istantanea, leggiMemoria, scrivi } from "@/lib/menu-aperture";
 
-const CHIAVE_RAMI = "hrx-menu-rami";
 const CHIAVE_SCORRIMENTO = "hrx-menu-scorrimento";
 
-/* Lo stato dei rami vive nella memoria del browser; il server non la conosce e rende tutto
-   aperto. `useSyncExternalStore` con un'istantanea del server diversa da quella del client è il
-   modo che React prevede per non creare una discordanza d'idratazione (errore #418). */
-const ascoltatori = new Set<() => void>();
-function iscrivi(f: () => void) {
-  ascoltatori.add(f);
-  return () => ascoltatori.delete(f);
-}
-function memoriaRami(): string {
-  try {
-    return window.localStorage.getItem(CHIAVE_RAMI) || "{}";
-  } catch {
-    return "{}";
-  }
-}
-
-function leggiRami(): Record<string, boolean> {
-  try {
-    return JSON.parse(window.localStorage.getItem(CHIAVE_RAMI) || "{}") as Record<string, boolean>;
-  } catch {
-    return {};
-  }
-}
-
-function contiene(r: Ramo, attiva: string | null): boolean {
-  return r.voci.some((v) => v.href === attiva) || r.rami.some((x) => contiene(x, attiva));
-}
+/* Lo stato dei rami vive nella memoria del browser (`lib/menu-aperture.ts`); il server non la
+   conosce e rende tutto aperto. `useSyncExternalStore` con un'istantanea del server diversa da
+   quella del client è il modo che React prevede per non creare una discordanza d'idratazione
+   (errore #418). */
+const memoriaRami = () => istantanea(CHIAVE_RAMI);
 
 function Voce({ v, attiva, icona, livello }: { v: VoceMenu; attiva: boolean; icona: ReactNode; livello: number }) {
   return (
@@ -83,25 +62,13 @@ function RamoMenu({
 }: { ramo: Ramo; idPadre: string; attiva: string | null; icone: (v: VoceMenu) => ReactNode; livello: number }) {
   const { t } = useTranslation();
   const id = `${idPadre}/${ramo.chiave}`;
-  const dentro = contiene(ramo, attiva);
   const memoria = useSyncExternalStore(iscrivi, memoriaRami, () => "{}");
-  let aperto = true;
-  try {
-    aperto = (JSON.parse(memoria) as Record<string, boolean>)[id] !== false;
-  } catch {
-    /* memoria illeggibile: aperto */
-  }
+  // Il ramo della pagina attiva si apre da sé solo quando si arriva sulla pagina (CorpoGruppo);
+  // poi decide la persona: prima era aperto per forza e il clic non cambiava niente (28/11).
+  const visibile = eAperto(leggiMemoria(memoria), id);
   const cambia = useCallback(() => {
-    try {
-      const s = leggiRami();
-      s[id] = !aperto;
-      window.localStorage.setItem(CHIAVE_RAMI, JSON.stringify(s));
-    } catch {
-      /* il browser può negare la memoria: si resta col comportamento predefinito */
-    }
-    ascoltatori.forEach((f) => f());
-  }, [id, aperto]);
-  const visibile = aperto || dentro;
+    scrivi(CHIAVE_RAMI, (m) => ({ ...m, [id]: !eAperto(m, id) }));
+  }, [id]);
   const titolo = t(`shell:nav.rami.${ramo.chiave}`, { defaultValue: ramo.chiave });
   return (
     <li>
@@ -140,9 +107,14 @@ function ContenutoRamo({
 
 /** Il corpo di un gruppo della barra laterale, da passare a `NavGroup.customContent`. */
 export function CorpoGruppo(props: { id: string; albero: Ramo; attiva: string | null; icone: (v: VoceMenu) => ReactNode }) {
+  const { id, albero, attiva } = props;
+  useEffect(() => {
+    const catena = catenaVersoPagina(albero, id, attiva);
+    if (catena && attiva) apriVersoPagina(id, catena, attiva);
+  }, [albero, id, attiva]);
   return (
     <li className="list-none">
-      <ContenutoRamo ramo={props.albero} idPadre={props.id} attiva={props.attiva} icone={props.icone} livello={0} />
+      <ContenutoRamo ramo={albero} idPadre={id} attiva={attiva} icone={props.icone} livello={0} />
     </li>
   );
 }

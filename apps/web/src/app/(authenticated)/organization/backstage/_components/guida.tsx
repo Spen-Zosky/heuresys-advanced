@@ -50,7 +50,8 @@ export function GuidaBackstage({ aperta, onChiudi }: { aperta: boolean; onChiudi
                 <MarkdownView key={i} content={p.testo} className={PROSA} />
               ) : (
                 <figure key={i} className="my-4 rounded-lg border border-border bg-background p-3" data-testid="backstage-guida-diagramma">
-                  <div className="flex justify-center overflow-x-auto [&_img]:h-auto [&_img]:w-full">
+                  {/* Il disegno di mermaid ha linee e testi scuri su fondo trasparente: il fondo resta chiaro anche nel tema scuro. */}
+                  <div className="flex justify-center overflow-x-auto rounded-md bg-white p-2 [&_img]:h-auto [&_img]:w-full">
                     <MermaidDiagram source={p.testo} ariaLabel={p.didascalia} />
                   </div>
                   <figcaption className="mt-2 text-center text-xs text-muted-foreground">{p.didascalia}</figcaption>

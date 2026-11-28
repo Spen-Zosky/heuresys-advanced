@@ -525,7 +525,9 @@
       "confirm": "Confirm the decision",
       "confirming": "Recording…",
       "close": "Close",
-      "sameHint": "You can reconfirm the same choice. The decision goes into the draft: the data change only with «Approve the changes for good»."
+      "sameHint": "You can reconfirm the same choice. The decision goes into the draft: the data change only with «Approve the changes for good».",
+      "replaces": "This choice replaces the decision already taken: «{{current}}» becomes «{{next}}».",
+      "confirmReplace": "Replace the decision"
     },
     "applyChanges": "Preview changes ({{count}})",
     "applyChanges_one": "Preview change ({{count}})",

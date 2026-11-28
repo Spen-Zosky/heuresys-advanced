@@ -189,8 +189,21 @@ const DENY_NOT_APPROVED = "write not approved (compliance gate)";
  */
 const DENY_READ_OVER_THRESHOLD =
   "read paused: this conversation has already touched more distinct people than the tenant's " +
-  "high threshold (ADR-0040 R2) and the human confirmation was not granted. Not a permission " +
-  "denial: ask the person to confirm, then retry.";
+  "high threshold (ADR-0040 R2) and the person chose Nega. Not a permission denial and not a " +
+  "question to repeat: do not ask the person to confirm again. Answer with what you have already " +
+  "read and say, in one sentence, that the rest was left out because the confirmation was refused.";
+/**
+ * Difetto del 2026-11-27: la scheda Consenti/Nega scade da sola, e il vecchio messaggio diceva
+ * «chiedi alla persona di confermare», così il modello scriveva «Mi confermi che posso
+ * proseguire?»: una conferma a parole che non sblocca niente, perché la scheda non c'è più. Il
+ * messaggio dice che la scheda è scaduta e che la persona la riavrà ripetendo la domanda.
+ */
+const DENY_READ_OVER_THRESHOLD_EXPIRED =
+  "read paused: the confirmation card (Consenti/Nega) for reading this many distinct people " +
+  "expired without an answer. Not a permission denial, and a reply in the chat does not unlock " +
+  "anything: do NOT ask «can I proceed?» or any confirmation in words. Answer with what you have " +
+  "already read and say, in one sentence, that the confirmation expired and that asking the " +
+  "question again shows a new card.";
 /** Il registro di una lettura consentita: classe A (ADR-0056 D2). */
 const LETTURA: PerContoDi = { outcome: "allow-read", actionClass: "A" };
 const DENY_NOT_ALLOWLISTED = "tool not in allowlist (defense-in-depth)";
@@ -392,13 +405,17 @@ export function makeCanUseTool(approve: ApproveFn, opts: GateOptions = {}) {
         auditDecision(name, input, d, "READ_OVER_THRESHOLD_CONSENTED", LETTURA);
         return d;
       }
+      const inizio = Date.now();
       const consentito = await chiediPerLettura(name, input, quante, livello);
+      // Un «no» arrivato allo scadere del tempo è una scheda scaduta, non un rifiuto della persona:
+      // una scelta con il dito dentro l'ultimo secondo non si distingue, ed è un'attesa già finita.
+      const scaduta = !consentito && Date.now() - inizio >= Math.max(timeoutMs * 0.9, timeoutMs - 1000);
       const d: ToolDecision = consentito
         ? { behavior: "allow", updatedInput: input as Record<string, unknown> }
-        : { behavior: "deny", message: DENY_READ_OVER_THRESHOLD };
+        : { behavior: "deny", message: scaduta ? DENY_READ_OVER_THRESHOLD_EXPIRED : DENY_READ_OVER_THRESHOLD };
       auditDecision(
         name, input, d,
-        consentito ? "READ_OVER_THRESHOLD_APPROVED" : "READ_OVER_THRESHOLD_DENIED",
+        consentito ? "READ_OVER_THRESHOLD_APPROVED" : scaduta ? "READ_OVER_THRESHOLD_EXPIRED" : "READ_OVER_THRESHOLD_DENIED",
         consentito ? LETTURA : { outcome: "deny", actionClass: "A" },
       );
       return d;

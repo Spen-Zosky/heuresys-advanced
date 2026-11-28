@@ -60,13 +60,28 @@ export interface TitolareOmbraCompleto extends TitolareOmbra {
   fte: number;
 }
 
+export interface PosizioneOmbraConUnita extends PosizioneOmbra {
+  /** l'unità ombra della posizione */
+  unitaId: string | null;
+}
+
+/** Le unità della fotografia (senza opzione): id ombra e nome, per dire quali unità cedono. */
+export async function leggiUnitaOmbra(c: PoolClient, versionId: string): Promise<Map<string, string>> {
+  const r = await c.query<{ id: string; name: string }>(
+    `SELECT shadow_unit_id AS id, shadow_unit_name AS name FROM sys.sys_scenario_shadow_units
+      WHERE shadow_unit_version_id = $1 AND shadow_unit_option_id IS NULL`,
+    [versionId],
+  );
+  return new Map(r.rows.map((x) => [x.id, x.name]));
+}
+
 export async function leggiOmbra(
   c: PoolClient,
   versionId: string,
-): Promise<{ posizioni: PosizioneOmbra[]; titolari: TitolareOmbraCompleto[] }> {
-  const p = await c.query<{ id: string; source_id: string | null; code: string; title: string; criticality: string | null }>(
+): Promise<{ posizioni: PosizioneOmbraConUnita[]; titolari: TitolareOmbraCompleto[] }> {
+  const p = await c.query<{ id: string; source_id: string | null; code: string; title: string; criticality: string | null; unit_id: string | null }>(
     `SELECT shadow_position_id AS id, shadow_position_source_id AS source_id, shadow_position_code AS code,
-            shadow_position_title AS title, shadow_position_criticality AS criticality
+            shadow_position_title AS title, shadow_position_criticality AS criticality, shadow_position_unit_id AS unit_id
        FROM sys.sys_scenario_shadow_positions
       WHERE shadow_position_version_id = $1 AND shadow_position_option_id IS NULL`,
     [versionId],
@@ -79,7 +94,7 @@ export async function leggiOmbra(
     [versionId],
   );
   return {
-    posizioni: p.rows.map((r) => ({ id: r.id, sourceId: r.source_id, codice: r.code, titolo: r.title, criticita: r.criticality })),
+    posizioni: p.rows.map((r) => ({ id: r.id, sourceId: r.source_id, codice: r.code, titolo: r.title, criticita: r.criticality, unitaId: r.unit_id })),
     titolari: a.rows.map((r) => ({ id: r.id, posizioneId: r.position_id, userId: r.user_id, tipo: r.kind, fte: Number(r.fte) })),
   };
 }
@@ -158,14 +173,19 @@ export interface Fonte {
 
 export async function inserisciIpotesi(
   c: PoolClient,
-  a: { versionId: string; tenantId: string; kind: string; statement: string; ordinal: number; fonti: readonly Fonte[] },
+  a: {
+    versionId: string; tenantId: string; kind: string; statement: string; ordinal: number; fonti: readonly Fonte[];
+    /** il numero dell'ipotesi e, per una STIMA, la sua banda (CHECK della 000515) */
+    value?: number | null; unit?: string | null; low?: number | null; high?: number | null;
+  },
 ): Promise<void> {
   const r = await c.query<{ id: string }>(
     `INSERT INTO sys.sys_scenario_assumptions
        (scenario_assumption_version_id, scenario_assumption_tenant_id, scenario_assumption_kind,
-        scenario_assumption_statement, scenario_assumption_ordinal)
-     VALUES ($1, $2, $3, $4, $5) RETURNING scenario_assumption_id AS id`,
-    [a.versionId, a.tenantId, a.kind, a.statement, a.ordinal],
+        scenario_assumption_statement, scenario_assumption_ordinal,
+        scenario_assumption_value, scenario_assumption_unit, scenario_assumption_low, scenario_assumption_high)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING scenario_assumption_id AS id`,
+    [a.versionId, a.tenantId, a.kind, a.statement, a.ordinal, a.value ?? null, a.unit ?? null, a.low ?? null, a.high ?? null],
   );
   for (const f of a.fonti) {
     await c.query(
@@ -180,14 +200,20 @@ export async function inserisciIpotesi(
 
 export async function inserisciRisultato(
   c: PoolClient,
-  x: { versionId: string; optionId: string; tenantId: string; metricCode: string; metricLabel: string; value: number; unit: string; computedBy: string; fonti: readonly Fonte[] },
+  x: {
+    versionId: string; optionId: string; tenantId: string; metricCode: string; metricLabel: string; value: number; unit: string; computedBy: string; fonti: readonly Fonte[];
+    /** banda, numero di estrazioni e orizzonte, per i risultati simulati (famiglia NEL_TEMPO) */
+    low?: number | null; high?: number | null; draws?: number | null; horizonMonths?: number | null;
+  },
 ): Promise<void> {
   const r = await c.query<{ id: string }>(
     `INSERT INTO sys.sys_scenario_results
        (scenario_result_option_id, scenario_result_tenant_id, scenario_result_metric_code, scenario_result_metric_label,
-        scenario_result_value, scenario_result_unit, scenario_result_computed_by)
-     VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING scenario_result_id AS id`,
-    [x.optionId, x.tenantId, x.metricCode, x.metricLabel, x.value, x.unit, x.computedBy],
+        scenario_result_value, scenario_result_unit, scenario_result_computed_by,
+        scenario_result_low, scenario_result_high, scenario_result_draws, scenario_result_horizon_months)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING scenario_result_id AS id`,
+    [x.optionId, x.tenantId, x.metricCode, x.metricLabel, x.value, x.unit, x.computedBy,
+     x.low ?? null, x.high ?? null, x.draws ?? null, x.horizonMonths ?? null],
   );
   for (const f of x.fonti) {
     await c.query(

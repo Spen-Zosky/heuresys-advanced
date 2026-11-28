@@ -6,14 +6,15 @@
 
 export type ParteGuida = { tipo: "md"; testo: string } | { tipo: "mermaid"; testo: string; didascalia: string };
 
-const MAPPA_IT = `flowchart LR
+const MAPPA_IT = `%%{init: {"htmlLabels": false, "flowchart": {"htmlLabels": false}}}%%
+flowchart LR
   subgraph REALE["Organizzazione reale del tenant"]
     direction TB
     R0["Vertice<br/>Direttore Generale"] --> R1["Direzioni e divisioni<br/>con i loro responsabili"] --> R2["Unità operative<br/>persone e posizioni"]
   end
   subgraph BACK["Backstage: l'organizzazione ghost"]
     direction TB
-    G0["Capo del vertice"] --> G1["Capi di divisione<br/>e di direzione"] --> G2["Squadre di specialisti<br/>persone, competenze, carriere,<br/>talenti, formazione, KPI, valutazioni"]
+    G0["Capo del vertice"] --> G1["Capi di divisione<br/>e di direzione"] --> G2["Squadre di specialisti<br/>persone, competenze, carriere, talenti, formazione, KPI, valutazioni"]
   end
   R0 -. "affianca" .-> G0
   R1 -. "affianca" .-> G1
@@ -41,14 +42,15 @@ const MAPPA_IT = `flowchart LR
   style CICLO fill:#ffffff,stroke:#a1a1aa,color:#18181b,stroke-dasharray:4 3
   style USO fill:#ffffff,stroke:#a1a1aa,color:#18181b`;
 
-const MAPPA_EN = `flowchart LR
+const MAPPA_EN = `%%{init: {"htmlLabels": false, "flowchart": {"htmlLabels": false}}}%%
+flowchart LR
   subgraph REALE["The tenant's real organisation"]
     direction TB
     R0["Apex<br/>General Manager"] --> R1["Departments and divisions<br/>with their heads"] --> R2["Operating units<br/>people and positions"]
   end
   subgraph BACK["Backstage: the ghost organisation"]
     direction TB
-    G0["Apex Head"] --> G1["Division and<br/>department Heads"] --> G2["Specialist teams<br/>people, skills, careers,<br/>talent, learning, KPIs, reviews"]
+    G0["Apex Head"] --> G1["Division and<br/>department Heads"] --> G2["Specialist teams<br/>people, skills, careers, talent, learning, KPIs, reviews"]
   end
   R0 -. "works alongside" .-> G0
   R1 -. "works alongside" .-> G1
@@ -76,7 +78,8 @@ const MAPPA_EN = `flowchart LR
   style CICLO fill:#ffffff,stroke:#a1a1aa,color:#18181b,stroke-dasharray:4 3
   style USO fill:#ffffff,stroke:#a1a1aa,color:#18181b`;
 
-const CICLO_IT = `stateDiagram-v2
+const CICLO_IT = `%%{init: {"htmlLabels": false, "flowchart": {"htmlLabels": false}}}%%
+stateDiagram-v2
   direction LR
   [*] --> Aperto: formazione o unità nuova
   Aperto --> Aperto: albero invariato
@@ -92,7 +95,8 @@ const CICLO_IT = `stateDiagram-v2
   class Aperto aperto
   class Chiuso_modificata,Chiuso_uscita chiuso`;
 
-const CICLO_EN = `stateDiagram-v2
+const CICLO_EN = `%%{init: {"htmlLabels": false, "flowchart": {"htmlLabels": false}}}%%
+stateDiagram-v2
   direction LR
   [*] --> Open: formation or new unit
   Open --> Open: tree unchanged
@@ -149,7 +153,7 @@ La scheda dice chi affianca il Capo, il tipo e il livello, l'unità reale, il re
 ### Aggiorna e riforma
 
 - **Aggiorna** rilegge tutto dal vivo: Backstage, storia, deriva e organigramma.
-- **Riforma**, nella scheda Deriva, riallinea il Backstage all'albero vivo. Compare solo a chi può aggiornare l'organigramma e parte solo dopo la conferma. Se l'albero non è cambiato non scrive niente.`,
+- **Riforma**, nella scheda Deriva, riallinea il Backstage all'albero vivo. Compare solo ai due ruoli del Backstage e parte solo dopo la conferma. Se l'albero non è cambiato non scrive niente.`,
       },
       {
         tipo: "mermaid",
@@ -216,7 +220,7 @@ The card says whom the Head works alongside, the type and level, the real unit, 
 ### Refresh and reform
 
 - **Refresh** rereads everything live: Backstage, history, drift and org chart.
-- **Reform**, in the Drift tab, realigns Backstage with the live tree. Only people who can update the org chart see it, and it starts only after confirmation. If the tree has not changed it writes nothing.`,
+- **Reform**, in the Drift tab, realigns Backstage with the live tree. Only the two Backstage roles see it, and it starts only after confirmation. If the tree has not changed it writes nothing.`,
       },
       {
         tipo: "mermaid",

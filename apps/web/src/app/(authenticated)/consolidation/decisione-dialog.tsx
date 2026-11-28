@@ -51,6 +51,9 @@ export function DecisioneDialog({
     queryFn: () => apiFetch<CascadeResponse>(`/v1/tenant-consolidations/proposals/${proposta.proposalId}/cascade`),
   });
   const voci = cascata.data?.items ?? [];
+  // Difetto del 2026-11-27: scegliere una strada diversa da quella già decisa sostituiva la decisione
+  // (per esempio una «Confermata») senza dirlo. L'avviso compare appena la scelta cambia.
+  const sostituisce = proposta.decision !== null && proposta.decision !== undefined && scelta !== proposta.decision;
   const daAggiornare = voci.filter((v) => v.decision === null && inCascata(scelta, v.outcome) !== null).length;
 
   return (
@@ -135,6 +138,14 @@ export function DecisioneDialog({
               ) : null}
               <p className="text-xs text-muted-foreground">{t("consolidation.modal.sameHint")}</p>
             </fieldset>
+            {sostituisce && proposta.decision ? (
+              <p role="alert" className="rounded-md border border-amber-500 bg-amber-50 p-2 text-sm text-amber-900" data-testid="consolidation-replace-warning">
+                {t("consolidation.modal.replaces", {
+                  current: t(`consolidation.decisions.${proposta.decision}`),
+                  next: t(`consolidation.decisions.${scelta}`),
+                })}
+              </p>
+            ) : null}
             {errore ? <p role="alert" className="text-sm text-destructive">{errore}</p> : null}
             <DialogFooter className="flex-wrap gap-2">
               <Button type="button" variant="outline" onClick={onChiudi} disabled={occupato}>{t("consolidation.modal.close")}</Button>
@@ -142,7 +153,7 @@ export function DecisioneDialog({
                 type="button" data-testid="consolidation-decide-confirm" disabled={occupato}
                 onClick={() => onConferma(scelta, scelta === "CONFERMATA" ? forma : undefined, false)}
               >
-                {occupato ? t("consolidation.modal.confirming") : t("consolidation.modal.confirm")}
+                {occupato ? t("consolidation.modal.confirming") : sostituisce ? t("consolidation.modal.confirmReplace") : t("consolidation.modal.confirm")}
               </Button>
               {daAggiornare > 0 ? (
                 <Button

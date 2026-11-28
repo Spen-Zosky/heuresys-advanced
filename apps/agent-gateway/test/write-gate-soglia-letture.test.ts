@@ -85,6 +85,8 @@ describe("#252 — oltre la soglia alta la lettura si ferma e chiede", () => {
       expect(d.message).toMatch(/threshold/i);
       // Senza questa metà il modello riferirebbe «non ho i permessi», che è falso (I22).
       expect(d.message).toMatch(/not a permission denial/i);
+      // Difetto del 2026-11-27: chi ha scelto Nega non si richiede la conferma.
+      expect(d.message).toMatch(/do not ask the person to confirm again/i);
     }
     expect(audit.entries.at(-1)?.reason).toBe("READ_OVER_THRESHOLD_DENIED");
   });
@@ -97,7 +99,14 @@ describe("#252 — oltre la soglia alta la lettura si ferma e chiede", () => {
     });
     const d = await canUseTool(LETTURA, {});
     expect(d.behavior).toBe("deny");
-    expect(audit.entries.at(-1)?.reason).toBe("READ_OVER_THRESHOLD_DENIED");
+    // Difetto del 2026-11-27: la scheda scaduta non è un rifiuto, e il messaggio non manda il
+    // modello a chiedere «Mi confermi che posso proseguire?» (una conferma a parole non sblocca).
+    expect(audit.entries.at(-1)?.reason).toBe("READ_OVER_THRESHOLD_EXPIRED");
+    if (d.behavior === "deny") {
+      expect(d.message).toMatch(/expired/i);
+      expect(d.message).toMatch(/do NOT ask/);
+      expect(d.message).not.toMatch(/ask the person to confirm, then retry/i);
+    }
   });
 
   it("l'approvatore che ALZA: si nega, non si lascia passare", async () => {

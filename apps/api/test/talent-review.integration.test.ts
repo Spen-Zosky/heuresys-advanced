@@ -13,6 +13,7 @@ import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 import { orgSubtreeUserIds } from "../src/lib/scope/org.js";
+import { EquitaDichiarazioneSchema } from "@heuresys/shared";
 
 const PWD = TEST_PERSONA_PASSWORD;
 const BANDS = new Set(["LOW", "MEDIUM", "HIGH"]);
@@ -236,5 +237,41 @@ describe("#29 A/L3 talent-review 9-box read", () => {
       if (i.ready6moCount !== undefined) expect(i.ready6moCount).toBe(atteso(i.positionId, "READY_6_MONTHS"));
       if (i.ready1yCount !== undefined) expect(i.ready1yCount).toBe(atteso(i.positionId, "READY_1_YEAR"));
     }
+  });
+
+  it("E12: 9-box, prontezza e successione dichiarano l'equità sull'intera popolazione del perimetro, non sulla pagina", async () => {
+    const casi = [
+      { url: "/v1/talent-review/nine-box?limit=1", tabella: "sys_talent_scores", prefisso: "talent_score", favorevole: "POTENZIALE_ALTO", ingressi: ["latest_overall_rating", "latest_potential_rating"] },
+      { url: "/v1/talent-review/readiness?limit=1&horizon=READY_NOW", tabella: "sys_readiness_scores", prefisso: "readiness_score", favorevole: "PRONTO_ENTRO_6_MESI", ingressi: ["readiness_level"] },
+      { url: "/v1/talent-review/succession?limit=1", tabella: "sys_succession_scores", prefisso: "succession_score", favorevole: "PRONTO_ENTRO_6_MESI", ingressi: ["readiness_level", "rank_order"] },
+    ];
+    for (const c of casi) {
+      const persone = await liveCount(
+        `SELECT count(DISTINCT ${c.prefisso}_user_id)::text AS n FROM sys.${c.tabella} WHERE ${c.prefisso}_tenant_id = $1`,
+        [rtlTenantId]);
+      const r = await suite.app.inject({ method: "GET", url: c.url, headers: { cookie: ch(federica.cookies) } });
+      expect(r.statusCode).toBe(200);
+      const body = r.json() as { items: unknown[]; equita: unknown };
+      const d = EquitaDichiarazioneSchema.parse(body.equita);
+      expect(body.items.length).toBeLessThanOrEqual(1);
+      // la pagina è di una riga e il filtro restringe, ma il confronto vale per tutto il tenant
+      expect(d.persone).toBe(persone);
+      expect(d.esitoFavorevole).toBe(c.favorevole);
+      expect(d.ingressi).toEqual(c.ingressi);
+      expect(d.ingressiProtetti).toEqual([]);
+      expect(d.tratti.map((t) => t.tratto)).toEqual(["GENERE", "ETA", "NAZIONALITA", "STATO_CIVILE"]);
+      const testo = JSON.stringify(d);
+      expect(testo).not.toMatch(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/);
+      expect(testo).not.toMatch(/\b(19|20)\d\d-\d\d-\d\d\b/);
+    }
+  });
+
+  it("E12: il MANAGER vede la dichiarazione del solo suo sottoalbero", async () => {
+    const persone = await liveCount(
+      `SELECT count(DISTINCT talent_score_user_id)::text AS n FROM sys.sys_talent_scores WHERE talent_score_user_id = ANY($1::uuid[])`,
+      [paoloSubtree]);
+    const r = await suite.app.inject({ method: "GET", url: "/v1/talent-review/nine-box?limit=1", headers: { cookie: ch(paolo.cookies) } });
+    expect(r.statusCode).toBe(200);
+    expect(EquitaDichiarazioneSchema.parse((r.json() as { equita: unknown }).equita).persone).toBe(persone);
   });
 });

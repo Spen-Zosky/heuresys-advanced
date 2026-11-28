@@ -512,3 +512,53 @@ export async function listCriticalCoverage(
   );
   return { total: Number(totalRow.rows[0]?.total ?? 0), items: res.rows.map(toCriticalCoverage) };
 }
+
+// ── Popolazione per il controllo di equità (E12, F6b) ────────────────────────
+
+type FiltroPerimetro = { tenantId?: string; userIdAllowList?: string[] };
+
+/**
+ * Le persone su cui la revisione dei talenti si pronuncia, tutte e non la sola pagina: il
+ * controllo di equità confronta i gruppi sull'intera popolazione che chi guarda può vedere
+ * (tenant e perimetro organizzativo), senza i filtri della lista (`userId`, `horizon`), che
+ * restringerebbero il confronto fino a renderlo vuoto o banale. Escono solo l'identificativo
+ * della persona e la classe del giudizio; il calcolo resta nel service e ne esce solo l'aggregato.
+ * `tabella`, `prefisso` e `colonnaClasse` sono costanti di questo file, mai input della richiesta.
+ */
+async function popolazione<C>(
+  q: DbConnector,
+  tabella: string,
+  prefisso: string,
+  colonnaClasse: string,
+  filter: FiltroPerimetro,
+): Promise<{ userId: string; classe: C }[]> {
+  const where: string[] = [];
+  const params: unknown[] = [];
+  if (filter.tenantId) {
+    params.push(filter.tenantId);
+    where.push(`${prefisso}_tenant_id = $${params.length}`);
+  }
+  if (filter.userIdAllowList) {
+    if (filter.userIdAllowList.length === 0) return [];
+    params.push(filter.userIdAllowList);
+    where.push(`${prefisso}_user_id = ANY($${params.length}::uuid[])`);
+  }
+  const wc = where.length ? `WHERE ${where.join(" AND ")}` : "";
+  const res = await q.query<{ userId: string; classe: C }>(
+    `SELECT ${prefisso}_user_id AS "userId", ${colonnaClasse} AS "classe" FROM sys.${tabella} ${wc}`,
+    params,
+  );
+  return res.rows;
+}
+
+/** 9-box: la banda di potenziale di ogni persona valutata (stessa regola di `bandCase`). */
+export const popolazioneNineBox = (q: DbConnector, filter: FiltroPerimetro) =>
+  popolazione<TalentBand>(q, "sys_talent_scores", "talent_score", bandCase("talent_score_potential"), filter);
+
+/** Prontezza: l'orizzonte di ogni riga (una persona può averne più d'una, per posizioni diverse). */
+export const popolazioneReadiness = (q: DbConnector, filter: FiltroPerimetro) =>
+  popolazione<string>(q, "sys_readiness_scores", "readiness_score", "readiness_score_horizon", filter);
+
+/** Successione: l'orizzonte di ogni riga. */
+export const popolazioneSuccession = (q: DbConnector, filter: FiltroPerimetro) =>
+  popolazione<string | null>(q, "sys_succession_scores", "succession_score", "succession_score_horizon", filter);

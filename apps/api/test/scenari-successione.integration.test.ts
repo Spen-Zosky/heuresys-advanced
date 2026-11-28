@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { pool } from "../src/db/client.js";
-import { calcolaScenarioUscite, METODO_EQUITA_PROVVISORIO } from "../src/modules/scenari/service.js";
+import { calcolaScenarioUscite } from "../src/modules/scenari/service.js";
+import { EQUITA_METODO } from "../src/lib/equita/index.js";
 import { CALCOLATORE_SUCCESSIONE, MESI_DI_PRONTEZZA, PROFONDITA_CASCATA, type Prontezza } from "../src/modules/scenari/calcolatori/successione.js";
 
 /**
@@ -138,21 +139,37 @@ describe("F3b-1 — lo scenario di uscita calcolato su RTL", () => {
     expect(rc.posizioni_scoperte).toBe(c!.esito.scoperte.length);
     expect(rc.persone_spostate).toBe(c!.esito.spostati.length);
 
-    const eq = await pool.query<{ code: string; outcome: string; method: string; recommended: boolean; touches: boolean }>(
-      `SELECT o.scenario_option_code AS code, e.scenario_equity_check_outcome AS outcome, e.scenario_equity_check_method AS method,
+    const eq = await pool.query<{ code: string; trait: string | null; groups: string | null; ratio: string | null; outcome: string | null; method: string | null; recommended: boolean; touches: boolean }>(
+      `SELECT o.scenario_option_code AS code, e.scenario_equity_check_trait AS trait, e.scenario_equity_check_groups AS groups,
+              e.scenario_equity_check_ratio::text AS ratio, e.scenario_equity_check_outcome AS outcome, e.scenario_equity_check_method AS method,
               o.scenario_option_recommended AS recommended, o.scenario_option_touches_people AS touches
          FROM sys.sys_scenario_options o
          LEFT JOIN sys.sys_scenario_equity_checks e ON e.scenario_equity_check_option_id = o.scenario_option_id
-        WHERE o.scenario_option_version_id = $1 ORDER BY o.scenario_option_code`,
+        WHERE o.scenario_option_version_id = $1 ORDER BY o.scenario_option_code, e.scenario_equity_check_trait`,
       [s.versionId],
     );
-    expect(eq.rows.map((x) => [x.code, x.touches, x.outcome])).toEqual([
-      ["A", false, null],
-      ["B", true, "DATI_INSUFFICIENTI"],
-      ["C", true, "DATI_INSUFFICIENTI"],
-    ]);
+    // E12 (F6b): A non tocca persone e non ha controlli; B e C ne hanno uno per tratto protetto, calcolato davvero
+    expect(eq.rows.filter((x) => x.code === "A").map((x) => x.trait)).toEqual([null]);
+    for (const code of ["B", "C"]) {
+      const righe = eq.rows.filter((x) => x.code === code);
+      expect(righe.every((x) => x.touches)).toBe(true);
+      expect(righe.map((x) => x.trait)).toEqual(["ALTRO", "ETA", "GENERE", "NAZIONALITA"]);
+      for (const x of righe) {
+        expect(x.method).toBe(EQUITA_METODO);
+        expect(["SUPERATO", "NON_SUPERATO", "DATI_INSUFFICIENTI"]).toContain(x.outcome);
+        expect(x.outcome === "DATI_INSUFFICIENTI").toBe(x.ratio === null);
+        const g = JSON.parse(x.groups!) as { tratto: string; gruppi: { persone: number; favorevoli: number | null; confrontato: boolean }[] };
+        expect(x.trait === "ALTRO" ? g.tratto === "STATO_CIVILE" : g.tratto === x.trait).toBe(true);
+        // i gruppi non confrontati non mostrano i favorevoli; nessun identificativo né data esce
+        expect(g.gruppi.every((y) => y.confrontato || y.favorevoli === null)).toBe(true);
+        expect(x.groups).not.toMatch(/[0-9a-f]{8}-[0-9a-f]{4}-/);
+      }
+      // ogni tratto conta le stesse persone: i candidati fra cui l'opzione ha scelto
+      const totali = righe.map((x) => (JSON.parse(x.groups!) as { gruppi: { persone: number }[] }).gruppi.reduce((a, y) => a + y.persone, 0));
+      expect(new Set(totali).size).toBe(1);
+      expect(totali[0]).toBeGreaterThan(0);
+    }
     expect(eq.rows.every((x) => !x.recommended)).toBe(true);
-    expect(eq.rows.filter((x) => x.method).every((x) => x.method === METODO_EQUITA_PROVVISORIO)).toBe(true);
 
     // la struttura ombra di B: chiusa l'assegnazione di chi esce, nuova quella di chi copre
     const ombra = await pool.query<{ user_id: string; change: string }>(

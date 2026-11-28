@@ -12,11 +12,13 @@
  *   B «solo il primo rimpiazzo»     (effetto diretto): i successori coprono, le loro posizioni no;
  *   C «copertura a cascata»         (solo per CASCATA): ogni posizione liberata si copre, fin dove si può.
  *
- * Equità (E12): B e C spostano persone, quindi portano un controllo di equità. Il calcolo vero è la
- * voce F6b: finché non c'è, il controllo si dichiara DATI_INSUFFICIENTI con il metodo
- * `equita-non-calcolata@0.1.0`, e per la guardia G3 l'opzione non può essere raccomandata. Nessuna
- * opzione viene raccomandata da questo calcolatore: raccomandare è una scelta che si fa dopo
- * l'equità, non un numero.
+ * Equità (E12, voce F6b): B e C spostano persone, quindi portano il controllo di equità per ogni
+ * tratto protetto. La popolazione è quella fra cui l'opzione ha scelto: i candidati pronti delle
+ * tavole di successione delle posizioni che l'opzione ha cercato di coprire, senza chi esce.
+ * Favorevole è chi viene scelto come rimpiazzo. Ingressi: la prontezza e la conferma del
+ * candidato, che sono ciò su cui il calcolatore sceglie. I gruppi si salvano come JSON
+ * (`EquitaGruppo[]`), così chi li mostra li traduce. Nessuna opzione viene raccomandata da questo
+ * calcolatore: raccomandare è una scelta che si fa dopo l'equità, non un numero.
  *
  * Il perimetro della persona (I16-I22) si applica alle rotte che chiamano questo servizio (F3b-2):
  * qui il servizio pretende solo che le persone siano del tenant (I5).
@@ -35,9 +37,43 @@ import {
 } from "./calcolatori/successione.js";
 import * as repo from "./repository.js";
 import type { Fonte, TitolareOmbraCompleto } from "./repository.js";
+import type { Successore, PosizioneOmbra } from "./calcolatori/successione.js";
+import { dichiaraEquita, EQUITA_SOGLIA } from "../../lib/equita/index.js";
+import type { EquitaControlloTratto, EquitaTratto } from "@heuresys/shared";
 
-export const METODO_EQUITA_PROVVISORIO = "equita-non-calcolata@0.1.0" as const;
-export const SOGLIA_EQUITA = 0.8;
+export const SOGLIA_EQUITA = EQUITA_SOGLIA;
+/** Che cosa conta come favorevole in un'opzione di successione: essere scelta come rimpiazzo. */
+export const EQUITA_FAVOREVOLE_SUCCESSIONE = "RIMPIAZZO_SCELTO" as const;
+/** Ciò su cui il calcolatore della successione sceglie (l'ordine dell'identificativo serve solo alla riproducibilità). */
+export const EQUITA_INGRESSI_SUCCESSIONE = ["readiness_level", "confirmed"] as const;
+
+/** I tratti della dichiarazione nei valori ammessi da `sys_scenario_equity_checks` (000515): lo stato civile va in ALTRO. */
+const TRATTO_SCENARIO: Readonly<Record<EquitaTratto, "GENERE" | "ETA" | "NAZIONALITA" | "ALTRO">> = {
+  GENERE: "GENERE", ETA: "ETA", NAZIONALITA: "NAZIONALITA", STATO_CIVILE: "ALTRO",
+};
+
+/** La riga da salvare per un tratto: i gruppi come JSON, con il tratto vero quando la colonna lo riduce ad ALTRO. */
+export function rigaEquita(t: EquitaControlloTratto): { trait: string; groups: string; ratio: number | null; outcome: string } {
+  return {
+    trait: TRATTO_SCENARIO[t.tratto],
+    groups: JSON.stringify({ tratto: t.tratto, gruppi: t.gruppi }),
+    ratio: t.rapporto,
+    outcome: t.esito,
+  };
+}
+
+/** I candidati fra cui l'opzione ha scelto: pronti, sulle posizioni che ha cercato di coprire, senza chi esce. */
+export function candidatiConsiderati(
+  esito: EsitoSuccessione,
+  posizioni: readonly PosizioneOmbra[],
+  successori: readonly Successore[],
+  uscite: readonly string[],
+): Successore[] {
+  const vere = new Map(posizioni.map((p) => [p.id, p.sourceId]));
+  const cercate = new Set(esito.passi.map((p) => vere.get(p.posizioneId)).filter((x): x is string => typeof x === "string"));
+  const escono = new Set(uscite);
+  return successori.filter((s) => cercate.has(s.posizioneSourceId) && !escono.has(s.userId) && s.prontezza !== null && s.prontezza !== "NOT_READY");
+}
 
 export interface RichiestaUscite {
   tenantId: string;
@@ -168,11 +204,12 @@ async function calcolaDentro(c: PoolClient, r: RichiestaUscite, uscite: string[]
       });
     }
     if (toccaPersone) {
-      await repo.inserisciEquita(c, {
-        optionId, tenantId: r.tenantId, trait: "GENERE",
-        groups: "non confrontati: il calcolo dell'equità è la voce F6b del piano, non ancora in servizio",
-        ratio: null, threshold: SOGLIA_EQUITA, outcome: "DATI_INSUFFICIENTI", method: METODO_EQUITA_PROVVISORIO,
-      });
+      const scelti = new Set(esito.spostati);
+      const d = await dichiaraEquita(c, candidatiConsiderati(esito, ombra.posizioni, successori, uscite), r.tenantId,
+        (x) => scelti.has(x.userId), EQUITA_FAVOREVOLE_SUCCESSIONE, EQUITA_INGRESSI_SUCCESSIONE);
+      for (const t of d.tratti) {
+        await repo.inserisciEquita(c, { optionId, tenantId: r.tenantId, ...rigaEquita(t), threshold: d.soglia, method: d.metodo });
+      }
     }
     await scriviOmbraOpzione(c, { versionId, tenantId: r.tenantId, optionId, uscite, esito, titolari: ombra.titolari });
     opzioni.push({ code: p.code, optionId, profondita: p.profondita, esito });

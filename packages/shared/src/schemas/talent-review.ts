@@ -13,6 +13,7 @@
  * (no `talent:read:self`); talent data is a management surface, org-gated.
  */
 import { z } from "zod";
+import { EquitaDichiarazioneSchema } from "./equita.js";
 import { paginationFields } from "./_pagination.js";
 
 /** Bucketed band on either 9-box axis (potential / performance). */
@@ -51,6 +52,8 @@ export type NineBoxListQuery = z.infer<typeof NineBoxListQuerySchema>;
 export const NineBoxListResponseSchema = z.object({
   items: z.array(NineBoxRowSchema),
   total: z.number().int().min(0),
+  /** E12 (F6b): il controllo di equità sull'intera popolazione nel perimetro di chi guarda, non sulla pagina (9-box: favorevole = potenziale alto). */
+  equita: EquitaDichiarazioneSchema,
 });
 export type NineBoxListResponse = z.infer<typeof NineBoxListResponseSchema>;
 
@@ -118,6 +121,8 @@ export type ReadinessScoreListQuery = z.infer<typeof ReadinessScoreListQuerySche
 export const ReadinessScoreListResponseSchema = z.object({
   items: z.array(ReadinessScoreSchema),
   total: z.number().int().min(0),
+  /** E12 (F6b): il controllo di equità sull'intera popolazione nel perimetro di chi guarda, non sulla pagina (prontezza: favorevole = pronta ora o entro sei mesi). */
+  equita: EquitaDichiarazioneSchema,
 });
 export type ReadinessScoreListResponse = z.infer<typeof ReadinessScoreListResponseSchema>;
 
@@ -151,6 +156,8 @@ export type SuccessionScoreListQuery = z.infer<typeof SuccessionScoreListQuerySc
 export const SuccessionScoreListResponseSchema = z.object({
   items: z.array(SuccessionScoreSchema),
   total: z.number().int().min(0),
+  /** E12 (F6b): il controllo di equità sull'intera popolazione nel perimetro di chi guarda, non sulla pagina (successione: favorevole = pronta ora o entro sei mesi). */
+  equita: EquitaDichiarazioneSchema,
 });
 export type SuccessionScoreListResponse = z.infer<typeof SuccessionScoreListResponseSchema>;
 

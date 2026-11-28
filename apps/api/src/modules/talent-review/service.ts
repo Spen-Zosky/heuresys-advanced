@@ -22,6 +22,19 @@ import type {
 import * as repo from "./repository.js";
 import { resolveOrgReadScope } from "../../lib/scope/resolver.js";
 import { masksUnderPlatformMandate, maskFields } from "../../lib/scope/mask.js";
+import { dichiaraEquita } from "../../lib/equita/index.js";
+
+/**
+ * E12 (ADR-0063, voce F6b) — il controllo di equità sulle tre famiglie che si pronunciano sulle
+ * persone. Gli ingressi sono quelli che hanno prodotto i giudizi, come li porta il payload: i
+ * voti della valutazione per il 9-box, il livello di prontezza e l'ordine nella lista dei
+ * successori per prontezza e successione. La dichiarazione si calcola sui valori veri e sull'intera
+ * popolazione del perimetro, prima della maschera, ed esce solo aggregata.
+ */
+const NINE_BOX_INGRESSI = ["latest_overall_rating", "latest_potential_rating"] as const;
+const READINESS_INGRESSI = ["readiness_level"] as const;
+const SUCCESSION_INGRESSI = ["readiness_level", "rank_order"] as const;
+const ORIZZONTI_FAVOREVOLI = new Set(["READY_NOW", "READY_6_MONTHS"]);
 
 /**
  * #124 D4 / ADR-0032 — cosa se ne va su ciascuna delle quattro famiglie
@@ -83,8 +96,11 @@ async function orgFilter(
 export const talentReviewService = {
   /** Org-gated 9-box grid (I18), giudizio mascherato al solo mandato piattaforma (#124 D4). */
   async listNineBox(actor: ActorContext, query: NineBoxListQuery) {
-    const page = await repo.listNineBox(pool, { ...(await orgFilter(actor)), query });
-    return maskPage(actor, page, NINE_BOX_JUDGMENT_FIELDS);
+    const f = await orgFilter(actor);
+    const page = await repo.listNineBox(pool, { ...f, query });
+    const equita = await dichiaraEquita(pool, await repo.popolazioneNineBox(pool, f), f.tenantId ?? null,
+      (r) => r.classe === "HIGH", "POTENZIALE_ALTO", NINE_BOX_INGRESSI);
+    return { ...maskPage(actor, page, NINE_BOX_JUDGMENT_FIELDS), equita };
   },
 
   /** Org-gated position-fit scores (I18), idem. */
@@ -95,14 +111,20 @@ export const talentReviewService = {
 
   /** Org-gated readiness scores (I18), idem. */
   async listReadiness(actor: ActorContext, query: ReadinessScoreListQuery) {
-    const page = await repo.listReadiness(pool, { ...(await orgFilter(actor)), query });
-    return maskPage(actor, page, VALUE_JUDGMENT_FIELDS);
+    const f = await orgFilter(actor);
+    const page = await repo.listReadiness(pool, { ...f, query });
+    const equita = await dichiaraEquita(pool, await repo.popolazioneReadiness(pool, f), f.tenantId ?? null,
+      (r) => ORIZZONTI_FAVOREVOLI.has(r.classe), "PRONTO_ENTRO_6_MESI", READINESS_INGRESSI);
+    return { ...maskPage(actor, page, VALUE_JUDGMENT_FIELDS), equita };
   },
 
   /** Org-gated succession scores (I18), idem. */
   async listSuccession(actor: ActorContext, query: SuccessionScoreListQuery) {
-    const page = await repo.listSuccession(pool, { ...(await orgFilter(actor)), query });
-    return maskPage(actor, page, VALUE_JUDGMENT_FIELDS);
+    const f = await orgFilter(actor);
+    const page = await repo.listSuccession(pool, { ...f, query });
+    const equita = await dichiaraEquita(pool, await repo.popolazioneSuccession(pool, f), f.tenantId ?? null,
+      (r) => r.classe !== null && ORIZZONTI_FAVOREVOLI.has(r.classe), "PRONTO_ENTRO_6_MESI", SUCCESSION_INGRESSI);
+    return { ...maskPage(actor, page, VALUE_JUDGMENT_FIELDS), equita };
   },
 
   /** Critical positions (position-level, no person rows) — tenant-scoped only. */

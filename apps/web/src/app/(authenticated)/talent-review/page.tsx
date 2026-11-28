@@ -9,8 +9,9 @@ import { KPIStrip } from "@/components/indicatori-leggibili";
 import { SchedePagina } from "@/components/schede-pagina";
 import type {
   NineBoxRow, TalentBand, FitScore, ReadinessScore, SuccessionScore,
-  CriticalPosition, CriticalCoverage,
+  CriticalPosition, CriticalCoverage, EquitaDichiarazione,
 } from "@heuresys/shared";
+import { DichiarazioneEquita } from "@/components/dichiarazione-equita";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { StatoErrore } from "@/components/stato-pagina";
@@ -108,6 +109,12 @@ export default function TalentReviewPage() {
   const succession = usePaginatedList<SuccessionScore>({ queryKey: ["talent-review", "succession"], path: "/v1/talent-review/succession" });
   const criticalPositions = usePaginatedList<CriticalPosition>({ queryKey: ["talent-review", "critical-positions"], path: "/v1/talent-review/critical-positions" });
   const coverage = usePaginatedList<CriticalCoverage>({ queryKey: ["talent-review", "critical-coverage"], path: "/v1/talent-review/critical-coverage" });
+  // E12 (F6b): ogni elenco che si pronuncia sulle persone porta la sua dichiarazione di equità,
+  // calcolata dall'API sull'intera popolazione del perimetro (non sulla pagina).
+  const equitaDi = (d: unknown): EquitaDichiarazione | undefined => (d as { equita?: EquitaDichiarazione } | undefined)?.equita;
+  const equitaNineBox = equitaDi(nineBox.query.data);
+  const equitaReadiness = equitaDi(readiness.query.data);
+  const equitaSuccession = equitaDi(succession.query.data);
 
   const fitColumns = useMemo(() => buildFitColumns(t, f, enumLabel), [t, f, enumLabel]);
   const readinessColumns = useMemo(() => buildReadinessColumns(t, enumLabel, f), [t, enumLabel, f]);
@@ -234,6 +241,8 @@ export default function TalentReviewPage() {
         </CardContent>
       </Card>
 
+      {equitaNineBox && <DichiarazioneEquita equita={equitaNineBox} />}
+
       {/* C5: le sezioni lunghe stanno in schede orizzontali */}
       <SchedePagina
         schede={[
@@ -256,6 +265,7 @@ export default function TalentReviewPage() {
           ) },
           { id: "prontezza", titolo: t("talentReview.sections.readiness"), contenuto: (
             <div className="space-y-3">
+            {equitaReadiness && <DichiarazioneEquita equita={equitaReadiness} />}
             <EntityTable<ReadinessScore>
               isLoading={readiness.query.isLoading}
               isError={readiness.query.isError}
@@ -273,6 +283,7 @@ export default function TalentReviewPage() {
           ) },
           { id: "successione", titolo: t("talentReview.sections.succession"), contenuto: (
             <div className="space-y-3">
+            {equitaSuccession && <DichiarazioneEquita equita={equitaSuccession} />}
             <EntityTable<SuccessionScore>
               isLoading={succession.query.isLoading}
               isError={succession.query.isError}

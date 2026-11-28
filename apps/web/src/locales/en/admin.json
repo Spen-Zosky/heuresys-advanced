@@ -616,7 +616,8 @@
     "title": "Org chart",
     "cliente": "Client",
     "back": "← Organization",
-    "description": "The client's units with the people who work in them, computed from today's data: as boxes like a classic org chart, or as a tree of nodes."
+    "description": "The client's units with the people who work in them, computed from today's data: as boxes like a classic org chart, or as a tree of nodes.",
+    "backstage": "Open Backstage"
   },
   "positions": {
     "title": "Positions",
@@ -2371,6 +2372,161 @@
       "CONFERMATA": "Confirmed",
       "NEGATA": "Denied",
       "AUTONOMA": "Without confirmation"
+    }
+  },
+  "backstage": {
+    "title": "Backstage",
+    "description": "The client's ghost organisation: the apex, the divisions and the departments, derived live from the unit tree. For each one an agent Head works alongside the real head.",
+    "negato": "For now the Backstage is reserved for the platform administration and HR department head roles. If you need it, you can send a request to the System Administrator.",
+    "back": "← Org chart",
+    "guida": {
+      "apri": "What Backstage is and how to use it",
+      "titolo": "Backstage guide",
+      "sottotitolo": "What it is for and how to use it",
+      "chiudi": "Close the guide"
+    },
+    "caricamento": {
+      "titolo": "Loading Backstage",
+      "dettaglio": "{{fatte}} of {{totale}} reads: units, history, drift and live org chart"
+    },
+    "errore": "Backstage could not be read.",
+    "riepilogo": "{{unita}} Backstage units: one apex, {{divisioni}} divisions, {{direzioni}} departments",
+    "stati": {
+      "formaAllineata": "Aligned with the live tree",
+      "formaDaRiformare_one": "{{count}} difference from the live tree",
+      "formaDaRiformare_other": "{{count}} differences from the live tree",
+      "allineata": "Aligned",
+      "chiusa": "Closed on {{quando}}",
+      "periodoChiuso": "Closed",
+      "periodoAperto": "In force"
+    },
+    "calcolato": "Computed on {{quando}}",
+    "aggiorna": "Refresh",
+    "aggiornando": "Refreshing…",
+    "vuoto": "This client's Backstage is empty",
+    "vuotoMotivo": "The unit tree has no active apex yet.",
+    "schede": {
+      "albero": "Tree",
+      "elenco": "List",
+      "storia": "History",
+      "deriva": "Drift"
+    },
+    "legendaAlbero": "Backstage from the apex down, with the people of each real unit (the head in bold). Double-click a box to open its card.",
+    "legendaDeriva": "Boxes with a coloured border are drifting from the live tree.",
+    "ariaAlbero": "Backstage tree",
+    "colonne": {
+      "unita": "Unit",
+      "tipo": "Type",
+      "livello": "Level",
+      "sopra": "Parent unit",
+      "responsabile": "Head",
+      "persone": "People",
+      "inVigoreDal": "In force since",
+      "codice": "Code",
+      "stato": "Status",
+      "dal": "From",
+      "al": "To",
+      "motivoApertura": "Reason for opening",
+      "motivoChiusura": "Reason for closing",
+      "cheCosaCambia": "What changes"
+    },
+    "senzaResponsabile": "No head",
+    "elencoCaption_one": "{{count}} Backstage unit",
+    "elencoCaption_other": "{{count}} Backstage units",
+    "legendaStoria": "Each row is a period in which a Backstage unit kept the same shape. A closed period is never reopened or changed.",
+    "storiaCaption_one": "{{count}} period",
+    "storiaCaption_other": "{{count}} periods",
+    "storiaVuota": "No period recorded",
+    "legendaDerivaScheda": "The differences between Backstage and today's live tree, unit by unit. The reform closes them and opens the new periods.",
+    "derivaCaption_one": "{{count}} difference",
+    "derivaCaption_other": "{{count}} differences",
+    "riforma": {
+      "esito": "Reform done: {{aperte}} periods opened, {{chiuse}} closed, {{attive}} units in force.",
+      "pulsante": "Reform Backstage",
+      "senzaPermesso": "Reforming Backstage requires permission to update the org chart.",
+      "titolo": "Reform Backstage?",
+      "testo_one": "Backstage realigns with the live tree: {{count}} difference. Outdated periods close and stay in the history, new ones open.",
+      "testo_other": "Backstage realigns with the live tree: {{count}} differences. Outdated periods close and stay in the history, new ones open.",
+      "errore": "The reform failed.",
+      "annulla": "Cancel",
+      "inCorso": "Reform in progress…",
+      "conferma": "Confirm and reform"
+    },
+    "deriva": {
+      "nessunaTitolo": "No drift",
+      "nessunaMotivo": "Backstage matches today's live tree: there is nothing to reform.",
+      "cambi": {
+        "NUOVA": "New",
+        "USCITA": "Left",
+        "MODIFICATA": "Changed"
+      },
+      "campi": {
+        "level": "Level",
+        "kind": "Type",
+        "code": "Code",
+        "name": "Name",
+        "sourceParentId": "Parent unit",
+        "sourceType": "Real unit type"
+      },
+      "spiega": {
+        "NUOVA": "The live tree has a unit that Backstage does not have yet",
+        "USCITA": "Backstage has a unit that the live tree no longer has"
+      },
+      "altraUnita": "a unit outside Backstage",
+      "nessuna": "none"
+    },
+    "tipi": {
+      "VERTICE": "Apex",
+      "DIVISIONE": "Division",
+      "DIREZIONE": "Department"
+    },
+    "livelli": {
+      "0": "Apex",
+      "1": "First level",
+      "2": "Second level"
+    },
+    "aperture": {
+      "FORMAZIONE": "Backstage formation",
+      "NUOVA": "New unit",
+      "MODIFICATA": "Changed unit"
+    },
+    "chiusure": {
+      "MODIFICATA": "Changed unit",
+      "USCITA": "Unit left"
+    },
+    "scheda": {
+      "nonIndicato": "Not specified",
+      "capoAffianca": "The agent Head of “{{unita}}” works alongside {{persona}}.",
+      "capoSenzaResponsabile": "“{{unita}}” has no real head: its agent Head does not work alongside anyone yet.",
+      "tipo": "Type",
+      "livello": "Level",
+      "unitaReale": "Real unit",
+      "unitaEliminata": "The real unit was deleted",
+      "responsabile": "Head",
+      "sopra": "Parent unit",
+      "eIlVertice": "It is the apex",
+      "persone": "People",
+      "personeValore": "{{unita}} in the unit, {{totali}} including the units below",
+      "posizioni": "Positions",
+      "posizioniValore_one": "{{posizioni}} position, vacant: {{scoperte}}",
+      "posizioniValore_other": "{{posizioni}} positions, vacant: {{scoperte}}",
+      "inVigoreDal": "In force since",
+      "motivoApertura": "Reason for opening",
+      "stato": "Status",
+      "cheCosaCambia": "What changes against the live tree",
+      "unitaSotto": "Backstage units below",
+      "personeUnita": "People in the unit",
+      "responsabileBreve": "head",
+      "posizioniUnita": "Positions in the unit",
+      "scoperta": "Vacant",
+      "storia": "History of periods",
+      "periodoChiuso": "from {{dal}} to {{al}}",
+      "periodoAperto": "from {{dal}}, in force",
+      "percorso": "Card trail",
+      "sottotitolo": "Backstage {{tipo}}",
+      "indietro": "Back",
+      "chiudi": "Close",
+      "chiudiCascata": "Close all"
     }
   }
 }

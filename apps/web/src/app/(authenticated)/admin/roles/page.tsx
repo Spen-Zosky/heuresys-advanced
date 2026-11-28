@@ -10,6 +10,7 @@ import { Check } from "lucide-react";
 import { apiFetch } from "../../../../lib/api/fetch";
 import { MandateActsQueue } from "./_components/mandate-acts-queue";
 import { DelegheAmministrazione } from "./_components/deleghe-amministrazione";
+import { chiaveEtichetta, risorsaEAzione } from "@/lib/permessi-etichette";
 
 interface RolePermItem {
   roleCode: string;
@@ -26,7 +27,7 @@ interface RolePermItem {
  */
 // D3-20: i due punti e il trattino dei codici (`read:self`, `job-requisition`) non sono chiavi valide
 // per i18next (il due punti separa lo spazio di nomi): le voci del dizionario usano il trattino basso.
-const chiave = (codice: string) => codice.replace(/[:.-]/g, "_");
+const chiave = chiaveEtichetta;
 
 export default function AdminRolesPage() {
   const { t } = useTranslation("admin");
@@ -42,8 +43,9 @@ export default function AdminRolesPage() {
     for (const r of rp.data?.items ?? []) {
       rolesSet.add(r.roleCode);
       if (!permsMap.has(r.permissionCode)) {
-        const area = t(`roles.resources.${chiave(r.permissionResource)}`, { defaultValue: r.permissionResource });
-        const azione = t(`roles.actions.${chiave(r.permissionAction)}`, { defaultValue: r.permissionAction });
+        const ra = risorsaEAzione(r.permissionCode, r.permissionResource, r.permissionAction);
+        const area = t(`roles.resources.${chiave(ra.risorsa)}`, { defaultValue: ra.risorsa });
+        const azione = t(`roles.actions.${chiave(ra.azione)}`, { defaultValue: ra.azione });
         permsMap.set(r.permissionCode, { label: `${area} · ${azione}` });
       }
       let s = mat.get(r.roleCode);

@@ -217,12 +217,12 @@ const COMPOSTE: Array<[RegExp, string]> = [
 export const PAROLE_EN: Record<string, string> = {
   id: "", ids: "", is: "", has: "",
   cal: "calendar", conf: "configuration", cred: "credential", prof: "professional", prefs: "preferences",
-  req: "request", seq: "sequence", op: "operation", cert: "certificate", ref: "reference", org: "organisation",
+  req: "request", seq: "sequence", op: "operation", cert: "certificate", ref: "reference", org: "organization",
   args: "arguments", params: "parameters",
   // Le parole italiane dei nomi di colonna.
   agente: "agent", aggiunto: "added", annotato: "annotated", annullata: "cancelled", annullato: "cancelled",
   applicata: "applied", applicato: "applied", approvatore: "approver", attiva: "active", attivo: "active",
-  attore: "actor", avvenuta: "occurred", avvenuto: "occurred", azione: "action", catalogo: "catalogue",
+  attore: "actor", avvenuta: "occurred", avvenuto: "occurred", azione: "action", catalogo: "catalog",
   categoria: "category", chiave: "key", chiusura: "closure", codice: "code", colonna: "column", compito: "task",
   concedente: "grantor", concessioni: "grants", condizione: "condition", confidenza: "confidence",
   conflitto: "conflict", contratto: "contract", corpo: "body", corsa: "run", creata: "created", creato: "created",

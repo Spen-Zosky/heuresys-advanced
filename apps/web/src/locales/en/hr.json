@@ -10,13 +10,13 @@
     "loading": "Loading…"
   },
   "skills": {
-    "title": "Skill Catalogue",
-    "description": "Skills visible in the catalogue, both global and tenant-scoped.",
+    "title": "Skill Catalog",
+    "description": "Skills visible in the catalog, both global and tenant-scoped.",
     "count": "{{count}} skills visible",
     "count_one": "{{count}} skill visible",
     "errorMessage": "Unable to load the skills.",
     "emptyTitle": "No skills",
-    "emptyDescription": "There are no skills in the catalogue.",
+    "emptyDescription": "There are no skills in the catalog.",
     "caption": "Skill list",
     "form": {
       "createTitle": "New skill",
@@ -36,7 +36,7 @@
       "forbidden": "You do not have permission for this operation.",
       "duplicate": "A skill with this name or code already exists.",
       "readOnly": "You do not have permission to edit this skill.",
-      "search": "Search the catalogue",
+      "search": "Search the catalog",
       "searchPlaceholder": "code or name…",
       "tenantRequired": "As a platform administrator you can only create global skills: tick “Global skill”, or create the skill from within a tenant."
     },
@@ -74,7 +74,7 @@
     }
   },
   "kpis": {
-    "title": "KPI Catalogue",
+    "title": "KPI Catalog",
     "description": "Defined indicators, with unit of measure, reading direction (higher is better, or lower is better) and scope.",
     "count": "{{count}} KPIs defined — {{piattaforma}} platform, {{azienda}} company",
     "count_one": "{{count}} KPI defined — {{piattaforma}} platform, {{azienda}} company",
@@ -107,7 +107,7 @@
       "save": "Save",
       "saved": "Saved",
       "close": "Close",
-      "search": "Search the catalogue",
+      "search": "Search the catalog",
       "searchPlaceholder": "code or name…",
       "codeImmutable": "The code cannot be changed after creation.",
       "saveError": "Save failed.",
@@ -180,7 +180,7 @@
     "periodEnded": "period ended"
   },
   "orgDirector": {
-    "title": "Organisation design",
+    "title": "Organization design",
     "description": "Capability and maturity per org unit, from the MLCE and Maturity engines.",
     "count": "{{count}} units",
     "count_one": "{{count}} unit",
@@ -233,7 +233,7 @@
       }
     },
     "tabs": {
-      "units": "Organisational units",
+      "units": "Organizational units",
       "essential": "Essential capabilities"
     },
     "maturityLevels": {
@@ -394,7 +394,7 @@
         "classe": "Company class",
         "ccnl": "Collective agreements",
         "processi": "Processes",
-        "unita": "Organisation units",
+        "unita": "Organization units",
         "organigramma": "Org chart",
         "obblighi": "Obligations",
         "ruoli": "Roles",
@@ -639,7 +639,7 @@
     "skillNotDetected": "Not recorded",
     "skillNotDetectedHint": "The record does not name any skill for this gap.",
     "skillUnresolved": "Skill unresolved",
-    "skillUnresolvedHint": "This gap cites a skill that is no longer in the catalogue, or is not visible to this tenant.",
+    "skillUnresolvedHint": "This gap cites a skill that is no longer in the catalog, or is not visible to this tenant.",
     "caption": "Gap list",
     "cols": {
       "user": "User",
@@ -791,7 +791,7 @@
     }
   },
   "learning": {
-    "title": "Module Catalogue",
+    "title": "Module Catalog",
     "description": "Available learning modules, both global and tenant-scoped.",
     "count": "{{count}} modules — {{piattaforma}} platform, {{azienda}} company",
     "count_one": "{{count}} module — {{piattaforma}} platform, {{azienda}} company",
@@ -814,7 +814,7 @@
       "save": "Save",
       "saved": "Saved",
       "close": "Close",
-      "search": "Search the catalogue",
+      "search": "Search the catalog",
       "searchPlaceholder": "code or title…",
       "codeImmutable": "The code cannot be changed after creation.",
       "saveError": "Save failed.",
@@ -917,7 +917,7 @@
   },
   "taxonomy": {
     "title": "Skill Taxonomy",
-    "description_page": "Families, categories and proficiency levels: the shape the skill catalogue rests on.",
+    "description_page": "Families, categories and proficiency levels: the shape the skill catalog rests on.",
     "description": "Description",
     "dash": "—",
     "edit": "Edit",
@@ -1161,7 +1161,7 @@
   },
   "projects": {
     "title": "Projects",
-    "description": "The work of the organisation and who carries it. You see the projects you take part in; with an HR mandate, every project in the tenant.",
+    "description": "The work of the organization and who carries it. You see the projects you take part in; with an HR mandate, every project in the tenant.",
     "error": "Could not load the projects.",
     "detailError": "Could not load the project.",
     "emptyTitle": "No projects",
@@ -1499,27 +1499,27 @@
   },
   "mentorship": {
     "titolo": "Mentoring",
-    "descrizione": "Mentoring programmes, mentor and mentee pairs and their meetings.",
+    "descrizione": "Mentoring programs, mentor and mentee pairs and their meetings.",
     "nessuno": "not set",
     "omissis": "{omissis}",
     "omissisAiuto": "Person outside your scope: the name is not shown.",
     "incontriFuoriPerimetro": "Meetings not visible: one of the two people is outside your scope.",
-    "programmi": "Programmes ({{count}})",
-    "programmi_one": "Programme ({{count}})",
+    "programmi": "Programs ({{count}})",
+    "programmi_one": "Program ({{count}})",
     "erroreCarica": "Mentoring could not be loaded.",
-    "nessunProgramma": "No mentoring programme.",
-    "statoProgramma": "Programme status",
-    "nome": "Programme name",
+    "nessunProgramma": "No mentoring program.",
+    "statoProgramma": "Program status",
+    "nome": "Program name",
     "tipo": "Type",
     "durataMesi": "Duration (months)",
-    "creaProgramma": "Create the programme (draft)",
+    "creaProgramma": "Create the program (draft)",
     "mesi": "{{count}} months",
     "mesi_one": "{{count}} month",
     "coppie": "Mentor and mentee pairs ({{count}})",
     "coppie_one": "Mentor and mentee pair ({{count}})",
-    "filtraProgramma": "Programme",
-    "tuttiProgrammi": "All programmes",
-    "senzaProgramma": "no programme",
+    "filtraProgramma": "Program",
+    "tuttiProgrammi": "All programs",
+    "senzaProgramma": "no program",
     "statoCoppia": "Pair status",
     "frequenza": "Meeting frequency",
     "apriIncontri": "Meetings",
@@ -1650,7 +1650,7 @@
     "navAria": "Alignment families and domains",
     "overview": "Overview",
     "cleanup": "Cleanup",
-    "cleanupDescription": "Items the agent proposes to remove: names that appear twice in the same company catalogue.",
+    "cleanupDescription": "Items the agent proposes to remove: names that appear twice in the same company catalog.",
     "summary": "Of {{rows}} items compared, {{same}} are equal, {{partial}} partly equal, {{different}} different, {{onlyModel}} only in the model and {{onlyTenant}} only in the company.",
     "decisionsSummary": "Decisions: {{drafts}} drafts, {{approved}} approved, {{stale}} on items no longer present.",
     "families": {

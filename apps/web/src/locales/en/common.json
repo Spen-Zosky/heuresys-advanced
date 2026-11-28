@@ -71,7 +71,7 @@
       },
       "enroll": {
         "title": "Set up two-step verification",
-        "prompt": "Your organisation requires a second authentication factor. Set it up now to continue.",
+        "prompt": "Your organization requires a second authentication factor. Set it up now to continue.",
         "chooseMethod": "Choose a method",
         "methodTotp": "Authenticator app",
         "methodEmail": "Code via email",
@@ -662,7 +662,7 @@
       "KPI": "KPIs",
       "LEARNING": "Learning",
       "CERTIFICATION": "Certifications",
-      "BEHAVIORAL": "Behaviours",
+      "BEHAVIORAL": "Behaviors",
       "OVERALL": "Overall"
     },
     "overtimeType": {
@@ -927,7 +927,7 @@
     "code": {
       "FORBIDDEN": "Your profile does not allow this operation.",
       "CSRF_FAIL": "The page has been open too long: reload it and try again.",
-      "ORIGIN_MISMATCH": "The request comes from an address the server does not recognise: this is a service configuration problem, not your profile. Tell whoever runs the service.",
+      "ORIGIN_MISMATCH": "The request comes from an address the server does not recognize: this is a service configuration problem, not your profile. Tell whoever runs the service.",
       "VALIDATION_ERROR": "The request is not valid: check the data you entered.",
       "RESPONSE_CONTRACT_VIOLATION": "The server produced a non-conforming response: the error is ours, not yours.",
       "RESULT_LIMIT_EXCEEDED": "There are too many results to show at once: narrow them with a filter, such as unit or period.",
@@ -1118,13 +1118,13 @@
     "cronologia": "Conversations",
     "mostraCronologia": "Show conversations",
     "nascondiCronologia": "Hide conversations",
-    "massimizza": "Maximise",
+    "massimizza": "Maximize",
     "riduci": "Restore",
     "ridimensiona": "Drag to widen or narrow the window",
     "vuotoTitolo": "How can I help?",
     "vuotoTesto": "Ask about the data and the people you are allowed to see. What you cannot see stays hidden and is shown as “{omissis}”.",
-    "suggerimento1": "Summarise what this page shows.",
-    "suggerimento2": "How many people work in each organisational unit?",
+    "suggerimento1": "Summarize what this page shows.",
+    "suggerimento2": "How many people work in each organizational unit?",
     "suggerimento3": "Which positions are vacant?",
     "fasePensa": "Thinking…",
     "faseConsulta": "Looking at the data…",
@@ -1652,7 +1652,7 @@
       "AT_RISK": "At risk",
       "AUTO": "Automatic",
       "BASIC": "Basic",
-      "BEHAVIORAL": "Behaviours",
+      "BEHAVIORAL": "Behaviors",
       "BEREAVEMENT": "Bereavement",
       "BI_WEEKLY": "Every two weeks",
       "BLACKLISTED": "Blocked",
@@ -1931,7 +1931,7 @@
       "aiuto": "Mouse wheel or + and − keys to zoom · drag to move · double-click an empty area to fit",
       "adatta": "Fit"
     },
-    "completo": "Full organisation chart",
+    "completo": "Full organization chart",
     "completoNota": "Overview without names; below, head office and branches with their people.",
     "centrale": "Head office",
     "filiali": "Branches",
@@ -1952,8 +1952,8 @@
     "riduci": "Zoom out",
     "ingrandisci": "Zoom in",
     "vuoto": "No active units for this client.",
-    "errore": "Unable to compute the organisation chart.",
-    "aria": "Organisation chart of {{cliente}}",
+    "errore": "Unable to compute the organization chart.",
+    "aria": "Organization chart of {{cliente}}",
     "ariaNodi": "Unit tree of {{cliente}}",
     "avvisi": {
       "unitaSenzaResponsabile_one": "{{count}} unit without a head",
@@ -1977,7 +1977,7 @@
     },
     "consolidamento": {
       "titolo": "The client's org chart today",
-      "spiegazione": "The organisation as it is now, with the people in each unit: the starting point of the consolidation proposals."
+      "spiegazione": "The organization as it is now, with the people in each unit: the starting point of the consolidation proposals."
     },
     "previste_one": "{{count}} planned",
     "previste_other": "{{count}} planned"
@@ -2010,7 +2010,7 @@
         "testo": "A way to judge whether a capability is a lasting competitive advantage: it must be valuable, rare, hard to copy and supported by the organization."
       },
       "CCNL": {
-        "esteso": "National collective labour agreement",
+        "esteso": "National collective labor agreement",
         "testo": "The sector agreement that sets levels, minimum pay, hours, holidays and leave. For a bank it is the credit-sector CCNL."
       },
       "RAL": {
@@ -2149,10 +2149,10 @@
       },
       "evidenza": {
         "termine": "evidence",
-        "testo": "The fact that supports the judgement: a finished course, a review, a certificate."
+        "testo": "The fact that supports the judgment: a finished course, a review, a certificate."
       },
       "giudizio": {
-        "termine": "judgement",
+        "termine": "judgment",
         "testo": "The assessment given on this point, with its reason."
       },
       "verdetto": {
@@ -2192,7 +2192,7 @@
         "testo": "The times the measure was collected in the period."
       },
       "iscrizione": {
-        "termine": "enrolment",
+        "termine": "enrollment",
         "testo": "The person is enrolled in the initiative: the status tells whether they started it, finished it or left it."
       },
       "obbligatorio": {
@@ -2273,7 +2273,7 @@
       },
       "compaRatio": {
         "termine": "compa-ratio",
-        "testo": "The person's pay divided by the midpoint of their band: 100% is the centre, below 80% or above 120% deserves a look."
+        "testo": "The person's pay divided by the midpoint of their band: 100% is the center, below 80% or above 120% deserves a look."
       },
       "turnover": {
         "termine": "turnover",
@@ -2361,7 +2361,7 @@
       },
       "valutazione": {
         "termine": "review",
-        "testo": "The period judgement on performance, given by the manager and, where foreseen, calibrated."
+        "testo": "The period judgment on performance, given by the manager and, where foreseen, calibrated."
       },
       "ciclo": {
         "termine": "cycle",
@@ -2369,11 +2369,11 @@
       },
       "competenza": {
         "termine": "skill",
-        "testo": "A professional ability described in a catalogue (ESCO or company), with a level from 1 to 5."
+        "testo": "A professional ability described in a catalog (ESCO or company), with a level from 1 to 5."
       },
       "competenze": {
         "termine": "skills",
-        "testo": "The professional abilities described in a catalogue (ESCO or company), each with a level from 1 to 5."
+        "testo": "The professional abilities described in a catalog (ESCO or company), each with a level from 1 to 5."
       },
       "livelloAtteso": {
         "termine": "expected level",
@@ -2449,7 +2449,7 @@
       },
       "ruoloProfessionale": {
         "termine": "job role",
-        "testo": "The job described in the catalogue (family and role), independent of the single position."
+        "testo": "The job described in the catalog (family and role), independent of the single position."
       },
       "maturato": {
         "termine": "accrued",
@@ -2637,7 +2637,7 @@
         "nome": "Model process",
         "domanda": "What is the reusable definition of a process, valid for a sector",
         "nonE": "How a single company lives it",
-        "dove": "Process catalogue; Process owner"
+        "dove": "Process catalog; Process owner"
       },
       "configurazione": {
         "nome": "Tenant process",
@@ -2708,13 +2708,13 @@
       "DATI_INSUFFICIENTI": "Insufficient data"
     },
     "sintesi": {
-      "SUPERATO": "The proposal does not penalise any group by {{tratti}}: every measured ratio is above the threshold.",
+      "SUPERATO": "The proposal does not penalize any group by {{tratti}}: every measured ratio is above the threshold.",
       "NON_SUPERATO": "The proposal does not pass the check.",
       "DATI_INSUFFICIENTI": "The groups are too small to measure a ratio: the check was run and says so, without inventing an outcome."
     },
     "nonMisurati": "Not measured for insufficient data: {{tratti}}.",
-    "nonRaccomandabile": "This proposal is not a recommendation: it penalises a protected group beyond the threshold, or uses a protected trait in the calculation. Review it before deciding.",
-    "metodo": "Four-fifths method: for each trait the share of people with a favourable outcome ({{favorevole}}) is compared group by group across {{persone}} people; the ratio between the lowest and the highest share must be at least {{soglia}}. Groups with fewer than {{minimo}} people are merged and not compared, and for them the number of people with a favourable outcome is not shown.",
+    "nonRaccomandabile": "This proposal is not a recommendation: it penalizes a protected group beyond the threshold, or uses a protected trait in the calculation. Review it before deciding.",
+    "metodo": "Four-fifths method: for each trait the share of people with a favorable outcome ({{favorevole}}) is compared group by group across {{persone}} people; the ratio between the lowest and the highest share must be at least {{soglia}}. Groups with fewer than {{minimo}} people are merged and not compared, and for them the number of people with a favorable outcome is not shown.",
     "favorevole": {
       "PRONTO_ENTRO_6_MESI": "ready now or within six months",
       "NON_A_RISCHIO_ALTO": "not flagged at high or critical risk of leaving",

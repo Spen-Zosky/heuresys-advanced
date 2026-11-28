@@ -68,3 +68,42 @@ export const GhostRiformaResponseSchema = z.object({
   attive: z.number().int().min(0),
 });
 export type GhostRiformaResponse = z.infer<typeof GhostRiformaResponseSchema>;
+
+/**
+ * La deriva: le differenze fra la forma ghost aperta e l'albero vivo, una voce per unità reale.
+ * NUOVA = l'albero vivo ha un'unità che la forma ghost non ha ancora; USCITA = la forma ghost ha
+ * un'unità che l'albero vivo non ha più (disattivata, scaduta o scesa sotto il secondo livello);
+ * MODIFICATA = la stessa unità reale con tratti diversi, e `changedFields` dice quali.
+ */
+export const GHOST_DRIFT_CHANGE_VALUES = ["NUOVA", "USCITA", "MODIFICATA"] as const;
+export const GHOST_DRIFT_FIELD_VALUES = ["level", "kind", "code", "name", "sourceParentId", "sourceType"] as const;
+
+export const GhostTraitsSchema = z.object({
+  sourceParentId: z.uuid().nullable(),
+  level: z.number().int().min(0).max(2),
+  kind: GhostUnitKindSchema,
+  code: z.string(),
+  name: z.string(),
+  sourceType: z.string().nullable(),
+});
+export type GhostTraits = z.infer<typeof GhostTraitsSchema>;
+
+export const GhostDriftItemSchema = z.object({
+  change: z.enum(GHOST_DRIFT_CHANGE_VALUES),
+  sourceUnitId: z.uuid().nullable(),
+  /** I tratti nella forma ghost aperta; null per una unità NUOVA. */
+  ghost: GhostTraitsSchema.nullable(),
+  /** I tratti nell'albero vivo; null per una unità USCITA. */
+  live: GhostTraitsSchema.nullable(),
+  changedFields: z.array(z.enum(GHOST_DRIFT_FIELD_VALUES)),
+});
+export type GhostDriftItem = z.infer<typeof GhostDriftItemSchema>;
+
+export const GhostDriftResponseSchema = z.object({
+  allineata: z.boolean(),
+  items: z.array(GhostDriftItemSchema),
+  total: z.number().int().min(0),
+  /** Quando la deriva è stata calcolata (ogni chiamata la ricalcola). */
+  calcolataIl: z.iso.datetime(),
+});
+export type GhostDriftResponse = z.infer<typeof GhostDriftResponseSchema>;

@@ -1,7 +1,7 @@
 /**
  * apps/web/tests/e2e/backstage.spec.ts — il Backstage, l'organizzazione ghost (ADR-0063 D2, G1).
  *
- * Dati vivi, login reale del TENANT_ADMIN di RTL: l'elenco ha lo stesso numero dell'API, l'albero
+ * Dati vivi, login reale del Responsabile della direzione HR di RTL (HRMS_MANAGER): l'elenco ha lo stesso numero dell'API, l'albero
  * si apre adattato e il doppio clic su un riquadro apre la scheda a cascata, la deriva coincide con
  * l'API, e la guida (i) si apre con le sue infografiche disegnate.
  */
@@ -25,10 +25,15 @@ test.describe("Backstage — dati vivi", () => {
       return;
     }
     await expect(page.getByTestId("backstage")).toBeVisible();
-    const vertice = body.items.find((g) => g.level === 0)!;
-    await page.locator(`[data-unita="${vertice.sourceUnitId}"]`).dblclick();
+    // La società è l'etichetta del disegno, non un riquadro (regola degli organigrammi): il primo
+    // riquadro è l'unità al vertice sotto di essa, ed è un'unità ghost dell'API.
+    const primo = page.getByTestId("backstage-albero-area").locator("g[data-unita][role=button]").first();
+    const id = await primo.getAttribute("data-unita");
+    const unita = body.items.find((g) => g.sourceUnitId === id);
+    expect(unita, `il riquadro ${id} è un'unità del Backstage`).toBeTruthy();
+    await primo.dblclick();
     await expect(page.getByTestId("scheda-ghost")).toBeVisible();
-    await expect(page.getByTestId("scheda-ghost").getByRole("heading", { name: vertice.name })).toBeVisible();
+    await expect(page.getByTestId("scheda-ghost").getByRole("heading", { name: unita!.name })).toBeVisible();
     await page.getByTestId("scheda-ghost-chiudi").click();
 
     await page.getByTestId("scheda-elenco").click();

@@ -9,7 +9,7 @@
 import type { Pool, PoolClient } from "pg";
 import type { TrattiPersona } from "./valuta.js";
 
-type DbConnector = Pool | PoolClient;
+export type DbConnector = Pool | PoolClient;
 
 export async function leggiTrattiProtetti(
   q: DbConnector,

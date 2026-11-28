@@ -138,3 +138,22 @@ describe("rifiuto", () => {
     expect(s.proposals.filter((p) => p.outcome === "PERSONALIZZAZIONE").map((p) => p.tenantKeys[0]).sort()).toEqual(["t-cc", "t-rec"]);
   });
 });
+
+describe("il motivo delle proposte ha anche la versione inglese (difetto del 2026-11-28)", () => {
+  it("lacune e personalizzazioni portano il motivo fisso in inglese, e quello del giudice passa com'è", async () => {
+    const giudice: Giudice = async (lotto) =>
+      lotto.questions.map((d) => ({
+        tenantKey: d.tenantItem.key,
+        prototypeKeys: d.candidates.filter((c) => c.key === "P-ASS").map((c) => c.key),
+        confidence: 95,
+        reason: "Stesso processo.",
+        reasonEn: "Same process.",
+      }));
+    const stato = await consolidaGruppo(nuovoStato("PROCESSES", prototipo, tenant), giudice);
+    expect(stato.proposals.length).toBeGreaterThan(0);
+    for (const p of stato.proposals) {
+      expect(p.reasonEn, `${p.outcome}/${p.method}: ${p.reason}`).toBeTruthy();
+      expect(p.reasonEn).not.toBe(p.reason);
+    }
+  });
+});

@@ -139,7 +139,11 @@ describe("2026-11-18 — ciò che la persona non vede: {omissis} e letture negat
     );
     const c = new HeuresysClient({ baseUrl: "http://api", session, fetchImpl });
     c.collegaEsiti(esiti);
-    expect(await c.call("GET", "/succession/plans")).toMatchObject({ esito: "CONFERMA_SECONDO_FATTORE" });
+    const daConfermare = (await c.call("GET", "/succession/plans")) as { esito: string; istruzione: string };
+    expect(daConfermare.esito).toBe("CONFERMA_SECONDO_FATTORE");
+    // Difetto del 2026-11-27: il modello ripeteva la richiesta senza mostrare ciò che poteva leggere.
+    expect(daConfermare.istruzione).toMatch(/Non fermarti qui/);
+    expect(daConfermare.istruzione).toMatch(/mostra tutto ciò che hai trovato/);
     expect(await c.call("GET", "/compensation")).toMatchObject({ esito: "NON_AUTORIZZATO" });
     expect(esiti.conteggio()).toEqual({ riuscite: 0, negate: 1, daConfermare: 1 });
     // La persona può sbloccare la lettura: il messaggio fisso le dice come, non che le è vietata.

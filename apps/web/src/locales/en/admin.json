@@ -940,7 +940,8 @@
       "scenario": "Scenarios",
       "me": "Personal area",
       "performance_review": "Performance reviews",
-      "review_cycle": "Review cycles"
+      "review_cycle": "Review cycles",
+      "ghost_unit": "Backstage"
     },
     "actions": {
       "activate": "activate",
@@ -985,7 +986,8 @@
       "respond_self": "respond for oneself",
       "sessions_manage": "manage sessions",
       "update_self": "update own data",
-      "upload_self": "upload own files"
+      "upload_self": "upload own files",
+      "reform": "reform"
     },
     "deleghe": {
       "titolo": "Tenant delegations",

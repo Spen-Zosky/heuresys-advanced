@@ -148,7 +148,7 @@ export const LENTI: Lente[] = [
         ? null
         : {
             tono: "attenzione",
-            titolo: L.t(`${L.n(v)} ${L.p(v, "unità organizzativa non ha", "unità organizzative non hanno", "", "")} un responsabile`, `${L.n(v)} ${L.p(v, "", "", "organisational unit has", "organisational units have")} no manager`),
+            titolo: L.t(`${L.n(v)} ${L.p(v, "unità organizzativa non ha", "unità organizzative non hanno", "", "")} un responsabile`, `${L.n(v)} ${L.p(v, "", "", "organizational unit has", "organizational units have")} no manager`),
             dettaglio: L.t("Senza responsabile nessuno approva ferie, valutazioni e richieste di quell'unità.", "Without a manager, no one approves leave, reviews and requests for that unit."),
             azione: { etichetta: L.t("Apri l'organigramma", "Open the org chart"), href: "/organization/org-chart" },
           },
@@ -167,7 +167,7 @@ export const LENTI: Lente[] = [
             tono: "attenzione",
             titolo: L.t(`${L.n(v)} ${L.p(v, "responsabile ha", "responsabili hanno", "", "")} più di 12 riporti diretti`, `${L.n(v)} ${L.p(v, "", "", "manager has", "managers have")} more than 12 direct reports`),
             dettaglio: L.t("Oltre una dozzina di riporti diretti il responsabile fatica a seguire ciascuno: valuta un livello intermedio.", "Beyond a dozen direct reports a manager struggles to follow each one: consider an intermediate level."),
-            azione: { etichetta: L.t("Diagnosi dell'organizzazione", "Organisation diagnosis"), href: "/organization" },
+            azione: { etichetta: L.t("Diagnosi dell'organizzazione", "Organization diagnosis"), href: "/organization" },
           },
   },
   /* ---------------- persone ---------------- */

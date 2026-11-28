@@ -53,8 +53,8 @@
     }
   },
   "processes": {
-    "title": "Process catalogue",
-    "description": "The catalogue of the sector model (blueprint) processes of the tenant, in value-chain order: these are the reusable definitions. The processes the company actually runs are in «Processes».",
+    "title": "Process catalog",
+    "description": "The catalog of the sector model (blueprint) processes of the tenant, in value-chain order: these are the reusable definitions. The processes the company actually runs are in «Processes».",
     "count": "{{count}} model processes",
     "count_one": "{{count}} model process",
     "error": "Unable to load the processes.",
@@ -518,7 +518,7 @@
       "nessunaCompetenza": "The performing positions declare no skills.",
       "nessunProgetto": "No project is linked to the process.",
       "approvazioni": "Approval requests: {{totale}}, of which {{inAttesa}} pending",
-      "fasiNota": "One column per phase (activity) in catalogue order and one lane per unit. The order is the catalogue's, not a sequence in time, so there are no arrows. Double-click a box to open the activity, a unit for its card.",
+      "fasiNota": "One column per phase (activity) in catalog order and one lane per unit. The order is the catalog's, not a sequence in time, so there are no arrows. Double-click a box to open the activity, a unit for its card.",
       "fasiSenzaAttivita": "No activity in this process: takes part with the role shown",
       "ariaFasi": "Phase diagram of process {{nome}}",
       "flussoNota": "One lane per unit; activities read left to right and subprocesses are the bands at the top. Double-click an activity to open it, a unit for its card.",
@@ -535,7 +535,7 @@
       "titolo": "Process × unit matrix",
       "scheda": "Process × unit matrix",
       "elenco": "List",
-      "spiega": "R = responsible (filled), E = executing (grey), C = consulted (dashed), I = informed (light). The E/C column counts executing and consulted units. Hover a column header for the unit's full name; click a process code to open its sheet.",
+      "spiega": "R = responsible (filled), E = executing (gray), C = consulted (dashed), I = informed (light). The E/C column counts executing and consulted units. Hover a column header for the unit's full name; click a process code to open its sheet.",
       "numeri": "{{processi}} processes and {{sottoprocessi}} subprocesses · {{unita}} units involved · {{celle}} participations",
       "processo": "Process",
       "eC": "E/C",
@@ -607,7 +607,7 @@
           "domanda": "How much work systems and agents do"
         },
         "STANDARDIZZAZIONE": {
-          "nome": "Standardisation",
+          "nome": "Standardization",
           "domanda": "Whether it is the same everywhere, configurable, sector-specific or only for this company"
         }
       },

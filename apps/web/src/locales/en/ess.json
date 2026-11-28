@@ -382,7 +382,7 @@
   },
   "catalogue": {
     "back": "← My paths",
-    "title": "Path catalogue",
+    "title": "Path catalog",
     "description": "Browse the available learning paths and enroll.",
     "count": "{{count}} available paths",
     "count_one": "{{count}} available path",
@@ -395,10 +395,10 @@
     "colAction": "Action",
     "enroll": "Enroll",
     "enrolling": "…",
-    "errorMessage": "Unable to load the catalogue.",
+    "errorMessage": "Unable to load the catalog.",
     "emptyTitle": "No path",
     "emptyDesc": "No path matches the filter.",
-    "caption": "Learning paths catalogue",
+    "caption": "Learning paths catalog",
     "errorEnroll": "Error during enrollment.",
     "enrolledConfirm": "Enrollment confirmed for {{path}}.",
     "alreadyAssigned": "Already assigned"
@@ -851,7 +851,7 @@
   },
   "orgChart": {
     "title": "Org chart",
-    "description": "Your unit in the organisation, with the people and units around you.",
+    "description": "Your unit in the organization, with the people and units around you.",
     "personalView": "Personal view",
     "tuaUnita": "Your unit is highlighted."
   },
@@ -1004,7 +1004,7 @@
       "totaleRighe": "Rows",
       "totaleSezioniConDati": "Sections with data",
       "diTotale": "{{n}} of {{totale}}",
-      "totaleVoci": "Catalogue fields",
+      "totaleVoci": "Catalog fields",
       "totaleOmissis": "Sections with hidden fields",
       "generatoIl": "Generated on",
       "soloConDati": "Only sections with data",

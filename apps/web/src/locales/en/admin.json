@@ -410,7 +410,7 @@
       "titolo_one": "Open session ({{count}})",
       "nessuna": "No open session.",
       "dispositivo": "{{browser}} on {{sistema}}",
-      "dispositivoIgnoto": "Unrecognised device",
+      "dispositivoIgnoto": "Unrecognized device",
       "ultimo": "last access {{data}}",
       "scade": "expires {{data}}",
       "conferma": "Close all sessions of this person? They will have to sign in again.",
@@ -784,8 +784,8 @@
       "nuovoIndicatore": "Add a required KPI",
       "aggiungi": "Add",
       "chiudi": "Close",
-      "cerca": "Search the catalogue",
-      "voce": "Catalogue item",
+      "cerca": "Search the catalog",
+      "voce": "Catalog item",
       "scegli": "Choose an item",
       "salva": "Save",
       "togli": "Remove",
@@ -936,7 +936,7 @@
       "consent": "Consents",
       "document": "Documents",
       "insight": "Insights",
-      "job_requisition": "Staffing requests",
+      "job_requisition": "Hiring requests",
       "scenario": "Scenarios",
       "me": "Personal area",
       "performance_review": "Performance reviews",
@@ -948,7 +948,7 @@
       "admin": "administer",
       "approve": "approve",
       "assign": "assign",
-      "browse_catalogue": "browse the catalogue",
+      "browse_catalogue": "browse the catalog",
       "create": "create",
       "decide": "decide",
       "delete": "delete",
@@ -981,6 +981,8 @@
       "preferences_read": "read preferences",
       "preferences_update": "update preferences",
       "read_self": "read own data",
+      "read_all": "read all data",
+      "use_self": "use for oneself",
       "request_self": "request for oneself",
       "request_target_self": "name the target of one's own request",
       "respond_self": "respond for oneself",
@@ -1019,7 +1021,7 @@
         "PROCESS_STEP": "Process step"
       },
       "gruppo": {
-        "ORGANIZATION": "Organisation",
+        "ORGANIZATION": "Organization",
         "POSITIONS_ROLES": "Positions and roles",
         "SKILLS": "Skills",
         "PROCESSES": "Processes",
@@ -1079,7 +1081,7 @@
       "motivoMasked": "Values withheld: you can see this view's data only in masked form. The view exists and concerns you; the values require a mandate you do not hold.",
       "motivoDenied": "None of your domains opens this view.",
       "senzaValori": "Values not available",
-      "catalogoIrraggiungibile": "Dashboard catalogue unreachable",
+      "catalogoIrraggiungibile": "Dashboard catalog unreachable",
       "datiIrraggiungibili": "Dashboard data unreachable",
       "nonDisponibileTitolo": "Dashboard not available",
       "nonDisponibileTesto": "This dashboard does not exist or is outside your permissions."
@@ -1089,7 +1091,7 @@
         "branch": "Branch dashboard",
         "company": "Company dashboard",
         "hr": "HR management dashboard",
-        "org": "Organisation dashboard",
+        "org": "Organization dashboard",
         "platform": "Platform dashboard",
         "process": "Processes dashboard",
         "self": "Self-service dashboard",
@@ -1220,11 +1222,11 @@
         "attivi": "People in service",
         "cessati": "Ended employments",
         "posizioni": "Active positions",
-        "unita": "Organisational units",
+        "unita": "Organizational units",
         "pending": "Awaiting a decision",
         "tenant": "Active companies",
         "utenti": "Active people",
-        "competenze": "Skills in the catalogue",
+        "competenze": "Skills in the catalog",
         "correnti": "Current credentials",
         "da_ruotare": "To rotate",
         "algoritmi": "Algorithms in use"
@@ -1966,7 +1968,7 @@
     }
   },
   "jobCatalog": {
-    "title": "Job Catalogue",
+    "title": "Job Catalog",
     "description": "Job families and roles: the job architecture positions are built on.",
     "dash": "—",
     "none": "— none —",
@@ -2109,7 +2111,7 @@
     "mappa_one": "Personal data map ({{count}} table)",
     "strategie": {
       "DELETE": "deleted",
-      "ANONYMIZE": "anonymised",
+      "ANONYMIZE": "anonymized",
       "RETAIN": "retained"
     },
     "tipi": {
@@ -2124,7 +2126,7 @@
     "mappaSpiega": "Every table holding a person's data, by data class, with what happens on erasure and the retention period.",
     "mostraNomiTecnici": "Show technical names",
     "nascondiNomiTecnici": "Hide technical names",
-    "senzaTitolo": "Table with no description in the catalogue",
+    "senzaTitolo": "Table with no description in the catalog",
     "piuColonne": "Appears {{count}} times: once for each column that points to the person.",
     "piuColonne_one": "Appears {{count}} time.",
     "classi": {
@@ -2377,7 +2379,7 @@
   },
   "backstage": {
     "title": "Backstage",
-    "description": "The client's ghost organisation: the apex, the divisions and the departments, derived live from the unit tree. For each one an agent Head works alongside the real head.",
+    "description": "The client's ghost organization: the apex, the divisions and the departments, derived live from the unit tree. For each one an agent Head works alongside the real head.",
     "negato": "For now the Backstage is reserved for the platform administration and HR department head roles. If you need it, you can send a request to the System Administrator.",
     "back": "← Org chart",
     "guida": {
@@ -2413,7 +2415,7 @@
       "deriva": "Drift"
     },
     "legendaAlbero": "Backstage from the apex down, with the people of each real unit (the head in bold). Double-click a box to open its card.",
-    "legendaDeriva": "Boxes with a coloured border are drifting from the live tree.",
+    "legendaDeriva": "Boxes with a colored border are drifting from the live tree.",
     "ariaAlbero": "Backstage tree",
     "colonne": {
       "unita": "Unit",

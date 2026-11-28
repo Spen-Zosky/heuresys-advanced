@@ -1,6 +1,6 @@
 /**
  * apps/api/src/modules/tenants/provisioning.ts
- * D-14 FASE 1+2 — provision-engine: takes an organisation from zero to
+ * D-14 FASE 1+2 — provision-engine: takes an organization from zero to
  * operational in ONE transaction. Admin-gated (tenant:create = PLATFORM_ADMIN).
  * Composes the existing PoolClient-compatible repos so it inherits their
  * SQL/validation: tenant + first TENANT_ADMIN (identity + Argon2id credential,

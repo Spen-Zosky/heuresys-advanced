@@ -2,7 +2,7 @@
  * packages/shared/src/schemas/provisioning.ts
  * D-14 FASE 1+2 — tenant provisioning contract.
  *
- * POST /v1/tenants/provision takes an organisation from zero to operational in
+ * POST /v1/tenants/provision takes an organization from zero to operational in
  * one transactional call: a tenant + its first TENANT_ADMIN (identity + Argon2id
  * credential + role grants) + a per-tenant MFA policy + (F2) an OPTIONAL org
  * MODELLO materialized in the SAME transaction (org-units, positions,

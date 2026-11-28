@@ -44,11 +44,11 @@ flowchart LR
 
 const MAPPA_EN = `%%{init: {"htmlLabels": false, "flowchart": {"htmlLabels": false}}}%%
 flowchart LR
-  subgraph REALE["The tenant's real organisation"]
+  subgraph REALE["The tenant's real organization"]
     direction TB
     R0["Apex<br/>General Manager"] --> R1["Departments and divisions<br/>with their heads"] --> R2["Operating units<br/>people and positions"]
   end
-  subgraph BACK["Backstage: the ghost organisation"]
+  subgraph BACK["Backstage: the ghost organization"]
     direction TB
     G0["Apex Head"] --> G1["Division and<br/>department Heads"] --> G2["Specialist teams<br/>people, skills, careers, talent, learning, KPIs, reviews"]
   end
@@ -186,16 +186,16 @@ Per ora il Backstage è riservato a due ruoli: l'amministrazione della piattafor
         tipo: "md",
         testo: `## What it is for
 
-**Backstage** is the organisation working behind the scenes of the real one. The apex and every division and department of the tenant have a Backstage unit, and each will have an **agent Head** with its own team of specialists. The Head works alongside the unit's real head: it reads data with the permissions of the person it serves, prepares analyses and what-if scenarios, and flags what deserves attention.
+**Backstage** is the organization working behind the scenes of the real one. The apex and every division and department of the tenant have a Backstage unit, and each will have an **agent Head** with its own team of specialists. The Head works alongside the unit's real head: it reads data with the permissions of the person it serves, prepares analyses and what-if scenarios, and flags what deserves attention.
 
-Backstage is not a second org chart to maintain by hand. **It is derived from the live tree of units**: the apex and the two levels below it. When the real organisation changes, Backstage notices and realigns; every shape it has had stays in the history.
+Backstage is not a second org chart to maintain by hand. **It is derived from the live tree of units**: the apex and the two levels below it. When the real organization changes, Backstage notices and realigns; every shape it has had stays in the history.
 
 > Agents prepare, read and flag. **No write to the data starts without the confirmation of the signed-in person** who asks for it, and within their permissions.`,
       },
       {
         tipo: "mermaid",
         testo: MAPPA_EN,
-        didascalia: "How Backstage works alongside the real organisation, and how it stays aligned with the live tree",
+        didascalia: "How Backstage works alongside the real organization, and how it stays aligned with the live tree",
       },
       {
         tipo: "md",

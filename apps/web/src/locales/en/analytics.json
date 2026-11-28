@@ -117,12 +117,12 @@
   },
   "skillsGroupShare": {
     "title": "Skill shares per group (ESCO classification)",
-    "description": "How the skills held by the company's people are spread across the groups of the European skills classification (ESCO). Platform managers see the whole catalogue.",
+    "description": "How the skills held by the company's people are spread across the groups of the European skills classification (ESCO). Platform managers see the whole catalog.",
     "stats": {
       "groupedLabel": "Grouped skills",
       "groupedDesc": "Skills with a group assigned",
       "groupsLabel": "Distinct groups",
-      "groupsDesc": "Groups present in the catalogue",
+      "groupsDesc": "Groups present in the catalog",
       "ungroupedLabel": "Ungrouped",
       "ungroupedDesc": "Skills not yet mapped to a group"
     },
@@ -136,16 +136,16 @@
     "colGroup": "Group",
     "colCount": "Skills",
     "colShare": "Share",
-    "emptyDesc": "The skill catalogue has no ESCO groups populated yet.",
+    "emptyDesc": "The skill catalog has no ESCO groups populated yet.",
     "colCode": "Group code"
   },
   "orgNetwork": {
     "title": "Org Network",
     "description": "How the active positions are linked: who reports to whom, how many levels there are below the top, and how many positions depend on each manager.",
-    "guida": "A position is a seat in the organisation; a person holds it. The numbers count active positions only (filled or vacant), so they can differ from the number of people.",
+    "guida": "A position is a seat in the organization; a person holds it. The numbers count active positions only (filled or vacant), so they can differ from the number of people.",
     "stats": {
       "positionsLabel": "Active positions",
-      "positionsDesc": "Seats in the organisation today, filled or vacant",
+      "positionsDesc": "Seats in the organization today, filled or vacant",
       "vacantLabel": "Vacant positions",
       "vacantDesc": "Active positions with no holder",
       "rootsLabel": "Positions at the top",
@@ -223,7 +223,7 @@
   },
   "skillsGraph": {
     "title": "Skill graph",
-    "description": "The neighbourhood of a skill: declared links between skills plus membership in the ESCO taxonomy. You always start from one skill — the whole catalogue holds over 18,000 edges, and drawing all of it would not be a view.",
+    "description": "The neighbourhood of a skill: declared links between skills plus membership in the ESCO taxonomy. You always start from one skill — the whole catalog holds over 18,000 edges, and drawing all of it would not be a view.",
     "searchLabel": "Search a skill",
     "searchPlaceholder": "at least two characters…",
     "depth": "{{count}} hops",

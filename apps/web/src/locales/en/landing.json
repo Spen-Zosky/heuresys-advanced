@@ -77,7 +77,7 @@
     "complaintTitle": "Complaints",
     "complaint": "If you believe the processing of your data infringes the Regulation, you have the right to lodge a complaint with the Italian Data Protection Authority (www.garanteprivacy.it) or with the supervisory authority of the country where you reside.",
     "securityTitle": "Security",
-    "security": "Access to the data is limited to authorised staff through authentication and named permissions; every administrative access is logged."
+    "security": "Access to the data is limited to authorized staff through authentication and named permissions; every administrative access is logged."
   },
   "whistleblowing": {
     "title": "Whistleblowing reporting channel",

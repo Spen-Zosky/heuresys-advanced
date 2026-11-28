@@ -1,0 +1,3 @@
+:HL["/heuresys-advanced/_next/static/chunks/00ud6-5sisjpf.css","style"]
+1:[["children",{"s":"__PAGE__","h":160}]]
+0:{"b":"DFWe7UPKr7P9m6vKg7-i-","t":{"t":{"s":"","h":80,"c":"$Q1"}}}

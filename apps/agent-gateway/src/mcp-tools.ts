@@ -19,6 +19,7 @@ import type { PonteVista } from "./comandi-vista.js";
 import { caricaEsclusi, concettiPer } from "./concetti-esclusi.js";
 import { letturaNegata } from "./omissis.js";
 import { riduciElenco } from "./elenco-grande.js";
+import { contaBooleani } from "./conteggi.js";
 
 /**
  * Sostituisce i `:segnaposto` del percorso con i parametri, e rifiuta ciò che non torna.
@@ -235,10 +236,13 @@ export function buildHeuresysMcp(
             if (scrive) return ok(await client.call(op.method, url, a.body ?? {}));
             const letto = await client.call(op.method, url);
             const ridotto = riduciElenco(letto, a.query);
+            // I conteggi dei campi vero/falso li fa il sistema sulle righe lette (conteggi.ts).
+            const conteggi = contaBooleani(letto);
             // L'origine del dato (A-14) è legata alla risposta letta: se la si riduce, va riportata.
-            if (ridotto === letto) return ok(letto);
+            if (ridotto === letto && !conteggi) return ok(letto);
             const origine = client.origineDi(letto);
-            return ok(origine ? { ...(ridotto as object), origineDelDato: origine } : ridotto);
+            const risposta = { ...(ridotto as object), ...(conteggi ? { conteggi } : {}), ...(origine ? { origineDelDato: origine } : {}) };
+            return ok(risposta);
           },
         ),
       ]

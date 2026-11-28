@@ -596,6 +596,7 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_job_postings",
       "sys_job_requisitions",
       "sys_job_role_embeddings",
+      "sys_organization_units",
       "sys_position_compensation_profiles",
       "sys_positions",
       "sys_pulse_checks",

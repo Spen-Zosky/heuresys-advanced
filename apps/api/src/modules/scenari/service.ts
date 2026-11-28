@@ -25,7 +25,7 @@ import type { PoolClient } from "pg";
 import { withTransaction } from "../../db/client.js";
 import { ForbiddenError, NotFoundError, UnprocessableEntityError } from "../../errors/index.js";
 import type { ActorContext } from "../../lib/actor.js";
-import type { ScenarioDetail, ScenarioExitsCreate, ScenarioList } from "@heuresys/shared";
+import type { ScenarioDetail, ScenarioExitsCreate, ScenarioList, ScenarioOverTimeCreate } from "@heuresys/shared";
 import { dettaglioScenario, elencoScenari } from "./lettura.js";
 import {
   CALCOLATORE_SUCCESSIONE,
@@ -33,6 +33,7 @@ import {
   PROFONDITA_CASCATA,
   type EsitoSuccessione,
 } from "./calcolatori/successione.js";
+import { calcolaScenarioNelTempo } from "./nel-tempo.js";
 import * as repo from "./repository.js";
 import type { Fonte, TitolareOmbraCompleto } from "./repository.js";
 
@@ -232,6 +233,20 @@ export const scenariService = {
   async createExits(a: ActorContext, body: ScenarioExitsCreate): Promise<ScenarioDetail> {
     const tenantId = tenantDi(a);
     const s = await calcolaScenarioUscite({ tenantId, actorUserId: a.userId, userIds: body.userIds, family: body.family });
+    const d = await dettaglioScenario(tenantId, s.scenarioId);
+    return d!;
+  },
+
+  /** F3b-3: lo scenario nel tempo (S-T3), con la stima dalla storia o con un tasso imposto. */
+  async createOverTime(a: ActorContext, body: ScenarioOverTimeCreate): Promise<ScenarioDetail> {
+    const tenantId = tenantDi(a);
+    const s = await calcolaScenarioNelTempo({
+      tenantId,
+      actorUserId: a.userId,
+      ...(body.horizonsMonths ? { orizzontiMesi: body.horizonsMonths } : {}),
+      ...(body.draws ? { estrazioni: body.draws } : {}),
+      ...(body.annualExitRate !== undefined ? { tassoAnnuoImposto: body.annualExitRate } : {}),
+    });
     const d = await dettaglioScenario(tenantId, s.scenarioId);
     return d!;
   },

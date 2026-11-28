@@ -1560,6 +1560,12 @@
    }
   },
   "scenari": {
+   "post_nel_tempo": {
+    "classe": "B",
+    "metodo": "POST",
+    "percorso": "/nel-tempo",
+    "ragione": "calcola uno scenario what-if nel tempo (S-T3): scrive solo le tabelle degli scenari e della struttura ombra, mai la struttura del tenant né una persona (ADR-0063 D3, D5)"
+   },
    "post_uscite": {
     "classe": "B",
     "metodo": "POST",

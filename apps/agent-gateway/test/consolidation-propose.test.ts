@@ -65,6 +65,12 @@ describe("filtraRisposte", () => {
     ]);
   });
 
+  it("tiene il motivo in inglese quando c'è e lo chiede nel prompt (difetto del 2026-11-28)", () => {
+    const r = filtraRisposte(lotto, { answers: [{ tenantKey: "t-1", prototypeKeys: ["P-ASSUNZIONI"], confidence: 90, reason: "Stesso processo.", reasonEn: "Same process." }] });
+    expect(r[0]?.reasonEn).toBe("Same process.");
+    expect(costruisciPrompt(lotto)).toContain("reasonEn");
+  });
+
   it("una lista vuota è una risposta valida: nessun candidato è la stessa cosa", () => {
     const r = filtraRisposte(lotto, { answers: [{ tenantKey: "t-2", prototypeKeys: [], confidence: 85, reason: "Nessuno dei candidati parla di assistenza clienti." }] });
     expect(r).toEqual([{ tenantKey: "t-2", prototypeKeys: [], confidence: 85, reason: "Nessuno dei candidati parla di assistenza clienti." }]);

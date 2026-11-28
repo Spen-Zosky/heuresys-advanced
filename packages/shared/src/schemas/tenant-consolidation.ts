@@ -146,6 +146,8 @@ export const JudgeAnswerSchema = z
     prototypeKeys: z.array(z.string().min(1).max(200)).max(8),
     confidence: ConfidenceSchema,
     reason: z.string().min(1).max(1000),
+    /** Lo stesso motivo in inglese: la pagina mostra quello della lingua scelta (difetto del 2026-11-28). */
+    reasonEn: z.string().min(1).max(1000).optional(),
   })
   .strict();
 export type JudgeAnswer = z.infer<typeof JudgeAnswerSchema>;
@@ -218,6 +220,8 @@ export const ConsolidationProposalSchema = z.object({
   method: ProposalMethodSchema,
   confidence: ConfidenceSchema,
   reason: z.string(),
+  /** Il motivo in inglese; null per le proposte salvate prima della colonna e non ancora tradotte. */
+  reasonEn: z.string().nullable(),
   round: z.number().int().min(0),
   adoptedInWorkingCopy: z.boolean(),
   dependsOn: z.array(z.uuid()),

@@ -153,6 +153,7 @@ interface RigaProposta {
   tenant_consolidation_proposal_method: string;
   tenant_consolidation_proposal_confidence: number;
   tenant_consolidation_proposal_reason: string;
+  tenant_consolidation_proposal_reason_en: string | null;
   tenant_consolidation_proposal_round: number;
   tenant_consolidation_proposal_adopted: boolean;
   tenant_consolidation_proposal_depends_on: string[];
@@ -171,6 +172,7 @@ function mappaProposta(r: RigaProposta): ConsolidationProposal {
     method: r.tenant_consolidation_proposal_method as ConsolidationProposal["method"],
     confidence: r.tenant_consolidation_proposal_confidence,
     reason: r.tenant_consolidation_proposal_reason,
+    reasonEn: r.tenant_consolidation_proposal_reason_en,
     round: r.tenant_consolidation_proposal_round,
     adoptedInWorkingCopy: r.tenant_consolidation_proposal_adopted,
     dependsOn: r.tenant_consolidation_proposal_depends_on,
@@ -198,7 +200,7 @@ const PROPOSTA = `p.tenant_consolidation_proposal_id, p.tenant_consolidation_pro
   p.tenant_consolidation_proposal_group, p.tenant_consolidation_proposal_prototype_keys,
   p.tenant_consolidation_proposal_tenant_keys, p.tenant_consolidation_proposal_outcome,
   p.tenant_consolidation_proposal_method, p.tenant_consolidation_proposal_confidence,
-  p.tenant_consolidation_proposal_reason, p.tenant_consolidation_proposal_round,
+  p.tenant_consolidation_proposal_reason, p.tenant_consolidation_proposal_reason_en, p.tenant_consolidation_proposal_round,
   p.tenant_consolidation_proposal_adopted, p.tenant_consolidation_proposal_depends_on,
   ud.decision_id, ud.decision_value`;
 
@@ -381,13 +383,14 @@ export async function saveGroup(
           tenant_consolidation_proposal_prototype_keys, tenant_consolidation_proposal_tenant_keys,
           tenant_consolidation_proposal_outcome, tenant_consolidation_proposal_method,
           tenant_consolidation_proposal_confidence, tenant_consolidation_proposal_reason,
+          tenant_consolidation_proposal_reason_en,
           tenant_consolidation_proposal_round, tenant_consolidation_proposal_adopted,
           tenant_consolidation_proposal_depends_on)
-       VALUES ($1, $2, $3::text[], $4::text[], $5, $6, $7, $8, $9, $10, $11::uuid[])
+       VALUES ($1, $2, $3::text[], $4::text[], $5, $6, $7, $8, $9, $10, $11, $12::uuid[])
        RETURNING tenant_consolidation_proposal_id AS id`,
       [
         consolidationId, stato.group, p.prototypeKeys, p.tenantKeys, p.outcome, p.method,
-        p.confidence, p.reason, p.round, p.adoptedInWorkingCopy, dipende,
+        p.confidence, p.reason, p.reasonEn ?? null, p.round, p.adoptedInWorkingCopy, dipende,
       ],
     );
     uuidDi.set(p.id, rows[0]!.id);

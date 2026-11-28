@@ -40,6 +40,7 @@ import { OrganigrammaCliente } from "./organigramma-cliente";
 import { LavoroInCorso } from "@/components/lavoro-in-corso";
 import { ProfileTabs } from "@/components/profile-tabs";
 import { SchedaAllineamento } from "./scheda-allineamento";
+import { motivoNellaLingua } from "./motivo";
 
 // AC-10 — La pagina del Direttore HR per il consolidamento del tenant col prototipo
 // (`.programmi/consolidamento/agente/`). L'agente propone, una persona decide: qui si avviano
@@ -71,6 +72,7 @@ function erroreDi(t: TFunction, e: unknown): string {
 
 function buildColumns(
   t: TFunction,
+  lingua: string,
   canDecide: boolean,
   onDecide: (p: ConsolidationProposal) => void,
   busy: boolean,
@@ -94,7 +96,7 @@ function buildColumns(
     },
     {
       header: t("consolidation.cols.reason"),
-      cell: (p) => <span className="text-xs text-muted-foreground">{p.reason}</span>,
+      cell: (p) => <span className="text-xs text-muted-foreground">{motivoNellaLingua(p, lingua)}</span>,
     },
     {
       header: t("consolidation.cols.decision"), align: "right",
@@ -118,7 +120,7 @@ function buildColumns(
 }
 
 export default function ConsolidationPage() {
-  const { t } = useTranslation("hr");
+  const { t, i18n } = useTranslation("hr");
   const fmt = useFormat();
   const qc = useQueryClient();
   const [scelto, setScelto] = useState<ConsolidationGroup | null>(null);
@@ -233,8 +235,8 @@ export default function ConsolidationPage() {
   const nBozza = pendenti.data?.pending ?? 0;
   const canDecide = corrente !== null && gruppo !== null && (access.data?.groups.includes(gruppo) ?? false);
   const columns = useMemo(
-    () => buildColumns(t, canDecide, (p) => { setErrore(null); setInDecisione(p); }, occupato),
-    [t, canDecide, occupato],
+    () => buildColumns(t, i18n.language, canDecide, (p) => { setErrore(null); setInDecisione(p); }, occupato),
+    [t, i18n.language, canDecide, occupato],
   );
   const avanzamento = progress.data?.groups ?? [];
   const delGruppo = avanzamento.find((g) => g.group === gruppo) ?? null;

@@ -13,6 +13,7 @@ import {
   type LinkForm,
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { motivoNellaLingua } from "./motivo";
 
 // La finestra della decisione: l'agente dà la sua raccomandazione e spiega la cascata (i prerequisiti
 // e le conseguenze della voce nel modello); la persona sceglie e conferma. La scelta va nella bozza:
@@ -41,7 +42,7 @@ export function DecisioneDialog({
   onConferma: (decisione: Decision, forma: LinkForm | undefined, cascata: boolean) => void;
   onChiudi: () => void;
 }) {
-  const { t } = useTranslation("hr");
+  const { t, i18n } = useTranslation("hr");
   const consigliata = raccomandata(proposta);
   const [scelta, setScelta] = useState<Decision>(proposta.decision ?? consigliata);
   const [forma, setForma] = useState<LinkForm>("NORMALIZZATA");
@@ -73,7 +74,7 @@ export function DecisioneDialog({
             {" · "}
             {t("consolidation.modal.confidence", { value: proposta.confidence })}
           </p>
-          <p className="text-sm text-muted-foreground">{t("consolidation.modal.because", { reason: proposta.reason })}</p>
+          <p className="text-sm text-muted-foreground">{t("consolidation.modal.because", { reason: motivoNellaLingua(proposta, i18n.language) })}</p>
           <p className="text-xs text-muted-foreground">
             {proposta.decision
               ? t("consolidation.modal.current", { decision: t(`consolidation.decisions.${proposta.decision}`) })

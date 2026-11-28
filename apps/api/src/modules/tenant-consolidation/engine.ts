@@ -48,6 +48,7 @@ export interface RispostaGiudice {
   prototypeKeys: string[];
   confidence: number;
   reason: string;
+  reasonEn?: string;
 }
 
 export type Giudice = (lotto: { group: string; round: number; questions: Domanda[] }) => Promise<RispostaGiudice[]>;
@@ -64,6 +65,8 @@ export interface Proposta {
   tenantKeys: string[];
   confidence: number;
   reason: string;
+  /** Il motivo in inglese, se si conosce. */
+  reasonEn?: string | null;
   round: number;
   adoptedInWorkingCopy: boolean;
   /** Le adozioni dei giri precedenti su cui questa proposta si appoggia (rifacimento al rifiuto). */
@@ -181,8 +184,8 @@ export function giroZero(stato: StatoGruppo, opz: Opzioni = {}): number {
     return new Map([...conta].filter(([, v]) => v.length === 1).map(([k, v]) => [k, v[0]!]));
   };
 
-  const tentativi: Array<{ metodo: Metodo; fp: (v: Voce) => string | null; ft: (v: Voce) => string | null; motivo: string }> = [
-    { metodo: "CHIAVE", fp: (v) => v.escoUri ?? null, ft: (v) => v.escoUri ?? null, motivo: "Stesso indirizzo ESCO da entrambe le parti." },
+  const tentativi: Array<{ metodo: Metodo; fp: (v: Voce) => string | null; ft: (v: Voce) => string | null; motivo: string; motivoEn: string }> = [
+    { metodo: "CHIAVE", fp: (v) => v.escoUri ?? null, ft: (v) => v.escoUri ?? null, motivo: "Stesso indirizzo ESCO da entrambe le parti.", motivoEn: "Same ESCO address on both sides." },
     {
       metodo: "VOCABOLARIO",
       fp: (v) => (v.type && v.level ? `${v.type}#${v.level}#${(v.parentName ?? "").toLowerCase()}` : null),
@@ -191,6 +194,7 @@ export function giroZero(stato: StatoGruppo, opz: Opzioni = {}): number {
         return tipo && v.level ? `${tipo}#${v.level}#${(v.parentName ?? "").toLowerCase()}` : null;
       },
       motivo: "Stesso tipo (secondo il vocabolario comune approvato), stesso livello e stessa voce madre.",
+      motivoEn: "Same type (according to the approved common vocabulary), same level and same parent item.",
     },
   ];
 
@@ -203,7 +207,7 @@ export function giroZero(stato: StatoGruppo, opz: Opzioni = {}): number {
       if (!vt || giaRifiutata(stato, [vp.key], [vt.key])) continue;
       const prop: Proposta = {
         id: nuovoId(), outcome: "CORRISPONDENZA", method: t.metodo, prototypeKeys: [vp.key], tenantKeys: [vt.key],
-        confidence: 100, reason: t.motivo, round: 0, adoptedInWorkingCopy: false, dependsOn: [],
+        confidence: 100, reason: t.motivo, reasonEn: t.motivoEn, round: 0, adoptedInWorkingCopy: false, dependsOn: [],
       };
       stato.proposals.push(prop);
       adotta(stato, prop);
@@ -262,7 +266,7 @@ async function unGiro(stato: StatoGruppo, giudice: Giudice, round: number, o: Re
     const conflitto = r.prototypeKeys.some((k) => prese.has(k));
     const prop: Proposta = {
       id: nuovoId(), outcome: "CORRISPONDENZA", method: "SEMANTICA", prototypeKeys: r.prototypeKeys, tenantKeys: [r.tenantKey],
-      confidence: r.confidence, reason: r.reason, round, adoptedInWorkingCopy: false, dependsOn: base,
+      confidence: r.confidence, reason: r.reason, reasonEn: r.reasonEn ?? null, round, adoptedInWorkingCopy: false, dependsOn: base,
     };
     stato.proposals.push(prop);
     if (r.confidence >= o.safeConfidence && !conflitto) {
@@ -288,14 +292,14 @@ export function chiudiGruppo(stato: StatoGruppo): void {
     if (coperte.proto.has(v.key)) continue;
     stato.proposals.push({
       id: nuovoId(), outcome: "LACUNA", method: "SEMANTICA", prototypeKeys: [v.key], tenantKeys: [], confidence: 100,
-      reason: "Il prototipo ha questa voce e il tenant non ha niente che le corrisponda.", round: ultimo, adoptedInWorkingCopy: false, dependsOn: [],
+      reason: "Il prototipo ha questa voce e il tenant non ha niente che le corrisponda.", reasonEn: "The prototype has this item and the tenant has nothing that matches it.", round: ultimo, adoptedInWorkingCopy: false, dependsOn: [],
     });
   }
   for (const v of stato.tenant) {
     if (coperte.tenant.has(v.key)) continue;
     stato.proposals.push({
       id: nuovoId(), outcome: "PERSONALIZZAZIONE", method: "SEMANTICA", prototypeKeys: [], tenantKeys: [v.key], confidence: 100,
-      reason: "Questa voce è del tenant e il prototipo non la conosce: resta sua.", round: ultimo, adoptedInWorkingCopy: false, dependsOn: [],
+      reason: "Questa voce è del tenant e il prototipo non la conosce: resta sua.", reasonEn: "This item belongs to the tenant and the prototype does not know it: it stays the tenant's own.", round: ultimo, adoptedInWorkingCopy: false, dependsOn: [],
     });
   }
 }

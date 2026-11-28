@@ -47,6 +47,13 @@ async function attive() {
   return r.json() as { items: G[]; total: number; allineata: boolean };
 }
 
+interface D { allineata: boolean; total: number; items: Array<{ change: string; sourceUnitId: string | null; changedFields: string[]; ghost: { name: string } | null; live: { name: string } | null }> }
+async function deriva() {
+  const r = await suite.app.inject({ method: "GET", url: "/v1/ghost-units/deriva", headers: { cookie: ch(s.cookies) } });
+  expect(r.statusCode).toBe(200);
+  return r.json() as D;
+}
+
 describe("/v1/ghost-units integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
@@ -96,6 +103,11 @@ describe("/v1/ghost-units integration", () => {
     expect(r.attive).toBe((await attive()).total);
   });
 
+  it("DERIVA: con la forma ghost allineata non c'è nessuna voce", async () => {
+    const d = await deriva();
+    expect(d).toMatchObject({ allineata: true, total: 0, items: [] });
+  });
+
   it("RIFORMA: un'unità rinominata chiude il periodo vecchio e ne apre uno nuovo, e la storia resta", async () => {
     const before = await attive();
     const target = before.items.find((g) => g.level > 0);
@@ -106,8 +118,15 @@ describe("/v1/ghost-units integration", () => {
       [target.sourceUnitId],
     );
     expect((await attive()).allineata).toBe(false);
+    const d = await deriva();
+    expect(d.allineata).toBe(false);
+    expect(d.items).toHaveLength(1);
+    expect(d.items[0]).toMatchObject({ change: "MODIFICATA", sourceUnitId: target.sourceUnitId, changedFields: ["name"] });
+    expect(d.items[0]?.ghost?.name).toBe(target.name);
+    expect(d.items[0]?.live?.name).toBe(`${target.name} (prova G1)`);
     const r = await riforma();
     expect(r).toMatchObject({ aperte: 1, chiuse: 1, attive: before.total });
+    expect((await deriva()).total).toBe(0);
     const after = await attive();
     expect(after.allineata).toBe(true);
     const nuova = after.items.find((g) => g.sourceUnitId === target.sourceUnitId);
@@ -128,6 +147,8 @@ describe("/v1/ghost-units integration", () => {
       `UPDATE sys.sys_organization_units SET organization_unit_is_active = false WHERE organization_unit_id = $1`,
       [target.sourceUnitId],
     );
+    const d = await deriva();
+    expect(d.items.find((x) => x.sourceUnitId === target.sourceUnitId)?.change).toBe("USCITA");
     const r = await riforma();
     expect(r.chiuse).toBeGreaterThanOrEqual(1);
     const after = await attive();

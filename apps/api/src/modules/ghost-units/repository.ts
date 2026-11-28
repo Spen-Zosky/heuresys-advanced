@@ -5,7 +5,7 @@
  */
 
 import type { Pool, PoolClient } from "pg";
-import type { GhostUnit } from "@heuresys/shared";
+import type { GhostTraits, GhostUnit } from "@heuresys/shared";
 
 export type DbConnector = Pool | PoolClient;
 
@@ -109,6 +109,55 @@ export async function countDrift(q: DbConnector, tenantId: string): Promise<numb
     [tenantId],
   );
   return Number(r.rows[0]?.n ?? 0);
+}
+
+/** I tratti della forma ghost aperta, per unità reale (per la deriva). */
+export async function listOpenTraits(q: DbConnector, tenantId: string): Promise<Array<GhostTraits & { sourceUnitId: string | null }>> {
+  const r = await q.query<TraitRow>(
+    `SELECT ghost_unit_source_unit_id AS source_unit_id, ghost_unit_source_parent_id AS source_parent_id,
+            ghost_unit_level AS level, ghost_unit_kind AS kind, ghost_unit_code AS code,
+            ghost_unit_name AS name, ghost_unit_source_type AS source_type
+       FROM sys.sys_ghost_units
+      WHERE ghost_unit_tenant_id = $1 AND ghost_unit_valid_to IS NULL
+      ORDER BY ghost_unit_level, ghost_unit_code`,
+    [tenantId],
+  );
+  return r.rows.map(toTraits);
+}
+
+/** I tratti che l'albero vivo dà oggi, dalla vista che la riforma usa. */
+export async function listLiveTraits(q: DbConnector, tenantId: string): Promise<Array<GhostTraits & { sourceUnitId: string | null }>> {
+  const r = await q.query<TraitRow>(
+    `SELECT source_unit_id, source_parent_id, ghost_level AS level, ghost_kind AS kind,
+            ghost_code AS code, ghost_name AS name, source_type
+       FROM sys.v_ghost_units_derivate
+      WHERE tenant_id = $1
+      ORDER BY ghost_level, ghost_code`,
+    [tenantId],
+  );
+  return r.rows.map(toTraits);
+}
+
+interface TraitRow {
+  source_unit_id: string | null;
+  source_parent_id: string | null;
+  level: number;
+  kind: GhostUnit["kind"];
+  code: string;
+  name: string;
+  source_type: string | null;
+}
+
+function toTraits(r: TraitRow): GhostTraits & { sourceUnitId: string | null } {
+  return {
+    sourceUnitId: r.source_unit_id,
+    sourceParentId: r.source_parent_id,
+    level: Number(r.level),
+    kind: r.kind,
+    code: r.code,
+    name: r.name,
+    sourceType: r.source_type,
+  };
 }
 
 /** Chiama la riforma: chiude ciò che non corrisponde più all'albero e apre il nuovo. */

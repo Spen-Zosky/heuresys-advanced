@@ -1,6 +1,6 @@
 /**
  * apps/api/src/modules/ghost-units/routes.ts
- * 3 endpoint sotto /v1/ghost-units (ADR-0063 D2, voce G1 del piano AI-driven).
+ * 4 endpoint sotto /v1/ghost-units (ADR-0063 D2, voce G1 del piano AI-driven).
  * Permessi: organization_unit:list per leggere, organization_unit:update per riformare.
  */
 
@@ -8,6 +8,7 @@ import { actorFromRequest as actor } from "../../lib/actor.js";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 
 import {
+  GhostDriftResponseSchema,
   GhostRiformaBodySchema,
   GhostRiformaResponseSchema,
   GhostUnitsHistoryResponseSchema,
@@ -33,6 +34,15 @@ export const ghostUnitsRoutes: FastifyPluginAsyncZod = async (app) => {
       response: { 200: GhostUnitsHistoryResponseSchema },
     },
   }, async (req) => ghostUnitsService.history(actor(req), req.query.tenantId));
+
+  // La deriva voce per voce: che cosa cambierebbe una riforma, prima di chiederla.
+  app.get("/deriva", {
+    preHandler: [requirePermission("organization_unit:list")],
+    schema: {
+      querystring: GhostUnitsQuerySchema,
+      response: { 200: GhostDriftResponseSchema },
+    },
+  }, async (req) => ghostUnitsService.drift(actor(req), req.query.tenantId));
 
   // La riforma non inventa niente: riallinea la storia all'albero vivo, e se l'albero non è
   // cambiato non scrive niente. Per questo basta il permesso di aggiornare l'organigramma.

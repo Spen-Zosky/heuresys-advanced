@@ -79,6 +79,7 @@ export const PAGINE_IDONEE_AGENTE: readonly string[] = [
   "/org-director/health",
   "/org-director/vrio",
   "/organization",
+  "/organization/backstage",
   "/organization/org-chart",
   "/performance",
   "/positions",

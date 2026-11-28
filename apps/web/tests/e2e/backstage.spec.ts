@@ -64,6 +64,9 @@ test.describe("Backstage — dati vivi", () => {
       await expect
         .poll(() => immagini.nth(i).evaluate((el) => (el as HTMLImageElement).complete && (el as HTMLImageElement).naturalWidth), { timeout: 15_000 })
         .toBeGreaterThan(0);
+      // Il disegno ha linee scure su fondo trasparente: il fondo dell'immagine stessa (non del
+      // contenitore) deve essere bianco, altrimenti nel tema scuro le frecce spariscono.
+      expect(await immagini.nth(i).evaluate((el) => getComputedStyle(el).backgroundColor)).toBe("rgb(255, 255, 255)");
     }
   });
 });

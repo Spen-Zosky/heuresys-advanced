@@ -954,7 +954,7 @@
     "searchPlaceholder": "codice o nome…"
   },
   "vrio": {
-    "title": "Scorecard VRIO",
+    "title": "Analisi VRIO",
     "description": "Le capability che l'organizzazione usa davvero, classificate con il modello VRIO su {{headcount}} persone. Valore = {{value}}% peso economico + {{crit}}% criticità; una dimensione conta come presente dal {{threshold}}° percentile delle nostre capability.",
     "descriptionIdle": "Le capability che l'organizzazione usa davvero, classificate con il modello VRIO.",
     "count": "{{count}} capability",
@@ -962,7 +962,7 @@
     "errorMessage": "Impossibile caricare la scorecard VRIO",
     "emptyTitle": "Nessuna capability in gioco",
     "emptyDescription": "Nessun gruppo di competenze risulta richiesto da una posizione o posseduto da una persona in questo tenant.",
-    "caption": "Scorecard VRIO per capability",
+    "caption": "Analisi VRIO per capability",
     "method": "Le quattro colonne sono percentili calcolati sull'insieme delle capability di questo tenant, con sotto la misura grezza. Si usano i percentili perché le scale grezze non sono calibrate: sui dati reali rarità, imitabilità e organizzazione stanno quasi tutte sopra 0,50, e una soglia assoluta le darebbe presenti ovunque facendo collassare il verdetto sul solo valore. Il verdetto è la classificazione di Barney, mai una media delle quattro dimensioni.",
     "cols": {
       "capability": "Capacità",
@@ -1093,7 +1093,7 @@
     },
     "sources": {
       "ESSENTIAL_RANKING": "Competenze essenziali",
-      "VRIO": "Scorecard VRIO",
+      "VRIO": "Analisi VRIO",
       "ORG_HEALTH": "Salute organizzativa"
     },
     "method": "{{count}} raccomandazioni da {{rules}} regole. Scartate dal controllo delle fonti: {{discarded}}. Modello {{model}}.",
@@ -1285,7 +1285,7 @@
     }
   },
   "recruiting": {
-    "title": "Selezione",
+    "title": "Selezione del personale",
     "description": "Il ciclo di selezione: richieste di personale, annunci, candidati e candidature. Una richiesta copre un posto dell'organigramma.",
     "error": "Non è stato possibile caricare il recruiting.",
     "summary": {

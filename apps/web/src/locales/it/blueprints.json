@@ -1,13 +1,13 @@
 {
   "list": {
-    "title": "Blueprint",
-    "description": "Varianti di blueprint con famiglia e industry.",
+    "title": "Modelli di impianto",
+    "description": "Varianti dei modelli di impianto, con famiglia e settore.",
     "count": "{{count}} varianti",
     "count_one": "{{count}} variante",
-    "error": "Impossibile caricare i blueprint.",
+    "error": "Impossibile caricare i modelli di impianto.",
     "emptyTitle": "Nessuna variante",
-    "emptyDescription": "Non ci sono varianti di blueprint.",
-    "caption": "Varianti di blueprint",
+    "emptyDescription": "Non ci sono varianti dei modelli di impianto.",
+    "caption": "Varianti dei modelli di impianto",
     "columns": {
       "name": "Nome",
       "family": "Famiglia",
@@ -17,7 +17,7 @@
   "detail": {
     "notFound": "Variante non trovata.",
     "error": "Errore.",
-    "back": "← Blueprint",
+    "back": "← Modelli di impianto",
     "tabs": {
       "processes": "Processi",
       "activations": "Attivazioni",
@@ -26,7 +26,7 @@
     "processesTitle": "Processi",
     "activationsTitle": "Attivazioni per tenant",
     "processesEmpty": "Nessun processo.",
-    "processesCaption": "Processi della variante blueprint",
+    "processesCaption": "Processi della variante di modello",
     "activationsEmpty": "Nessuna attivazione.",
     "activationsCaption": "Attivazioni della variante per tenant",
     "yes": "sì",
@@ -54,7 +54,7 @@
   },
   "processes": {
     "title": "Catalogo dei processi",
-    "description": "Il catalogo dei processi del modello (blueprint) di settore del tenant, nell'ordine della catena del valore: sono le definizioni riutilizzabili. I processi con cui lavora l'azienda stanno in «Processi».",
+    "description": "Il catalogo dei processi del modello di settore del tenant, nell'ordine della catena del valore: sono le definizioni riutilizzabili. I processi con cui lavora l'azienda stanno in «Processi».",
     "count": "{{count}} processi del modello",
     "count_one": "{{count}} processo del modello",
     "error": "Impossibile caricare i processi.",

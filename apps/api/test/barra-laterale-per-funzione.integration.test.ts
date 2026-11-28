@@ -75,4 +75,11 @@ describe("000484 — la barra laterale per funzione", () => {
     );
     expect(d.rows.map((r) => r.name)).toEqual([]);
   });
+
+  it("nessuna etichetta italiana del menu resta in inglese", async () => {
+    // «Dashboard», «Tenant», «team» e le sigle sono termini del prodotto e non stanno nell'elenco.
+    const inglese = /\b(process owner|recruiting|talent|review|blueprints?|engagement|scorecard|whistleblowing|gaps?|skills?|insights?)\b/i;
+    const voci = (await vociAttive()).filter((v) => inglese.test(v.label));
+    expect(voci.map((v) => `${v.route} → ${v.label}`)).toEqual([]);
+  });
 });

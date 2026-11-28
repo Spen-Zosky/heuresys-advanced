@@ -29,6 +29,11 @@
 --       profilo dei clienti che li copia (000398), e le etichette inglesi tradotte.
 --   (d) le traduzioni inglesi delle etichette (000306) si allineano.
 --
+-- EMENDAMENTO 2026-11-28 (ADR-0035, si emenda la fonte): otto etichette italiane restavano in
+--   inglese (Process owner, Recruiting, Talent review, Blueprint, Engagement, Scorecard,
+--   whistleblowing, gap). Ora sono in italiano; l'inglese non cambia.
+--   «Dashboard», «Tenant», «team», «KPI», «OKR», «VRIO» e «HR» restano: sono i termini del prodotto.
+--
 -- I PERMESSI NON CAMBIANO. Nessuna colonna di cancello è toccata (`required_resource`,
 -- `required_action`, `requires_admin`, `is_active`, classi di dato): chi vedeva una voce la
 -- vede ancora, solo in un altro gruppo. La post-condizione lo verifica.
@@ -70,7 +75,7 @@ INSERT INTO barra_mappa (route, persp, grp, ord, icon, label, label_en) VALUES
   ('/dashboard/branch',             'OVERVIEW',     'dashboards',    150, 'Store',               'Filiale',                            'Branch'),
   ('/dashboard/tenant',             'OVERVIEW',     'dashboards',    160, 'Building',            'Gestione del tenant',                'Tenant management'),
   ('/dashboard/platform',           'OVERVIEW',     'dashboards',    170, 'ServerCog',           'Piattaforma',                        'Platform'),
-  ('/process-owner',                'OVERVIEW',     'dashboards',    180, 'GitBranch',           'Process owner',                      'Process owner'),
+  ('/process-owner',                'OVERVIEW',     'dashboards',    180, 'GitBranch',           'Responsabile di processo',           'Process owner'),
   ('/org-director',                 'OVERVIEW',     'dashboards',    190, 'Compass',             'Direzione organizzativa',            'Organisation design'),
   -- Organizzazione
   ('/organization/org-chart',       'GOVERNANCE',   'organization',  200, 'Network',             'Organigramma',                       'Org chart'),
@@ -78,7 +83,7 @@ INSERT INTO barra_mappa (route, persp, grp, ord, icon, label, label_en) VALUES
   ('/job-catalog',                  'GOVERNANCE',   'organization',  220, 'BriefcaseBusiness',   'Catalogo delle mansioni',            'Job catalogue'),
   ('/organization',                 'GOVERNANCE',   'organization',  230, 'ChartNoAxesCombined', 'Analisi organizzativa',              'Organisation analysis'),
   ('/org-director/health',          'GOVERNANCE',   'organization',  240, 'HeartPulse',          'Salute organizzativa',               'Organisational health'),
-  ('/org-director/vrio',            'GOVERNANCE',   'organization',  250, 'Award',               'Scorecard VRIO',                     'VRIO scorecard'),
+  ('/org-director/vrio',            'GOVERNANCE',   'organization',  250, 'Award',               'Analisi VRIO',                       'VRIO scorecard'),
   ('/org-director/advisor',         'GOVERNANCE',   'organization',  260, 'Lightbulb',           'Consigli operativi',                 'Operational advice'),
   -- Processi e progetti
   ('/processes',                    'GOVERNANCE',   'processes',     300, 'Workflow',            'Catalogo dei processi',              'Process catalogue'),
@@ -89,13 +94,13 @@ INSERT INTO barra_mappa (route, persp, grp, ord, icon, label, label_en) VALUES
   ('/time-off',                     'WORKFORCE',    'people',        410, 'CalendarDays',        'Ferie e permessi',                   'Time off & leave'),
   ('/analytics/attendance',         'WORKFORCE',    'people',        420, 'Clock',               'Presenze e straordinari',            'Attendance & overtime'),
   ('/analytics/compensation',       'WORKFORCE',    'people',        430, 'Coins',               'Retribuzioni',                       'Compensation'),
-  ('/recruiting',                   'WORKFORCE',    'people',        440, 'UserPlus',            'Recruiting',                         'Recruiting'),
+  ('/recruiting',                   'WORKFORCE',    'people',        440, 'UserPlus',            'Selezione del personale',            'Recruiting'),
   -- Performance e talento
   ('/performance',                  'WORKFORCE',    'talent',        500, 'Star',                'Valutazioni',                        'Performance reviews'),
   ('/goals',                        'WORKFORCE',    'talent',        510, 'Target',              'Obiettivi',                          'Goals'),
   ('/okrs',                         'WORKFORCE',    'talent',        520, 'Flag',                'OKR',                                'OKRs'),
   ('/analytics/kpi',                'WORKFORCE',    'talent',        530, 'TrendingUp',          'KPI',                                'KPIs'),
-  ('/talent-review',                'WORKFORCE',    'talent',        540, 'Grid3x3',             'Talent review',                      'Talent review'),
+  ('/talent-review',                'WORKFORCE',    'talent',        540, 'Grid3x3',             'Revisione dei talenti',              'Talent review'),
   ('/career-succession',            'WORKFORCE',    'talent',        550, 'Route',               'Carriera e successione',             'Career & succession'),
   -- Competenze e formazione
   ('/skills',                       'WORKFORCE',    'skills',        600, 'Puzzle',              'Competenze',                         'Skills'),
@@ -106,16 +111,16 @@ INSERT INTO barra_mappa (route, persp, grp, ord, icon, label, label_en) VALUES
   -- Analisi
   ('/analytics/workforce',          'INTELLIGENCE', 'analytics',     700, 'ChartPie',            'Analisi della forza lavoro',         'Workforce analysis'),
   ('/insights',                     'INTELLIGENCE', 'analytics',     710, 'Radar',               'Rischio di abbandono',               'Attrition risk'),
-  ('/engagement',                   'INTELLIGENCE', 'analytics',     720, 'MessageSquareHeart',  'Engagement e sondaggi',              'Engagement & surveys'),
+  ('/engagement',                   'INTELLIGENCE', 'analytics',     720, 'MessageSquareHeart',  'Clima e sondaggi',                   'Engagement & surveys'),
   ('/visualizations',               'INTELLIGENCE', 'analytics',     730, 'PieChart',            'Visualizzazioni',                    'Visualisations'),
   -- Sicurezza e conformità
   ('/admin/roles',                  'GOVERNANCE',   'compliance',    800, 'KeyRound',            'Ruoli e permessi',                   'Roles & permissions'),
   ('/admin/mfa-policy',             'GOVERNANCE',   'compliance',    810, 'Fingerprint',         'Autenticazione a più fattori',       'Multi-factor authentication'),
   ('/provenance',                   'GOVERNANCE',   'compliance',    820, 'ScrollText',          'Registro di provenienza',            'Provenance register'),
   ('/generated-origins',            'GOVERNANCE',   'compliance',    830, 'DatabaseZap',         'Registro delle righe generate',      'Generated rows register'),
-  ('/whistleblowing-console',       'GOVERNANCE',   'compliance',    840, 'Megaphone',           'Segnalazioni whistleblowing',        'Whistleblowing reports'),
+  ('/whistleblowing-console',       'GOVERNANCE',   'compliance',    840, 'Megaphone',           'Segnalazioni di illeciti',           'Whistleblowing reports'),
   -- Configurazione
-  ('/blueprints',                   'GOVERNANCE',   'configuration', 900, 'Blocks',              'Blueprint',                          'Blueprints'),
+  ('/blueprints',                   'GOVERNANCE',   'configuration', 900, 'Blocks',              'Modelli di impianto',                'Blueprints'),
   ('/tenant-blueprints',            'GOVERNANCE',   'configuration', 910, 'FileStack',           'Fascicoli di configurazione',        'Configuration dossiers'),
   ('/tenants',                      'GOVERNANCE',   'configuration', 920, 'Landmark',            'Tenant',                             'Tenants'),
   ('/consolidation',                'GOVERNANCE',   'configuration', 930, 'GitMerge',            'Consolidamento con il prototipo',    'Prototype consolidation'),
@@ -140,7 +145,7 @@ INSERT INTO barra_mappa (route, persp, grp, ord, icon, label, label_en) VALUES
   -- La mia crescita
   ('/me/skills',                    'PERSONAL',     'me_growth',    1200, 'Puzzle',              'Le mie competenze',                  'My skills'),
   ('/me/skills/self-assessment',    'PERSONAL',     'me_growth',    1210, 'ClipboardCheck',      'Autovalutazione delle competenze',   'Skills self-assessment'),
-  ('/me/gaps',                      'PERSONAL',     'me_growth',    1220, 'Crosshair',           'I miei gap di competenza',           'My skill gaps'),
+  ('/me/gaps',                      'PERSONAL',     'me_growth',    1220, 'Crosshair',           'I miei divari di competenze',        'My skill gaps'),
   ('/me/certifications',            'PERSONAL',     'me_growth',    1230, 'BadgeCheck',          'Le mie certificazioni',              'My certifications'),
   ('/me/learning',                  'PERSONAL',     'me_growth',    1240, 'GraduationCap',       'La mia formazione',                  'My learning'),
   ('/me/learning/catalogue',        'PERSONAL',     'me_growth',    1250, 'Library',             'Catalogo dei percorsi',              'Learning catalogue'),

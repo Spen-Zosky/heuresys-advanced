@@ -1826,7 +1826,7 @@
     }
   },
   "talentReview": {
-    "title": "Revisione talenti",
+    "title": "Revisione dei talenti",
     "description": "La griglia che incrocia prestazione e potenziale di ogni persona, più l'adeguatezza alla posizione, la prontezza, la successione e la copertura delle posizioni critiche. Sola consultazione. I punteggi di prontezza qui sono quelli importati; il calcolo del modello è in Approfondimenti.",
     "error": "Errore di caricamento.",
     "empty": "Nessun record.",
@@ -1930,7 +1930,7 @@
     }
   },
   "whistleblowingConsole": {
-    "title": "Segnalazioni whistleblowing",
+    "title": "Segnalazioni di illeciti",
     "description": "Area riservata al custode designato (D.Lgs 24/2023). Nessun altro ruolo può leggere queste segnalazioni.",
     "count": "{{count}} segnalazioni",
     "count_one": "{{count}} segnalazione",

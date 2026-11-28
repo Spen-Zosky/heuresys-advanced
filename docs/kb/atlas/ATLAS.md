@@ -1,18 +1,18 @@
 # ATLAS — mappa cross-layer heuresys-advanced (GENERATO)
 
-> Generato da `docs/kb/tools/build_atlas.py` @ commit `242e41b5` (2026-11-28T00:21:01+00:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
+> Generato da `docs/kb/tools/build_atlas.py` @ commit `b7a5045e7` (2026-11-28T00:37:49+00:00). **Non editare a mano** — la sintesi curata vive in `ATLAS_CURATED.md`. Ruolo SoT: atlas = SoT interrogabile; graphify-out/ e wiki-graph = viste esplorative parallele, mai autoritative.
 
 ## Conteggi
 
 | Layer | Valore |
 |---|---|
 | Moduli API | 129 |
-| Route API | 765 |
+| Route API | 766 |
 | Pagine web | 146 |
 | Schemi shared | 143 |
 | Tabelle DB | 449 (vuote: 39) |
 | Viste / matview | 98 / 0 |
-| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 353 |
+| Endpoint API senza consumer web (server-side/CLI/ESS-fetch indiretto) | 354 |
 
 ## Moduli API
 
@@ -109,7 +109,7 @@
 | research | — | 0 | 0 | 20 | 1 |
 | review-cycles | /v1/review-cycles | 4 | 2 | 1 | 2 |
 | rubrica | — | 0 | 0 | 4 | 2 |
-| scenari | /v1/scenari | 3 | 2 | 14 | 3 |
+| scenari | /v1/scenari | 4 | 2 | 15 | 4 |
 | seed-acquisition-runs | /v1/seed-acquisition-runs | 6 | 3 | 1 | 1 |
 | seed-approval-decisions | /v1/seed-approval-decisions | 3 | 2 | 2 | 1 |
 | seed-candidate-records | /v1/seed-candidate-records | 5 | 2 | 3 | 1 |

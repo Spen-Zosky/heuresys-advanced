@@ -3221,6 +3221,12 @@
      "path": "/:id",
      "permission": "scenario:read"
     },
+    "post_nel_tempo": {
+     "classe": "B",
+     "method": "POST",
+     "path": "/nel-tempo",
+     "permission": "scenario:create"
+    },
     "post_uscite": {
      "classe": "B",
      "method": "POST",

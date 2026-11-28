@@ -56,6 +56,14 @@ test.describe("Backstage — dati vivi", () => {
     const guida = page.getByTestId("backstage-guida");
     await expect(guida).toBeVisible();
     await expect(guida.getByTestId("backstage-guida-diagramma")).toHaveCount(2);
-    await expect(guida.locator("[data-testid=backstage-guida-diagramma] img").first()).toBeVisible({ timeout: 15_000 });
+    // Visibile non basta: un SVG non valido come XML resta un'icona rotta con il testo alternativo.
+    // Ogni infografica deve essere davvero disegnata, cioè caricata con una larghezza propria.
+    const immagini = guida.locator("[data-testid=backstage-guida-diagramma] img");
+    await expect(immagini).toHaveCount(2, { timeout: 15_000 });
+    for (let i = 0; i < 2; i++) {
+      await expect
+        .poll(() => immagini.nth(i).evaluate((el) => (el as HTMLImageElement).complete && (el as HTMLImageElement).naturalWidth), { timeout: 15_000 })
+        .toBeGreaterThan(0);
+    }
   });
 });

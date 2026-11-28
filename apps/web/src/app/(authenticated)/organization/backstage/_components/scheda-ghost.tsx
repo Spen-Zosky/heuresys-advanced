@@ -105,7 +105,7 @@ function Corpo({ g, dati }: { g: GhostUnit; dati: DatiBackstage }) {
           {viva ? t("backstage.scheda.personeValore", { unita: fmt.numero(viva.persone.length), totali: fmt.numero(viva.addettiTotali) }) : null}
         </Riga>
         <Riga etichetta={t("backstage.scheda.posizioni")}>
-          {viva ? t("backstage.scheda.posizioniValore", { posizioni: fmt.numero(viva.posizioni), scoperte: fmt.numero(viva.scoperte) }) : null}
+          {viva ? t("backstage.scheda.posizioniValore", { count: viva.posizioni, posizioni: fmt.numero(viva.posizioni), scoperte: fmt.numero(viva.scoperte) }) : null}
         </Riga>
         <Riga etichetta={t("backstage.scheda.inVigoreDal")}>{fmt.data(g.validFrom)}</Riga>
         <Riga etichetta={t("backstage.scheda.motivoApertura")}>{t(`backstage.aperture.${g.openedReason}`)}</Riga>

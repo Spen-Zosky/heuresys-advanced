@@ -421,6 +421,25 @@ export const ScenarioExitsCreateSchema = z
   .strict();
 export type ScenarioExitsCreate = z.infer<typeof ScenarioExitsCreateSchema>;
 
+/**
+ * Lo scenario nel tempo (S-T3, resistenza, voce F3b-3): orizzonti in mesi (multipli di 3, fino a 36),
+ * numero di estrazioni e, per una prova di resistenza, il tasso annuo di uscita imposto (0-1, per
+ * esempio 0,1 per «esce il 10% in un anno»). Senza tasso imposto vale la stima dalla storia (F3c).
+ */
+export const SCENARIO_HORIZON_MONTHS_VALUES = [3, 6, 9, 12, 18, 24, 36] as const;
+export const ScenarioOverTimeCreateSchema = z
+  .object({
+    horizonsMonths: z
+      .array(z.literal(SCENARIO_HORIZON_MONTHS_VALUES))
+      .min(1)
+      .max(SCENARIO_HORIZON_MONTHS_VALUES.length)
+      .optional(),
+    draws: z.number().int().min(100).max(5000).optional(),
+    annualExitRate: z.number().gt(0).lt(1).optional(),
+  })
+  .strict();
+export type ScenarioOverTimeCreate = z.infer<typeof ScenarioOverTimeCreateSchema>;
+
 /** Uno scenario con la sua versione più recente (null se non ne ha ancora una). */
 export const ScenarioDetailSchema = z
   .object({

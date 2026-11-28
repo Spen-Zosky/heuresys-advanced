@@ -32,9 +32,8 @@ import type {
   SkillGapSegment,
   SkillGapScore,
   SkillGapListResponse,
-  EquitaDichiarazione,
 } from "@heuresys/shared";
-import { leggiTrattiProtetti, valutaEquita } from "../../lib/equita/index.js";
+import { dichiaraEquita as dichiaraEquitaSu } from "../../lib/equita/index.js";
 import * as repo from "./repository.js";
 import { posizioniNelPerimetroOrganizzativo } from "../dashboard/repository.js";
 import { emitNotificationsBulk } from "../../lib/notifications/emit.js";
@@ -329,22 +328,15 @@ export const READINESS_ORIZZONTI_FAVOREVOLI: ReadonlySet<SuccessionReadinessHori
  * favorevole se lo è per almeno una riga: chi compare per tre posizioni conta una volta. Si calcola
  * sui valori veri, prima della maschera, ed esce solo aggregata.
  */
-async function dichiaraEquita<T extends { userId: string }>(
+/** La dichiarazione di equità di una lista di proposte (E12), sul pool dell'API. */
+const dichiaraEquita = <T extends { userId: string }>(
   items: readonly T[],
   tenantId: string | null,
   favorevoleDi: (r: T) => boolean,
   esitoFavorevole: string,
   ingressi: readonly string[],
   oggi = new Date(),
-): Promise<EquitaDichiarazione> {
-  const favorevole = new Map<string, boolean>();
-  for (const r of items) favorevole.set(r.userId, (favorevole.get(r.userId) ?? false) || favorevoleDi(r));
-  const tratti = await leggiTrattiProtetti(pool, tenantId, [...favorevole.keys()]);
-  return valutaEquita(
-    [...favorevole.entries()].map(([userId, f]) => ({ userId, favorevole: f, tratti: tratti.get(userId) })),
-    { esitoFavorevole, ingressi, oggi },
-  );
-}
+) => dichiaraEquitaSu(pool, items, tenantId, favorevoleDi, esitoFavorevole, ingressi, oggi);
 
 export const dichiaraEquitaPronti = (items: SuccessionReadinessScore[], tenantId: string | null, oggi = new Date()) =>
   dichiaraEquita(items, tenantId, (r) => r.horizon !== undefined && READINESS_ORIZZONTI_FAVOREVOLI.has(r.horizon), "PRONTO_ENTRO_6_MESI", READINESS_FEATURE_KEYS, oggi);

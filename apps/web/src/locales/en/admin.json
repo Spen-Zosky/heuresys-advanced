@@ -616,7 +616,8 @@
     "title": "Org chart",
     "cliente": "Client",
     "back": "← Organization",
-    "description": "The client's units with the people who work in them, computed from today's data: as boxes like a classic org chart, or as a tree of nodes."
+    "description": "The client's units with the people who work in them, computed from today's data: as boxes like a classic org chart, or as a tree of nodes.",
+    "backstage": "Open Backstage"
   },
   "positions": {
     "title": "Positions",

@@ -21,6 +21,7 @@ import type { TenantListResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { useCurrentUser } from "@/lib/api/auth";
 import { useTranslation } from "react-i18next";
+import { Layers } from "lucide-react";
 import { Card, CardContent } from "@heuresys/ui";
 import { PageHeader } from "@/components/intestazione-pagina";
 import { VistaOrganigramma } from "@/components/organigramma/vista";
@@ -49,6 +50,15 @@ export default function OrgChartPage() {
         data-testid="org-chart-title"
         title={t("orgChart.title")}
         description={t("orgChart.description")}
+        actions={
+          <Link
+            href={tenantId ? `/organization/backstage?tenantId=${encodeURIComponent(tenantId)}` : "/organization/backstage"}
+            data-testid="org-chart-backstage"
+            className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm hover:bg-muted"
+          >
+            <Layers className="h-4 w-4" aria-hidden />{t("orgChart.backstage")}
+          </Link>
+        }
         breadcrumbs={
           <Link
             href="/organization"

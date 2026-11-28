@@ -12,6 +12,7 @@ import cookie from "@fastify/cookie";
 import { pool, closePool } from "../src/db/client.js";
 import { localePlugin } from "../src/middleware/locale.js";
 import { addTraduzioneRisposta, costruisciGlossario, rovescia } from "../src/lib/i18n/traduci-risposta.js";
+import { leggiRegistroRighe } from "../src/lib/i18n/traduzione-della-riga.js";
 
 let app: FastifyInstance;
 let it0 = "";
@@ -22,7 +23,8 @@ let ricevuto: unknown = null;
 
 describe("traduzione del dato nella risposta", () => {
   beforeAll(async () => {
-    const g = await costruisciGlossario(pool);
+    // Le righe di catalogo (senza tenant): valgono per ogni richiesta, anche senza utente.
+    const g = (await costruisciGlossario(pool)).comune;
     const primo = [...g.entries()].sort(([a], [b]) => a.localeCompare(b))[0];
     if (!primo) throw new Error("glossario vuoto: nessuna traduzione inglese per i campi registrati");
     [it0, en0] = primo;
@@ -43,6 +45,7 @@ describe("traduzione del dato nella risposta", () => {
     addTraduzioneRisposta(app, pool);
     app.get("/v1/prova", async () => ({ items: [{ id: it0, name: it0, owner: "Rossi, Mario" }] }));
     app.post("/v1/prova", async () => ({ name: it0 }));
+    app.get("/v1/testo", async (req) => ({ name: (req.query as { t?: string }).t ?? "" }));
     // Il corpo arrivato all'handler si guarda da qui, non si rimanda nella risposta.
     app.patch("/v1/eco", async (req, reply) => {
       ricevuto = req.body;
@@ -54,6 +57,8 @@ describe("traduzione del dato nella risposta", () => {
       ricevuto = req.body;
       return reply.code(204).send();
     });
+    // Come una modifica vera: risponde con la riga, cioè con l'italiano canonico che ha ricevuto.
+    app.patch("/v1/prova-risposta/skills/:id", { schema: { body: corpoSkill } }, async (req) => ({ name: (req.body as { name?: string }).name }));
     // Un'altra risorsa: un id di sys_skills qui non deve toccare la competenza.
     app.patch("/v1/teams/:id", { schema: { body: z.object({ name: z.string().optional() }) } }, async (req, reply) => {
       ricevuto = req.body;
@@ -90,13 +95,13 @@ describe("traduzione del dato nella risposta", () => {
     expect(r.json()).toEqual({ items: [{ id: it0, name: en0, owner: "Rossi, Mario" }] });
   });
 
-  it("in italiano, con x-localize: off e fuori dalle letture la risposta non cambia", async () => {
+  it("in italiano e con x-localize: off la risposta non cambia; la risposta di una scrittura si traduce", async () => {
     const itR = await app.inject({ method: "GET", url: "/v1/prova", cookies: { NEXT_LOCALE: "it" } });
     expect(itR.json().items[0].name).toBe(it0);
     const off = await app.inject({ method: "GET", url: "/v1/prova", cookies: { NEXT_LOCALE: "en" }, headers: { "x-localize": "off" } });
     expect(off.json().items[0].name).toBe(it0);
     const post = await app.inject({ method: "POST", url: "/v1/prova", cookies: { NEXT_LOCALE: "en" } });
-    expect(post.json().name).toBe(it0);
+    expect(post.json().name).toBe(en0);
   });
 
   it("in inglese una scrittura riporta la traduzione all'italiano canonico; il resto passa com'è", async () => {
@@ -192,5 +197,44 @@ describe("traduzione del dato nella risposta", () => {
     expect(letto).toBe(nuovo);
     const italiano = await pool.query<{ n: string }>(`SELECT skill_name AS n FROM sys.sys_skills WHERE skill_id = $1::uuid`, [riga.entity_id]);
     expect(italiano.rows[0]?.n).toBe(riga.it);
+  });
+
+  it("il glossario è separato per tenant: la traduzione di una riga di un tenant non va in un altro", async () => {
+    const strati = await costruisciGlossario(pool, await leggiRegistroRighe(pool));
+    const tenants = await pool.query<{ id: string }>(`SELECT tenant_id::text AS id FROM sys.sys_tenancies ORDER BY 1`);
+    const ids = tenants.rows.map((r) => r.id);
+    // un testo italiano tradotto solo nelle righe di un tenant, e non nel catalogo né nell'altro
+    let caso: { a: string; b: string; it: string; en: string } | null = null;
+    for (const a of ids) {
+      for (const b of ids) {
+        if (a === b || caso) continue;
+        for (const [it, en] of strati.perTenant.get(a) ?? []) {
+          if (!strati.comune.has(it) && !strati.perTenant.get(b)?.has(it)) {
+            caso = { a, b, it, en };
+            break;
+          }
+        }
+      }
+    }
+    if (!caso) throw new Error("nessun testo tradotto solo nelle righe di un tenant: la prova non si può fare");
+    const di = async (tenant: string) =>
+      (await app.inject({ method: "GET", url: `/v1/testo?t=${encodeURIComponent(caso!.it)}`, cookies: EN, headers: { "x-prova-tenant": tenant } })).json();
+    expect(await di(caso.a)).toEqual({ name: caso.en });
+    expect(await di(caso.b)).toEqual({ name: caso.it });
+    expect(await di("nessuno")).toEqual({ name: caso.it });
+  });
+
+  it("la risposta di una modifica fatta in inglese porta il testo inglese appena scritto", async () => {
+    const riga = (await competenza(true)) ?? (await competenza(false));
+    if (!riga) throw new Error("nessuna competenza con traduzione inglese del nome");
+    const nuovo = `${riga.en} (edited, answered in English)`;
+    const r = await app.inject({
+      method: "PATCH",
+      url: `/v1/prova-risposta/skills/${riga.entity_id}`,
+      cookies: EN,
+      headers: { "x-prova-tenant": riga.tenant ?? "nessuno" },
+      payload: { name: nuovo },
+    });
+    expect(r.json()).toEqual({ name: nuovo });
   });
 });

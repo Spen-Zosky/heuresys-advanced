@@ -37,6 +37,7 @@ export const RAMO_DI: Record<string, string[]> = {
   "/dashboard/platform": ["dash_governo"],
   /* Organizzazione */
   "/organization/org-chart": ["org_struttura"],
+  "/organization/backstage": ["org_struttura"],
   "/positions": ["org_struttura"],
   "/job-catalog": ["org_struttura"],
   "/organization": ["org_diagnosi"],

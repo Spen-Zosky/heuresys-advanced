@@ -33,6 +33,14 @@ export interface CampoDellaRiga {
   tenant_column: string | null;
 }
 
+/**
+ * L'espressione SQL del tenant della riga `e` (alias fisso), o `NULL` se la tabella non ne ha:
+ * una riga senza tenant è di catalogo, comune a tutti. Il nome viene dal registro filtrato.
+ */
+export function tenantDellaRiga(c: Pick<CampoDellaRiga, "tenant_column">): string {
+  return c.tenant_column ? `e.${c.tenant_column}` : "NULL::uuid";
+}
+
 /** Chi scrive: il suo tenant, o nessuno per un mandato di piattaforma senza tenant. */
 export interface Scrivente {
   tenantId: string | null;
@@ -43,6 +51,8 @@ export interface CampoTrovato {
   campo: string;
   it: string | null;
   en: string | null;
+  /** Il tenant della riga (null per una riga di catalogo): la sua traduzione vale per lui solo. */
+  tenant?: string | null;
 }
 
 export interface ModificaInglese {
@@ -51,6 +61,8 @@ export interface ModificaInglese {
   campo: string;
   testo: string;
   it: string;
+  /** Il tenant della riga: il glossario in memoria si aggiorna solo per lui. */
+  tenant?: string | null;
 }
 
 /** I campi registrati utilizzabili: tabelle che esistono, nomi sicuri, chiave uuid. */
@@ -97,16 +109,14 @@ export async function campiDellaRiga(
   const utili = registro.filter((c) => c.entity_table === tabella && chiavi.has(c.field));
   if (utili.length === 0) return [];
   if (scrivente.tenantId !== null && !UUID.test(scrivente.tenantId)) return [];
-  const conTenant = scrivente.tenantId !== null && utili.some((c) => c.tenant_column !== null);
+  const conTenant = scrivente.tenantId !== null && utili.some((c) => tenantDellaRiga(c) !== "NULL::uuid");
   const parametri: string[] = conTenant ? [id, scrivente.tenantId!] : [id];
   // I nomi vengono dal registro e sono già passati per IDENT: si possono scrivere nel testo.
   const parti = utili.map((c) => {
-    const delTenant =
-      conTenant && c.tenant_column !== null
-        ? ` AND (e.${c.tenant_column} IS NULL OR e.${c.tenant_column} = $2::uuid)`
-        : "";
+    const tenant = tenantDellaRiga(c);
+    const delTenant = conTenant && tenant !== "NULL::uuid" ? ` AND (${tenant} IS NULL OR ${tenant} = $2::uuid)` : "";
     return `SELECT '${c.entity_table}'::text AS tabella, '${c.field}'::text AS campo,
-              e.${c.entity_field_column}::text AS it, x.text AS en
+              e.${c.entity_field_column}::text AS it, x.text AS en, (${tenant})::text AS tenant
          FROM sys.${c.entity_table} e
          LEFT JOIN sys.sys_reference_translations x
            ON x.entity_table = '${c.entity_table}' AND x.field = '${c.field}'
@@ -166,7 +176,7 @@ export function separaModifiche(
     }
     campi.add(k);
     voci.push([k, t.it]);
-    if (v !== t.it && v !== t.en) modifiche.push({ tabella: t.tabella, id, campo: k, testo: v, it: t.it });
+    if (v !== t.it && v !== t.en) modifiche.push({ tabella: t.tabella, id, campo: k, testo: v, it: t.it, tenant: t.tenant ?? null });
   }
   return { corpo: Object.fromEntries(voci), modifiche, campi };
 }

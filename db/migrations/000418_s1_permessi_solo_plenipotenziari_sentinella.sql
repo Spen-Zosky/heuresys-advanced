@@ -216,6 +216,17 @@ SELECT v.code, 'ADR-0063 D5, piano AI-driven F3b-2: uno scenario legge le tavole
   ) AS v(code)
 ON CONFLICT (permission_code) DO NOTHING;
 
+-- [Backstage G1, mig 000526] il Backstage (l'organizzazione ghost) è per ora dei soli ruoli di Enzo
+-- (PLATFORM_ADMIN) e di Valentina Conti (HRMS_MANAGER), per decisione di Enzo del 2026-11-28, in attesa
+-- del gruppo autonomo degli agenti e degli assistenti per i ruoli apicali. È la regola, non un debito.
+INSERT INTO sys.sys_permessi_plenipotenziari_ammessi (permission_code, motivo, data)
+SELECT v.code, 'Enzo 2026-11-28: il Backstage e'' per ora dei soli ruoli PLATFORM_ADMIN e HRMS_MANAGER, in attesa del gruppo degli agenti e degli assistenti per i ruoli apicali. E'' la regola, non un debito.', DATE '2026-11-28'
+  FROM (VALUES
+  ('ghost_unit:read'),
+  ('ghost_unit:reform')
+  ) AS v(code)
+ON CONFLICT (permission_code) DO NOTHING;
+
 CREATE OR REPLACE VIEW sys.v_permessi_solo_plenipotenziari AS
 WITH titolari AS (
   SELECT p.auth_permission_code AS permission_code,

@@ -111,7 +111,8 @@
       "me_performance": "My reviews",
       "me_kpis": "My KPIs",
       "me_analytics": "My analytics",
-      "tenant-processes": "Processes"
+      "tenant-processes": "Processes",
+      "organization_backstage": "Backstage"
     },
     "rami": {
       "dash_aree": "By area",

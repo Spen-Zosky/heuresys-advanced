@@ -283,9 +283,18 @@ BEGIN
   INSERT INTO staging.storia36_runs (cluster_code, seed_file, rows_written, twice_run_delta)
   VALUES ('C15', '15_uscite.sql', v_tot, v_tot);
 
-  PERFORM staging.storia36_check_c15a();
-  PERFORM staging.storia36_check_c15b();
-  PERFORM staging.storia36_check_c15c();
+  -- C15a/b/c nascono in db/scripts/verify-storia36.sql (custodia). Sul primo giro in un
+  -- database dove la custodia non le ha ancora create, il seed non le pretende: la verifica
+  -- la fa la custodia lanciata subito dopo, e C15d qui sotto protegge comunque il presente.
+  IF to_regprocedure('staging.storia36_check_c15a()') IS NOT NULL
+     AND to_regprocedure('staging.storia36_check_c15b()') IS NOT NULL
+     AND to_regprocedure('staging.storia36_check_c15c()') IS NOT NULL THEN
+    PERFORM staging.storia36_check_c15a();
+    PERFORM staging.storia36_check_c15b();
+    PERFORM staging.storia36_check_c15c();
+  ELSE
+    RAISE NOTICE 'storia36 C15: verifiche C15a/b/c non ancora create, le esegue la custodia dopo il seed';
+  END IF;
 
   -- C15d: il presente non è cambiato.
   IF v_impr IS DISTINCT FROM (

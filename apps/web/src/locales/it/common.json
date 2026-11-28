@@ -2718,7 +2718,8 @@
     "favorevole": {
       "PRONTO_ENTRO_6_MESI": "pronta ora o entro sei mesi",
       "NON_A_RISCHIO_ALTO": "non segnalata a rischio di uscita alto o critico",
-      "DIVARIO_AL_PIU_LIEVE": "allineata al ruolo o con un divario lieve"
+      "DIVARIO_AL_PIU_LIEVE": "allineata al ruolo o con un divario lieve",
+      "POTENZIALE_ALTO": "valutata ad alto potenziale"
     },
     "colTratto": "Tratto protetto",
     "colGruppi": "Gruppi",
@@ -2779,7 +2780,11 @@
       "comp": "posizione nella fascia retributiva",
       "promotion": "tempo dall'ultimo passaggio",
       "role_fit_gap": "distanza dal ruolo",
-      "evidence_sparsity": "scarsità di evidenze"
+      "evidence_sparsity": "scarsità di evidenze",
+      "latest_overall_rating": "valutazione complessiva più recente",
+      "latest_potential_rating": "valutazione del potenziale più recente",
+      "readiness_level": "livello di prontezza indicato",
+      "rank_order": "posizione nella lista dei successori"
     }
   }
 }

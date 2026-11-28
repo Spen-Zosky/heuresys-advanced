@@ -2719,7 +2719,8 @@
       "PRONTO_ENTRO_6_MESI": "pronta ora o entro sei mesi",
       "NON_A_RISCHIO_ALTO": "non segnalata a rischio di uscita alto o critico",
       "DIVARIO_AL_PIU_LIEVE": "allineata al ruolo o con un divario lieve",
-      "POTENZIALE_ALTO": "valutata ad alto potenziale"
+      "POTENZIALE_ALTO": "valutata ad alto potenziale",
+      "RIMPIAZZO_SCELTO": "scelta come rimpiazzo"
     },
     "colTratto": "Tratto protetto",
     "colGruppi": "Gruppi",
@@ -2784,7 +2785,8 @@
       "latest_overall_rating": "valutazione complessiva più recente",
       "latest_potential_rating": "valutazione del potenziale più recente",
       "readiness_level": "livello di prontezza indicato",
-      "rank_order": "posizione nella lista dei successori"
+      "rank_order": "posizione nella lista dei successori",
+      "confirmed": "candidatura confermata"
     }
   }
 }

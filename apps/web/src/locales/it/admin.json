@@ -2376,6 +2376,7 @@
   "backstage": {
     "title": "Backstage",
     "description": "L'organizzazione ghost del cliente: il vertice, le divisioni e le direzioni, ricavati dal vivo dall'albero delle unità. Per ognuna un Capo agente affianca il responsabile reale.",
+    "negato": "Per ora il Backstage è riservato ai ruoli di amministrazione della piattaforma e di responsabile della direzione HR. Se ti serve, puoi inviare una richiesta all'Amministratore del Sistema.",
     "back": "← Organigramma",
     "guida": {
       "apri": "Che cos'è il Backstage e come si usa",

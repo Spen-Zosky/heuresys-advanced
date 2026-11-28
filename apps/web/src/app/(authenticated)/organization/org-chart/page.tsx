@@ -19,7 +19,7 @@ import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import type { TenantListResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
-import { useCurrentUser } from "@/lib/api/auth";
+import { useCan, useCurrentUser } from "@/lib/api/auth";
 import { useTranslation } from "react-i18next";
 import { Layers } from "lucide-react";
 import { Card, CardContent } from "@heuresys/ui";
@@ -44,6 +44,7 @@ export default function OrgChartPage() {
   const [scelto, setScelto] = useState("");
   const predefinito = clienti.length > 1 && me.data ? (clienti.find((x) => x.tenantId !== me.data?.tenantId)?.tenantId ?? null) : null;
   const tenantId = richiesto ?? (scelto || predefinito);
+  const puoBackstage = useCan("ghost_unit:read");
   return (
     <div data-testid="org-chart-page" className="mx-auto max-w-[96rem] space-y-6 px-6 pb-8">
       <PageHeader
@@ -51,13 +52,14 @@ export default function OrgChartPage() {
         title={t("orgChart.title")}
         description={t("orgChart.description")}
         actions={
-          <Link
+          // Il Backstage è per ora dei soli ruoli PLATFORM_ADMIN e HRMS_MANAGER (Enzo, 28/11/2026).
+          puoBackstage ? <Link
             href={tenantId ? `/organization/backstage?tenantId=${encodeURIComponent(tenantId)}` : "/organization/backstage"}
             data-testid="org-chart-backstage"
             className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm hover:bg-muted"
           >
             <Layers className="h-4 w-4" aria-hidden />{t("orgChart.backstage")}
-          </Link>
+          </Link> : undefined
         }
         breadcrumbs={
           <Link

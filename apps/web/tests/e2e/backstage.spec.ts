@@ -8,7 +8,7 @@
 import { test, expect } from "@playwright/test";
 import { storageStateFor } from "./fixtures";
 
-test.use({ storageState: storageStateFor("tenantAdmin") });
+test.use({ storageState: storageStateFor("hrManager") });
 
 interface G { ghostUnitId: string; sourceUnitId: string | null; name: string; level: number }
 

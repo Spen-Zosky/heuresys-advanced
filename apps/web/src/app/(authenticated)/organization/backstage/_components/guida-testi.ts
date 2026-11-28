@@ -172,7 +172,7 @@ La scheda dice chi affianca il Capo, il tipo e il livello, l'unità reale, il re
 
 ## Chi vede che cosa
 
-Vede il Backstage chi può leggere l'organigramma del tenant; lo riforma chi può aggiornarlo. Un mandato di piattaforma sceglie il cliente dalla casella in alto. I nomi dei responsabili sono gli stessi che l'organigramma già mostra.`,
+Per ora il Backstage è riservato a due ruoli: l'amministrazione della piattaforma e il Responsabile della direzione HR del tenant. L'accesso segue il ruolo, non la persona che lo occupa: chi riceve uno di questi ruoli vede il Backstage e può riformarlo, chi lo lascia non lo vede più. Più avanti il Backstage entrerà in un gruppo che raccoglierà le funzioni degli agenti e degli assistenti, riservato ai ruoli apicali. Un mandato di piattaforma sceglie il cliente dalla casella in alto. I nomi dei responsabili sono gli stessi che l'organigramma già mostra.`,
       },
     ],
   },
@@ -239,7 +239,7 @@ The card says whom the Head works alongside, the type and level, the real unit, 
 
 ## Who sees what
 
-Anyone who can read the tenant's org chart sees Backstage; anyone who can update it can reform it. A platform mandate picks the client from the box at the top. The heads' names are the same the org chart already shows.`,
+For now Backstage is reserved for two roles: platform administration and the tenant's HR department head. Access follows the role, not the person who holds it: whoever is given one of these roles sees Backstage and can reform it, whoever leaves it no longer sees it. Later Backstage will join a group gathering the functions of agents and assistants, reserved for top-level roles. A platform mandate picks the client from the box at the top. The heads' names are the same the org chart already shows.`,
       },
     ],
   },

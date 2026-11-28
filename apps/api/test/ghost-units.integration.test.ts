@@ -6,6 +6,10 @@
  * Le prove si fanno contro la VISTA, non contro numeri scritti qui: il database della CI è un
  * clone congelato, e un conteggio fisso sarebbe verde lì e rosso in produzione (o il contrario).
  * Gli alberi cambiati qui dentro tornano indietro con la transazione del file.
+ *
+ * Il Backstage è per ora dei soli ruoli PLATFORM_ADMIN e HRMS_MANAGER (Enzo, 2026-11-28, 000526):
+ * le prove leggono come HRMS_MANAGER (valentina.conti@) e verificano che un TENANT_ADMIN
+ * (governo@) riceva un diniego su ogni rotta.
  */
 
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
@@ -32,6 +36,21 @@ interface G { ghostUnitId: string; sourceUnitId: string | null; level: number; k
 let suite: TestApp;
 let s: S;
 
+/** HRMS_MANAGER, il ruolo di Valentina Conti: il Backstage è suo (000526). */
+const MANDATO_HR = "valentina.conti@rtl-bank.org";
+/** TENANT_ADMIN senza HRMS_MANAGER: per ora il Backstage non è suo. */
+const SENZA_BACKSTAGE = "governo@collaudo.invalid";
+
+async function ruoli(email: string): Promise<string[]> {
+  const r = await pool.query<{ c: string }>(
+    `SELECT r.auth_role_code AS c
+       FROM sys.sys_users u
+       JOIN sys.sys_user_auth_roles uar ON uar.user_auth_role_user_id = u.user_id AND uar.user_auth_role_revoked_at IS NULL
+       JOIN sys.sys_auth_roles r ON r.auth_role_id = uar.user_auth_role_role_id
+      WHERE u.user_email = $1`, [email]);
+  return r.rows.map((x) => x.c);
+}
+
 async function riforma() {
   const r = await suite.app.inject({
     method: "POST", url: "/v1/ghost-units/riforma",
@@ -57,7 +76,7 @@ async function deriva() {
 describe("/v1/ghost-units integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    s = await login(suite, "governo@collaudo.invalid");
+    s = await login(suite, MANDATO_HR);
     await riforma();
   });
 
@@ -190,6 +209,35 @@ describe("/v1/ghost-units integration", () => {
       headers: { cookie: ch(s.cookies), "content-type": "application/json" }, payload: {},
     });
     expect(senza.statusCode).toBe(403);
+  });
+
+  it("PERMESSI: il Backstage è dei soli ruoli PLATFORM_ADMIN e HRMS_MANAGER, un TENANT_ADMIN riceve un diniego", async () => {
+    expect(await ruoli(MANDATO_HR)).toContain("HRMS_MANAGER");
+    const suoi = await ruoli(SENZA_BACKSTAGE);
+    expect(suoi).toContain("TENANT_ADMIN");
+    expect(suoi.some((c) => c === "HRMS_MANAGER" || c === "PLATFORM_ADMIN")).toBe(false);
+
+    const titolari = await pool.query<{ codice: string; ruolo: string }>(
+      `SELECT p.auth_permission_code AS codice, r.auth_role_code AS ruolo
+         FROM sys.sys_auth_role_permissions rp
+         JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
+         JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
+        WHERE p.auth_permission_resource = 'ghost_unit'`);
+    expect(new Set(titolari.rows.map((x) => x.ruolo))).toEqual(new Set(["HRMS_MANAGER", "PLATFORM_ADMIN"]));
+
+    const altro = await login(suite, SENZA_BACKSTAGE);
+    for (const url of ["/v1/ghost-units", "/v1/ghost-units/storia", "/v1/ghost-units/deriva"]) {
+      const r = await suite.app.inject({ method: "GET", url, headers: { cookie: ch(altro.cookies) } });
+      expect(r.statusCode, url).toBe(403);
+      expect((r.json() as { error: { code: string } }).error.code, url).toBe("FORBIDDEN");
+    }
+    const r = await suite.app.inject({
+      method: "POST", url: "/v1/ghost-units/riforma",
+      headers: { cookie: ch(altro.cookies), "x-csrf-token": altro.csrfToken, "content-type": "application/json" },
+      payload: {},
+    });
+    expect(r.statusCode).toBe(403);
+    expect((r.json() as { error: { code: string } }).error.code).toBe("FORBIDDEN");
   });
 
   it("AUTENTICAZIONE: senza sessione non si legge", async () => {

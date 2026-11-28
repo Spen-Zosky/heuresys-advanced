@@ -2376,6 +2376,7 @@
   "backstage": {
     "title": "Backstage",
     "description": "The client's ghost organisation: the apex, the divisions and the departments, derived live from the unit tree. For each one an agent Head works alongside the real head.",
+    "negato": "For now the Backstage is reserved for the platform administration and HR department head roles. If you need it, you can send a request to the System Administrator.",
     "back": "← Org chart",
     "guida": {
       "apri": "What Backstage is and how to use it",

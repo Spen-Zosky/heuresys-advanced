@@ -8,8 +8,11 @@
  * Capo agente affiancherà il responsabile reale. Quattro schede: l'albero navigabile (fit, rotella,
  * + −, trascinamento, doppio clic), l'elenco, la storia dei periodi e la deriva rispetto all'albero
  * vivo. Ogni unità apre la sua scheda a cascata (`scheda-ghost.tsx`), e da lì le schede rapide di
- * unità reali, persone e posizioni. La riforma riallinea la storia all'albero: la vede solo chi ha
- * `organization_unit:update`, come l'API, e parte solo dopo la conferma della persona.
+ * unità reali, persone e posizioni. La riforma riallinea la storia all'albero e parte solo dopo la
+ * conferma della persona.
+ *
+ * Per ora il Backstage è dei soli ruoli PLATFORM_ADMIN e HRMS_MANAGER (Enzo, 28/11/2026, 000526):
+ * la pagina chiede `ghost_unit:read` e il pulsante della riforma `ghost_unit:reform`, come l'API.
  */
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -20,7 +23,7 @@ import { Info, RefreshCw, Wrench } from "lucide-react";
 import type { GhostDriftItem, GhostRiformaResponse, GhostUnit, TenantListResponse } from "@heuresys/shared";
 import { Button, Card, CardContent, Dialog, DialogContent, DialogDescription, DialogTitle } from "@heuresys/ui";
 import { apiFetch } from "@/lib/api/fetch";
-import { useCan, useCurrentUser } from "@/lib/api/auth";
+import { useCan, useCurrentUser, useCurrentUserPermissions } from "@/lib/api/auth";
 import { useFormat } from "@/lib/format";
 import { useEnumLabel } from "@/lib/enum-labels";
 import { MODALE } from "@/lib/modale";
@@ -28,7 +31,7 @@ import { PageHeader } from "@/components/intestazione-pagina";
 import { SchedePagina } from "@/components/schede-pagina";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { LavoroInCorso } from "@/components/lavoro-in-corso";
-import { StatoErrore, StatoVuoto } from "@/components/stato-pagina";
+import { StatoCaricamento, StatoErrore, StatoNegato, StatoVuoto } from "@/components/stato-pagina";
 import { StatusPill } from "@/components/status-pill";
 import { Riferimento } from "@/components/scheda-rapida";
 import { OrganigrammaBlocchi } from "@/components/organigramma/blocchi";
@@ -56,6 +59,8 @@ export default function BackstagePage() {
   const predefinito = clienti.length > 1 && me.data ? (clienti.find((x) => x.tenantId !== me.data?.tenantId)?.tenantId ?? null) : null;
   const tenantId = richiesto ?? (scelto || predefinito);
   const [guida, setGuida] = useState(false);
+  const permessi = useCurrentUserPermissions();
+  const puoVedere = useCan("ghost_unit:read");
 
   return (
     <div data-testid="backstage-page" className="mx-auto max-w-[96rem] space-y-6 px-6 pb-8">
@@ -82,6 +87,11 @@ export default function BackstagePage() {
         }
       />
       <GuidaBackstage aperta={guida} onChiudi={() => setGuida(false)} />
+      {permessi.isLoading ? (
+        <StatoCaricamento testId="backstage-permessi" />
+      ) : !puoVedere ? (
+        <StatoNegato motivo={t("backstage.negato")} testId="backstage-negato" />
+      ) : (<>
       {clienti.length > 1 && !richiesto ? (
         <label className="flex items-center gap-2 text-sm">
           <span className="text-muted-foreground">{t("orgChart.cliente")}</span>
@@ -95,6 +105,7 @@ export default function BackstagePage() {
           <Backstage tenantId={tenantId} />
         </CardContent>
       </Card>
+      </>)}
     </div>
   );
 }
@@ -279,7 +290,7 @@ function Deriva({ dati, tenantId, isError, error }: { dati: DatiBackstage; tenan
   const fmt = useFormat();
   const enumLabel = useEnumLabel();
   const qc = useQueryClient();
-  const puoRiformare = useCan("organization_unit:update");
+  const puoRiformare = useCan("ghost_unit:reform");
   const [conferma, setConferma] = useState(false);
   const riforma = useMutation({
     mutationFn: () => apiFetch<GhostRiformaResponse>("/v1/ghost-units/riforma", { method: "POST", body: tenantId ? { tenantId } : {} }),

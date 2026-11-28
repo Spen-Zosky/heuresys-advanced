@@ -66,7 +66,7 @@ export function letturaDaConfermare(): LetturaDaConfermare {
   return {
     esito: "CONFERMA_SECONDO_FATTORE",
     istruzione:
-      "La persona può vedere questi dati ma deve prima confermare il secondo fattore: la conferma la dà lei, con il suo codice, dal pulsante che la finestra dell'assistente le mostra. Non citarli e non stimarli. Dille di confermare con quel pulsante e di ripetere la domanda; non dire che «si può fare solo dalla pagina» e non dire che non puoi aiutarla.",
+      "La persona può vedere questi dati ma deve prima confermare il secondo fattore: la conferma la dà lei, con il suo codice, dal pulsante che la finestra dell'assistente le mostra. Non citarli e non stimarli. Non fermarti qui: fai comunque le altre letture che la domanda permette (per esempio le posizioni, le unità, le persone che puoi già leggere) e mostra tutto ciò che hai trovato; solo alla fine dille in una frase che per questi dati deve confermare con quel pulsante e ripetere la domanda. Non limitarti a chiederle di ripetere la richiesta; non dire che «si può fare solo dalla pagina» e non dire che non puoi aiutarla.",
   };
 }
 

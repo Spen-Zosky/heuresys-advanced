@@ -26,14 +26,20 @@ test.describe("Backstage — dati vivi", () => {
     }
     await expect(page.getByTestId("backstage")).toBeVisible();
     // La società è l'etichetta del disegno, non un riquadro (regola degli organigrammi): il primo
-    // riquadro è l'unità al vertice sotto di essa, ed è un'unità ghost dell'API.
-    const primo = page.getByTestId("backstage-albero-area").locator("g[data-unita][role=button]").first();
-    const id = await primo.getAttribute("data-unita");
+    // riquadro unisce il vertice e la Direzione Generale, e il doppio clic apre il vertice ghost.
+    const riquadri = page.getByTestId("backstage-albero-area").locator("g[data-unita][role=button]");
+    const vertice = body.items.find((g) => g.level === 0)!;
+    await riquadri.first().dblclick();
+    await expect(page.getByTestId("scheda-ghost").getByRole("heading", { name: vertice.name, exact: true })).toBeVisible();
+    await page.getByTestId("scheda-ghost-chiudi").click();
+    await expect(page.getByTestId("scheda-ghost")).toHaveCount(0);
+    // Un riquadro sotto il vertice apre la sua unità del Backstage.
+    const secondo = riquadri.nth(1);
+    const id = await secondo.getAttribute("data-unita");
     const unita = body.items.find((g) => g.sourceUnitId === id);
     expect(unita, `il riquadro ${id} è un'unità del Backstage`).toBeTruthy();
-    await primo.dblclick();
-    await expect(page.getByTestId("scheda-ghost")).toBeVisible();
-    await expect(page.getByTestId("scheda-ghost").getByRole("heading", { name: unita!.name })).toBeVisible();
+    await secondo.dblclick();
+    await expect(page.getByTestId("scheda-ghost").getByRole("heading", { name: unita!.name, exact: true })).toBeVisible();
     await page.getByTestId("scheda-ghost-chiudi").click();
 
     await page.getByTestId("scheda-elenco").click();

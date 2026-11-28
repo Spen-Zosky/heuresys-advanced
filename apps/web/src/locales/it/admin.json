@@ -616,7 +616,8 @@
     "title": "Organigramma",
     "cliente": "Cliente",
     "back": "← Organizzazione",
-    "description": "Le unità del cliente con le persone che ci lavorano, calcolate dai dati di oggi: a blocchi come un organigramma classico, oppure ad albero di nodi."
+    "description": "Le unità del cliente con le persone che ci lavorano, calcolate dai dati di oggi: a blocchi come un organigramma classico, oppure ad albero di nodi.",
+    "backstage": "Apri il Backstage"
   },
   "positions": {
     "title": "Posizioni",
@@ -939,7 +940,8 @@
       "scenario": "Scenari",
       "me": "Area personale",
       "performance_review": "Valutazioni delle prestazioni",
-      "review_cycle": "Cicli di valutazione"
+      "review_cycle": "Cicli di valutazione",
+      "ghost_unit": "Backstage"
     },
     "actions": {
       "activate": "attivare",
@@ -984,7 +986,8 @@
       "respond_self": "rispondere per sé",
       "sessions_manage": "gestire le sessioni",
       "update_self": "modificare i propri dati",
-      "upload_self": "caricare i propri file"
+      "upload_self": "caricare i propri file",
+      "reform": "riformare"
     },
     "deleghe": {
       "titolo": "Deleghe del tenant",
@@ -2370,6 +2373,161 @@
       "CONFERMATA": "Confermata",
       "NEGATA": "Negata",
       "AUTONOMA": "Senza conferma"
+    }
+  },
+  "backstage": {
+    "title": "Backstage",
+    "description": "L'organizzazione ghost del cliente: il vertice, le divisioni e le direzioni, ricavati dal vivo dall'albero delle unità. Per ognuna un Capo agente affianca il responsabile reale.",
+    "negato": "Per ora il Backstage è riservato ai ruoli di amministrazione della piattaforma e di responsabile della direzione HR. Se ti serve, puoi inviare una richiesta all'Amministratore del Sistema.",
+    "back": "← Organigramma",
+    "guida": {
+      "apri": "Che cos'è il Backstage e come si usa",
+      "titolo": "Guida al Backstage",
+      "sottotitolo": "A che cosa serve e come si usa",
+      "chiudi": "Chiudi la guida"
+    },
+    "caricamento": {
+      "titolo": "Caricamento del Backstage",
+      "dettaglio": "{{fatte}} letture su {{totale}}: unità, storia, deriva e organigramma vivo"
+    },
+    "errore": "Non è stato possibile leggere il Backstage.",
+    "riepilogo": "{{unita}} unità del Backstage: un vertice, {{divisioni}} divisioni, {{direzioni}} direzioni",
+    "stati": {
+      "formaAllineata": "Allineato all'albero vivo",
+      "formaDaRiformare_one": "{{count}} differenza dall'albero vivo",
+      "formaDaRiformare_other": "{{count}} differenze dall'albero vivo",
+      "allineata": "Allineata",
+      "chiusa": "Chiusa il {{quando}}",
+      "periodoChiuso": "Chiuso",
+      "periodoAperto": "In vigore"
+    },
+    "calcolato": "Calcolato il {{quando}}",
+    "aggiorna": "Aggiorna",
+    "aggiornando": "Aggiornamento in corso…",
+    "vuoto": "Il Backstage di questo cliente è vuoto",
+    "vuotoMotivo": "L'albero delle unità non ha ancora un vertice attivo.",
+    "schede": {
+      "albero": "Albero",
+      "elenco": "Elenco",
+      "storia": "Storia",
+      "deriva": "Deriva"
+    },
+    "legendaAlbero": "Il Backstage dal vertice in giù, con le persone di ogni unità reale (il responsabile in grassetto). Doppio clic su un riquadro per aprirne la scheda.",
+    "legendaDeriva": "I riquadri bordati di colore sono in deriva rispetto all'albero vivo.",
+    "ariaAlbero": "Albero del Backstage",
+    "colonne": {
+      "unita": "Unità",
+      "tipo": "Tipo",
+      "livello": "Livello",
+      "sopra": "Unità sopra",
+      "responsabile": "Responsabile",
+      "persone": "Persone",
+      "inVigoreDal": "In vigore dal",
+      "codice": "Codice",
+      "stato": "Stato",
+      "dal": "Dal",
+      "al": "Al",
+      "motivoApertura": "Motivo dell'apertura",
+      "motivoChiusura": "Motivo della chiusura",
+      "cheCosaCambia": "Che cosa cambia"
+    },
+    "senzaResponsabile": "Senza responsabile",
+    "elencoCaption_one": "{{count}} unità del Backstage",
+    "elencoCaption_other": "{{count}} unità del Backstage",
+    "legendaStoria": "Ogni riga è un periodo in cui un'unità del Backstage ha avuto la stessa forma. Un periodo chiuso non si riapre e non si modifica.",
+    "storiaCaption_one": "{{count}} periodo",
+    "storiaCaption_other": "{{count}} periodi",
+    "storiaVuota": "Nessun periodo registrato",
+    "legendaDerivaScheda": "Le differenze fra il Backstage e l'albero vivo di oggi, unità per unità. La riforma le chiude e apre i periodi nuovi.",
+    "derivaCaption_one": "{{count}} differenza",
+    "derivaCaption_other": "{{count}} differenze",
+    "riforma": {
+      "esito": "Riforma fatta: {{aperte}} periodi aperti, {{chiuse}} chiusi, {{attive}} unità in vigore.",
+      "pulsante": "Riforma il Backstage",
+      "senzaPermesso": "Per riformare il Backstage serve il permesso di aggiornare l'organigramma.",
+      "titolo": "Riformare il Backstage?",
+      "testo_one": "Il Backstage si riallinea all'albero vivo: {{count}} differenza. I periodi superati si chiudono e restano nella storia, quelli nuovi si aprono.",
+      "testo_other": "Il Backstage si riallinea all'albero vivo: {{count}} differenze. I periodi superati si chiudono e restano nella storia, quelli nuovi si aprono.",
+      "errore": "La riforma non è riuscita.",
+      "annulla": "Annulla",
+      "inCorso": "Riforma in corso…",
+      "conferma": "Conferma e riforma"
+    },
+    "deriva": {
+      "nessunaTitolo": "Nessuna deriva",
+      "nessunaMotivo": "Il Backstage coincide con l'albero vivo di oggi: non c'è niente da riformare.",
+      "cambi": {
+        "NUOVA": "Nuova",
+        "USCITA": "Uscita",
+        "MODIFICATA": "Modificata"
+      },
+      "campi": {
+        "level": "Livello",
+        "kind": "Tipo",
+        "code": "Codice",
+        "name": "Nome",
+        "sourceParentId": "Unità sopra",
+        "sourceType": "Tipo dell'unità reale"
+      },
+      "spiega": {
+        "NUOVA": "L'albero vivo ha un'unità che il Backstage non ha ancora",
+        "USCITA": "Il Backstage ha un'unità che l'albero vivo non ha più"
+      },
+      "altraUnita": "un'unità fuori dal Backstage",
+      "nessuna": "nessuna"
+    },
+    "tipi": {
+      "VERTICE": "Vertice",
+      "DIVISIONE": "Divisione",
+      "DIREZIONE": "Direzione"
+    },
+    "livelli": {
+      "0": "Vertice",
+      "1": "Primo livello",
+      "2": "Secondo livello"
+    },
+    "aperture": {
+      "FORMAZIONE": "Formazione del Backstage",
+      "NUOVA": "Unità nuova",
+      "MODIFICATA": "Unità modificata"
+    },
+    "chiusure": {
+      "MODIFICATA": "Unità modificata",
+      "USCITA": "Unità uscita"
+    },
+    "scheda": {
+      "nonIndicato": "Non indicato",
+      "capoAffianca": "Il Capo agente di «{{unita}}» affianca {{persona}}.",
+      "capoSenzaResponsabile": "«{{unita}}» non ha un responsabile reale: il suo Capo agente non affianca ancora nessuno.",
+      "tipo": "Tipo",
+      "livello": "Livello",
+      "unitaReale": "Unità reale",
+      "unitaEliminata": "L'unità reale è stata eliminata",
+      "responsabile": "Responsabile",
+      "sopra": "Unità sopra",
+      "eIlVertice": "È il vertice",
+      "persone": "Persone",
+      "personeValore": "{{unita}} nell'unità, {{totali}} con le unità sotto",
+      "posizioni": "Posizioni",
+      "posizioniValore_one": "{{posizioni}} posizione, scoperte: {{scoperte}}",
+      "posizioniValore_other": "{{posizioni}} posizioni, scoperte: {{scoperte}}",
+      "inVigoreDal": "In vigore dal",
+      "motivoApertura": "Motivo dell'apertura",
+      "stato": "Stato",
+      "cheCosaCambia": "Che cosa cambia rispetto all'albero vivo",
+      "unitaSotto": "Unità del Backstage sotto",
+      "personeUnita": "Persone dell'unità",
+      "responsabileBreve": "responsabile",
+      "posizioniUnita": "Posizioni dell'unità",
+      "scoperta": "Scoperta",
+      "storia": "Storia dei periodi",
+      "periodoChiuso": "dal {{dal}} al {{al}}",
+      "periodoAperto": "dal {{dal}}, in vigore",
+      "percorso": "Percorso delle schede",
+      "sottotitolo": "{{tipo}} del Backstage",
+      "indietro": "Indietro",
+      "chiudi": "Chiudi",
+      "chiudiCascata": "Chiudi tutte"
     }
   }
 }

@@ -111,7 +111,8 @@
       "me_performance": "Le mie valutazioni",
       "me_kpis": "I miei KPI",
       "me_analytics": "Le mie analisi",
-      "tenant-processes": "Processi"
+      "tenant-processes": "Processi",
+      "organization_backstage": "Backstage"
     },
     "rami": {
       "dash_aree": "Per area",

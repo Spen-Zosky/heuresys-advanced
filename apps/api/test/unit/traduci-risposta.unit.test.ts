@@ -3,7 +3,7 @@
  * La prova sul database vero è in test/traduci-risposta.integration.test.ts.
  */
 import { describe, it, expect } from "vitest";
-import { traduciValore, rovescia, riceveRitorno } from "../../src/lib/i18n/traduci-risposta.js";
+import { traduciValore, rovescia, riceveRitorno, glossarioDi, vociDi, conModifiche } from "../../src/lib/i18n/traduci-risposta.js";
 import { z } from "zod";
 import { separaModifiche, idDellaRisorsa, tabellaDellaRotta, campiAccettati } from "../../src/lib/i18n/traduzione-della-riga.js";
 
@@ -95,7 +95,7 @@ describe("modifiche fatte in inglese (3b)", () => {
     const r = separaModifiche({ name: "Risk management", description: "A new English description", level: 3 }, id, trovati);
     expect(r.corpo).toEqual({ name: "Gestione del rischio", description: "Descrizione italiana", level: 3 });
     expect(r.modifiche).toEqual([
-      { tabella: "sys_skills", id, campo: "description", testo: "A new English description", it: "Descrizione italiana" },
+      { tabella: "sys_skills", id, campo: "description", testo: "A new English description", it: "Descrizione italiana", tenant: null },
     ]);
     expect([...r.campi].sort()).toEqual(["description", "name"]);
   });
@@ -127,5 +127,38 @@ describe("legame della modifica con la richiesta (3b)", () => {
     expect(campiAccettati(z.object({ name: z.string() }).transform((x) => x)).size).toBe(0);
     expect(campiAccettati(undefined).size).toBe(0);
     expect(campiAccettati({ shape: null }).size).toBe(0);
+  });
+});
+
+describe("glossario separato per tenant", () => {
+  const A = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+  const B = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+  const strati = {
+    comune: new Map([["Finanza", "Finance"]]),
+    perTenant: new Map([[A, new Map([["Gestione del rischio", "risk management (A)"], ["Finanza", "Finance dept"]])]]),
+  };
+
+  it("la traduzione di una riga di un tenant non compare in un altro tenant", () => {
+    expect(glossarioDi(strati, A).get("Gestione del rischio")).toBe("risk management (A)");
+    expect(glossarioDi(strati, B).get("Gestione del rischio")).toBeUndefined();
+    expect(glossarioDi(strati, null).get("Gestione del rischio")).toBeUndefined();
+  });
+
+  it("il tenant vede prima le sue traduzioni, poi quelle di catalogo", () => {
+    expect(glossarioDi(strati, A).get("Finanza")).toBe("Finance dept");
+    expect(glossarioDi(strati, B).get("Finanza")).toBe("Finance");
+  });
+
+  it("il ritorno all'italiano segue la vista del tenant", () => {
+    expect(rovescia(vociDi(strati, A)).get("risk management (A)")).toBe("Gestione del rischio");
+    expect(rovescia(vociDi(strati, B)).get("risk management (A)")).toBeUndefined();
+    expect(rovescia(vociDi(strati, B)).get("Finance")).toBe("Finanza");
+  });
+
+  it("la risposta di una modifica porta già il testo inglese appena scritto", () => {
+    const g = conModifiche(glossarioDi(strati, B), [
+      { tabella: "sys_skills", id: A, campo: "name", testo: "Brand new name", it: "Gestione del rischio", tenant: B },
+    ]);
+    expect(traduciValore({ name: "Gestione del rischio", unit: "Finanza" }, g!)).toEqual({ name: "Brand new name", unit: "Finance" });
   });
 });

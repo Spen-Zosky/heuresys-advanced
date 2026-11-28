@@ -940,7 +940,8 @@
       "scenario": "Scenari",
       "me": "Area personale",
       "performance_review": "Valutazioni delle prestazioni",
-      "review_cycle": "Cicli di valutazione"
+      "review_cycle": "Cicli di valutazione",
+      "ghost_unit": "Backstage"
     },
     "actions": {
       "activate": "attivare",
@@ -985,7 +986,8 @@
       "respond_self": "rispondere per sé",
       "sessions_manage": "gestire le sessioni",
       "update_self": "modificare i propri dati",
-      "upload_self": "caricare i propri file"
+      "upload_self": "caricare i propri file",
+      "reform": "riformare"
     },
     "deleghe": {
       "titolo": "Deleghe del tenant",

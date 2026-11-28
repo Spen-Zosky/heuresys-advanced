@@ -104,10 +104,11 @@ export function controllaTratto(
     }
     gruppi.push({ gruppo: g, persone: c.persone, favorevoli: c.favorevoli, quota: arrotonda(c.favorevoli / c.persone), confrontato: true });
   }
-  // I gruppi piccoli e i non dichiarati si contano ma non si confrontano: le loro quote non escono.
-  if (piccoli.persone > 0) gruppi.push({ gruppo: EQUITA_GRUPPO_PICCOLI, persone: piccoli.persone, favorevoli: 0, quota: null, confrontato: false });
+  // I gruppi piccoli e i non dichiarati si contano ma non si confrontano: né i favorevoli né la quota escono
+  // (null, non 0: uno zero si leggerebbe come «nessuno ha l'esito favorevole»).
+  if (piccoli.persone > 0) gruppi.push({ gruppo: EQUITA_GRUPPO_PICCOLI, persone: piccoli.persone, favorevoli: null, quota: null, confrontato: false });
   const nd = conteggi.get(EQUITA_GRUPPO_NON_DICHIARATO);
-  if (nd) gruppi.push({ gruppo: EQUITA_GRUPPO_NON_DICHIARATO, persone: nd.persone, favorevoli: 0, quota: null, confrontato: false });
+  if (nd) gruppi.push({ gruppo: EQUITA_GRUPPO_NON_DICHIARATO, persone: nd.persone, favorevoli: null, quota: null, confrontato: false });
 
   const confrontati = gruppi.filter((g) => g.confrontato);
   if (confrontati.length < 2) {

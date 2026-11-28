@@ -2708,12 +2708,13 @@
       "DATI_INSUFFICIENTI": "Insufficient data"
     },
     "sintesi": {
-      "SUPERATO": "The proposal does not penalise any group by gender, age, nationality or marital status: every measured ratio is above the threshold.",
+      "SUPERATO": "The proposal does not penalise any group by {{tratti}}: every measured ratio is above the threshold.",
       "NON_SUPERATO": "The proposal does not pass the check.",
       "DATI_INSUFFICIENTI": "The groups are too small to measure a ratio: the check was run and says so, without inventing an outcome."
     },
+    "nonMisurati": "Not measured for insufficient data: {{tratti}}.",
     "nonRaccomandabile": "This proposal is not a recommendation: it penalises a protected group beyond the threshold, or uses a protected trait in the calculation. Review it before deciding.",
-    "metodo": "Four-fifths method: for each trait the share of people with a favourable outcome ({{favorevole}}) is compared group by group across {{persone}} people; the ratio between the lowest and the highest share must be at least {{soglia}}. Groups with fewer than {{minimo}} people are merged and not compared, so no individual trait can be inferred.",
+    "metodo": "Four-fifths method: for each trait the share of people with a favourable outcome ({{favorevole}}) is compared group by group across {{persone}} people; the ratio between the lowest and the highest share must be at least {{soglia}}. Groups with fewer than {{minimo}} people are merged and not compared, and for them the number of people with a favourable outcome is not shown.",
     "favorevole": {
       "PRONTO_ENTRO_6_MESI": "ready now or within six months",
       "NON_A_RISCHIO_ALTO": "not flagged at high or critical risk of leaving",
@@ -2728,6 +2729,12 @@
       "ETA": "Age",
       "NAZIONALITA": "Nationality",
       "STATO_CIVILE": "Marital status"
+    },
+    "trattoNelTesto": {
+      "GENERE": "gender",
+      "ETA": "age",
+      "NAZIONALITA": "nationality",
+      "STATO_CIVILE": "marital status"
     },
     "gruppo": {
       "GENERE": {

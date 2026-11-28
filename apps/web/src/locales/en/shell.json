@@ -270,6 +270,8 @@
     "toggleSidebar": "Collapse or expand the sidebar",
     "moveGroup": "Move the group “{{gruppo}}”",
     "moveGroupHint": "Hold and drag up or down (keyboard: arrow keys)",
+    "collapseAllGroups": "Collapse all groups",
+    "expandAllGroups": "Expand all groups",
     "restoreOrder": "Restore the standard order",
     "content": "Page content",
     "menuOpen": "Open the global context menu",

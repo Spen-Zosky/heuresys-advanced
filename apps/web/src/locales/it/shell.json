@@ -270,6 +270,8 @@
     "toggleSidebar": "Comprimi o espandi la barra laterale",
     "moveGroup": "Sposta il gruppo «{{gruppo}}»",
     "moveGroupHint": "Tieni premuto e trascina in su o in giù (da tastiera: frecce)",
+    "collapseAllGroups": "Chiudi tutti i gruppi",
+    "expandAllGroups": "Apri tutti i gruppi",
     "restoreOrder": "Ripristina ordine standard",
     "content": "Contenuto pagina",
     "menuOpen": "Apri il menu del contesto globale",

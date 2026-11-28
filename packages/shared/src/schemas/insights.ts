@@ -101,6 +101,8 @@ export const SuccessionReadinessScoreSchema = z.object({
   positionId: z.uuid(),
   positionCode: z.string().nullable(),
   positionTitle: z.string().nullable(),
+  /** Unità organizzativa della posizione: distingue posizioni con lo stesso titolo. */
+  positionOrgUnitName: z.string().nullable(),
   // giudizio (mascherabile, ADR-0032 / #124 D4): il valore, l'orizzonte che ne
   // deriva e la spiegazione coi valori grezzi. Restano la persona e la POSIZIONE
   // per cui e' stata valutata: che una candidatura sia stata considerata non e'

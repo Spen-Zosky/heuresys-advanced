@@ -1519,6 +1519,7 @@
     "caption": "Succession readiness (most ready first)",
     "colSubject": "Person",
     "colPosition": "Target position",
+    "colUnit": "Organizational unit",
     "colValue": "Readiness",
     "colHorizon": "Horizon",
     "horizon": {

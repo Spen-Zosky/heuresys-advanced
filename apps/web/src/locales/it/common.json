@@ -373,7 +373,7 @@
       "PROCESS_FLOW": "Flusso di processo",
       "CAREER_PATH": "Percorso di carriera",
       "LEARNING_PATH": "Percorso formativo",
-      "SKILL_GAP_MAP": "Mappa gap di skill",
+      "SKILL_GAP_MAP": "Mappa dei divari di competenza",
       "SUCCESSION_MAP": "Mappa successioni",
       "KPI_CASCADE": "Cascata KPI",
       "POSITION_INTELLIGENCE_MAP": "Mappa position intelligence",
@@ -502,9 +502,9 @@
     },
     "skillGapSegment": {
       "ALIGNED": "Allineato",
-      "MINOR_GAP": "Gap lieve",
-      "MODERATE_GAP": "Gap moderato",
-      "MAJOR_GAP": "Gap rilevante"
+      "MINOR_GAP": "Divario lieve",
+      "MODERATE_GAP": "Divario moderato",
+      "MAJOR_GAP": "Divario rilevante"
     },
     "nineBoxBand": {
       "LOW": "Basso",
@@ -1869,7 +1869,7 @@
       "SHORT_TERM": "Breve periodo",
       "SICK": "Malattia",
       "SKILL": "Competenze",
-      "SKILL_GAP_MAP": "Mappa gap di skill",
+      "SKILL_GAP_MAP": "Mappa dei divari di competenza",
       "SPECIALIST": "Specialistico",
       "SPLIT": "Divisa",
       "SS": "Inizio-inizio",

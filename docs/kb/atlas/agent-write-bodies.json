@@ -7872,6 +7872,43 @@
    }
   },
   "scenari": {
+   "post_nel_tempo": {
+    "schema": "ScenarioOverTimeCreateSchema",
+    "body": {
+     "$schema": "https://json-schema.org/draft/2020-12/schema",
+     "type": "object",
+     "properties": {
+      "horizonsMonths": {
+       "minItems": 1,
+       "maxItems": 7,
+       "type": "array",
+       "items": {
+        "type": "number",
+        "enum": [
+         3,
+         6,
+         9,
+         12,
+         18,
+         24,
+         36
+        ]
+       }
+      },
+      "draws": {
+       "type": "integer",
+       "minimum": 100,
+       "maximum": 5000
+      },
+      "annualExitRate": {
+       "type": "number",
+       "exclusiveMinimum": 0,
+       "exclusiveMaximum": 1
+      }
+     },
+     "additionalProperties": false
+    }
+   },
    "post_uscite": {
     "schema": "ScenarioExitsCreateSchema",
     "body": {

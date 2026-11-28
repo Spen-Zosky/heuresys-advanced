@@ -1141,6 +1141,7 @@ export const MODULI_DELLE_TABELLE: Readonly<Record<string, ModuloDelleTabelle>> 
       "sys_scenario_results",
       "sys_scenario_shadow_assignments",
       "sys_scenario_shadow_positions",
+      "sys_scenario_shadow_units",
       "sys_scenario_sources",
       "sys_scenario_versions",
       "sys_scenarios",

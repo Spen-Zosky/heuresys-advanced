@@ -5,6 +5,7 @@
  *   GET  /v1/scenari          gli scenari del tenant, tutti, con il numero
  *   GET  /v1/scenari/:id      uno scenario con la sua ultima versione: ipotesi, opzioni, leve, risultati, fonti, equità
  *   POST /v1/scenari/uscite   calcola uno scenario di uscita (S-T1 effetto diretto, S-T2 cascata)
+ *   POST /v1/scenari/nel-tempo  calcola uno scenario nel tempo (S-T3 resistenza, F3b-3): uscite a 6, 12, 36 mesi
  *
  * Il calcolo scrive solo nelle tabelle degli scenari e della struttura ombra, mai sulle tabelle di
  * business (ADR-0063 D3): lo verificano le guardie della 000515 e la prova di integrazione.
@@ -13,7 +14,7 @@
  */
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
-import { ScenarioDetailSchema, ScenarioExitsCreateSchema, ScenarioListSchema } from "@heuresys/shared";
+import { ScenarioDetailSchema, ScenarioExitsCreateSchema, ScenarioListSchema, ScenarioOverTimeCreateSchema } from "@heuresys/shared";
 import { actorFromRequest as actor } from "../../lib/actor.js";
 import { requirePermission } from "../../middleware/rbac.js";
 import { scenariService as svc } from "./service.js";
@@ -37,6 +38,15 @@ export const scenariRoutes: FastifyPluginAsyncZod = async (app) => {
     schema: { body: ScenarioExitsCreateSchema, response: { 201: ScenarioDetailSchema } },
   }, async (req, reply) => {
     const d = await svc.createExits(actor(req), req.body);
+    return reply.code(201).send(d);
+  });
+
+  app.post("/nel-tempo", {
+    config: { orgGate: "service", tenantGate: "service" },
+    preHandler: [app.verifyCsrf, requirePermission("scenario:create")],
+    schema: { body: ScenarioOverTimeCreateSchema, response: { 201: ScenarioDetailSchema } },
+  }, async (req, reply) => {
+    const d = await svc.createOverTime(actor(req), req.body);
     return reply.code(201).send(d);
   });
 };

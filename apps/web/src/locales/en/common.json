@@ -2719,7 +2719,8 @@
       "PRONTO_ENTRO_6_MESI": "ready now or within six months",
       "NON_A_RISCHIO_ALTO": "not flagged at high or critical risk of leaving",
       "DIVARIO_AL_PIU_LIEVE": "aligned with the role or with a minor gap",
-      "POTENZIALE_ALTO": "assessed as high potential"
+      "POTENZIALE_ALTO": "assessed as high potential",
+      "RIMPIAZZO_SCELTO": "chosen as replacement"
     },
     "colTratto": "Protected trait",
     "colGruppi": "Groups",
@@ -2784,7 +2785,8 @@
       "latest_overall_rating": "latest overall rating",
       "latest_potential_rating": "latest potential rating",
       "readiness_level": "stated readiness level",
-      "rank_order": "place in the successor list"
+      "rank_order": "place in the successor list",
+      "confirmed": "confirmed candidacy"
     }
   }
 }

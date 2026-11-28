@@ -311,9 +311,14 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
   // Una voce sola accesa: la rotta più lunga che contiene la pagina. Con la sola regola del
   // prefisso «/dashboard» restava accesa anche su «/dashboard/company», insieme alla sua voce.
   const allRoutes = sections.flatMap((s) => s.interfaces.map((i) => i.route));
-  const activeRoute = allRoutes
+  const perPrefisso = allRoutes
     .filter((r) => isActive(r))
     .reduce<string | null>((best, r) => (best === null || r.length > best.length ? r : best), null);
+  // Una scheda assorbita (regola S1009) accende la voce principale del suo gruppo, non la voce
+  // di un'altra pagina che ne e' solo il prefisso (/insights/skill-gap non e' «Rischio di abbandono»).
+  const gruppoScheda = SECTION_TAB_GROUPS.find((g) => g.includes(pathname));
+  const principale = gruppoScheda?.[0];
+  const activeRoute = principale && principale !== pathname && allRoutes.includes(principale) ? principale : perPrefisso;
 
   // C6 (piano interfaccia sistematica): voci con Link di Next e rami più profondi, vedi
   // components/menu-laterale.tsx e lib/menu-albero.ts. I gruppi di primo livello restano quelli

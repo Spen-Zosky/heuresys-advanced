@@ -735,9 +735,9 @@
         }
       },
       "gaps": {
-        "cardTitle": "Gap aperti",
-        "caption": "Gap formativi aperti per la posizione",
-        "empty": "Nessun gap formativo associato a questa posizione.",
+        "cardTitle": "Divari aperti",
+        "caption": "Divari formativi aperti per la posizione",
+        "empty": "Nessun divario formativo associato a questa posizione.",
         "columns": {
           "user": "Persona",
           "skill": "Skill",
@@ -1041,14 +1041,14 @@
       "positions": "Posizioni attive",
       "organizationUnits": "Unità organizzative",
       "learningPaths": "Percorsi formativi",
-      "learningGaps": "Lacune formative",
+      "learningGaps": "Divari formativi",
       "tenants": "Aziende",
       "blueprints": "Modelli di impianto",
       "recommendations": "Proposte retributive"
     },
-    "gapsTitle": "Lacune formative gravi recenti",
-    "gapsEmptyTitle": "Nessun gap critico",
-    "gapsEmptyDesc": "Non ci sono gap critici o alti aperti al momento.",
+    "gapsTitle": "Divari formativi gravi recenti",
+    "gapsEmptyTitle": "Nessun divario critico",
+    "gapsEmptyDesc": "Non ci sono divari critici o alti aperti al momento.",
     "gapGeneral": "Generale",
     "activityTitle": "Attività recente",
     "activityKind": {
@@ -1539,15 +1539,15 @@
     "featureDetail": "valore {{normalized}} · peso {{weight}}% · contributo {{contribution}}"
   },
   "insightsSkillGap": {
-    "title": "Lacune di competenze",
-    "description": "Gap di competenze per persona rispetto al ruolo attuale, derivato in-piattaforma con regola trasparente.",
-    "descriptionScoped": "Ambito {{kind}} · lacune di competenze per persona rispetto al ruolo attuale, spiegate voce per voce.",
+    "title": "Divario di competenze",
+    "description": "Divario di competenze per persona rispetto al ruolo attuale, derivato in-piattaforma con regola trasparente.",
+    "descriptionScoped": "Ambito {{kind}} · divario di competenze per persona rispetto al ruolo attuale, spiegate voce per voce.",
     "count": "{{count}} persone valutate",
     "count_one": "{{count}} persona valutata",
-    "errorMessage": "Impossibile caricare i gap di competenze.",
+    "errorMessage": "Impossibile caricare i divari di competenze.",
     "emptyTitle": "Nessun punteggio",
-    "emptyDescription": "Nessun gap calcolato. Esegui un ricalcolo.",
-    "caption": "Gap di competenze (gap più ampio in cima)",
+    "emptyDescription": "Nessun divario calcolato. Esegui un ricalcolo.",
+    "caption": "Divario di competenze (divario più ampio in cima)",
     "colSubject": "Persona",
     "colPosition": "Ruolo attuale",
     "colValue": "Divario",

@@ -207,7 +207,7 @@
         "skill": "Copertura skill",
         "kpi": "Raggiungimento KPI",
         "readiness": "Prontezza",
-        "gapFree": "Assenza gap"
+        "gapFree": "Assenza di divari"
       }
     },
     "essential": {
@@ -624,12 +624,12 @@
   },
   "gaps": {
     "title": "Analisi dei divari",
-    "description": "Gap di competenza per severità, sull'intero tenant.",
-    "count": "{{count}} gap registrati",
-    "count_one": "{{count}} gap registrato",
-    "error": "Impossibile caricare i gap.",
-    "emptyTitle": "Nessun gap registrato",
-    "emptyDescription": "Non ci sono gap di competenza al momento.",
+    "description": "Divari di competenza per gravità, sull'intero tenant.",
+    "count": "{{count}} divari registrati",
+    "count_one": "{{count}} divario registrato",
+    "error": "Impossibile caricare i divari.",
+    "emptyTitle": "Nessun divario registrato",
+    "emptyDescription": "Non ci sono divari di competenza al momento.",
     "positionNotDetected": "Non rilevata",
     "positionNotDetectedHint": "La rilevazione non ha registrato a quale posizione si riferisse questa lacuna. Il dato non viene dedotto dall’incarico attuale: sarebbe un’attribuzione mai misurata.",
     "positionUnresolved": "Posizione non risolta",
@@ -638,7 +638,7 @@
     "skillNotDetectedHint": "Il dato non nomina alcuna competenza per questa lacuna.",
     "skillUnresolved": "Competenza non risolta",
     "skillUnresolvedHint": "La lacuna cita una competenza che non è più nel catalogo, oppure non è visibile a questo tenant.",
-    "caption": "Elenco gap",
+    "caption": "Elenco divari",
     "cols": {
       "user": "Persona",
       "position": "Posizione",

@@ -51,7 +51,7 @@
   },
   "landing": {
     "title": "La mia area",
-    "description": "La tua panoramica personale: posizione, formazione e gap di sviluppo.",
+    "description": "La tua panoramica personale: posizione, formazione e divari di sviluppo.",
     "greeting": "Ciao, {{name}}",
     "rolesLabel": "Ruoli: {{roles}}",
     "primaryPositionLabel": "Posizione attuale",
@@ -60,7 +60,7 @@
     "learningUnit": "assegnati",
     "learningCount": "{{count}} assegnati",
     "learningCount_one": "{{count}} assegnato",
-    "gapsLabel": "Gap di sviluppo",
+    "gapsLabel": "Divari di sviluppo",
     "gapsUnit": "aperti",
     "gapsCount": "{{count}} aperti",
     "gapsCount_one": "{{count}} aperto",
@@ -232,8 +232,8 @@
     "caption": "Elenco documenti"
   },
   "gaps": {
-    "title": "I miei gap",
-    "description": "Gap di sviluppo aperti sulle tue skill.",
+    "title": "I miei divari",
+    "description": "Divari di sviluppo aperti sulle tue skill.",
     "count": "{{count}} aperti",
     "count_one": "{{count}} aperto",
     "skillFallback": "Generale",
@@ -241,10 +241,10 @@
     "colSeverity": "Severità",
     "colScore": "Punteggio",
     "colDetected": "Rilevato",
-    "errorMessage": "Impossibile caricare i gap.",
-    "emptyTitle": "Nessun gap aperto",
-    "emptyDesc": "Non hai gap di sviluppo aperti.",
-    "caption": "Gap di sviluppo",
+    "errorMessage": "Impossibile caricare i divari.",
+    "emptyTitle": "Nessun divario aperto",
+    "emptyDesc": "Non hai divari di sviluppo aperti.",
+    "caption": "Divari di sviluppo",
     "levels": "livello {{current}} su {{target}}",
     "gapSize": "scarto {{value}}"
   },
@@ -310,14 +310,14 @@
         "body": "Una richiesta che hai aperto è ferma da {{cycles}} cicli senza decisione dell'approvatore."
       },
       "GAP_CLOSURE_DUE": {
-        "subject": "Gap di competenze da colmare",
-        "body": "È stato rilevato un gap di competenze per la tua posizione ({{segment}}).",
+        "subject": "Divario di competenze da colmare",
+        "body": "È stato rilevato un divario di competenze per la tua posizione ({{segment}}).",
         "segment": {
-          "MAJOR_GAP": "gap rilevante",
-          "MODERATE_GAP": "gap moderato",
-          "MINOR_GAP": "gap lieve",
+          "MAJOR_GAP": "divario rilevante",
+          "MODERATE_GAP": "divario moderato",
+          "MINOR_GAP": "divario lieve",
           "ALIGNED": "allineato",
-          "UNKNOWN": "gap da valutare"
+          "UNKNOWN": "divario da valutare"
         }
       },
       "AGENT_WEEKLY_SUMMARY": {

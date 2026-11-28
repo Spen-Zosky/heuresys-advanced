@@ -100,7 +100,7 @@
       "me_security": "Sicurezza dell'account",
       "me_skills": "Le mie competenze",
       "me_skills_self-assessment": "Autovalutazione delle competenze",
-      "me_gaps": "I miei gap di competenze",
+      "me_gaps": "I miei divari di competenze",
       "me_certifications": "Le mie certificazioni",
       "me_learning": "La mia formazione",
       "me_learning_catalogue": "Catalogo dei percorsi",
@@ -156,7 +156,7 @@
       "group": "Per gruppo",
       "catalog": "Catalogo",
       "gap": "Divari",
-      "skillGap": "Divari di competenza",
+      "skillGap": "Divario di competenze",
       "graph": "Grafo",
       "navigatore": "Navigatore"
     },

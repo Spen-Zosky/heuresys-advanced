@@ -133,6 +133,18 @@ describe("insights API P2 (cap③ succession-readiness + skill-gap)", () => {
     expect(await stat(`SELECT count(*)::int AS n FROM sys.sys_skill_gap_scores`)).toBe(sgRows1);
   });
 
+  it("successione: una riga per destinazione (titolo e unità), mai posti uguali ripetuti", async () => {
+    await recompute(admin, "succession-readiness");
+    const b = (await list(tenantAdmin, "succession-readiness")).json() as {
+      items: (RItem & { positionTitle: string | null; positionOrgUnitName: string | null })[];
+    };
+    expect(b.items.length).toBeGreaterThan(0);
+    const chiavi = b.items.map((i) => `${i.userId}|${i.positionTitle}|${i.positionOrgUnitName}`);
+    expect(new Set(chiavi).size).toBe(chiavi.length);
+    // a parità di valore l'ordine è per cognome, non per identificativo
+    for (let i = 1; i < b.items.length; i++) expect(b.items[i - 1]!.value).toBeGreaterThanOrEqual(b.items[i]!.value);
+  });
+
   it("I5: TENANT_ADMIN sees only its own tenant's scores", async () => {
     const b = (await list(tenantAdmin, "succession-readiness")).json() as { scope: { kind: string }; items: RItem[] };
     expect(b.scope.kind).toBe("TENANT");

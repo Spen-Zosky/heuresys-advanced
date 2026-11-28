@@ -409,6 +409,8 @@ export interface StoredSubjectPositionRow {
   positionId: string;
   positionCode: string | null;
   positionTitle: string | null;
+  /** Unità organizzativa della posizione (letta solo dalla successione). */
+  positionOrgUnitName?: string | null;
   value: number;
   category: string;
   modelVersion: string;
@@ -430,6 +432,10 @@ export interface SubjectPositionScoreToStore {
  * Slice B feature extraction: each scoped user's top-N best-fit CANDIDATE target
  * positions (cosine profile ↔ position's job_role embedding, in-tenant, excluding the
  * user's current position) + KPI achievement + tenure. The service normalizes + weights.
+ *
+ * Una destinazione è (ruolo, titolo, unità organizzativa): i posti uguali della stessa unità
+ * hanno lo stesso punteggio e nell'elenco sembravano righe doppie, occupando tutti i top-N.
+ * Ne resta uno solo (il codice più basso), e i top-N sono N destinazioni diverse.
  */
 export async function extractReadinessFeatures(
   q: DbConnector,
@@ -450,17 +456,26 @@ export async function extractReadinessFeatures(
       FROM sys.sys_user_position_assignments
       WHERE user_position_assignment_kind = 'PRIMARY' AND user_position_assignment_status = 'ACTIVE'
     ),
-    cand AS (
+    dest AS (
       SELECT s.user_id, s.user_tenant_id AS tenant_id, s.user_display_name AS display_name,
              p.position_id, p.position_code, p.position_title,
-             (1 - (jre.embedding <=> pe.embedding)) AS cosine,
-             row_number() OVER (PARTITION BY s.user_id ORDER BY (jre.embedding <=> pe.embedding), p.position_code) AS rn
+             (jre.embedding <=> pe.embedding) AS distance,
+             row_number() OVER (
+               PARTITION BY s.user_id, p.position_job_role_id, p.position_title, p.position_organization_unit_id
+               ORDER BY p.position_code
+             ) AS seat
       FROM scoped s
       JOIN sys.sys_user_profile_embeddings pe ON pe.user_id = s.user_id
       JOIN sys.sys_positions p ON p.position_is_active = true AND p.position_tenant_id = s.user_tenant_id
       JOIN sys.sys_job_role_embeddings jre ON jre.job_role_id = p.position_job_role_id
       LEFT JOIN cur ON cur.user_id = s.user_id
       WHERE p.position_id IS DISTINCT FROM cur.position_id
+    ),
+    cand AS (
+      SELECT d.*, (1 - d.distance) AS cosine,
+             row_number() OVER (PARTITION BY d.user_id ORDER BY d.distance, d.position_code) AS rn
+      FROM dest d
+      WHERE d.seat = 1
     ),
     kpi AS (
       SELECT user_kpi_evidence_user_id AS user_id,
@@ -608,6 +623,7 @@ function mapSubjectPosition(r: Record<string, unknown>): StoredSubjectPositionRo
     positionId: r.position_id as string,
     positionCode: (r.position_code as string | null) ?? null,
     positionTitle: (r.position_title as string | null) ?? null,
+    positionOrgUnitName: (r.position_org_unit_name as string | null) ?? null,
     value: Number(r.value),
     category: r.category as string,
     modelVersion: r.model_version as string,
@@ -639,6 +655,7 @@ export async function readReadinessScores(q: DbConnector, scope: ScopeFilter): P
             ${cognomeNomeSql('u')} AS display_name,
             sr.succession_readiness_score_position_id AS position_id,
             p.position_code, p.position_title,
+            ou.organization_unit_name AS position_org_unit_name,
             sr.succession_readiness_score_value         AS value,
             sr.succession_readiness_score_horizon       AS category,
             sr.succession_readiness_score_model_version AS model_version,
@@ -647,6 +664,7 @@ export async function readReadinessScores(q: DbConnector, scope: ScopeFilter): P
      FROM sys.sys_succession_readiness_scores sr
      JOIN sys.sys_users u ON u.user_id = sr.succession_readiness_score_user_id
      LEFT JOIN sys.sys_positions p ON p.position_id = sr.succession_readiness_score_position_id
+     LEFT JOIN sys.sys_organization_units ou ON ou.organization_unit_id = p.position_organization_unit_id
      LEFT JOIN sys.sys_user_position_assignments a
        ON a.user_position_assignment_user_id = sr.succession_readiness_score_user_id
       AND a.user_position_assignment_kind = 'PRIMARY' AND a.user_position_assignment_status = 'ACTIVE'

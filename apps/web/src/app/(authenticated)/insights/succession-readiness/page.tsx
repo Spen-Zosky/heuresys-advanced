@@ -37,6 +37,8 @@ const HORIZON_TEXT: Record<SuccessionReadinessHorizon, string> = {
 };
 
 const positionLabel = (r: SuccessionReadinessScore, senzaNome: string) => r.positionTitle ?? r.positionCode ?? senzaNome;
+const positionWithUnit = (r: SuccessionReadinessScore, senzaNome: string) =>
+  r.positionOrgUnitName ? `${positionLabel(r, senzaNome)} (${r.positionOrgUnitName})` : positionLabel(r, senzaNome);
 
 export default function SuccessionReadinessPage() {
   const { t } = useTranslation("admin");
@@ -74,6 +76,7 @@ export default function SuccessionReadinessPage() {
         ),
       },
       { header: t("insightsReadiness.colPosition"), cell: (r) => <span className="text-foreground">{positionLabel(r, t("common:unnamed"))}</span> },
+      { header: t("insightsReadiness.colUnit"), cell: (r) => <span className="text-muted-foreground">{r.positionOrgUnitName ?? t("common:unnamed")}</span> },
       { header: t("insightsReadiness.colValue"), align: "right", cell: (r) => (
         // #124 D6: assente e dichiarato, non «—».
         isMasked(r, "value") || r.value === undefined
@@ -142,7 +145,7 @@ export default function SuccessionReadinessPage() {
         <div className="mx-auto max-w-7xl px-6">
           <Card data-testid="readiness-explain">
             <CardHeader>
-              <CardTitle as="h2">{t("insightsReadiness.explainTitle", { name: selected.displayName ?? t("common:unnamed"), position: positionLabel(selected, t("common:unnamed")) })}</CardTitle>
+              <CardTitle as="h2">{t("insightsReadiness.explainTitle", { name: selected.displayName ?? t("common:unnamed"), position: positionWithUnit(selected, t("common:unnamed")) })}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {/* #219 F2/B — il gemello del guasto su `/insights/skill-gap`: `selected.value!`

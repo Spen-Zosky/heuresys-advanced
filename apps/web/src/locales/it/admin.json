@@ -1516,6 +1516,7 @@
     "caption": "Prontezza alla successione (più pronti in cima)",
     "colSubject": "Persona",
     "colPosition": "Posizione-obiettivo",
+    "colUnit": "Unità organizzativa",
     "colValue": "Prontezza",
     "colHorizon": "Orizzonte",
     "horizon": {
@@ -1527,7 +1528,7 @@
     },
     "feature": {
       "position_fit": "Affinità posizione",
-      "kpi": "Performance KPI",
+      "kpi": "Risultati sui KPI",
       "tenure": "Anzianità"
     },
     "recompute": "Ricalcola",
@@ -1541,7 +1542,7 @@
   "insightsSkillGap": {
     "title": "Divario di competenze",
     "description": "Divario di competenze per persona rispetto al ruolo attuale, derivato in-piattaforma con regola trasparente.",
-    "descriptionScoped": "Ambito {{kind}} · divario di competenze per persona rispetto al ruolo attuale, spiegate voce per voce.",
+    "descriptionScoped": "Ambito {{kind}} · divario di competenze per persona rispetto al ruolo attuale, spiegato voce per voce.",
     "count": "{{count}} persone valutate",
     "count_one": "{{count}} persona valutata",
     "errorMessage": "Impossibile caricare i divari di competenze.",

@@ -429,6 +429,7 @@ function toReadinessScore(row: repo.StoredSubjectPositionRow): SuccessionReadine
   return {
     userId: row.userId, tenantId: row.tenantId, displayName: row.displayName,
     positionId: row.positionId, positionCode: row.positionCode, positionTitle: row.positionTitle,
+    positionOrgUnitName: row.positionOrgUnitName ?? null,
     value: row.value, horizon: row.category as SuccessionReadinessHorizon,
     modelVersion: row.modelVersion, computedAt: row.computedAt, features: readFeatures(row.payload),
   };
@@ -442,6 +443,21 @@ function toSkillGapScore(row: repo.StoredSubjectPositionRow): SkillGapScore {
   };
 }
 
+/**
+ * Ordine degli elenchi: per valore decrescente; a parità, per «Cognome, Nome» e poi per
+ * posizione e unità, invece che per identificativo.
+ */
+export function perValorePoiNome<T extends { displayName: string | null; positionTitle?: string | null; positionOrgUnitName?: string | null }>(
+  valore: (r: T) => number | undefined,
+): (x: T, y: T) => number {
+  const testo = (a: string | null | undefined, b: string | null | undefined) => (a ?? "").localeCompare(b ?? "", "it");
+  return (x, y) =>
+    (valore(y) ?? 0) - (valore(x) ?? 0) ||
+    testo(x.displayName, y.displayName) ||
+    testo(x.positionTitle, y.positionTitle) ||
+    testo(x.positionOrgUnitName, y.positionOrgUnitName);
+}
+
 export const insightsService = {
   /** Scored list (scope-filtered), highest risk first. */
   async flightRisk(a: ActorContext): Promise<FlightRiskListResponse> {
@@ -451,7 +467,7 @@ export const insightsService = {
       ...s.filter,
       userIdAllowList: orgAllowList(orgScope),
     });
-    const items = rows.map(toFlightRiskScore).sort((x, y) => (y.score ?? 0) - (x.score ?? 0));
+    const items = rows.map(toFlightRiskScore).sort(perValorePoiNome((r) => r.score));
     const equita = await dichiaraEquita(items, s.tenantId, (r) => r.band === "LOW" || r.band === "MEDIUM", "NON_A_RISCHIO_ALTO", FLIGHT_RISK_FEATURE_KEYS);
     return maskItems(a, {
       scope: { kind: s.kind, tenantId: s.tenantId },
@@ -514,7 +530,7 @@ export const insightsService = {
       ...s.filter,
       userIdAllowList: orgAllowList(orgScope),
     });
-    const items = rows.map(toReadinessScore).sort((x, y) => (y.value ?? 0) - (x.value ?? 0));
+    const items = rows.map(toReadinessScore).sort(perValorePoiNome((r) => r.value));
     // E12 (F6b): il controllo si fa sui valori veri, prima della maschera; esce solo l'aggregato.
     const equita = await dichiaraEquitaPronti(items, s.tenantId);
     return maskItems(a, { scope: { kind: s.kind, tenantId: s.tenantId }, items, total: items.length, generatedAt: equita.calcolatoIl, equita }, READINESS_JUDGMENT_FIELDS);
@@ -545,7 +561,7 @@ export const insightsService = {
       ...s.filter,
       userIdAllowList: orgAllowList(orgScope),
     });
-    const items = rows.map(toSkillGapScore).sort((x, y) => (y.value ?? 0) - (x.value ?? 0));
+    const items = rows.map(toSkillGapScore).sort(perValorePoiNome((r) => r.value));
     const equita = await dichiaraEquita(items, s.tenantId, (r) => r.segment === "ALIGNED" || r.segment === "MINOR_GAP", "DIVARIO_AL_PIU_LIEVE", SKILL_GAP_FEATURE_KEYS);
     return maskItems(a, { scope: { kind: s.kind, tenantId: s.tenantId }, items, total: items.length, generatedAt: equita.calcolatoIl, equita }, SKILL_GAP_JUDGMENT_FIELDS);
   },

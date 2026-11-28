@@ -11,9 +11,8 @@ import { addTraduzioneRisposta } from "../../src/lib/i18n/traduci-risposta.js";
 const db = {
   query: async (sql: string) => {
     if (sql.includes("sys_translatable_field"))
-      return { rows: [{ entity_table: "sys_skills", entity_pk_column: "skill_id", field: "name", entity_field_column: "skill_name" }] };
-    if (sql.includes("information_schema")) return { rows: [{ t: "sys_skills" }] };
-    return { rows: [{ it: "Finanza", en: "Finance" }] };
+      return { rows: [{ entity_table: "sys_skills", entity_pk_column: "skill_id", field: "name", entity_field_column: "skill_name", tenant_column: "skill_tenant_id" }] };
+    return { rows: [{ tenant: null, it: "Finanza", en: "Finance" }] };
   },
 } as never;
 

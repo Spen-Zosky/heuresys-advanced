@@ -36,13 +36,45 @@ import {
   scriviTraduzioni,
   separaModifiche,
   tabellaDellaRotta,
+  tenantDellaRiga,
   type CampoDellaRiga,
   type ModificaInglese,
 } from "./traduzione-della-riga.js";
 
-export type Glossario = ReadonlyMap<string, string>;
+/** Quanto serve per tradurre: cercare un testo. Una Map lo è, e lo è la vista di un tenant. */
+export interface Glossario {
+  get(testo: string): string | undefined;
+  readonly size: number;
+}
 
-const IDENT = /^[a-z_][a-z0-9_]*$/;
+/**
+ * Il glossario a strati: le traduzioni delle righe di catalogo (senza tenant) valgono per tutti,
+ * quelle delle righe di un tenant solo per lui. Una traduzione `MANUAL` scritta da una persona
+ * di un tenant non compare mai nelle pagine di un altro tenant per lo stesso testo italiano.
+ */
+export interface GlossarioStrati {
+  comune: Map<string, string>;
+  perTenant: Map<string, Map<string, string>>;
+}
+
+/** La vista di un tenant: prima le sue traduzioni, poi quelle comuni. Senza tenant, le comuni. */
+export function glossarioDi(strati: GlossarioStrati, tenantId: string | null | undefined): Glossario {
+  const proprio = tenantId ? strati.perTenant.get(tenantId) : undefined;
+  if (!proprio || proprio.size === 0) return strati.comune;
+  return {
+    get: (testo) => proprio.get(testo) ?? strati.comune.get(testo),
+    size: proprio.size + strati.comune.size,
+  };
+}
+
+/** Le voci della vista di un tenant, per rovesciarla. */
+export function vociDi(strati: GlossarioStrati, tenantId: string | null | undefined): Map<string, string> {
+  const unite = new Map(strati.comune);
+  const proprio = tenantId ? strati.perTenant.get(tenantId) : undefined;
+  if (proprio) for (const [it, en] of proprio) unite.set(it, en);
+  return unite;
+}
+
 const CHIAVE_ESCLUSA =
   /^(id|ids|code|codes|email|slug|url|href|locale|password|token|secret|otp)$|(Id|Ids|Code|Codes|Email|Url|Href|Slug|Password|Token|Secret|Otp)$/;
 const SCRITTURE = new Set(["POST", "PATCH", "PUT"]);
@@ -51,57 +83,53 @@ const CHIAVE_PROTOTIPO = new Set(["__proto__", "constructor", "prototype"]);
 const LUNGHEZZA_MIN = 2;
 const DURATA_MS = 5 * 60 * 1000;
 
-interface CampoRegistrato {
-  entity_table: string;
-  entity_pk_column: string;
-  field: string;
-  entity_field_column: string;
-}
-
 /**
- * Costruisce il glossario italiano → inglese dai campi registrati.
- * Se uno stesso testo italiano ha più traduzioni, vince la più frequente (poi l'ordine
- * alfabetico): la scelta è deterministica a ogni costruzione.
+ * Costruisce il glossario italiano → inglese dai campi registrati, separato per il tenant della
+ * riga (la sua colonna `<chiave>_tenant_id`; una riga senza tenant è di catalogo, comune).
+ * Se uno stesso testo italiano ha più traduzioni nello stesso strato, vince la più frequente
+ * (poi l'ordine alfabetico): la scelta è deterministica a ogni costruzione.
  */
-export async function costruisciGlossario(db: Pick<Pool, "query">): Promise<Map<string, string>> {
-  const reg = await db.query<CampoRegistrato>(
-    `SELECT entity_table, entity_pk_column, field, entity_field_column
-       FROM sys.sys_translatable_field
-      WHERE canonical_locale = 'it'
-      ORDER BY entity_table, field`,
-  );
-  const esistenti = await db.query<{ t: string }>(
-    `SELECT table_name AS t FROM information_schema.tables WHERE table_schema = 'sys'`,
-  );
-  const tabelle = new Set(esistenti.rows.map((r) => r.t));
+export async function costruisciGlossario(
+  db: Pick<Pool, "query">,
+  registro?: readonly CampoDellaRiga[],
+): Promise<GlossarioStrati> {
+  const campi = registro ?? (await leggiRegistroRighe(db));
   const parti: string[] = [];
   const parametri: string[] = [];
-  for (const c of reg.rows) {
-    if (![c.entity_table, c.entity_pk_column, c.entity_field_column].every((x) => IDENT.test(x))) continue;
-    if (!tabelle.has(c.entity_table)) continue;
+  for (const c of campi) {
     parametri.push(c.entity_table, c.field);
     const t = parametri.length - 1;
+    // I nomi vengono dal registro e sono già passati per IDENT (leggiRegistroRighe).
     parti.push(
-      `SELECT e.${c.entity_field_column}::text AS it, x.text AS en
+      `SELECT (${tenantDellaRiga(c)})::text AS tenant, e.${c.entity_field_column}::text AS it, x.text AS en
          FROM sys.${c.entity_table} e
          JOIN sys.sys_reference_translations x
            ON x.entity_table = $${t} AND x.field = $${t + 1} AND x.locale = 'en'
           AND x.entity_id = e.${c.entity_pk_column}`,
     );
   }
-  const glossario = new Map<string, string>();
-  if (parti.length === 0) return glossario;
-  const res = await db.query<{ it: string; en: string }>(
-    `SELECT it, en FROM (
-       SELECT it, en, row_number() OVER (PARTITION BY it ORDER BY count(*) DESC, en) AS n
+  const strati: GlossarioStrati = { comune: new Map(), perTenant: new Map() };
+  if (parti.length === 0) return strati;
+  const res = await db.query<{ tenant: string | null; it: string; en: string }>(
+    `SELECT tenant, it, en FROM (
+       SELECT tenant, it, en,
+              row_number() OVER (PARTITION BY tenant, it ORDER BY count(*) DESC, en) AS n
          FROM (${parti.join("\n UNION ALL \n")}) u
         WHERE it IS NOT NULL AND length(trim(it)) >= ${LUNGHEZZA_MIN} AND en <> it
-        GROUP BY it, en
+        GROUP BY tenant, it, en
      ) s WHERE n = 1`,
     parametri,
   );
-  for (const r of res.rows) glossario.set(r.it, r.en);
-  return glossario;
+  for (const r of res.rows) {
+    if (r.tenant === null) {
+      strati.comune.set(r.it, r.en);
+      continue;
+    }
+    let proprio = strati.perTenant.get(r.tenant);
+    if (!proprio) strati.perTenant.set(r.tenant, (proprio = new Map()));
+    proprio.set(r.it, r.en);
+  }
+  return strati;
 }
 
 /**
@@ -146,7 +174,7 @@ export function traduciValore(valore: unknown, g: Glossario, profondita = 0, sos
  * Il glossario rovesciato, inglese → italiano, per le scritture. Una traduzione che viene da più
  * testi italiani diversi non si rovescia: non si saprebbe quale rimettere.
  */
-export function rovescia(g: Glossario): Map<string, string> {
+export function rovescia(g: ReadonlyMap<string, string>): Map<string, string> {
   const inverso = new Map<string, string>();
   const doppi = new Set<string>();
   for (const [it, en] of g) {
@@ -163,17 +191,19 @@ export function rovescia(g: Glossario): Map<string, string> {
  * background e intanto restituisce quello di prima (o null se non ce n'è ancora uno).
  */
 export function cacheGlossario(db: Pick<Pool, "query">, durataMs = DURATA_MS) {
-  let valore: Map<string, string> | null = null;
-  let inverso: Glossario | null = null;
+  let valore: GlossarioStrati | null = null;
   let registro: CampoDellaRiga[] | null = null;
+  // Il glossario rovesciato di ogni tenant si calcola alla prima scrittura e vale fino al rinfresco.
+  let inversi = new Map<string, Glossario>();
   let scade = 0;
-  let inVolo: Promise<Glossario | null> | null = null;
-  function rinfresca(): Promise<Glossario | null> {
-    inVolo ??= Promise.all([costruisciGlossario(db), leggiRegistroRighe(db)])
-      .then(([g, r]) => {
+  let inVolo: Promise<GlossarioStrati | null> | null = null;
+  function rinfresca(): Promise<GlossarioStrati | null> {
+    inVolo ??= leggiRegistroRighe(db)
+      .then(async (r) => {
+        const g = await costruisciGlossario(db, r);
         valore = g;
         registro = r;
-        inverso = rovescia(g);
+        inversi = new Map();
         scade = Date.now() + durataMs;
         return g;
       })
@@ -187,24 +217,43 @@ export function cacheGlossario(db: Pick<Pool, "query">, durataMs = DURATA_MS) {
       });
     return inVolo;
   }
-  function attuale(): Glossario | null {
+  function attuale(tenantId: string | null): Glossario | null {
     if (Date.now() >= scade) void rinfresca();
-    return valore;
+    return valore ? glossarioDi(valore, tenantId) : null;
   }
-  function attualeInverso(): Glossario | null {
+  function attualeInverso(tenantId: string | null): Glossario | null {
     if (Date.now() >= scade) void rinfresca();
-    return inverso;
+    if (!valore) return null;
+    const chiave = tenantId && valore.perTenant.has(tenantId) ? tenantId : "";
+    let inv = inversi.get(chiave);
+    if (!inv) inversi.set(chiave, (inv = rovescia(vociDi(valore, chiave || null))));
+    return inv;
   }
   function registroRighe(): readonly CampoDellaRiga[] | null {
     return registro;
   }
-  /** Una modifica inglese appena scritta vale subito anche per le letture che seguono. */
+  /** Una modifica inglese appena scritta vale subito, per il solo tenant della riga. */
   function aggiorna(modifiche: readonly ModificaInglese[]): void {
     if (!valore) return;
-    for (const m of modifiche) valore.set(m.it, m.testo);
-    inverso = rovescia(valore);
+    for (const m of modifiche) {
+      if (!m.tenant) {
+        valore.comune.set(m.it, m.testo);
+        continue;
+      }
+      let proprio = valore.perTenant.get(m.tenant);
+      if (!proprio) valore.perTenant.set(m.tenant, (proprio = new Map()));
+      proprio.set(m.it, m.testo);
+    }
+    inversi = new Map();
   }
   return { attuale, attualeInverso, rinfresca, registroRighe, aggiorna };
+}
+
+/** Le modifiche inglesi della richiesta, sopra il glossario: la risposta le mostra già. */
+export function conModifiche(g: Glossario | null, modifiche: readonly ModificaInglese[] | undefined): Glossario | null {
+  if (!modifiche || modifiche.length === 0) return g;
+  const proprie = new Map(modifiche.filter((m) => m.testo.trim() !== "").map((m) => [m.it, m.testo] as const));
+  return { get: (testo) => proprie.get(testo) ?? g?.get(testo), size: proprie.size + (g?.size ?? 0) };
 }
 
 export function addTraduzioneRisposta(app: FastifyInstance, db: Pick<Pool, "query">): void {
@@ -217,11 +266,18 @@ export function addTraduzioneRisposta(app: FastifyInstance, db: Pick<Pool, "quer
   app.addHook("onReady", async () => {
     await glossario.rinfresca();
   });
+  // Le modifiche inglesi della richiesta, dal ritorno (prima dell'handler) alla risposta e alla
+  // scrittura della traduzione (dopo).
+  const pendenti = new WeakMap<FastifyRequest, ModificaInglese[]>();
+  // L'andata vale per le letture e per la risposta delle scritture: una modifica fatta in una
+  // pagina inglese risponde con il testo inglese (anche quello appena scritto), così il modulo
+  // non torna all'italiano finché non si ricarica la pagina. Le rotte di accesso restano fuori.
   app.addHook("preSerialization", (req, reply, payload, done) => {
     if (
       req.locale !== "en" ||
-      req.method !== "GET" ||
+      !(req.method === "GET" || SCRITTURE.has(req.method)) ||
       !req.url.startsWith("/v1/") ||
+      (req.method !== "GET" && !riceveRitorno(req.routeOptions.url ?? req.url, req.method)) ||
       reply.statusCode >= 300 ||
       req.headers["x-localize"] === "off" ||
       payload === null ||
@@ -232,7 +288,7 @@ export function addTraduzioneRisposta(app: FastifyInstance, db: Pick<Pool, "quer
     }
     let uscita: unknown = payload;
     try {
-      const g = glossario.attuale();
+      const g = conModifiche(glossario.attuale(req.user?.tenantId ?? null), pendenti.get(req));
       if (g && g.size > 0) uscita = traduciValore(payload, g);
     } catch {
       uscita = payload; // la traduzione non rompe mai una risposta
@@ -246,7 +302,6 @@ export function addTraduzioneRisposta(app: FastifyInstance, db: Pick<Pool, "quer
   // ricevono proprio, invece di saltarlo a runtime: il loro corpo non passa mai di qui.
   // È asincrono perché legge la riga: prima dell'handler non c'è la finestra di «Reply was
   // already sent», che riguarda i hook dopo l'handler.
-  const pendenti = new WeakMap<FastifyRequest, ModificaInglese[]>();
   const ritorno: preValidationAsyncHookHandler = async (req) => {
     if (req.locale !== "en" || req.headers["x-localize"] === "off" || req.body === null || typeof req.body !== "object") return;
     let corpo = req.body;
@@ -275,7 +330,7 @@ export function addTraduzioneRisposta(app: FastifyInstance, db: Pick<Pool, "quer
       req.log.warn({ err, url: req.url }, "ADR-0062: campi della riga non letti, resta il solo glossario");
     }
     try {
-      const g = glossario.attualeInverso();
+      const g = glossario.attualeInverso(req.user?.tenantId ?? null);
       if (g && g.size > 0) {
         const sostituite: string[] = [];
         if (gestiti.size === 0) {
